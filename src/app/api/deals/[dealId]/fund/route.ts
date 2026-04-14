@@ -5,7 +5,7 @@ import { logAudit } from '@/lib/engine/audit'
 import { stripe } from '@/lib/stripe'
 import { errorResponse, internalError, notFoundError, validationError } from '@/lib/errors'
 
-type RouteContext = { params: { dealId: string } }
+
 
 // ─── POST /api/deals/[dealId]/fund ────────────────────────────────────────────
 // Fund a deal (funder only).
@@ -17,8 +17,8 @@ type RouteContext = { params: { dealId: string } }
 //
 // Body: {} (no required fields — amount is always computed server-side)
 
-export async function POST(request: NextRequest, { params }: RouteContext) {
-  const { dealId } = params
+export async function POST(request: NextRequest, { params }: { params: Promise<{ dealId: string }> }) {
+  const { dealId } = await params
 
   let authContext
 

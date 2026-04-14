@@ -5,14 +5,14 @@ import { logAudit } from '@/lib/engine/audit'
 import { errorResponse, internalError, notFoundError } from '@/lib/errors'
 import type { MilestoneStatus } from '@/lib/types'
 
-type RouteContext = { params: { milestoneId: string } }
+
 
 // ─── GET /api/milestones/[milestoneId]/documents ──────────────────────────────
 // List all documents attached to a milestone.
 // Participants and admins only.
 
-export async function GET(request: NextRequest, { params }: RouteContext) {
-  const { milestoneId } = params
+export async function GET(request: NextRequest, { params }: { params: Promise<{ milestoneId: string }> }) {
+  const { milestoneId } = await params
 
   let authContext
 
@@ -82,8 +82,8 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
 //
 // Body: { file_name, file_url, file_size, mime_type }
 
-export async function POST(request: NextRequest, { params }: RouteContext) {
-  const { milestoneId } = params
+export async function POST(request: NextRequest, { params }: { params: Promise<{ milestoneId: string }> }) {
+  const { milestoneId } = await params
 
   let authContext
 

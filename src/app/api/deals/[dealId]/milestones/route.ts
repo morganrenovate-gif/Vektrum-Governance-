@@ -4,14 +4,14 @@ import { getAuthUser, requireRole, requireDealAccess } from '@/lib/auth/middlewa
 import { logAudit } from '@/lib/engine/audit'
 import { errorResponse, internalError, notFoundError, validationError } from '@/lib/errors'
 
-type RouteContext = { params: { dealId: string } }
+
 
 // ─── GET /api/deals/[dealId]/milestones ───────────────────────────────────────
 // List all milestones for a deal.
 // Participants and admins only.
 
-export async function GET(request: NextRequest, { params }: RouteContext) {
-  const { dealId } = params
+export async function GET(request: NextRequest, { params }: { params: Promise<{ dealId: string }> }) {
+  const { dealId } = await params
 
   let authContext
 
@@ -77,8 +77,8 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
 //
 // Body: { title, description?, amount, order_index? }
 
-export async function POST(request: NextRequest, { params }: RouteContext) {
-  const { dealId } = params
+export async function POST(request: NextRequest, { params }: { params: Promise<{ dealId: string }> }) {
+  const { dealId } = await params
 
   let authContext
 

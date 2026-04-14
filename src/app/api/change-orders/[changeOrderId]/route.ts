@@ -5,8 +5,6 @@ import { logAudit } from '@/lib/engine/audit'
 import { errorResponse, internalError, notFoundError, validationError } from '@/lib/errors'
 import type { ChangeOrderStatus } from '@/lib/types'
 
-type RouteContext = { params: { changeOrderId: string } }
-
 // ─── PATCH /api/change-orders/[changeOrderId] ─────────────────────────────────
 // Approve or reject a change order (funder only).
 //
@@ -21,8 +19,8 @@ type RouteContext = { params: { changeOrderId: string } }
 //
 // Body: { decision: 'approved' | 'rejected' }
 
-export async function PATCH(request: NextRequest, { params }: RouteContext) {
-  const { changeOrderId } = params
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ changeOrderId: string }> }) {
+  const { changeOrderId } = await params
 
   let authContext
 

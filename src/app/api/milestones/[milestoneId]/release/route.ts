@@ -6,7 +6,7 @@ import { validateRelease } from '@/lib/engine/release-gate'
 import { stripe } from '@/lib/stripe'
 import { internalError, notFoundError, validationError } from '@/lib/errors'
 
-type RouteContext = { params: { milestoneId: string } }
+
 
 // ─── POST /api/milestones/[milestoneId]/release ───────────────────────────────
 // THE CRITICAL ROUTE.
@@ -22,8 +22,8 @@ type RouteContext = { params: { milestoneId: string } }
 //      with the Stripe transfer ID so support can reconcile.
 //   5. All actions are audit-logged.
 
-export async function POST(request: NextRequest, { params }: RouteContext) {
-  const { milestoneId } = params
+export async function POST(request: NextRequest, { params }: { params: Promise<{ milestoneId: string }> }) {
+  const { milestoneId } = await params
 
   let authContext
 

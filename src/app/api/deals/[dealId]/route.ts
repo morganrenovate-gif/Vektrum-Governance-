@@ -4,14 +4,14 @@ import { getAuthUser, requireDealAccess } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
 import { errorResponse, internalError, notFoundError } from '@/lib/errors'
 
-type RouteContext = { params: { dealId: string } }
+
 
 // ─── GET /api/deals/[dealId] ──────────────────────────────────────────────────
 // Fetch a deal with its milestones.
 // Access restricted to: the deal's contractor, the deal's funder, and admins.
 
-export async function GET(request: NextRequest, { params }: RouteContext) {
-  const { dealId } = params
+export async function GET(request: NextRequest, { params }: { params: Promise<{ dealId: string }> }) {
+  const { dealId } = await params
 
   let authContext
 
@@ -90,8 +90,8 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
 // Neither role may directly mutate financial fields (total_amount, funded_amount,
 // released_amount) or status through this endpoint — dedicated sub-routes handle those.
 
-export async function PATCH(request: NextRequest, { params }: RouteContext) {
-  const { dealId } = params
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ dealId: string }> }) {
+  const { dealId } = await params
 
   let authContext
 

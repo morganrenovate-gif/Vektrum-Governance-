@@ -6,7 +6,7 @@ import { validateTransition } from '@/lib/engine/state-machine'
 import { errorResponse, internalError, notFoundError } from '@/lib/errors'
 import type { MilestoneStatus } from '@/lib/types'
 
-type RouteContext = { params: { milestoneId: string } }
+
 
 // ─── POST /api/milestones/[milestoneId]/transition ────────────────────────────
 // Transition a milestone's status according to the state machine rules.
@@ -16,8 +16,8 @@ type RouteContext = { params: { milestoneId: string } }
 //
 // Body: { new_status: MilestoneStatus }
 
-export async function POST(request: NextRequest, { params }: RouteContext) {
-  const { milestoneId } = params
+export async function POST(request: NextRequest, { params }: { params: Promise<{ milestoneId: string }> }) {
+  const { milestoneId } = await params
 
   let authContext
 
