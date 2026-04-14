@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
         stripe_account_id: stripeAccountId,
         updated_at: new Date().toISOString(),
       })
-      .eq('user_id', user.id)
+      .eq('id', user.id)
 
     if (updateError) {
       // The Stripe account was created but we couldn't save the ID — log and surface to support
