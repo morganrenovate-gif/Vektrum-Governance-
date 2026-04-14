@@ -56,3 +56,15 @@ export async function createClient() {
     }
   )
 }
+
+// ─── Admin Client ─────────────────────────────────────────────────────────────
+// Re-exported here for backwards compatibility with existing import paths.
+// Bypasses RLS — server-side only.
+import { createClient as _createAdminClient } from '@supabase/supabase-js'
+
+export function createSupabaseAdminClient() {
+  return _createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  )
+}
