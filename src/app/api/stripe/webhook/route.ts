@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseAdminClient } from '@/lib/supabase/server'
+import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { logAudit } from '@/lib/engine/audit'
 import { stripe } from '@/lib/stripe'
 import type Stripe from 'stripe'
