@@ -117,3 +117,7 @@ export interface ReleaseGateResult {
   can_release: boolean;
   blockers: string[];
 }
+
+export type ChangeOrderStatus = 'pending' | 'approved' | 'rejected'
+export type DisputeStatus = 'open' | 'under_review' | 'resolved' | 'escalated'
+export type ReleaseStatus = 'completed' | 'failed'

@@ -81,14 +81,13 @@ export type AuditAction =
 export interface ProfileRow {
   /** UUID — references auth.users(id). */
   id: string
-  role: UserRole
+  email: string
   full_name: string | null
-  company_name: string | null
+  role: UserRole
   /** Stripe Connect account ID. Set for contractors once onboarding is done. */
   stripe_account_id: string | null
-  /** True when Stripe has enabled payouts for this contractor. */
-  stripe_payouts_enabled: boolean
-  onboarding_complete: boolean
+  /** Status of Stripe Connect onboarding: 'not_connected' | 'pending' | 'active' */
+  stripe_account_status: string
   created_at: string
   updated_at: string
 }
@@ -233,12 +232,11 @@ export interface AuditLogRow {
 export interface ProfileInsert {
   /** Must match the auth.users UUID that was just created. */
   id: string
+  email: string
   role?: UserRole
   full_name?: string | null
-  company_name?: string | null
   stripe_account_id?: string | null
-  stripe_payouts_enabled?: boolean
-  onboarding_complete?: boolean
+  stripe_account_status?: string
 }
 
 export interface DealInsert {
@@ -323,12 +321,10 @@ export interface AuditLogInsert {
 // =============================================================================
 
 export interface ProfileUpdate {
-  /** Role is excluded — role changes must use a privileged server operation. */
   full_name?: string | null
-  company_name?: string | null
   stripe_account_id?: string | null
-  stripe_payouts_enabled?: boolean
-  onboarding_complete?: boolean
+  stripe_account_status?: string
+  updated_at?: string
 }
 
 export interface DealUpdate {
@@ -418,14 +414,14 @@ export interface Database {
       releases: {
         Row: ReleaseRow
         Insert: ReleaseInsert
-        // No Update type — releases are immutable
-        Update: never
+        // Releases are immutable — Update intentionally empty
+        Update: Record<string, never>
       }
       audit_log: {
         Row: AuditLogRow
         Insert: AuditLogInsert
-        // No Update type — audit log is immutable
-        Update: never
+        // Audit log is immutable — Update intentionally empty
+        Update: Record<string, never>
       }
     }
     Views: {

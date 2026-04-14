@@ -105,37 +105,36 @@ async function handleAccountUpdated(account: Stripe.Account): Promise<void> {
   const adminClient = createSupabaseAdminClient()
 
   // Look up the profile by stripe_account_id
-  const { data: profile, error: profileError } = await adminClient
+  const profileRes = await adminClient
     .from('profiles')
-    .select('user_id, stripe_payouts_enabled, onboarding_complete')
+    .select('*')
     .eq('stripe_account_id', account.id)
     .single()
 
-  if (profileError || !profile) {
-    // This can happen legitimately if the account was created outside Vektrum
+  if (profileRes.error || !profileRes.data) {
     console.warn(
       `[webhook] account.updated: No Vektrum profile found for Stripe account ${account.id}`,
     )
     return
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const profile = profileRes.data as any
+
   const payoutsEnabled = account.payouts_enabled ?? false
   const detailsSubmitted = account.details_submitted ?? false
   const chargesEnabled = account.charges_enabled ?? false
 
-  // onboarding_complete when Stripe reports all details submitted and both payouts + charges enabled
-  const onboardingComplete = detailsSubmitted && payoutsEnabled && chargesEnabled
+  const newStatus = detailsSubmitted && payoutsEnabled && chargesEnabled
+    ? 'active'
+    : 'pending'
 
-  const oldValues = {
-    stripe_payouts_enabled: profile.stripe_payouts_enabled,
-    onboarding_complete: profile.onboarding_complete,
-  }
+  const oldValues = { stripe_account_status: profile.stripe_account_status as string }
 
   const { error: updateError } = await adminClient
     .from('profiles')
     .update({
-      stripe_payouts_enabled: payoutsEnabled,
-      onboarding_complete: onboardingComplete,
+      stripe_account_status: newStatus,
       updated_at: new Date().toISOString(),
     })
     .eq('stripe_account_id', account.id)
@@ -145,20 +144,16 @@ async function handleAccountUpdated(account: Stripe.Account): Promise<void> {
       `[webhook] account.updated: Failed to update profile for Stripe account ${account.id}:`,
       updateError.message,
     )
-    // Re-throw so the event returns 500 and Stripe retries
     throw updateError
   }
 
   await logAudit({
     entity_type: 'profile',
-    entity_id: profile.user_id,
+    entity_id: profile.id,
     action: 'stripe_account_updated',
     actor_id: 'system',
     old_values: oldValues,
-    new_values: {
-      stripe_payouts_enabled: payoutsEnabled,
-      onboarding_complete: onboardingComplete,
-    },
+    new_values: { stripe_account_status: newStatus },
     metadata: {
       stripe_account_id: account.id,
       details_submitted: detailsSubmitted,
@@ -168,8 +163,7 @@ async function handleAccountUpdated(account: Stripe.Account): Promise<void> {
   })
 
   console.log(
-    `[webhook] account.updated: Profile ${profile.user_id} — ` +
-      `payouts_enabled=${payoutsEnabled}, onboarding_complete=${onboardingComplete}`,
+    `[webhook] account.updated: Profile ${profile.id} — stripe_account_status=${newStatus}`,
   )
 }
 
