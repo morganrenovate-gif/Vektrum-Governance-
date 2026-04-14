@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #ffffff;
+    --foreground: #0f172a;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  /* Focus ring for accessibility */
+  :focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+@layer components {
+  /* Consistent transition for interactive elements */
+  .interactive {
+    @apply transition-colors duration-150 ease-in-out;
+  }
+
+  /* Page container */
+  .page-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Section spacing */
+  .section {
+    @apply py-8 sm:py-12;
+  }
+
+  /* Status colors as utility */
+  .status-not-started {
+    @apply bg-slate-100 text-slate-700;
+  }
+  .status-in-progress {
+    @apply bg-blue-100 text-blue-700;
+  }
+  .status-ready-for-review {
+    @apply bg-amber-100 text-amber-700;
+  }
+  .status-approved {
+    @apply bg-green-100 text-green-700;
+  }
+  .status-released {
+    @apply bg-green-100 text-green-800;
+  }
+  .status-disputed {
+    @apply bg-red-100 text-red-700;
+  }
+}
+
+@layer utilities {
+  /* Small caps helper */
+  .small-caps {
+    font-variant: small-caps;
+    letter-spacing: 0.06em;
+  }
+
+  /* Numeric font feature for money display */
+  .font-numeric {
+    font-feature-settings: "tnum" 1, "lnum" 1;
+  }
+}
