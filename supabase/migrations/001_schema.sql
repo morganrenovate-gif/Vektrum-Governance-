@@ -313,10 +313,11 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.profiles (id, full_name, role)
+  insert into public.profiles (id, email, full_name, role)
   values (
     new.id,
-    -- Use display_name from metadata if provided, otherwise email prefix
+    new.email,
+    -- Use full_name from metadata if provided, otherwise email prefix
     coalesce(new.raw_user_meta_data->>'full_name', split_part(new.email, '@', 1)),
     -- Default role; can be overridden in raw_user_meta_data
     coalesce(

@@ -42,7 +42,7 @@ export async function getAuthUser(request: NextRequest): Promise<AuthContext> {
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('*')
-    .eq('user_id', user.id)
+    .eq('id', user.id)
     .single()
 
   if (profileError || !profile) {
