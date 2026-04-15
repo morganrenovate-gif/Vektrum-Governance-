@@ -13,9 +13,9 @@ import { updateSession } from "@/lib/supabase/middleware";
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // ── Public paths — always allowed ─────────────────────────────────────────
-  // Static assets, Next.js internals, and Stripe webhook (must be public for
-  // Stripe's servers which have no session cookie)
+  // ── Public paths — pass through without touching Supabase ─────────────────
+  // Avoids an unnecessary getUser() round-trip on every public page load.
+  // The auth/callback route handles its own session exchange.
   if (
     pathname.startsWith("/_next/") ||
     pathname.startsWith("/api/stripe/webhook") ||
@@ -25,12 +25,11 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/invite/") ||
     pathname.startsWith("/favicon")
   ) {
-    // Still update session cookies so they stay fresh
-    const { supabaseResponse } = await updateSession(request);
-    return supabaseResponse;
+    return NextResponse.next();
   }
 
   // ── Protected paths — require session ─────────────────────────────────────
+  // Only call getUser() (which hits Supabase) when we actually need to gate.
   if (pathname.startsWith("/dashboard") || pathname.startsWith("/api/")) {
     const { supabaseResponse, user } = await updateSession(request);
 
@@ -44,19 +43,18 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse;
   }
 
-  // ── All other routes — update session and pass through ───────────────────
-  const { supabaseResponse } = await updateSession(request);
-  return supabaseResponse;
+  // ── All other routes — pass through ───────────────────────────────────────
+  return NextResponse.next();
 }
 
 export const config = {
   matcher: [
     /*
-     * Match all request paths EXCEPT:
-     * - _next/static (static files)
-     * - _next/image (image optimization)
-     * - favicon.ico, sitemap.xml, robots.txt (metadata files)
+     * Only run middleware on routes that need it:
+     * - Page routes (not _next internals, not static files)
+     * - API routes
+     * Excludes: _next/static, _next/image, favicon, sitemap, robots
      */
-    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
+    "/((?!_next/static|_next/image|favicon\\.ico|sitemap\\.xml|robots\\.txt|.*\\.png$|.*\\.jpg$|.*\\.svg$|.*\\.ico$).*)",
   ],
 };
