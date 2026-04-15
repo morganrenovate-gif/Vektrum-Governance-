@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertCircle, Shield, Lock, CheckCircle2, FileCheck } from "lucide-react";
+import { VektrumWordmark } from "@/components/ui/vektrum-logo";
 
 const AUTH_ERROR_MAP: Record<string, string> = {
   "Invalid login credentials": "Incorrect email or password. Please try again.",
@@ -81,17 +82,7 @@ export default function LoginPage() {
       {/* ── Left: Trust panel (hidden on mobile) ─────────────────────────── */}
       <div className="hidden lg:flex lg:w-[480px] xl:w-[540px] flex-col justify-between bg-vektrum-canvas px-12 py-16 flex-shrink-0">
         {/* Brand */}
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-vektrum-canvas-text/10">
-            <span className="text-sm font-bold text-vektrum-canvas-text">V</span>
-          </div>
-          <div>
-            <span className="text-sm font-bold text-vektrum-canvas-text tracking-tight">Vektrum</span>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30 leading-none mt-0.5">
-              Trust. Built In.
-            </p>
-          </div>
-        </div>
+        <VektrumWordmark showTagline dark />
 
         {/* Main trust copy */}
         <div className="space-y-10">

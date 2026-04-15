@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertCircle, CheckCircle2, Shield, Building2, User, Lock, FileCheck } from "lucide-react";
+import { VektrumWordmark } from "@/components/ui/vektrum-logo";
 import { cn } from "@/lib/utils";
 import type { UserRole } from "@/lib/types";
 
@@ -108,17 +109,7 @@ export default function SignupPage() {
     <div className="flex min-h-[calc(100vh-4rem)]">
       {/* ── Left: Trust panel ─────────────────────────────────────────────── */}
       <div className="hidden lg:flex lg:w-[480px] xl:w-[540px] flex-col justify-between bg-vektrum-canvas px-12 py-16 flex-shrink-0">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10">
-            <span className="text-sm font-bold text-white">V</span>
-          </div>
-          <div>
-            <span className="text-sm font-bold text-white tracking-tight">Vektrum</span>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30 leading-none mt-0.5">
-              Trust. Built In.
-            </p>
-          </div>
-        </div>
+        <VektrumWordmark showTagline dark />
 
         <div className="space-y-10">
           <div>

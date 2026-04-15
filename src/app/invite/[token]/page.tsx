@@ -16,6 +16,7 @@ import {
   FileCheck,
 } from 'lucide-react'
 import { formatMoney } from '@/lib/utils'
+import { VektrumWordmark } from '@/components/ui/vektrum-logo'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -153,16 +154,8 @@ export default function InviteAcceptPage() {
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-vektrum-bg flex flex-col items-center justify-center px-4 py-12">
       {/* Brand header */}
-      <div className="mb-8 flex items-center gap-2.5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-vektrum-canvas shadow-md">
-          <span className="text-sm font-bold text-white">V</span>
-        </div>
-        <div>
-          <span className="text-base font-bold tracking-tight text-vektrum-text">Vektrum</span>
-          <p className="text-[11px] font-medium uppercase tracking-widest text-vektrum-faint leading-none mt-0.5">
-            Trust. Built In.
-          </p>
-        </div>
+      <div className="mb-8">
+        <VektrumWordmark showTagline />
       </div>
 
       <div className="w-full max-w-lg">
