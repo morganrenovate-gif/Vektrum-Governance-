@@ -2,18 +2,21 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { Menu, X } from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
+import { Menu, X, LogOut, Settings, FileText } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
-const NAV_LINKS = [
-  { href: '/pricing', label: 'Pricing' },
-  { href: '/dashboard', label: 'Dashboard' },
-  { href: '/auth/login', label: 'Sign in' },
-]
+interface MobileNavProps {
+  isLoggedIn?: boolean
+  userName?: string | null
+  userEmail?: string | null
+}
 
-export function MobileNav() {
+export function MobileNav({ isLoggedIn = false, userName, userEmail }: MobileNavProps) {
   const [open, setOpen] = useState(false)
+  const [signingOut, setSigningOut] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
 
   // Close on route change
   useEffect(() => {
@@ -31,6 +34,26 @@ export function MobileNav() {
       document.body.style.overflow = ''
     }
   }, [open])
+
+  async function handleSignOut() {
+    setSigningOut(true)
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    setOpen(false)
+    router.push('/')
+    router.refresh()
+  }
+
+  // Get initials for mobile avatar
+  function getInitials() {
+    if (userName && userName.trim()) {
+      const parts = userName.trim().split(/\s+/)
+      if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+      return parts[0][0].toUpperCase()
+    }
+    if (userEmail) return userEmail[0].toUpperCase()
+    return 'U'
+  }
 
   return (
     <>
@@ -57,25 +80,100 @@ export function MobileNav() {
           {/* Drawer */}
           <div className="fixed inset-x-0 top-[65px] z-50 sm:hidden border-b border-vektrum-border bg-vektrum-surface shadow-xl">
             <nav className="flex flex-col px-4 py-4 gap-1">
-              {NAV_LINKS.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="flex items-center min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
-                  onClick={() => setOpen(false)}
-                >
-                  {link.label}
-                </Link>
-              ))}
-              <div className="mt-3 pt-3 border-t border-vektrum-border">
-                <Link
-                  href="/auth/signup"
-                  className="flex items-center justify-center min-h-[48px] w-full rounded-xl bg-vektrum-blue text-[15px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 hover:bg-vektrum-blue-hover transition-all"
-                  onClick={() => setOpen(false)}
-                >
-                  Get started
-                </Link>
-              </div>
+
+              {isLoggedIn ? (
+                // ── Logged-in drawer ────────────────────────────────────────
+                <>
+                  {/* User identity row */}
+                  <div className="flex items-center gap-3 px-4 py-3 mb-1 rounded-xl bg-vektrum-bg">
+                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-vektrum-blue text-[13px] font-bold text-white select-none">
+                      {getInitials()}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-semibold text-vektrum-text truncate">
+                        {userName ?? 'Your account'}
+                      </p>
+                      <p className="text-[11px] text-vektrum-muted truncate">
+                        {userEmail ?? ''}
+                      </p>
+                    </div>
+                  </div>
+
+                  <Link
+                    href="/dashboard"
+                    className="flex items-center min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                    onClick={() => setOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+
+                  <Link
+                    href="/dashboard/audit"
+                    className="flex items-center gap-3 min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                    onClick={() => setOpen(false)}
+                  >
+                    <FileText size={16} aria-hidden="true" />
+                    Audit Log
+                  </Link>
+
+                  <Link
+                    href="/dashboard/settings"
+                    className="flex items-center gap-3 min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                    onClick={() => setOpen(false)}
+                  >
+                    <Settings size={16} aria-hidden="true" />
+                    Account Settings
+                    <span className="ml-auto text-[10px] font-medium text-vektrum-amber bg-vektrum-amber-bg border border-vektrum-amber-border rounded-full px-1.5 py-0.5">
+                      Soon
+                    </span>
+                  </Link>
+
+                  <div className="mt-2 pt-2 border-t border-vektrum-border">
+                    <button
+                      onClick={handleSignOut}
+                      disabled={signingOut}
+                      className="flex items-center gap-3 w-full min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-red hover:bg-vektrum-red-bg transition-all disabled:opacity-50"
+                    >
+                      <LogOut size={16} aria-hidden="true" />
+                      {signingOut ? 'Signing out…' : 'Sign out'}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                // ── Logged-out drawer ───────────────────────────────────────
+                <>
+                  <Link
+                    href="/pricing"
+                    className="flex items-center min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                    onClick={() => setOpen(false)}
+                  >
+                    Pricing
+                  </Link>
+                  <Link
+                    href="/dashboard"
+                    className="flex items-center min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                    onClick={() => setOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    href="/auth/login"
+                    className="flex items-center min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                    onClick={() => setOpen(false)}
+                  >
+                    Sign in
+                  </Link>
+                  <div className="mt-3 pt-3 border-t border-vektrum-border">
+                    <Link
+                      href="/auth/signup"
+                      className="flex items-center justify-center min-h-[48px] w-full rounded-xl bg-vektrum-blue text-[15px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 hover:bg-vektrum-blue-hover transition-all"
+                      onClick={() => setOpen(false)}
+                    >
+                      Get started
+                    </Link>
+                  </div>
+                </>
+              )}
             </nav>
           </div>
         </>

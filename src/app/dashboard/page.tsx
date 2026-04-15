@@ -6,7 +6,7 @@ import { Money } from '@/components/ui/money'
 import { Button } from '@/components/ui/button'
 import { Card, CardBody } from '@/components/ui/card'
 import type { Deal, Profile } from '@/lib/types'
-import { Plus, FileText, AlertCircle, Lock } from 'lucide-react'
+import { Plus, FileText, FolderOpen, Lock } from 'lucide-react'
 
 // Phase 6/7 dashboard sub-components
 import { DrawReviewPanel } from '@/components/dashboard/draw-review-panel'
@@ -84,7 +84,7 @@ function MoneyStatTile({ label, amount }: { label: string; amount: number }) {
 function EmptyDeals({ role }: { role: string }) {
   return (
     <div className="rounded-lg border border-dashed border-vektrum-border bg-vektrum-surface-alt px-8 py-16 text-center">
-      <AlertCircle size={32} className="mx-auto text-vektrum-faint" aria-hidden="true" />
+      <FolderOpen size={32} className="mx-auto text-vektrum-faint" aria-hidden="true" />
       <p className="mt-3 text-sm font-medium text-vektrum-muted">
         {role === 'contractor'
           ? "You haven't created any deals yet."
@@ -150,10 +150,15 @@ export default async function DashboardPage() {
           {/* Header */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-xl font-bold text-vektrum-text">
+              <h1 className="font-display text-2xl font-bold text-vektrum-text">
                 Welcome back, {profile.full_name?.split(' ')[0] ?? 'there'}
               </h1>
-              <p className="mt-0.5 text-sm text-vektrum-muted">Contractor dashboard</p>
+              <div className="mt-1.5 flex items-center gap-2">
+                <p className="text-sm text-vektrum-muted">Contractor dashboard</p>
+                <span className="inline-flex items-center rounded-full bg-vektrum-blue-subtle border border-vektrum-blue-border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-vektrum-blue">
+                  Contractor
+                </span>
+              </div>
             </div>
             <Link href="/dashboard/deals/new">
               <Button variant="primary" size="md">
@@ -172,11 +177,18 @@ export default async function DashboardPage() {
           </div>
 
           {/* Draw Review Status Panel */}
-          <DrawReviewPanel deals={deals} />
+          <div className="rounded-xl border border-vektrum-border bg-vektrum-surface shadow-sm overflow-hidden">
+            <div className="border-l-4 border-vektrum-blue px-5 py-4 border-b border-vektrum-border-subtle">
+              <p className="text-[13px] font-semibold text-vektrum-text">Draw Review Status</p>
+            </div>
+            <div className="p-4">
+              <DrawReviewPanel deals={deals} embedded />
+            </div>
+          </div>
 
           {/* Lien Waiver Tracker — Coming Soon */}
-          <div className="rounded-xl border border-dashed border-vektrum-border bg-vektrum-surface-alt p-6">
-            <div className="flex items-center gap-3">
+          <div className="rounded-xl border border-dashed border-vektrum-border bg-vektrum-surface-alt p-6 opacity-60 cursor-not-allowed select-none">
+            <div className="flex items-center gap-3 pointer-events-none">
               <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-vektrum-border">
                 <Lock size={16} className="text-vektrum-faint" />
               </div>
@@ -248,10 +260,15 @@ export default async function DashboardPage() {
         <div className="page-container section space-y-8">
           {/* Header */}
           <div>
-            <h1 className="text-xl font-bold text-vektrum-text">
+            <h1 className="font-display text-2xl font-bold text-vektrum-text">
               Welcome back, {profile.full_name?.split(' ')[0] ?? 'there'}
             </h1>
-            <p className="mt-0.5 text-sm text-vektrum-muted">Funder dashboard</p>
+            <div className="mt-1.5 flex items-center gap-2">
+              <p className="text-sm text-vektrum-muted">Funder dashboard</p>
+              <span className="inline-flex items-center rounded-full bg-vektrum-blue-subtle border border-vektrum-blue-border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-vektrum-blue">
+                Funder
+              </span>
+            </div>
           </div>
 
           {/* Weekly briefing card */}

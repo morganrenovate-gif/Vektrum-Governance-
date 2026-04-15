@@ -2,6 +2,9 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Instrument_Sans, JetBrains_Mono } from "next/font/google";
 import Link from "next/link";
 import { MobileNav } from "@/components/nav/mobile-nav";
+import { VektrumWordmark } from "@/components/ui/vektrum-logo";
+import { UserMenu } from "@/components/nav/user-menu";
+import { createClient } from "@/lib/supabase/server";
 import "./globals.css";
 
 const inter = Inter({
@@ -38,11 +41,19 @@ export const viewport: Viewport = {
   maximumScale: 5,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Detect auth state server-side — zero client round-trip
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  // Pull display name from user metadata
+  const userName = user?.user_metadata?.full_name ?? null
+  const userEmail = user?.email ?? null
+
   return (
     <html lang="en" className={`${inter.variable} ${instrumentSans.variable} ${jetbrainsMono.variable}`}>
       <body className="flex min-h-screen flex-col bg-vektrum-bg font-sans text-vektrum-text antialiased">
@@ -52,49 +63,63 @@ export default function RootLayout({
             <nav className="flex h-16 items-center justify-between">
               <Link
                 href="/"
-                className="flex items-center gap-2.5 group"
+                className="flex items-center group"
                 aria-label="Vektrum home"
               >
-                {/* Logo mark — matches logo's near-black canvas */}
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-vektrum-canvas">
-                  <span className="text-sm font-bold text-vektrum-canvas-text tracking-tight">V</span>
-                </div>
-                <span className="text-[15px] font-semibold tracking-[-0.02em] text-vektrum-text group-hover:text-vektrum-muted transition-colors">
-                  Vektrum
-                </span>
+                <VektrumWordmark
+                  markSize={28}
+                  className="group-hover:opacity-80 transition-opacity"
+                />
               </Link>
 
               {/* Desktop nav — hidden on mobile */}
               <div className="hidden sm:flex items-center gap-1">
-                <Link
-                  href="/pricing"
-                  className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
-                >
-                  Pricing
-                </Link>
-                <Link
-                  href="/dashboard"
-                  className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  href="/auth/login"
-                  className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
-                >
-                  Sign in
-                </Link>
-                {/* Primary CTA — brand cobalt blue */}
-                <Link
-                  href="/auth/signup"
-                  className="ml-2 rounded-lg bg-vektrum-blue px-4 py-2 text-[13px] font-medium text-white hover:bg-vektrum-blue-hover transition-all shadow-sm"
-                >
-                  Get started
-                </Link>
+                {user ? (
+                  // ── Logged-in nav ──────────────────────────────────────────
+                  <>
+                    <Link
+                      href="/dashboard"
+                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                    >
+                      Dashboard
+                    </Link>
+                    <div className="ml-2">
+                      <UserMenu name={userName} email={userEmail} />
+                    </div>
+                  </>
+                ) : (
+                  // ── Logged-out nav ─────────────────────────────────────────
+                  <>
+                    <Link
+                      href="/pricing"
+                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                    >
+                      Pricing
+                    </Link>
+                    <Link
+                      href="/dashboard"
+                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                    >
+                      Dashboard
+                    </Link>
+                    <Link
+                      href="/auth/login"
+                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                    >
+                      Sign in
+                    </Link>
+                    <Link
+                      href="/auth/signup"
+                      className="ml-2 rounded-lg bg-vektrum-blue px-4 py-2 text-[13px] font-medium text-white hover:bg-vektrum-blue-hover transition-all shadow-sm"
+                    >
+                      Get started
+                    </Link>
+                  </>
+                )}
               </div>
 
               {/* Mobile hamburger — shown only on mobile */}
-              <MobileNav />
+              <MobileNav isLoggedIn={!!user} userName={userName} userEmail={userEmail} />
             </nav>
           </div>
         </header>
@@ -108,20 +133,11 @@ export default function RootLayout({
             <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
               {/* Brand */}
               <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-md bg-vektrum-canvas">
-                    <span className="text-xs font-bold text-vektrum-canvas-text">V</span>
-                  </div>
-                  <span className="text-sm font-semibold tracking-[-0.02em] text-vektrum-text">
-                    Vektrum
-                  </span>
-                </div>
+                <VektrumWordmark markSize={24} showTagline />
                 <p className="text-[13px] leading-relaxed text-vektrum-muted max-w-xs">
                   Construction payment governance. Funds release only when work is verified.
                 </p>
-                <p className="text-[11px] font-medium uppercase tracking-widest text-vektrum-faint">
-                  Trust. Built In.
-                </p>
+
               </div>
 
               {/* Links */}
