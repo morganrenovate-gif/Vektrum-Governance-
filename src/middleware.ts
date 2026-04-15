@@ -4,7 +4,8 @@ import { updateSession } from "@/lib/supabase/middleware";
 /**
  * Vektrum route protection middleware.
  *
- * Public routes: /, /auth/*, /api/stripe/webhook
+ * Public routes: /, /auth/*, /api/stripe/webhook, /api/invites/[token] (GET),
+ *                /invite/*, /pricing
  * Protected routes: /dashboard/* — requires authenticated Supabase session.
  *
  * All other routes are left to Next.js to handle.
@@ -20,6 +21,8 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/api/stripe/webhook") ||
     pathname.startsWith("/auth/") ||
     pathname === "/" ||
+    pathname === "/pricing" ||
+    pathname.startsWith("/invite/") ||
     pathname.startsWith("/favicon")
   ) {
     // Still update session cookies so they stay fresh

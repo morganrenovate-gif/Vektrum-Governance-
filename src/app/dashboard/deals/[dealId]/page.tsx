@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { MoneySummary } from "@/components/deal/money-summary";
 import { MilestoneCard } from "@/components/deal/milestone-card";
 import { ReleaseButton } from "@/components/deal/release-button";
+import { InviteFunderButton } from "@/components/deal/invite-funder-button";
 import { DealStatusBadge } from "@/components/ui/badge";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { AddMilestoneForm } from "./add-milestone-form";
@@ -113,12 +114,18 @@ export default async function DealDetailPage({
     typedProfile.role === "funder" &&
     typedDeal.funded_amount < typedDeal.total_amount;
 
+  // Contractor sees invite UI when deal has no funder and is in draft
+  const showInviteFunder =
+    typedProfile.role === "contractor" &&
+    typedDeal.status === "draft" &&
+    !typedDeal.funder_id;
+
   return (
     <div className="page-container py-8 space-y-8">
       {/* Back */}
       <Link
         href="/dashboard"
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800 transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm text-vektrum-muted hover:text-vektrum-text transition-colors"
       >
         <ArrowLeft size={14} aria-hidden="true" />
         Back to dashboard
@@ -128,30 +135,34 @@ export default async function DealDetailPage({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-xl font-bold text-slate-900">{typedDeal.title}</h1>
+            <h1 className="text-xl font-bold text-vektrum-text">{typedDeal.title}</h1>
             <DealStatusBadge status={typedDeal.status} />
           </div>
           {typedDeal.description && (
-            <p className="max-w-2xl text-sm text-slate-500">
+            <p className="max-w-2xl text-sm text-vektrum-muted">
               {typedDeal.description}
             </p>
           )}
-          <div className="flex flex-wrap gap-x-4 gap-y-0.5 pt-1 text-xs text-slate-400">
+          <div className="flex flex-wrap gap-x-4 gap-y-0.5 pt-1 text-xs text-vektrum-faint">
             {typedDeal.contractor && (
               <span>
                 Contractor:{" "}
-                <strong className="text-slate-600">
+                <strong className="text-vektrum-muted">
                   {typedDeal.contractor.company_name ??
                     typedDeal.contractor.full_name}
                 </strong>
               </span>
             )}
-            {typedDeal.funder && (
+            {typedDeal.funder ? (
               <span>
                 Funder:{" "}
-                <strong className="text-slate-600">
+                <strong className="text-vektrum-muted">
                   {typedDeal.funder.full_name}
                 </strong>
+              </span>
+            ) : (
+              <span className="text-vektrum-amber font-medium">
+                No funder assigned yet
               </span>
             )}
           </div>
@@ -165,6 +176,23 @@ export default async function DealDetailPage({
           />
         )}
       </div>
+
+      {/* ── Invite Funder Panel (contractor, draft, no funder) ── */}
+      {showInviteFunder && (
+        <Card>
+          <CardHeader border>
+            <CardTitle>Invite a Funder</CardTitle>
+          </CardHeader>
+          <CardBody>
+            <p className="mb-4 text-sm text-vektrum-muted">
+              Share a secure invite link with your funder. When they accept, they will be
+              assigned to this deal room and can begin reviewing milestones and funding the
+              project. The link is valid for 7 days.
+            </p>
+            <InviteFunderButton dealId={typedDeal.id} />
+          </CardBody>
+        </Card>
+      )}
 
       {/* ── Money summary ── */}
       <Card>
@@ -180,14 +208,14 @@ export default async function DealDetailPage({
       {/* ── Milestones ── */}
       <section>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-vektrum-muted">
             Milestones ({milestones.length})
           </h2>
         </div>
 
         {milestones.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-8 py-12 text-center">
-            <p className="text-sm text-slate-400">
+          <div className="rounded-lg border border-dashed border-vektrum-border bg-vektrum-surface-alt px-8 py-12 text-center">
+            <p className="text-sm text-vektrum-faint">
               {isDraftContractor
                 ? "No milestones yet. Add the first one below."
                 : "No milestones have been added to this deal."}
@@ -231,7 +259,7 @@ export default async function DealDetailPage({
       {/* ── Add milestone (contractor, draft deals) ── */}
       {isDraftContractor && (
         <section>
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-500">
+          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-vektrum-muted">
             Add Milestone
           </h2>
           <Card>
@@ -240,7 +268,7 @@ export default async function DealDetailPage({
             </CardHeader>
             <CardBody>
               {/* Running total */}
-              <div className="mb-5 flex items-start gap-2 rounded-md bg-blue-50 border border-blue-100 px-3 py-2.5 text-sm text-blue-700">
+              <div className="mb-5 flex items-start gap-2 rounded-md bg-vektrum-blue-subtle border border-vektrum-blue-border px-3 py-2.5 text-sm text-vektrum-blue">
                 <Info size={14} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
                 <span>
                   Milestones allocated:{" "}
