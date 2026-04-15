@@ -4,13 +4,18 @@
 
 @layer base {
   :root {
-    --background: #ffffff;
-    --foreground: #0f172a;
+    --background: #FAFBFC;
+    --foreground: #0A0F1C;
+    --surface: #FFFFFF;
+    --border: #E5E7EB;
+    --muted: #6B7280;
+    --accent: #2563EB;
   }
 
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
   }
 
   body {
@@ -24,60 +29,68 @@
     box-sizing: border-box;
   }
 
-  /* Focus ring for accessibility */
   :focus-visible {
-    outline: 2px solid #2563eb;
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
     border-radius: 4px;
+  }
+
+  ::selection {
+    background-color: rgba(37, 99, 235, 0.15);
   }
 }
 
 @layer components {
-  /* Consistent transition for interactive elements */
   .interactive {
-    @apply transition-colors duration-150 ease-in-out;
+    @apply transition-all duration-200 ease-out;
   }
 
-  /* Page container */
   .page-container {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+    @apply max-w-6xl mx-auto px-6 sm:px-8 lg:px-12;
   }
 
-  /* Section spacing */
   .section {
     @apply py-8 sm:py-12;
   }
 
-  /* Status colors as utility */
-  .status-not-started {
-    @apply bg-slate-100 text-slate-700;
+  /* Status badges */
+  .status-not-started { @apply bg-slate-100 text-slate-600; }
+  .status-in-progress { @apply bg-blue-50 text-blue-700; }
+  .status-ready-for-review { @apply bg-amber-50 text-amber-700; }
+  .status-approved { @apply bg-emerald-50 text-emerald-700; }
+  .status-released { @apply bg-emerald-50 text-emerald-800; }
+  .status-disputed { @apply bg-red-50 text-red-700; }
+
+  /* Gradient border for feature cards */
+  .gradient-border {
+    position: relative;
   }
-  .status-in-progress {
-    @apply bg-blue-100 text-blue-700;
-  }
-  .status-ready-for-review {
-    @apply bg-amber-100 text-amber-700;
-  }
-  .status-approved {
-    @apply bg-green-100 text-green-700;
-  }
-  .status-released {
-    @apply bg-green-100 text-green-800;
-  }
-  .status-disputed {
-    @apply bg-red-100 text-red-700;
+  .gradient-border::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(37, 99, 235, 0.0) 50%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
   }
 }
 
 @layer utilities {
-  /* Small caps helper */
   .small-caps {
     font-variant: small-caps;
     letter-spacing: 0.06em;
   }
 
-  /* Numeric font feature for money display */
   .font-numeric {
     font-feature-settings: "tnum" 1, "lnum" 1;
+  }
+
+  .text-balance {
+    text-wrap: balance;
   }
 }
