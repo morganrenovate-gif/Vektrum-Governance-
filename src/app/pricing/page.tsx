@@ -7,6 +7,8 @@ import {
   Building2,
   TrendingUp,
   Lock,
+  DollarSign,
+  BarChart3,
 } from 'lucide-react'
 
 export const metadata = {
@@ -25,6 +27,8 @@ interface PlanProps {
   audience: string
   projectSize: string
   features: string[]
+  releaseFeeLine: string
+  releaseFeeHighlight?: boolean
   highlight?: boolean
   badge?: string
   cta?: string
@@ -38,6 +42,8 @@ function PlanCard({
   audience,
   projectSize,
   features,
+  releaseFeeLine,
+  releaseFeeHighlight = false,
   highlight = false,
   badge,
   cta = 'Start free trial',
@@ -85,6 +91,37 @@ function PlanCard({
         </div>
       </div>
 
+      {/* Disbursement Processing Fee callout — Stream 2 */}
+      <div
+        className={[
+          'mb-6 flex items-start gap-2.5 rounded-xl border px-4 py-3',
+          releaseFeeHighlight
+            ? 'border-vektrum-green/30 bg-vektrum-green-bg/40'
+            : 'border-vektrum-border bg-vektrum-surface-alt',
+        ].join(' ')}
+      >
+        <DollarSign
+          size={13}
+          className={[
+            'mt-0.5 flex-shrink-0',
+            releaseFeeHighlight ? 'text-vektrum-green' : 'text-vektrum-faint',
+          ].join(' ')}
+        />
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-vektrum-faint">
+            Disbursement Processing Fee
+          </p>
+          <p
+            className={[
+              'mt-0.5 text-[12px] font-semibold',
+              releaseFeeHighlight ? 'text-vektrum-green' : 'text-vektrum-muted',
+            ].join(' ')}
+          >
+            {releaseFeeLine}
+          </p>
+        </div>
+      </div>
+
       <ul className="mb-8 flex flex-col gap-2.5 flex-1">
         {features.map((f) => (
           <li key={f} className="flex items-start gap-2.5">
@@ -109,6 +146,30 @@ function PlanCard({
         {cta}
         <ArrowRight size={14} />
       </Link>
+    </div>
+  )
+}
+
+// ─── Revenue Stream Row ────────────────────────────────────────────────────────
+
+function RevenueStream({
+  icon,
+  label,
+  description,
+}: {
+  icon: React.ReactNode
+  label: string
+  description: string
+}) {
+  return (
+    <div className="flex items-start gap-4">
+      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-vektrum-border bg-vektrum-surface">
+        {icon}
+      </div>
+      <div>
+        <p className="text-[14px] font-semibold text-vektrum-text tracking-[-0.01em]">{label}</p>
+        <p className="mt-1 text-[13px] leading-relaxed text-vektrum-muted">{description}</p>
+      </div>
     </div>
   )
 }
@@ -149,7 +210,7 @@ export default function PricingPage() {
       </section>
 
       {/* ─── Pricing cards ───────────────────────────────────────────────────── */}
-      <section className="bg-vektrum-bg py-4 pb-20 sm:pb-28">
+      <section className="bg-vektrum-bg py-4 pb-12 sm:pb-16">
         <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="grid gap-6 sm:grid-cols-3">
             <PlanCard
@@ -159,6 +220,8 @@ export default function PricingPage() {
               tagline="Solo GC, small lender, or first deal. Full governance from day one."
               audience="Solo GC or small private lender"
               projectSize="1–3 active projects up to $5M each"
+              releaseFeeLine="$25 per milestone release"
+              releaseFeeHighlight={false}
               features={[
                 'Full 7-condition release gate',
                 'Milestone isolation',
@@ -176,6 +239,8 @@ export default function PricingPage() {
               tagline="The tier most commercial lenders and active GCs run on."
               audience="Commercial lender or GC managing multiple jobs"
               projectSize="3–20 active projects, any size"
+              releaseFeeLine="Included — unlimited releases"
+              releaseFeeHighlight={true}
               features={[
                 'Everything in Standard',
                 'Up to 20 active projects',
@@ -195,6 +260,8 @@ export default function PricingPage() {
               tagline="Or $25K&ndash;$80K/year for 20+ projects. 3 enterprise funders = $1M ARR."
               audience="Large lender or developer with 20+ concurrent projects"
               projectSize="Unlimited projects, $10M+ deal sizes"
+              releaseFeeLine="Included — unlimited releases"
+              releaseFeeHighlight={true}
               features={[
                 'Everything in Professional',
                 'Unlimited active projects',
@@ -206,6 +273,42 @@ export default function PricingPage() {
               ]}
               cta="Contact us"
             />
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Two Revenue Streams ─────────────────────────────────────────────── */}
+      <section className="bg-vektrum-bg pb-20 sm:pb-28">
+        <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="rounded-2xl border border-vektrum-border bg-vektrum-surface p-8 sm:p-10">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-vektrum-faint mb-1">
+              How Vektrum earns revenue
+            </p>
+            <h2 className="text-xl font-bold tracking-[-0.02em] text-vektrum-text mb-8">
+              Two explicit revenue streams
+            </h2>
+
+            <div className="grid gap-8 sm:grid-cols-2">
+              <RevenueStream
+                icon={<BarChart3 size={18} className="text-vektrum-blue" />}
+                label="Stream 1 — Platform Subscription"
+                description="Per-project, per-month SaaS fee. Standard ($299), Professional ($599), or Enterprise ($1,499). Billed to the funder. Scales directly with portfolio size — every new active project adds a seat."
+              />
+              <RevenueStream
+                icon={<DollarSign size={18} className="text-vektrum-amber" />}
+                label="Stream 2 — Disbursement Processing Fee"
+                description="$25 per milestone release on the Standard tier. Covers the governance work of each approved release event. Included at no extra charge on Professional and Enterprise — a clear dollar-value upgrade incentive."
+              />
+            </div>
+
+            <div className="mt-8 pt-8 border-t border-vektrum-border">
+              <p className="text-[12px] text-vektrum-faint leading-relaxed">
+                <span className="font-semibold text-vektrum-muted">Not a revenue stream:</span>{' '}
+                Stripe payment processing fees are passed through at cost with zero markup.
+                You pay exactly what Stripe charges, disclosed at every transaction.
+                Vektrum earns nothing from the payment rail &mdash; only from governance.
+              </p>
+            </div>
           </div>
         </div>
       </section>
