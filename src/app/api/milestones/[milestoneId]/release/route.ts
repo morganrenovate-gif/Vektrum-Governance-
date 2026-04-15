@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { getAuthUser, requireDealAccess } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
-import { validateRelease } from '@/lib/engine/release-gate'
+import { validateRelease, checkAiPrecondition } from '@/lib/engine/release-gate'
 import { stripe } from '@/lib/stripe'
 import { internalError, notFoundError, validationError } from '@/lib/errors'
 
@@ -69,6 +69,15 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     await requireDealAccess(supabase, milestone.deal_id, user.id, profile.role)
   } catch (err) {
     return err as NextResponse
+  }
+
+  // ── STEP 0: AI Draw Review Precondition ─────────────────────────────────────
+  const aiCheck = await checkAiPrecondition(milestoneId, supabase)
+  if (!aiCheck.passed) {
+    return NextResponse.json(
+      { error: aiCheck.reason },
+      { status: 422 },
+    )
   }
 
   // ── STEP 1: Run Release Gate (all 7 conditions + role check) ────────────────

@@ -46,6 +46,9 @@ export const VALID_TRANSITIONS: Record<
   released: [
     // Terminal state — no further transitions are possible
   ],
+  disputed: [
+    // Terminal state — disputes are resolved through the dispute resolution flow
+  ],
 }
 
 // ─── Validation ───────────────────────────────────────────────────────────────

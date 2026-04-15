@@ -23,7 +23,8 @@ export async function middleware(request: NextRequest) {
     pathname === "/" ||
     pathname === "/pricing" ||
     pathname.startsWith("/invite/") ||
-    pathname.startsWith("/favicon")
+    pathname.startsWith("/favicon") ||
+    pathname === "/demo"
   ) {
     return NextResponse.next();
   }

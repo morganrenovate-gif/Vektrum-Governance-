@@ -26,7 +26,7 @@ export default async function AuditLogPage({
     .from("profiles")
     .select("role")
     .eq("id", user.id)
-    .single();
+    .single() as { data: { role: string } | null };
 
   if (!profile || profile.role !== "admin") {
     redirect("/dashboard");

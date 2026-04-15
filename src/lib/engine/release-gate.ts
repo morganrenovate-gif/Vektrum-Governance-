@@ -1,4 +1,5 @@
 import { createServerClient } from '@supabase/ssr'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Profile } from '@/lib/types'
 
 // ─── Result Shape ─────────────────────────────────────────────────────────────
@@ -206,4 +207,48 @@ export async function validateRelease(
     allowed: errors.length === 0,
     errors,
   }
+}
+
+// ─── AI Draw Review Precondition ─────────────────────────────────────────────
+
+/**
+ * Checks whether a recent, passing AI draw review exists for the milestone.
+ * This is a SEPARATE precondition checked BEFORE the 7-condition release gate.
+ *
+ * Rules:
+ *   - Must have at least one ai_draw_review audit entry
+ *   - Assessment must be < 48 hours old
+ *   - Assessment must NOT be critical risk level
+ */
+export async function checkAiPrecondition(
+  milestoneId: string,
+  supabase: SupabaseClient
+): Promise<{ passed: boolean; reason?: string }> {
+  const { data: reviews } = await supabase
+    .from('audit_log')
+    .select('created_at, metadata')
+    .eq('entity_type', 'milestone')
+    .eq('entity_id', milestoneId)
+    .eq('action', 'ai_draw_review')
+    .order('created_at', { ascending: false })
+    .limit(1)
+
+  if (!reviews || reviews.length === 0) {
+    return { passed: false, reason: 'AI draw review is required before release' }
+  }
+
+  const review = reviews[0]
+  const reviewAge = Date.now() - new Date(review.created_at).getTime()
+  const fortyEightHours = 48 * 60 * 60 * 1000
+
+  if (reviewAge > fortyEightHours) {
+    return { passed: false, reason: 'AI assessment expired — please request a fresh review' }
+  }
+
+  const riskLevel = (review.metadata as Record<string, unknown> | null)?.risk_level
+  if (riskLevel === 'critical') {
+    return { passed: false, reason: 'AI flagged critical risk — admin review required before release' }
+  }
+
+  return { passed: true }
 }

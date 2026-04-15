@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import type { Profile } from '@/lib/types'
@@ -16,7 +18,7 @@ import type { Profile } from '@/lib/types'
  *   { reply: string, suggestions: string[], requiresConfirmation?: boolean }
  *
  * Write actions require { confirm: true } in the body before they execute.
- * Current implementation: structured "Coming soon" responses until LLM is wired.
+ * Powered by Perplexity Sonar AI.
  */
 export async function POST(req: NextRequest) {
   try {
@@ -77,13 +79,54 @@ export async function POST(req: NextRequest) {
     const suggestions =
       profile.role === 'contractor' ? contractorSuggestions : funderSuggestions
 
-    // ── Coming-soon response ────────────────────────────────────────────────────
-    // Full LLM integration will be wired here. The response shape is final.
+    // ── Perplexity Sonar AI ────────────────────────────────────────────────────
+    const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY
+    if (!PERPLEXITY_API_KEY) {
+      return NextResponse.json({
+        reply:
+          'AI assistant is temporarily unavailable. Please try again later.',
+        suggestions,
+        requiresConfirmation: false,
+      })
+    }
+
+    const systemPrompt =
+      'You are the Vektrum AI Assistant — helping construction project funders, contractors, and deal managers understand their projects, navigate the platform, and make informed decisions about milestone management and fund governance. ' +
+      `The current user is a ${profile.role}${profile.full_name ? ` named ${profile.full_name}` : ''}. ` +
+      'Keep responses concise and actionable. Use plain language.'
+
+    const perplexityResponse = await fetch('https://api.perplexity.ai/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'sonar',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: command },
+        ],
+        temperature: 0.5,
+        max_tokens: 512,
+      }),
+    })
+
+    if (!perplexityResponse.ok) {
+      console.error('[api/assistant] Perplexity API error:', await perplexityResponse.text())
+      return NextResponse.json({
+        reply:
+          'AI assistant encountered an error processing your request. Please try again.',
+        suggestions,
+        requiresConfirmation: false,
+      })
+    }
+
+    const perplexityData = await perplexityResponse.json()
+    const reply: string = perplexityData.choices?.[0]?.message?.content ?? 'No response from AI.'
+
     return NextResponse.json({
-      reply:
-        'AI assistant is coming soon. Your command has been received. ' +
-        'Full draw review analysis, dispute risk flagging, and milestone intelligence ' +
-        'will be available in the next release.',
+      reply,
       suggestions,
       requiresConfirmation: false,
     })

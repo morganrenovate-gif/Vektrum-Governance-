@@ -43,7 +43,7 @@ export async function createClient() {
          * Component (where cookies are read-only). Route handlers and Server
          * Actions can mutate cookies without issue.
          */
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options)

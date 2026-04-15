@@ -14,7 +14,8 @@ export type MilestoneStatus =
   | "in_progress"
   | "ready_for_review"
   | "approved"
-  | "released";
+  | "released"
+  | "disputed";
 
 export type ProtectionStatus =
   | "pending"
@@ -84,6 +85,18 @@ export interface AuditLog {
   created_at: string;
   // Joined
   actor?: Profile;
+}
+
+// ─── Auth types ──────────────────────────────────────────────────────────────
+
+export interface AuthUser {
+  id: string;
+  email: string;
+}
+
+export interface AuthContext {
+  user: AuthUser;
+  profile: Profile;
 }
 
 // ─── API request/response shapes ─────────────────────────────────────────────

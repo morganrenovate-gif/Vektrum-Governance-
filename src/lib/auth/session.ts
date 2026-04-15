@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import type { AuthContext, Profile } from '@/lib/types'
 
 /**
@@ -17,7 +17,7 @@ import type { AuthContext, Profile } from '@/lib/types'
  */
 export async function getSession(): Promise<AuthContext | null> {
   try {
-    const supabase = createSupabaseServerClient()
+    const supabase = await createClient()
 
     const {
       data: { user },

@@ -6,6 +6,7 @@ import { MilestoneStatusBadge, ProtectionStatusBadge } from "@/components/ui/bad
 import { Button } from "@/components/ui/button";
 import type { Milestone, UserRole } from "@/lib/types";
 import { CheckCircle2, AlertCircle } from "lucide-react";
+import { DrawReviewAgent } from "@/components/ai/draw-review-agent";
 
 // Left-border color coding by milestone status — Tier 2 spec
 // Actionable milestones are visually differentiated from passive ones.
@@ -173,6 +174,13 @@ export function MilestoneCard({
             </div>
           </div>
         </div>
+
+        {/* AI Draw Review Agent — shown for ready_for_review and approved milestones */}
+        {(milestone.status === 'ready_for_review' || milestone.status === 'approved') && (
+          <div className="mt-4">
+            <DrawReviewAgent milestoneId={milestone.id} milestoneStatus={milestone.status} />
+          </div>
+        )}
 
         {/* Error / success feedback */}
         {error && (

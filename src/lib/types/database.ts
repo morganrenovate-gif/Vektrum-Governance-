@@ -457,6 +457,3 @@ export interface Database {
 // CONVENIENCE RE-EXPORTS
 // Shorthand type aliases for common patterns in server and client components.
 // =============================================================================
-
-/** A fully-typed Supabase client parameterised with the Vektrum Database schema. */
-export type { Database }

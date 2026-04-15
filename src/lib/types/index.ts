@@ -19,6 +19,7 @@ export type MilestoneStatus =
   | 'ready_for_review'
   | 'approved'
   | 'released'
+  | 'disputed'
 
 export type MilestoneProtectionStatus =
   | 'pending'

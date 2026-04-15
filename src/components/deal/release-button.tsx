@@ -84,6 +84,53 @@ export function ReleaseButton({
     );
   }
 
+  // ── Error state ────────────────────────────────────────────────────────────
+  if (uiState === "error") {
+    return (
+      <div className="space-y-3">
+        {serverError && (
+          <div className="flex items-start gap-2 rounded-md bg-vektrum-red-bg border border-vektrum-red-border px-3 py-2.5 text-sm text-vektrum-red">
+            <AlertCircle size={14} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
+            {serverError}
+          </div>
+        )}
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setUiState("confirming")}
+            className={cn(
+              "inline-flex items-center gap-2 rounded-lg px-4 py-2",
+              "bg-vektrum-blue text-white text-sm font-semibold",
+              "hover:bg-vektrum-blue-hover transition-colors",
+            )}
+          >
+            Try Again
+          </button>
+          <button
+            type="button"
+            onClick={() => { setUiState("idle"); setServerError(null); }}
+            className="inline-flex items-center rounded-lg border border-vektrum-border px-4 py-2 text-sm text-vektrum-muted hover:bg-vektrum-surface-alt transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Loading state ──────────────────────────────────────────────────────────
+  if (uiState === "loading") {
+    return (
+      <div className="relative rounded-xl border-2 border-vektrum-blue bg-vektrum-surface shadow-xl overflow-hidden">
+        <div className="h-1 w-full bg-vektrum-blue" />
+        <div className="px-6 py-5 flex items-center justify-center gap-3">
+          <span className="h-5 w-5 animate-spin rounded-full border-2 border-vektrum-blue/30 border-t-vektrum-blue" aria-hidden="true" />
+          <p className="text-sm font-semibold text-vektrum-text">Processing release...</p>
+        </div>
+      </div>
+    );
+  }
+
   // ── Confirmation modal (overlaid on the section) ───────────────────────────
   if (uiState === "confirming") {
     return (
@@ -160,20 +207,11 @@ export function ReleaseButton({
             ))}
           </ul>
 
-          {/* Error feedback */}
-          {uiState === "error" && serverError && (
-            <div className="flex items-start gap-2 rounded-md bg-vektrum-red-bg border border-vektrum-red-border px-3 py-2.5 text-sm text-vektrum-red">
-              <AlertCircle size={14} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
-              {serverError}
-            </div>
-          )}
-
           {/* Action row */}
           <div className="flex flex-col gap-2.5 sm:flex-row">
             <button
               type="button"
               onClick={handleRelease}
-              disabled={uiState === "loading"}
               className={cn(
                 "flex-1 inline-flex items-center justify-center gap-2",
                 "min-h-[48px] rounded-lg px-5 py-3",
@@ -181,32 +219,19 @@ export function ReleaseButton({
                 "shadow-blue transition-all",
                 "hover:bg-vektrum-blue-hover",
                 "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue",
-                "disabled:opacity-60 disabled:cursor-not-allowed"
               )}
-              aria-busy={uiState === "loading"}
             >
-              {uiState === "loading" ? (
-                <>
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" aria-hidden="true" />
-                  Processing…
-                </>
-              ) : (
-                <>
-                  <Shield size={15} aria-hidden="true" />
-                  Release {formatMoney(amount)}
-                </>
-              )}
+              <Shield size={15} aria-hidden="true" />
+              Release {formatMoney(amount)}
             </button>
             <button
               type="button"
               onClick={() => { setUiState("idle"); setServerError(null); }}
-              disabled={uiState === "loading"}
               className={cn(
                 "inline-flex items-center justify-center",
                 "min-h-[48px] rounded-lg border border-vektrum-border bg-vektrum-surface px-5 py-3",
                 "text-sm font-semibold text-vektrum-muted shadow-xs",
                 "transition-all hover:bg-vektrum-surface-alt hover:text-vektrum-text",
-                "disabled:opacity-50 disabled:cursor-not-allowed"
               )}
             >
               Cancel
@@ -242,13 +267,6 @@ export function ReleaseButton({
             {formatMoney(amount)}
           </span>
         </button>
-
-        {uiState === "error" && serverError && (
-          <div className="flex items-start gap-2 rounded-md bg-vektrum-red-bg border border-vektrum-red-border px-3 py-2 text-sm text-vektrum-red">
-            <AlertCircle size={14} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
-            {serverError}
-          </div>
-        )}
       </div>
     );
   }
