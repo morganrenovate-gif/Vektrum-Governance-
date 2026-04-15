@@ -68,7 +68,7 @@ export default async function HomePage() {
           <div className="animate-fade-in-delay-2 mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
             <Link
               href="/auth/signup"
-              className="group inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-vektrum-canvas px-7 py-3 text-[14px] font-semibold text-vektrum-canvas-text shadow-lg shadow-vektrum-canvas/20 hover:bg-vektrum-blue transition-all"
+              className="group inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-7 py-3 text-[14px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 hover:bg-vektrum-blue-hover transition-all"
             >
               Start a deal
               <ArrowRight
@@ -311,7 +311,7 @@ export default async function HomePage() {
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
             <Link
               href="/auth/signup"
-              className="group inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-vektrum-canvas px-7 py-3 text-[14px] font-semibold text-vektrum-canvas-text shadow-lg shadow-vektrum-canvas/20 hover:bg-vektrum-blue transition-all"
+              className="group inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-7 py-3 text-[14px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 hover:bg-vektrum-blue-hover transition-all"
             >
               Create your account
               <ArrowRight

@@ -60,10 +60,10 @@ export default function RootLayout({
                 >
                   Sign in
                 </Link>
-                {/* Primary CTA — brand cobalt blue on hover, dark canvas at rest */}
+                {/* Primary CTA — brand cobalt blue */}
                 <Link
                   href="/auth/signup"
-                  className="ml-2 rounded-lg bg-vektrum-canvas px-4 py-2 text-[13px] font-medium text-vektrum-canvas-text hover:bg-vektrum-blue transition-all shadow-sm"
+                  className="ml-2 rounded-lg bg-vektrum-blue px-4 py-2 text-[13px] font-medium text-white hover:bg-vektrum-blue-hover transition-all shadow-sm"
                 >
                   Get started
                 </Link>
