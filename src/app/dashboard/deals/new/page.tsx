@@ -90,13 +90,13 @@ export default function NewDealPage() {
         {/* Back link */}
         <Link
           href="/dashboard"
-          className="mb-6 inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800 transition-colors"
+          className="mb-6 inline-flex items-center gap-1.5 text-sm text-vektrum-muted hover:text-vektrum-text transition-colors"
         >
           <ArrowLeft size={14} aria-hidden="true" />
           Back to dashboard
         </Link>
 
-        <h1 className="mb-6 text-xl font-bold text-slate-900">
+        <h1 className="mb-6 font-display text-2xl font-bold text-vektrum-text">
           Create New Deal
         </h1>
 
@@ -147,7 +147,7 @@ export default function NewDealPage() {
               {serverError && (
                 <div
                   role="alert"
-                  className="flex items-start gap-2 rounded-md bg-red-50 border border-red-200 px-3 py-2.5 text-sm text-vektrum-red"
+                  className="flex items-start gap-2 rounded-md bg-vektrum-red-bg border border-vektrum-red-border px-3 py-2.5 text-sm text-vektrum-red"
                 >
                   <AlertCircle
                     size={15}
@@ -180,7 +180,7 @@ export default function NewDealPage() {
                 </Link>
               </div>
 
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-vektrum-faint">
                 After creating the deal, you&rsquo;ll be able to add milestones and
                 invite a funder.
               </p>

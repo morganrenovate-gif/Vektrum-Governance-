@@ -27,10 +27,10 @@ export function MoneySummary({
         <Money label="Remaining" amount={remaining} size="lg" muted={remaining === 0} />
       </div>
 
-      {/* Progress bar */}
-      <div className="space-y-1">
+      {/* Progress bar — h-4 per Tier 2 spec, featured size */}
+      <div className="space-y-2">
         <div
-          className="relative h-2 w-full overflow-hidden rounded-full bg-slate-100"
+          className="relative h-4 w-full overflow-hidden rounded-full bg-vektrum-surface-alt shadow-inner"
           role="progressbar"
           aria-label="Payment progress"
           aria-valuenow={releasedPct}
@@ -39,7 +39,7 @@ export function MoneySummary({
         >
           {/* Funded bar (blue background) */}
           <div
-            className="absolute left-0 top-0 h-full rounded-full bg-vektrum-blue opacity-30 transition-all duration-500"
+            className="absolute left-0 top-0 h-full rounded-full bg-vektrum-blue opacity-20 transition-all duration-500"
             style={{ width: `${Math.min(100, fundedPct)}%` }}
           />
           {/* Released bar (green foreground) */}
@@ -48,11 +48,11 @@ export function MoneySummary({
             style={{ width: `${Math.min(100, releasedPct)}%` }}
           />
         </div>
-        <div className="flex justify-between text-xs text-slate-400">
-          <span>
+        <div className="flex justify-between text-xs text-vektrum-muted">
+          <span className="tabular-nums">
             {releasedPct.toFixed(0)}% released
           </span>
-          <span>
+          <span className="tabular-nums">
             {fundedPct.toFixed(0)}% funded
           </span>
         </div>

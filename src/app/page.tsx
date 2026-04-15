@@ -12,6 +12,8 @@ import {
   Building2,
   TrendingUp,
   X,
+  BadgeCheck,
+  Star,
 } from 'lucide-react'
 import { DemoScene } from '@/components/homepage/demo-scene'
 
@@ -52,8 +54,8 @@ export default async function HomePage() {
             </div>
           </div>
 
-          {/* Headline — tension-first */}
-          <h1 className="animate-fade-in text-center text-[2rem] font-bold tracking-[-0.035em] text-vektrum-text sm:text-5xl lg:text-[3.5rem] lg:leading-[1.1] text-balance leading-[1.15]">
+          {/* Headline — display typeface for authority */}
+          <h1 className="animate-fade-in font-display text-center text-[2rem] font-bold tracking-[-0.035em] text-vektrum-text sm:text-5xl lg:text-[3.75rem] lg:leading-[1.08] text-balance leading-[1.12]">
             $9M jobs don&rsquo;t stall
             <br className="hidden sm:block" />
             {' '}over $15K disputes.
@@ -71,9 +73,9 @@ export default async function HomePage() {
           <div className="animate-fade-in-delay-2 mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
             <Link
               href="/auth/signup"
-              className="group inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-7 py-3 text-[14px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 hover:bg-vektrum-blue-hover transition-all"
+              className="group inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-8 py-3.5 text-[15px] font-semibold text-white shadow-blue transition-all hover:bg-vektrum-blue-hover hover:shadow-lg"
             >
-              Start a deal
+              Start a deal — it&rsquo;s free
               <ArrowRight
                 size={15}
                 className="transition-transform group-hover:translate-x-0.5"
@@ -81,10 +83,30 @@ export default async function HomePage() {
             </Link>
             <a
               href="#demo"
-              className="inline-flex min-h-[48px] items-center justify-center rounded-xl border border-vektrum-border bg-vektrum-surface px-7 py-3 text-[14px] font-semibold text-vektrum-muted shadow-sm hover:bg-vektrum-surface-alt hover:border-vektrum-blue/40 transition-all"
+              className="inline-flex min-h-[52px] items-center justify-center rounded-xl border border-vektrum-border bg-vektrum-surface px-7 py-3 text-[14px] font-semibold text-vektrum-muted shadow-sm hover:bg-vektrum-surface-alt hover:border-vektrum-blue/40 transition-all"
             >
               See how it works
             </a>
+          </div>
+
+          {/* Trust signals — above fold, 2026 fintech standard */}
+          <div className="animate-fade-in-delay-3 mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+            <div className="flex items-center gap-2 text-[12px] text-vektrum-faint">
+              <BadgeCheck size={14} className="text-vektrum-blue" aria-hidden="true" />
+              <span>Payments via Stripe Connect</span>
+            </div>
+            <div className="flex items-center gap-2 text-[12px] text-vektrum-faint">
+              <Shield size={14} className="text-vektrum-green" aria-hidden="true" />
+              <span>7-condition server-side gate</span>
+            </div>
+            <div className="flex items-center gap-2 text-[12px] text-vektrum-faint">
+              <Lock size={14} className="text-vektrum-muted" aria-hidden="true" />
+              <span>Funds held by Stripe, not Vektrum</span>
+            </div>
+            <div className="flex items-center gap-2 text-[12px] text-vektrum-faint">
+              <Star size={14} className="text-vektrum-amber" aria-hidden="true" />
+              <span>Contractors join free when invited</span>
+            </div>
           </div>
         </div>
       </section>
@@ -138,7 +160,7 @@ export default async function HomePage() {
               <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-vektrum-faint">
                 How it works
               </span>
-              <h2 className="mt-3 text-2xl font-bold tracking-[-0.025em] text-vektrum-text sm:text-3xl">
+              <h2 className="mt-3 font-display text-2xl font-bold tracking-[-0.025em] text-vektrum-text sm:text-3xl">
                 See the governance in action
               </h2>
               <p className="mt-4 text-[15px] leading-relaxed text-vektrum-muted">
@@ -171,7 +193,7 @@ export default async function HomePage() {
             <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
               Competitive positioning
             </span>
-            <h2 className="mt-3 text-2xl font-bold tracking-[-0.025em] text-white sm:text-3xl">
+            <h2 className="mt-3 font-display text-2xl font-bold tracking-[-0.025em] text-white sm:text-3xl">
               The gap nobody else fills
             </h2>
             <p className="mt-3 mx-auto max-w-md text-[15px] text-white/60">
@@ -250,7 +272,7 @@ export default async function HomePage() {
             <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-vektrum-faint">
               Core protections
             </span>
-            <h2 className="mt-3 text-2xl font-bold tracking-[-0.025em] text-vektrum-text sm:text-3xl">
+            <h2 className="mt-3 font-display text-2xl font-bold tracking-[-0.025em] text-vektrum-text sm:text-3xl">
               Every dollar governed
             </h2>
           </div>
@@ -329,7 +351,7 @@ export default async function HomePage() {
             <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
               Built for
             </span>
-            <h2 className="mt-3 text-2xl font-bold tracking-[-0.025em] text-white sm:text-3xl">
+            <h2 className="mt-3 font-display text-2xl font-bold tracking-[-0.025em] text-white sm:text-3xl">
               Every party in the deal
             </h2>
           </div>
@@ -414,7 +436,7 @@ export default async function HomePage() {
             <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-vektrum-faint">
               The process
             </span>
-            <h2 className="mt-3 text-2xl font-bold tracking-[-0.025em] text-vektrum-text sm:text-3xl">
+            <h2 className="mt-3 font-display text-2xl font-bold tracking-[-0.025em] text-vektrum-text sm:text-3xl">
               Protected at every step
             </h2>
           </div>

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Inter, Instrument_Sans, JetBrains_Mono } from "next/font/google";
 import Link from "next/link";
 import { MobileNav } from "@/components/nav/mobile-nav";
 import "./globals.css";
@@ -8,6 +8,16 @@ const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
+});
+
+// Display typeface — Instrument Sans for headings
+// Paired with Inter for body copy. Gives Vektrum typographic authority
+// matching Mercury, Carta, and Stripe's premium SaaS aesthetic.
+const instrumentSans = Instrument_Sans({
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -34,7 +44,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
+    <html lang="en" className={`${inter.variable} ${instrumentSans.variable} ${jetbrainsMono.variable}`}>
       <body className="flex min-h-screen flex-col bg-vektrum-bg font-sans text-vektrum-text antialiased">
         {/* Navigation */}
         <header className="sticky top-0 z-50 border-b border-vektrum-border/80 bg-vektrum-surface/90 backdrop-blur-xl">

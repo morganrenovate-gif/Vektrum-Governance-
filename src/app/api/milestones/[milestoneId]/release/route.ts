@@ -95,7 +95,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
 
   // ── STEP 2: Generate Idempotency Key ────────────────────────────────────────
-  const idempotencyKey = `release_${milestoneId}_${Date.now()}`
+  // Stable idempotency key — milestone_id is a UUID so this is globally unique per milestone.
+  // Using Date.now() would create a new key on each retry, defeating idempotency entirely.
+  const idempotencyKey = `release_${milestoneId}`
 
   // ── Amount in Cents ─────────────────────────────────────────────────────────
   const amountInCents = Math.round(milestone.amount * 100)

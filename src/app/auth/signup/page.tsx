@@ -6,9 +6,16 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, Shield, Building2, User, Lock, FileCheck } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { UserRole } from "@/lib/types";
+
+const AUTH_TRUST = [
+  { icon: Lock, title: "7-condition release gate", desc: "Payments move only with your explicit approval." },
+  { icon: Shield, title: "Funds held by Stripe", desc: "Vektrum governs — never holds your capital." },
+  { icon: FileCheck, title: "Immutable audit trail", desc: "Every action logged. No edits. No deletes." },
+  { icon: CheckCircle2, title: "Contractors join free", desc: "Funders pay. Contractors are always free." },
+];
 
 export default function SignupPage() {
   const router = useRouter();
@@ -24,7 +31,7 @@ export default function SignupPage() {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+  const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setFormData((prev) => ({ ...prev, [field]: e.target.value }));
 
   const validate = (): string | null => {
@@ -73,22 +80,22 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-12">
-        <div className="w-full max-w-sm text-center space-y-4">
-          <CheckCircle2
-            size={48}
-            className="mx-auto text-vektrum-green"
-            aria-hidden="true"
-          />
-          <h2 className="text-xl font-semibold text-vektrum-text">Check your inbox</h2>
-          <p className="text-sm text-vektrum-muted">
-            We sent a confirmation link to{" "}
-            <strong className="text-vektrum-text">{formData.email}</strong>. Click it
-            to activate your account and sign in.
-          </p>
+      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12 bg-vektrum-bg">
+        <div className="w-full max-w-sm text-center space-y-5">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-vektrum-green-bg">
+            <CheckCircle2 size={28} className="text-vektrum-green" aria-hidden="true" />
+          </div>
+          <div>
+            <h2 className="font-display text-2xl font-bold text-vektrum-text">Check your inbox</h2>
+            <p className="mt-2 text-sm text-vektrum-muted">
+              We sent a confirmation link to{" "}
+              <strong className="text-vektrum-text">{formData.email}</strong>. Click it
+              to activate your account and sign in.
+            </p>
+          </div>
           <Link
             href="/auth/login"
-            className="inline-block text-sm font-medium text-vektrum-blue hover:underline"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-vektrum-blue hover:underline"
           >
             Back to sign in
           </Link>
@@ -98,21 +105,119 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-12">
-      <div className="w-full max-w-sm">
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold text-vektrum-text">Create your account</h1>
-          <p className="mt-2 text-sm text-vektrum-muted">
-            Join Vektrum — construction payment governance
-          </p>
+    <div className="flex min-h-[calc(100vh-4rem)]">
+      {/* ── Left: Trust panel ─────────────────────────────────────────────── */}
+      <div className="hidden lg:flex lg:w-[480px] xl:w-[540px] flex-col justify-between bg-vektrum-canvas px-12 py-16 flex-shrink-0">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10">
+            <span className="text-sm font-bold text-white">V</span>
+          </div>
+          <div>
+            <span className="text-sm font-bold text-white tracking-tight">Vektrum</span>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30 leading-none mt-0.5">
+              Trust. Built In.
+            </p>
+          </div>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Account Details</CardTitle>
-          </CardHeader>
-          <CardBody>
+        <div className="space-y-10">
+          <div>
+            <h2 className="font-display text-3xl font-bold leading-tight tracking-tight text-white">
+              Govern your construction payments.
+            </h2>
+            <p className="mt-4 text-[15px] leading-relaxed text-white/60">
+              Milestone-based disbursement with server-enforced release gates.
+              Built for the $500K&ndash;$25M projects that need this most.
+            </p>
+          </div>
+
+          <ul className="space-y-5">
+            {AUTH_TRUST.map(({ icon: Icon, title, desc }) => (
+              <li key={title} className="flex items-start gap-3.5">
+                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-white/10 mt-0.5">
+                  <Icon size={15} className="text-white/70" aria-hidden="true" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white">{title}</p>
+                  <p className="mt-0.5 text-xs leading-relaxed text-white/50">{desc}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <p className="text-xs text-white/30">
+          Payments powered by Stripe Connect · Vektrum never holds funds
+        </p>
+      </div>
+
+      {/* ── Right: Signup form ────────────────────────────────────────────── */}
+      <div className="flex flex-1 items-start justify-center overflow-y-auto px-4 py-12 sm:px-8 bg-vektrum-bg">
+        <div className="w-full max-w-sm">
+          <div className="mb-8">
+            <h1 className="font-display text-2xl font-bold text-vektrum-text">
+              Create your account
+            </h1>
+            <p className="mt-1.5 text-sm text-vektrum-muted">
+              Join Vektrum — construction payment governance
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-vektrum-border bg-vektrum-surface p-6 shadow-sm">
             <form onSubmit={handleSubmit} noValidate className="space-y-4">
+
+              {/* Visual role selection cards */}
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-vektrum-text">
+                  I am a…{" "}
+                  <span className="text-vektrum-red text-xs" aria-hidden="true">*</span>
+                </p>
+                <div className="grid grid-cols-2 gap-2.5">
+                  {(["contractor", "funder"] as UserRole[]).map((role) => {
+                    const isSelected = formData.role === role;
+                    const Icon = role === "contractor" ? Building2 : User;
+                    const label = role === "contractor" ? "Contractor" : "Funder";
+                    const sub = role === "contractor" ? "I complete the work" : "I finance the project";
+                    return (
+                      <button
+                        key={role}
+                        type="button"
+                        onClick={() => setFormData((prev) => ({ ...prev, role }))}
+                        className={cn(
+                          "flex flex-col items-center gap-2 rounded-lg border-2 px-3 py-3.5 text-center transition-all",
+                          isSelected
+                            ? "border-vektrum-blue bg-vektrum-blue-subtle"
+                            : "border-vektrum-border bg-vektrum-bg hover:border-vektrum-blue/40 hover:bg-vektrum-surface"
+                        )}
+                        aria-pressed={isSelected}
+                      >
+                        <div className={cn(
+                          "flex h-8 w-8 items-center justify-center rounded-lg",
+                          isSelected ? "bg-vektrum-blue" : "bg-vektrum-surface-alt"
+                        )}>
+                          <Icon size={16} className={isSelected ? "text-white" : "text-vektrum-muted"} aria-hidden="true" />
+                        </div>
+                        <div>
+                          <p className={cn(
+                            "text-[13px] font-semibold",
+                            isSelected ? "text-vektrum-blue" : "text-vektrum-text"
+                          )}>
+                            {label}
+                          </p>
+                          <p className="text-[11px] text-vektrum-faint">{sub}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+                {formData.role === "contractor" && (
+                  <p className="text-[11px] text-vektrum-green flex items-center gap-1">
+                    <CheckCircle2 size={11} aria-hidden="true" />
+                    Contractors always join free when invited by a funder.
+                  </p>
+                )}
+              </div>
+
               <Input
                 type="text"
                 label="Full Name"
@@ -163,32 +268,6 @@ export default function SignupPage() {
                 required
               />
 
-              {/* Role selector */}
-              <div className="flex flex-col gap-1">
-                <label
-                  htmlFor="role"
-                  className="text-sm font-medium text-vektrum-text"
-                >
-                  I am a…{" "}
-                  <span className="ml-0.5 text-vektrum-red" aria-hidden="true">
-                    *
-                  </span>
-                </label>
-                <select
-                  id="role"
-                  value={formData.role}
-                  onChange={update("role")}
-                  required
-                  className="block min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-vektrum-text focus:border-vektrum-blue focus:outline-none focus:ring-2 focus:ring-blue-100"
-                >
-                  <option value="contractor">Contractor — I complete the work</option>
-                  <option value="funder">Funder — I finance the project</option>
-                </select>
-                <p className="text-xs text-vektrum-muted">
-                  Admin accounts are provisioned separately.
-                </p>
-              </div>
-
               {error && (
                 <div
                   role="alert"
@@ -209,18 +288,25 @@ export default function SignupPage() {
                 {loading ? "Creating account…" : "Create Account"}
               </Button>
             </form>
-          </CardBody>
-        </Card>
+          </div>
 
-        <p className="mt-6 text-center text-sm text-vektrum-muted">
-          Already have an account?{" "}
-          <Link
-            href="/auth/login"
-            className="font-medium text-vektrum-blue hover:underline"
-          >
-            Sign in
-          </Link>
-        </p>
+          <p className="mt-5 text-center text-sm text-vektrum-muted">
+            Already have an account?{" "}
+            <Link
+              href="/auth/login"
+              className="font-medium text-vektrum-blue hover:underline"
+            >
+              Sign in
+            </Link>
+          </p>
+
+          <div className="mt-6 lg:hidden flex items-start gap-2 rounded-lg border border-vektrum-border bg-vektrum-surface px-4 py-3">
+            <Shield size={14} className="text-vektrum-blue mt-0.5 flex-shrink-0" aria-hidden="true" />
+            <p className="text-xs text-vektrum-muted">
+              Payments powered by Stripe Connect. Vektrum governs release — never holds your funds.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

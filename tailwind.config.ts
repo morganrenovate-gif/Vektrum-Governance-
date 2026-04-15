@@ -64,8 +64,28 @@ const config: Config = {
 
       fontFamily: {
         sans:    ["var(--font-sans)", "system-ui", "sans-serif"],
-        display: ["var(--font-display)", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "var(--font-sans)", "system-ui", "sans-serif"],
         mono:    ["var(--font-mono)", "monospace"],
+      },
+
+      // ── 5-Level Shadow Hierarchy ────────────────────────────────────────────
+      // Level 1 (xs): hairline lift — table rows, minor UI elements
+      // Level 2 (sm): card resting state — the default card shadow
+      // Level 3 (md): card hover / active state — actionable cards
+      // Level 4 (lg): modals, drawers, popovers
+      // Level 5 (xl): feature-hero cards, release confirmation modal
+      boxShadow: {
+        xs:  "0 1px 2px 0 rgba(20,20,20,0.04)",
+        sm:  "0 1px 3px 0 rgba(20,20,20,0.07), 0 1px 2px -1px rgba(20,20,20,0.04)",
+        md:  "0 4px 6px -1px rgba(20,20,20,0.08), 0 2px 4px -2px rgba(20,20,20,0.05)",
+        lg:  "0 10px 15px -3px rgba(20,20,20,0.10), 0 4px 6px -4px rgba(20,20,20,0.06)",
+        xl:  "0 20px 25px -5px rgba(20,20,20,0.12), 0 8px 10px -6px rgba(20,20,20,0.07)",
+        "2xl": "0 25px 50px -12px rgba(20,20,20,0.20)",
+        // Brand-tinted shadow for primary CTAs
+        blue: "0 4px 14px 0 rgba(26,58,150,0.30)",
+        // Inner shadow for inset wells
+        inner: "inset 0 2px 4px 0 rgba(20,20,20,0.06)",
+        none: "none",
       },
 
       animation: {

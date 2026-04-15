@@ -20,9 +20,9 @@ const variantClasses: Record<ButtonVariant, string> = {
   secondary:
     "bg-vektrum-surface text-vektrum-muted border border-vektrum-border hover:bg-vektrum-surface-alt focus-visible:ring-vektrum-blue disabled:opacity-40",
   danger:
-    "bg-vektrum-red text-white hover:bg-red-800 focus-visible:ring-vektrum-red disabled:opacity-50",
+    "bg-vektrum-red text-white hover:bg-vektrum-red/80 focus-visible:ring-vektrum-red disabled:opacity-50",
   success:
-    "bg-vektrum-green text-white hover:bg-green-800 focus-visible:ring-vektrum-green disabled:opacity-50",
+    "bg-vektrum-green text-white hover:bg-vektrum-green/80 focus-visible:ring-vektrum-green disabled:opacity-50",
   ghost:
     "bg-transparent text-vektrum-muted hover:bg-vektrum-surface-alt focus-visible:ring-vektrum-blue disabled:opacity-30",
 };

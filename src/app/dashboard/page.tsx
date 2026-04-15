@@ -59,21 +59,24 @@ async function getProfileAndDeals(userId: string) {
 
 // ─── Stat tile ────────────────────────────────────────────────────────────────
 
+// Tier 2 upgrade: text-4xl numbers for stat tiles (previously text-2xl)
+// Numbers are the primary anchor — make them visually dominant.
 function StatTile({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-lg border border-vektrum-border bg-vektrum-surface px-5 py-4 shadow-sm">
+    <div className="rounded-lg border border-vektrum-border bg-vektrum-surface px-5 py-5 shadow-sm hover:shadow-md transition-shadow">
       <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">
         {label}
       </p>
-      <p className="mt-1 text-2xl font-bold tabular-nums text-vektrum-text">{value}</p>
+      <p className="mt-1.5 font-display text-4xl font-bold tabular-nums text-vektrum-text leading-none">{value}</p>
     </div>
   )
 }
 
+// Money stat tile: upgrade label text and use xl size for visual weight
 function MoneyStatTile({ label, amount }: { label: string; amount: number }) {
   return (
-    <div className="rounded-lg border border-vektrum-border bg-vektrum-surface px-5 py-4 shadow-sm">
-      <Money label={label} amount={amount} size="lg" />
+    <div className="rounded-lg border border-vektrum-border bg-vektrum-surface px-5 py-5 shadow-sm hover:shadow-md transition-shadow">
+      <Money label={label} amount={amount} size="xl" />
     </div>
   )
 }

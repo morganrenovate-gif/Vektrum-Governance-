@@ -16,7 +16,8 @@ const sizeClasses = {
   sm: "text-base font-semibold",
   md: "text-xl font-semibold",
   lg: "text-2xl font-bold",
-  xl: "text-3xl font-bold",
+  xl: "text-4xl font-bold tracking-tight",
+  hero: "text-5xl font-bold tracking-tight",
 };
 
 export function Money({
@@ -29,7 +30,7 @@ export function Money({
   const formatted = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
-    minimumFractionDigits: 2,
+    minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   }).format(amount);
 
@@ -38,7 +39,7 @@ export function Money({
       <span
         className={cn(
           "text-[10px] font-semibold uppercase tracking-widest",
-          muted ? "text-slate-400" : "text-slate-500"
+          muted ? "text-vektrum-faint" : "text-vektrum-muted"
         )}
       >
         {label}
@@ -46,8 +47,8 @@ export function Money({
       <span
         className={cn(
           "font-numeric tabular-nums",
-          sizeClasses[size],
-          muted ? "text-slate-400" : "text-slate-900"
+          sizeClasses[size as keyof typeof sizeClasses],
+          muted ? "text-vektrum-faint" : "text-vektrum-text"
         )}
       >
         {formatted}

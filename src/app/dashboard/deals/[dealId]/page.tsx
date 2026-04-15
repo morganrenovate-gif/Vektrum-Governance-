@@ -122,20 +122,30 @@ export default async function DealDetailPage({
 
   return (
     <div className="page-container py-8 space-y-8">
-      {/* Back */}
-      <Link
-        href="/dashboard"
-        className="inline-flex items-center gap-1.5 text-sm text-vektrum-muted hover:text-vektrum-text transition-colors"
-      >
-        <ArrowLeft size={14} aria-hidden="true" />
-        Back to dashboard
-      </Link>
+      {/* Breadcrumb */}
+      <nav aria-label="Breadcrumb">
+        <ol className="flex items-center gap-1.5 text-sm text-vektrum-faint">
+          <li>
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-1 hover:text-vektrum-text transition-colors"
+            >
+              <ArrowLeft size={13} aria-hidden="true" />
+              Dashboard
+            </Link>
+          </li>
+          <li aria-hidden="true" className="text-vektrum-border">/</li>
+          <li className="text-vektrum-muted font-medium truncate max-w-[200px] sm:max-w-xs">
+            {typedDeal.title}
+          </li>
+        </ol>
+      </nav>
 
       {/* ── Header ── */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-xl font-bold text-vektrum-text">{typedDeal.title}</h1>
+            <h1 className="font-display text-2xl font-bold text-vektrum-text">{typedDeal.title}</h1>
             <DealStatusBadge status={typedDeal.status} />
           </div>
           {typedDeal.description && (

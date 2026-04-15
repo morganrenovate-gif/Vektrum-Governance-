@@ -6,8 +6,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Shield, Lock, CheckCircle2, FileCheck } from "lucide-react";
 
 const AUTH_ERROR_MAP: Record<string, string> = {
   "Invalid login credentials": "Incorrect email or password. Please try again.",
@@ -23,6 +22,30 @@ function humanizeError(message: string): string {
   }
   return message;
 }
+
+// Trust signals displayed on the auth page right panel
+const AUTH_TRUST = [
+  {
+    icon: Lock,
+    title: "7-condition release gate",
+    desc: "Every payment passes 7 server-side checks before a single dollar moves.",
+  },
+  {
+    icon: Shield,
+    title: "Funds held by Stripe",
+    desc: "Vektrum governs disbursement — your capital is held by Stripe, not us.",
+  },
+  {
+    icon: FileCheck,
+    title: "Immutable audit trail",
+    desc: "Every action is logged with timestamp and actor. No edits. No deletes.",
+  },
+  {
+    icon: CheckCircle2,
+    title: "Milestone isolation",
+    desc: "A dispute on one milestone never freezes the others. Your project keeps moving.",
+  },
+];
 
 export default function LoginPage() {
   const router = useRouter();
@@ -54,21 +77,72 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-12">
-      <div className="w-full max-w-sm">
-        {/* Heading */}
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold text-vektrum-text">Sign in to Vektrum</h1>
-          <p className="mt-2 text-sm text-vektrum-muted">
-            Construction payment governance
-          </p>
+    <div className="flex min-h-[calc(100vh-4rem)]">
+      {/* ── Left: Trust panel (hidden on mobile) ─────────────────────────── */}
+      <div className="hidden lg:flex lg:w-[480px] xl:w-[540px] flex-col justify-between bg-vektrum-canvas px-12 py-16 flex-shrink-0">
+        {/* Brand */}
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-vektrum-canvas-text/10">
+            <span className="text-sm font-bold text-vektrum-canvas-text">V</span>
+          </div>
+          <div>
+            <span className="text-sm font-bold text-vektrum-canvas-text tracking-tight">Vektrum</span>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30 leading-none mt-0.5">
+              Trust. Built In.
+            </p>
+          </div>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Sign In</CardTitle>
-          </CardHeader>
-          <CardBody>
+        {/* Main trust copy */}
+        <div className="space-y-10">
+          <div>
+            <h2 className="font-display text-3xl font-bold leading-tight tracking-tight text-white">
+              Every dollar governed.<br />
+              Every release verified.
+            </h2>
+            <p className="mt-4 text-[15px] leading-relaxed text-white/60">
+              Construction payment governance built for the $500K&ndash;$25M
+              project range where disputes cost the most and protection is the most absent.
+            </p>
+          </div>
+
+          {/* Trust items */}
+          <ul className="space-y-5">
+            {AUTH_TRUST.map(({ icon: Icon, title, desc }) => (
+              <li key={title} className="flex items-start gap-3.5">
+                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-white/10 mt-0.5">
+                  <Icon size={15} className="text-white/70" aria-hidden="true" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white">{title}</p>
+                  <p className="mt-0.5 text-xs leading-relaxed text-white/50">{desc}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Bottom note */}
+        <p className="text-xs text-white/30">
+          Payments powered by Stripe Connect · Vektrum never holds funds
+        </p>
+      </div>
+
+      {/* ── Right: Auth form ──────────────────────────────────────────────── */}
+      <div className="flex flex-1 items-center justify-center px-4 py-12 sm:px-8 bg-vektrum-bg">
+        <div className="w-full max-w-sm">
+          {/* Heading */}
+          <div className="mb-8">
+            <h1 className="font-display text-2xl font-bold text-vektrum-text">
+              Sign in to Vektrum
+            </h1>
+            <p className="mt-1.5 text-sm text-vektrum-muted">
+              Construction payment governance
+            </p>
+          </div>
+
+          {/* Form card */}
+          <div className="rounded-xl border border-vektrum-border bg-vektrum-surface p-6 shadow-sm">
             <form onSubmit={handleSubmit} noValidate className="space-y-4">
               <Input
                 type="email"
@@ -110,18 +184,26 @@ export default function LoginPage() {
                 {loading ? "Signing in…" : "Sign In"}
               </Button>
             </form>
-          </CardBody>
-        </Card>
+          </div>
 
-        <p className="mt-6 text-center text-sm text-vektrum-muted">
-          Don&rsquo;t have an account?{" "}
-          <Link
-            href="/auth/signup"
-            className="font-medium text-vektrum-blue hover:underline"
-          >
-            Create account
-          </Link>
-        </p>
+          <p className="mt-5 text-center text-sm text-vektrum-muted">
+            Don&rsquo;t have an account?{" "}
+            <Link
+              href="/auth/signup"
+              className="font-medium text-vektrum-blue hover:underline"
+            >
+              Create account
+            </Link>
+          </p>
+
+          {/* Mobile trust note (only on small screens) */}
+          <div className="mt-8 lg:hidden flex items-start gap-2 rounded-lg border border-vektrum-border bg-vektrum-surface px-4 py-3">
+            <Shield size={14} className="text-vektrum-blue mt-0.5 flex-shrink-0" aria-hidden="true" />
+            <p className="text-xs text-vektrum-muted">
+              Payments powered by Stripe Connect. Vektrum governs release — never holds your funds.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

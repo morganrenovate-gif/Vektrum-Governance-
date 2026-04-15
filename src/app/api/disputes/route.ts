@@ -60,6 +60,9 @@ export async function POST(request: NextRequest) {
   if (!reason || typeof reason !== 'string' || reason.trim().length < 10) {
     return errorResponse(400, 'reason is required and must be at least 10 characters.')
   }
+  if (reason.trim().length > 2000) {
+    return errorResponse(400, 'reason must not exceed 2000 characters.')
+  }
 
   // ── Fetch Milestone ─────────────────────────────────────────────────────────
   const { data: milestone, error: milestoneError } = await supabase
