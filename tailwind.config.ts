@@ -53,6 +53,13 @@ const config: Config = {
         "vektrum-red":          "#B01C1C",   // Error / danger
         "vektrum-red-bg":       "#FEF0F0",
         "vektrum-red-border":   "#F0AAAA",
+
+        // ── New tokens (Phase 0) ─────────────────────────────────────────────
+        "vektrum-blue-glow":    "rgba(26,58,150,0.15)",  // AI panel pulse ring
+        "vektrum-score-low":    "#1A7A4A",  // Dispute risk — low (green)
+        "vektrum-score-med":    "#9A5A0A",  // Dispute risk — medium (amber)
+        "vektrum-score-high":   "#B01C1C",  // Dispute risk — high (red)
+        "vektrum-surface-raised": "#F9FAFB", // Wizard overlay panels
       },
 
       fontFamily: {

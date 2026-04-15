@@ -49,6 +49,12 @@ export default function RootLayout({
 
               <div className="flex items-center gap-1">
                 <Link
+                  href="/pricing"
+                  className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                >
+                  Pricing
+                </Link>
+                <Link
                   href="/dashboard"
                   className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
                 >
@@ -112,6 +118,9 @@ export default function RootLayout({
                   <Link href="/dashboard" className="text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors">
                     Dashboard
                   </Link>
+                  <Link href="/pricing" className="text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors">
+                    Pricing
+                  </Link>
                 </div>
               </div>
             </div>
@@ -120,9 +129,19 @@ export default function RootLayout({
               <p className="text-[12px] text-vektrum-muted">
                 &copy; {new Date().getFullYear()} Vektrum. All rights reserved.
               </p>
-              <p className="text-[12px] text-vektrum-faint">
-                Vektrum governs disbursement. Vektrum never holds funds.
-              </p>
+              <div className="flex flex-col gap-1 sm:items-end">
+                <p className="text-[12px] text-vektrum-faint">
+                  Vektrum governs disbursement. Vektrum never holds funds.
+                </p>
+                <a
+                  href="https://perplexity.ai"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-[11px] text-vektrum-faint hover:text-vektrum-muted transition-colors"
+                >
+                  Competitive intelligence powered by Perplexity
+                </a>
+              </div>
             </div>
           </div>
         </footer>

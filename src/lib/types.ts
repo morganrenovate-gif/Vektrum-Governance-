@@ -31,7 +31,9 @@ export interface Profile {
   company_name: string | null;
   role: UserRole;
   stripe_account_id: string | null;
+  stripe_payouts_enabled: boolean;
   stripe_onboarding_complete: boolean;
+  onboarding_complete: boolean;
   created_at: string;
   updated_at: string;
 }
