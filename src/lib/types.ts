@@ -14,15 +14,13 @@ export type MilestoneStatus =
   | "in_progress"
   | "ready_for_review"
   | "approved"
-  | "released"
-  | "disputed";
+  | "released";
 
 export type ProtectionStatus =
-  | "pending_funding"
-  | "funded"
+  | "pending"
   | "ready_for_release"
   | "released"
-  | "refunded";
+  | "disputed";
 
 // ─── Database row types ───────────────────────────────────────────────────────
 
@@ -119,5 +117,19 @@ export interface ReleaseGateResult {
 }
 
 export type ChangeOrderStatus = 'pending' | 'approved' | 'rejected'
-export type DisputeStatus = 'open' | 'under_review' | 'resolved' | 'escalated'
+export type DisputeStatus = 'open' | 'resolved' | 'escalated'
 export type ReleaseStatus = 'completed' | 'failed'
+
+export interface Dispute {
+  id: string
+  milestone_id: string
+  deal_id: string
+  amount_in_dispute: number
+  reason: string
+  status: DisputeStatus
+  opened_by: string
+  resolved_by: string | null
+  resolution: string | null
+  opened_at: string
+  resolved_at: string | null
+}
