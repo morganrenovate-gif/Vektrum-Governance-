@@ -1,5 +1,17 @@
 import type { Config } from "tailwindcss";
 
+// ── Vektrum Brand Color Tokens ──────────────────────────────────────────────
+//
+// Source: Vektrum logo (2.jpg) — exact pixel extraction
+//   Logo cobalt blue : #1A3A96  (dominant V mark color)
+//   Logo near-black  : #141414  (wordmark and dark surfaces)
+//   Tagline          : "TRUST. BUILT IN." — institutional, structural
+//
+// All Tailwind custom colors mirror the CSS variables in globals.css.
+// Use the vektrum-* tokens in components instead of raw Tailwind color names
+// so rebranding only requires changes in this one file + globals.css.
+// ─────────────────────────────────────────────────────────────────────────────
+
 const config: Config = {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -9,39 +21,64 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        "vektrum-navy": "#0A0F1C",
-        "vektrum-blue": "#2563eb",
-        "vektrum-green": "#16a34a",
-        "vektrum-amber": "#d97706",
-        "vektrum-red": "#dc2626",
-        "vektrum-gray": "#64748b",
-        "vektrum-surface": "#111827",
-        "vektrum-border": "#1E293B",
-        "vektrum-muted": "#94A3B8",
-        "vektrum-accent": "#3B82F6",
+        // ── Core brand ──────────────────────────────────────────────────────
+        "vektrum-blue":         "#1A3A96",   // Logo cobalt — primary accent
+        "vektrum-blue-hover":   "#132D78",   // Hover state (10% darker)
+        "vektrum-blue-subtle":  "#E8EDF8",   // Tinted bg for badges / wells
+        "vektrum-blue-border":  "#A8BAEA",   // Bordered info states
+        "vektrum-canvas":       "#141414",   // Logo near-black — dark sections
+        "vektrum-canvas-text":  "#F0F2F7",   // Text on dark canvas
+
+        // ── Surfaces & borders ───────────────────────────────────────────────
+        "vektrum-bg":           "#F4F6FA",   // Page background (blueprint grey)
+        "vektrum-surface":      "#FFFFFF",   // Card / panel surface
+        "vektrum-surface-alt":  "#EEF2F8",   // Slightly deeper surface
+        "vektrum-border":       "#D0D8E8",   // Blue-tinted border
+        "vektrum-border-subtle":"#E4E8F0",   // Hairline borders
+
+        // ── Typography ───────────────────────────────────────────────────────
+        "vektrum-text":         "#141414",   // Primary text
+        "vektrum-muted":        "#5A6478",   // Secondary text
+        "vektrum-faint":        "#9AA3B5",   // Tertiary / placeholder
+
+        // ── Semantic status ──────────────────────────────────────────────────
+        "vektrum-green":        "#1A7A4A",   // Success
+        "vektrum-green-bg":     "#EAF7F0",
+        "vektrum-green-border": "#B0DFC4",
+
+        "vektrum-amber":        "#9A5A0A",   // Warning
+        "vektrum-amber-bg":     "#FEF3E2",
+        "vektrum-amber-border": "#F0CC80",
+
+        "vektrum-red":          "#B01C1C",   // Error / danger
+        "vektrum-red-bg":       "#FEF0F0",
+        "vektrum-red-border":   "#F0AAAA",
       },
+
       fontFamily: {
-        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+        sans:    ["var(--font-sans)", "system-ui", "sans-serif"],
         display: ["var(--font-display)", "system-ui", "sans-serif"],
-        mono: ["var(--font-mono)", "monospace"],
+        mono:    ["var(--font-mono)", "monospace"],
       },
+
       animation: {
-        "fade-in": "fadeIn 0.8s ease-out both",
-        "fade-in-delay": "fadeIn 0.8s ease-out 0.15s both",
-        "fade-in-delay-2": "fadeIn 0.8s ease-out 0.3s both",
-        "fade-in-delay-3": "fadeIn 0.8s ease-out 0.45s both",
-        "slide-up": "slideUp 0.6s ease-out both",
-        "slide-up-delay": "slideUp 0.6s ease-out 0.1s both",
+        "fade-in":          "fadeIn 0.8s ease-out both",
+        "fade-in-delay":    "fadeIn 0.8s ease-out 0.15s both",
+        "fade-in-delay-2":  "fadeIn 0.8s ease-out 0.3s both",
+        "fade-in-delay-3":  "fadeIn 0.8s ease-out 0.45s both",
+        "slide-up":         "slideUp 0.6s ease-out both",
+        "slide-up-delay":   "slideUp 0.6s ease-out 0.1s both",
         "slide-up-delay-2": "slideUp 0.6s ease-out 0.2s both",
-        "pulse-slow": "pulse 4s ease-in-out infinite",
+        "pulse-slow":       "pulse 4s ease-in-out infinite",
       },
+
       keyframes: {
         fadeIn: {
-          "0%": { opacity: "0" },
+          "0%":   { opacity: "0" },
           "100%": { opacity: "1" },
         },
         slideUp: {
-          "0%": { opacity: "0", transform: "translateY(16px)" },
+          "0%":   { opacity: "0", transform: "translateY(16px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
       },

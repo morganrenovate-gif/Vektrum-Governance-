@@ -58,8 +58,8 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Heading */}
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold text-slate-900">Sign in to Vektrum</h1>
-          <p className="mt-2 text-sm text-slate-500">
+          <h1 className="text-2xl font-bold text-vektrum-text">Sign in to Vektrum</h1>
+          <p className="mt-2 text-sm text-vektrum-muted">
             Construction payment governance
           </p>
         </div>
@@ -93,7 +93,7 @@ export default function LoginPage() {
               {error && (
                 <div
                   role="alert"
-                  className="flex items-start gap-2 rounded-md bg-red-50 border border-red-200 px-3 py-2.5 text-sm text-vektrum-red"
+                  className="flex items-start gap-2 rounded-md bg-vektrum-red-bg border border-vektrum-red-border px-3 py-2.5 text-sm text-vektrum-red"
                 >
                   <AlertCircle size={15} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
                   {error}
@@ -113,7 +113,7 @@ export default function LoginPage() {
           </CardBody>
         </Card>
 
-        <p className="mt-6 text-center text-sm text-slate-500">
+        <p className="mt-6 text-center text-sm text-vektrum-muted">
           Don&rsquo;t have an account?{" "}
           <Link
             href="/auth/signup"

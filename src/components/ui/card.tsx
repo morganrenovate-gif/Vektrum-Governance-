@@ -14,7 +14,7 @@ export function Card({ children, className, noPadding }: CardProps) {
   return (
     <div
       className={cn(
-        "rounded-lg border border-slate-200 bg-white shadow-sm",
+        "rounded-lg border border-vektrum-border bg-vektrum-surface shadow-sm",
         !noPadding && "overflow-hidden",
         className
       )}
@@ -42,7 +42,7 @@ export function CardHeader({
     <div
       className={cn(
         "px-5 py-4",
-        border && "border-b border-slate-100",
+        border && "border-b border-vektrum-border-subtle",
         className
       )}
     >
@@ -73,7 +73,7 @@ export function CardFooter({ children, className }: CardFooterProps) {
   return (
     <div
       className={cn(
-        "border-t border-slate-100 bg-slate-50 px-5 py-3",
+        "border-t border-vektrum-border-subtle bg-vektrum-surface-alt px-5 py-3",
         className
       )}
     >
@@ -93,7 +93,7 @@ export function CardTitle({
 }) {
   return (
     <h3
-      className={cn("text-base font-semibold text-slate-900 leading-none", className)}
+      className={cn("text-base font-semibold text-vektrum-text leading-none", className)}
     >
       {children}
     </h3>
@@ -108,6 +108,6 @@ export function CardDescription({
   className?: string;
 }) {
   return (
-    <p className={cn("mt-1 text-sm text-slate-500", className)}>{children}</p>
+    <p className={cn("mt-1 text-sm text-vektrum-muted", className)}>{children}</p>
   );
 }

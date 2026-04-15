@@ -80,10 +80,10 @@ export default function SignupPage() {
             className="mx-auto text-vektrum-green"
             aria-hidden="true"
           />
-          <h2 className="text-xl font-semibold text-slate-900">Check your inbox</h2>
-          <p className="text-sm text-slate-500">
+          <h2 className="text-xl font-semibold text-vektrum-text">Check your inbox</h2>
+          <p className="text-sm text-vektrum-muted">
             We sent a confirmation link to{" "}
-            <strong className="text-slate-700">{formData.email}</strong>. Click it
+            <strong className="text-vektrum-text">{formData.email}</strong>. Click it
             to activate your account and sign in.
           </p>
           <Link
@@ -101,8 +101,8 @@ export default function SignupPage() {
     <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold text-slate-900">Create your account</h1>
-          <p className="mt-2 text-sm text-slate-500">
+          <h1 className="text-2xl font-bold text-vektrum-text">Create your account</h1>
+          <p className="mt-2 text-sm text-vektrum-muted">
             Join Vektrum — construction payment governance
           </p>
         </div>
@@ -167,7 +167,7 @@ export default function SignupPage() {
               <div className="flex flex-col gap-1">
                 <label
                   htmlFor="role"
-                  className="text-sm font-medium text-slate-700"
+                  className="text-sm font-medium text-vektrum-text"
                 >
                   I am a…{" "}
                   <span className="ml-0.5 text-vektrum-red" aria-hidden="true">
@@ -179,12 +179,12 @@ export default function SignupPage() {
                   value={formData.role}
                   onChange={update("role")}
                   required
-                  className="block min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-vektrum-blue focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  className="block min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-vektrum-text focus:border-vektrum-blue focus:outline-none focus:ring-2 focus:ring-blue-100"
                 >
                   <option value="contractor">Contractor — I complete the work</option>
                   <option value="funder">Funder — I finance the project</option>
                 </select>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-vektrum-muted">
                   Admin accounts are provisioned separately.
                 </p>
               </div>
@@ -192,7 +192,7 @@ export default function SignupPage() {
               {error && (
                 <div
                   role="alert"
-                  className="flex items-start gap-2 rounded-md bg-red-50 border border-red-200 px-3 py-2.5 text-sm text-vektrum-red"
+                  className="flex items-start gap-2 rounded-md bg-vektrum-red-bg border border-vektrum-red-border px-3 py-2.5 text-sm text-vektrum-red"
                 >
                   <AlertCircle size={15} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
                   {error}
@@ -212,7 +212,7 @@ export default function SignupPage() {
           </CardBody>
         </Card>
 
-        <p className="mt-6 text-center text-sm text-slate-500">
+        <p className="mt-6 text-center text-sm text-vektrum-muted">
           Already have an account?{" "}
           <Link
             href="/auth/login"

@@ -16,15 +16,15 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    "bg-vektrum-blue text-white hover:bg-blue-700 focus-visible:ring-blue-500 disabled:bg-blue-300",
+    "bg-vektrum-blue text-white hover:bg-vektrum-blue-hover focus-visible:ring-vektrum-blue disabled:opacity-50",
   secondary:
-    "bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 focus-visible:ring-slate-400 disabled:text-slate-400",
+    "bg-vektrum-surface text-vektrum-muted border border-vektrum-border hover:bg-vektrum-surface-alt focus-visible:ring-vektrum-blue disabled:opacity-40",
   danger:
-    "bg-vektrum-red text-white hover:bg-red-700 focus-visible:ring-red-500 disabled:bg-red-300",
+    "bg-vektrum-red text-white hover:bg-red-800 focus-visible:ring-vektrum-red disabled:opacity-50",
   success:
-    "bg-vektrum-green text-white hover:bg-green-700 focus-visible:ring-green-500 disabled:bg-green-300",
+    "bg-vektrum-green text-white hover:bg-green-800 focus-visible:ring-vektrum-green disabled:opacity-50",
   ghost:
-    "bg-transparent text-slate-600 hover:bg-slate-100 focus-visible:ring-slate-400 disabled:text-slate-300",
+    "bg-transparent text-vektrum-muted hover:bg-vektrum-surface-alt focus-visible:ring-vektrum-blue disabled:opacity-30",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {

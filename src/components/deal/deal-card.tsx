@@ -28,14 +28,14 @@ export function DealCard({ deal, className }: DealCardProps) {
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="truncate text-sm font-semibold text-slate-900 group-hover:text-vektrum-blue transition-colors">
+                <h3 className="truncate text-sm font-semibold text-vektrum-text group-hover:text-vektrum-blue transition-colors">
                   {deal.title}
                 </h3>
                 <DealStatusBadge status={deal.status} />
               </div>
 
               {/* Participants */}
-              <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+              <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-vektrum-muted">
                 {deal.contractor && (
                   <span className="flex items-center gap-1">
                     <Building2 size={11} aria-hidden="true" />
@@ -53,7 +53,7 @@ export function DealCard({ deal, className }: DealCardProps) {
 
             <ChevronRight
               size={16}
-              className="mt-0.5 flex-shrink-0 text-slate-300 group-hover:text-vektrum-blue transition-colors"
+              className="mt-0.5 flex-shrink-0 text-vektrum-faint group-hover:text-vektrum-blue transition-colors"
               aria-hidden="true"
             />
           </div>
@@ -61,15 +61,15 @@ export function DealCard({ deal, className }: DealCardProps) {
           {/* Money summary row */}
           <div className="mt-3 grid grid-cols-3 gap-3 text-center">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">
                 Total
               </p>
-              <p className="mt-0.5 text-sm font-semibold tabular-nums text-slate-900">
+              <p className="mt-0.5 text-sm font-semibold tabular-nums text-vektrum-text">
                 {formatMoney(deal.total_amount)}
               </p>
             </div>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">
                 Funded
               </p>
               <p className="mt-0.5 text-sm font-semibold tabular-nums text-vektrum-blue">
@@ -77,7 +77,7 @@ export function DealCard({ deal, className }: DealCardProps) {
               </p>
             </div>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">
                 Released
               </p>
               <p className="mt-0.5 text-sm font-semibold tabular-nums text-vektrum-green">
@@ -88,13 +88,13 @@ export function DealCard({ deal, className }: DealCardProps) {
 
           {/* Mini progress bar */}
           <div className="mt-3">
-            <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+            <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-vektrum-surface-alt">
               <div
                 className="absolute left-0 top-0 h-full rounded-full bg-vektrum-green"
                 style={{ width: `${Math.min(100, releasedPct)}%` }}
               />
             </div>
-            <p className="mt-1 text-right text-[10px] text-slate-400">
+            <p className="mt-1 text-right text-[10px] text-vektrum-faint">
               {formatMoney(remaining)} remaining
             </p>
           </div>
@@ -102,7 +102,7 @@ export function DealCard({ deal, className }: DealCardProps) {
 
         {deal.milestones && deal.milestones.length > 0 && (
           <CardFooter>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-vektrum-muted">
               {deal.milestones.length} milestone
               {deal.milestones.length !== 1 ? "s" : ""}
               {" · "}

@@ -4,12 +4,56 @@
 
 @layer base {
   :root {
-    --background: #FAFBFC;
-    --foreground: #0A0F1C;
-    --surface: #FFFFFF;
-    --border: #E5E7EB;
-    --muted: #6B7280;
-    --accent: #2563EB;
+    /* ── Vektrum Brand Palette ────────────────────────────────────────────────
+     *
+     * Derived directly from the Vektrum logo:
+     *   Primary blue  #1A3A96  — cobalt/royal blue (the V mark)
+     *   Near-black    #141414  — wordmark and dark surfaces
+     *
+     * Construction fintech: institutional, structural, high-trust.
+     * One accent + neutrals. Color is used to encode meaning, not decorate.
+     * ────────────────────────────────────────────────────────────────────── */
+
+    /* Surfaces */
+    --background:   #F4F6FA;   /* Light blue-grey — construction blueprint feel */
+    --surface:      #FFFFFF;
+    --surface-alt:  #EEF2F8;   /* Slightly deeper blue-grey for section contrast */
+
+    /* Borders */
+    --border:       #D0D8E8;   /* Blue-tinted border — echoes brand blue subtly */
+    --border-subtle:#E4E8F0;
+
+    /* Text */
+    --foreground:   #141414;   /* Logo wordmark black — primary text */
+    --muted:        #5A6478;   /* Blue-grey muted text */
+    --faint:        #9AA3B5;   /* Tertiary text */
+
+    /* Brand accent — logo cobalt blue */
+    --accent:       #1A3A96;
+    --accent-hover: #132D78;   /* 10% darker for hover */
+    --accent-subtle:#E8EDF8;   /* Tinted blue bg for badges / highlights */
+
+    /* Dark canvas — logo near-black, used in dark hero sections */
+    --canvas:       #141414;
+    --canvas-text:  #F0F2F7;
+    --canvas-muted: #8A93A8;
+
+    /* Semantic — status colors (accessible, distinct from brand blue) */
+    --success:      #1A7A4A;   /* Deep green */
+    --success-bg:   #EAF7F0;
+    --success-border:#B0DFC4;
+
+    --warning:      #9A5A0A;   /* Warm amber */
+    --warning-bg:   #FEF3E2;
+    --warning-border:#F0CC80;
+
+    --error:        #B01C1C;   /* Deep red */
+    --error-bg:     #FEF0F0;
+    --error-border: #F0AAAA;
+
+    --info:         #1A3A96;   /* Same as accent — blue IS info */
+    --info-bg:      #E8EDF8;
+    --info-border:  #A8BAEA;
   }
 
   html {
@@ -36,7 +80,7 @@
   }
 
   ::selection {
-    background-color: rgba(37, 99, 235, 0.15);
+    background-color: rgba(26, 58, 150, 0.15);
   }
 }
 
@@ -53,15 +97,16 @@
     @apply py-8 sm:py-12;
   }
 
-  /* Status badges */
-  .status-not-started { @apply bg-slate-100 text-slate-600; }
-  .status-in-progress { @apply bg-blue-50 text-blue-700; }
-  .status-ready-for-review { @apply bg-amber-50 text-amber-700; }
-  .status-approved { @apply bg-emerald-50 text-emerald-700; }
-  .status-released { @apply bg-emerald-50 text-emerald-800; }
-  .status-disputed { @apply bg-red-50 text-red-700; }
+  /* ── Status badges ──────────────────────────────────────────────────────── */
+  /* Milestone workflow status */
+  .status-not-started    { background-color: var(--surface-alt); color: var(--muted); }
+  .status-in-progress    { background-color: var(--accent-subtle); color: var(--accent); }
+  .status-ready-for-review { background-color: var(--warning-bg); color: var(--warning); }
+  .status-approved       { background-color: var(--success-bg); color: var(--success); }
+  .status-released       { background-color: var(--success-bg); color: var(--success); }
+  .status-disputed       { background-color: var(--error-bg); color: var(--error); }
 
-  /* Gradient border for feature cards */
+  /* ── Gradient border for feature cards ─────────────────────────────────── */
   .gradient-border {
     position: relative;
   }
@@ -71,7 +116,7 @@
     inset: 0;
     border-radius: inherit;
     padding: 1px;
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(37, 99, 235, 0.0) 50%);
+    background: linear-gradient(135deg, rgba(26, 58, 150, 0.25), rgba(26, 58, 150, 0.0) 50%);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;

@@ -73,13 +73,13 @@ export function MilestoneCard({
                   aria-hidden="true"
                 />
               )}
-              <h4 className="text-sm font-semibold text-slate-900">
+              <h4 className="text-sm font-semibold text-vektrum-text">
                 {milestone.title}
               </h4>
             </div>
 
             {milestone.description && (
-              <p className="text-sm text-slate-500">{milestone.description}</p>
+              <p className="text-sm text-vektrum-muted">{milestone.description}</p>
             )}
 
             <div className="flex flex-wrap items-center gap-2">
@@ -91,10 +91,10 @@ export function MilestoneCard({
           {/* Right: amount + actions */}
           <div className="flex flex-col items-start gap-3 sm:items-end">
             <div className="text-right">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">
                 Amount
               </p>
-              <p className="text-lg font-bold tabular-nums text-slate-900">
+              <p className="text-lg font-bold tabular-nums text-vektrum-text">
                 {formatMoney(milestone.amount)}
               </p>
             </div>
@@ -150,13 +150,13 @@ export function MilestoneCard({
 
         {/* Error / success feedback */}
         {error && (
-          <div className="mt-3 flex items-start gap-1.5 rounded-md bg-red-50 px-3 py-2 text-sm text-vektrum-red">
+          <div className="mt-3 flex items-start gap-1.5 rounded-md bg-vektrum-red-bg px-3 py-2 text-sm text-vektrum-red">
             <AlertCircle size={14} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
             {error}
           </div>
         )}
         {success && (
-          <div className="mt-3 flex items-start gap-1.5 rounded-md bg-green-50 px-3 py-2 text-sm text-vektrum-green">
+          <div className="mt-3 flex items-start gap-1.5 rounded-md bg-vektrum-green-bg px-3 py-2 text-sm text-vektrum-green">
             <CheckCircle2 size={14} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
             {success}
           </div>

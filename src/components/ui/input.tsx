@@ -30,7 +30,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="text-sm font-medium text-slate-700"
+            className="text-sm font-medium text-vektrum-text"
           >
             {label}
             {required && (
@@ -54,16 +54,16 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           }
           aria-invalid={error ? "true" : undefined}
           className={cn(
-            "block rounded-md border px-3 py-2.5 text-sm text-slate-900",
-            "placeholder:text-slate-400",
+            "block rounded-md border px-3 py-2.5 text-sm text-vektrum-text",
+            "placeholder:text-vektrum-faint",
             "transition-colors duration-150",
             "focus:outline-none focus:ring-2 focus:ring-offset-0",
             "min-h-[44px]", // Touch target
             fullWidth && "w-full",
             error
-              ? "border-vektrum-red bg-red-50 focus:border-vektrum-red focus:ring-red-200"
-              : "border-slate-300 bg-white focus:border-vektrum-blue focus:ring-blue-100",
-            props.disabled && "cursor-not-allowed bg-slate-50 text-slate-500",
+              ? "border-vektrum-red bg-vektrum-red-bg focus:border-vektrum-red focus:ring-vektrum-red-border"
+              : "border-vektrum-border bg-vektrum-surface focus:border-vektrum-blue focus:ring-vektrum-blue-border",
+            props.disabled && "cursor-not-allowed bg-vektrum-surface-alt text-vektrum-muted",
             className
           )}
           {...props}
@@ -79,7 +79,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           </p>
         )}
         {!error && helperText && (
-          <p id={`${inputId}-helper`} className="text-xs text-slate-500">
+          <p id={`${inputId}-helper`} className="text-xs text-vektrum-muted">
             {helperText}
           </p>
         )}
@@ -109,7 +109,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         {label && (
           <label
             htmlFor={textareaId}
-            className="text-sm font-medium text-slate-700"
+            className="text-sm font-medium text-vektrum-text"
           >
             {label}
             {required && (
@@ -126,14 +126,14 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           aria-invalid={error ? "true" : undefined}
           rows={3}
           className={cn(
-            "block rounded-md border px-3 py-2.5 text-sm text-slate-900",
-            "placeholder:text-slate-400 resize-y",
+            "block rounded-md border px-3 py-2.5 text-sm text-vektrum-text",
+            "placeholder:text-vektrum-faint resize-y",
             "transition-colors duration-150",
             "focus:outline-none focus:ring-2 focus:ring-offset-0",
             fullWidth && "w-full",
             error
-              ? "border-vektrum-red bg-red-50 focus:border-vektrum-red focus:ring-red-200"
-              : "border-slate-300 bg-white focus:border-vektrum-blue focus:ring-blue-100",
+              ? "border-vektrum-red bg-vektrum-red-bg focus:border-vektrum-red focus:ring-vektrum-red-border"
+              : "border-vektrum-border bg-vektrum-surface focus:border-vektrum-blue focus:ring-vektrum-blue-border",
             className
           )}
           {...props}
@@ -144,7 +144,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           </p>
         )}
         {!error && helperText && (
-          <p className="text-xs text-slate-500">{helperText}</p>
+          <p className="text-xs text-vektrum-muted">{helperText}</p>
         )}
       </div>
     );
