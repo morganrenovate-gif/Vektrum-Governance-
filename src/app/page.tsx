@@ -183,10 +183,10 @@ export default async function HomePage() {
       <section className="bg-vektrum-canvas py-20 sm:py-28">
         <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center mb-16">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-vektrum-canvas-muted">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
               Core protections
             </span>
-            <h2 className="mt-3 text-2xl font-bold tracking-[-0.025em] text-vektrum-canvas-text sm:text-3xl">
+            <h2 className="mt-3 text-2xl font-bold tracking-[-0.025em] text-white sm:text-3xl">
               Every dollar governed
             </h2>
           </div>
@@ -197,10 +197,10 @@ export default async function HomePage() {
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-vektrum-blue/15 mb-5">
                 <Shield size={20} className="text-vektrum-blue-subtle" />
               </div>
-              <h3 className="text-[15px] font-semibold text-vektrum-canvas-text tracking-[-0.01em]">
+              <h3 className="text-[15px] font-semibold text-white tracking-[-0.01em]">
                 Milestone isolation
               </h3>
-              <p className="mt-3 text-[13px] leading-relaxed text-vektrum-canvas-muted">
+              <p className="mt-3 text-[13px] leading-relaxed text-white/70">
                 Each milestone is an independent financial unit. A dispute on one
                 never freezes another. A $9M job is never held up by a $15K disagreement.
               </p>
@@ -211,10 +211,10 @@ export default async function HomePage() {
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-vektrum-amber/15 mb-5">
                 <Lock size={20} className="text-yellow-400" />
               </div>
-              <h3 className="text-[15px] font-semibold text-vektrum-canvas-text tracking-[-0.01em]">
+              <h3 className="text-[15px] font-semibold text-white tracking-[-0.01em]">
                 7-condition release gate
               </h3>
-              <p className="mt-3 text-[13px] leading-relaxed text-vektrum-canvas-muted">
+              <p className="mt-3 text-[13px] leading-relaxed text-white/70">
                 Every release passes 7 server-side checks simultaneously. Milestone approved, funds available, no disputes, no
                 pending changes, contractor verified, Stripe active, no duplicates.
               </p>
@@ -225,10 +225,10 @@ export default async function HomePage() {
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-vektrum-green/15 mb-5">
                 <GitBranch size={20} className="text-green-400" />
               </div>
-              <h3 className="text-[15px] font-semibold text-vektrum-canvas-text tracking-[-0.01em]">
+              <h3 className="text-[15px] font-semibold text-white tracking-[-0.01em]">
                 Immutable audit trail
               </h3>
-              <p className="mt-3 text-[13px] leading-relaxed text-vektrum-canvas-muted">
+              <p className="mt-3 text-[13px] leading-relaxed text-white/70">
                 No update. No delete. Every status change, approval, and payment logged
                 with timestamp and actor. Full accountability for every dollar, forever.
               </p>
