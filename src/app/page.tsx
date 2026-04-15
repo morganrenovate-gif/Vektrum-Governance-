@@ -45,15 +45,15 @@ export default async function HomePage() {
           {/* Badge */}
           <div className="animate-fade-in flex justify-center mb-8">
             <div className="inline-flex items-center gap-2 rounded-full border border-vektrum-border bg-vektrum-surface px-4 py-1.5 shadow-sm">
-              <div className="h-1.5 w-1.5 rounded-full bg-vektrum-green animate-pulse-slow" />
-              <span className="text-[12px] font-medium text-vektrum-muted tracking-wide">
-                Construction payment governance &mdash; milestone-based, server-enforced
+              <div className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-vektrum-green animate-pulse-slow" />
+              <span className="text-[11px] sm:text-[12px] font-medium text-vektrum-muted tracking-wide text-center">
+                Milestone payments &mdash; server-enforced
               </span>
             </div>
           </div>
 
           {/* Headline — tension-first */}
-          <h1 className="animate-fade-in text-center text-4xl font-bold tracking-[-0.035em] text-vektrum-text sm:text-5xl lg:text-[3.5rem] lg:leading-[1.1] text-balance">
+          <h1 className="animate-fade-in text-center text-[2rem] font-bold tracking-[-0.035em] text-vektrum-text sm:text-5xl lg:text-[3.5rem] lg:leading-[1.1] text-balance leading-[1.15]">
             $9M jobs don&rsquo;t stall
             <br className="hidden sm:block" />
             {' '}over $15K disputes.
@@ -92,7 +92,7 @@ export default async function HomePage() {
       {/* ─── Live Proof Bar ────────────────────────────────────────────────── */}
       <section className="border-y border-vektrum-border bg-vektrum-surface">
         <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-10">
-          <div className="grid grid-cols-2 gap-8 sm:grid-cols-4 sm:gap-0 sm:divide-x sm:divide-vektrum-border-subtle">
+          <div className="grid grid-cols-2 gap-6 sm:grid-cols-4 sm:gap-0 sm:divide-x sm:divide-vektrum-border-subtle">
             {[
               {
                 value: '7',
@@ -181,33 +181,33 @@ export default async function HomePage() {
           </div>
 
           {/* Table */}
-          <div className="overflow-x-auto rounded-2xl border border-white/10">
-            <table className="w-full border-collapse text-left text-[13px]">
+          <div className="overflow-x-auto rounded-2xl border border-white/10 -mx-2 sm:mx-0">
+            <table className="w-full border-collapse text-left" style={{ minWidth: '520px' }}>
               <thead>
                 <tr className="border-b border-white/10 bg-white/5">
-                  <th className="px-5 py-3.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/40 w-[200px]">
+                  <th className="px-3 sm:px-5 py-3.5 text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.08em] text-white/40">
                     Capability
                   </th>
-                  <th className="px-5 py-3.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/40">
-                    Procore / Textura
+                  <th className="px-3 sm:px-5 py-3.5 text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.08em] text-white/40">
+                    Procore
                   </th>
-                  <th className="px-5 py-3.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/40">
-                    Traditional Lender
+                  <th className="px-3 sm:px-5 py-3.5 text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.08em] text-white/40">
+                    Lender
                   </th>
-                  <th className="px-5 py-3.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-vektrum-blue">
+                  <th className="px-3 sm:px-5 py-3.5 text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.08em] text-vektrum-blue">
                     Vektrum
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {[
-                  ['Target deal size', '$50M+', 'No minimum', '$500K\u2013$25M'],
+                  ['Deal size', '$50M+', 'Any', '$500K\u2013$25M'],
                   ['Milestone isolation', '✗', '✗', '✓'],
-                  ['7-condition release gate', '✗', '✗', '✓'],
-                  ['Contractor joins free', '✗', '✗', '✓'],
-                  ['Funder controls release', 'Partial', 'Manual', '✓ Automated'],
+                  ['7-condition gate', '✗', '✗', '✓'],
+                  ['Contractor free', '✗', '✗', '✓'],
+                  ['Funder controls release', 'Partial', 'Manual', '✓ Auto'],
                   ['AI draw review', '✗', '✗', 'Coming soon'],
-                  ['Immutable audit trail', 'Partial', '✗', '✓'],
+                  ['Immutable audit', 'Partial', '✗', '✓'],
                 ].map(([label, procore, lender, vektrum], i) => (
                   <tr
                     key={label}
@@ -216,21 +216,21 @@ export default async function HomePage() {
                       i % 2 === 0 ? 'bg-transparent' : 'bg-white/[0.02]',
                     ].join(' ')}
                   >
-                    <td className="px-5 py-3 font-medium text-white/70">{label}</td>
-                    <td className="px-5 py-3 text-white/40">
-                      {procore === '✗' ? <X size={14} className="text-vektrum-red/60" /> : procore}
+                    <td className="px-3 sm:px-5 py-3 text-[12px] sm:text-[13px] font-medium text-white/70">{label}</td>
+                    <td className="px-3 sm:px-5 py-3 text-[12px] sm:text-[13px] text-white/40">
+                      {procore === '✗' ? <X size={13} className="text-vektrum-red/60" /> : procore}
                     </td>
-                    <td className="px-5 py-3 text-white/40">
-                      {lender === '✗' ? <X size={14} className="text-vektrum-red/60" /> : lender}
+                    <td className="px-3 sm:px-5 py-3 text-[12px] sm:text-[13px] text-white/40">
+                      {lender === '✗' ? <X size={13} className="text-vektrum-red/60" /> : lender}
                     </td>
-                    <td className="px-5 py-3 font-semibold text-vektrum-blue-subtle">
-                      {vektrum === '✓' || vektrum === '✓ Automated' ? (
-                        <span className="flex items-center gap-1.5">
-                          <CheckCircle2 size={13} className="text-vektrum-green" />
-                          {vektrum === '✓ Automated' ? 'Automated' : ''}
+                    <td className="px-3 sm:px-5 py-3 text-[12px] sm:text-[13px] font-semibold text-vektrum-blue-subtle">
+                      {vektrum === '✓' || vektrum === '✓ Auto' ? (
+                        <span className="flex items-center gap-1">
+                          <CheckCircle2 size={13} className="text-vektrum-green flex-shrink-0" />
+                          {vektrum === '✓ Auto' ? <span className="text-[11px]">Auto</span> : ''}
                         </span>
                       ) : vektrum === 'Coming soon' ? (
-                        <span className="text-[11px] text-vektrum-amber">Coming soon</span>
+                        <span className="text-[10px] text-vektrum-amber">Soon</span>
                       ) : (
                         vektrum
                       )}
@@ -334,7 +334,7 @@ export default async function HomePage() {
             </h2>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-3">
             {/* Contractors */}
             <div className="rounded-2xl border border-white/10 bg-white/5 p-8 hover:border-vektrum-blue/30 transition-colors">
               <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-blue-subtle">

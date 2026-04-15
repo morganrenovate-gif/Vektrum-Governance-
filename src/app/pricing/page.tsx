@@ -212,7 +212,7 @@ export default function PricingPage() {
       {/* ─── Pricing cards ───────────────────────────────────────────────────── */}
       <section className="bg-vektrum-bg py-4 pb-12 sm:pb-16">
         <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="grid gap-6 sm:grid-cols-3">
+          <div className="grid gap-6 lg:grid-cols-3">
             <PlanCard
               name="Standard"
               price="$299"
@@ -343,7 +343,7 @@ export default function PricingPage() {
       {/* ─── Trust details row ───────────────────────────────────────────────── */}
       <section className="bg-vektrum-bg py-16 sm:py-20">
         <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="grid gap-6 sm:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-3">
             {/* Free trial */}
             <div className="rounded-2xl border border-vektrum-border bg-vektrum-surface p-6">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-vektrum-green-bg mb-4">

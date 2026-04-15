@@ -47,13 +47,13 @@ function Scene1() {
         ].map((m) => (
           <div
             key={m.label}
-            className="flex items-center justify-between gap-3 rounded-lg border border-vektrum-border-subtle bg-vektrum-surface-alt px-3.5 py-2.5"
+            className="flex items-center justify-between gap-2 rounded-lg border border-vektrum-border-subtle bg-vektrum-surface-alt px-3 py-2.5"
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0">
               <m.icon size={13} className={`flex-shrink-0 ${m.color}`} />
-              <span className="text-[12px] font-medium text-vektrum-text">{m.label}</span>
+              <span className="text-[11px] sm:text-[12px] font-medium text-vektrum-text truncate">{m.label}</span>
             </div>
-            <div className="flex items-center gap-2.5">
+            <div className="flex flex-col items-end flex-shrink-0">
               <span className="text-[11px] font-semibold tabular-nums text-vektrum-muted">{m.amount}</span>
               <span className="text-[10px] capitalize text-vektrum-faint">{m.status}</span>
             </div>
@@ -281,7 +281,7 @@ export function DemoScene() {
             key={s.id}
             onClick={() => handleTabClick(i)}
             className={[
-              'flex-1 px-3 py-3 text-left transition-colors',
+              'flex-1 px-2 sm:px-3 py-3 min-h-[52px] text-left transition-colors',
               active === i
                 ? 'border-b-2 border-vektrum-blue bg-vektrum-surface'
                 : 'hover:bg-vektrum-surface',
@@ -289,13 +289,13 @@ export function DemoScene() {
           >
             <p
               className={[
-                'text-[12px] font-semibold truncate',
+                'text-[11px] sm:text-[12px] font-semibold',
                 active === i ? 'text-vektrum-blue' : 'text-vektrum-muted',
               ].join(' ')}
             >
-              Scene {s.id}
+              {s.label}
             </p>
-            <p className="text-[10px] text-vektrum-faint truncate">{s.label}</p>
+            <p className="text-[10px] text-vektrum-faint leading-snug hidden sm:block">{s.sublabel}</p>
           </button>
         ))}
       </div>

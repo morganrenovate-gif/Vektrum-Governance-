@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import Link from "next/link";
+import { MobileNav } from "@/components/nav/mobile-nav";
 import "./globals.css";
 
 const inter = Inter({
@@ -19,6 +20,12 @@ export const metadata: Metadata = {
   title: "Vektrum — Construction Payment Governance",
   description:
     "Protected milestone payments for construction. Funds release only when work is verified.",
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({
@@ -47,7 +54,8 @@ export default function RootLayout({
                 </span>
               </Link>
 
-              <div className="flex items-center gap-1">
+              {/* Desktop nav — hidden on mobile */}
+              <div className="hidden sm:flex items-center gap-1">
                 <Link
                   href="/pricing"
                   className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
@@ -74,6 +82,9 @@ export default function RootLayout({
                   Get started
                 </Link>
               </div>
+
+              {/* Mobile hamburger — shown only on mobile */}
+              <MobileNav />
             </nav>
           </div>
         </header>
@@ -104,7 +115,7 @@ export default function RootLayout({
               </div>
 
               {/* Links */}
-              <div className="flex gap-16">
+              <div className="flex gap-8 sm:gap-16">
                 <div className="flex flex-col gap-3">
                   <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-vektrum-faint">
                     Platform
