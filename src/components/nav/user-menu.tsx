@@ -4,11 +4,12 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { LogOut, Settings, FileText, ChevronDown } from 'lucide-react'
+import { LogOut, Settings, FileText, ChevronDown, Shield } from 'lucide-react'
 
 interface UserMenuProps {
   name: string | null
   email: string | null
+  role?: string | null
 }
 
 function getInitials(name: string | null, email: string | null): string {
@@ -23,7 +24,7 @@ function getInitials(name: string | null, email: string | null): string {
   return 'U'
 }
 
-export function UserMenu({ name, email }: UserMenuProps) {
+export function UserMenu({ name, email, role }: UserMenuProps) {
   const [open, setOpen] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -128,10 +129,19 @@ export function UserMenu({ name, email }: UserMenuProps) {
             >
               <Settings size={14} className="text-vektrum-muted" aria-hidden="true" />
               Account Settings
-              <span className="ml-auto text-[10px] font-medium text-vektrum-amber bg-vektrum-amber-bg border border-vektrum-amber-border rounded-full px-1.5 py-0.5">
-                Soon
-              </span>
             </Link>
+
+            {role === 'admin' && (
+              <Link
+                href="/dashboard/admin"
+                role="menuitem"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-vektrum-text hover:bg-vektrum-surface-alt transition-colors"
+              >
+                <Shield size={14} className="text-vektrum-blue" aria-hidden="true" />
+                Admin Dashboard
+              </Link>
+            )}
           </div>
 
           {/* Divider + sign out */}

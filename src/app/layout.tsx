@@ -54,6 +54,19 @@ export default async function RootLayout({
   const userName = user?.user_metadata?.full_name ?? null
   const userEmail = user?.email ?? null
 
+  // Fetch role from profiles for admin-gated nav items
+  // Only query when user is authenticated — avoids unnecessary DB call for anon visitors
+  let userRole: string | null = null
+  if (user) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: profileRow } = await (supabase as any)
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+    userRole = (profileRow as { role: string } | null)?.role ?? null
+  }
+
   return (
     <html lang="en" className={`${inter.variable} ${instrumentSans.variable} ${jetbrainsMono.variable}`}>
       <body className="flex min-h-screen flex-col bg-vektrum-bg font-sans text-vektrum-text antialiased">
@@ -84,7 +97,7 @@ export default async function RootLayout({
                       Dashboard
                     </Link>
                     <div className="ml-2">
-                      <UserMenu name={userName} email={userEmail} />
+                      <UserMenu name={userName} email={userEmail} role={userRole} />
                     </div>
                   </>
                 ) : (
@@ -119,7 +132,7 @@ export default async function RootLayout({
               </div>
 
               {/* Mobile hamburger — shown only on mobile */}
-              <MobileNav isLoggedIn={!!user} userName={userName} userEmail={userEmail} />
+              <MobileNav isLoggedIn={!!user} userName={userName} userEmail={userEmail} userRole={userRole} />
             </nav>
           </div>
         </header>

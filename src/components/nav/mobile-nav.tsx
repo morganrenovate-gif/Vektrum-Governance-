@@ -3,16 +3,17 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Menu, X, LogOut, Settings, FileText } from 'lucide-react'
+import { Menu, X, LogOut, Settings, FileText, Shield } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 interface MobileNavProps {
   isLoggedIn?: boolean
   userName?: string | null
   userEmail?: string | null
+  userRole?: string | null
 }
 
-export function MobileNav({ isLoggedIn = false, userName, userEmail }: MobileNavProps) {
+export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }: MobileNavProps) {
   const [open, setOpen] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
   const pathname = usePathname()
@@ -123,10 +124,18 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail }: MobileNav
                   >
                     <Settings size={16} aria-hidden="true" />
                     Account Settings
-                    <span className="ml-auto text-[10px] font-medium text-vektrum-amber bg-vektrum-amber-bg border border-vektrum-amber-border rounded-full px-1.5 py-0.5">
-                      Soon
-                    </span>
                   </Link>
+
+                  {userRole === 'admin' && (
+                    <Link
+                      href="/dashboard/admin"
+                      className="flex items-center gap-3 min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                      onClick={() => setOpen(false)}
+                    >
+                      <Shield size={16} className="text-vektrum-blue" aria-hidden="true" />
+                      Admin Dashboard
+                    </Link>
+                  )}
 
                   <div className="mt-2 pt-2 border-t border-vektrum-border">
                     <button
