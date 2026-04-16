@@ -25,6 +25,8 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/invite/") ||
     pathname.startsWith("/favicon") ||
     pathname === "/demo" ||
+    pathname === "/demo-live" ||
+    pathname.startsWith("/demo-live/") ||
     pathname === "/lenders" ||
     pathname === "/contractors" ||
     pathname === "/about" ||
