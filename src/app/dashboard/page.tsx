@@ -6,7 +6,7 @@ import { Money } from '@/components/ui/money'
 import { Button } from '@/components/ui/button'
 import { Card, CardBody } from '@/components/ui/card'
 import type { Deal, Profile } from '@/lib/types'
-import { Plus, FileText, FolderOpen, Lock } from 'lucide-react'
+import { Plus, FolderOpen, Lock } from 'lucide-react'
 
 // Phase 6/7 dashboard sub-components
 import { DrawReviewPanel } from '@/components/dashboard/draw-review-panel'
@@ -320,52 +320,8 @@ export default async function DashboardPage() {
     )
   }
 
-  // ── Admin view ──────────────────────────────────────────────────────────────
-  const totalAmount = deals.reduce((s, d) => s + d.total_amount, 0)
-
-  return (
-    <>
-      {/* Admin also gets the assistant */}
-      <AssistantPanel actionRequired={pendingMilestones} />
-
-      <div className="page-container section space-y-8">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-vektrum-text">Admin Dashboard</h1>
-            <p className="mt-0.5 text-sm text-vektrum-muted">All deals across the platform</p>
-          </div>
-          <Link href="/dashboard/audit">
-            <Button variant="secondary" size="md">
-              <FileText size={15} aria-hidden="true" />
-              Audit Log
-            </Button>
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <StatTile label="Total Deals" value={deals.length} />
-          <MoneyStatTile label="Deal Volume" amount={totalAmount} />
-          <MoneyStatTile label="Total Released" amount={totalReleased} />
-          <StatTile label="Pending Milestones" value={pendingMilestones} />
-        </div>
-
-        <section>
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-vektrum-muted">
-            All Deals
-          </h2>
-          {deals.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-vektrum-border bg-vektrum-surface-alt px-8 py-12 text-center">
-              <p className="text-sm text-vektrum-faint">No deals in the system yet.</p>
-            </div>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {deals.map((deal) => (
-                <DealCard key={deal.id} deal={deal} />
-              ))}
-            </div>
-          )}
-        </section>
-      </div>
-    </>
-  )
+  // ── Admin view — redirect to dedicated admin panel ──────────────────────────
+  if (profile.role === 'admin') {
+    redirect('/dashboard/admin')
+  }
 }
