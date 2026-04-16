@@ -17,6 +17,8 @@ export interface AuditParams {
   new_values?: Record<string, unknown> | null
   /** Arbitrary contextual data — request IDs, Stripe transfer IDs, IP addresses, etc. */
   metadata?: Record<string, unknown> | null
+  /** Denormalized role of the actor: 'contractor' | 'funder' | 'admin' | 'system' | null */
+  actor_role?: string | null
 }
 
 // ─── Logger ───────────────────────────────────────────────────────────────────
@@ -40,6 +42,7 @@ export async function logAudit(params: AuditParams): Promise<void> {
       entity_id: params.entity_id,
       action: params.action,
       actor_id: params.actor_id,
+      actor_role: params.actor_role ?? null,
       old_values: params.old_values ?? null,
       new_values: params.new_values ?? null,
       metadata: params.metadata ?? null,

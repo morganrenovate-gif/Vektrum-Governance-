@@ -167,6 +167,7 @@ export async function POST(
     entity_id: invite.deal_id,
     action: 'funder_assigned',
     actor_id: user.id,
+    actor_role: 'funder',
     old_values: { funder_id: null },
     new_values: {
       funder_id: user.id,

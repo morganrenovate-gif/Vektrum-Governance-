@@ -172,6 +172,7 @@ export async function POST(request: NextRequest) {
       entity_id: deal.id,
       action: 'deal_created',
       actor_id: user.id,
+      actor_role: profile.role,
       old_values: null,
       new_values: {
         title: deal.title,

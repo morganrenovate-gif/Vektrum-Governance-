@@ -74,6 +74,7 @@ export async function POST(request: NextRequest) {
       entity_id: invitedUserId,
       action: 'admin_invite_sent',
       actor_id: user.id,
+      actor_role: 'admin',
       metadata: { invited_email: email, invited_by: user.id },
     })
 

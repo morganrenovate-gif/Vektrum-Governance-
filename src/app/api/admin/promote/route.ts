@@ -68,6 +68,7 @@ export async function POST(request: NextRequest) {
       entity_id: body.userId,
       action: 'admin_role_granted',
       actor_id: user.id,
+      actor_role: 'admin',
       old_values: null,
       new_values: { role: 'admin' },
       metadata: { promoted_by: user.id },
