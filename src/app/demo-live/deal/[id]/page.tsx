@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { CheckCircle2, Clock, Brain, Shield, AlertCircle, Lock } from 'lucide-react'
+import { DemoMilestoneList } from './demo-milestone-list'
 
 // ── Mock data ────────────────────────────────────────────────────────────────
 
@@ -11,11 +11,15 @@ function fmt(n: number) {
 interface Milestone {
   title: string
   amount: number
-  status: 'released' | 'approved' | 'ready_for_review' | 'in_progress' | 'not_started'
+  status: 'released' | 'approved' | 'ready_for_review' | 'in_progress' | 'not_started' | 'disputed'
   releasedAgo?: string
   aiScore?: number
   riskLevel?: string
   findings?: string[]
+  disputedLineItem?: string
+  disputeReason?: string
+  fundsReleased?: number
+  fundsHeld?: number
 }
 
 interface Deal {
@@ -78,6 +82,59 @@ const DEALS: Record<string, Deal> = {
       { title: 'Structural Frame & Enclosure', amount: 1_425_000, status: 'in_progress' },
       { title: 'Interior Build-Out & MEP', amount: 1_900_000, status: 'not_started' },
       { title: 'FF&E, Technology & CO', amount: 950_000, status: 'not_started' },
+    ],
+  },
+  'harbor-dispute': {
+    title: 'Harbor Logistics Center \u2014 Partial Dispute',
+    total: 9_100_000,
+    funded: 9_100_000,
+    released: 7_640_000,
+    status: 'active',
+    startedAgo: '180 days ago',
+    contractor: 'Marcus Webb',
+    funder: 'Sarah Chen',
+    milestones: [
+      {
+        title: 'Site Preparation & Grading',
+        amount: 320_000,
+        status: 'released',
+        releasedAgo: '60 days ago',
+      },
+      {
+        title: 'Concrete Sub-grade & Foundations',
+        amount: 1_840_000,
+        status: 'released',
+        releasedAgo: '45 days ago',
+      },
+      {
+        title: 'Structural Steel Erection',
+        amount: 2_180_000,
+        status: 'released',
+        releasedAgo: '30 days ago',
+      },
+      {
+        title: 'Building Envelope & Roofing',
+        amount: 2_640_000,
+        status: 'released',
+        releasedAgo: '14 days ago',
+      },
+      {
+        title: 'MEP Systems & Commissioning',
+        amount: 2_120_000,
+        status: 'disputed',
+        disputedLineItem: 'HVAC equipment procurement \u2014 $487,000',
+        disputeReason: 'AI draw review flagged invoice mismatch: submitted amount exceeds approved scope by $487,000. Supporting documentation does not reconcile with change order CO-004.',
+        aiScore: 34,
+        riskLevel: 'high',
+        findings: [
+          '\u26a0 Invoice amount ($847K) exceeds approved scope ($360K) by $487,000',
+          '\u26a0 Change order CO-004 not signed by funder',
+          '\u2713 Lien waiver on file',
+          '\u2713 General inspection report attached',
+        ],
+        fundsReleased: 1_633_000,
+        fundsHeld: 487_000,
+      },
     ],
   },
 }
@@ -154,142 +211,8 @@ export default async function DemoDealPage({ params }: { params: Promise<{ id: s
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-vektrum-muted">
           Milestones
         </h2>
-        <div className="space-y-4">
-          {deal.milestones.map((ms, i) => (
-            <MilestoneCard key={i} milestone={ms} index={i + 1} />
-          ))}
-        </div>
+        <DemoMilestoneList milestones={deal.milestones} releaseGateConditions={RELEASE_GATE_CONDITIONS} dealTotal={deal.total} dealReleased={deal.released} />
       </section>
-    </div>
-  )
-}
-
-// ── Milestone Card ───────────────────────────────────────────────────────────
-
-function MilestoneCard({ milestone: ms, index }: { milestone: Milestone; index: number }) {
-  const statusConfig = {
-    released: { label: 'Released', color: 'text-vektrum-green', bg: 'bg-vektrum-green-bg border-vektrum-green-border' },
-    approved: { label: 'Approved', color: 'text-vektrum-blue', bg: 'bg-vektrum-blue-subtle border-vektrum-blue-border' },
-    ready_for_review: { label: 'Ready for Review', color: 'text-vektrum-amber', bg: 'bg-vektrum-amber-bg border-vektrum-amber-border' },
-    in_progress: { label: 'In Progress', color: 'text-vektrum-muted', bg: 'bg-vektrum-surface-alt border-vektrum-border' },
-    not_started: { label: 'Not Started', color: 'text-vektrum-faint', bg: 'bg-vektrum-surface-alt border-vektrum-border' },
-  }
-
-  const cfg = statusConfig[ms.status]
-
-  return (
-    <div className="rounded-xl border border-vektrum-border bg-vektrum-surface shadow-sm overflow-hidden">
-      <div className="px-5 py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-vektrum-surface-alt text-[12px] font-bold text-vektrum-muted">
-            {index}
-          </span>
-          <div>
-            <p className="text-[14px] font-semibold text-vektrum-text">{ms.title}</p>
-            <p className="text-[12px] text-vektrum-muted mt-0.5">{fmt(ms.amount)}</p>
-          </div>
-        </div>
-        <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${cfg.bg} ${cfg.color}`}>
-          {cfg.label}
-        </span>
-      </div>
-
-      {/* Released state */}
-      {ms.status === 'released' && (
-        <div className="border-t border-vektrum-border-subtle px-5 py-3 flex items-center gap-2 text-[13px] text-vektrum-green">
-          <CheckCircle2 size={14} aria-hidden="true" />
-          Released &mdash; {ms.releasedAgo}
-        </div>
-      )}
-
-      {/* Approved state — show AI review */}
-      {ms.status === 'approved' && ms.aiScore && (
-        <div className="border-t border-vektrum-border-subtle">
-          <div className="px-5 py-4 space-y-3">
-            {/* AI Review Panel */}
-            <div className="rounded-lg border border-vektrum-blue-border bg-vektrum-blue-subtle p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Brain size={14} className="text-vektrum-blue" aria-hidden="true" />
-                <span className="text-[13px] font-semibold text-vektrum-blue">AI Draw Review</span>
-              </div>
-              <div className="grid grid-cols-3 gap-4 mb-3">
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">Score</p>
-                  <p className="text-xl font-bold text-vektrum-blue tabular-nums">{ms.aiScore}/100</p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">Risk</p>
-                  <p className="text-[14px] font-semibold text-vektrum-green">{ms.riskLevel}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">Recommendation</p>
-                  <p className="text-[14px] font-semibold text-vektrum-green">Approve</p>
-                </div>
-              </div>
-              <ul className="space-y-1.5">
-                {ms.findings?.map((f, i) => (
-                  <li key={i} className="flex items-center gap-2 text-[12px] text-vektrum-blue">
-                    <CheckCircle2 size={12} aria-hidden="true" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Approve button (non-functional) */}
-            <button
-              type="button"
-              className="w-full rounded-lg bg-vektrum-blue px-4 py-2.5 text-[13px] font-medium text-white cursor-default"
-              title="Demo mode — approval simulated"
-            >
-              Approve Draw
-            </button>
-
-            {/* Release button (disabled) */}
-            <button
-              type="button"
-              disabled
-              className="w-full rounded-lg border border-vektrum-border bg-vektrum-surface px-4 py-2.5 text-[13px] font-medium text-vektrum-muted opacity-60 cursor-not-allowed"
-              title="Demo mode — no real releases"
-            >
-              <Lock size={12} className="inline mr-1.5" aria-hidden="true" />
-              Release Funds (Demo)
-            </button>
-
-            {/* 7-condition gate checklist */}
-            <div className="rounded-lg border border-vektrum-border bg-vektrum-surface p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Shield size={14} className="text-vektrum-blue" aria-hidden="true" />
-                <span className="text-[12px] font-semibold text-vektrum-text">7-Condition Release Gate</span>
-              </div>
-              <ul className="space-y-2">
-                {RELEASE_GATE_CONDITIONS.map((c, i) => (
-                  <li key={i} className="flex items-center gap-2 text-[12px] text-vektrum-green">
-                    <CheckCircle2 size={12} className="flex-shrink-0" aria-hidden="true" />
-                    {c}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Ready for review state */}
-      {ms.status === 'ready_for_review' && (
-        <div className="border-t border-vektrum-border-subtle px-5 py-3 flex items-center gap-2 text-[13px] text-vektrum-amber">
-          <AlertCircle size={14} aria-hidden="true" />
-          AI Review Requested &mdash; pending analysis
-        </div>
-      )}
-
-      {/* In progress state */}
-      {ms.status === 'in_progress' && (
-        <div className="border-t border-vektrum-border-subtle px-5 py-3 flex items-center gap-2 text-[13px] text-vektrum-muted">
-          <Clock size={14} aria-hidden="true" />
-          Work in progress
-        </div>
-      )}
     </div>
   )
 }
