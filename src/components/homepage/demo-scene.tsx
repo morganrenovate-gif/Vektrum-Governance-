@@ -307,24 +307,22 @@ export function DemoScene() {
       </div>
 
       {/* Active scene content */}
-      <div className="p-5">
+      <div className="p-5 min-h-[420px]">
         <ActiveScene />
       </div>
 
       {/* Auto-cycle indicator */}
-      {!paused && (
-        <div className="flex gap-1 justify-center pb-4">
-          {SCENES.map((_, i) => (
-            <div
-              key={i}
-              className={[
-                'h-1 rounded-full transition-all duration-300',
-                i === active ? 'w-6 bg-vektrum-blue' : 'w-1.5 bg-vektrum-border',
-              ].join(' ')}
-            />
-          ))}
-        </div>
-      )}
+      <div className="flex gap-1 justify-center pb-4" style={{ opacity: paused ? 0 : 1 }}>
+        {SCENES.map((_, i) => (
+          <div
+            key={i}
+            className={[
+              'h-1 rounded-full transition-all duration-300',
+              i === active ? 'w-6 bg-vektrum-blue' : 'w-1.5 bg-vektrum-border',
+            ].join(' ')}
+          />
+        ))}
+      </div>
     </div>
   )
 }
