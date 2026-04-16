@@ -82,12 +82,10 @@ export async function POST(req: NextRequest) {
     // ── Perplexity Sonar AI ────────────────────────────────────────────────────
     const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY
     if (!PERPLEXITY_API_KEY) {
-      return NextResponse.json({
-        reply:
-          'AI assistant is temporarily unavailable. Please try again later.',
-        suggestions,
-        requiresConfirmation: false,
-      })
+      return NextResponse.json(
+        { error: 'AI service unavailable' },
+        { status: 503 },
+      )
     }
 
     const systemPrompt =

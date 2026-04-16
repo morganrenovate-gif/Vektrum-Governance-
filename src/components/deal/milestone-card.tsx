@@ -51,11 +51,24 @@ export function MilestoneCard({
     setError(null);
     setSuccess(null);
 
+    const statusMap: Record<string, string> = {
+      start: "in_progress",
+      submit: "ready_for_review",
+      approve: "approved",
+      request_changes: "in_progress",
+    };
+    const new_status = statusMap[action];
+    if (!new_status) {
+      setError("Unknown action.");
+      setLoading(null);
+      return;
+    }
+
     try {
       const res = await fetch(`/api/milestones/${milestone.id}/transition`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action }),
+        body: JSON.stringify({ new_status }),
       });
 
       const data = await res.json();

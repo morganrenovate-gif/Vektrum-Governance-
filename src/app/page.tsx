@@ -451,7 +451,7 @@ export default async function HomePage() {
               },
               {
                 step: '02',
-                title: 'Fund escrow',
+                title: 'Fund Project Trust Account',
                 desc: 'Funder deposits funds via Stripe. Money is held — Vektrum governs release but never holds funds directly.',
                 icon: Building2,
               },

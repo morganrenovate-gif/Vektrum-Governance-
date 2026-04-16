@@ -84,7 +84,7 @@ function TierCard({
       {/* CRF Rate */}
       <div className="mb-4 rounded-xl border border-vektrum-border bg-vektrum-surface-alt px-4 py-3">
         <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-vektrum-faint mb-1">
-          Compliance Review Fee
+          Vektrum Compliance Review Fee
         </p>
         <p className="text-[20px] font-bold tracking-[-0.03em] text-vektrum-text tabular-nums">
           {crfRate}
@@ -320,7 +320,7 @@ export default function PricingPage() {
                   Every tier uses the same core structure: a <strong className="text-white/90">governance component</strong>{' '}
                   (the portfolio retainer — predictable, billed annually) plus a{' '}
                   <strong className="text-white/90">performance component</strong>{' '}
-                  (the Compliance Review Fee — charged per verified disbursement). The only difference
+                  (the Vektrum Compliance Review Fee — charged per verified disbursement). The only difference
                   across tiers is scale and whether the retainer applies. Standalone clients have no
                   retainer — pure performance pricing. Institutional and Enterprise clients commit to
                   a retainer in exchange for a lower CRF rate.
@@ -339,7 +339,7 @@ export default function PricingPage() {
                   <div className="rounded-xl bg-white/5 border border-white/10 p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <DollarSign size={14} className="text-vektrum-amber" />
-                      <p className="text-[12px] font-semibold text-white/80 uppercase tracking-wide">Compliance Review Fee</p>
+                      <p className="text-[12px] font-semibold text-white/80 uppercase tracking-wide">Vektrum Compliance Review Fee</p>
                     </div>
                     <p className="text-[13px] text-white/60 leading-relaxed">
                       Charged per verified disbursement only — never before money moves.
@@ -372,7 +372,7 @@ export default function PricingPage() {
                 <span className="text-[14px] font-semibold text-vektrum-text tabular-nums">$37,500 / yr</span>
               </div>
               <div className="flex items-center justify-between px-6 py-4">
-                <span className="text-[14px] text-vektrum-muted">Compliance Review Fee (0.70% × 6 avg draws of $500K)</span>
+                <span className="text-[14px] text-vektrum-muted">Vektrum Compliance Review Fee (0.70% × 6 avg draws of $500K)</span>
                 <span className="text-[14px] font-semibold text-vektrum-text tabular-nums">$21,000 / yr</span>
               </div>
               <div className="flex items-center justify-between px-6 py-4 bg-vektrum-green-bg/30">

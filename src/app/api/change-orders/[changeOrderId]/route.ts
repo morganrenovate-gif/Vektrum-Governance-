@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
+import { createClient } from '@/lib/supabase/server'
 import { getAuthUser, requireRole, requireDealAccess } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
 import { errorResponse, internalError, notFoundError, validationError } from '@/lib/errors'
 import type { ChangeOrderStatus } from '@/lib/types'
+
+export const dynamic = 'force-dynamic'
 
 // ─── PATCH /api/change-orders/[changeOrderId] ─────────────────────────────────
 // Approve or reject a change order (funder only).
@@ -60,12 +62,12 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
   const decision = body.decision as Extract<ChangeOrderStatus, 'approved' | 'rejected'>
 
-  const supabase = buildSupabaseFromRequest(request)
+  const supabase = await createClient()
 
   // ── Fetch Change Order ──────────────────────────────────────────────────────
   const { data: changeOrder, error: fetchError } = await supabase
     .from('change_orders')
-    .select('id, milestone_id, deal_id, amount, description, status, requestor_id')
+    .select('id, milestone_id, deal_id, amount, description, status, submitted_by')
     .eq('id', changeOrderId)
     .single()
 
@@ -123,8 +125,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       .from('change_orders')
       .update({
         status: decision,
-        reviewed_by: user.id,
-        reviewed_at: now,
+        approved_by: user.id,
+        approved_at: now,
         updated_at: now,
       })
       .eq('id', changeOrderId)
@@ -149,7 +151,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         // Roll back the change order update — we cannot allow a milestone with a zero or negative amount
         await supabase
           .from('change_orders')
-          .update({ status: 'submitted', reviewed_by: null, reviewed_at: null })
+          .update({ status: 'submitted', approved_by: null, approved_at: null })
           .eq('id', changeOrderId)
 
         return errorResponse(
@@ -203,7 +205,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       action: `change_order_${decision}`,
       actor_id: user.id,
       old_values: { status: oldChangeOrderStatus },
-      new_values: { status: decision, reviewed_by: user.id, reviewed_at: now },
+      new_values: { status: decision, approved_by: user.id, approved_at: now },
       metadata: {
         milestone_id: changeOrder.milestone_id,
         deal_id: changeOrder.deal_id,
@@ -224,21 +226,4 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       message,
     )
   }
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function buildSupabaseFromRequest(request: NextRequest) {
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll() {},
-      },
-    },
-  )
 }

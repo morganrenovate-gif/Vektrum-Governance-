@@ -32,7 +32,7 @@ const FAQ: FaqItem[] = [
   },
   {
     q: 'What is the 7-condition release gate?',
-    a: 'Before any milestone payment releases, 7 server-side conditions must all be true simultaneously: milestone approved, deal active, no open disputes, sufficient escrow balance, Stripe account verified, no duplicate release, and integrity check passed.',
+    a: 'Before any milestone payment releases, 7 server-side conditions must all be true simultaneously: milestone approved, deal active, no open disputes, sufficient Project Trust Account balance, Stripe account verified, no duplicate release, and integrity check passed.',
   },
   {
     q: 'How does dispute isolation work?',
@@ -40,11 +40,11 @@ const FAQ: FaqItem[] = [
   },
   {
     q: 'Is Vektrum free for contractors?',
-    a: 'Yes. Contractors always join free. No subscription, no per-milestone charge, no onboarding fee. The funder pays the Compliance Review Fee when funds are disbursed.',
+    a: 'Yes. Contractors always join free. No subscription, no per-milestone charge, no onboarding fee. The funder pays the Vektrum Compliance Review Fee when funds are disbursed.',
   },
   {
     q: 'How do lenders get charged?',
-    a: 'Vektrum uses a hybrid pricing model: a governance retainer (annual, based on portfolio size) plus a Compliance Review Fee (per verified disbursement). Standalone projects have no retainer — pure performance pricing.',
+    a: 'Vektrum uses a hybrid pricing model: a governance retainer (annual, based on portfolio size) plus a Vektrum Compliance Review Fee (per verified disbursement). Standalone projects have no retainer — pure performance pricing.',
   },
   {
     q: 'What happens if there is a dispute?',

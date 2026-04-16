@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
+import { createClient } from '@/lib/supabase/server'
 import { getAuthUser, requireRole, requireDealAccess } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
 import { errorResponse, internalError, notFoundError, validationError } from '@/lib/errors'
+
+export const dynamic = 'force-dynamic'
 
 // ─── POST /api/change-orders ──────────────────────────────────────────────────
 // Create a change order against a milestone (contractor only).
@@ -82,7 +84,7 @@ export async function POST(request: NextRequest) {
     return validationError(validationErrors)
   }
 
-  const supabase = buildSupabaseFromRequest(request)
+  const supabase = await createClient()
 
   // ── Fetch Milestone & Deal ──────────────────────────────────────────────────
   const { data: milestone, error: milestoneError } = await supabase
@@ -151,7 +153,7 @@ export async function POST(request: NextRequest) {
       .insert({
         milestone_id: body.milestone_id!,
         deal_id: milestone.deal_id,
-        requestor_id: user.id,
+        submitted_by: user.id,
         amount: body.amount!,
         description: body.description!.trim(),
         status: 'submitted',
@@ -188,21 +190,4 @@ export async function POST(request: NextRequest) {
       message,
     )
   }
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function buildSupabaseFromRequest(request: NextRequest) {
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll() {},
-      },
-    },
-  )
 }

@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import type { Profile } from '@/lib/types'
 
+export const dynamic = 'force-dynamic'
+
 /**
  * PATCH /api/onboarding
  * Sets onboarding_complete = true on the caller's profile.

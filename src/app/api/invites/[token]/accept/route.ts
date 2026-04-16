@@ -4,6 +4,8 @@ import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { logAudit } from '@/lib/engine/audit'
 import { conflictError, errorResponse, internalError, notFoundError } from '@/lib/errors'
 
+export const dynamic = 'force-dynamic'
+
 // ─── POST /api/invites/[token]/accept ─────────────────────────────────────────
 // Authenticated funders (or users without a role yet) accept an invite.
 //

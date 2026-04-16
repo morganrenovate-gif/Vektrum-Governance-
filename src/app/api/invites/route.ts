@@ -10,6 +10,8 @@ import {
   validationError,
 } from '@/lib/errors'
 
+export const dynamic = 'force-dynamic'
+
 // ─── POST /api/invites ────────────────────────────────────────────────────────
 // Generate a secure funder invite link for a deal.
 //

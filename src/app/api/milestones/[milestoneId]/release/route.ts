@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
+import { createClient } from '@/lib/supabase/server'
 import { getAuthUser, requireDealAccess } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
 import { validateRelease, checkAiPrecondition } from '@/lib/engine/release-gate'
 import { stripe } from '@/lib/stripe'
 import { internalError, notFoundError, validationError } from '@/lib/errors'
+
+export const dynamic = 'force-dynamic'
 
 
 
@@ -34,7 +36,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
 
   const { user, profile } = authContext
-  const supabase = buildSupabaseFromRequest(request)
+  const supabase = await createClient()
 
   // ── Fetch Milestone (needed for deal access check) ──────────────────────────
   const { data: milestone, error: milestoneError } = await supabase
@@ -148,7 +150,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       .insert({
         milestone_id: milestoneId,
         deal_id: milestone.deal_id,
-        contractor_id: deal.contractor_id,
         amount: milestone.amount,
         stripe_transfer_id: stripeTransferId,
         idempotency_key: idempotencyKey,
@@ -321,19 +322,3 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function buildSupabaseFromRequest(request: NextRequest) {
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll() {},
-      },
-    },
-  )
-}

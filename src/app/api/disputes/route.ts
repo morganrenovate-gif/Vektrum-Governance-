@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
+import { createClient } from '@/lib/supabase/server'
 import { getAuthUser, requireDealAccess } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
 import { errorResponse, internalError, notFoundError } from '@/lib/errors'
+
+export const dynamic = 'force-dynamic'
 
 // ─── POST /api/disputes ───────────────────────────────────────────────────────
 //
@@ -31,7 +33,7 @@ export async function POST(request: NextRequest) {
   }
 
   const { user, profile } = authContext
-  const supabase = buildSupabaseFromRequest(request)
+  const supabase = await createClient()
 
   // ── Parse Body ──────────────────────────────────────────────────────────────
   let body: {
@@ -218,7 +220,7 @@ export async function GET(request: NextRequest) {
   }
 
   const { profile } = authContext
-  const supabase = buildSupabaseFromRequest(request)
+  const supabase = await createClient()
 
   const { searchParams } = new URL(request.url)
   const dealId = searchParams.get('deal_id')
@@ -247,21 +249,4 @@ export async function GET(request: NextRequest) {
     const message = err instanceof Error ? err.message : String(err)
     return internalError('An unexpected error occurred while fetching disputes.', message)
   }
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function buildSupabaseFromRequest(request: NextRequest) {
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll() {},
-      },
-    },
-  )
 }

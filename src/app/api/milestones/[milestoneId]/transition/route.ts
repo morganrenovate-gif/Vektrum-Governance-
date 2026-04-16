@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
+import { createClient } from '@/lib/supabase/server'
 import { getAuthUser, requireDealAccess } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
 import { validateTransition } from '@/lib/engine/state-machine'
 import { errorResponse, internalError, notFoundError } from '@/lib/errors'
 import type { MilestoneStatus } from '@/lib/types'
+
+export const dynamic = 'force-dynamic'
 
 
 
@@ -28,7 +30,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
 
   const { user, profile } = authContext
-  const supabase = buildSupabaseFromRequest(request)
+  const supabase = await createClient()
 
   // ── Parse Body ──────────────────────────────────────────────────────────────
   let body: { new_status?: string }
@@ -46,7 +48,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return errorResponse(
       400,
       'new_status is required and must be a string. ' +
-        'Valid values are: not_started, in_progress, ready_for_review, approved.',
+        'Valid values are: not_started, in_progress, ready_for_review, approved, disputed.',
     )
   }
 
@@ -55,7 +57,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     'in_progress',
     'ready_for_review',
     'approved',
-    'released',
+    'disputed',
   ]
 
   if (!VALID_STATUSES.includes(body.new_status as MilestoneStatus)) {
@@ -156,19 +158,3 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function buildSupabaseFromRequest(request: NextRequest) {
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll() {},
-      },
-    },
-  )
-}

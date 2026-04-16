@@ -4,6 +4,8 @@ import { logAudit } from '@/lib/engine/audit'
 import { stripe } from '@/lib/stripe'
 import type Stripe from 'stripe'
 
+export const dynamic = 'force-dynamic'
+
 // ─── POST /api/stripe/webhook ─────────────────────────────────────────────────
 // Handles incoming Stripe webhook events.
 //

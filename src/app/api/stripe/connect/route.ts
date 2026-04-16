@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
+import { createClient } from '@/lib/supabase/server'
 import { getAuthUser, requireRole } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
 import { stripe } from '@/lib/stripe'
 import { errorResponse, internalError } from '@/lib/errors'
+
+export const dynamic = 'force-dynamic'
 
 // ─── POST /api/stripe/connect ─────────────────────────────────────────────────
 // Initiates or resumes Stripe Connect Express onboarding for a contractor.
@@ -36,7 +38,7 @@ export async function POST(request: NextRequest) {
     return err as NextResponse
   }
 
-  const supabase = buildSupabaseFromRequest(request)
+  const supabase = await createClient()
 
   // ── Resolve or Create Stripe Account ───────────────────────────────────────
   let stripeAccountId = profile.stripe_account_id
@@ -137,21 +139,4 @@ export async function POST(request: NextRequest) {
     expires_at: accountLink.expires_at,
     stripe_account_id: stripeAccountId,
   })
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function buildSupabaseFromRequest(request: NextRequest) {
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll() {},
-      },
-    },
-  )
 }

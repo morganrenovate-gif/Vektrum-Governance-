@@ -141,7 +141,7 @@ function Step3({ role }: { role: Profile['role'] }) {
         <p className="mt-1 text-[13px] leading-relaxed text-vektrum-muted">
           {role === 'contractor'
             ? 'Stripe Connect Express — bank-grade security, instant payouts, zero markup on transfer fees.'
-            : 'Stripe holds escrow. Vektrum governs release. Fees passed through at cost — never marked up.'}
+            : 'Stripe holds funds in your Project Trust Account. Vektrum governs release. Fees passed through at cost — never marked up.'}
         </p>
       </div>
       {role === 'contractor' && (

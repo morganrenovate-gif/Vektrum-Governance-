@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
+import { createClient } from '@/lib/supabase/server'
 import { getAuthUser, requireDealAccess } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
 import { errorResponse, internalError, notFoundError } from '@/lib/errors'
+
+export const dynamic = 'force-dynamic'
 
 // ─── PATCH /api/disputes/[disputeId]/resolve ──────────────────────────────────
 //
@@ -43,7 +45,7 @@ export async function PATCH(
   }
 
   const { user, profile } = authContext
-  const supabase = buildSupabaseFromRequest(request)
+  const supabase = await createClient()
 
   // ── Role check — contractors cannot resolve disputes ────────────────────────
   if (profile.role === 'contractor') {
@@ -302,21 +304,4 @@ export async function PATCH(
     const message = err instanceof Error ? err.message : String(err)
     return internalError('An unexpected error occurred while resolving the dispute.', message)
   }
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function buildSupabaseFromRequest(request: NextRequest) {
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll() {},
-      },
-    },
-  )
 }

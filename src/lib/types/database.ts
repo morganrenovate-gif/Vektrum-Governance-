@@ -37,6 +37,7 @@ export type MilestoneStatus =
   | 'ready_for_review'
   | 'approved'
   | 'released'
+  | 'disputed'
 
 /** Payment protection states of a milestone. */
 export type ProtectionStatus =
@@ -81,13 +82,15 @@ export type AuditAction =
 export interface ProfileRow {
   /** UUID — references auth.users(id). */
   id: string
-  email: string
   full_name: string | null
+  company_name: string | null
   role: UserRole
   /** Stripe Connect account ID. Set for contractors once onboarding is done. */
   stripe_account_id: string | null
-  /** Status of Stripe Connect onboarding: 'not_connected' | 'pending' | 'active' */
-  stripe_account_status: string
+  /** True when Stripe has enabled payouts for this contractor account. */
+  stripe_payouts_enabled: boolean
+  /** True after onboarding wizard is completed. */
+  onboarding_complete: boolean
   created_at: string
   updated_at: string
 }
@@ -232,11 +235,12 @@ export interface AuditLogRow {
 export interface ProfileInsert {
   /** Must match the auth.users UUID that was just created. */
   id: string
-  email: string
   role?: UserRole
   full_name?: string | null
+  company_name?: string | null
   stripe_account_id?: string | null
-  stripe_account_status?: string
+  stripe_payouts_enabled?: boolean
+  onboarding_complete?: boolean
 }
 
 export interface DealInsert {
@@ -322,8 +326,10 @@ export interface AuditLogInsert {
 
 export interface ProfileUpdate {
   full_name?: string | null
+  company_name?: string | null
   stripe_account_id?: string | null
-  stripe_account_status?: string
+  stripe_payouts_enabled?: boolean
+  onboarding_complete?: boolean
   updated_at?: string
 }
 
@@ -385,49 +391,52 @@ export interface Database {
         Row: ProfileRow
         Insert: ProfileInsert
         Update: ProfileUpdate
+        Relationships: []
       }
       deals: {
         Row: DealRow
         Insert: DealInsert
         Update: DealUpdate
+        Relationships: []
       }
       milestones: {
         Row: MilestoneRow
         Insert: MilestoneInsert
         Update: MilestoneUpdate
+        Relationships: []
       }
       milestone_documents: {
         Row: MilestoneDocumentRow
         Insert: MilestoneDocumentInsert
         Update: MilestoneDocumentUpdate
+        Relationships: []
       }
       change_orders: {
         Row: ChangeOrderRow
         Insert: ChangeOrderInsert
         Update: ChangeOrderUpdate
+        Relationships: []
       }
       disputes: {
         Row: DisputeRow
         Insert: DisputeInsert
         Update: DisputeUpdate
+        Relationships: []
       }
       releases: {
         Row: ReleaseRow
         Insert: ReleaseInsert
-        // Releases are immutable — Update intentionally empty
         Update: Record<string, never>
+        Relationships: []
       }
       audit_log: {
         Row: AuditLogRow
         Insert: AuditLogInsert
-        // Audit log is immutable — Update intentionally empty
         Update: Record<string, never>
+        Relationships: []
       }
     }
-    Views: {
-      // No views defined in this migration
-      [key: string]: never
-    }
+    Views: Record<string, never>
     Functions: {
       is_admin: {
         Args: Record<string, never>
@@ -436,6 +445,10 @@ export interface Database {
       is_deal_participant: {
         Args: { p_deal_id: string }
         Returns: boolean
+      }
+      increment_deal_released_amount: {
+        Args: { p_deal_id: string; p_amount: number }
+        Returns: undefined
       }
     }
     Enums: {
@@ -447,7 +460,6 @@ export interface Database {
       dispute_status: DisputeStatus
     }
     CompositeTypes: {
-      // No composite types defined
       [key: string]: never
     }
   }

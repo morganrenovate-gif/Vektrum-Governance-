@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
+import { createClient } from '@/lib/supabase/server'
 import { getAuthUser, requireRole, requireDealAccess } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
 import { errorResponse, internalError, notFoundError, validationError } from '@/lib/errors'
+
+export const dynamic = 'force-dynamic'
 
 
 
@@ -22,7 +24,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   }
 
   const { user, profile } = authContext
-  const supabase = buildSupabaseFromRequest(request)
+  const supabase = await createClient()
 
   try {
     await requireDealAccess(supabase, dealId, user.id, profile.role)
@@ -96,7 +98,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return err as NextResponse
   }
 
-  const supabase = buildSupabaseFromRequest(request)
+  const supabase = await createClient()
 
   try {
     await requireDealAccess(supabase, dealId, user.id, profile.role)
@@ -255,21 +257,4 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       message,
     )
   }
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function buildSupabaseFromRequest(request: NextRequest) {
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll() {},
-      },
-    },
-  )
 }

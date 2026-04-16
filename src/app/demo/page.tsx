@@ -328,7 +328,7 @@ export default function DemoPage() {
             </div>
             <div className="divide-y divide-white/10">
               {[
-                ['Standalone', '1.0% Compliance Review Fee per verified disbursement', '$0 monthly'],
+                ['Standalone', '1.0% Vektrum Compliance Review Fee per verified disbursement', '$0 monthly'],
                 ['Institutional', '0.70% CRF + 0.075% ACV governance retainer', 'From $5K/yr'],
                 ['Enterprise', '0.65% CRF + negotiated retainer', 'Custom'],
               ].map(([tier, desc, price]) => (

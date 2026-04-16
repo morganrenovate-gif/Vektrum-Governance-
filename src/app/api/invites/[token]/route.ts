@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { internalError, notFoundError } from '@/lib/errors'
 
+export const dynamic = 'force-dynamic'
+
 // ─── GET /api/invites/[token] ─────────────────────────────────────────────────
 // Public endpoint — no auth required.
 // Returns deal preview for the invite accept page.
