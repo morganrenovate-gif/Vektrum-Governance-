@@ -67,9 +67,47 @@ export default async function RootLayout({
     userRole = (profileRow as { role: string } | null)?.role ?? null
   }
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://vektrum.io/#organization",
+        "name": "Vektrum",
+        "url": "https://vektrum.io",
+        "logo": "https://vektrum.io/logo.png",
+        "description": "Vektrum is a construction payment governance platform providing controlled draw disbursements, AI compliance review, and immutable audit trails for lenders and contractors.",
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "email": "lenders@vektrum.io",
+          "contactType": "sales"
+        },
+        "sameAs": []
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://vektrum.io/#website",
+        "url": "https://vektrum.io",
+        "name": "Vektrum",
+        "publisher": {
+          "@id": "https://vektrum.io/#organization"
+        },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://vektrum.io/help?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    ]
+  }
+
   return (
     <html lang="en" className={`${inter.variable} ${instrumentSans.variable} ${jetbrainsMono.variable}`}>
       <body className="flex min-h-screen flex-col bg-vektrum-bg font-sans text-vektrum-text antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         {/* Navigation */}
         <header className="sticky top-0 z-50 border-b border-vektrum-border/80 bg-vektrum-surface/90 backdrop-blur-xl">
           <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
@@ -103,6 +141,18 @@ export default async function RootLayout({
                 ) : (
                   // ── Logged-out nav ─────────────────────────────────────────
                   <>
+                    <Link
+                      href="/lenders"
+                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                    >
+                      Lenders
+                    </Link>
+                    <Link
+                      href="/about"
+                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                    >
+                      About
+                    </Link>
                     <Link
                       href="/pricing"
                       className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
@@ -170,6 +220,31 @@ export default async function RootLayout({
                   </Link>
                   <Link href="/pricing" className="text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors">
                     Pricing
+                  </Link>
+                </div>
+                <div className="flex flex-col gap-3">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-vektrum-faint">
+                    For Lenders &amp; Contractors
+                  </span>
+                  <Link href="/lenders" className="text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors">
+                    Lenders
+                  </Link>
+                  <Link href="/contractors" className="text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors">
+                    Contractors
+                  </Link>
+                </div>
+                <div className="flex flex-col gap-3">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-vektrum-faint">
+                    Company
+                  </span>
+                  <Link href="/about" className="text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors">
+                    About
+                  </Link>
+                  <Link href="/careers" className="text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors">
+                    Careers
+                  </Link>
+                  <Link href="/help" className="text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors">
+                    Help
                   </Link>
                 </div>
               </div>
