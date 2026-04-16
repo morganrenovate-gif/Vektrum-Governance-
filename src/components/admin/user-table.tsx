@@ -3,12 +3,11 @@
 // Advisor 10 (Adversarial): Admins see user data but cannot modify financial records.
 // Advisor 8 (Ops): Search + filter by role is essential for support workflows.
 // Advisor 4 (Security): Email display only — no ability to impersonate or modify auth.
-// Display-only table. No mutation actions.
 
 import { useState } from 'react'
 import Link from 'next/link'
 import type { Profile, Deal } from '@/lib/types'
-import { CheckCircle2, AlertCircle, Search } from 'lucide-react'
+import { CheckCircle2, AlertCircle, Search, ShieldPlus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface UserTableProps {
@@ -33,6 +32,36 @@ const ROLE_COLORS: Record<string, string> = {
 export function UserTable({ profiles, deals }: UserTableProps) {
   const [search, setSearch]           = useState('')
   const [roleFilter, setRoleFilter]   = useState<RoleFilter>('all')
+  const [promotingId, setPromotingId] = useState<string | null>(null)
+  const [promotedIds, setPromotedIds] = useState<Set<string>>(new Set())
+  const [promoteError, setPromoteError] = useState<string | null>(null)
+
+  async function handlePromote(userId: string, userName: string) {
+    if (!window.confirm(`Promote "${userName}" to Admin? This grants full admin access.`)) return
+
+    setPromotingId(userId)
+    setPromoteError(null)
+
+    try {
+      const res = await fetch('/api/admin/promote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({ error: 'Request failed' }))
+        setPromoteError(data.error ?? 'Failed to promote user.')
+        return
+      }
+
+      setPromotedIds((prev) => new Set(prev).add(userId))
+    } catch {
+      setPromoteError('Network error. Please try again.')
+    } finally {
+      setPromotingId(null)
+    }
+  }
 
   const dealCountByUser = deals.reduce<Record<string, number>>((acc, deal) => {
     acc[deal.contractor_id] = (acc[deal.contractor_id] ?? 0) + 1
@@ -85,9 +114,16 @@ export function UserTable({ profiles, deals }: UserTableProps) {
         </div>
       </div>
 
+      {/* Promote error banner */}
+      {promoteError && (
+        <div className="px-5 py-3 bg-red-50 border-b border-red-200">
+          <p className="text-[12px] text-red-700">{promoteError}</p>
+        </div>
+      )}
+
       {/* Column headers */}
-      <div className="hidden md:grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-5 py-3 border-b border-vektrum-border-subtle">
-        {['User', 'Role', 'Stripe', 'Deals', 'Joined'].map((h) => (
+      <div className="hidden md:grid grid-cols-[2fr_1fr_1fr_1fr_auto_auto] gap-4 px-5 py-3 border-b border-vektrum-border-subtle">
+        {['User', 'Role', 'Stripe', 'Deals', 'Joined', 'Actions'].map((h) => (
           <p key={h} className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">{h}</p>
         ))}
       </div>
@@ -104,10 +140,13 @@ export function UserTable({ profiles, deals }: UserTableProps) {
             const stripeOk  = profile.stripe_payouts_enabled
             const hasStripe = !!profile.stripe_account_id
 
+            const isPromoted = promotedIds.has(profile.id)
+            const effectiveRole = isPromoted ? 'admin' : profile.role
+
             return (
               <div
                 key={profile.id}
-                className="flex flex-col gap-2 md:grid md:grid-cols-[2fr_1fr_1fr_1fr_auto] md:items-center md:gap-4 px-5 py-3.5 hover:bg-vektrum-bg transition-colors"
+                className="flex flex-col gap-2 md:grid md:grid-cols-[2fr_1fr_1fr_1fr_auto_auto] md:items-center md:gap-4 px-5 py-3.5 hover:bg-vektrum-bg transition-colors"
               >
                 {/* User info */}
                 <div className="min-w-0">
@@ -123,9 +162,9 @@ export function UserTable({ profiles, deals }: UserTableProps) {
                 <div>
                   <span className={cn(
                     'inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-semibold capitalize',
-                    ROLE_COLORS[profile.role] ?? 'bg-vektrum-surface-alt border-vektrum-border text-vektrum-muted'
+                    ROLE_COLORS[effectiveRole] ?? 'bg-vektrum-surface-alt border-vektrum-border text-vektrum-muted'
                   )}>
-                    {ROLE_LABELS[profile.role] ?? profile.role}
+                    {ROLE_LABELS[effectiveRole] ?? effectiveRole}
                   </span>
                 </div>
 
@@ -171,6 +210,27 @@ export function UserTable({ profiles, deals }: UserTableProps) {
                     >
                       View deals
                     </Link>
+                  )}
+                </div>
+
+                {/* Promote action */}
+                <div>
+                  {effectiveRole !== 'admin' ? (
+                    <button
+                      onClick={() => handlePromote(profile.id, profile.full_name ?? 'this user')}
+                      disabled={promotingId === profile.id}
+                      className={cn(
+                        'inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[11px] font-medium transition-all',
+                        promotingId === profile.id
+                          ? 'border-vektrum-border bg-vektrum-surface-alt text-vektrum-faint cursor-not-allowed'
+                          : 'border-vektrum-blue-border bg-vektrum-blue-subtle text-vektrum-blue hover:bg-vektrum-blue hover:text-white'
+                      )}
+                    >
+                      <ShieldPlus size={12} aria-hidden="true" />
+                      {promotingId === profile.id ? 'Promoting…' : 'Promote'}
+                    </button>
+                  ) : (
+                    <span className="text-[11px] text-vektrum-faint">—</span>
                   )}
                 </div>
               </div>

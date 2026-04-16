@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import { DisputeQueue } from '@/components/admin/dispute-queue'
 import { UserTable } from '@/components/admin/user-table'
+import { InviteAdminForm } from '@/components/admin/invite-admin-form'
 
 export const metadata = {
   title: 'Admin Dashboard — Vektrum',
@@ -228,6 +229,14 @@ export default async function AdminDashboardPage() {
             warning={openDisputes.length > 0}
           />
         </div>
+      </section>
+
+      {/* ── Section: Invite New Admin ────────────────────────────────────── */}
+      <section>
+        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-vektrum-muted">
+          Admin Management
+        </h2>
+        <InviteAdminForm />
       </section>
 
       {/* ── Section 2: Dispute Queue ──────────────────────────────────────── */}
