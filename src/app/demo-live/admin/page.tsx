@@ -237,7 +237,7 @@ function AdminTile({
           <Icon size={13} className={warning ? 'text-vektrum-amber' : 'text-vektrum-blue'} aria-hidden="true" />
         </div>
       </div>
-      <p className={`font-display text-3xl font-bold tabular-nums leading-none ${accent ? 'text-vektrum-blue' : warning ? 'text-vektrum-amber' : 'text-vektrum-text'}`}>
+      <p className={`font-display text-2xl font-bold tabular-nums leading-none break-all ${accent ? 'text-vektrum-blue' : warning ? 'text-vektrum-amber' : 'text-vektrum-text'}`}>
         {value}
       </p>
       {sub && <p className="mt-1.5 text-[11px] text-vektrum-faint">{sub}</p>}
