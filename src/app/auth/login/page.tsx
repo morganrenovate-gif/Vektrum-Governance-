@@ -73,8 +73,8 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/dashboard");
-    router.refresh();
+    const next = new URLSearchParams(window.location.search).get("next");
+    window.location.href = next && next.startsWith("/") ? next : "/dashboard";
   };
 
   return (
