@@ -127,16 +127,14 @@ async function handleAccountUpdated(account: Stripe.Account): Promise<void> {
   const detailsSubmitted = account.details_submitted ?? false
   const chargesEnabled = account.charges_enabled ?? false
 
-  const newStatus = detailsSubmitted && payoutsEnabled && chargesEnabled
-    ? 'active'
-    : 'pending'
+  const newPayoutsEnabled = detailsSubmitted && payoutsEnabled && chargesEnabled
 
-  const oldValues = { stripe_account_status: profile.stripe_account_status as string }
+  const oldValues = { stripe_payouts_enabled: profile.stripe_payouts_enabled as boolean }
 
   const { error: updateError } = await adminClient
     .from('profiles')
     .update({
-      stripe_account_status: newStatus,
+      stripe_payouts_enabled: newPayoutsEnabled,
       updated_at: new Date().toISOString(),
     })
     .eq('stripe_account_id', account.id)
@@ -155,7 +153,7 @@ async function handleAccountUpdated(account: Stripe.Account): Promise<void> {
     action: 'stripe_account_updated',
     actor_id: 'system',
     old_values: oldValues,
-    new_values: { stripe_account_status: newStatus },
+    new_values: { stripe_payouts_enabled: newPayoutsEnabled },
     metadata: {
       stripe_account_id: account.id,
       details_submitted: detailsSubmitted,
@@ -165,7 +163,7 @@ async function handleAccountUpdated(account: Stripe.Account): Promise<void> {
   })
 
   console.log(
-    `[webhook] account.updated: Profile ${profile.id} — stripe_account_status=${newStatus}`,
+    `[webhook] account.updated: Profile ${profile.id} — stripe_payouts_enabled=${newPayoutsEnabled}`,
   )
 }
 

@@ -104,8 +104,8 @@ function buildSupabaseMock(overrides: MockOverrides) {
 
 function funder(): Profile {
   return {
-    id: 'funder-1', email: 'funder@test.com', full_name: 'Test Funder',
-    company_name: null, role: 'funder', stripe_account_id: null, stripe_payouts_enabled: false, stripe_onboarding_complete: false, onboarding_complete: true,
+    id: 'funder-1', full_name: 'Test Funder',
+    company_name: null, role: 'funder', stripe_account_id: null, stripe_payouts_enabled: false, onboarding_complete: true,
     created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
   }
 }

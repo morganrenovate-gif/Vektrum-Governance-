@@ -5,9 +5,9 @@
 // Advisor 10 (Adversarial): Warn clearly that changing Stripe accounts mid-deal
 // does NOT affect funds already in transit. Display this unconditionally.
 
+import { useState } from 'react'
 import type { Profile } from '@/lib/types'
-import { CheckCircle2, AlertCircle, ExternalLink, Info } from 'lucide-react'
-import Link from 'next/link'
+import { CheckCircle2, AlertCircle, ExternalLink, Info, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface StripeTabProps {
@@ -17,6 +17,27 @@ interface StripeTabProps {
 export function StripeTab({ profile }: StripeTabProps) {
   const isConnected = !!profile.stripe_account_id
   const payoutsEnabled = profile.stripe_payouts_enabled
+  const [connecting, setConnecting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleConnectStripe() {
+    setConnecting(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/stripe/connect', { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error ?? 'Failed to start Stripe onboarding. Please try again.')
+        return
+      }
+      // Redirect to Stripe-hosted onboarding
+      window.location.href = data.url
+    } catch {
+      setError('Network error. Please check your connection and try again.')
+    } finally {
+      setConnecting(false)
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -65,12 +86,14 @@ export function StripeTab({ profile }: StripeTabProps) {
 
           {/* CTA */}
           {!isConnected && (
-            <Link
-              href="/api/stripe/connect"
-              className="flex-shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-vektrum-blue px-4 py-2 text-[13px] font-semibold text-white hover:bg-vektrum-blue-hover transition-all shadow-sm"
+            <button
+              onClick={handleConnectStripe}
+              disabled={connecting}
+              className="flex-shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-vektrum-blue px-4 py-2 text-[13px] font-semibold text-white hover:bg-vektrum-blue-hover transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Connect Stripe
-            </Link>
+              {connecting && <Loader2 size={14} className="animate-spin" aria-hidden="true" />}
+              {connecting ? 'Connecting…' : 'Connect Stripe'}
+            </button>
           )}
           {isConnected && (
             <a
@@ -84,6 +107,14 @@ export function StripeTab({ profile }: StripeTabProps) {
             </a>
           )}
         </div>
+
+        {/* Error banner */}
+        {error && (
+          <div className="mt-4 flex items-start gap-2.5 rounded-lg border border-vektrum-red-border bg-vektrum-red-subtle px-4 py-3">
+            <AlertCircle size={13} className="text-vektrum-red flex-shrink-0 mt-0.5" aria-hidden="true" />
+            <p className="text-[12px] text-vektrum-red leading-relaxed">{error}</p>
+          </div>
+        )}
 
         {/* Advisor 10: Warn unconditionally about account switching mid-deal */}
         {isConnected && (

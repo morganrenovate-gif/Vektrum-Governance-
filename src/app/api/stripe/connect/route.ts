@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { getAuthUser, requireRole } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
 import { stripe } from '@/lib/stripe'
-import { errorResponse, internalError } from '@/lib/errors'
+import { internalError } from '@/lib/errors'
 
 export const dynamic = 'force-dynamic'
 
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     return err as NextResponse
   }
 
-  const supabase = await createClient()
+  const supabase = createSupabaseAdminClient()
 
   // ── Resolve or Create Stripe Account ───────────────────────────────────────
   let stripeAccountId = profile.stripe_account_id
