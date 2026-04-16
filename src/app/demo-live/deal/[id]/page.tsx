@@ -151,10 +151,24 @@ const RELEASE_GATE_CONDITIONS = [
 
 // ── Page ─────────────────────────────────────────────────────────────────────
 
-export default async function DemoDealPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function DemoDealPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ from?: string }>
+}) {
   const { id } = await params
+  const { from } = await searchParams
   const deal = DEALS[id]
   if (!deal) notFound()
+
+  const backHref = from === 'contractor' ? '/demo-live/contractor'
+    : from === 'admin' ? '/demo-live/admin'
+    : '/demo-live/funder'
+  const backLabel = from === 'contractor' ? '← Back to contractor dashboard'
+    : from === 'admin' ? '← Back to admin dashboard'
+    : '← Back to funder dashboard'
 
   const pct = deal.total > 0 ? Math.round((deal.released / deal.total) * 100) : 0
 
@@ -162,10 +176,10 @@ export default async function DemoDealPage({ params }: { params: Promise<{ id: s
     <div className="page-container section space-y-8">
       {/* Back link */}
       <Link
-        href="/demo-live/funder"
+        href={backHref}
         className="inline-flex items-center gap-1 text-[13px] text-vektrum-muted hover:text-vektrum-blue transition-colors"
       >
-        &larr; Back to dashboard
+        {backLabel}
       </Link>
 
       {/* Deal Header */}

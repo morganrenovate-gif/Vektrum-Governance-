@@ -5,7 +5,7 @@ import { cn, formatMoney } from "@/lib/utils";
 import { MilestoneStatusBadge, ProtectionStatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Milestone, UserRole } from "@/lib/types";
-import { CheckCircle2, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
+import { CheckCircle2, AlertCircle, ChevronDown } from "lucide-react";
 import { DrawReviewAgent } from "@/components/ai/draw-review-agent";
 
 // Left-border color coding by milestone status — Tier 2 spec
@@ -45,8 +45,6 @@ export function MilestoneCard({
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [detailsOpen, setDetailsOpen] = useState(milestone.status !== "released");
-
   const handleAction = async (action: string) => {
     setLoading(action);
     setError(null);
@@ -91,42 +89,56 @@ export function MilestoneCard({
   const borderColor = statusBorderColor[milestone.status] ?? "border-l-vektrum-border";
   const shadowClass = statusShadow[milestone.status] ?? "shadow-xs";
 
-  // Collapsed view for released milestones
-  if (isReleased && !detailsOpen) {
+  if (isReleased) {
     return (
-      <div
-        className={cn(
-          "rounded-lg border border-vektrum-border bg-vektrum-surface overflow-hidden",
-          "border-l-[3px]",
-          borderColor,
-          shadowClass,
-          "transition-shadow duration-150",
-          "opacity-75"
-        )}
-      >
-        <div className="px-5 py-3 flex items-center gap-3">
-          <CheckCircle2
-            size={15}
-            className="text-vektrum-green flex-shrink-0"
-            aria-hidden="true"
-          />
-          <h4 className="text-sm font-semibold text-vektrum-text flex-1 min-w-0 truncate">
-            {milestone.title}
-          </h4>
-          <span className="text-sm font-bold tabular-nums text-vektrum-text flex-shrink-0">
-            {formatMoney(milestone.amount)}
-          </span>
-          <MilestoneStatusBadge status={milestone.status} />
-          <button
-            type="button"
-            onClick={() => setDetailsOpen(true)}
-            className="inline-flex items-center gap-1 text-xs text-vektrum-blue hover:text-vektrum-blue-hover transition-colors flex-shrink-0"
-          >
-            <ChevronDown size={14} aria-hidden="true" />
-            Show details
-          </button>
+      <details className={cn("rounded-lg border border-vektrum-border bg-vektrum-surface overflow-hidden border-l-[3px]", borderColor, shadowClass)}>
+        <summary className="flex cursor-pointer list-none items-center justify-between px-5 py-3 hover:bg-vektrum-surface-alt transition-colors">
+          <div className="flex items-center gap-2 min-w-0">
+            <CheckCircle2 size={14} className="text-vektrum-green flex-shrink-0" aria-hidden="true" />
+            <span className="text-sm font-semibold text-vektrum-text truncate">{milestone.title}</span>
+            <MilestoneStatusBadge status={milestone.status} />
+          </div>
+          <div className="flex items-center gap-3 flex-shrink-0 ml-3">
+            <span className="text-sm font-bold tabular-nums text-vektrum-text">{formatMoney(milestone.amount)}</span>
+            <ChevronDown size={14} className="text-vektrum-faint" aria-hidden="true" />
+          </div>
+        </summary>
+        <div className="border-t border-vektrum-border-subtle px-5 py-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0 flex-1 space-y-1.5">
+              <div className="flex flex-wrap items-center gap-2">
+                <CheckCircle2 size={15} className="text-vektrum-green flex-shrink-0" aria-hidden="true" />
+                <h4 className="text-sm font-semibold text-vektrum-text">{milestone.title}</h4>
+              </div>
+              {milestone.description && (
+                <p className="text-sm text-vektrum-muted">{milestone.description}</p>
+              )}
+              <div className="flex flex-wrap items-center gap-2">
+                <MilestoneStatusBadge status={milestone.status} />
+                <ProtectionStatusBadge status={milestone.protection_status} />
+              </div>
+            </div>
+            <div className="flex flex-col items-start gap-3 sm:items-end">
+              <div className="text-right">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">Amount</p>
+                <p className="text-xl font-bold tabular-nums text-vektrum-text">{formatMoney(milestone.amount)}</p>
+              </div>
+            </div>
+          </div>
+          {error && (
+            <div className="mt-3 flex items-start gap-1.5 rounded-md bg-vektrum-red-bg border border-vektrum-red-border px-3 py-2 text-sm text-vektrum-red">
+              <AlertCircle size={14} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
+              {error}
+            </div>
+          )}
+          {success && (
+            <div className="mt-3 flex items-start gap-1.5 rounded-md bg-vektrum-green-bg border border-vektrum-green-border px-3 py-2 text-sm text-vektrum-green">
+              <CheckCircle2 size={14} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
+              {success}
+            </div>
+          )}
         </div>
-      </div>
+      </details>
     );
   }
 
@@ -138,7 +150,6 @@ export function MilestoneCard({
         borderColor,
         shadowClass,
         "transition-shadow duration-150",
-        isReleased && "opacity-75"
       )}
     >
       <div className="px-5 py-4">
@@ -146,13 +157,6 @@ export function MilestoneCard({
           {/* Left: info */}
           <div className="min-w-0 flex-1 space-y-1.5">
             <div className="flex flex-wrap items-center gap-2">
-              {isReleased && (
-                <CheckCircle2
-                  size={15}
-                  className="text-vektrum-green flex-shrink-0"
-                  aria-hidden="true"
-                />
-              )}
               <h4 className="text-sm font-semibold text-vektrum-text">
                 {milestone.title}
               </h4>
@@ -223,18 +227,6 @@ export function MilestoneCard({
                     Request Changes
                   </Button>
                 </>
-              )}
-
-              {/* Hide details toggle for released milestones */}
-              {isReleased && (
-                <button
-                  type="button"
-                  onClick={() => setDetailsOpen(false)}
-                  className="inline-flex items-center gap-1 text-xs text-vektrum-blue hover:text-vektrum-blue-hover transition-colors"
-                >
-                  <ChevronUp size={14} aria-hidden="true" />
-                  Hide details
-                </button>
               )}
             </div>
           </div>

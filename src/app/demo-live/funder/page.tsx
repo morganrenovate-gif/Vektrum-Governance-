@@ -120,7 +120,7 @@ export default function DemoFunderPage() {
             const pct = deal.total > 0 ? Math.round((deal.released / deal.total) * 100) : 0
             return (
               <div key={deal.id} className="flex items-center gap-4">
-                <Link href={`/demo-live/deal/${deal.id}`} className="text-[13px] font-medium text-vektrum-text hover:text-vektrum-blue transition-colors flex-1 min-w-0 truncate">
+                <Link href={`/demo-live/deal/${deal.id}?from=funder`} className="text-[13px] font-medium text-vektrum-text hover:text-vektrum-blue transition-colors flex-1 min-w-0 truncate">
                   {deal.title}
                 </Link>
                 <div className="w-24 h-2 rounded-full bg-vektrum-surface-alt flex-shrink-0 overflow-hidden">
@@ -151,7 +151,7 @@ export default function DemoFunderPage() {
                   Ready for review
                 </span>
                 <Link
-                  href="/demo-live/deal/riverside"
+                  href="/demo-live/deal/riverside?from=funder"
                   className="inline-flex items-center gap-1 rounded-lg bg-vektrum-blue px-3 py-2 text-[12px] font-medium text-white hover:bg-vektrum-blue-hover transition-colors"
                 >
                   Review <ArrowRight size={12} aria-hidden="true" />
@@ -180,7 +180,7 @@ export default function DemoFunderPage() {
           Featured Scenario
         </h2>
         <Link
-          href="/demo-live/deal/harbor-dispute"
+          href="/demo-live/deal/harbor-dispute?from=funder"
           className="group block rounded-xl border border-vektrum-border bg-vektrum-surface p-5 shadow-sm hover:shadow-md hover:border-vektrum-blue transition-all"
         >
           <div className="flex items-start gap-3">
@@ -239,7 +239,7 @@ function DealCard({ deal }: { deal: typeof MOCK_DEALS[number] }) {
   const pct = deal.total > 0 ? Math.round((deal.released / deal.total) * 100) : 0
   return (
     <Link
-      href={`/demo-live/deal/${deal.id}`}
+      href={`/demo-live/deal/${deal.id}?from=funder`}
       className="group rounded-xl border border-vektrum-border bg-vektrum-surface p-5 shadow-sm hover:shadow-md transition-all"
     >
       <div className="flex items-center justify-between mb-3">

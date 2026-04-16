@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Shield } from 'lucide-react'
+import { Shield, ArrowLeft } from 'lucide-react'
 
 // ── Human-readable action labels ────────────────────────────────────────────
 
@@ -68,6 +68,14 @@ function roleBadgeClasses(role: string): string {
 export default function DemoAuditPage() {
   return (
     <div className="page-container section space-y-6">
+      {/* Back link */}
+      <Link
+        href="/demo-live/admin"
+        className="inline-flex items-center gap-1.5 text-sm text-vektrum-muted hover:text-vektrum-text transition-colors mb-6"
+      >
+        <ArrowLeft size={14} /> Back to admin dashboard
+      </Link>
+
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-vektrum-blue-subtle">
@@ -82,14 +90,6 @@ export default function DemoAuditPage() {
           </p>
         </div>
       </div>
-
-      {/* Back link */}
-      <Link
-        href="/demo-live/admin"
-        className="inline-flex items-center gap-1 text-[13px] text-vektrum-muted hover:text-vektrum-blue transition-colors"
-      >
-        &larr; Back to admin dashboard
-      </Link>
 
       {/* Audit table */}
       <div className="rounded-xl border border-vektrum-border bg-vektrum-surface shadow-sm overflow-hidden">

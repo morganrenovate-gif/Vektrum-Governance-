@@ -83,14 +83,22 @@ export default function DemoContractorPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatTile label="Total Deals" value={totalDeals} />
-        <MoneyTile label="Total Funded" amount={totalFunded} />
-        <MoneyTile label="Total Released" amount={totalReleased} />
-        <StatTile label="Pending Review" value={pendingReview} warning />
+        <Link href="/demo-live/contractor#your-deals" className="hover:border-vektrum-blue hover:shadow-md transition-all cursor-pointer rounded-lg">
+          <StatTile label="Total Deals" value={totalDeals} />
+        </Link>
+        <Link href="/demo-live/contractor#your-deals" className="hover:border-vektrum-blue hover:shadow-md transition-all cursor-pointer rounded-lg">
+          <MoneyTile label="Total Funded" amount={totalFunded} />
+        </Link>
+        <Link href="/demo-live/contractor#your-deals" className="hover:border-vektrum-blue hover:shadow-md transition-all cursor-pointer rounded-lg">
+          <MoneyTile label="Total Released" amount={totalReleased} />
+        </Link>
+        <Link href="/demo-live/contractor#draw-review" className="hover:border-vektrum-blue hover:shadow-md transition-all cursor-pointer rounded-lg">
+          <StatTile label="Pending Review" value={pendingReview} warning />
+        </Link>
       </div>
 
       {/* Draw Review Status */}
-      <div className="rounded-xl border border-vektrum-border bg-vektrum-surface shadow-sm overflow-hidden">
+      <div id="draw-review" className="rounded-xl border border-vektrum-border bg-vektrum-surface shadow-sm overflow-hidden">
         <div className="border-l-4 border-vektrum-blue px-5 py-4 border-b border-vektrum-border-subtle">
           <p className="text-[13px] font-semibold text-vektrum-text">Draw Review Status</p>
         </div>
@@ -106,7 +114,7 @@ export default function DemoContractorPage() {
                 Ready for review
               </span>
               <Link
-                href="/demo-live/deal/riverside"
+                href="/demo-live/deal/riverside?from=contractor"
                 className="inline-flex items-center gap-1 text-[12px] font-medium text-vektrum-blue hover:text-vektrum-blue-hover transition-colors"
               >
                 View <ArrowRight size={12} aria-hidden="true" />
@@ -117,7 +125,7 @@ export default function DemoContractorPage() {
       </div>
 
       {/* All Deals */}
-      <section>
+      <section id="your-deals">
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-vektrum-muted">
           Your Deals
         </h2>
@@ -155,7 +163,7 @@ function DealCard({ deal }: { deal: typeof MOCK_DEALS[number] }) {
   const pct = deal.total > 0 ? Math.round((deal.released / deal.total) * 100) : 0
   return (
     <Link
-      href={`/demo-live/deal/${deal.id}`}
+      href={`/demo-live/deal/${deal.id}?from=contractor`}
       className="group rounded-xl border border-vektrum-border bg-vektrum-surface p-5 shadow-sm hover:shadow-md transition-all"
     >
       <div className="flex items-center justify-between mb-3">
