@@ -72,17 +72,17 @@ export default function DemoAdminPage() {
           Platform Overview
         </h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          <AdminTile label="Contractors" value={1} icon={Users} href="/demo-live/admin#users" />
-          <AdminTile label="Funders" value={1} icon={Users} accent href="/demo-live/admin#users" />
-          <AdminTile label="Active Deals" value={3} icon={Activity} href="/demo-live/admin#users" />
-          <AdminTile label="Capital Governed" value={fmt(16_250_000)} icon={DollarSign} accent href="/demo-live/funder/capital" />
-          <AdminTile label="Total Released" value={fmt(4_890_000)} icon={CheckCircle2} href="/demo-live/funder/capital#released" />
-          <AdminTile label="Open Disputes" value={0} icon={AlertTriangle} href="/demo-live/admin#disputes" />
+          <AdminTile label="Contractors" value={1} icon={Users} href="#user-management" />
+          <AdminTile label="Funders" value={1} icon={Users} accent href="#user-management" />
+          <AdminTile label="Active Deals" value={3} icon={Activity} href="#user-management" />
+          <AdminTile label="Capital Governed" value={fmt(16_250_000)} icon={DollarSign} accent href="#user-management" />
+          <AdminTile label="Total Released" value={fmt(4_890_000)} icon={CheckCircle2} href="#audit-activity" />
+          <AdminTile label="Open Disputes" value={0} icon={AlertTriangle} href="#open-disputes" />
         </div>
       </section>
 
       {/* Dispute Queue */}
-      <section id="disputes">
+      <section id="open-disputes">
         <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-vektrum-muted">
           Open Disputes
         </h2>
@@ -92,7 +92,7 @@ export default function DemoAdminPage() {
       </section>
 
       {/* User Table */}
-      <section id="users">
+      <section id="user-management">
         <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-vektrum-muted">
           User Management
         </h2>
@@ -179,7 +179,7 @@ export default function DemoAdminPage() {
       </section>
 
       {/* Recent Audit Activity */}
-      <section>
+      <section id="audit-activity">
         <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-vektrum-muted">
           Recent Audit Activity
         </h2>
@@ -230,8 +230,8 @@ function AdminTile({
   warning?: boolean
   href?: string
 }) {
-  const content = (
-    <div className={`rounded-xl border bg-vektrum-surface px-5 py-5 shadow-sm ${warning ? 'border-vektrum-amber-border' : 'border-vektrum-border'} ${href ? 'hover:border-vektrum-blue hover:shadow-md transition-all cursor-pointer' : ''}`}>
+  const inner = (
+    <div className={`rounded-xl border bg-vektrum-surface px-5 py-5 shadow-sm transition-all ${warning ? 'border-vektrum-amber-border' : 'border-vektrum-border'} ${href ? 'hover:border-vektrum-blue hover:shadow-md cursor-pointer' : ''}`}>
       <div className="flex items-start justify-between gap-3 mb-3">
         <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">{label}</p>
         <div className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg ${warning ? 'bg-vektrum-amber-bg' : 'bg-vektrum-blue-subtle'}`}>
@@ -244,9 +244,5 @@ function AdminTile({
       {sub && <p className="mt-1.5 text-[11px] text-vektrum-faint">{sub}</p>}
     </div>
   )
-
-  if (href) {
-    return <Link href={href}>{content}</Link>
-  }
-  return content
+  return href ? <Link href={href}>{inner}</Link> : inner
 }

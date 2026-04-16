@@ -96,22 +96,14 @@ export default function DemoFunderPage() {
 
       {/* Capital Summary */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Link href="/demo-live/funder/deals" className="hover:border-vektrum-blue hover:shadow-md transition-all cursor-pointer rounded-lg">
-          <StatTile label="Total Deals" value={totalDeals} icon={TrendingUp} />
-        </Link>
-        <Link href="/demo-live/funder/capital" className="hover:border-vektrum-blue hover:shadow-md transition-all cursor-pointer rounded-lg">
-          <MoneyTile label="Capital Deployed" amount={capitalDeployed} icon={DollarSign} />
-        </Link>
-        <Link href="/demo-live/funder/capital#released" className="hover:border-vektrum-blue hover:shadow-md transition-all cursor-pointer rounded-lg">
-          <MoneyTile label="Total Released" amount={totalReleased} icon={CheckCircle2} />
-        </Link>
-        <Link href="/demo-live/funder#action-queue" className="hover:border-vektrum-blue hover:shadow-md transition-all cursor-pointer rounded-lg">
-          <StatTile label="Action Queue" value={actionQueue} icon={AlertCircle} warning={actionQueue > 0} />
-        </Link>
+        <StatTile label="Total Deals" value={totalDeals} icon={TrendingUp} href="#funded-deals" />
+        <MoneyTile label="Capital Deployed" amount={capitalDeployed} icon={DollarSign} href="#portfolio-overview" />
+        <MoneyTile label="Total Released" amount={totalReleased} icon={CheckCircle2} href="#portfolio-overview" />
+        <StatTile label="Action Queue" value={actionQueue} icon={AlertCircle} warning={actionQueue > 0} href="#action-queue" />
       </div>
 
       {/* Portfolio Risk Overview */}
-      <div className="rounded-xl border border-vektrum-border bg-vektrum-surface shadow-sm overflow-hidden">
+      <div id="portfolio-overview" className="rounded-xl border border-vektrum-border bg-vektrum-surface shadow-sm overflow-hidden">
         <div className="px-5 py-4 border-b border-vektrum-border-subtle">
           <p className="text-[13px] font-semibold text-vektrum-text">Portfolio Overview</p>
         </div>
@@ -163,7 +155,7 @@ export default function DemoFunderPage() {
       )}
 
       {/* All Deals */}
-      <section>
+      <section id="funded-deals">
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-vektrum-muted">
           Funded Deals
         </h2>
@@ -207,9 +199,9 @@ export default function DemoFunderPage() {
 
 // ── Inline components ────────────────────────────────────────────────────────
 
-function StatTile({ label, value, icon: Icon, warning = false }: { label: string; value: string | number; icon: React.ElementType; warning?: boolean }) {
-  return (
-    <div className={`rounded-lg border bg-vektrum-surface px-5 py-5 shadow-sm hover:border-vektrum-blue hover:shadow-md transition-all cursor-pointer ${warning ? 'border-vektrum-amber-border' : 'border-vektrum-border'}`}>
+function StatTile({ label, value, icon: Icon, warning = false, href }: { label: string; value: string | number; icon: React.ElementType; warning?: boolean; href?: string }) {
+  const inner = (
+    <div className={`rounded-lg border bg-vektrum-surface px-5 py-5 shadow-sm transition-all ${warning ? 'border-vektrum-amber-border' : 'border-vektrum-border'} ${href ? 'hover:border-vektrum-blue hover:shadow-md cursor-pointer' : ''}`}>
       <div className="flex items-start justify-between gap-3 mb-2">
         <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">{label}</p>
         <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${warning ? 'bg-vektrum-amber-bg' : 'bg-vektrum-blue-subtle'}`}>
@@ -219,11 +211,12 @@ function StatTile({ label, value, icon: Icon, warning = false }: { label: string
       <p className={`font-display text-4xl font-bold tabular-nums leading-none ${warning ? 'text-vektrum-amber' : 'text-vektrum-text'}`}>{value}</p>
     </div>
   )
+  return href ? <Link href={href}>{inner}</Link> : inner
 }
 
-function MoneyTile({ label, amount, icon: Icon }: { label: string; amount: number; icon: React.ElementType }) {
-  return (
-    <div className="rounded-lg border border-vektrum-border bg-vektrum-surface px-5 py-5 shadow-sm hover:border-vektrum-blue hover:shadow-md transition-all cursor-pointer">
+function MoneyTile({ label, amount, icon: Icon, href }: { label: string; amount: number; icon: React.ElementType; href?: string }) {
+  const inner = (
+    <div className={`rounded-lg border border-vektrum-border bg-vektrum-surface px-5 py-5 shadow-sm transition-all ${href ? 'hover:border-vektrum-blue hover:shadow-md cursor-pointer' : ''}`}>
       <div className="flex items-start justify-between gap-3 mb-2">
         <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">{label}</p>
         <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-vektrum-blue-subtle">
@@ -233,6 +226,7 @@ function MoneyTile({ label, amount, icon: Icon }: { label: string; amount: numbe
       <p className="font-display text-xl font-bold tabular-nums leading-none text-vektrum-text">{fmt(amount)}</p>
     </div>
   )
+  return href ? <Link href={href}>{inner}</Link> : inner
 }
 
 function DealCard({ deal }: { deal: typeof MOCK_DEALS[number] }) {

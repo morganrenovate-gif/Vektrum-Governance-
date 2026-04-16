@@ -83,18 +83,10 @@ export default function DemoContractorPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Link href="/demo-live/contractor#your-deals" className="hover:border-vektrum-blue hover:shadow-md transition-all cursor-pointer rounded-lg">
-          <StatTile label="Total Deals" value={totalDeals} />
-        </Link>
-        <Link href="/demo-live/contractor#your-deals" className="hover:border-vektrum-blue hover:shadow-md transition-all cursor-pointer rounded-lg">
-          <MoneyTile label="Total Funded" amount={totalFunded} />
-        </Link>
-        <Link href="/demo-live/contractor#your-deals" className="hover:border-vektrum-blue hover:shadow-md transition-all cursor-pointer rounded-lg">
-          <MoneyTile label="Total Released" amount={totalReleased} />
-        </Link>
-        <Link href="/demo-live/contractor#draw-review" className="hover:border-vektrum-blue hover:shadow-md transition-all cursor-pointer rounded-lg">
-          <StatTile label="Pending Review" value={pendingReview} warning />
-        </Link>
+        <StatTile label="Total Deals" value={totalDeals} href="#your-deals" />
+        <MoneyTile label="Total Funded" amount={totalFunded} href="#your-deals" />
+        <MoneyTile label="Total Released" amount={totalReleased} href="#your-deals" />
+        <StatTile label="Pending Review" value={pendingReview} warning href="#draw-review" />
       </div>
 
       {/* Draw Review Status */}
@@ -141,22 +133,24 @@ export default function DemoContractorPage() {
 
 // ── Inline components ────────────────────────────────────────────────────────
 
-function StatTile({ label, value, warning = false }: { label: string; value: string | number; warning?: boolean }) {
-  return (
-    <div className={`rounded-lg border bg-vektrum-surface px-5 py-5 shadow-sm ${warning ? 'border-vektrum-amber-border' : 'border-vektrum-border'}`}>
+function StatTile({ label, value, warning = false, href }: { label: string; value: string | number; warning?: boolean; href?: string }) {
+  const inner = (
+    <div className={`rounded-lg border bg-vektrum-surface px-5 py-5 shadow-sm transition-all ${warning ? 'border-vektrum-amber-border' : 'border-vektrum-border'} ${href ? 'hover:border-vektrum-blue hover:shadow-md cursor-pointer' : ''}`}>
       <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">{label}</p>
       <p className={`mt-1.5 font-display text-4xl font-bold tabular-nums leading-none ${warning ? 'text-vektrum-amber' : 'text-vektrum-text'}`}>{value}</p>
     </div>
   )
+  return href ? <Link href={href}>{inner}</Link> : inner
 }
 
-function MoneyTile({ label, amount }: { label: string; amount: number }) {
-  return (
-    <div className="rounded-lg border border-vektrum-border bg-vektrum-surface px-5 py-5 shadow-sm">
+function MoneyTile({ label, amount, href }: { label: string; amount: number; href?: string }) {
+  const inner = (
+    <div className={`rounded-lg border border-vektrum-border bg-vektrum-surface px-5 py-5 shadow-sm transition-all ${href ? 'hover:border-vektrum-blue hover:shadow-md cursor-pointer' : ''}`}>
       <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">{label}</p>
       <p className="mt-1.5 font-display text-xl font-bold tabular-nums leading-none text-vektrum-text">{fmt(amount)}</p>
     </div>
   )
+  return href ? <Link href={href}>{inner}</Link> : inner
 }
 
 function DealCard({ deal }: { deal: typeof MOCK_DEALS[number] }) {
