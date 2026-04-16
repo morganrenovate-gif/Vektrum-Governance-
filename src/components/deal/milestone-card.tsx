@@ -55,7 +55,7 @@ export function MilestoneCard({
       start: "in_progress",
       submit: "ready_for_review",
       approve: "approved",
-      request_changes: "changes_requested",
+      request_changes: "in_progress",
     };
     const new_status = statusMap[action];
     if (!new_status) {
