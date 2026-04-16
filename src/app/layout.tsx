@@ -247,12 +247,32 @@ export default async function RootLayout({
                     Help
                   </Link>
                 </div>
+                <div className="flex flex-col gap-3">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-vektrum-faint">
+                    Legal
+                  </span>
+                  <Link href="/terms" className="text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors">
+                    Terms of Service
+                  </Link>
+                  <Link href="/privacy" className="text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors">
+                    Privacy Policy
+                  </Link>
+                  <Link href="/security" className="text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors">
+                    Security
+                  </Link>
+                  <Link href="/contact" className="text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors">
+                    Contact
+                  </Link>
+                </div>
               </div>
             </div>
 
             <div className="mt-12 pt-6 border-t border-vektrum-border-subtle flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-[12px] text-vektrum-muted">
                 &copy; {new Date().getFullYear()} Vektrum. All rights reserved.
+              </p>
+              <p className="text-[11px] text-vektrum-faint">
+                Funds are held in Stripe Connect managed accounts, not by Vektrum.
               </p>
               <div className="flex flex-col gap-1 sm:items-end">
                 <p className="text-[12px] text-vektrum-faint">

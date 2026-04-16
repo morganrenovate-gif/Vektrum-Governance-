@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { VektrumWordmark } from '@/components/ui/vektrum-logo'
 import { Shield, CheckCircle2, FileText, Brain, Banknote, Users, AlertTriangle, ArrowDown } from 'lucide-react'
 
@@ -102,7 +103,7 @@ export default function DemoPage() {
               {
                 step: 1,
                 title: 'Deal Created',
-                desc: 'Funder deposits funds into Vektrum escrow account',
+                desc: 'Funder deposits funds into Project Trust Account',
                 icon: Banknote,
               },
               {
@@ -245,7 +246,7 @@ export default function DemoPage() {
                 'Milestone status: approved',
                 'Deal status: active',
                 'No open disputes on this milestone',
-                'Funder has sufficient escrow balance',
+                'Funder has sufficient Project Trust Account balance',
                 'Stripe payout account verified',
                 'Release not already processed (unique per milestone)',
                 'Cryptographic integrity check passed',
@@ -320,19 +321,43 @@ export default function DemoPage() {
           <h2 className="font-display text-2xl sm:text-3xl font-bold text-white mb-8">
             Ready to govern your next project?
           </h2>
+          {/* Pricing snapshot */}
+          <div className="mb-10 mx-auto max-w-lg rounded-xl border border-white/10 bg-white/5 overflow-hidden">
+            <div className="px-5 py-3 border-b border-white/10">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/40">Pricing — v2.0</p>
+            </div>
+            <div className="divide-y divide-white/10">
+              {[
+                ['Standalone', '1.0% Compliance Review Fee per verified disbursement', '$0 monthly'],
+                ['Institutional', '0.70% CRF + 0.075% ACV governance retainer', 'From $5K/yr'],
+                ['Enterprise', '0.65% CRF + negotiated retainer', 'Custom'],
+              ].map(([tier, desc, price]) => (
+                <div key={tier} className="flex items-start justify-between gap-4 px-5 py-3">
+                  <div>
+                    <p className="text-[13px] font-semibold text-white">{tier}</p>
+                    <p className="text-[11px] text-white/50">{desc}</p>
+                  </div>
+                  <span className="text-[12px] font-semibold text-vektrum-blue-subtle whitespace-nowrap">{price}</span>
+                </div>
+              ))}
+              <div className="px-5 py-3">
+                <p className="text-[12px] font-semibold text-vektrum-green">Contractors: Always $0. No subscription. No fees. Ever.</p>
+              </div>
+            </div>
+          </div>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
-            <button
-              type="button"
+            <Link
+              href="/auth/signup"
               className="inline-flex items-center gap-2 rounded-lg bg-vektrum-blue px-8 py-3 text-sm font-semibold text-white shadow-blue hover:bg-vektrum-blue-hover transition-colors"
             >
-              Start Free Trial
-            </button>
-            <button
-              type="button"
+              Get started — it&apos;s free
+            </Link>
+            <Link
+              href="mailto:lenders@vektrum.io"
               className="inline-flex items-center gap-2 rounded-lg border border-white/20 px-8 py-3 text-sm font-semibold text-white hover:bg-white/10 transition-colors"
             >
-              Schedule a Demo
-            </button>
+              Contact lenders@vektrum.io
+            </Link>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-white/40">
             <span>Built on Perplexity AI</span>
