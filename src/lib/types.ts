@@ -81,10 +81,12 @@ export interface AuditLog {
   entity_id: string;
   action: string;
   actor_id: string | null;
-  details: Record<string, unknown> | null;
+  old_values: Record<string, unknown> | null;
+  new_values: Record<string, unknown> | null;
+  metadata: Record<string, unknown> | null;
   created_at: string;
-  // Joined
-  actor?: Profile;
+  // Populated by Supabase join: profiles!audit_log_actor_id_fkey
+  actor?: { full_name: string | null; email?: string | null } | null;
 }
 
 // ─── Auth types ──────────────────────────────────────────────────────────────

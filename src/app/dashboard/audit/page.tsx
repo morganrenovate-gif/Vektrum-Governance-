@@ -37,8 +37,8 @@ export default async function AuditLogPage({
   const to = from + PAGE_SIZE - 1;
 
   const { data: logs, count } = await supabase
-    .from("audit_logs")
-    .select("*, actor:profiles!audit_logs_actor_id_fkey(*)", { count: "exact" })
+    .from("audit_log")
+    .select("*, actor:profiles!audit_log_actor_id_fkey(*)", { count: "exact" })
     .order("created_at", { ascending: false })
     .range(from, to);
 
@@ -169,13 +169,13 @@ function AuditRow({ log }: { log: AuditLog }) {
 
       {/* Details — expandable JSON */}
       <td className="px-4 py-3">
-        {log.details ? (
+        {log.metadata ? (
           <details className="group cursor-pointer">
             <summary className="select-none list-none text-xs text-vektrum-blue hover:underline">
               View details
             </summary>
             <pre className="mt-2 max-w-xs overflow-auto rounded-md bg-vektrum-surface-alt border border-vektrum-border p-2 text-[10px] text-vektrum-text">
-              {JSON.stringify(log.details, null, 2)}
+              {JSON.stringify(log.metadata, null, 2)}
             </pre>
           </details>
         ) : (

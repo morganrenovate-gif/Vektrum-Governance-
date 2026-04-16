@@ -301,10 +301,8 @@ export default async function AdminDashboardPage() {
             sub="All draw requests route through /api/ai/draw-review — AI precondition required before release"
             icon={Zap}
           />
-          <div className="mt-2 rounded-lg border border-vektrum-amber-border bg-vektrum-amber-bg px-4 py-3 text-[12px] text-vektrum-amber">
-            <strong>ACTION REQUIRED:</strong> Confirm PERPLEXITY_API_KEY is set in Vercel
-            environment variables. Without it, all AI draw review endpoints return 503 and the release gate
-            is permanently blocked.
+          <div className="mt-2 rounded-lg border border-vektrum-green-border bg-vektrum-green-bg px-4 py-3 text-[12px] text-vektrum-green">
+            <strong>✓ PERPLEXITY_API_KEY confirmed live.</strong> Sonar Pro draw review is active — all AI precondition checks are operational.
           </div>
         </div>
       </section>

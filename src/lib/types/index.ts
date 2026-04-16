@@ -119,6 +119,8 @@ export interface AuditLog {
   new_values: Record<string, unknown> | null
   metadata: Record<string, unknown> | null
   created_at: string
+  // Populated by Supabase join: profiles!audit_log_actor_id_fkey
+  actor?: { full_name: string | null; email?: string | null } | null
 }
 
 // ─── Convenience Types ────────────────────────────────────────────────────────
