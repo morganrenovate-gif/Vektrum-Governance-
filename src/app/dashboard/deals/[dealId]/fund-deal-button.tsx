@@ -1,18 +1,41 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { formatMoney } from "@/lib/utils";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, ArrowRight } from "lucide-react";
 
 interface FundDealButtonProps {
   dealId: string;
   remaining: number;
+  stripeConnected: boolean;
 }
 
-export function FundDealButton({ dealId, remaining }: FundDealButtonProps) {
+export function FundDealButton({ dealId, remaining, stripeConnected }: FundDealButtonProps) {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Gate: funder must connect Stripe before funding deals
+  if (!stripeConnected) {
+    return (
+      <div className="flex flex-col items-start gap-2 sm:items-end">
+        <div className="rounded-lg border border-vektrum-amber-border bg-vektrum-amber-bg px-4 py-3 max-w-sm">
+          <p className="text-[13px] font-medium text-vektrum-amber">
+            Connect your Stripe account to fund deals.
+          </p>
+          <button
+            onClick={() => router.push('/dashboard/funder/onboarding')}
+            className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-vektrum-blue px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-vektrum-blue-hover transition-all"
+          >
+            Complete Setup
+            <ArrowRight size={12} />
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const handleFund = async () => {
     setLoading(true);

@@ -2,16 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { getAuthUser, requireRole } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
-import { stripe } from '@/lib/stripe'
+import { getStripe } from '@/lib/stripe'
 import { internalError } from '@/lib/errors'
 
 export const dynamic = 'force-dynamic'
 
 // ─── POST /api/stripe/connect ─────────────────────────────────────────────────
-// Initiates or resumes Stripe Connect Express onboarding for a contractor.
+// Initiates or resumes Stripe Connect Express onboarding for a contractor/funder.
 //
 // Behaviour:
-//   1. If the contractor already has a stripe_account_id, generates a new
+//   1. If the user already has a stripe_account_id, generates a new
 //      account link for that existing account (resumable onboarding).
 //   2. If no Stripe account exists yet, creates a new Express account and
 //      stores the ID on the profile, then generates the onboarding link.
@@ -33,35 +33,63 @@ export async function POST(request: NextRequest) {
   const { user, profile } = authContext
 
   try {
-    requireRole(profile, 'contractor', 'admin')
+    requireRole(profile, 'contractor', 'funder', 'admin')
   } catch (err) {
     return err as NextResponse
   }
 
+  // ── Validate Stripe secret key early ──────────────────────────────────────
+  let stripe
+  try {
+    stripe = getStripe()
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    console.error('[api/stripe/connect] Stripe initialization failed:', message)
+    return internalError(
+      'Stripe is not configured on this server. Please contact support.',
+      message,
+    )
+  }
+
+  // ── Fetch email from auth.users (profiles has no email column) ────────────
   const supabase = createSupabaseAdminClient()
+
+  let userEmail: string | undefined
+  try {
+    const { data: authUser, error: authError } =
+      await supabase.auth.admin.getUserById(user.id)
+    if (authError) {
+      console.error('[api/stripe/connect] Failed to fetch auth user:', authError.message)
+    } else {
+      userEmail = authUser?.user?.email ?? undefined
+    }
+  } catch (err) {
+    console.error('[api/stripe/connect] Unexpected error fetching auth user:', err)
+  }
 
   // ── Resolve or Create Stripe Account ───────────────────────────────────────
   let stripeAccountId = profile.stripe_account_id
 
   if (!stripeAccountId) {
-    // Create a new Stripe Express account for this contractor
     let account
 
     try {
       account = await stripe.accounts.create({
         type: 'express',
         country: 'US',
+        ...(userEmail ? { email: userEmail } : {}),
         capabilities: {
           transfers: { requested: true },
         },
         metadata: {
           vektrum_user_id: user.id,
-          vektrum_role: 'contractor',
+          vektrum_role: profile.role,
         },
       })
     } catch (stripeError) {
       const message =
         stripeError instanceof Error ? stripeError.message : String(stripeError)
+      console.error('[api/stripe/connect] Stripe account creation failed:', message)
       return internalError(
         'Could not create a Stripe Connect account. Please try again. If this problem persists, contact support.',
         message,
@@ -69,8 +97,9 @@ export async function POST(request: NextRequest) {
     }
 
     stripeAccountId = account.id
+    console.log(`[api/stripe/connect] Created Stripe account ${stripeAccountId} for user ${user.id}`)
 
-    // Persist the Stripe account ID to the profile immediately
+    // Persist the Stripe account ID to the profile immediately (service role — bypasses RLS)
     const { error: updateError } = await supabase
       .from('profiles')
       .update({
@@ -80,7 +109,7 @@ export async function POST(request: NextRequest) {
       .eq('id', user.id)
 
     if (updateError) {
-      // The Stripe account was created but we couldn't save the ID — log and surface to support
+      console.error('[api/stripe/connect] Failed to persist stripe_account_id:', updateError.message)
       return internalError(
         `A Stripe account was created (ID: ${stripeAccountId}) but could not be linked to your profile. ` +
           'Contact support immediately with this Stripe account ID so your account can be manually linked.',
@@ -100,20 +129,26 @@ export async function POST(request: NextRequest) {
   }
 
   // ── Generate Account Link ───────────────────────────────────────────────────
-  const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+  const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://vektrum.io'
+
+  // Route back to the role-appropriate settings page after Stripe onboarding
+  const returnPath = '/dashboard/settings'
+  const returnUrl = `${appBaseUrl}${returnPath}?stripe=success`
+  const refreshUrl = `${appBaseUrl}${returnPath}?stripe=refresh`
 
   let accountLink
 
   try {
     accountLink = await stripe.accountLinks.create({
       account: stripeAccountId,
-      refresh_url: `${appBaseUrl}/dashboard/onboarding?refresh=true`,
-      return_url: `${appBaseUrl}/dashboard/onboarding?success=true`,
+      refresh_url: refreshUrl,
+      return_url: returnUrl,
       type: 'account_onboarding',
     })
   } catch (stripeError) {
     const message =
       stripeError instanceof Error ? stripeError.message : String(stripeError)
+    console.error('[api/stripe/connect] Account link creation failed:', message)
     return internalError(
       'Could not generate the Stripe onboarding link. Please try again. If this problem persists, contact support.',
       message,

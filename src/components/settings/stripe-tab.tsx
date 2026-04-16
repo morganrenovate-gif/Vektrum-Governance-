@@ -42,9 +42,11 @@ export function StripeTab({ profile }: StripeTabProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-display text-lg font-bold text-vektrum-text">Stripe Payouts</h2>
+        <h2 className="font-display text-lg font-bold text-vektrum-text">Stripe Connect</h2>
         <p className="mt-1 text-sm text-vektrum-muted">
-          Your connected Stripe account is where released milestone payments are deposited.
+          {profile.role === 'contractor'
+            ? 'Your connected Stripe account is where released milestone payments are deposited.'
+            : 'Your connected Stripe account is used to fund deals and release milestone payments.'}
         </p>
       </div>
 

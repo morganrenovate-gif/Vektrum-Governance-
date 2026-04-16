@@ -183,6 +183,7 @@ export default async function DealDetailPage({
           <FundDealButton
             dealId={typedDeal.id}
             remaining={typedDeal.total_amount - typedDeal.funded_amount}
+            stripeConnected={!!typedProfile.stripe_account_id}
           />
         )}
       </div>

@@ -6,7 +6,7 @@ import { Money } from '@/components/ui/money'
 import { Button } from '@/components/ui/button'
 import { Card, CardBody } from '@/components/ui/card'
 import type { Deal, Profile } from '@/lib/types'
-import { Plus, FolderOpen, Lock } from 'lucide-react'
+import { Plus, FolderOpen, Lock, AlertCircle, ArrowRight } from 'lucide-react'
 
 // Phase 6/7 dashboard sub-components
 import { DrawReviewPanel } from '@/components/dashboard/draw-review-panel'
@@ -116,6 +116,13 @@ export default async function DashboardPage() {
 
   const { profile, deals } = await getProfileAndDeals(user.id)
 
+  // First-login redirect: contractors and funders without Stripe go to onboarding
+  // Admins are never gated
+  if (profile && !profile.stripe_account_id) {
+    if (profile.role === 'contractor') redirect('/dashboard/contractor/onboarding')
+    if (profile.role === 'funder') redirect('/dashboard/funder/onboarding')
+  }
+
   if (!profile) {
     return (
       <div className="page-container py-12">
@@ -160,13 +167,45 @@ export default async function DashboardPage() {
                 </span>
               </div>
             </div>
-            <Link href="/dashboard/deals/new">
-              <Button variant="primary" size="md">
-                <Plus size={15} aria-hidden="true" />
-                Create New Deal
-              </Button>
-            </Link>
+            {profile.stripe_account_id ? (
+              <Link href="/dashboard/deals/new">
+                <Button variant="primary" size="md">
+                  <Plus size={15} aria-hidden="true" />
+                  Create New Deal
+                </Button>
+              </Link>
+            ) : (
+              <Link href="/dashboard/contractor/onboarding">
+                <Button variant="secondary" size="md">
+                  <AlertCircle size={15} aria-hidden="true" />
+                  Complete Setup to Create Deals
+                  <ArrowRight size={14} aria-hidden="true" />
+                </Button>
+              </Link>
+            )}
           </div>
+
+          {/* Stripe setup banner */}
+          {!profile.stripe_account_id && (
+            <div className="flex items-start gap-3 rounded-xl border border-vektrum-amber-border bg-vektrum-amber-bg px-5 py-4">
+              <AlertCircle size={18} className="text-vektrum-amber flex-shrink-0 mt-0.5" aria-hidden="true" />
+              <div>
+                <p className="text-[13px] font-semibold text-vektrum-amber">
+                  Connect your Stripe account to create deals
+                </p>
+                <p className="text-[12px] text-vektrum-muted mt-0.5">
+                  You must connect a Stripe account before you can create deals and receive milestone payments.
+                </p>
+                <Link
+                  href="/dashboard/contractor/onboarding"
+                  className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-vektrum-blue px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-vektrum-blue-hover transition-all"
+                >
+                  Complete Setup
+                  <ArrowRight size={12} />
+                </Link>
+              </div>
+            </div>
+          )}
 
           {/* Quick Stats */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

@@ -20,14 +20,14 @@ interface Tab {
   id: TabId
   label: string
   icon: React.ElementType
-  contractorOnly?: boolean
+  hideForAdmin?: boolean
   comingSoon?: boolean
 }
 
 const TABS: Tab[] = [
   { id: 'profile',       label: 'Profile',       icon: User },
   { id: 'notifications', label: 'Notifications', icon: Bell,         comingSoon: true },
-  { id: 'stripe',        label: 'Stripe Payouts', icon: CreditCard,  contractorOnly: true },
+  { id: 'stripe',        label: 'Stripe Connect',  icon: CreditCard,  hideForAdmin: true },
   { id: 'security',      label: 'Security',      icon: Shield },
   { id: 'danger',        label: 'Danger Zone',   icon: AlertTriangle },
 ]
@@ -36,8 +36,8 @@ export function SettingsShell({ profile, userEmail }: SettingsShellProps) {
   const [activeTab, setActiveTab] = useState<TabId>('profile')
 
   const visibleTabs = TABS.filter((tab) => {
-    // Stripe payouts tab: only relevant for contractors
-    if (tab.contractorOnly && profile.role !== 'contractor') return false
+    // Stripe tab: relevant for contractors and funders, not admins
+    if (tab.hideForAdmin && profile.role === 'admin') return false
     return true
   })
 
