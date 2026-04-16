@@ -35,7 +35,8 @@ create type public.milestone_status as enum (
   'in_progress',
   'ready_for_review',
   'approved',
-  'released'
+  'released',
+  'disputed'
 );
 
 create type public.protection_status as enum (
@@ -81,6 +82,8 @@ create table public.profiles (
 
   constraint profiles_pkey primary key (id)
 );
+
+-- NOTE: profiles has NO email column. Email lives exclusively in auth.users.
 
 comment on table  public.profiles                      is 'User profiles, extending auth.users with role and Stripe data.';
 comment on column public.profiles.stripe_account_id   is 'Stripe Connect account ID — set for contractors once onboarding is complete.';
@@ -313,10 +316,9 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.profiles (id, email, full_name, role)
+  insert into public.profiles (id, full_name, role)
   values (
     new.id,
-    new.email,
     -- Use full_name from metadata if provided, otherwise email prefix
     coalesce(new.raw_user_meta_data->>'full_name', split_part(new.email, '@', 1)),
     -- Default role; can be overridden in raw_user_meta_data
@@ -329,7 +331,7 @@ begin
 end;
 $$;
 
-comment on function public.handle_new_user() is 'Automatically creates a public.profiles row when a new auth.users row is inserted.';
+comment on function public.handle_new_user() is 'Automatically creates a public.profiles row when a new auth.users row is inserted. Email is intentionally excluded — it lives in auth.users only.';
 
 create trigger trg_on_auth_user_created
   after insert on auth.users
