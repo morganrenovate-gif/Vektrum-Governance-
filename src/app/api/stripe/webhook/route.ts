@@ -60,7 +60,6 @@ export async function POST(request: NextRequest) {
       {
         error:
           'Webhook signature verification failed. Ensure the request originates from Stripe and the webhook secret is correct.',
-        detail: message,
       },
       { status: 400 },
     )
@@ -90,7 +89,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error: `Webhook handler failed for event type '${event.type}'. Stripe will retry.`,
-        detail: message,
       },
       { status: 500 },
     )

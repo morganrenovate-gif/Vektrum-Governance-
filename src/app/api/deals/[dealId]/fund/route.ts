@@ -91,19 +91,24 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
 
   // ── Create Stripe PaymentIntent ─────────────────────────────────────────────
+  // Stable idempotency key prevents duplicate charges on retries
+  const idempotencyKey = `fund-${dealId}`
   let paymentIntent
 
   try {
-    paymentIntent = await stripe.paymentIntents.create({
-      amount: amountInCents,
-      currency: 'usd',
-      metadata: {
-        deal_id: dealId,
-        funder_id: user.id,
-        vektrum_action: 'deal_funding',
+    paymentIntent = await stripe.paymentIntents.create(
+      {
+        amount: amountInCents,
+        currency: 'usd',
+        metadata: {
+          deal_id: dealId,
+          funder_id: user.id,
+          vektrum_action: 'deal_funding',
+        },
+        description: `Vektrum deal funding — Deal ${dealId}`,
       },
-      description: `Vektrum deal funding — Deal ${dealId}`,
-    })
+      { idempotencyKey },
+    )
   } catch (stripeError) {
     const message =
       stripeError instanceof Error ? stripeError.message : String(stripeError)

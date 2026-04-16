@@ -66,16 +66,18 @@ export function conflictError(message: string): NextResponse {
 
 /**
  * 500 — An unexpected server-side error occurred.
- * Includes an optional technical detail string to aid debugging without leaking internals.
+ * The optional detail is logged server-side only — never returned to the client.
  */
 export function internalError(
   message: string,
   detail?: string,
 ): NextResponse {
+  if (detail) {
+    console.error('[internalError]', message, detail)
+  }
   return NextResponse.json(
     {
       error: message,
-      ...(detail !== undefined && { detail }),
     },
     { status: 500 },
   )

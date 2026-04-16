@@ -180,8 +180,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       )
     }
 
-    // ── STEP 5: Update Milestone Status ────────────────────────────────────
-    const { error: milestoneUpdateError } = await supabase
+    // ── STEP 5: Update Milestone Status (conditional write) ──────────────
+    // Atomic: only transitions 'approved' → 'released'. If 0 rows returned,
+    // a concurrent request already released this milestone.
+    const { data: milestoneUpdateData, error: milestoneUpdateError } = await supabase
       .from('milestones')
       .update({
         status: 'released',
@@ -189,6 +191,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         updated_at: new Date().toISOString(),
       })
       .eq('id', milestoneId)
+      .eq('status', 'approved')
+      .select('id')
 
     if (milestoneUpdateError) {
       await logAudit({
@@ -209,6 +213,31 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         'Funds were transferred but the milestone status could not be updated to \'released\'. ' +
           `Contact support with Stripe Transfer ID: ${stripeTransferId} and Milestone ID: ${milestoneId}.`,
         milestoneUpdateError.message,
+      )
+    }
+
+    if (!milestoneUpdateData || milestoneUpdateData.length === 0) {
+      // Concurrent release — milestone was already transitioned by another request.
+      // Stripe idempotency key ensures no duplicate transfer, so this is safe to abort.
+      await logAudit({
+        entity_type: 'milestone',
+        entity_id: milestoneId,
+        action: 'release_concurrent_conflict',
+        actor_id: user.id,
+        old_values: null,
+        new_values: null,
+        metadata: {
+          stripe_transfer_id: stripeTransferId,
+          idempotency_key: idempotencyKey,
+          note: 'Milestone was no longer in approved status at time of update — likely concurrent release.',
+        },
+      })
+
+      return NextResponse.json(
+        {
+          error: 'This milestone has already been released by a concurrent request. No duplicate payment was made.',
+        },
+        { status: 409 },
       )
     }
 
