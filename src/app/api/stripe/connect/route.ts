@@ -22,6 +22,8 @@ export const dynamic = 'force-dynamic'
 // which updates stripe_payouts_enabled on the profile.
 
 export async function POST(request: NextRequest) {
+  console.log('[stripe/connect] STRIPE_SECRET_KEY prefix:', process.env.STRIPE_SECRET_KEY?.slice(0, 12))
+
   let authContext
 
   try {
@@ -86,13 +88,16 @@ export async function POST(request: NextRequest) {
           vektrum_role: profile.role,
         },
       })
-    } catch (stripeError) {
-      const message =
-        stripeError instanceof Error ? stripeError.message : String(stripeError)
-      console.error('[api/stripe/connect] Stripe account creation failed:', message)
-      return internalError(
-        'Could not create a Stripe Connect account. Please try again. If this problem persists, contact support.',
-        message,
+    } catch (stripeError: unknown) {
+      console.error('[stripe/connect] error:', JSON.stringify(stripeError, null, 2))
+      const err = stripeError as { message?: string; code?: string; type?: string }
+      return NextResponse.json(
+        {
+          error: 'Could not create a Stripe Connect account',
+          stripe_error_code: err.code,
+          stripe_error_type: err.type,
+        },
+        { status: 500 },
       )
     }
 
@@ -145,13 +150,16 @@ export async function POST(request: NextRequest) {
       return_url: returnUrl,
       type: 'account_onboarding',
     })
-  } catch (stripeError) {
-    const message =
-      stripeError instanceof Error ? stripeError.message : String(stripeError)
-    console.error('[api/stripe/connect] Account link creation failed:', message)
-    return internalError(
-      'Could not generate the Stripe onboarding link. Please try again. If this problem persists, contact support.',
-      message,
+  } catch (stripeError: unknown) {
+    console.error('[stripe/connect] error:', JSON.stringify(stripeError, null, 2))
+    const err = stripeError as { message?: string; code?: string; type?: string }
+    return NextResponse.json(
+      {
+        error: 'Could not create a Stripe Connect account',
+        stripe_error_code: err.code,
+        stripe_error_type: err.type,
+      },
+      { status: 500 },
     )
   }
 
