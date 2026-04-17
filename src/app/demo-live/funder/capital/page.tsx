@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
+import { formatCurrency } from '@/lib/utils/format'
 
 // ── Data ─────────────────────────────────────────────────────────────────────
 
@@ -186,6 +187,40 @@ export default function CapitalPage() {
               ))}
             </tbody>
           </table>
+        </div>
+      </section>
+
+      {/* Section 5: Portfolio Health */}
+      <section className="mt-6">
+        <h2 className="text-lg font-semibold text-vektrum-text mb-3">Portfolio Health</h2>
+        <div className="border rounded-xl overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-vektrum-surface-alt">
+              <tr>
+                <th className="text-left px-4 py-3 text-vektrum-muted font-medium">Project</th>
+                <th className="text-left px-4 py-3 text-vektrum-muted font-medium">Risk Level</th>
+                <th className="text-left px-4 py-3 text-vektrum-muted font-medium">AI Score Avg</th>
+                <th className="text-left px-4 py-3 text-vektrum-muted font-medium">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { name: 'Riverside Mixed-Use Development', href: '/demo-live/deal/riverside?from=funder', risk: 'Low', riskColor: 'text-green-600', score: '89/100', status: 'On Schedule' },
+                { name: 'Harbor Logistics Center', href: '/demo-live/deal/harbor-dispute?from=funder', risk: 'Medium', riskColor: 'text-amber-600', score: '91/100', status: 'Dispute Active' },
+                { name: 'Westside Medical Office Campus', href: '/demo-live/deal/westside?from=funder', risk: 'Low', riskColor: 'text-green-600', score: '74/100', status: 'On Schedule' },
+              ].map(p => (
+                <tr key={p.name} className="border-t hover:bg-vektrum-surface-alt/50">
+                  <td className="px-4 py-3"><Link href={p.href} className="text-blue-600 hover:underline">{p.name}</Link></td>
+                  <td className={`px-4 py-3 font-medium ${p.riskColor}`}>{p.risk}</td>
+                  <td className="px-4 py-3 text-vektrum-text">{p.score}</td>
+                  <td className="px-4 py-3 text-vektrum-muted">{p.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="px-4 py-3 bg-green-50 border-t border-green-100 text-sm text-green-700 font-medium">
+            Overall portfolio health: Good — 2 of 3 projects on schedule · 1 dispute in resolution
+          </div>
         </div>
       </section>
     </div>

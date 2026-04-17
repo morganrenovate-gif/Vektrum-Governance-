@@ -3,24 +3,13 @@ import {
   Users, DollarSign, AlertTriangle, CheckCircle2,
   Shield, Activity, Zap
 } from 'lucide-react'
+import { formatCurrency } from '@/lib/utils/format'
 
 // ── Mock data ────────────────────────────────────────────────────────────────
 
-function fmt(n: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
-}
-
 const MOCK_USERS = [
-  { name: 'Sarah Chen', email: 'sarah@meridiancap.com', role: 'funder', company: 'Meridian Capital Partners', stripeVerified: true, onboarded: true },
-  { name: 'Marcus Webb', email: 'marcus@webbcg.com', role: 'contractor', company: 'Webb Construction Group', stripeVerified: true, onboarded: true },
-]
-
-const MOCK_AUDIT = [
-  { id: '1', action: 'milestone_released', entity: 'milestone / Framing & Structural (Deal 1)', actor: 'Sarah Chen', time: '2h ago' },
-  { id: '2', action: 'ai_draw_review', entity: 'milestone / Framing & Structural (Deal 1)', actor: 'system', time: '2h 5m ago' },
-  { id: '3', action: 'milestone_approved', entity: 'milestone / Framing & Structural (Deal 1)', actor: 'Sarah Chen', time: '2h 10m ago' },
-  { id: '4', action: 'milestone_transition', entity: 'milestone / MEP Rough-In', actor: 'Marcus Webb', time: '3h ago' },
-  { id: '5', action: 'ai_draw_review', entity: 'milestone / Building Envelope (Deal 2)', actor: 'system', time: '1d ago' },
+  { name: 'Marcus Webb', email: 'marcus@webbcg.com', role: 'contractor', company: 'Webb Construction Group', stripeStatus: 'Stripe Connected' },
+  { name: 'Sarah Chen', email: 'sarah@meridiancap.com', role: 'funder', company: 'Meridian Capital Partners', stripeStatus: '—' },
 ]
 
 // ── Page ─────────────────────────────────────────────────────────────────────
@@ -28,6 +17,14 @@ const MOCK_AUDIT = [
 export default function DemoAdminPage() {
   return (
     <div className="page-container section space-y-8">
+      {/* Back link */}
+      <Link
+        href="/demo-live"
+        className="inline-flex items-center gap-1.5 text-sm text-vektrum-muted hover:text-vektrum-text transition-colors"
+      >
+        ← Back to role selector
+      </Link>
+
       {/* Demo info */}
       <div className="rounded-xl border border-vektrum-blue-border bg-vektrum-blue-subtle px-5 py-4">
         <p className="text-[13px] text-vektrum-blue leading-relaxed">
@@ -74,10 +71,10 @@ export default function DemoAdminPage() {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           <AdminTile label="Contractors" value={1} icon={Users} href="#user-management" />
           <AdminTile label="Funders" value={1} icon={Users} accent href="#user-management" />
-          <AdminTile label="Active Deals" value={3} icon={Activity} href="#user-management" />
-          <AdminTile label="Capital Governed" value={fmt(16_250_000)} icon={DollarSign} accent href="#user-management" />
-          <AdminTile label="Total Released" value={fmt(4_890_000)} icon={CheckCircle2} href="#audit-activity" />
-          <AdminTile label="Open Disputes" value={0} icon={AlertTriangle} href="#open-disputes" />
+          <AdminTile label="Active Deals" value={3} icon={Activity} href="#all-deals" />
+          <AdminTile label="Capital Governed" value={formatCurrency(16_250_000)} icon={DollarSign} accent href="#all-deals" />
+          <AdminTile label="Total Released" value={formatCurrency(4_890_000)} icon={CheckCircle2} href="#audit-activity" />
+          <AdminTile label="Open Disputes" value={1} icon={AlertTriangle} warning href="#open-disputes" />
         </div>
       </section>
 
@@ -86,8 +83,53 @@ export default function DemoAdminPage() {
         <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-vektrum-muted">
           Open Disputes
         </h2>
-        <div className="rounded-xl border border-dashed border-vektrum-border bg-vektrum-surface-alt px-8 py-12 text-center">
-          <p className="text-sm text-vektrum-faint">No open disputes. The platform is operating cleanly.</p>
+        <div className="border border-orange-200 bg-orange-50 rounded-xl p-4 flex items-start justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <AlertTriangle size={18} className="text-orange-500 mt-0.5 shrink-0" />
+            <div>
+              <p className="font-semibold text-vektrum-text">Harbor Logistics Center</p>
+              <p className="text-sm text-vektrum-muted">HVAC Equipment Procurement · {formatCurrency(487_000)} disputed · Priority 1</p>
+              <p className="text-sm text-vektrum-muted mt-0.5">Marcus Webb vs. Sarah Chen · Flagged 3 days ago</p>
+            </div>
+          </div>
+          <Link href="/demo-live/deal/harbor-dispute?from=admin" className="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap hover:bg-orange-600">
+            View Dispute →
+          </Link>
+        </div>
+      </section>
+
+      {/* All Deals */}
+      <section id="all-deals" className="mt-6">
+        <h2 className="text-lg font-semibold text-vektrum-text mb-3">All Deals</h2>
+        <div className="border rounded-xl overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-vektrum-surface-alt">
+              <tr>
+                <th className="text-left px-4 py-3 text-vektrum-muted font-medium">Deal</th>
+                <th className="text-left px-4 py-3 text-vektrum-muted font-medium">Contractor</th>
+                <th className="text-left px-4 py-3 text-vektrum-muted font-medium">Funder</th>
+                <th className="text-right px-4 py-3 text-vektrum-muted font-medium">Total</th>
+                <th className="text-right px-4 py-3 text-vektrum-muted font-medium">Released</th>
+                <th className="text-left px-4 py-3 text-vektrum-muted font-medium">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { name: 'Riverside Mixed-Use Development', slug: 'riverside', contractor: 'Marcus Webb', funder: 'Sarah Chen', total: 2400000, released: 480000 },
+                { name: 'Harbor Logistics Center', slug: 'harbor-dispute', contractor: 'Marcus Webb', funder: 'Sarah Chen', total: 9100000, released: 7640000 },
+                { name: 'Westside Medical Office Campus', slug: 'westside', contractor: 'Marcus Webb', funder: 'Sarah Chen', total: 4750000, released: 950000 },
+              ].map(d => (
+                <tr key={d.slug} className="border-t hover:bg-vektrum-surface-alt/50">
+                  <td className="px-4 py-3"><Link href={`/demo-live/deal/${d.slug}?from=admin`} className="text-blue-600 hover:underline font-medium">{d.name}</Link></td>
+                  <td className="px-4 py-3 text-vektrum-text">{d.contractor}</td>
+                  <td className="px-4 py-3 text-vektrum-text">{d.funder}</td>
+                  <td className="px-4 py-3 text-right text-vektrum-text">{formatCurrency(d.total)}</td>
+                  <td className="px-4 py-3 text-right text-green-600 font-medium">{formatCurrency(d.released)}</td>
+                  <td className="px-4 py-3"><span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-medium">Active</span></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </section>
 
@@ -104,8 +146,8 @@ export default function DemoAdminPage() {
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-vektrum-muted">Name</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-vektrum-muted">Role</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-vektrum-muted">Company</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-vektrum-muted">Status</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-vektrum-muted">Stripe</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-vektrum-muted">Onboarded</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-vektrum-border-subtle">
@@ -113,7 +155,6 @@ export default function DemoAdminPage() {
                   <tr key={u.email} className="hover:bg-vektrum-surface-alt transition-colors">
                     <td className="px-4 py-3">
                       <p className="text-[13px] font-medium text-vektrum-text">{u.name}</p>
-                      <p className="text-[11px] text-vektrum-faint">{u.email}</p>
                     </td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
@@ -126,15 +167,11 @@ export default function DemoAdminPage() {
                     </td>
                     <td className="px-4 py-3 text-[13px] text-vektrum-muted">{u.company}</td>
                     <td className="px-4 py-3">
-                      <span className="inline-flex items-center gap-1 text-[12px] text-vektrum-green">
-                        <CheckCircle2 size={12} aria-hidden="true" /> Verified
+                      <span className="inline-flex items-center gap-1 text-[12px] text-green-600">
+                        <CheckCircle2 size={12} aria-hidden="true" /> Active
                       </span>
                     </td>
-                    <td className="px-4 py-3">
-                      <span className="inline-flex items-center gap-1 text-[12px] text-vektrum-green">
-                        <CheckCircle2 size={12} aria-hidden="true" /> Complete
-                      </span>
-                    </td>
+                    <td className="px-4 py-3 text-[13px] text-vektrum-muted">{u.stripeStatus}</td>
                   </tr>
                 ))}
               </tbody>
@@ -179,38 +216,27 @@ export default function DemoAdminPage() {
       </section>
 
       {/* Recent Audit Activity */}
-      <section id="audit-activity">
-        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-vektrum-muted">
-          Recent Audit Activity
-        </h2>
-        <div className="rounded-xl border border-vektrum-border bg-vektrum-surface shadow-sm overflow-hidden">
-          <ul className="divide-y divide-vektrum-border-subtle">
-            {MOCK_AUDIT.map((entry) => {
-              const color = entry.action.includes('released')
-                ? 'text-vektrum-green'
-                : entry.action.includes('blocked') || entry.action.includes('dispute')
-                ? 'text-vektrum-amber'
-                : entry.action.includes('ai_draw_review')
-                ? 'text-vektrum-blue'
-                : 'text-vektrum-muted'
-              return (
-                <li key={entry.id} className="flex items-center gap-4 px-5 py-3 hover:bg-vektrum-surface-alt transition-colors">
-                  <span className={`font-mono text-[13px] font-medium ${color} min-w-[160px]`}>{entry.action}</span>
-                  <span className="text-[12px] text-vektrum-muted truncate flex-1">{entry.entity}</span>
-                  <span className="text-[12px] text-vektrum-faint flex-shrink-0">{entry.actor}</span>
-                  <span className="text-[11px] text-vektrum-faint tabular-nums flex-shrink-0">{entry.time}</span>
-                </li>
-              )
-            })}
-          </ul>
-          <div className="border-t border-vektrum-border-subtle px-5 py-3 bg-vektrum-surface-alt">
-            <Link
-              href="/demo-live/audit"
-              className="text-[13px] font-medium text-vektrum-blue hover:text-vektrum-blue-hover transition-colors"
-            >
-              View full audit log &rarr;
-            </Link>
-          </div>
+      <section className="mt-6" id="audit-activity">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-semibold text-vektrum-text">Recent Audit Activity</h2>
+          <Link href="/demo-live/audit" className="text-sm text-blue-600 hover:underline">View full audit log →</Link>
+        </div>
+        <div className="border rounded-xl divide-y text-sm">
+          {[
+            { time: '3 days ago', actor: 'System', role: 'system', action: 'Dispute Opened', entity: 'Harbor Logistics Center', details: 'HVAC $487K' },
+            { time: '14 days ago', actor: 'Sarah Chen', role: 'funder', action: 'Funds Released', entity: 'Harbor Logistics Center', details: '$2,640,000' },
+            { time: '14 days ago', actor: 'Sarah Chen', role: 'funder', action: 'Milestone Approved', entity: 'Harbor Logistics Center', details: 'Building Envelope' },
+            { time: '15 days ago', actor: 'Marcus Webb', role: 'contractor', action: 'Document Uploaded', entity: 'Westside Medical', details: 'Lien waiver' },
+            { time: '45 days ago', actor: 'System', role: 'system', action: 'Deal Created', entity: 'Riverside Mixed-Use', details: '$2,400,000' },
+          ].map((e, i) => (
+            <div key={i} className="px-4 py-3 flex items-center gap-4">
+              <span className="text-vektrum-muted w-24 shrink-0">{e.time}</span>
+              <span className="font-medium text-vektrum-text w-28 shrink-0">{e.actor}</span>
+              <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs">{e.action}</span>
+              <span className="text-vektrum-muted flex-1 truncate">{e.entity}</span>
+              <span className="text-vektrum-muted text-xs">{e.details}</span>
+            </div>
+          ))}
         </div>
       </section>
     </div>
@@ -231,14 +257,14 @@ function AdminTile({
   href?: string
 }) {
   const inner = (
-    <div className={`rounded-xl border bg-vektrum-surface px-5 py-5 shadow-sm transition-all ${warning ? 'border-vektrum-amber-border' : 'border-vektrum-border'} ${href ? 'hover:border-vektrum-blue hover:shadow-md cursor-pointer' : ''}`}>
+    <div className={`rounded-xl border bg-vektrum-surface px-5 py-5 shadow-sm transition-all ${warning ? 'border-orange-200 bg-orange-50' : 'border-vektrum-border'} ${href ? 'hover:border-vektrum-blue hover:shadow-md cursor-pointer' : ''}`}>
       <div className="flex items-start justify-between gap-3 mb-3">
         <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">{label}</p>
-        <div className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg ${warning ? 'bg-vektrum-amber-bg' : 'bg-vektrum-blue-subtle'}`}>
-          <Icon size={13} className={warning ? 'text-vektrum-amber' : 'text-vektrum-blue'} aria-hidden="true" />
+        <div className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg ${warning ? 'bg-orange-100' : 'bg-vektrum-blue-subtle'}`}>
+          <Icon size={13} className={warning ? 'text-orange-500' : 'text-vektrum-blue'} aria-hidden="true" />
         </div>
       </div>
-      <p className={`font-display text-2xl font-bold tabular-nums leading-none break-all ${accent ? 'text-vektrum-blue' : warning ? 'text-vektrum-amber' : 'text-vektrum-text'}`}>
+      <p className={`font-display text-2xl font-bold tabular-nums leading-none break-all ${accent ? 'text-vektrum-blue' : warning ? 'text-orange-500' : 'text-vektrum-text'}`}>
         {value}
       </p>
       {sub && <p className="mt-1.5 text-[11px] text-vektrum-faint">{sub}</p>}

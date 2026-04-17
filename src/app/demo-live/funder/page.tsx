@@ -1,5 +1,10 @@
+'use client'
+
+import { useState } from 'react'
 import Link from 'next/link'
-import { Landmark, TrendingUp, DollarSign, AlertCircle, Lightbulb, ArrowRight, CheckCircle2, Clock, Zap } from 'lucide-react'
+import { Landmark, TrendingUp, DollarSign, AlertCircle, Lightbulb, ArrowRight, ArrowLeft, CheckCircle2, Clock, Zap } from 'lucide-react'
+import { formatCurrency } from '@/lib/utils/format'
+import { FundDealModal } from '@/components/demo/FundDealModal'
 
 // ── Mock data ────────────────────────────────────────────────────────────────
 
@@ -12,7 +17,6 @@ const MOCK_DEALS = [
     released: 480_000,
     status: 'active',
     milestoneCount: 4,
-    actionRequired: true,
   },
   {
     id: 'harbor',
@@ -22,7 +26,6 @@ const MOCK_DEALS = [
     released: 3_460_000,
     status: 'active',
     milestoneCount: 5,
-    actionRequired: false,
   },
   {
     id: 'westside',
@@ -32,7 +35,6 @@ const MOCK_DEALS = [
     released: 950_000,
     status: 'active',
     milestoneCount: 4,
-    actionRequired: false,
   },
 ]
 
@@ -42,20 +44,26 @@ const BRIEFING_INSIGHTS = [
   'Westside Medical Site Work released on time — project 20% complete',
 ]
 
-function fmt(n: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
-}
-
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export default function DemoFunderPage() {
+  const [fundModal, setFundModal] = useState(false)
+
   const totalDeals = MOCK_DEALS.length
   const capitalDeployed = MOCK_DEALS.reduce((s, d) => s + d.funded, 0)
   const totalReleased = MOCK_DEALS.reduce((s, d) => s + d.released, 0)
-  const actionQueue = MOCK_DEALS.filter(d => d.actionRequired).length
 
   return (
     <div className="page-container section space-y-8">
+      {/* Back link */}
+      <Link
+        href="/demo-live"
+        className="inline-flex items-center gap-1.5 text-sm text-vektrum-muted hover:text-vektrum-text transition-colors"
+      >
+        <ArrowLeft size={14} aria-hidden="true" />
+        Back to role selector
+      </Link>
+
       {/* Demo info */}
       <div className="rounded-xl border border-vektrum-blue-border bg-vektrum-blue-subtle px-5 py-4">
         <p className="text-[13px] text-vektrum-blue leading-relaxed">
@@ -64,17 +72,27 @@ export default function DemoFunderPage() {
       </div>
 
       {/* Header */}
-      <div>
-        <h1 className="font-display text-2xl font-bold text-vektrum-text">
-          Welcome back, Sarah
-        </h1>
-        <div className="mt-1.5 flex items-center gap-2">
-          <p className="text-sm text-vektrum-muted">Funder dashboard</p>
-          <span className="inline-flex items-center rounded-full bg-vektrum-blue-subtle border border-vektrum-blue-border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-vektrum-blue">
-            Funder
-          </span>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="font-display text-2xl font-bold text-vektrum-text">
+            Welcome back, Sarah
+          </h1>
+          <div className="mt-1.5 flex items-center gap-2">
+            <p className="text-sm text-vektrum-muted">Funder dashboard</p>
+            <span className="inline-flex items-center rounded-full bg-vektrum-blue-subtle border border-vektrum-blue-border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-vektrum-blue">
+              Funder
+            </span>
+          </div>
         </div>
+        <button
+          onClick={() => setFundModal(true)}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+        >
+          + Fund New Deal
+        </button>
       </div>
+
+      <FundDealModal open={fundModal} onConfirm={() => setFundModal(false)} onClose={() => setFundModal(false)} />
 
       {/* Weekly Intelligence Briefing */}
       <div className="rounded-xl border border-vektrum-border bg-vektrum-surface shadow-sm overflow-hidden">
@@ -97,12 +115,22 @@ export default function DemoFunderPage() {
       {/* Capital Summary */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatTile label="Total Deals" value={totalDeals} icon={TrendingUp} href="#funded-deals" />
-        <MoneyTile label="Capital Deployed" amount={capitalDeployed} icon={DollarSign} href="#portfolio-overview" />
+        <MoneyTile label="Capital Deployed" amount={capitalDeployed} icon={DollarSign} href="/demo-live/funder/capital" />
         <MoneyTile label="Total Released" amount={totalReleased} icon={CheckCircle2} href="#portfolio-overview" />
-        <StatTile label="Action Queue" value={actionQueue} icon={AlertCircle} warning={actionQueue > 0} href="#action-queue" />
+        <Link href="/demo-live/deal/harbor-dispute?from=funder">
+          <div className="rounded-lg border border-orange-200 bg-orange-50 px-5 py-5 shadow-sm transition-all hover:border-orange-400 hover:shadow-md cursor-pointer">
+            <div className="flex items-start justify-between gap-3 mb-2">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">Action Queue</p>
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-100">
+                <AlertCircle size={13} className="text-orange-500" aria-hidden="true" />
+              </div>
+            </div>
+            <p className="font-display text-4xl font-bold tabular-nums leading-none text-orange-500">1</p>
+          </div>
+        </Link>
       </div>
 
-      {/* Portfolio Risk Overview */}
+      {/* Portfolio Overview */}
       <div id="portfolio-overview" className="rounded-xl border border-vektrum-border bg-vektrum-surface shadow-sm overflow-hidden">
         <div className="px-5 py-4 border-b border-vektrum-border-subtle">
           <p className="text-[13px] font-semibold text-vektrum-text">Portfolio Overview</p>
@@ -111,50 +139,50 @@ export default function DemoFunderPage() {
           {MOCK_DEALS.map((deal) => {
             const pct = deal.total > 0 ? Math.round((deal.released / deal.total) * 100) : 0
             return (
-              <div key={deal.id} className="flex items-center gap-4">
-                <Link href={`/demo-live/deal/${deal.id}?from=funder`} className="text-[13px] font-medium text-vektrum-text hover:text-vektrum-blue transition-colors flex-1 min-w-0 truncate">
+              <Link key={deal.id} href={`/demo-live/deal/${deal.id}?from=funder`} className="flex items-center gap-4 hover:bg-vektrum-surface-alt rounded-lg px-2 py-1.5 -mx-2 transition-colors">
+                <span className="text-[13px] font-medium text-vektrum-text hover:text-vektrum-blue transition-colors flex-1 min-w-0 truncate">
                   {deal.title}
-                </Link>
+                </span>
+                <span className="inline-flex items-center rounded-full border border-vektrum-green-border bg-vektrum-green-bg px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-vektrum-green flex-shrink-0">
+                  Active
+                </span>
+                <span className="text-[12px] text-vektrum-muted tabular-nums flex-shrink-0">{formatCurrency(deal.total)}</span>
                 <div className="w-24 h-2 rounded-full bg-vektrum-surface-alt flex-shrink-0 overflow-hidden">
                   <div className="h-full rounded-full bg-vektrum-green" style={{ width: `${pct}%` }} />
                 </div>
-                <span className="text-[12px] text-vektrum-muted tabular-nums w-10 text-right flex-shrink-0">{pct}%</span>
-              </div>
+                <span className="text-[12px] text-vektrum-muted tabular-nums w-20 text-right flex-shrink-0">{pct}% released</span>
+              </Link>
             )
           })}
         </div>
       </div>
 
       {/* Action Queue */}
-      {actionQueue > 0 && (
-        <section id="action-queue">
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-vektrum-amber">
-            Action Queue ({actionQueue})
-          </h2>
-          <div className="rounded-xl border border-vektrum-amber-border bg-vektrum-surface shadow-sm overflow-hidden">
-            <div className="px-5 py-4 flex items-center justify-between">
-              <div>
-                <p className="text-[13px] font-semibold text-vektrum-text">Riverside Mixed-Use Development</p>
-                <p className="text-[12px] text-vektrum-muted mt-0.5">MEP Rough-In &mdash; {fmt(680_000)} &mdash; ready for review</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1 rounded-full border border-vektrum-amber-border bg-vektrum-amber-bg px-2.5 py-0.5 text-[11px] font-medium text-vektrum-amber">
-                  <Clock size={11} aria-hidden="true" />
-                  Ready for review
-                </span>
-                <Link
-                  href="/demo-live/deal/riverside?from=funder"
-                  className="inline-flex items-center gap-1 rounded-lg bg-vektrum-blue px-3 py-2 text-[12px] font-medium text-white hover:bg-vektrum-blue-hover transition-colors"
-                >
-                  Review <ArrowRight size={12} aria-hidden="true" />
-                </Link>
-              </div>
-            </div>
+      <section id="action-queue" className="mt-6">
+        <h2 className="text-lg font-semibold text-vektrum-text mb-3 flex items-center gap-2">
+          <AlertCircle size={18} className="text-amber-500" /> Action Required
+        </h2>
+        <div className="border border-amber-200 bg-amber-50 rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <p className="font-medium text-vektrum-text">Riverside Mixed-Use Development</p>
+            <p className="text-sm text-vektrum-muted">MEP Rough-In — {formatCurrency(680_000)} · Ready for Review</p>
           </div>
-        </section>
-      )}
+          <Link href="/demo-live/deal/riverside?from=funder" className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">
+            Review Draw →
+          </Link>
+        </div>
+        <div className="border border-red-200 bg-red-50 rounded-xl p-4 flex items-center justify-between mt-3">
+          <div>
+            <p className="font-medium text-vektrum-text">Harbor Logistics Center</p>
+            <p className="text-sm text-red-600">HVAC Equipment Procurement — {formatCurrency(487_000)} · Dispute Active</p>
+          </div>
+          <Link href="/demo-live/deal/harbor-dispute?from=funder" className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700">
+            View Dispute →
+          </Link>
+        </div>
+      </section>
 
-      {/* All Deals */}
+      {/* Funded Deals */}
       <section id="funded-deals">
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-vektrum-muted">
           Funded Deals
@@ -199,16 +227,16 @@ export default function DemoFunderPage() {
 
 // ── Inline components ────────────────────────────────────────────────────────
 
-function StatTile({ label, value, icon: Icon, warning = false, href }: { label: string; value: string | number; icon: React.ElementType; warning?: boolean; href?: string }) {
+function StatTile({ label, value, icon: Icon, href }: { label: string; value: string | number; icon: React.ElementType; href?: string }) {
   const inner = (
-    <div className={`rounded-lg border bg-vektrum-surface px-5 py-5 shadow-sm transition-all ${warning ? 'border-vektrum-amber-border' : 'border-vektrum-border'} ${href ? 'hover:border-vektrum-blue hover:shadow-md cursor-pointer' : ''}`}>
+    <div className={`rounded-lg border border-vektrum-border bg-vektrum-surface px-5 py-5 shadow-sm transition-all ${href ? 'hover:border-vektrum-blue hover:shadow-md cursor-pointer' : ''}`}>
       <div className="flex items-start justify-between gap-3 mb-2">
         <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">{label}</p>
-        <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${warning ? 'bg-vektrum-amber-bg' : 'bg-vektrum-blue-subtle'}`}>
-          <Icon size={13} className={warning ? 'text-vektrum-amber' : 'text-vektrum-blue'} aria-hidden="true" />
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-vektrum-blue-subtle">
+          <Icon size={13} className="text-vektrum-blue" aria-hidden="true" />
         </div>
       </div>
-      <p className={`font-display text-4xl font-bold tabular-nums leading-none ${warning ? 'text-vektrum-amber' : 'text-vektrum-text'}`}>{value}</p>
+      <p className="font-display text-4xl font-bold tabular-nums leading-none text-vektrum-text">{value}</p>
     </div>
   )
   return href ? <Link href={href}>{inner}</Link> : inner
@@ -223,7 +251,7 @@ function MoneyTile({ label, amount, icon: Icon, href }: { label: string; amount:
           <Icon size={13} className="text-vektrum-blue" aria-hidden="true" />
         </div>
       </div>
-      <p className="font-display text-xl font-bold tabular-nums leading-none text-vektrum-text">{fmt(amount)}</p>
+      <p className="font-display text-xl font-bold tabular-nums leading-none text-vektrum-text">{formatCurrency(amount)}</p>
     </div>
   )
   return href ? <Link href={href}>{inner}</Link> : inner
@@ -251,8 +279,8 @@ function DealCard({ deal }: { deal: typeof MOCK_DEALS[number] }) {
         <span className="text-[11px] text-vektrum-faint tabular-nums">{pct}%</span>
       </div>
       <div className="mt-3 flex items-center justify-between text-[12px]">
-        <span className="text-vektrum-muted">Total: {fmt(deal.total)}</span>
-        <span className="text-vektrum-green font-medium">Released: {fmt(deal.released)}</span>
+        <span className="text-vektrum-muted">Total: {formatCurrency(deal.total)}</span>
+        <span className="text-vektrum-green font-medium">Released: {formatCurrency(deal.released)}</span>
       </div>
     </Link>
   )
