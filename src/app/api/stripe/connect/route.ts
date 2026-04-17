@@ -135,7 +135,8 @@ export async function POST(request: NextRequest) {
   }
 
   // ── Generate Account Link ───────────────────────────────────────────────────
-  const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://vektrum.io'
+  // Always use the canonical domain — never a Vercel preview URL
+  const appBaseUrl = 'https://vektrum.io'
 
   // Route back to the role-appropriate settings page after Stripe onboarding
   const returnPath = '/dashboard/settings'
