@@ -69,6 +69,38 @@ async function getAdminData() {
     .order('created_at', { ascending: false })
     .limit(10)
 
+  // Fetch emails from auth.users (email lives in auth.users, not profiles)
+  const { data: authUsersData } = await adminClient.auth.admin.listUsers()
+  const emailMap: Record<string, string> = {}
+  if (authUsersData?.users) {
+    for (const u of authUsersData.users) {
+      if (u.email) emailMap[u.id] = u.email
+    }
+  }
+
+  // ── Health metrics ──────────────────────────────────────────────────────────
+  const { count: onboardingBacklog } = await adminClient
+    .from('profiles')
+    .select('*', { count: 'exact', head: true })
+    .in('role', ['contractor', 'funder'])
+    .is('stripe_account_id', null)
+
+  const { count: blockedReleases } = await adminClient
+    .from('milestones')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'approved')
+
+  const { count: openDisputeCount } = await adminClient
+    .from('milestones')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'disputed')
+
+  const { count: recentRoleChanges } = await adminClient
+    .from('audit_log')
+    .select('*', { count: 'exact', head: true })
+    .eq('action', 'admin_role_granted')
+    .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+
   return {
     profiles: (profiles ?? []) as (Profile & { company_name?: string | null })[],
     deals:    (deals    ?? []) as Deal[],
@@ -77,6 +109,13 @@ async function getAdminData() {
     disputes: (disputes ?? []) as any as DisputeRow[],
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     recentAudit: (recentAudit ?? []) as any[],
+    emailMap,
+    healthMetrics: {
+      onboardingBacklog: onboardingBacklog ?? 0,
+      blockedReleases: blockedReleases ?? 0,
+      openDisputes: openDisputeCount ?? 0,
+      recentRoleChanges: recentRoleChanges ?? 0,
+    },
   }
 }
 
@@ -142,7 +181,7 @@ export default async function AdminDashboardPage() {
     redirect('/dashboard')
   }
 
-  const { profiles, deals, disputes, recentAudit } = await getAdminData()
+  const { profiles, deals, disputes, recentAudit, healthMetrics, emailMap } = await getAdminData()
 
   // ── Computed platform stats ────────────────────────────────────────────────
   const contractors    = profiles.filter(p => p.role === 'contractor')
@@ -178,14 +217,32 @@ export default async function AdminDashboardPage() {
         </Link>
       </div>
 
-      {/* Security notice */}
-      <div className="flex items-start gap-3 rounded-xl border border-vektrum-blue-border bg-vektrum-blue-subtle px-5 py-4">
-        <Shield size={15} className="text-vektrum-blue flex-shrink-0 mt-0.5" aria-hidden="true" />
-        <p className="text-[13px] text-vektrum-blue leading-relaxed">
-          <strong>Admin access is read-only for financial data.</strong> You cannot release funds, modify milestone amounts,
-          or alter deal terms from this panel. All payment actions require the full 7-condition release gate
-          to be satisfied by the deal participants.
-        </p>
+      {/* Admin access info */}
+      <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm text-slate-600">
+        <p className="font-medium text-slate-800 mb-1">Admin Access</p>
+        <p>You can manage users, invite new admins, review audit logs, and monitor platform health.
+        <strong> Financial actions (fund releases, payment processing) are governed by the 7-condition milestone gate</strong>
+        {' '}and cannot be overridden from this dashboard. All admin actions are permanently logged.</p>
+      </div>
+
+      {/* ── Operator Health Metrics ─────────────────────────────────────── */}
+      <div className="flex flex-wrap gap-3">
+        <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${healthMetrics.onboardingBacklog > 0 ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-green-50 border-green-200 text-green-700'}`}>
+          <Users size={14} />
+          {healthMetrics.onboardingBacklog} pending onboarding
+        </div>
+        <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${healthMetrics.blockedReleases > 0 ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-green-50 border-green-200 text-green-700'}`}>
+          <Clock size={14} />
+          {healthMetrics.blockedReleases} releases pending
+        </div>
+        <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${healthMetrics.openDisputes > 0 ? 'bg-red-50 border-red-200 text-red-700' : 'bg-green-50 border-green-200 text-green-700'}`}>
+          <AlertTriangle size={14} />
+          {healthMetrics.openDisputes} open disputes
+        </div>
+        <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${healthMetrics.recentRoleChanges > 0 ? 'bg-purple-50 border-purple-200 text-purple-700' : 'bg-gray-50 border-gray-200 text-gray-600'}`}>
+          <Shield size={14} />
+          {healthMetrics.recentRoleChanges} role changes (7d)
+        </div>
       </div>
 
       {/* ── Section 1: Platform Overview ──────────────────────────────────── */}
@@ -261,7 +318,7 @@ export default async function AdminDashboardPage() {
         <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-vektrum-muted">
           User Management
         </h2>
-        <UserTable profiles={profiles} deals={deals} />
+        <UserTable profiles={profiles} deals={deals} emailMap={emailMap} />
       </section>
 
       {/* ── Section 4: Platform Health ───────────────────────────────────── */}
@@ -305,13 +362,13 @@ export default async function AdminDashboardPage() {
         {/* AI Draw Review System — full width tile */}
         <div className="mt-3">
           <AdminStatTile
-            label="Perplexity AI Integration"
-            value="Active — Sonar Pro draw review enabled"
-            sub="All draw requests route through /api/ai/draw-review — AI precondition required before release"
+            label="AI Draw Review"
+            value="Operational"
+            sub="AI precondition required before any fund release — all draw reviews are logged"
             icon={Zap}
           />
           <div className="mt-2 rounded-lg border border-vektrum-green-border bg-vektrum-green-bg px-4 py-3 text-[12px] text-vektrum-green">
-            <strong>✓ AI Service: Operational.</strong> Draw review system is active — all AI precondition checks are operational.
+            <strong>AI draw review system is operational.</strong> All precondition checks are active.
           </div>
         </div>
       </section>

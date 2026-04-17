@@ -7,12 +7,13 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import type { Profile, Deal } from '@/lib/types'
-import { CheckCircle2, AlertCircle, Search, ShieldPlus } from 'lucide-react'
+import { CheckCircle2, AlertCircle, Search, ShieldPlus, X, AlertTriangle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface UserTableProps {
   profiles: (Profile & { company_name?: string | null })[]
   deals: Deal[]
+  emailMap?: Record<string, string>
 }
 
 type RoleFilter = 'all' | 'contractor' | 'funder' | 'admin'
@@ -29,18 +30,18 @@ const ROLE_COLORS: Record<string, string> = {
   admin:      'bg-vektrum-amber-bg border-vektrum-amber-border text-vektrum-amber',
 }
 
-export function UserTable({ profiles, deals }: UserTableProps) {
+export function UserTable({ profiles, deals, emailMap = {} }: UserTableProps) {
   const [search, setSearch]           = useState('')
   const [roleFilter, setRoleFilter]   = useState<RoleFilter>('all')
   const [promotingId, setPromotingId] = useState<string | null>(null)
   const [promotedIds, setPromotedIds] = useState<Set<string>>(new Set())
   const [promoteError, setPromoteError] = useState<string | null>(null)
+  const [promoteTarget, setPromoteTarget] = useState<{ id: string; full_name: string } | null>(null)
 
-  async function handlePromote(userId: string, userName: string) {
-    if (!window.confirm(`Promote "${userName}" to Admin? This grants full admin access.`)) return
-
+  async function executePromote(userId: string) {
     setPromotingId(userId)
     setPromoteError(null)
+    setPromoteTarget(null)
 
     try {
       const res = await fetch('/api/admin/promote', {
@@ -150,11 +151,14 @@ export function UserTable({ profiles, deals }: UserTableProps) {
               >
                 {/* User info */}
                 <div className="min-w-0">
-                  <p className="text-[13px] font-semibold text-vektrum-text truncate">
+                  <p className="text-[13px] font-semibold text-vektrum-text truncate max-w-[200px]">
                     {profile.full_name ?? 'No name'}
                   </p>
+                  {emailMap[profile.id] && (
+                    <p className="text-[11px] text-vektrum-faint truncate max-w-[200px]">{emailMap[profile.id]}</p>
+                  )}
                   {profile.company_name && (
-                    <p className="text-[11px] text-vektrum-muted truncate">{profile.company_name}</p>
+                    <p className="text-[11px] text-vektrum-muted truncate max-w-[200px]">{profile.company_name}</p>
                   )}
                 </div>
 
@@ -168,25 +172,24 @@ export function UserTable({ profiles, deals }: UserTableProps) {
                   </span>
                 </div>
 
-                {/* Stripe status — contractors only */}
+                {/* Stripe status */}
                 <div>
-                  {profile.role === 'contractor' ? (
-                    hasStripe ? (
-                      <div className="flex items-center gap-1.5">
-                        {stripeOk ? (
-                          <CheckCircle2 size={12} className="text-vektrum-green" aria-hidden="true" />
-                        ) : (
-                          <AlertCircle size={12} className="text-vektrum-amber" aria-hidden="true" />
-                        )}
-                        <span className={`text-[11px] font-medium ${stripeOk ? 'text-vektrum-green' : 'text-vektrum-amber'}`}>
-                          {stripeOk ? 'Active' : 'Pending'}
-                        </span>
-                      </div>
-                    ) : (
-                      <span className="text-[11px] text-vektrum-faint">Not connected</span>
-                    )
+                  {hasStripe ? (
+                    <div className="flex items-center gap-1.5">
+                      {stripeOk ? (
+                        <CheckCircle2 size={12} className="text-vektrum-green" aria-hidden="true" />
+                      ) : (
+                        <AlertCircle size={12} className="text-vektrum-amber" aria-hidden="true" />
+                      )}
+                      <span className={`text-[11px] font-medium ${stripeOk ? 'text-vektrum-green' : 'text-vektrum-amber'}`}>
+                        {stripeOk ? 'Connected' : 'Pending'}
+                      </span>
+                    </div>
                   ) : (
-                    <span className="text-[11px] text-vektrum-faint">N/A</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="inline-block h-2 w-2 rounded-full bg-gray-300" />
+                      <span className="text-[11px] text-vektrum-faint">Not connected</span>
+                    </div>
                   )}
                 </div>
 
@@ -217,7 +220,7 @@ export function UserTable({ profiles, deals }: UserTableProps) {
                 <div>
                   {effectiveRole !== 'admin' ? (
                     <button
-                      onClick={() => handlePromote(profile.id, profile.full_name ?? 'this user')}
+                      onClick={() => setPromoteTarget({ id: profile.id, full_name: profile.full_name ?? 'this user' })}
                       disabled={promotingId === profile.id}
                       className={cn(
                         'inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[11px] font-medium transition-all',
@@ -245,6 +248,48 @@ export function UserTable({ profiles, deals }: UserTableProps) {
           Showing {filtered.length} of {profiles.length} users
         </p>
       </div>
+
+      {/* Promote confirmation modal */}
+      {promoteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setPromoteTarget(null)} />
+          <div className="relative max-w-md w-full mx-4 rounded-2xl bg-white shadow-2xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">Promote to Admin</h2>
+              <button type="button" onClick={() => setPromoteTarget(null)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <p className="text-sm text-gray-700 mb-4">
+              You are about to grant admin privileges to <strong>{promoteTarget.full_name}</strong>.
+              This gives them full access to user management, audit logs, and platform oversight.
+              This action will be logged.
+            </p>
+            <div className="flex items-start gap-2.5 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 mb-5">
+              <AlertTriangle size={14} className="text-amber-600 flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-amber-700">
+                Admin role grants access to all user data and audit records. Only promote trusted team members.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setPromoteTarget(null)}
+                className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => executePromote(promoteTarget.id)}
+                className="flex-1 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 transition-colors"
+              >
+                Confirm Promotion
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

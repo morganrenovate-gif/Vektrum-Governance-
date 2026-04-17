@@ -468,14 +468,25 @@ function AuditRow({ log }: { log: AuditLog }) {
 
       {/* Details */}
       <td className="px-4 py-3">
-        {log.metadata ? (
+        {log.metadata && Object.keys(log.metadata).length > 0 ? (
           <details className="group cursor-pointer">
             <summary className="select-none list-none text-xs text-vektrum-blue hover:underline">
               View details
             </summary>
-            <pre className="mt-2 max-w-xs overflow-auto rounded-md bg-vektrum-surface-alt border border-vektrum-border p-2 text-[10px] text-vektrum-text">
-              {JSON.stringify(log.metadata, null, 2)}
-            </pre>
+            <div className="mt-2 max-w-xs overflow-auto rounded-md bg-vektrum-surface-alt border border-vektrum-border p-2">
+              <dl className="space-y-1">
+                {Object.entries(log.metadata).map(([key, value]) => (
+                  <div key={key} className="flex items-baseline gap-1.5 text-[11px]">
+                    <dt className="font-medium text-vektrum-muted capitalize whitespace-nowrap">
+                      {key.replace(/_/g, ' ')}:
+                    </dt>
+                    <dd className="text-vektrum-text truncate">
+                      {typeof value === 'object' && value !== null ? JSON.stringify(value) : String(value ?? '—')}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
           </details>
         ) : (
           <span className="text-xs text-vektrum-faint">&mdash;</span>

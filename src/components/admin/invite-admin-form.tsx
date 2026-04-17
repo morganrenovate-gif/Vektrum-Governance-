@@ -39,7 +39,7 @@ export function InviteAdminForm() {
         return
       }
 
-      setSuccess(`Invite sent to ${trimmed}`)
+      setSuccess(`Invite sent to ${trimmed}. They will receive an email with instructions to set up their admin account.`)
       setEmail('')
     } catch {
       setError('Network error. Please try again.')
@@ -73,27 +73,34 @@ export function InviteAdminForm() {
             placeholder="admin@company.com"
             className="w-full rounded-lg border border-vektrum-border bg-vektrum-bg px-3 py-2 text-[13px] text-vektrum-text placeholder:text-vektrum-faint focus:outline-none focus:ring-2 focus:ring-vektrum-blue/30 focus:border-vektrum-blue transition-all"
           />
+          <p className="text-xs text-vektrum-muted mt-1">
+            Invited users will receive admin access upon accepting. This action is logged in the audit trail.
+          </p>
         </div>
         <button
           type="submit"
-          disabled={sending}
+          disabled={sending || !email.trim() || !EMAIL_REGEX.test(email.trim())}
           className={cn(
             'inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-[13px] font-medium transition-all',
-            sending
+            sending || !email.trim() || !EMAIL_REGEX.test(email.trim())
               ? 'bg-vektrum-surface-alt text-vektrum-faint border border-vektrum-border cursor-not-allowed'
               : 'bg-vektrum-blue text-white hover:bg-vektrum-blue-hover'
           )}
         >
           <Send size={13} aria-hidden="true" />
-          {sending ? 'Sending…' : 'Send Invite'}
+          {sending ? 'Sending invite…' : 'Send Invite'}
         </button>
       </form>
 
       {success && (
-        <p className="mt-3 text-[12px] font-medium text-vektrum-green">{success}</p>
+        <div className="mt-3 rounded-lg bg-green-50 border border-green-200 px-4 py-3">
+          <p className="text-[12px] font-medium text-green-700">{success}</p>
+        </div>
       )}
       {error && (
-        <p className="mt-3 text-[12px] font-medium text-red-600">{error}</p>
+        <div className="mt-3 rounded-lg bg-red-50 border border-red-200 px-4 py-3">
+          <p className="text-[12px] font-medium text-red-600">{error}</p>
+        </div>
       )}
     </div>
   )
