@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils";
+import { LocalTime } from "@/components/ui/local-time";
 import type { AuditLog } from "@/lib/types";
 import { Shield, Search, X } from "lucide-react";
 
@@ -410,7 +411,7 @@ function AuditRow({ log }: { log: AuditLog }) {
     <tr className="hover:bg-vektrum-surface-alt transition-colors">
       {/* Timestamp */}
       <td className="whitespace-nowrap px-4 py-3 font-numeric tabular-nums text-xs text-vektrum-muted">
-        {formatDate(log.created_at)}
+        <LocalTime iso={log.created_at} />
       </td>
 
       {/* Actor */}
