@@ -86,6 +86,8 @@ export interface AuditLog {
   created_at: string;
   // Populated by Supabase join: profiles!audit_log_actor_id_fkey
   actor?: { full_name: string | null; role?: string | null } | null;
+  // Populated by Supabase join on entity_id for system-triggered events (e.g. signups)
+  entity_profile?: { full_name: string | null; role?: string | null } | null;
 }
 
 // ─── Auth types ──────────────────────────────────────────────────────────────

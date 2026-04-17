@@ -192,7 +192,7 @@ export default async function AuditLogPage({
   let query = supabase
     .from("audit_log")
     .select(
-      "*, actor:profiles!audit_log_actor_id_fkey(full_name, role)",
+      "*, actor:profiles!audit_log_actor_id_fkey(full_name, role), entity_profile:profiles!audit_log_entity_id_fkey(full_name, role)",
       { count: "exact" },
     )
     .order("created_at", { ascending: false });
@@ -424,6 +424,18 @@ function AuditRow({ log }: { log: AuditLog }) {
                 className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium ${roleBadgeClasses(displayRole)}`}
               >
                 {displayRole}
+              </span>
+            )}
+          </div>
+        ) : !log.actor_id && log.entity_type === "profile" && log.entity_profile ? (
+          // System-triggered events (e.g. signups) — show the subject user's name
+          <div className="flex items-center gap-1.5">
+            <span>{log.entity_profile.full_name ?? "Unknown"}</span>
+            {log.entity_profile.role && (
+              <span
+                className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium ${roleBadgeClasses(log.entity_profile.role)}`}
+              >
+                {log.entity_profile.role}
               </span>
             )}
           </div>
