@@ -81,6 +81,7 @@ export async function POST(request: NextRequest) {
         country: 'US',
         ...(userEmail ? { email: userEmail } : {}),
         capabilities: {
+          card_payments: { requested: true },
           transfers: { requested: true },
         },
         metadata: {
