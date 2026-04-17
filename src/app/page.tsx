@@ -105,7 +105,7 @@ export default async function HomePage() {
             </div>
             <div className="flex items-center gap-2 text-[12px] text-vektrum-faint">
               <Star size={14} className="text-vektrum-amber" aria-hidden="true" />
-              <span>Contractors join free when invited</span>
+              <span>Contractors always join free</span>
             </div>
           </div>
         </div>
@@ -147,6 +147,26 @@ export default async function HomePage() {
                 <span className="mt-1 text-[11px] text-vektrum-faint">{stat.sub}</span>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Trust Numbers ───────────────────────────────────────────────── */}
+      <section className="bg-vektrum-bg py-10">
+        <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+            <div>
+              <p className="text-2xl font-bold text-vektrum-text sm:text-3xl font-numeric">$0</p>
+              <p className="mt-1 text-[13px] text-vektrum-muted">in disputed funds lost</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-vektrum-text sm:text-3xl font-numeric">7</p>
+              <p className="mt-1 text-[13px] text-vektrum-muted">condition release gate</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-vektrum-text sm:text-3xl">AI-reviewed</p>
+              <p className="mt-1 text-[13px] text-vektrum-muted">every draw request</p>
+            </div>
           </div>
         </div>
       </section>
@@ -214,7 +234,7 @@ export default async function HomePage() {
                     Procore
                   </th>
                   <th className="px-3 sm:px-5 py-3.5 text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.08em] text-white/40">
-                    Lender
+                    Traditional Funder
                   </th>
                   <th className="px-3 sm:px-5 py-3.5 text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.08em] text-vektrum-blue">
                     Vektrum
@@ -230,7 +250,7 @@ export default async function HomePage() {
                   ['Funder controls release', 'Partial', 'Manual', '✓ Auto'],
                   ['AI draw review', '✗', '✗', 'Coming soon'],
                   ['Immutable audit', 'Partial', '✗', '✓'],
-                ].map(([label, procore, lender, vektrum], i) => (
+                ].map(([label, procore, traditionalFunder, vektrum], i) => (
                   <tr
                     key={label}
                     className={[
@@ -243,7 +263,7 @@ export default async function HomePage() {
                       {procore === '✗' ? <X size={13} className="text-vektrum-red/60" /> : procore}
                     </td>
                     <td className="px-3 sm:px-5 py-3 text-[12px] sm:text-[13px] text-white/40">
-                      {lender === '✗' ? <X size={13} className="text-vektrum-red/60" /> : lender}
+                      {traditionalFunder === '✗' ? <X size={13} className="text-vektrum-red/60" /> : traditionalFunder}
                     </td>
                     <td className="px-3 sm:px-5 py-3 text-[12px] sm:text-[13px] font-semibold text-vektrum-blue-subtle">
                       {vektrum === '✓' || vektrum === '✓ Auto' ? (
@@ -383,7 +403,7 @@ export default async function HomePage() {
             {/* Funders & GCs */}
             <div className="rounded-2xl border border-white/10 bg-white/5 p-8 hover:border-vektrum-blue/30 transition-colors">
               <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-amber">
-                Funders &amp; GCs
+                Funders
               </span>
               <h3 className="mt-3 text-lg font-semibold text-white tracking-[-0.01em]">
                 Release only what&rsquo;s earned
@@ -489,6 +509,20 @@ export default async function HomePage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ─── Demo CTA ────────────────────────────────────────────────────── */}
+      <section className="py-12 bg-vektrum-canvas text-white">
+        <div className="max-w-3xl mx-auto px-6 text-center">
+          <h2 className="text-2xl font-bold mb-3">See Vektrum in Action</h2>
+          <p className="text-white/70 mb-6">Watch a live walkthrough of milestone-gated payments, AI draw review, and dispute resolution.</p>
+          <Link
+            href="/demo-live"
+            className="inline-block bg-white text-vektrum-canvas font-semibold px-8 py-3 rounded-xl hover:bg-white/90 transition-colors"
+          >
+            View Interactive Demo →
+          </Link>
         </div>
       </section>
 

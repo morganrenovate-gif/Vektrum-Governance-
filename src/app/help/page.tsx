@@ -43,7 +43,7 @@ const FAQ: FaqItem[] = [
     a: 'Yes. Contractors always join free. No subscription, no per-milestone charge, no onboarding fee. The funder pays the Vektrum Compliance Review Fee when funds are disbursed.',
   },
   {
-    q: 'How do lenders get charged?',
+    q: 'How do funders get charged?',
     a: 'Vektrum uses a hybrid pricing model: a governance retainer (annual, based on portfolio size) plus a Vektrum Compliance Review Fee (per verified disbursement). Standalone projects have no retainer — pure performance pricing.',
   },
   {
@@ -52,7 +52,7 @@ const FAQ: FaqItem[] = [
   },
   {
     q: 'How do I get started?',
-    a: 'Sign up for a free account. Contractors can join when invited by a funder. Lenders can create a standalone project immediately or contact us for institutional onboarding.',
+    a: 'Sign up for a free account — it takes under a minute. Contractors can create an account anytime and get added to deals by their funder. Funders can create a standalone project immediately or contact us for institutional onboarding.',
   },
 ]
 

@@ -107,7 +107,7 @@ export default function AboutPage() {
             Protect your next deal
           </h2>
           <p className="mt-4 mx-auto max-w-md text-[15px] text-vektrum-muted">
-            Contractors join free. Lenders start with a standalone project or contact us
+            Contractors join free. Funders start with a standalone project or contact us
             for institutional onboarding.
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">

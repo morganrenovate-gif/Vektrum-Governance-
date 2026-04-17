@@ -152,6 +152,20 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
                 // ── Logged-out drawer ───────────────────────────────────────
                 <>
                   <Link
+                    href="/lenders"
+                    className="flex items-center min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                    onClick={() => setOpen(false)}
+                  >
+                    Funders
+                  </Link>
+                  <Link
+                    href="/contractors"
+                    className="flex items-center min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                    onClick={() => setOpen(false)}
+                  >
+                    For Contractors
+                  </Link>
+                  <Link
                     href="/pricing"
                     className="flex items-center min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
                     onClick={() => setOpen(false)}

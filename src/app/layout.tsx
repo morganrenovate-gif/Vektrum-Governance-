@@ -145,7 +145,13 @@ export default async function RootLayout({
                       href="/lenders"
                       className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
                     >
-                      Lenders
+                      Funders
+                    </Link>
+                    <Link
+                      href="/contractors"
+                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                    >
+                      For Contractors
                     </Link>
                     <Link
                       href="/about"
@@ -224,10 +230,10 @@ export default async function RootLayout({
                 </div>
                 <div className="flex flex-col gap-3">
                   <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-vektrum-faint">
-                    For Lenders &amp; Contractors
+                    For Funders &amp; Contractors
                   </span>
                   <Link href="/lenders" className="text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors">
-                    Lenders
+                    Funders
                   </Link>
                   <Link href="/contractors" className="text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors">
                     Contractors

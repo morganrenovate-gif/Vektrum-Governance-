@@ -110,7 +110,7 @@ export default function ContractorsPage() {
           </h2>
           <ol className="space-y-6">
             {[
-              'You receive an invite from your funder or GC to join a deal on Vektrum.',
+              'You receive an invite from your funder to join a deal on Vektrum.',
               'Set up your Stripe Connect account for direct deposit — takes minutes.',
               'Complete milestones and submit draw requests with supporting documentation.',
               'The funder reviews and approves. The 7-condition gate verifies everything server-side.',

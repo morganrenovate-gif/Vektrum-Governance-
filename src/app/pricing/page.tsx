@@ -210,7 +210,7 @@ export default function PricingPage() {
             <TierCard
               num="01"
               name="Standalone Project"
-              target="Individual GCs · Developers · Private projects"
+              target="Individual contractors · Developers · Private projects"
               crfRate="1.0%"
               crfNote="per verified milestone disbursement"
               retainer="None"
@@ -252,7 +252,7 @@ export default function PricingPage() {
             <TierCard
               num="03"
               name="Enterprise / Platform"
-              target="Large GCs · Owners · Construction lenders at scale"
+              target="Large contractors · Owners · Construction lenders at scale"
               crfRate="0.65%"
               crfNote="per verified disbursement — negotiated annually"
               retainer="0.05–0.10% of ACV / year"

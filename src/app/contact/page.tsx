@@ -16,7 +16,7 @@ export default function ContactPage() {
         <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div className="rounded-xl border border-vektrum-border bg-vektrum-surface p-6">
             <h2 className="text-[15px] font-semibold text-vektrum-text mb-2">
-              Lender &amp; Partnership Inquiries
+              Funder &amp; Partnership Inquiries
             </h2>
             <a
               href="mailto:lenders@vektrum.io"
@@ -42,7 +42,7 @@ export default function ContactPage() {
         </div>
 
         <p className="mt-10 text-[15px] leading-relaxed text-vektrum-muted">
-          {'Vektrum is currently available to qualified contractors and funders. If you are a construction lender or funder evaluating the platform, email '}
+          {'Vektrum is open to contractors and funders. Create a free account to get started, or if you are an institutional funder evaluating the platform, email '}
           <a href="mailto:lenders@vektrum.io" className="text-vektrum-blue hover:underline">
             lenders@vektrum.io
           </a>

@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 
 export const metadata = {
-  title: 'For Lenders — Vektrum',
+  title: 'For Funders & Capital Partners — Vektrum',
   description:
     'Automated draw management, 7-condition release gates, and immutable audit trails. Vektrum systematizes your construction lending disbursement process.',
 }
@@ -33,7 +33,7 @@ export default function LendersPage() {
           <div className="inline-flex items-center gap-2 rounded-full border border-vektrum-border bg-vektrum-surface px-4 py-1.5 shadow-sm mb-8">
             <div className="h-1.5 w-1.5 rounded-full bg-vektrum-green animate-pulse-slow" />
             <span className="text-[12px] font-medium text-vektrum-muted tracking-wide">
-              For construction lenders
+              For funders &amp; capital partners
             </span>
           </div>
 

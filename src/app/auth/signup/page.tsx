@@ -204,7 +204,7 @@ export default function SignupPage() {
                 {formData.role === "contractor" && (
                   <p className="text-[11px] text-vektrum-green flex items-center gap-1">
                     <CheckCircle2 size={11} aria-hidden="true" />
-                    Contractors always join free when invited by a funder.
+                    Contractors always join free — no subscription, no fees.
                   </p>
                 )}
               </div>
