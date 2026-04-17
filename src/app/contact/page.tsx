@@ -42,7 +42,7 @@ export default function ContactPage() {
         </div>
 
         <p className="mt-10 text-[15px] leading-relaxed text-vektrum-muted">
-          {'Vektrum is currently in private beta. If you are a construction lender or funder evaluating the platform, email '}
+          {'Vektrum is currently available to qualified contractors and funders. If you are a construction lender or funder evaluating the platform, email '}
           <a href="mailto:lenders@vektrum.io" className="text-vektrum-blue hover:underline">
             lenders@vektrum.io
           </a>

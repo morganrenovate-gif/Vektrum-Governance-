@@ -2,6 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import type { Profile } from "@/lib/types";
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Auth callback handler for:
  * - Email confirmation links

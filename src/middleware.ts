@@ -35,7 +35,8 @@ export async function middleware(request: NextRequest) {
     pathname === "/terms" ||
     pathname === "/privacy" ||
     pathname === "/security" ||
-    pathname === "/contact"
+    pathname === "/contact" ||
+    pathname === "/forgot-password"
   ) {
     return NextResponse.next();
   }

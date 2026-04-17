@@ -311,7 +311,7 @@ export default async function AdminDashboardPage() {
             icon={Zap}
           />
           <div className="mt-2 rounded-lg border border-vektrum-green-border bg-vektrum-green-bg px-4 py-3 text-[12px] text-vektrum-green">
-            <strong>✓ PERPLEXITY_API_KEY confirmed live.</strong> Sonar Pro draw review is active — all AI precondition checks are operational.
+            <strong>✓ AI Service: Operational.</strong> Draw review system is active — all AI precondition checks are operational.
           </div>
         </div>
       </section>

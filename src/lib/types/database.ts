@@ -97,7 +97,7 @@ export interface ProfileRow {
 
 /**
  * deals
- * An escrow deal linking a contractor to a funder.
+ * A Project Trust Account deal linking a contractor to a funder.
  */
 export interface DealRow {
   id: string
@@ -108,7 +108,7 @@ export interface DealRow {
   description: string | null
   /** Total deal value in dollars (numeric(12,2)). */
   total_amount: number
-  /** Amount funded into escrow so far. funded_amount <= total_amount. */
+  /** Amount funded into trust account so far. funded_amount <= total_amount. */
   funded_amount: number
   /** Amount released to the contractor so far. released_amount <= funded_amount. */
   released_amount: number
@@ -119,7 +119,7 @@ export interface DealRow {
 
 /**
  * milestones
- * An ordered work phase within a deal, each carrying its own escrow amount.
+ * An ordered work phase within a deal, each carrying its own trust account amount.
  */
 export interface MilestoneRow {
   id: string

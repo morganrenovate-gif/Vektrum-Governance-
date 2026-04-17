@@ -12,30 +12,131 @@ export default function TermsPage() {
         <h1 className="font-display text-2xl sm:text-3xl font-bold text-vektrum-text tracking-[-0.025em]">
           Terms of Service
         </h1>
-        <p className="mt-2 text-[15px] text-vektrum-muted">Last updated: April 2026</p>
+        <p className="mt-2 text-[15px] text-vektrum-muted">Last updated: April 17, 2026</p>
 
-        <p className="mt-8 text-[15px] leading-relaxed text-vektrum-muted">
-          {"Vektrum's Terms of Service are currently in preparation by licensed legal counsel. If you are a lender or funder evaluating Vektrum, please contact us at "}
-          <a href="mailto:lenders@vektrum.io" className="text-vektrum-blue hover:underline">
-            lenders@vektrum.io
-          </a>
-          {' for a preview of the draft agreement and our MSA template.'}
-        </p>
+        <div className="mt-10 space-y-10">
+          {/* Section 1 */}
+          <section>
+            <h2 className="text-lg font-semibold text-vektrum-text">1. Acceptance</h2>
+            <p className="mt-3 text-[15px] leading-relaxed text-vektrum-muted">
+              By accessing or using the Vektrum platform (&ldquo;Service&rdquo;), you agree to be bound by these Terms of Service (&ldquo;Terms&rdquo;). If you do not agree to these Terms, do not use the Service. Vektrum reserves the right to update these Terms at any time. Continued use of the Service after changes constitutes acceptance of the revised Terms.
+            </p>
+          </section>
 
-        <div className="mt-10 rounded-xl border border-vektrum-border bg-vektrum-surface p-6">
-          <p className="text-[15px] leading-relaxed text-vektrum-muted">
-            Vektrum is a technology governance platform. Funds are held in Stripe Connect managed
-            accounts, not by Vektrum. Vektrum is not a money transmitter. Vektrum is a governance
-            and authorization layer.
-          </p>
+          {/* Section 2 */}
+          <section>
+            <h2 className="text-lg font-semibold text-vektrum-text">2. Description of Service</h2>
+            <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-vektrum-muted">
+              <p>
+                Vektrum is a milestone-gated construction project financing governance platform. The Service provides tools for contractors and funders to structure deals, define milestones, manage draw requests, and govern the release of funds based on verified conditions.
+              </p>
+              <p>
+                Vektrum is a governance and authorization layer. Funds are held in Stripe Connect managed accounts, not by Vektrum. Vektrum is not a bank, lender, or money transmitter.
+              </p>
+            </div>
+          </section>
+
+          {/* Section 3 */}
+          <section>
+            <h2 className="text-lg font-semibold text-vektrum-text">3. User Accounts</h2>
+            <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-vektrum-muted">
+              <p>You must provide accurate, complete, and current information when creating an account. You are responsible for maintaining the confidentiality of your account credentials and for all activity that occurs under your account.</p>
+              <p>You agree to immediately notify Vektrum of any unauthorized use of your account. Vektrum is not liable for any loss or damage arising from your failure to safeguard your account credentials.</p>
+            </div>
+          </section>
+
+          {/* Section 4 */}
+          <section>
+            <h2 className="text-lg font-semibold text-vektrum-text">4. Contractor Terms</h2>
+            <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-vektrum-muted">
+              <p>Contractors must connect a Stripe account via Stripe Connect before creating deals or receiving payments. Contractors are responsible for:</p>
+              <ul className="space-y-2 list-disc pl-5">
+                <li>Providing accurate project descriptions, milestone definitions, and amounts.</li>
+                <li>Submitting truthful documentation for milestone completion and draw requests.</li>
+                <li>Complying with all applicable laws, regulations, and licensing requirements for construction work.</li>
+              </ul>
+            </div>
+          </section>
+
+          {/* Section 5 */}
+          <section>
+            <h2 className="text-lg font-semibold text-vektrum-text">5. Funder Terms</h2>
+            <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-vektrum-muted">
+              <p>Funders use the platform to fund deals into a Project Trust Account and approve milestone-gated releases. Funders acknowledge and agree that:</p>
+              <ul className="space-y-2 list-disc pl-5">
+                <li>Funds are held in Stripe Connect managed accounts, not by Vektrum.</li>
+                <li>Release of funds is subject to the platform&rsquo;s 7-condition release gate, which includes AI-assisted draw review, documentation verification, and funder authorization.</li>
+                <li>Vektrum does not guarantee the quality or completion of construction work performed by contractors.</li>
+              </ul>
+            </div>
+          </section>
+
+          {/* Section 6 */}
+          <section>
+            <h2 className="text-lg font-semibold text-vektrum-text">6. Prohibited Conduct</h2>
+            <div className="mt-3 text-[15px] leading-relaxed text-vektrum-muted">
+              <p>You agree not to:</p>
+              <ul className="mt-3 space-y-2 list-disc pl-5">
+                <li>Use the Service for any unlawful purpose or in violation of any applicable laws.</li>
+                <li>Submit false, misleading, or fraudulent information, including milestone documentation.</li>
+                <li>Attempt to circumvent the platform&rsquo;s security measures, release conditions, or audit controls.</li>
+                <li>Interfere with or disrupt the Service, servers, or networks connected to the Service.</li>
+                <li>Impersonate any person or entity, or misrepresent your affiliation with any person or entity.</li>
+              </ul>
+            </div>
+          </section>
+
+          {/* Section 7 */}
+          <section>
+            <h2 className="text-lg font-semibold text-vektrum-text">7. Intellectual Property</h2>
+            <p className="mt-3 text-[15px] leading-relaxed text-vektrum-muted">
+              The Service, including its design, code, features, and documentation, is the property of Vektrum and is protected by intellectual property laws. You retain ownership of any content you submit to the platform. By using the Service, you grant Vektrum a limited license to use your content solely for the purpose of operating and improving the Service.
+            </p>
+          </section>
+
+          {/* Section 8 */}
+          <section>
+            <h2 className="text-lg font-semibold text-vektrum-text">8. Disclaimers and Limitation of Liability</h2>
+            <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-vektrum-muted">
+              <p>
+                THE SERVICE IS PROVIDED &ldquo;AS IS&rdquo; AND &ldquo;AS AVAILABLE&rdquo; WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT.
+              </p>
+              <p>
+                TO THE MAXIMUM EXTENT PERMITTED BY LAW, VEKTRUM SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING OUT OF OR RELATING TO YOUR USE OF THE SERVICE, INCLUDING BUT NOT LIMITED TO LOSS OF PROFITS, DATA, OR BUSINESS OPPORTUNITIES.
+              </p>
+              <p>
+                Vektrum does not guarantee the performance, reliability, or availability of third-party services, including Stripe and Supabase.
+              </p>
+            </div>
+          </section>
+
+          {/* Section 9 */}
+          <section>
+            <h2 className="text-lg font-semibold text-vektrum-text">9. Governing Law</h2>
+            <p className="mt-3 text-[15px] leading-relaxed text-vektrum-muted">
+              These Terms shall be governed by and construed in accordance with the laws of the State of Delaware, without regard to conflict of law principles. Any disputes arising under these Terms shall be resolved in the state or federal courts located in the State of Delaware.
+            </p>
+          </section>
+
+          {/* Section 10 */}
+          <section>
+            <h2 className="text-lg font-semibold text-vektrum-text">10. Changes to Terms</h2>
+            <p className="mt-3 text-[15px] leading-relaxed text-vektrum-muted">
+              Vektrum reserves the right to modify these Terms at any time. Material changes will be communicated via email or a prominent notice on the platform. Your continued use of the Service following the posting of changes constitutes your acceptance of those changes.
+            </p>
+          </section>
+
+          {/* Section 11 */}
+          <section>
+            <h2 className="text-lg font-semibold text-vektrum-text">11. Contact</h2>
+            <p className="mt-3 text-[15px] leading-relaxed text-vektrum-muted">
+              For questions about these Terms, contact us at{' '}
+              <a href="mailto:legal@vektrum.io" className="text-vektrum-blue hover:underline">
+                legal@vektrum.io
+              </a>.
+            </p>
+          </section>
         </div>
-
-        <p className="mt-10 text-[15px] leading-relaxed text-vektrum-muted">
-          {'Questions? Email '}
-          <a href="mailto:lenders@vektrum.io" className="text-vektrum-blue hover:underline">
-            lenders@vektrum.io
-          </a>
-        </p>
       </div>
     </div>
   )

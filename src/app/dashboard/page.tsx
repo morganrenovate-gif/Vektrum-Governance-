@@ -112,7 +112,7 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) redirect('/auth/login')
+  if (!user) redirect('/auth/login?next=/dashboard')
 
   const { profile, deals } = await getProfileAndDeals(user.id)
 

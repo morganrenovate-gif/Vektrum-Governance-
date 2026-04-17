@@ -155,6 +155,12 @@ export default function LoginPage() {
                 required
               />
 
+              <div className="flex justify-end">
+                <Link href="/forgot-password" className="text-sm text-vektrum-blue hover:underline">
+                  Forgot password?
+                </Link>
+              </div>
+
               {error && (
                 <div
                   role="alert"
