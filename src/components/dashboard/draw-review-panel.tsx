@@ -40,7 +40,7 @@ export function DrawReviewPanel({ deals, embedded = false }: DrawReviewPanelProp
         </p>
         <span className="inline-flex items-center gap-1 rounded-full border border-vektrum-amber-border bg-vektrum-amber-bg px-2.5 py-1 text-[10px] font-medium text-vektrum-amber">
           <Zap size={10} />
-          AI review coming soon
+          AI-assisted review
         </span>
       </div>
       <div className="space-y-3">

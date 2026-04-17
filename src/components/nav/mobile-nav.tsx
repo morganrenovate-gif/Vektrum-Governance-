@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Menu, X, LogOut, Settings, FileText, Shield } from 'lucide-react'
+import { Menu, X, LogOut, Settings, FileText, Shield, Briefcase, FileBox, DollarSign, HelpCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 interface MobileNavProps {
@@ -108,6 +108,35 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
                     Dashboard
                   </Link>
 
+                  {userRole === 'contractor' && (
+                    <>
+                      <Link
+                        href="/dashboard/deals/new"
+                        className="flex items-center gap-3 min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                        onClick={() => setOpen(false)}
+                      >
+                        <Briefcase size={16} aria-hidden="true" />
+                        Deals
+                      </Link>
+                      <Link
+                        href="/dashboard/contractor/documents"
+                        className="flex items-center gap-3 min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                        onClick={() => setOpen(false)}
+                      >
+                        <FileBox size={16} aria-hidden="true" />
+                        Documents
+                      </Link>
+                      <Link
+                        href="/dashboard/contractor/payments"
+                        className="flex items-center gap-3 min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                        onClick={() => setOpen(false)}
+                      >
+                        <DollarSign size={16} aria-hidden="true" />
+                        Payments
+                      </Link>
+                    </>
+                  )}
+
                   <Link
                     href="/dashboard/audit"
                     className="flex items-center gap-3 min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
@@ -136,6 +165,15 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
                       Admin Dashboard
                     </Link>
                   )}
+
+                  <Link
+                    href="/contact"
+                    className="flex items-center gap-3 min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                    onClick={() => setOpen(false)}
+                  >
+                    <HelpCircle size={16} aria-hidden="true" />
+                    Support
+                  </Link>
 
                   <div className="mt-2 pt-2 border-t border-vektrum-border">
                     <button

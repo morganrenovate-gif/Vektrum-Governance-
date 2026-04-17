@@ -180,7 +180,7 @@ export function AssistantPanel({ actionRequired = 0 }: AssistantPanelProps) {
               </div>
               <div>
                 <p className="text-[13px] font-semibold text-white">Vektrum AI</p>
-                <p className="text-[10px] text-white/50">Coming soon — preview mode</p>
+                <p className="text-[10px] text-white/50">AI-powered assistant</p>
               </div>
             </div>
             <button

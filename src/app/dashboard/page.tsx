@@ -83,22 +83,19 @@ function MoneyStatTile({ label, amount }: { label: string; amount: number }) {
 
 function EmptyDeals({ role }: { role: string }) {
   return (
-    <div className="rounded-lg border border-dashed border-vektrum-border bg-vektrum-surface-alt px-8 py-16 text-center">
-      <FolderOpen size={32} className="mx-auto text-vektrum-faint" aria-hidden="true" />
-      <p className="mt-3 text-sm font-medium text-vektrum-muted">
+    <div className="text-center py-16 border border-dashed border-gray-200 rounded-2xl">
+      <FolderOpen size={40} className="mx-auto text-gray-300 mb-3" aria-hidden="true" />
+      <p className="text-vektrum-text font-medium mb-1">No deals yet</p>
+      <p className="text-vektrum-muted text-sm mb-4">
         {role === 'contractor'
-          ? "You haven't created any deals yet."
-          : 'No deals have been assigned to you yet.'}
+          ? 'Create your first deal to start tracking milestones and receiving payments.'
+          : 'Deals will appear here once a contractor invites you to a project.'}
       </p>
       {role === 'contractor' && (
-        <div className="mt-4">
-          <Link href="/dashboard/deals/new">
-            <Button variant="primary" size="sm">
-              <Plus size={14} aria-hidden="true" />
-              Create your first deal
-            </Button>
-          </Link>
-        </div>
+        <Link href="/dashboard/deals/new" className="inline-flex items-center gap-1.5 bg-vektrum-navy text-white px-6 py-2 rounded-lg text-sm font-medium">
+          <Plus size={14} aria-hidden="true" />
+          Create Deal →
+        </Link>
       )}
     </div>
   )
@@ -185,6 +182,57 @@ export default async function DashboardPage() {
             )}
           </div>
 
+          {/* Next Best Action module */}
+          {(() => {
+            const allMilestones = deals.flatMap((d) => d.milestones ?? [])
+            let actionTitle: string | null = null
+            let actionDescription = ''
+            let actionCTA = ''
+            let actionHref = ''
+            let borderColor = 'border-blue-500'
+            let bgColor = 'bg-blue-50'
+
+            if (!profile.stripe_account_id) {
+              actionTitle = 'Connect your Stripe account'
+              actionDescription = 'Connect your Stripe account to receive payments.'
+              actionCTA = 'Complete Setup'
+              actionHref = '/dashboard/contractor/onboarding'
+              borderColor = 'border-amber-500'
+              bgColor = 'bg-amber-50'
+            } else if (deals.length === 0) {
+              actionTitle = 'Create your first deal'
+              actionDescription = 'Create your first deal to get started.'
+              actionCTA = 'Create Deal'
+              actionHref = '/dashboard/deals/new'
+            } else if (allMilestones.some((m) => m.status === 'ready_for_review')) {
+              actionTitle = 'Draw ready to submit'
+              actionDescription = 'You have a draw ready to submit for funder review.'
+              actionCTA = 'View Milestones'
+              actionHref = `/dashboard/deals/${deals.find((d) => (d.milestones ?? []).some((m) => m.status === 'ready_for_review'))?.id}`
+              borderColor = 'border-amber-500'
+              bgColor = 'bg-amber-50'
+            } else if (allMilestones.some((m) => m.status === 'in_progress')) {
+              actionTitle = 'Update your milestone progress'
+              actionDescription = 'You have milestones in progress. Upload documents or submit for review when ready.'
+              actionCTA = 'View Deal'
+              actionHref = `/dashboard/deals/${deals.find((d) => (d.milestones ?? []).some((m) => m.status === 'in_progress'))?.id}`
+            }
+
+            if (!actionTitle) return null
+
+            return (
+              <div className={`border-l-4 ${borderColor} ${bgColor} rounded-r-xl p-4 mb-6 flex items-center justify-between`}>
+                <div>
+                  <p className="font-semibold text-vektrum-text">{actionTitle}</p>
+                  <p className="text-sm text-vektrum-muted">{actionDescription}</p>
+                </div>
+                <Link href={actionHref} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap ml-4">
+                  {actionCTA} →
+                </Link>
+              </div>
+            )
+          })()}
+
           {/* Stripe setup banner */}
           {!profile.stripe_account_id && (
             <div className="flex items-start gap-3 rounded-xl border border-vektrum-amber-border bg-vektrum-amber-bg px-5 py-4">
@@ -225,25 +273,27 @@ export default async function DashboardPage() {
             </div>
           </div>
 
-          {/* Lien Waiver Tracker — Coming Soon */}
-          <div className="rounded-xl border border-dashed border-vektrum-border bg-vektrum-surface-alt p-6 opacity-60 cursor-not-allowed select-none">
-            <div className="flex items-center gap-3 pointer-events-none">
-              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-vektrum-border">
-                <Lock size={16} className="text-vektrum-faint" />
+          {/* Lien Waiver Tracker — feature-flagged */}
+          {process.env.NEXT_PUBLIC_FEATURE_LIEN_WAIVER === 'true' && (
+            <div className="rounded-xl border border-dashed border-vektrum-border bg-vektrum-surface-alt p-6 opacity-60 cursor-not-allowed select-none">
+              <div className="flex items-center gap-3 pointer-events-none">
+                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-vektrum-border">
+                  <Lock size={16} className="text-vektrum-faint" />
+                </div>
+                <div>
+                  <p className="text-[13px] font-semibold text-vektrum-muted">
+                    Lien Waiver Tracker
+                  </p>
+                  <p className="text-[12px] text-vektrum-faint">
+                    Track lien waivers per deal — required before final release. Coming soon.
+                  </p>
+                </div>
+                <span className="ml-auto flex-shrink-0 rounded-full border border-vektrum-amber-border bg-vektrum-amber-bg px-2.5 py-0.5 text-[10px] font-medium text-vektrum-amber">
+                  Coming soon
+                </span>
               </div>
-              <div>
-                <p className="text-[13px] font-semibold text-vektrum-muted">
-                  Lien Waiver Tracker
-                </p>
-                <p className="text-[12px] text-vektrum-faint">
-                  Track lien waivers per deal — required before final release. Coming soon.
-                </p>
-              </div>
-              <span className="ml-auto flex-shrink-0 rounded-full border border-vektrum-amber-border bg-vektrum-amber-bg px-2.5 py-0.5 text-[10px] font-medium text-vektrum-amber">
-                Coming soon
-              </span>
             </div>
-          </div>
+          )}
 
           {/* Deals */}
           <section>
@@ -255,7 +305,7 @@ export default async function DashboardPage() {
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {deals.map((deal) => (
-                  <DealCard key={deal.id} deal={deal} />
+                  <DealCard key={deal.id} deal={deal} viewerRole="contractor" />
                 ))}
               </div>
             )}

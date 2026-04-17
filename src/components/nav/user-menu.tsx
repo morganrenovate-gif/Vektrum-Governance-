@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { LogOut, Settings, FileText, ChevronDown, Shield } from 'lucide-react'
+import { LogOut, Settings, FileText, ChevronDown, Shield, Briefcase, FileBox, DollarSign, HelpCircle } from 'lucide-react'
 
 interface UserMenuProps {
   name: string | null
@@ -111,6 +111,38 @@ export function UserMenu({ name, email, role }: UserMenuProps) {
               Dashboard
             </Link>
 
+            {role === 'contractor' && (
+              <>
+                <Link
+                  href="/dashboard/deals/new"
+                  role="menuitem"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-vektrum-text hover:bg-vektrum-surface-alt transition-colors"
+                >
+                  <Briefcase size={14} className="text-vektrum-muted" aria-hidden="true" />
+                  Deals
+                </Link>
+                <Link
+                  href="/dashboard/contractor/documents"
+                  role="menuitem"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-vektrum-text hover:bg-vektrum-surface-alt transition-colors"
+                >
+                  <FileBox size={14} className="text-vektrum-muted" aria-hidden="true" />
+                  Documents
+                </Link>
+                <Link
+                  href="/dashboard/contractor/payments"
+                  role="menuitem"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-vektrum-text hover:bg-vektrum-surface-alt transition-colors"
+                >
+                  <DollarSign size={14} className="text-vektrum-muted" aria-hidden="true" />
+                  Payments
+                </Link>
+              </>
+            )}
+
             <Link
               href="/dashboard/audit"
               role="menuitem"
@@ -129,6 +161,16 @@ export function UserMenu({ name, email, role }: UserMenuProps) {
             >
               <Settings size={14} className="text-vektrum-muted" aria-hidden="true" />
               Account Settings
+            </Link>
+
+            <Link
+              href="/contact"
+              role="menuitem"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-vektrum-text hover:bg-vektrum-surface-alt transition-colors"
+            >
+              <HelpCircle size={14} className="text-vektrum-muted" aria-hidden="true" />
+              Support
             </Link>
 
             {role === 'admin' && (
