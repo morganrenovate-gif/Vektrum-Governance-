@@ -128,7 +128,7 @@ export interface MilestoneRow {
   description: string | null
   amount: number
   /** Zero-based ordering integer. Unique within a deal. */
-  position: number
+  order_index: number
   status: MilestoneStatus
   protection_status: ProtectionStatus
   created_at: string
@@ -259,7 +259,7 @@ export interface MilestoneInsert {
   title: string
   description?: string | null
   amount: number
-  position: number
+  order_index: number
   status?: MilestoneStatus
   protection_status?: ProtectionStatus
 }
@@ -347,7 +347,7 @@ export interface MilestoneUpdate {
   title?: string
   description?: string | null
   amount?: number
-  position?: number
+  order_index?: number
   status?: MilestoneStatus
   protection_status?: ProtectionStatus
 }
