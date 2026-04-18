@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Instrument_Sans, JetBrains_Mono } from "next/font/google";
 import Link from "next/link";
+import { Analytics } from "@vercel/analytics/next";
 import { MobileNav } from "@/components/nav/mobile-nav";
 import { VektrumWordmark } from "@/components/ui/vektrum-logo";
 import { UserMenu } from "@/components/nav/user-menu";
@@ -204,6 +205,7 @@ export default async function RootLayout({
 
         {/* Main */}
         <main className="flex-1">{children}</main>
+        <Analytics />
 
         {/* Footer */}
         <footer className="border-t border-vektrum-border bg-vektrum-surface">
