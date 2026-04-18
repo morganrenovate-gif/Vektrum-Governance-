@@ -11,20 +11,26 @@ const founders = [
   {
     initials: 'AM',
     name: 'Adam Morgan',
-    title: 'Chief Product Officer',
-    bio: "Adam spent years on the contractor side watching milestone payments stall in email threads and PDF approval chains. He built the first version of Vektrum's document verification workflow before joining forces with the Walstad brothers. His focus is translating construction finance workflows into product logic — specifically the draw request, compliance check, and release gate that sits at the center of the platform.",
+    title: 'Co-Founder & Chief Product Officer',
+    bio1: 'Adam brings 10+ years of hands-on construction project management, having personally managed residential and commercial projects valued from $100K to $1M+. As Owner/Operator of Morgan Renovations, he managed full-cycle projects including estimating, budgeting, scheduling, crew oversight, and client relations.',
+    bio2: 'While operating Morgan Renovations, Adam witnessed endemic payment governance failures: draws held up by minor disputes, no server-side enforcement of release conditions, no immutable record of approvals, and projects stalling while lenders and contractors negotiated administrative details. Recognizing this as a structural problem, Adam began building a solution called RenovateAI, architecting the platform around his direct understanding of how payment enforcement could prevent disputes before they cost projects.',
+    bio3: 'Adam is accountable for Vektrum\'s technical architecture and product design. He built the foundational infrastructure (Supabase backend, Stripe Connect integration, API webhooks, DNS configuration) and continues to iterate on core architecture. He is self-taught in software engineering, learning the technologies he needed to solve the problem he understood.',
   },
   {
     initials: 'TW',
     name: 'Tanner Walstad',
-    title: 'Chief Commercial Officer',
-    bio: "Tanner comes from the lending side. He worked with regional banks and credit unions that were manually tracking construction draws in spreadsheets — approving disbursements based on site visit photos emailed in by contractors. That process worked until it didn't. His job at Vektrum is making sure lenders can adopt the platform without disrupting their existing origination workflows, and that the compliance record it produces is one their auditors will accept.",
+    title: 'Co-Founder & Chief Commercial Officer',
+    bio1: 'Tanner brings deep experience in sales, marketing, and go-to-market strategy across institutional software environments. His background includes roles at Canary Speech AI (Sales Specialist & Account Manager for institutional clients), Altol Consulting (Director of Sales and Marketing), World Financial Group (Sales team management), and digital commerce.',
+    bio2: 'Tanner witnessed his mother\'s experience with contractor fraud and misappropriation. This gave him direct insight into a critical market failure: the absence of enforceable payment governance structures that protect property owners and lenders. He independently began building Vektrum as a marketplace platform to manage money transfer and dispute resolution in construction, recognizing that payment disputes were destroying relationships and finances at every tier of the market.',
+    bio3: 'Tanner is accountable for Vektrum\'s commercial strategy, institutional partnerships, and market positioning. He brings institutional SaaS expertise to lender conversations and understands the compliance signaling, sales cycles, and governance requirements that institutional adoption requires.',
   },
   {
     initials: 'PW',
     name: 'Phillip Walstad',
-    title: 'Board & Strategic Advisor',
-    bio: 'Phillip brings the institutional perspective. With a background in construction project finance and real estate capital markets, he advises on the regulatory boundaries that Vektrum must operate within — particularly around fund custody, disbursement authority, and audit trail requirements for federally regulated lenders. He keeps the platform grounded in what the compliance and legal side of the industry will actually accept.',
+    title: 'Board Member, Advisor & Strategic Partner',
+    bio1: 'Phillip Walstad is a Utah-based serial entrepreneur and co-founder of Canary Speech, a healthcare AI company focused on voice biomarker technology for detecting mental health and neurological conditions through speech analysis.',
+    bio2: 'Walstad\'s entrepreneurial background spans technology, social impact, and education sectors. He has founded or co-founded multiple ventures including Compass Group (board member; U.S. and Latin America expansion), Study&Work (education and internship platform), and Turnkey Social (social media marketing agency). His core expertise includes startup formation and scaling, go-to-market strategy, fundraising, product development, and team building.',
+    bio3: 'As Vektrum\'s board member and strategic partner, Phillip provides governance oversight, capital strategy, and operational guidance from his experience building companies across multiple sectors. His background identifying emerging opportunities and scaling ventures to execution directly informs Vektrum\'s approach to institutional market expansion and operational rigor.',
   },
 ]
 
@@ -63,71 +69,35 @@ export default function FoundersPage() {
       </section>
 
       <section className="py-20 sm:py-24 bg-vektrum-bg" aria-label="Founding team">
-        <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="space-y-12">
             {founders.map((founder) => (
               <article
                 key={founder.name}
                 className="rounded-2xl border border-vektrum-border bg-vektrum-surface p-8 hover:border-vektrum-blue/40 hover:shadow-lg hover:shadow-vektrum-blue/5 transition-all"
               >
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-vektrum-blue/10 border border-vektrum-blue/20 mb-6 select-none">
-                  <span className="font-display text-[17px] font-bold tracking-tight text-vektrum-blue">
-                    {founder.initials}
-                  </span>
+                <div className="flex items-center gap-5 mb-6">
+                  <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-vektrum-blue/10 border border-vektrum-blue/20 select-none">
+                    <span className="font-display text-[17px] font-bold tracking-tight text-vektrum-blue">
+                      {founder.initials}
+                    </span>
+                  </div>
+                  <div>
+                    <h2 className="font-display text-[18px] font-bold text-vektrum-text leading-tight">
+                      {founder.name}
+                    </h2>
+                    <p className="mt-0.5 text-[12px] font-semibold uppercase tracking-[0.1em] text-vektrum-faint">
+                      {founder.title}
+                    </p>
+                  </div>
                 </div>
-                <h2 className="font-display text-[17px] font-bold text-vektrum-text leading-tight">
-                  {founder.name}
-                </h2>
-                <p className="mt-1 text-[12px] font-semibold uppercase tracking-[0.1em] text-vektrum-faint">
-                  {founder.title}
-                </p>
-                <div className="mt-1 h-px w-8 bg-vektrum-blue/30" aria-hidden="true" />
-                <p className="mt-5 text-[14px] leading-relaxed text-vektrum-muted">
-                  {founder.bio}
-                </p>
+                <div className="space-y-4 text-[14px] leading-relaxed text-vektrum-muted">
+                  <p>{founder.bio1}</p>
+                  <p>{founder.bio2}</p>
+                  <p>{founder.bio3}</p>
+                </div>
               </article>
             ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-vektrum-canvas py-20 sm:py-28" aria-label="Origin story">
-        <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-vektrum-faint mb-4">
-            How Vektrum started
-          </p>
-          <h2 className="font-display text-2xl font-bold tracking-[-0.025em] text-white sm:text-3xl mb-10">
-            Two solutions. One problem. One company.
-          </h2>
-          <div className="space-y-6 text-[15px] leading-relaxed text-white/70">
-            <p>
-              Adam and Tanner did not know each other when they each independently decided to build
-              software for the same broken process: construction draw disbursement. Adam was approaching
-              it from the contractor side — frustrated that projects stalled because lenders had no
-              reliable way to verify milestone completion. Tanner was approaching it from inside a
-              lender that was approving six-figure disbursements based on unverified photos attached
-              to email threads.
-            </p>
-            <p>
-              They were, in effect, building competing products. Adam's first prototype let
-              contractors submit milestone documentation through a structured workflow instead of
-              informal email. Tanner's let lenders define release conditions and track draw
-              status across a portfolio. Neither product was complete. Both pointed at the same gap.
-            </p>
-            <p>
-              When they eventually connected — through a mutual contact in regional construction
-              lending — the overlap was immediate and obvious. They merged the two prototypes, brought
-              in Phillip for regulatory and capital markets guidance, and rebuilt from scratch as a
-              unified governance layer: a single platform where contractors submit, lenders verify,
-              and funds release only when the conditions are met. No exceptions. No manual overrides.
-              No email threads standing between a contractor and their payment.
-            </p>
-            <p>
-              That is still what Vektrum does. The platform is more complete now — compliance AI,
-              immutable audit trails, Stripe Connect fund custody — but the core logic has not
-              changed since the first whiteboard session: funds should release when work is verified,
-              not when someone decides to trust a photo.
-            </p>
           </div>
         </div>
       </section>
