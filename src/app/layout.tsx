@@ -103,18 +103,15 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className={`${inter.variable} ${instrumentSans.variable} ${jetbrainsMono.variable}`}>
-<head>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-SZ5V40216Y"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', 'G-SZ5V40216Y');
-  </script>
-</head>
-
+      <head>
+         <script async src="..."></script>
+         <script dangerouslySetInnerHTML={{ __html: `
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-SZ5V40216Y');
+        `}} />
+      </head>
       <body className="flex min-h-screen flex-col bg-vektrum-bg font-sans text-vektrum-text antialiased">
         <script
           type="application/ld+json"
