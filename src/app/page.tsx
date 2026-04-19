@@ -56,17 +56,14 @@ export default async function HomePage() {
 
           {/* Headline — display typeface for authority */}
           <h1 className="animate-fade-in font-display text-center text-[2rem] font-bold tracking-[-0.035em] text-vektrum-text sm:text-5xl lg:text-[3.75rem] lg:leading-[1.08] text-balance leading-[1.12]">
-            $9M jobs don&rsquo;t stall
+            Control every construction draw.
             <br className="hidden sm:block" />
-            {' '}over $15K disputes.
-            <br className="hidden sm:block" />
-            <span className="text-vektrum-faint">They shouldn&rsquo;t.</span>
+            <span className="text-vektrum-faint">Before money moves.</span>
           </h1>
 
           {/* Sub */}
           <p className="animate-fade-in-delay mx-auto mt-6 max-w-lg text-center text-[17px] leading-relaxed text-vektrum-muted">
-            Vektrum isolates every milestone. A dispute on one never freezes another.
-            Funds release when work is verified &mdash; not before.
+             Vektrum enforces milestone-based releases, isolates disputes to individual draws, and ensures funds move only when work is verified.
           </p>
 
           {/* CTAs */}
@@ -111,6 +108,82 @@ export default async function HomePage() {
         </div>
       </section>
 
+{/* ─── Audience Split ────────────────────────────────────────────────── */}
+<section className="bg-vektrum-bg py-16 sm:py-20">
+  <div className="mx-auto max-w-6xl px-6 sm:px-8 lg:px-12">
+    <div className="mb-8 text-center">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-faint">
+        Choose your path
+      </p>
+    </div>
+
+    <div className="grid gap-4 sm:grid-cols-2">
+      <Link
+        href="/lenders"
+        className="group flex flex-col rounded-2xl border border-vektrum-border bg-vektrum-surface p-10 transition-all duration-300 hover:border-vektrum-blue/40 hover:shadow-lg hover:shadow-vektrum-blue/5"
+      >
+        <span className="mb-4 text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-blue">
+          For funders
+        </span>
+        <h2 className="font-display text-xl font-bold tracking-[-0.02em] text-vektrum-text sm:text-2xl">
+          Protect capital. Control every release.
+        </h2>
+        <p className="mt-4 flex-1 text-[14px] leading-relaxed text-vektrum-muted">
+          Protect capital. Enforce milestone-based releases. Eliminate draw disputes before funds move.
+        </p>
+        <div className="mt-8 inline-flex items-center gap-2 text-[13px] font-semibold text-vektrum-blue transition-all group-hover:gap-3">
+          Explore for funders
+          <ArrowRight size={14} />
+        </div>
+      </Link>
+
+      <Link
+        href="/contractors"
+        className="group flex flex-col rounded-2xl border border-vektrum-border bg-vektrum-surface p-10 transition-all duration-300 hover:border-vektrum-blue/40 hover:shadow-lg hover:shadow-vektrum-blue/5"
+      >
+        <span className="mb-4 text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-green">
+          For contractors
+        </span>
+        <h2 className="font-display text-xl font-bold tracking-[-0.02em] text-vektrum-text sm:text-2xl">
+          Get paid when the work is done.
+        </h2>
+        <p className="mt-4 flex-1 text-[14px] leading-relaxed text-vektrum-muted">
+          Get paid faster with verified milestones. Reduce disputes. Keep projects moving.
+        </p>
+        <div className="mt-8 inline-flex items-center gap-2 text-[13px] font-semibold text-vektrum-green transition-all group-hover:gap-3">
+          Explore for contractors
+          <ArrowRight size={14} />
+        </div>
+      </Link>
+    </div>
+  </div>
+</section>
+
+      {/* ─── Credibility Bar ───────────────────────────────────────────────── */}
+<section className="border-b border-vektrum-border bg-vektrum-surface/60">
+  <div className="mx-auto max-w-6xl px-6 py-8 sm:px-8 lg:px-12">
+    <div className="mb-5 flex flex-wrap items-center justify-center gap-6 sm:gap-10">
+      {[
+        { icon: Zap, text: "AI-reviewed on every draw", color: "text-vektrum-blue" },
+        { icon: Shield, text: "Stripe Connect secured funds", color: "text-vektrum-green" },
+        { icon: Lock, text: "Zero fund custody by Vektrum", color: "text-vektrum-muted" },
+        { icon: CheckCircle2, text: "Real-time milestone verification", color: "text-vektrum-blue" },
+      ].map(({ icon: Icon, text, color }) => (
+        <div key={text} className="flex items-center gap-2">
+          <Icon size={14} className={color} aria-hidden="true" />
+          <span className="text-[12px] font-medium text-vektrum-muted">
+            {text}
+          </span>
+        </div>
+      ))}
+    </div>
+
+    <p className="text-center text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-faint">
+      Built for institutional-grade construction finance
+    </p>
+  </div>
+</section>
+
       {/* ─── Live Proof Bar ────────────────────────────────────────────────── */}
       <section className="border-y border-vektrum-border bg-vektrum-surface">
         <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-10">
@@ -150,6 +223,46 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+      
+{/* ─── Proof Layer ───────────────────────────────────────────────────── */}
+<section className="bg-vektrum-bg py-12 sm:py-16">
+  <div className="mx-auto max-w-6xl px-6 sm:px-8 lg:px-12">
+    <div className="mb-8 text-center">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-faint">
+        Why teams trust Vektrum
+      </p>
+    </div>
+
+    <div className="grid gap-4 sm:grid-cols-3">
+      <div className="rounded-2xl border border-vektrum-border bg-vektrum-surface p-8">
+        <h3 className="text-[15px] font-semibold tracking-[-0.01em] text-vektrum-text">
+          Built by operators
+        </h3>
+        <p className="mt-3 text-[13px] leading-relaxed text-vektrum-muted">
+          Created by construction and product operators who understand draw friction, dispute risk, and delayed payments.
+        </p>
+      </div>
+
+      <div className="rounded-2xl border border-vektrum-border bg-vektrum-surface p-8">
+        <h3 className="text-[15px] font-semibold tracking-[-0.01em] text-vektrum-text">
+          Funds held by Stripe
+        </h3>
+        <p className="mt-3 text-[13px] leading-relaxed text-vektrum-muted">
+          Vektrum governs release conditions. Stripe Connect holds and moves funds.
+        </p>
+      </div>
+
+      <div className="rounded-2xl border border-vektrum-border bg-vektrum-surface p-8">
+        <h3 className="text-[15px] font-semibold tracking-[-0.01em] text-vektrum-text">
+          Built for real deal sizes
+        </h3>
+        <p className="mt-3 text-[13px] leading-relaxed text-vektrum-muted">
+          Purpose-built for construction deals from $500K to $25M.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* ─── Trust Numbers ───────────────────────────────────────────────── */}
       <section className="bg-vektrum-bg py-10">
@@ -341,13 +454,8 @@ export default async function HomePage() {
               </p>
             </div>
 
-            {/* Card 4 — AI Pre-Clearance (coming soon) */}
+            {/* Card 4 — AI Pre-Clearance */}
             <div className="rounded-2xl border border-vektrum-border bg-vektrum-surface p-8 hover:border-vektrum-blue/40 hover:shadow-lg hover:shadow-vektrum-blue/5 transition-all duration-300 relative">
-              <div className="absolute top-4 right-4">
-                <span className="rounded-full border border-vektrum-amber-border bg-vektrum-amber-bg px-2 py-0.5 text-[10px] font-semibold text-vektrum-amber">
-                  Coming soon
-                </span>
-              </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-vektrum-blue/10 mb-5">
                 <Zap size={20} className="text-vektrum-blue" />
               </div>

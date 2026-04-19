@@ -164,28 +164,18 @@ export default async function RootLayout({
                       For Contractors
                     </Link>
                     <Link
-                      href="/about"
-                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
-                    >
-                      About
-                    </Link>
-                    <Link
                       href="/pricing"
                       className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
                     >
                       Pricing
                     </Link>
                     <Link
-                      href="/founders"
+                      href="https://cal.com/vektrum"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
                     >
-                      Founders
-                    </Link>
-                    <Link
-                      href="/dashboard"
-                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
-                    >
-                      Dashboard
+                      Book a call
                     </Link>
                     <Link
                       href="/auth/login"
@@ -195,10 +185,15 @@ export default async function RootLayout({
                     </Link>
                     <Link
                       href="/auth/signup"
-                      className="ml-2 rounded-lg bg-vektrum-blue px-4 py-2 text-[13px] font-medium text-white hover:bg-vektrum-blue-hover transition-all shadow-sm"
+                      className="group inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-8 py-3.5 text-[15px] font-semibold text-white shadow-blue transition-all hover:bg-vektrum-blue-hover hover:shadow-lg"
                     >
-                      Get started
+                      Protect your first payment — free
+                      <ArrowRight
+                        size={15}
+                        className="transition-transform group-hover:translate-x-0.5"
+                      />
                     </Link>
+                     
                   </>
                 )}
               </div>
@@ -301,14 +296,7 @@ export default async function RootLayout({
                 <p className="text-[12px] text-vektrum-faint">
                   Vektrum governs disbursement. Vektrum never holds funds.
                 </p>
-                <a
-                  href="https://perplexity.ai"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[11px] text-vektrum-faint hover:text-vektrum-muted transition-colors"
-                >
-                  Competitive intelligence powered by Perplexity
-                </a>
+                {/* Removed footer attribution */}
               </div>
             </div>
           </div>
