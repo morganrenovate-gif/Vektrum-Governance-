@@ -63,8 +63,7 @@ export default async function HomePage() {
 
           {/* Sub */}
           <p className="animate-fade-in-delay mx-auto mt-6 max-w-lg text-center text-[17px] leading-relaxed text-vektrum-muted">
-            Vektrum isolates every milestone. A dispute on one never freezes another.
-            Funds release when work is verified &mdash; not before.
+             Vektrum enforces milestone-based releases, isolates disputes to individual draws, and ensures funds move only when work is verified.
           </p>
 
           {/* CTAs */}
