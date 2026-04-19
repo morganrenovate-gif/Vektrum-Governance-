@@ -270,7 +270,7 @@ export function DemoScene() {
 
   return (
     <div
-      className="rounded-2xl border border-vektrum-border bg-vektrum-surface shadow-xl shadow-vektrum-blue/5 overflow-hidden"
+      className="rounded-2xl border border-vektrum-border bg-vektrum-surface shadow-xl shadow-vektrum-blue/5 overflow-hidden min-h-[720px] sm:min-h-[760px]"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
