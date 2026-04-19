@@ -14,6 +14,8 @@ import {
   X,
   BadgeCheck,
   Star,
+  AlertCircle,
+  Banknote,
 } from 'lucide-react'
 import { DemoScene } from '@/components/homepage/demo-scene'
 
@@ -43,7 +45,10 @@ export default async function HomePage() {
         {/* Brand blue radial glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-vektrum-blue-subtle/60 to-transparent rounded-full blur-3xl" />
 
-        <div className="relative max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 pt-24 pb-20 sm:pt-32 sm:pb-28">
+       <div className="relative max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 pt-24 pb-20 sm:pt-32 sm:pb-28">
+         <div className="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center"></div>
+         {/* Left: hero copy */}
+        <div>
           {/* Badge */}
           <div className="animate-fade-in flex justify-center mb-8">
             <div className="inline-flex items-center gap-2 rounded-full border border-vektrum-border bg-vektrum-surface px-4 py-1.5 shadow-sm">
@@ -108,6 +113,80 @@ export default async function HomePage() {
               <Star size={14} className="text-vektrum-amber" aria-hidden="true" />
               <span>Contractors always join free</span>
             </div>
+            {/* Right: product preview */}
+<div className="hidden lg:block mt-12 lg:mt-0">
+  <div className="rounded-2xl border border-vektrum-border bg-vektrum-surface shadow-2xl shadow-vektrum-blue/10 overflow-hidden">
+    <div className="flex items-center gap-1.5 border-b border-vektrum-border bg-vektrum-surface-alt px-4 py-3">
+      <div className="h-2.5 w-2.5 rounded-full bg-vektrum-blue/30" />
+      <div className="h-2.5 w-2.5 rounded-full bg-vektrum-blue/40" />
+      <div className="h-2.5 w-2.5 rounded-full bg-vektrum-blue/50" />
+      <div className="mx-auto flex items-center gap-2 rounded-md border border-vektrum-border-subtle bg-vektrum-bg px-3 py-1">
+        <div className="h-1.5 w-1.5 rounded-full bg-vektrum-blue" />
+        <span className="text-[11px] text-vektrum-faint">app.vektrum.io</span>
+      </div>
+    </div>
+
+    <div className="p-5 space-y-3">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-faint">
+        $15K dispute — $9M project unaffected
+      </p>
+
+      <div className="rounded-xl border border-vektrum-border bg-vektrum-surface p-3.5 flex items-center justify-between">
+        <span className="text-[12px] font-medium text-vektrum-text">Harbor Logistics Center</span>
+        <span className="text-[13px] font-bold tabular-nums text-vektrum-text">$9,000,000</span>
+      </div>
+
+      <div className="space-y-2">
+        <div className="rounded-lg border border-vektrum-blue/20 bg-vektrum-blue/5 px-3.5 py-2.5 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 size={13} className="text-vektrum-blue flex-shrink-0" />
+            <span className="text-[12px] font-medium text-vektrum-text">Site Preparation</span>
+          </div>
+          <p className="text-[11px] font-semibold tabular-nums text-vektrum-blue">$320,000 released</p>
+        </div>
+
+        <div className="rounded-lg border border-vektrum-border bg-vektrum-surface-alt px-3.5 py-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <AlertCircle size={13} className="text-vektrum-blue flex-shrink-0" />
+              <span className="text-[12px] font-medium text-vektrum-text">Concrete Sub-grade</span>
+            </div>
+            <span className="rounded-full bg-vektrum-blue/10 px-2 py-0.5 text-[10px] font-medium text-vektrum-blue">Review hold</span>
+          </div>
+          <div className="mt-2 flex items-center justify-between">
+            <p className="text-[11px] text-vektrum-blue font-semibold">$15,000 locked</p>
+            <p className="text-[10px] text-vektrum-faint">Isolated — does not block others</p>
+          </div>
+        </div>
+
+        {[
+          { label: 'Structural Steel', amount: '$2,180,000', pct: 100 },
+          { label: 'MEP Systems', amount: '$1,640,000', pct: 75 },
+        ].map((m) => (
+          <div key={m.label} className="rounded-lg border border-vektrum-border bg-vektrum-surface px-3.5 py-2.5">
+            <div className="flex items-center justify-between gap-2 mb-1.5">
+              <div className="flex items-center gap-2">
+                <Banknote size={13} className="text-vektrum-blue flex-shrink-0" />
+                <span className="text-[12px] font-medium text-vektrum-text">{m.label}</span>
+              </div>
+              <span className="text-[11px] font-semibold tabular-nums text-vektrum-blue">{m.amount}</span>
+            </div>
+            <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-vektrum-surface-alt">
+              <div className="absolute left-0 top-0 h-full rounded-full bg-vektrum-blue" style={{ width: `${m.pct}%` }} />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="rounded-xl border border-vektrum-blue/20 bg-vektrum-blue/5 px-4 py-3">
+        <p className="text-[12px] font-semibold text-vektrum-blue">$8,985,000 continues flowing</p>
+        <p className="mt-0.5 text-[11px] text-vektrum-muted">
+          The $15K dispute is isolated to its milestone. Every other payment proceeds on schedule.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
           </div>
         </div>
       </section>
@@ -228,7 +307,7 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-      
+
             {/* ─── Partnership Model Flow ─────────────────────────────────────────── */}
       <section className="bg-vektrum-surface border-b border-vektrum-border py-16 sm:py-20">
         <div className="mx-auto max-w-5xl px-6 sm:px-8 lg:px-12">
