@@ -56,11 +56,9 @@ export default async function HomePage() {
 
           {/* Headline — display typeface for authority */}
           <h1 className="animate-fade-in font-display text-center text-[2rem] font-bold tracking-[-0.035em] text-vektrum-text sm:text-5xl lg:text-[3.75rem] lg:leading-[1.08] text-balance leading-[1.12]">
-            $9M jobs don&rsquo;t stall
+            Control every construction draw.
             <br className="hidden sm:block" />
-            {' '}over $15K disputes.
-            <br className="hidden sm:block" />
-            <span className="text-vektrum-faint">They shouldn&rsquo;t.</span>
+            <span className="text-vektrum-faint">Before money moves.</span>
           </h1>
 
           {/* Sub */}
@@ -110,7 +108,7 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-      
+
 {/* ─── Audience Split ────────────────────────────────────────────────── */}
 <section className="bg-vektrum-bg py-16 sm:py-20">
   <div className="mx-auto max-w-6xl px-6 sm:px-8 lg:px-12">
