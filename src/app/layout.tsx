@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Instrument_Sans, JetBrains_Mono } from "next/font/google";
 import Link from "next/link";
 import { Analytics } from "@vercel/analytics/next";
+import { ArrowRight } from "lucide-react"
 import { MobileNav } from "@/components/nav/mobile-nav";
 import { VektrumWordmark } from "@/components/ui/vektrum-logo";
 import { UserMenu } from "@/components/nav/user-menu";
