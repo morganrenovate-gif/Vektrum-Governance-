@@ -164,28 +164,10 @@ export default async function RootLayout({
                       For Contractors
                     </Link>
                     <Link
-                      href="/about"
-                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
-                    >
-                      About
-                    </Link>
-                    <Link
                       href="/pricing"
                       className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
                     >
                       Pricing
-                    </Link>
-                    <Link
-                      href="/founders"
-                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
-                    >
-                      Founders
-                    </Link>
-                    <Link
-                      href="/dashboard"
-                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
-                    >
-                      Dashboard
                     </Link>
                     <Link
                       href="/auth/login"
