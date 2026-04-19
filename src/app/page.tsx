@@ -110,6 +110,58 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+      
+{/* ─── Audience Split ────────────────────────────────────────────────── */}
+<section className="bg-vektrum-bg py-16 sm:py-20">
+  <div className="mx-auto max-w-6xl px-6 sm:px-8 lg:px-12">
+    <div className="mb-8 text-center">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-faint">
+        Choose your path
+      </p>
+    </div>
+
+    <div className="grid gap-4 sm:grid-cols-2">
+      <Link
+        href="/lenders"
+        className="group flex flex-col rounded-2xl border border-vektrum-border bg-vektrum-surface p-10 transition-all duration-300 hover:border-vektrum-blue/40 hover:shadow-lg hover:shadow-vektrum-blue/5"
+      >
+        <span className="mb-4 text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-blue">
+          For funders
+        </span>
+        <h2 className="font-display text-xl font-bold tracking-[-0.02em] text-vektrum-text sm:text-2xl">
+          Protect capital. Control every release.
+        </h2>
+        <p className="mt-4 flex-1 text-[14px] leading-relaxed text-vektrum-muted">
+          Protect capital. Enforce milestone-based releases. Eliminate draw disputes before funds move.
+        </p>
+        <div className="mt-8 inline-flex items-center gap-2 text-[13px] font-semibold text-vektrum-blue transition-all group-hover:gap-3">
+          Explore for funders
+          <ArrowRight size={14} />
+        </div>
+      </Link>
+
+      <Link
+        href="/contractors"
+        className="group flex flex-col rounded-2xl border border-vektrum-border bg-vektrum-surface p-10 transition-all duration-300 hover:border-vektrum-blue/40 hover:shadow-lg hover:shadow-vektrum-blue/5"
+      >
+        <span className="mb-4 text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-green">
+          For contractors
+        </span>
+        <h2 className="font-display text-xl font-bold tracking-[-0.02em] text-vektrum-text sm:text-2xl">
+          Get paid when the work is done.
+        </h2>
+        <p className="mt-4 flex-1 text-[14px] leading-relaxed text-vektrum-muted">
+          Get paid faster with verified milestones. Reduce disputes. Keep projects moving.
+        </p>
+        <div className="mt-8 inline-flex items-center gap-2 text-[13px] font-semibold text-vektrum-green transition-all group-hover:gap-3">
+          Explore for contractors
+          <ArrowRight size={14} />
+        </div>
+      </Link>
+    </div>
+  </div>
+</section>
+
       {/* ─── Credibility Bar ───────────────────────────────────────────────── */}
 <section className="border-b border-vektrum-border bg-vektrum-surface/60">
   <div className="mx-auto max-w-6xl px-6 py-8 sm:px-8 lg:px-12">
