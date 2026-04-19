@@ -66,6 +66,10 @@ export default async function HomePage() {
              Vektrum enforces milestone-based releases, isolates disputes to individual draws, and ensures funds move only when work is verified.
           </p>
 
+          <p className="mx-auto mt-4 max-w-3xl text-center text-[15px] leading-relaxed text-vektrum-faint">
+             Vektrum is a software governance layer. We enforce release conditions and audit every disbursement. We do not hold, transmit, or control funds. We are built to operate alongside licensed escrow providers, not replace them.
+          </p>
+
           {/* CTAs */}
           <div className="animate-fade-in-delay-2 mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
             <Link
