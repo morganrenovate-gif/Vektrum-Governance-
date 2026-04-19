@@ -48,7 +48,7 @@ export default function CareersPage() {
             </p>
             <div className="mt-6">
               <Link
-                href="mailto:lenders@vektrum.io"
+                href="mailto:operations@vektrum.io"
                 className="group inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-6 py-2.5 text-[14px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 hover:bg-vektrum-blue-hover transition-all"
               >
                 Send your resume

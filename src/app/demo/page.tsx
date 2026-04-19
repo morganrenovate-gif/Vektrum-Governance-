@@ -353,10 +353,10 @@ export default function DemoPage() {
               Get started — it&apos;s free
             </Link>
             <Link
-              href="mailto:lenders@vektrum.io"
+              href="mailto:operations@vektrum.io"
               className="inline-flex items-center gap-2 rounded-lg border border-white/20 px-8 py-3 text-sm font-semibold text-white hover:bg-white/10 transition-colors"
             >
-              Contact lenders@vektrum.io
+              Contact operations@vektrum.io
             </Link>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-white/40">

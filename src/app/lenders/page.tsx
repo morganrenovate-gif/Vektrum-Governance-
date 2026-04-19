@@ -148,7 +148,7 @@ export default function LendersPage() {
               <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
             </Link>
             <Link
-              href="mailto:lenders@vektrum.io"
+              href="mailto:operations@vektrum.io"
               className="inline-flex min-h-[48px] items-center justify-center rounded-xl border border-vektrum-border bg-vektrum-surface px-7 py-3 text-[14px] font-semibold text-vektrum-muted shadow-sm hover:bg-vektrum-surface-alt hover:border-vektrum-blue/40 transition-all"
             >
               Talk to us

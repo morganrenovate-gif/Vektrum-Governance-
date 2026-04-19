@@ -80,7 +80,7 @@ export default async function RootLayout({
         "description": "Vektrum is a construction payment governance platform providing controlled draw disbursements, AI compliance review, and immutable audit trails for lenders and contractors.",
         "contactPoint": {
           "@type": "ContactPoint",
-          "email": "lenders@vektrum.io",
+          "email": "operations@vektrum.io",
           "contactType": "sales"
         },
         "sameAs": []

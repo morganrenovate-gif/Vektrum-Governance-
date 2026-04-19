@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Contact Vektrum | lenders@vektrum.io',
+  title: 'Contact Vektrum | operations@vektrum.io',
   description: 'Contact Vektrum for lender inquiries, partnership discussions, or platform support.',
 }
 
@@ -19,10 +19,10 @@ export default function ContactPage() {
               Funder &amp; Partnership Inquiries
             </h2>
             <a
-              href="mailto:lenders@vektrum.io"
+              href="mailto:operations@vektrum.io"
               className="text-[15px] text-vektrum-blue hover:underline"
             >
-              lenders@vektrum.io
+              operations@vektrum.io
             </a>
           </div>
           <div className="rounded-xl border border-vektrum-border bg-vektrum-surface p-6">
@@ -32,10 +32,10 @@ export default function ContactPage() {
             <p className="text-[15px] leading-relaxed text-vektrum-muted">
               {'Use the Help Center or email '}
               <a
-                href="mailto:lenders@vektrum.io"
+                href="mailto:operations@vektrum.io"
                 className="text-vektrum-blue hover:underline"
               >
-                lenders@vektrum.io
+                operations@vektrum.io
               </a>
             </p>
           </div>
@@ -43,8 +43,8 @@ export default function ContactPage() {
 
         <p className="mt-10 text-[15px] leading-relaxed text-vektrum-muted">
           {'Vektrum is open to contractors and funders. Create a free account to get started, or if you are an institutional funder evaluating the platform, email '}
-          <a href="mailto:lenders@vektrum.io" className="text-vektrum-blue hover:underline">
-            lenders@vektrum.io
+          <a href="mailto:operations@vektrum.io" className="text-vektrum-blue hover:underline">
+            operations@vektrum.io
           </a>
           {' to speak with the team.'}
         </p>

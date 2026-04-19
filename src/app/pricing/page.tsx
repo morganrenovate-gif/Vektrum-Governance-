@@ -259,7 +259,7 @@ export default function PricingPage() {
               retainerNote="Floor: $25,000 / yr — negotiated"
               implementation="$15,000–$50,000 — includes integration & training"
               cta="Contact us"
-              ctaHref="mailto:lenders@vektrum.io"
+              ctaHref="mailto:operations@vektrum.io"
               features={[
                 'Everything in Institutional',
                 'LOS / API integration (included)',
@@ -407,7 +407,7 @@ export default function PricingPage() {
               <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
             </Link>
             <Link
-              href="mailto:lenders@vektrum.io"
+              href="mailto:operations@vektrum.io"
               className="inline-flex min-h-[48px] items-center justify-center rounded-xl border border-vektrum-border bg-vektrum-surface px-7 py-3 text-[14px] font-semibold text-vektrum-muted shadow-sm hover:bg-vektrum-surface-alt hover:border-vektrum-blue/40 transition-all"
             >
               Talk to us about Institutional

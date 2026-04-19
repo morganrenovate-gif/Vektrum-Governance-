@@ -63,8 +63,8 @@ export default function SecurityPage() {
 
         <p className="mt-10 text-[15px] leading-relaxed text-vektrum-muted">
           {'For security inquiries, vendor due diligence packages, or penetration test scope discussions: '}
-          <a href="mailto:lenders@vektrum.io" className="text-vektrum-blue hover:underline">
-            lenders@vektrum.io
+          <a href="mailto:operations@vektrum.io" className="text-vektrum-blue hover:underline">
+            operations@vektrum.io
           </a>
         </p>
       </div>
