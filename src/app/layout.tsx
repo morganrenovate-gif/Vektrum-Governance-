@@ -301,14 +301,7 @@ export default async function RootLayout({
                 <p className="text-[12px] text-vektrum-faint">
                   Vektrum governs disbursement. Vektrum never holds funds.
                 </p>
-                <a
-                  href="https://perplexity.ai"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[11px] text-vektrum-faint hover:text-vektrum-muted transition-colors"
-                >
-                  Competitive intelligence powered by Perplexity
-                </a>
+                {/* Removed footer attribution */}
               </div>
             </div>
           </div>
