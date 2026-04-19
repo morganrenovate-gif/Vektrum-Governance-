@@ -129,7 +129,7 @@ export default async function HomePage() {
           Protect capital. Control every release.
         </h2>
         <p className="mt-4 flex-1 text-[14px] leading-relaxed text-vektrum-muted">
-          Protect capital. Enforce milestone-based releases. Eliminate draw disputes before funds move.
+          Enforce milestone-based releases. Eliminate draw disputes before funds move.
         </p>
         <div className="mt-8 inline-flex items-center gap-2 text-[13px] font-semibold text-vektrum-blue transition-all group-hover:gap-3">
           Explore for funders
