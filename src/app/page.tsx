@@ -174,6 +174,46 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+      
+{/* ─── Proof Layer ───────────────────────────────────────────────────── */}
+<section className="bg-vektrum-bg py-12 sm:py-16">
+  <div className="mx-auto max-w-6xl px-6 sm:px-8 lg:px-12">
+    <div className="mb-8 text-center">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-faint">
+        Why teams trust Vektrum
+      </p>
+    </div>
+
+    <div className="grid gap-4 sm:grid-cols-3">
+      <div className="rounded-2xl border border-vektrum-border bg-vektrum-surface p-8">
+        <h3 className="text-[15px] font-semibold tracking-[-0.01em] text-vektrum-text">
+          Built by operators
+        </h3>
+        <p className="mt-3 text-[13px] leading-relaxed text-vektrum-muted">
+          Created by construction and product operators who understand draw friction, dispute risk, and delayed payments.
+        </p>
+      </div>
+
+      <div className="rounded-2xl border border-vektrum-border bg-vektrum-surface p-8">
+        <h3 className="text-[15px] font-semibold tracking-[-0.01em] text-vektrum-text">
+          Funds held by Stripe
+        </h3>
+        <p className="mt-3 text-[13px] leading-relaxed text-vektrum-muted">
+          Vektrum governs release conditions. Stripe Connect holds and moves funds.
+        </p>
+      </div>
+
+      <div className="rounded-2xl border border-vektrum-border bg-vektrum-surface p-8">
+        <h3 className="text-[15px] font-semibold tracking-[-0.01em] text-vektrum-text">
+          Built for real deal sizes
+        </h3>
+        <p className="mt-3 text-[13px] leading-relaxed text-vektrum-muted">
+          Purpose-built for construction deals from $500K to $25M.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* ─── Trust Numbers ───────────────────────────────────────────────── */}
       <section className="bg-vektrum-bg py-10">
