@@ -20,7 +20,7 @@ export default function SecurityPage() {
             SOC 2 Type I Audit
           </p>
           <p className="text-[15px] leading-relaxed text-vektrum-muted">
-            Initiated Q2 2026. Target completion: Q3 2026. Auditor: To be announced upon engagement.
+              SOC 2 Type I audit in progress. Security documentation available to institutional clients upon request.
           </p>
         </div>
 
