@@ -170,6 +170,14 @@ export default async function RootLayout({
                       Pricing
                     </Link>
                     <Link
+                      href="https://cal.com/vektrum"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                    >
+                      Book a call
+                    </Link>
+                    <Link
                       href="/auth/login"
                       className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
                     >
