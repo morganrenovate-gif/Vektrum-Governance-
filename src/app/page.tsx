@@ -46,9 +46,9 @@ export default async function HomePage() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-vektrum-blue-subtle/60 to-transparent rounded-full blur-3xl" />
 
        <div className="relative max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 pt-24 pb-20 sm:pt-32 sm:pb-28">
-         <div className="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center"></div>
-         {/* Left: hero copy */}
-        <div>
+  <div className="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
+    {/* Left: hero copy */}
+    <div></div></div>
           {/* Badge */}
           <div className="animate-fade-in flex justify-center mb-8">
             <div className="inline-flex items-center gap-2 rounded-full border border-vektrum-border bg-vektrum-surface px-4 py-1.5 shadow-sm">
