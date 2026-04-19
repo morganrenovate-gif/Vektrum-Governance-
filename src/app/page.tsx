@@ -168,6 +168,7 @@ export default async function HomePage() {
         { icon: Shield, text: "Stripe Connect secured funds", color: "text-vektrum-green" },
         { icon: Lock, text: "Zero fund custody by Vektrum", color: "text-vektrum-muted" },
         { icon: CheckCircle2, text: "Real-time milestone verification", color: "text-vektrum-blue" },
+        { icon: Shield, text: "Vektrum requires a licensed fund custodian", color: "text-vektrum-green" },
       ].map(({ icon: Icon, text, color }) => (
         <div key={text} className="flex items-center gap-2">
           <Icon size={14} className={color} aria-hidden="true" />
