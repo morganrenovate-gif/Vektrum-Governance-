@@ -186,7 +186,7 @@ export default async function RootLayout({
                     </Link>
                     <Link
                       href="/auth/signup"
-                      className="group inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-8 py-3.5 text-[15px] font-semibold text-white shadow-blue transition-all hover:bg-vektrum-blue-hover hover:shadow-lg"
+                      className="group inline-flex items-center justify-center gap-2 rounded-lg bg-vektrum-blue px-4 py-2 text-[13px] font-medium text-white hover:bg-vektrum-blue-hover transition-all shadow-sm"
                     >
                       Protect your first payment — free
                       <ArrowRight
@@ -250,6 +250,12 @@ export default async function RootLayout({
                   </Link>
                   <Link href="/contractors" className="text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors">
                     Contractors
+                  </Link>
+                  <Link
+                    href="/founders"
+                    className="text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors"
+                  >
+                    Founders
                   </Link>
                 </div>
                 <div className="flex flex-col gap-3">
