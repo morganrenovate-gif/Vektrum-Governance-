@@ -110,6 +110,30 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+      {/* ─── Credibility Bar ───────────────────────────────────────────────── */}
+<section className="border-b border-vektrum-border bg-vektrum-surface/60">
+  <div className="mx-auto max-w-6xl px-6 py-8 sm:px-8 lg:px-12">
+    <div className="mb-5 flex flex-wrap items-center justify-center gap-6 sm:gap-10">
+      {[
+        { icon: Zap, text: "AI-reviewed on every draw", color: "text-vektrum-blue" },
+        { icon: Shield, text: "Stripe Connect secured funds", color: "text-vektrum-green" },
+        { icon: Lock, text: "Zero fund custody by Vektrum", color: "text-vektrum-muted" },
+        { icon: CheckCircle2, text: "Real-time milestone verification", color: "text-vektrum-blue" },
+      ].map(({ icon: Icon, text, color }) => (
+        <div key={text} className="flex items-center gap-2">
+          <Icon size={14} className={color} aria-hidden="true" />
+          <span className="text-[12px] font-medium text-vektrum-muted">
+            {text}
+          </span>
+        </div>
+      ))}
+    </div>
+
+    <p className="text-center text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-faint">
+      Built for institutional-grade construction finance
+    </p>
+  </div>
+</section>
 
       {/* ─── Live Proof Bar ────────────────────────────────────────────────── */}
       <section className="border-y border-vektrum-border bg-vektrum-surface">
