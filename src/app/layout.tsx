@@ -193,8 +193,7 @@ export default async function RootLayout({
                         className="transition-transform group-hover:translate-x-0.5"
                       />
                     </Link>
-                      Get started
-                    </Link>
+                     
                   </>
                 )}
               </div>
