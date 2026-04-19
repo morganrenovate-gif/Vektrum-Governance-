@@ -184,12 +184,7 @@ export default function PricingPage() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-gradient-to-b from-vektrum-blue-subtle/50 to-transparent rounded-full blur-3xl" />
 
         <div className="relative max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-vektrum-border bg-vektrum-surface px-4 py-1.5 shadow-sm mb-8">
-            <div className="h-1.5 w-1.5 rounded-full bg-vektrum-green animate-pulse-slow" />
-            <span className="text-[12px] font-medium text-vektrum-muted tracking-wide">
-              Pricing Model v2.0 &mdash; Effective April 2026
-            </span>
-          </div>
+    
 
           <h1 className="text-4xl font-bold tracking-[-0.035em] text-vektrum-text sm:text-5xl text-balance">
             Governance + Performance.
