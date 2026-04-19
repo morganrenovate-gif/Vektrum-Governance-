@@ -32,90 +32,65 @@ export default async function HomePage() {
   return (
     <div className="flex flex-col">
       {/* ─── Hero ──────────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-vektrum-bg">
-        {/* Blueprint grid */}
-        <div
-          className="absolute inset-0 opacity-[0.035]"
-          style={{
-            backgroundImage:
-              'linear-gradient(rgba(26,58,150,1) 1px, transparent 1px), linear-gradient(90deg, rgba(26,58,150,1) 1px, transparent 1px)',
-            backgroundSize: '64px 64px',
-          }}
-        />
-        {/* Brand blue radial glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-vektrum-blue-subtle/60 to-transparent rounded-full blur-3xl" />
+      <section className="relative overflow-hidden bg-[#0D1B2A]">
+
+       {/* Brand blue radial glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-vektrum-blue/20 to-transparent rounded-full blur-3xl" />
 
        <div className="relative max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 pt-24 pb-20 sm:pt-32 sm:pb-28">
-  <div className="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
-    {/* Left: hero copy */}
-    <div></div></div>
-          {/* Badge */}
-          <div className="animate-fade-in flex justify-center mb-8">
-            <div className="inline-flex items-center gap-2 rounded-full border border-vektrum-border bg-vektrum-surface px-4 py-1.5 shadow-sm">
-              <div className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-vektrum-green animate-pulse-slow" />
-              <span className="text-[11px] sm:text-[12px] font-medium text-vektrum-muted tracking-wide text-center">
-                Milestone payments &mdash; server-enforced
-              </span>
-            </div>
-          </div>
+ <div className="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center lg:pt-8">
 
-          {/* Headline — display typeface for authority */}
-          <h1 className="animate-fade-in font-display text-center text-[2rem] font-bold tracking-[-0.035em] text-vektrum-text sm:text-5xl lg:text-[3.75rem] lg:leading-[1.08] text-balance leading-[1.12]">
-            Control every construction draw.
-            <br className="hidden sm:block" />
-            <span className="text-vektrum-faint">Before money moves.</span>
-          </h1>
+  {/* LEFT COLUMN */}
+  <div>
 
-          {/* Sub */}
-          <p className="animate-fade-in-delay mx-auto mt-6 max-w-lg text-center text-[17px] leading-relaxed text-vektrum-muted">
-             Vektrum enforces milestone-based releases, isolates disputes to individual draws, and ensures funds move only when work is verified.
-          </p>
+    {/* CATEGORY LABEL */}
+    <div className="animate-fade-in mb-6 text-center lg:text-left">
+      <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-medium">
+        Construction Payment Infrastructure
+      </p>
+    </div>
 
-          <p className="mx-auto mt-4 max-w-3xl text-center text-[15px] leading-relaxed text-vektrum-faint">
-             Vektrum is a software governance layer. We enforce release conditions and audit every disbursement. We do not hold, transmit, or control funds. We are built to operate alongside licensed escrow providers, not replace them.
-          </p>
+    {/* HEADLINE */}
+    <h1 className="animate-fade-in font-display text-center lg:text-left text-[2rem] font-bold tracking-[-0.035em] text-white sm:text-5xl lg:text-[4rem] lg:leading-[1.08]">
+      Control every construction draw.
+      <br className="hidden sm:block" />
+      <span className="text-white/70">Before money moves.</span>
+    </h1>
 
-          {/* CTAs */}
-          <div className="animate-fade-in-delay-2 mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
-            <Link
-              href="/auth/signup"
-              className="group inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-8 py-3.5 text-[15px] font-semibold text-white shadow-blue transition-all hover:bg-vektrum-blue-hover hover:shadow-lg"
-            >
-              Start a deal — it&rsquo;s free
-              <ArrowRight
-                size={15}
-                className="transition-transform group-hover:translate-x-0.5"
-              />
-            </Link>
-            <a
-              href="#demo"
-              className="inline-flex min-h-[52px] items-center justify-center rounded-xl border border-vektrum-border bg-vektrum-surface px-7 py-3 text-[14px] font-semibold text-vektrum-muted shadow-sm hover:bg-vektrum-surface-alt hover:border-vektrum-blue/40 transition-all"
-            >
-              See how it works
-            </a>
-          </div>
+    {/* SUB */}
+    <p className="animate-fade-in-delay mx-auto lg:mx-0 mt-5 max-w-lg text-center lg:text-left text-[17px] leading-relaxed text-white/75">
+      Vektrum enforces milestone-based releases, isolates disputes to individual draws, and ensures funds move only when work is verified.
+    </p>
 
-          {/* Trust signals — above fold, 2026 fintech standard */}
-          <div className="animate-fade-in-delay-3 mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
-            <div className="flex items-center gap-2 text-[12px] text-vektrum-faint">
-              <BadgeCheck size={14} className="text-vektrum-blue" aria-hidden="true" />
-              <span>Payments via Stripe Connect</span>
-            </div>
-            <div className="flex items-center gap-2 text-[12px] text-vektrum-faint">
-              <Shield size={14} className="text-vektrum-green" aria-hidden="true" />
-              <span>7-condition server-side gate</span>
-            </div>
-            <div className="flex items-center gap-2 text-[12px] text-vektrum-faint">
-              <Lock size={14} className="text-vektrum-muted" aria-hidden="true" />
-              <span>Funds held by Stripe, not Vektrum</span>
-            </div>
-            <div className="flex items-center gap-2 text-[12px] text-vektrum-faint">
-              <Star size={14} className="text-vektrum-amber" aria-hidden="true" />
-              <span>Contractors always join free</span>
-            </div>
-            {/* Right: product preview */}
-<div className="hidden lg:block mt-12 lg:mt-0">
-  <div className="rounded-2xl border border-vektrum-border bg-vektrum-surface shadow-2xl shadow-vektrum-blue/10 overflow-hidden">
+    {/* BODY */}
+    <p className="mx-auto lg:mx-0 mt-4 max-w-3xl text-center lg:text-left text-[15px] leading-relaxed text-white/50">
+      Vektrum is a software governance layer. We enforce release conditions and audit every disbursement. We do not hold, transmit, or control funds.
+    </p>
+
+    {/* CTA */}
+    <div className="animate-fade-in-delay-3 mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-x-8 gap-y-3">
+      <Link
+        href="/auth/signup"
+        className="group inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-8 py-3.5 text-[15px] font-semibold text-white shadow-blue transition-all hover:bg-vektrum-blue-hover hover:shadow-lg"
+      >
+        Start a deal — it’s free
+        <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
+      </Link>
+
+      <a
+        href="#demo"
+        className="inline-flex min-h-[52px] items-center justify-center rounded-xl border border-white/20 bg-white/5 px-7 py-3 text-[14px] font-semibold text-white/80 hover:bg-white/10 transition-all"
+      >
+        See how it works
+      </a>
+    </div>
+    </div>
+
+  {/* RIGHT COLUMN (THIS IS WHAT YOU WERE MISSING) */}
+  
+                {/* Right: product preview */}
+<div className="hidden lg:block lg:mt-2 scale-[1.04]">
+  <div className="rounded-2xl border border-vektrum-border bg-vektrum-surface shadow-2xl shadow-vektrum-blue/8 overflow-hidden transition-transform duration-500 hover:-translate-y-1">
     <div className="flex items-center gap-1.5 border-b border-vektrum-border bg-vektrum-surface-alt px-4 py-3">
       <div className="h-2.5 w-2.5 rounded-full bg-vektrum-blue/30" />
       <div className="h-2.5 w-2.5 rounded-full bg-vektrum-blue/40" />
@@ -188,6 +163,27 @@ export default async function HomePage() {
   </div>
   </div>
   </div>
+
+</div>
+          {/* Trust signals — above fold, 2026 fintech standard */}
+          <div className="animate-fade-in-delay-3 mt-10 flex flex-wrap items-center justify-center lg:justify-start gap-x-8 gap-y-3">
+            <div className="flex items-center gap-2 text-[12px] text-white/55">
+              <BadgeCheck size={14} className="text-vektrum-blue" aria-hidden="true" />
+              <span>Payments via Stripe Connect</span>
+            </div>
+            <div className="flex items-center gap-2 text-[12px] text-white/55">
+              <Shield size={14} className="text-vektrum-blue" aria-hidden="true" />
+              <span>7-condition server-side gate</span>
+            </div>
+            <div className="flex items-center gap-2 text-[12px] text-white/55">
+              <Lock size={14} className="text-vektrum-muted" aria-hidden="true" />
+              <span>Funds held by Stripe, not Vektrum</span>
+            </div>
+            <div className="flex items-center gap-2 text-[12px] text-white/55">
+              <Star size={14} className="text-vektrum-blue" aria-hidden="true" />
+              <span>Contractors always join free</span>
+            </div>
+
   </div>
       </section>
 
