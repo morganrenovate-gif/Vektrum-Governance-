@@ -341,13 +341,8 @@ export default async function HomePage() {
               </p>
             </div>
 
-            {/* Card 4 — AI Pre-Clearance (coming soon) */}
+            {/* Card 4 — AI Pre-Clearance */}
             <div className="rounded-2xl border border-vektrum-border bg-vektrum-surface p-8 hover:border-vektrum-blue/40 hover:shadow-lg hover:shadow-vektrum-blue/5 transition-all duration-300 relative">
-              <div className="absolute top-4 right-4">
-                <span className="rounded-full border border-vektrum-amber-border bg-vektrum-amber-bg px-2 py-0.5 text-[10px] font-semibold text-vektrum-amber">
-                  Coming soon
-                </span>
-              </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-vektrum-blue/10 mb-5">
                 <Zap size={20} className="text-vektrum-blue" />
               </div>
