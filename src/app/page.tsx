@@ -262,51 +262,13 @@ export default async function HomePage() {
   </div>
 </section>
 
-      {/* ─── Live Proof Bar ────────────────────────────────────────────────── */}
-      <section className="border-y border-vektrum-border bg-vektrum-surface">
-        <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-10">
-          <div className="grid grid-cols-2 gap-6 sm:grid-cols-4 sm:gap-0 sm:divide-x sm:divide-vektrum-border-subtle">
-            {[
-              {
-                value: '7',
-                label: 'Server-side conditions before any dollar moves',
-                sub: 'Platform architecture',
-              },
-              {
-                value: '$0',
-                label: 'Held by Vektrum — Stripe holds the funds',
-                sub: 'By design',
-              },
-              {
-                value: '∞',
-                label: 'Releases immutable after completion',
-                sub: 'Audit log',
-              },
-              {
-                value: '1',
-                label: 'Dispute isolates 1 milestone, not the whole deal',
-                sub: 'Release gate',
-              },
-            ].map((stat, i) => (
-              <div key={i} className="flex flex-col items-center text-center sm:px-6">
-                <span className="text-2xl font-bold tracking-[-0.02em] text-vektrum-text font-numeric sm:text-3xl">
-                  {stat.value}
-                </span>
-                <span className="mt-1.5 text-[13px] leading-snug text-vektrum-muted">
-                  {stat.label}
-                </span>
-                <span className="mt-1 text-[11px] text-vektrum-faint">{stat.sub}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+
 
 {/* ─── Proof Layer ───────────────────────────────────────────────────── */}
 <section className="bg-vektrum-bg py-12 sm:py-16">
   <div className="mx-auto max-w-6xl px-6 sm:px-8 lg:px-12">
 
-    <div className="grid gap-4 sm:grid-cols-3">
+    <div className="mt-8 grid gap-4 sm:grid-cols-3">
       <div className="rounded-2xl border border-vektrum-border bg-vektrum-surface p-8">
         <h3 className="text-[15px] font-semibold tracking-[-0.01em] text-vektrum-text">
           Built by Construction Operators
