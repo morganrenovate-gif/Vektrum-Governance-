@@ -166,20 +166,20 @@ export default async function HomePage() {
 
 </div>
           {/* Trust signals — above fold, 2026 fintech standard */}
-          <div className="animate-fade-in-delay-3 mt-10 flex flex-wrap items-center justify-center lg:justify-start gap-x-8 gap-y-3">
-            <div className="flex items-center gap-2 text-[12px] text-white/55">
+          <div className="animate-fade-in-delay-3 mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-center">
+            <div className="flex items-center justify-center gap-8 text-[12px] text-white/55">
               <BadgeCheck size={14} className="text-vektrum-blue" aria-hidden="true" />
               <span>Payments via Stripe Connect</span>
             </div>
-            <div className="flex items-center gap-2 text-[12px] text-white/55">
+            <div className="flex items-center justify-center gap-8 text-[12px] text-white/55">
               <Shield size={14} className="text-vektrum-blue" aria-hidden="true" />
               <span>7-condition server-side gate</span>
             </div>
-            <div className="flex items-center gap-2 text-[12px] text-white/55">
+            <div className="flex items-center justify-center gap-8 text-[12px] text-white/55">
               <Lock size={14} className="text-vektrum-muted" aria-hidden="true" />
               <span>Funds held by Stripe, not Vektrum</span>
             </div>
-            <div className="flex items-center gap-2 text-[12px] text-white/55">
+            <div className="flex items-center justify-center gap-8 text-[12px] text-white/55">
               <Star size={14} className="text-vektrum-blue" aria-hidden="true" />
               <span>Contractors always join free</span>
             </div>
@@ -188,7 +188,7 @@ export default async function HomePage() {
       </section>
 
 {/* ─── Audience Split ────────────────────────────────────────────────── */}
-<section className="bg-vektrum-bg py-16 sm:py-20">
+<section className="bg-white py-16 sm:py-20">
   <div className="mx-auto max-w-6xl px-6 sm:px-8 lg:px-12">
     <div className="mb-8 text-center">
       <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-faint">
@@ -199,7 +199,7 @@ export default async function HomePage() {
     <div className="grid gap-4 sm:grid-cols-2">
       <Link
         href="/lenders"
-        className="group flex flex-col rounded-2xl border border-vektrum-border bg-vektrum-surface p-10 transition-all duration-300 hover:border-vektrum-blue/40 hover:shadow-lg hover:shadow-vektrum-blue/5"
+        className="group flex flex-col rounded-2xl border border-vektrum-border bg-white/15 p-10 transition-all duration-300 hover:border-vektrum-blue/40 hover:shadow-lg hover:shadow-vektrum-blue/5"
       >
         <span className="mb-4 text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-blue">
           For funders
@@ -218,7 +218,7 @@ export default async function HomePage() {
 
       <Link
         href="/contractors"
-        className="group flex flex-col rounded-2xl border border-vektrum-border bg-vektrum-surface p-10 transition-all duration-300 hover:border-vektrum-blue/40 hover:shadow-lg hover:shadow-vektrum-blue/5"
+        className="group flex flex-col rounded-2xl border border-vektrum-border bg-white/15 p-10 transition-all duration-300 hover:border-vektrum-blue/40 hover:shadow-lg hover:shadow-vektrum-blue/5"
       >
         <span className="mb-4 text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-green">
           For contractors
@@ -258,9 +258,7 @@ export default async function HomePage() {
       ))}
     </div>
 
-    <p className="text-center text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-faint">
-      Built for institutional-grade construction finance
-    </p>
+
   </div>
 </section>
 
@@ -304,189 +302,40 @@ export default async function HomePage() {
         </div>
       </section>
 
-            {/* ─── Partnership Model Flow ─────────────────────────────────────────── */}
-      <section className="bg-vektrum-surface border-b border-vektrum-border py-16 sm:py-20">
-        <div className="mx-auto max-w-5xl px-6 sm:px-8 lg:px-12">
-          <div className="mb-10 text-center">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-vektrum-faint">
-              How the partnership works
-            </span>
-            <p className="mx-auto mt-3 max-w-2xl text-center text-[14px] leading-relaxed text-vektrum-muted">
-              Licensed escrow or title partners hold funds. Vektrum provides the governance layer that enforces release conditions and preserves the audit trail.
-            </p>
-          </div>
-
-          <div className="hidden gap-2 sm:grid sm:grid-cols-[1fr_32px_1fr_32px_1fr] sm:items-center">
-            <div className="rounded-2xl border-2 border-vektrum-blue bg-vektrum-surface p-7">
-              <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-xl bg-vektrum-blue/10">
-                <Building2 size={18} className="text-vektrum-blue" />
-              </div>
-              <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-vektrum-blue">
-                Fund custodian
-              </p>
-              <h3 className="mb-3 text-[14px] font-semibold leading-snug text-vektrum-text">
-                Licensed Escrow / Title Company
-              </h3>
-              <p className="text-[13px] leading-relaxed text-vektrum-muted">
-                Serves as the licensed fund custodian and holds project funds.
-              </p>
-            </div>
-
-            <div className="flex justify-center">
-              <ArrowRight size={18} className="text-vektrum-faint" />
-            </div>
-
-            <div className="rounded-2xl border border-vektrum-border bg-vektrum-surface p-7">
-              <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-xl bg-vektrum-amber-bg">
-                <Shield size={18} className="text-vektrum-amber" />
-              </div>
-              <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-vektrum-amber">
-                Governance software
-              </p>
-              <h3 className="mb-3 text-[14px] font-semibold leading-snug text-vektrum-text">
-                Vektrum Software Layer
-              </h3>
-              <p className="text-[13px] leading-relaxed text-vektrum-muted">
-                Enforces release conditions, verifies milestones, and maintains the audit trail.
-              </p>
-            </div>
-
-            <div className="flex justify-center">
-              <ArrowRight size={18} className="text-vektrum-faint" />
-            </div>
-
-            <div className="rounded-2xl border border-vektrum-border bg-vektrum-surface p-7">
-              <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-xl bg-vektrum-green-bg">
-                <CheckCircle2 size={18} className="text-vektrum-green" />
-              </div>
-              <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-vektrum-green">
-                Payment recipient
-              </p>
-              <h3 className="mb-3 text-[14px] font-semibold leading-snug text-vektrum-text">
-                Contractor
-              </h3>
-              <p className="text-[13px] leading-relaxed text-vektrum-muted">
-                Receives payment only after verified release conditions are met.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-4 sm:hidden">
-            <div className="rounded-2xl border-2 border-vektrum-blue bg-vektrum-surface p-7">
-              <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-xl bg-vektrum-blue/10">
-                <Building2 size={18} className="text-vektrum-blue" />
-              </div>
-              <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-vektrum-blue">
-                Fund custodian
-              </p>
-              <h3 className="mb-3 text-[14px] font-semibold leading-snug text-vektrum-text">
-                Licensed Escrow / Title Company
-              </h3>
-              <p className="text-[13px] leading-relaxed text-vektrum-muted">
-                Serves as the licensed fund custodian and holds project funds.
-              </p>
-            </div>
-
-            <div className="flex justify-center">
-              <ArrowRight size={18} className="rotate-90 text-vektrum-faint" />
-            </div>
-
-            <div className="rounded-2xl border border-vektrum-border bg-vektrum-surface p-7">
-              <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-xl bg-vektrum-amber-bg">
-                <Shield size={18} className="text-vektrum-amber" />
-              </div>
-              <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-vektrum-amber">
-                Governance software
-              </p>
-              <h3 className="mb-3 text-[14px] font-semibold leading-snug text-vektrum-text">
-                Vektrum Software Layer
-              </h3>
-              <p className="text-[13px] leading-relaxed text-vektrum-muted">
-                Enforces release conditions, verifies milestones, and maintains the audit trail.
-              </p>
-            </div>
-
-            <div className="flex justify-center">
-              <ArrowRight size={18} className="rotate-90 text-vektrum-faint" />
-            </div>
-
-            <div className="rounded-2xl border border-vektrum-border bg-vektrum-surface p-7">
-              <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-xl bg-vektrum-green-bg">
-                <CheckCircle2 size={18} className="text-vektrum-green" />
-              </div>
-              <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-vektrum-green">
-                Payment recipient
-              </p>
-              <h3 className="mb-3 text-[14px] font-semibold leading-snug text-vektrum-text">
-                Contractor
-              </h3>
-              <p className="text-[13px] leading-relaxed text-vektrum-muted">
-                Receives payment only after verified release conditions are met.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-      
 {/* ─── Proof Layer ───────────────────────────────────────────────────── */}
 <section className="bg-vektrum-bg py-12 sm:py-16">
   <div className="mx-auto max-w-6xl px-6 sm:px-8 lg:px-12">
-    <div className="mb-8 text-center">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-faint">
-        Why teams trust Vektrum
-      </p>
-    </div>
 
     <div className="grid gap-4 sm:grid-cols-3">
       <div className="rounded-2xl border border-vektrum-border bg-vektrum-surface p-8">
         <h3 className="text-[15px] font-semibold tracking-[-0.01em] text-vektrum-text">
-          Built by operators
+          Built by Construction Operators
         </h3>
         <p className="mt-3 text-[13px] leading-relaxed text-vektrum-muted">
-          Created by construction and product operators who understand draw friction, dispute risk, and delayed payments.
+         Designed by teams who manage real draws and disputes
+        </p>
+      </div>
+
+      <div className="rounded-2xl border border-vektrum-blue bg-vektrum-blue/5 p-8 shadow-lg">
+        <h3 className="text-[15px] font-semibold tracking-[-0.01em] text-vektrum-text">
+          Funds never touch Vektrum
+        </h3>
+        <p className="mt-3 text-[13px] leading-relaxed text-vektrum-muted">
+          All funds are held and moved by Stripe
         </p>
       </div>
 
       <div className="rounded-2xl border border-vektrum-border bg-vektrum-surface p-8">
         <h3 className="text-[15px] font-semibold tracking-[-0.01em] text-vektrum-text">
-          Funds held by Stripe
+          Designed for real project scale
         </h3>
         <p className="mt-3 text-[13px] leading-relaxed text-vektrum-muted">
-          Vektrum governs release conditions. Stripe Connect holds and moves funds.
-        </p>
-      </div>
-
-      <div className="rounded-2xl border border-vektrum-border bg-vektrum-surface p-8">
-        <h3 className="text-[15px] font-semibold tracking-[-0.01em] text-vektrum-text">
-          Built for real deal sizes
-        </h3>
-        <p className="mt-3 text-[13px] leading-relaxed text-vektrum-muted">
-          Purpose-built for construction deals from $500K to $25M.
+          Structured for multi-million dollar workflows.
         </p>
       </div>
     </div>
   </div>
 </section>
-
-      {/* ─── Trust Numbers ───────────────────────────────────────────────── */}
-      <section className="bg-vektrum-bg py-10">
-        <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
-            <div>
-              <p className="text-2xl font-bold text-vektrum-text sm:text-3xl font-numeric">$0</p>
-              <p className="mt-1 text-[13px] text-vektrum-muted">in disputed funds lost</p>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-vektrum-text sm:text-3xl font-numeric">7</p>
-              <p className="mt-1 text-[13px] text-vektrum-muted">condition release gate</p>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-vektrum-text sm:text-3xl">AI-reviewed</p>
-              <p className="mt-1 text-[13px] text-vektrum-muted">every draw request</p>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* ─── Interactive Demo ──────────────────────────────────────────────── */}
       <section id="demo" className="bg-vektrum-bg py-20 sm:py-28">
@@ -603,7 +452,7 @@ export default async function HomePage() {
       </section>
 
       {/* ─── Core Protections (4 cards) ────────────────────────────────────── */}
-      <section className="bg-vektrum-bg py-20 sm:py-28">
+      <section className="bg-white py-20 sm:py-28">
         <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center mb-16">
             <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-vektrum-faint">
@@ -677,7 +526,7 @@ export default async function HomePage() {
       </section>
 
       {/* ─── Built for (3 personas) ────────────────────────────────────────── */}
-      <section className="bg-vektrum-canvas py-20 sm:py-28">
+      <section className="bg-[#0D1B2A] py-20 sm:py-28">
         <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center mb-16">
             <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
@@ -762,7 +611,7 @@ export default async function HomePage() {
       </section>
 
       {/* ─── How it works (steps) ──────────────────────────────────────────── */}
-      <section className="bg-vektrum-bg py-20 sm:py-28">
+      <section className="bg-white py-20 sm:py-28">
         <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center mb-16">
             <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-vektrum-faint">
@@ -839,9 +688,9 @@ export default async function HomePage() {
       </section>
 
       {/* ─── CTA ───────────────────────────────────────────────────────────── */}
-      <section className="border-t border-vektrum-border bg-vektrum-surface py-20 sm:py-24">
+      <section className="bg-[#0D1B2A] py-16 sm:py-20">
         <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
-          <h2 className="text-2xl font-bold tracking-[-0.025em] text-vektrum-text sm:text-3xl text-balance">
+          <h2 className="text-2xl font-bold tracking-[-0.025em] text-vektrum-text sm:text-3xl text-white">
             Stop losing money to broken payment processes
           </h2>
           <p className="mt-4 mx-auto max-w-md text-[15px] text-vektrum-muted">
