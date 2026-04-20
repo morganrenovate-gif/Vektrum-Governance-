@@ -57,7 +57,7 @@ export default async function HomePage() {
 
               <p className="animate-fade-in-delay mx-auto lg:mx-0 mt-6 max-w-lg text-center lg:text-left text-[17px] leading-relaxed text-white/60">
                 Vektrum enforces milestone-based releases, isolates disputes to individual draws,
-                Perplexity Computer flags risks before approval.
+                and ensures funds move only when work is verified.
               </p>
 
               <div className="animate-fade-in-delay-3 mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-3">
@@ -614,7 +614,7 @@ export default async function HomePage() {
             <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-vektrum-blue">Core protections</span>
             <h2 className="mt-3 font-display text-2xl font-bold tracking-[-0.025em] text-vektrum-text sm:text-3xl lg:text-[2.5rem] lg:leading-[1.1]">Every dollar governed</h2>
           </div>
-          
+
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[
               { icon: Shield, title: 'Milestone isolation', desc: 'Each milestone stands alone. One dispute never freezes a project.', bg: 'bg-vektrum-blue/10', color: 'text-vektrum-blue' },
