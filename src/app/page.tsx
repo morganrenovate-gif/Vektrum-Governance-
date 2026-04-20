@@ -37,7 +37,7 @@ export default async function HomePage() {
        {/* Brand blue radial glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-vektrum-blue/20 to-transparent rounded-full blur-3xl" />
 
-       <div className="relative max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 pt-24 pb-20 sm:pt-32 sm:pb-28">
+       <div className="relative max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 pt-24 pb-14 sm:pt-32 sm:pb-18">
  <div className="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center lg:pt-8">
 
   {/* LEFT COLUMN */}
@@ -51,20 +51,24 @@ export default async function HomePage() {
     </div>
 
     {/* HEADLINE */}
-    <h1 className="animate-fade-in font-display text-center lg:text-left text-[2rem] font-bold tracking-[-0.035em] text-white sm:text-5xl lg:text-[4rem] lg:leading-[1.08]">
-      Control every construction draw.
+    <h1 className="animate-fade-in font-display text-center lg:text-left text-[2rem] font-bold tracking-[-0.035em] text-white sm:text-5xl lg:text-[3.75rem] lg:leading-[1.08]">
+      Infrastructure for
       <br className="hidden sm:block" />
-      <span className="text-white/70">Before money moves.</span>
+      construction payments
+      <br className="hidden sm:block" />
+      <span className="text-white/70">Control every draw before money moves</span>
     </h1>
 
     {/* SUB */}
     <p className="animate-fade-in-delay mx-auto lg:mx-0 mt-5 max-w-lg text-center lg:text-left text-[17px] leading-relaxed text-white/75">
-      Vektrum enforces milestone-based releases, isolates disputes to individual draws, and ensures funds move only when work is verified.
+      Vektrum controls construction disbursements milestone by milestone. 
+      Stripe holds the funds. Vektrum enforces release conditions. 
+      Perplexity Computer flags risk before approval.
     </p>
 
     {/* BODY */}
     <p className="mx-auto lg:mx-0 mt-4 max-w-3xl text-center lg:text-left text-[15px] leading-relaxed text-white/50">
-      Vektrum is a software governance layer. We enforce release conditions and audit every disbursement. We do not hold, transmit, or control funds.
+
     </p>
 
     {/* CTA */}
@@ -84,7 +88,28 @@ export default async function HomePage() {
         See how it works
       </a>
     </div>
+    <div className="mt-4 flex items-center justify-center lg:justify-start gap-2 text-[12px] text-white/60">
+  <Shield size={14} className="text-vektrum-blue" />
+  <span>Funds held by licensed custodians, never Vektrum</span>
+</div>
+
+{/*proof strip */}
+    <div className="mt-6 grid grid-cols-2 gap-x-6 gap-y-2 lg:flex lg:flex-wrap lg:items-center lg:justify-start lg:gap-6">
+  {[
+    { icon: Zap, text: "AI-reviewed on every draw", color: "text-vektrum-blue" },
+    { icon: Shield, text: "Stripe Connect secured funds", color: "text-vektrum-blue" },
+    { icon: Lock, text: "Zero fund custody by Vektrum", color: "text-vektrum-muted" },
+    { icon: CheckCircle2, text: "Real-time milestone verification", color: "text-vektrum-blue" },
+  ].map(({ icon: Icon, text, color }) => (
+    <div key={text} className="flex items-center gap-2">
+      <Icon size={14} className={color} aria-hidden="true" />
+      <span className="text-[12px] font-medium text-white/60">
+        {text}
+      </span>
     </div>
+  ))}
+</div>
+</div>
 
   {/* RIGHT COLUMN (THIS IS WHAT YOU WERE MISSING) */}
   
@@ -164,25 +189,7 @@ export default async function HomePage() {
   </div>
   </div>
 
-</div>
-          {/* Trust signals — above fold, 2026 fintech standard */}
-          <div className="animate-fade-in-delay-3 mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-center">
-            <div className="flex items-center justify-center gap-8 text-[12px] text-white/55">
-              <BadgeCheck size={14} className="text-vektrum-blue" aria-hidden="true" />
-              <span>Payments via Stripe Connect</span>
-            </div>
-            <div className="flex items-center justify-center gap-8 text-[12px] text-white/55">
-              <Shield size={14} className="text-vektrum-blue" aria-hidden="true" />
-              <span>7-condition server-side gate</span>
-            </div>
-            <div className="flex items-center justify-center gap-8 text-[12px] text-white/55">
-              <Lock size={14} className="text-vektrum-muted" aria-hidden="true" />
-              <span>Funds held by Stripe, not Vektrum</span>
-            </div>
-            <div className="flex items-center justify-center gap-8 text-[12px] text-white/55">
-              <Star size={14} className="text-vektrum-blue" aria-hidden="true" />
-              <span>Contractors always join free</span>
-            </div>
+
 
   </div>
       </section>
@@ -192,7 +199,7 @@ export default async function HomePage() {
   <div className="mx-auto max-w-6xl px-6 sm:px-8 lg:px-12">
     <div className="mb-8 text-center">
       <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-faint">
-        Choose your path
+        Built for how deals actually work
       </p>
     </div>
 
@@ -205,10 +212,10 @@ export default async function HomePage() {
           For funders
         </span>
         <h2 className="font-display text-xl font-bold tracking-[-0.02em] text-vektrum-text sm:text-2xl">
-          Protect capital. Control every release.
+          Control capital at the draw level
         </h2>
         <p className="mt-4 flex-1 text-[14px] leading-relaxed text-vektrum-muted">
-          Enforce milestone-based releases. Eliminate draw disputes before funds move.
+          Approve milestone-based releases before funds move.
         </p>
         <div className="mt-8 inline-flex items-center gap-2 text-[13px] font-semibold text-vektrum-blue transition-all group-hover:gap-3">
           Explore for funders
@@ -224,10 +231,10 @@ export default async function HomePage() {
           For contractors
         </span>
         <h2 className="font-display text-xl font-bold tracking-[-0.02em] text-vektrum-text sm:text-2xl">
-          Get paid when the work is done.
+          Get paid as each milestone clears
         </h2>
         <p className="mt-4 flex-1 text-[14px] leading-relaxed text-vektrum-muted">
-          Get paid faster with verified milestones. Reduce disputes. Keep projects moving.
+          Get paid faster through verified milestone releases.
         </p>
         <div className="mt-8 inline-flex items-center gap-2 text-[13px] font-semibold text-vektrum-green transition-all group-hover:gap-3">
           Explore for contractors
@@ -238,69 +245,141 @@ export default async function HomePage() {
   </div>
 </section>
 
-      {/* ─── Credibility Bar ───────────────────────────────────────────────── */}
-<section className="border-b border-vektrum-border bg-vektrum-surface/60">
-  <div className="mx-auto max-w-6xl px-6 py-8 sm:px-8 lg:px-12">
-    <div className="mb-5 flex flex-wrap items-center justify-center gap-6 sm:gap-10">
-      {[
-        { icon: Zap, text: "AI-reviewed on every draw", color: "text-vektrum-blue" },
-        { icon: Shield, text: "Stripe Connect secured funds", color: "text-vektrum-green" },
-        { icon: Lock, text: "Zero fund custody by Vektrum", color: "text-vektrum-muted" },
-        { icon: CheckCircle2, text: "Real-time milestone verification", color: "text-vektrum-blue" },
-        { icon: Shield, text: "Vektrum requires a licensed fund custodian", color: "text-vektrum-green" },
-      ].map(({ icon: Icon, text, color }) => (
-        <div key={text} className="flex items-center gap-2">
-          <Icon size={14} className={color} aria-hidden="true" />
-          <span className="text-[12px] font-medium text-vektrum-muted">
-            {text}
-          </span>
-        </div>
-      ))}
-    </div>
 
-
-  </div>
-</section>
 
 
 
 {/* ─── Proof Layer ───────────────────────────────────────────────────── */}
-<section className="bg-vektrum-bg py-12 sm:py-16">
+<section className="bg-vektrum-bg py-8 sm:py-12">
   <div className="mx-auto max-w-6xl px-6 sm:px-8 lg:px-12">
 
-    <div className="mt-8 grid gap-4 sm:grid-cols-3">
-      <div className="rounded-2xl border border-vektrum-border bg-vektrum-surface p-8">
-        <h3 className="text-[15px] font-semibold tracking-[-0.01em] text-vektrum-text">
-          Built by Construction Operators
-        </h3>
-        <p className="mt-3 text-[13px] leading-relaxed text-vektrum-muted">
-         Designed by teams who manage real draws and disputes
-        </p>
-      </div>
-
-      <div className="rounded-2xl border border-vektrum-blue bg-vektrum-blue/5 p-8 shadow-lg">
-        <h3 className="text-[15px] font-semibold tracking-[-0.01em] text-vektrum-text">
-          Funds never touch Vektrum
-        </h3>
-        <p className="mt-3 text-[13px] leading-relaxed text-vektrum-muted">
-          All funds are held and moved by Stripe
-        </p>
-      </div>
-
-      <div className="rounded-2xl border border-vektrum-border bg-vektrum-surface p-8">
-        <h3 className="text-[15px] font-semibold tracking-[-0.01em] text-vektrum-text">
-          Designed for real project scale
-        </h3>
-        <p className="mt-3 text-[13px] leading-relaxed text-vektrum-muted">
-          Structured for multi-million dollar workflows.
-        </p>
-      </div>
+    {/*How funds are controlled, held, and released*/}
+    <div className="text-center mb-5">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-vektrum-muted">
+        System Architecture
+      </p>
+      <h2 className="mt-3 text-2x1 sm:text-3x1 font-display font-semibold tracking-[-0.02em] text-vektrum-text">
+      </h2>
     </div>
+
+    <div className="mt-6 grid gap-5 sm:grid-cols-3">
+      <div className="rounded-2xl border border-vektrum-border/50 bg-white p-7 flex flex-col h-full transition-all duration-300 hover:shadow-md hover:border-vektrum-blue/30">
+        <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-vektrum-muted">
+          Release logic
+        </p> 
+        <h3 className="text-[16x] font-semibold tracking-[-0.01em] text-vektrum-text">
+          Milestone-level control
+          </h3>
+         
+        <p className="mt-3 text-[14px] leading-relaxed text-vektrum-muted">
+         Every release is gated, verified, and approved at the draw level.
+        </p>
+
+      </div>
+
+      <div className="rounded-2xl border border-vektrum-blue/50 bg-vektrum-surface/80 p-7 flex flex-col justify-start h-full shadow-sm transition-all duration-300 hover:shadow-md hover:border-vektrum-blue/50">
+        <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-vektrum-blue">
+          CUSTODY + REVIEW LAYER
+          </p>
+      
+        <h3 className="text-[16px] font-semibold tracking-[-0.01em] text-vektrum-blue">
+          Funds move only when conditions pass
+          </h3>
+          
+        <p className="mt-2.5 text-[14px] leading-relaxed text-vektrum-muted">
+         Stripe and licensed custodians hold funds. 
+         Vektrum enforces release rules, and Perplexity Computer pre-reviews every draw before approval.
+        </p>
+
+      </div>
+
+      <div className="rounded-2xl border border-vektrum-border/50 bg-white p-7 flex flex-col h-full transition-all duration-300 hover:shadow-md hover:border-vektrum-blue/30">
+       <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#6B7280]">
+          Deal size
+        </p> 
+        <h3 className="text-[16px] font-semibold tracking-[-0.01em] text-vektrum-text">
+          Built for real project scale
+          
+        </h3>
+        <p className="mt-2.5 text-[14px] leading-relaxed text-vektrum-muted">
+          Structured for $500K–$25M+ construction workflows
+        </p>
+      </div>
+      </div> 
+
+      {/* perlexity section */}
+
+<div className="mt-12 rounded-2xl border border-vektrum-border/60 bg-white p-8 sm:p-10 shadow-sm">
+ <div className="max-w-5xl mx-auto">
+
+  <div className="text-center">
+    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-vektrum-muted">
+      Perplexity Computer
+    </p>
+
+    <h3 className="mt-3 text-[32px] sm:text-[36px] leading-[1.05] font-semibold tracking-[-0.03em] text-vektrum-text">
+      AI flags issues before money moves
+    </h3>
+
+    <p className="mt-4 text-[16px] leading-relaxed text-vektrum-muted max-w-2xl mx-auto">
+      Perplexity Computer reviews draw packages for missing documents,
+      conflicting change orders, and milestone readiness before the release gate runs.
+      Final approval remains human-controlled.
+    </p>
   </div>
+
+  <div className="mt-10 grid gap-4 md:grid-cols-3">
+    <div className="rounded-xl border border-vektrum-border/60 bg-vektrum-surface/40 p-5 text-center">
+     <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-vektrum-muted">
+      Input
+  </p>
+  <p className="mt-2 text-[15px] font-medium text-vektrum-text">
+    Draw submitted
+  </p>
+  <p className="mt-1 text-[13px] leading-relaxed text-vektrum-muted">
+    Contractor uploads draw package
+  </p>
+</div>
+   
+     <div className="rounded-xl border border-vektrum-border/60 bg-vektrum-surface/40 p-5">
+  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-vektrum-muted">
+    Analysis
+  </p>
+  <p className="mt-2 text-[15px] font-medium text-vektrum-text">
+    Issues flagged
+  </p>
+  <p className="mt-1 text-[13px] leading-relaxed text-vektrum-muted">
+    Missing docs, conflicts, readiness risks
+  </p>
+</div>
+<div className="rounded-xl border border-vektrum-border/60 bg-vektrum-surface/40 p-5">
+  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-vektrum-muted">
+    Output
+  </p>
+  <p className="mt-2 text-[15px] font-medium text-vektrum-text">
+    Summary surfaced
+  </p>
+  <p className="mt-1 text-[13px] leading-relaxed text-vektrum-muted">
+    Structured review for human approval
+  </p>
+</div>
+  </div>
+</div>
+</div>
+
+    {/* end boxed Perplexity module */}
+<div className="mt-6 text-center">
+  <p className="text-[12px] font-medium tracking-[-0.01em] text-vektrum-muted">
+    Vektrum never holds or transmits funds. Release decisions remain governed by server-side conditions and human approval.
+  </p>
+</div>
+
+</div>
 </section>
 
+
       {/* ─── Interactive Demo ──────────────────────────────────────────────── */}
-      <section id="demo" className="bg-vektrum-bg py-20 sm:py-28">
+      <section id="demo" className="bg-vektrum-bg pt-10 pb-20 sm:pt-12 sm:pb-24">
         <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
             {/* Left: copy */}
@@ -309,11 +388,10 @@ export default async function HomePage() {
                 How it works
               </span>
               <h2 className="mt-3 font-display text-2xl font-bold tracking-[-0.025em] text-vektrum-text sm:text-3xl">
-                See the governance in action
+                See how $9M keeps moving when $15K breaks
               </h2>
               <p className="mt-4 text-[15px] leading-relaxed text-vektrum-muted">
-                Three scenes. Deal creation, AI draw pre-clearance, and the defining scenario: a $15K
-                dispute locked to one milestone while $8.98M keeps flowing.
+                One milestone is disputed. Every other payment continues. This is how Vektrum isolates risk in real time.
               </p>
               <ul className="mt-6 space-y-3">
                 {[
@@ -435,8 +513,7 @@ export default async function HomePage() {
                 Milestone isolation
               </h3>
               <p className="mt-3 text-[13px] leading-relaxed text-vektrum-muted">
-                Each milestone is an independent financial unit. A dispute on one never
-                freezes another. A $9M job is never held up by a $15K disagreement.
+                Each milestone stands alone. One dispute never freezes a project.
               </p>
             </div>
 
@@ -449,9 +526,7 @@ export default async function HomePage() {
                 7-condition release gate
               </h3>
               <p className="mt-3 text-[13px] leading-relaxed text-vektrum-muted">
-                Every release passes 7 server-side checks simultaneously. Milestone approved,
-                funds available, no disputes, no pending changes, contractor verified, Stripe active,
-                no duplicates.
+                Every release passes 7 enforced conditions before funds move.
               </p>
             </div>
 
@@ -464,8 +539,7 @@ export default async function HomePage() {
                 Immutable audit trail
               </h3>
               <p className="mt-3 text-[13px] leading-relaxed text-vektrum-muted">
-                No update. No delete. Every status change, approval, and payment logged with
-                timestamp and actor. Full accountability for every dollar, forever.
+                Every action is logged permanently. No edits. No deletion.
               </p>
             </div>
 
@@ -478,9 +552,7 @@ export default async function HomePage() {
                 AI pre-clearance
               </h3>
               <p className="mt-3 text-[13px] leading-relaxed text-vektrum-muted">
-                Before a milestone reaches the funder, Vektrum AI checks for red flags: lien
-                waivers, document completeness, change order conflicts. Funders see
-                pre-cleared or flagged &mdash; not raw docs.
+                Draws are pre-cleared before funders ever review them.
               </p>
             </div>
           </div>
@@ -488,7 +560,7 @@ export default async function HomePage() {
       </section>
 
       {/* ─── Built for (3 personas) ────────────────────────────────────────── */}
-      <section className="bg-[#0D1B2A] py-20 sm:py-28">
+      <section className="bg-[#0D1B2A] py-16 sm:py-20">
         <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center mb-16">
             <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
@@ -510,10 +582,8 @@ export default async function HomePage() {
               </h3>
               <ul className="mt-5 flex flex-col gap-3">
                 {[
-                  'Milestone-based payouts — no 90-day net terms',
-                  'Immutable proof that work was approved',
-                  'Disputes isolate one milestone, not the whole project',
-                  'Direct deposit to your bank via Stripe Connect',
+                  '• Get paid per milestone — no delays',
+                  '• Disputes never freeze your entire job',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
                     <CheckCircle2 size={15} className="mt-0.5 flex-shrink-0 text-vektrum-green" />
@@ -533,10 +603,8 @@ export default async function HomePage() {
               </h3>
               <ul className="mt-5 flex flex-col gap-3">
                 {[
-                  'Approve each milestone before funds move',
-                  'Full audit trail for every disbursement',
-                  'Change orders tracked and gated',
-                  '7-condition server-side release enforcement',
+                  '• Release only when conditions are met',
+                  '• Full audit trail on every dollar',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
                     <CheckCircle2 size={15} className="mt-0.5 flex-shrink-0 text-vektrum-green" />
@@ -556,10 +624,8 @@ export default async function HomePage() {
               </h3>
               <ul className="mt-5 flex flex-col gap-3">
                 {[
-                  'Milestone approvals without your team touching paper',
-                  'Release gates run server-side — not spreadsheets',
-                  'Audit trails for compliance, due diligence, and disputes',
-                  'Portfolio risk scores and readiness dashboards built in',
+                  '• Standardized release control across deals',
+                  '• Built-in compliance and audit visibility',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
                     <CheckCircle2 size={15} className="mt-0.5 flex-shrink-0 text-vektrum-green" />
