@@ -367,7 +367,7 @@ export default async function HomePage() {
       {/* RIGHT — PERPLEXITY FLOW */}
       <div className="rounded-2xl border border-vektrum-border bg-white p-8">
         <span className="inline-block rounded-full bg-vektrum-blue/10 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-vektrum-blue">
-          Perplexity Computer
+          Vektrum AI
         </span>
 
         <h3 className="mt-6 font-display text-[24px] font-bold tracking-[-0.03em] text-vektrum-text">
@@ -375,8 +375,8 @@ export default async function HomePage() {
         </h3>
 
         <p className="mt-4 text-[15px] leading-relaxed text-vektrum-muted">
-          Perplexity analyzes draw submissions for missing documents, conflicts, and readiness risks
-          before the release gate runs. It surfaces a structured summary for approval.
+          Vektrum Ai analyzes draw submissions for missing documents, conflicts, and readiness risks
+          before the release gate runs. It surfaces a structured summary for human approval.
         </p>
 
         <ul className="mt-8 flex flex-col gap-4">
@@ -750,7 +750,7 @@ export default async function HomePage() {
               { step: '01', title: 'Create the deal', desc: 'Contractor creates a deal with defined milestones, amounts, and conditions. Contract value is set upfront — no ambiguity.', icon: FileText, bg: 'bg-vektrum-blue/10', color: 'text-vektrum-blue' },
               { step: '02', title: 'Fund via Stripe', desc: 'Funder deposits via Stripe Connect or Licensed Escrow/Lender. Funds are held in managed accounts — Vektrum governs release but never touches the money.', icon: Shield, bg: 'bg-vektrum-blue/10', color: 'text-vektrum-blue' },
               { step: '03', title: 'Complete & approve', desc: 'Contractor marks work done. AI pre-clears documents. Funder reviews and approves each milestone independently — no bundling.', icon: CheckCircle2, bg: 'bg-vektrum-green-bg', color: 'text-vektrum-green' },
-              { step: '04', title: 'Release payment', desc: 'All 7 conditions verified server-side via Perplexity Computer. Funds transfer to contractor via Stripe. Immutably logged. No exceptions.', icon: Zap, bg: 'bg-vektrum-green-bg', color: 'text-vektrum-green' },
+              { step: '04', title: 'Release payment', desc: 'All 7 conditions verified server-side. Immutably logged. No exceptions.', icon: Zap, bg: 'bg-vektrum-green-bg', color: 'text-vektrum-green' },
             ].map((item) => (
               <div key={item.step} className="bg-white p-8 relative">
                 <div className="flex items-start justify-between mb-6">
@@ -805,80 +805,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ─── Footer ────────────────────────────────────────────────────────── */}
-      <footer className="bg-[#0a0f1a] border-t border-white/[0.06]">
-        <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-16">
-          <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
-            {/* Brand */}
-            <div className="col-span-2 md:col-span-1">
-              <p className="font-display text-[20px] font-bold text-white tracking-[-0.03em] mb-3">
-                Vektrum<span className="text-vektrum-blue">.</span>
-              </p>
-              <p className="text-[13px] leading-relaxed text-white/35 max-w-[200px]">
-                Construction payment governance. Funds release only when work is verified.
-              </p>
-            </div>
-
-            {/* Platform */}
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/30 mb-4">Platform</p>
-              <ul className="flex flex-col gap-3">
-                {[
-                  { label: 'Get started', href: '/auth/signup' },
-                  { label: 'Sign in', href: '/auth/login' },
-                  { label: 'Dashboard', href: '/dashboard' },
-                  { label: 'Pricing', href: '/pricing' },
-                ].map((link) => (
-                  <li key={link.href}>
-                    <Link href={link.href} className="text-[14px] text-white/50 hover:text-white transition-colors">{link.label}</Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* For */}
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/30 mb-4">For</p>
-              <ul className="flex flex-col gap-3">
-                {[
-                  { label: 'Funders', href: '/lenders' },
-                  { label: 'Contractors', href: '/contractors' },
-                  { label: 'Founders', href: '/founders' },
-                ].map((link) => (
-                  <li key={link.href}>
-                    <Link href={link.href} className="text-[14px] text-white/50 hover:text-white transition-colors">{link.label}</Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Company */}
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/30 mb-4">Company</p>
-              <ul className="flex flex-col gap-3">
-                {[
-                  { label: 'About', href: '/about' },
-                  { label: 'Security', href: '/security' },
-                  { label: 'Terms', href: '/terms' },
-                  { label: 'Privacy', href: '/privacy' },
-                  { label: 'Contact', href: '/contact' },
-                ].map((link) => (
-                  <li key={link.href}>
-                    <Link href={link.href} className="text-[14px] text-white/50 hover:text-white transition-colors">{link.label}</Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          <div className="mt-14 pt-6 border-t border-white/[0.06] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <p className="text-[12px] text-white/25">© 2026 Vektrum. All rights reserved.</p>
-            <p className="text-[11px] text-white/20 text-right max-w-sm leading-relaxed">
-              Funds are held in Stripe Connect managed accounts, not by Vektrum. Vektrum governs disbursement. Vektrum never holds or transmits funds.
-            </p>
-          </div>
-        </div>
-      </footer>
 
     </div>
   )
