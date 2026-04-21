@@ -206,7 +206,7 @@ export default function PricingPage() {
               num="01"
               name="Standalone Project"
               target="Individual contractors · Developers · Private projects"
-              crfRate="1.0%"
+              crfRate="100 BPS"
               crfNote="per verified milestone disbursement"
               retainer="None"
               retainerNote="Pure performance model — pay only when money moves"
@@ -226,21 +226,21 @@ export default function PricingPage() {
               num="02"
               name="Institutional Portfolio"
               target="Banks · Private credit funds · Regional lenders"
-              crfRate="0.70%"
+              crfRate="70 BPS"
               crfNote="per verified disbursement (retainer rate)"
-              retainer="0.075% of ACV / year"
+              retainer="75 BPS of ACV / year"
               retainerNote="Floor: $5,000 / yr · Cap: $50,000 / yr"
               implementation="$5,000–$15,000 one-time setup"
               highlight
               badge="Most Common"
               features={[
                 'Everything in Standalone',
-                'Reduced CRF rate (0.70% vs. 1.0%)',
+                'Reduced CRF rate (70 bps vs. 100 bps)',
                 'Retainer converts to fee credit on first disbursement',
                 'Portfolio risk dashboard',
                 'Release Readiness score per deal',
                 'Priority support',
-                'Rate reverts to 1.0% without retainer',
+                'Rate reverts to 100 bps without retainer',
               ]}
             />
 
@@ -248,9 +248,9 @@ export default function PricingPage() {
               num="03"
               name="Enterprise / Platform"
               target="Large contractors · Owners · Construction lenders at scale"
-              crfRate="0.65%"
+              crfRate="65 BPS"
               crfNote="per verified disbursement — negotiated annually"
-              retainer="0.05–0.10% of ACV / year"
+              retainer="50 - 100 bps of ACV / year"
               retainerNote="Floor: $25,000 / yr — negotiated"
               implementation="$15,000–$50,000 — includes integration & training"
               cta="Contact us"
@@ -359,15 +359,15 @@ export default function PricingPage() {
           </h2>
           <div className="rounded-2xl border border-vektrum-border bg-vektrum-surface overflow-hidden">
             <div className="bg-vektrum-blue px-6 py-4">
-              <p className="text-[13px] font-semibold text-white">Institutional tier — 0.075% ACV retainer + 0.70% CRF</p>
+              <p className="text-[13px] font-semibold text-white">Institutional tier — 75 bps ACV retainer + 70 bps CRF</p>
             </div>
             <div className="divide-y divide-vektrum-border">
               <div className="flex items-center justify-between px-6 py-4">
-                <span className="text-[14px] text-vektrum-muted">Governance Retainer (0.075% of $50M ACV)</span>
+                <span className="text-[14px] text-vektrum-muted">Governance Retainer (75 bps of $50M ACV)</span>
                 <span className="text-[14px] font-semibold text-vektrum-text tabular-nums">$37,500 / yr</span>
               </div>
               <div className="flex items-center justify-between px-6 py-4">
-                <span className="text-[14px] text-vektrum-muted">Vektrum Compliance Review Fee (0.70% × 6 avg draws of $500K)</span>
+                <span className="text-[14px] text-vektrum-muted">Vektrum Compliance Review Fee (70 bps × 6 avg draws of $500K)</span>
                 <span className="text-[14px] font-semibold text-vektrum-text tabular-nums">$21,000 / yr</span>
               </div>
               <div className="flex items-center justify-between px-6 py-4 bg-vektrum-green-bg/30">
