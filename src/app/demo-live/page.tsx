@@ -33,12 +33,13 @@ const roles = [
 
 export default function DemoLivePage() {
   return (
+    <div className="min-h-screen bg-[#0D1B2A]">
     <div className="page-container section space-y-8">
       <div className="text-center">
-        <h1 className="font-display text-3xl font-bold text-vektrum-text sm:text-4xl">
+        <h1 className="font-display text-3xl font-bold text-white sm:text-4xl">
           Vektrum &mdash; Interactive Demo
         </h1>
-        <p className="mt-3 text-[15px] text-vektrum-muted max-w-md mx-auto">
+        <p className="mt-3 text-[15px] text-white/60 max-w-md mx-auto">
           Choose a role to explore the platform. All data is simulated.
         </p>
       </div>

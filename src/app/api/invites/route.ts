@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { Resend } from 'resend'
 import { getAuthUser, requireRole } from '@/lib/auth/middleware'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { logAudit } from '@/lib/engine/audit'
@@ -175,9 +176,43 @@ const { data: invite, error: insertError } = await admin
 
   const inviteUrl = buildInviteUrl(request, invite.token, invite.slug)
 
+  // ── Send invite email (non-blocking — invite exists regardless of email outcome) ──
+  let emailSent = false
+  if (invitedEmail) {
+    try {
+      const resend = new Resend(process.env.RESEND_API_KEY)
+      const from = process.env.EMAIL_FROM ?? 'Vektrum <invites@vektrum.io>'
+      const expiryDate = new Date(invite.expires_at).toLocaleDateString('en-US', {
+        month: 'long', day: 'numeric', year: 'numeric',
+      })
+      const { error: emailError } = await resend.emails.send({
+        from,
+        to: invitedEmail,
+        subject: `You've been invited to fund "${deal.title}" on Vektrum`,
+        html: `
+          <p>Hi,</p>
+          <p>You've been invited to join <strong>${deal.title}</strong> as a funder on Vektrum.</p>
+          <p>Click the link below to accept your invitation and get started:</p>
+          <p><a href="${inviteUrl}" style="color:#1A3A96;font-weight:bold">${inviteUrl}</a></p>
+          <p style="color:#9AA3B5;font-size:13px">This link expires on ${expiryDate}. It is single-use — once accepted, it cannot be reused.</p>
+          <p style="color:#9AA3B5;font-size:13px">If you were not expecting this invitation, you can safely ignore this email.</p>
+          <p>— The Vektrum Team</p>
+        `,
+      })
+      if (emailError) {
+        console.error('[invites] email send failed:', emailError)
+      } else {
+        emailSent = true
+      }
+    } catch (err) {
+      console.error('[invites] email send threw:', err)
+    }
+  }
+
   return NextResponse.json(
     {
       invite_url: inviteUrl,
+      email_sent: emailSent,
       invite: {
         id: invite.id,
         token: invite.token,
