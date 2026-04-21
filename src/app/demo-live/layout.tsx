@@ -79,3 +79,5 @@ export default function DemoLiveLayout({ children }: { children: React.ReactNode
       <main className="flex-1">{children}</main>
 
       </>
+  )
+}
