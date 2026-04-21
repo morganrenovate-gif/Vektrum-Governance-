@@ -41,12 +41,11 @@ type AnalyzeContractResult =
 // ── PDF text extraction ───────────────────────────────────────────────────────
 
 async function extractPdfText(buffer: Buffer): Promise<string> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const pdfParse = ((await import('pdf-parse')) as any).default as (buf: Buffer) => Promise<{ text: string }>
+  const pdfParse = (await import('pdf-parse')).default
   console.log('buffer length:', buffer.length)
-  const parsed = await pdfParse(buffer)
+  const parsed = await pdfParse(buffer, { max: 0 })
   console.log('parsed text length:', parsed.text?.length)
-  console.log('parsed text preview:', parsed.text?.slice(0, 300))
+  console.log('preview:', parsed.text?.slice(0, 200))
   return parsed.text
 }
 

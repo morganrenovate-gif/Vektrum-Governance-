@@ -45,18 +45,19 @@ export function MilestoneCard({
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const handleAction = async (action: string) => {
   const [aiAssessment, setAiAssessment] = useState<{
-  assessment_id?: string
-  risk_level?: string
-  score?: number
-  findings?: string[]
-  recommendation?: string
-  reasoning?: string
-  reviewed_at?: string
-} | null>(null)
+    assessment_id?: string
+    risk_level?: string
+    score?: number
+    findings?: string[]
+    recommendation?: string
+    reasoning?: string
+    reviewed_at?: string
+  } | null>(null)
+  const [aiLoading, setAiLoading] = useState(false)
 
-const [aiLoading, setAiLoading] = useState(false)
+  const handleAction = async (action: string) => {
+    console.log('handleAction fired', action)
     setLoading(action);
     setError(null);
     setSuccess(null);
