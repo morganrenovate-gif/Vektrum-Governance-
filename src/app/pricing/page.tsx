@@ -228,7 +228,7 @@ export default function PricingPage() {
               target="Banks · Private credit funds · Regional lenders"
               crfRate="70 bps"
               crfNote="per verified disbursement (retainer rate)"
-              retainer="75 bps of ACV / year"
+              retainer="7.5 bps of ACV / year"
               retainerNote="Floor: $5,000 / yr · Cap: $50,000 / yr"
               implementation="$5,000–$15,000 one-time setup"
               highlight
@@ -363,7 +363,7 @@ export default function PricingPage() {
             </div>
             <div className="divide-y divide-vektrum-border">
               <div className="flex items-center justify-between px-6 py-4">
-                <span className="text-[14px] text-vektrum-muted">Governance Retainer (75 bps of $50M ACV)</span>
+                <span className="text-[14px] text-vektrum-muted">Governance Retainer (7.5 bps of $50M ACV)</span>
                 <span className="text-[14px] font-semibold text-vektrum-text tabular-nums">$37,500 / yr</span>
               </div>
               <div className="flex items-center justify-between px-6 py-4">
