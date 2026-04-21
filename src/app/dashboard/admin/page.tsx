@@ -218,28 +218,28 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Admin access info */}
-      <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm text-slate-600">
-        <p className="font-medium text-slate-800 mb-1">Admin Access</p>
+      <div className="bg-vektrum-surface-alt border border-vektrum-border rounded-xl p-4 text-sm text-vektrum-muted">
+        <p className="font-medium text-vektrum-text mb-1">Admin Access</p>
         <p>You can manage users, invite new admins, review audit logs, and monitor platform health.
-        <strong> Financial actions (fund releases, payment processing) are governed by the 7-condition milestone gate</strong>
+        <strong className="text-vektrum-text"> Financial actions (fund releases, payment processing) are governed by the 7-condition milestone gate</strong>
         {' '}and cannot be overridden from this dashboard. All admin actions are permanently logged.</p>
       </div>
 
       {/* ── Operator Health Metrics ─────────────────────────────────────── */}
       <div className="flex flex-wrap gap-3">
-        <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${healthMetrics.onboardingBacklog > 0 ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-green-50 border-green-200 text-green-700'}`}>
+        <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${healthMetrics.onboardingBacklog > 0 ? 'bg-vektrum-amber-bg border-vektrum-amber-border text-vektrum-amber' : 'bg-vektrum-green-bg border-vektrum-green-border text-vektrum-green'}`}>
           <Users size={14} />
           {healthMetrics.onboardingBacklog} pending onboarding
         </div>
-        <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${healthMetrics.blockedReleases > 0 ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-green-50 border-green-200 text-green-700'}`}>
+        <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${healthMetrics.blockedReleases > 0 ? 'bg-vektrum-blue-subtle border-vektrum-blue-border text-vektrum-blue' : 'bg-vektrum-green-bg border-vektrum-green-border text-vektrum-green'}`}>
           <Clock size={14} />
           {healthMetrics.blockedReleases} releases pending
         </div>
-        <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${healthMetrics.openDisputes > 0 ? 'bg-red-50 border-red-200 text-red-700' : 'bg-green-50 border-green-200 text-green-700'}`}>
+        <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${healthMetrics.openDisputes > 0 ? 'bg-vektrum-red-bg border-vektrum-red-border text-vektrum-red' : 'bg-vektrum-green-bg border-vektrum-green-border text-vektrum-green'}`}>
           <AlertTriangle size={14} />
           {healthMetrics.openDisputes} open disputes
         </div>
-        <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${healthMetrics.recentRoleChanges > 0 ? 'bg-purple-50 border-purple-200 text-purple-700' : 'bg-gray-50 border-gray-200 text-gray-600'}`}>
+        <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${healthMetrics.recentRoleChanges > 0 ? 'bg-vektrum-blue-subtle border-vektrum-blue-border text-vektrum-blue' : 'bg-vektrum-surface-alt border-vektrum-border text-vektrum-muted'}`}>
           <Shield size={14} />
           {healthMetrics.recentRoleChanges} role changes (7d)
         </div>

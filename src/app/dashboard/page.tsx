@@ -83,8 +83,8 @@ function MoneyStatTile({ label, amount }: { label: string; amount: number }) {
 
 function EmptyDeals({ role }: { role: string }) {
   return (
-    <div className="text-center py-16 border border-dashed border-gray-200 rounded-2xl">
-      <FolderOpen size={40} className="mx-auto text-gray-300 mb-3" aria-hidden="true" />
+    <div className="text-center py-16 border border-dashed border-vektrum-border rounded-2xl">
+      <FolderOpen size={40} className="mx-auto text-vektrum-faint mb-3" aria-hidden="true" />
       <p className="text-vektrum-text font-medium mb-1">No deals yet</p>
       <p className="text-vektrum-muted text-sm mb-4">
         {role === 'contractor'
@@ -92,7 +92,7 @@ function EmptyDeals({ role }: { role: string }) {
           : 'Deals will appear here once a contractor invites you to a project.'}
       </p>
       {role === 'contractor' && (
-        <Link href="/dashboard/deals/new" className="inline-flex items-center gap-1.5 bg-vektrum-navy text-white px-6 py-2 rounded-lg text-sm font-medium">
+        <Link href="/dashboard/deals/new" className="inline-flex items-center gap-1.5 bg-vektrum-blue text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-vektrum-blue-hover transition-colors">
           <Plus size={14} aria-hidden="true" />
           Create Deal →
         </Link>
@@ -189,16 +189,16 @@ export default async function DashboardPage() {
             let actionDescription = ''
             let actionCTA = ''
             let actionHref = ''
-            let borderColor = 'border-blue-500'
-            let bgColor = 'bg-blue-50'
+            let borderColor = 'border-vektrum-blue'
+            let bgColor = 'bg-vektrum-blue-subtle'
 
             if (!profile.stripe_account_id) {
               actionTitle = 'Connect your Stripe account'
               actionDescription = 'Connect your Stripe account to receive payments.'
               actionCTA = 'Complete Setup'
               actionHref = '/dashboard/contractor/onboarding'
-              borderColor = 'border-amber-500'
-              bgColor = 'bg-amber-50'
+              borderColor = 'border-vektrum-amber'
+              bgColor = 'bg-vektrum-amber-bg'
             } else if (deals.length === 0) {
               actionTitle = 'Create your first deal'
               actionDescription = 'Create your first deal to get started.'
@@ -209,8 +209,8 @@ export default async function DashboardPage() {
               actionDescription = 'You have a draw ready to submit for funder review.'
               actionCTA = 'View Milestones'
               actionHref = `/dashboard/deals/${deals.find((d) => (d.milestones ?? []).some((m) => m.status === 'ready_for_review'))?.id}`
-              borderColor = 'border-amber-500'
-              bgColor = 'bg-amber-50'
+              borderColor = 'border-vektrum-amber'
+              bgColor = 'bg-vektrum-amber-bg'
             } else if (allMilestones.some((m) => m.status === 'in_progress')) {
               actionTitle = 'Update your milestone progress'
               actionDescription = 'You have milestones in progress. Upload documents or submit for review when ready.'
@@ -226,7 +226,7 @@ export default async function DashboardPage() {
                   <p className="font-semibold text-vektrum-text">{actionTitle}</p>
                   <p className="text-sm text-vektrum-muted">{actionDescription}</p>
                 </div>
-                <Link href={actionHref} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap ml-4">
+                <Link href={actionHref} className="bg-vektrum-blue text-white px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap ml-4 hover:bg-vektrum-blue-hover transition-colors">
                   {actionCTA} →
                 </Link>
               </div>

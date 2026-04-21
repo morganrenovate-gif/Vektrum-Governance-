@@ -125,15 +125,15 @@ export default async function ContractorPaymentsPage() {
       </div>
 
       {releases.length === 0 ? (
-        <div className="text-center py-16 border border-dashed border-gray-200 rounded-2xl">
-          <DollarSign size={40} className="mx-auto text-gray-300 mb-3" />
+        <div className="text-center py-16 border border-dashed border-vektrum-border rounded-2xl">
+          <DollarSign size={40} className="mx-auto text-vektrum-faint mb-3" />
           <p className="text-vektrum-text font-medium mb-1">No payments yet</p>
           <p className="text-vektrum-muted text-sm mb-4">
             Payments will appear here once milestone funds are released.
           </p>
           <Link
             href="/dashboard"
-            className="inline-flex items-center gap-1.5 bg-vektrum-navy text-white px-6 py-2 rounded-lg text-sm font-medium"
+            className="inline-flex items-center gap-1.5 bg-vektrum-blue text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-vektrum-blue-hover transition-colors"
           >
             Go to Dashboard
             <ArrowRight size={14} />
@@ -181,7 +181,7 @@ export default async function ContractorPaymentsPage() {
                     }).format(new Date(rel.released_at))}
                   </td>
                   <td className="px-4 py-3">
-                    <span className="inline-flex items-center rounded-full bg-green-50 border border-green-200 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-green-700">
+                    <span className="inline-flex items-center rounded-full bg-vektrum-green-bg border border-vektrum-green-border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-vektrum-green">
                       Released
                     </span>
                   </td>

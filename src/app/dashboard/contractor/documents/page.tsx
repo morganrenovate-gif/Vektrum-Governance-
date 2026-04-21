@@ -67,15 +67,15 @@ export default async function ContractorDocumentsPage() {
       </div>
 
       {documents.length === 0 ? (
-        <div className="text-center py-16 border border-dashed border-gray-200 rounded-2xl">
-          <FileBox size={40} className="mx-auto text-gray-300 mb-3" />
+        <div className="text-center py-16 border border-dashed border-vektrum-border rounded-2xl">
+          <FileBox size={40} className="mx-auto text-vektrum-faint mb-3" />
           <p className="text-vektrum-text font-medium mb-1">No documents yet</p>
           <p className="text-vektrum-muted text-sm mb-4">
             Your deal documents will appear here once you create a deal and attach files.
           </p>
           <Link
             href="/dashboard/deals/new"
-            className="inline-flex items-center gap-1.5 bg-vektrum-navy text-white px-6 py-2 rounded-lg text-sm font-medium"
+            className="inline-flex items-center gap-1.5 bg-vektrum-blue text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-vektrum-blue-hover transition-colors"
           >
             Go to Deals
             <ArrowRight size={14} />

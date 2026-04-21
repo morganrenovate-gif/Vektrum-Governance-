@@ -757,7 +757,7 @@ export default async function HomePage() {
                   <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${item.bg}`}>
                     <item.icon size={20} className={item.color} />
                   </div>
-                  <span className="font-display text-[3rem] font-bold text-vektrum-fog leading-none tracking-[-0.05em]">{item.step}</span>
+                  <span className="font-display text-[3rem] font-bold text-vektrum-faint leading-none tracking-[-0.05em]">{item.step}</span>
                 </div>
                 <h3 className="text-[16px] font-semibold text-vektrum-text tracking-[-0.01em] mb-3">{item.title}</h3>
                 <p className="text-[13px] leading-relaxed text-vektrum-muted">{item.desc}</p>
