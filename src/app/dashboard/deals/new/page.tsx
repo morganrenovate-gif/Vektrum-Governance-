@@ -1,6 +1,6 @@
 "use client";
 
-import { ContractImportFlow } from '@/components/ai/ContractImportFlow'
+import { ContractImportFlow } from "@/components/ai/ContractImportFlow";
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -8,6 +8,7 @@ import { Input, Textarea } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle, ArrowLeft } from "lucide-react";
+import type { DealMetadata } from "@/lib/actions/analyze-contract";
 
 function formatCurrency(value: string): string {
   const num = parseFloat(value.replace(/[^0-9.]/g, ""));
@@ -25,7 +26,6 @@ export default function NewDealPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [serverError, setServerError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [metadata, setMetadata] = useState<any>({})
 
   const update =
     (field: string) =>
@@ -86,112 +86,111 @@ export default function NewDealPage() {
     }
   };
 
+  // Derived from form state so the AI receives the deal name and can use it
+  const metadata: DealMetadata = {
+    dealName: form.title.trim() || "Untitled Deal",
+    funderEmail: "",
+    contractorEmail: "",
+    jurisdiction: "US",
+  };
+
   return (
     <div className="page-container py-8">
-      <div className="max-w-xl">
-        {/* Back link */}
-        <Link
-          href="/dashboard"
-          className="mb-6 inline-flex items-center gap-1.5 text-sm text-vektrum-muted hover:text-vektrum-text transition-colors"
-        >
-          <ArrowLeft size={14} aria-hidden="true" />
-          Back to dashboard
-        </Link>
+      <ContractImportFlow metadata={metadata}>
+        <div className="max-w-xl">
+          {/* Back link */}
+          <Link
+            href="/dashboard"
+            className="mb-6 inline-flex items-center gap-1.5 text-sm text-vektrum-muted hover:text-vektrum-text transition-colors"
+          >
+            <ArrowLeft size={14} aria-hidden="true" />
+            Back to dashboard
+          </Link>
 
-        <h1 className="mb-6 font-display text-2xl font-bold text-vektrum-text">
-          Create New Deal
-        </h1>
+          <h1 className="mb-6 font-display text-2xl font-bold text-vektrum-text">
+            Create New Deal
+          </h1>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Deal Details</CardTitle>
-          </CardHeader>
-         <CardBody>
-         <ContractImportFlow metadata={metadata}>
-          <form onSubmit={handleSubmit} noValidate className="space-y-5">
-              <Input
-                label="Deal Title"
-                placeholder="e.g. Riverside Apartments — Foundation Phase"
-                value={form.title}
-                onChange={update("title")}
-                error={errors.title}
-                required
-                maxLength={120}
-                helperText="A clear, project-specific name visible to all parties."
-              />
+          <Card>
+            <CardHeader>
+              <CardTitle>Deal Details</CardTitle>
+            </CardHeader>
+            <CardBody>
+              <form onSubmit={handleSubmit} noValidate className="space-y-5">
+                <Input
+                  label="Deal Title"
+                  placeholder="e.g. Riverside Apartments — Foundation Phase"
+                  value={form.title}
+                  onChange={update("title")}
+                  error={errors.title}
+                  required
+                  maxLength={120}
+                  helperText="A clear, project-specific name visible to all parties."
+                />
 
-              <Textarea
-                label="Description"
-                placeholder="Scope of work, special conditions, references to contract clauses…"
-                value={form.description}
-                onChange={update("description")}
-                rows={4}
-                helperText="Optional. Visible to the funder when reviewing this deal."
-              />
+                <Textarea
+                  label="Description"
+                  placeholder="Scope of work, special conditions, references to contract clauses…"
+                  value={form.description}
+                  onChange={update("description")}
+                  rows={4}
+                  helperText="Optional. Visible to the funder when reviewing this deal."
+                />
 
-              <Input
-                type="number"
-                label="Total Contract Amount (USD)"
-                placeholder="250000"
-                value={form.total_amount}
-                onChange={update("total_amount")}
-                error={errors.total_amount}
-                required
-                min={100}
-                step={0.01}
-                helperText="The full value of the contract. Milestones must sum to this amount."
-                onBlur={(e) => {
-                  const formatted = formatCurrency(e.target.value);
-                  if (formatted)
-                    setForm((prev) => ({ ...prev, total_amount: formatted }));
-                }}
-              />
+                <Input
+                  type="number"
+                  label="Total Contract Amount (USD)"
+                  placeholder="250000"
+                  value={form.total_amount}
+                  onChange={update("total_amount")}
+                  error={errors.total_amount}
+                  required
+                  min={100}
+                  step={0.01}
+                  helperText="The full value of the contract. Milestones must sum to this amount."
+                  onBlur={(e) => {
+                    const formatted = formatCurrency(e.target.value);
+                    if (formatted)
+                      setForm((prev) => ({ ...prev, total_amount: formatted }));
+                  }}
+                />
 
-              {serverError && (
-                <div
-                  role="alert"
-                  className="flex items-start gap-2 rounded-md bg-vektrum-red-bg border border-vektrum-red-border px-3 py-2.5 text-sm text-vektrum-red"
-                >
-                  <AlertCircle
-                    size={15}
-                    className="mt-0.5 flex-shrink-0"
-                    aria-hidden="true"
-                  />
-                  {serverError}
-                </div>
-              )}
-
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="lg"
-                  loading={loading}
-                  className="sm:w-auto"
-                >
-                  {loading ? "Creating Deal…" : "Create Deal"}
-                </Button>
-                <Link href="/dashboard">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="lg"
-                    disabled={loading}
+                {serverError && (
+                  <div
+                    role="alert"
+                    className="flex items-start gap-2 rounded-md bg-vektrum-red-bg border border-vektrum-red-border px-3 py-2.5 text-sm text-vektrum-red"
                   >
-                    Cancel
-                  </Button>
-                </Link>
-              </div>
+                    <AlertCircle size={15} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
+                    {serverError}
+                  </div>
+                )}
 
-              <p className="text-xs text-vektrum-faint">
-                After creating the deal, you&rsquo;ll be able to add milestones and
-                invite a funder.
-              </p>
-            </form>
-           </ContractImportFlow>
-          </CardBody>
-        </Card>
-      </div>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="lg"
+                    loading={loading}
+                    className="sm:w-auto"
+                  >
+                    {loading ? "Creating Deal…" : "Create Deal"}
+                  </Button>
+                  <Link href="/dashboard">
+                    <Button type="button" variant="ghost" size="lg" disabled={loading}>
+                      Cancel
+                    </Button>
+                  </Link>
+                </div>
+
+                <p className="text-xs text-vektrum-faint">
+                  After creating the deal, you&rsquo;ll be able to add milestones and
+                  invite a funder.
+                </p>
+              </form>
+            </CardBody>
+          </Card>
+        </div>
+      </ContractImportFlow>
     </div>
   );
 }
