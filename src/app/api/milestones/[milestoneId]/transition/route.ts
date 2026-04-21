@@ -139,6 +139,24 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         transitioned_by_role: profile.role,
       },
     })
+    // ── Auto-trigger AI draw review when submitted ─────────────────────────────
+if (body.new_status === 'ready_for_review') {
+  try {
+    fetch(`${request.nextUrl.origin}/api/ai/draw-review`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // pass auth cookie through
+        cookie: request.headers.get('cookie') ?? '',
+      },
+      body: JSON.stringify({ milestoneId }),
+    }).catch((err) => {
+      console.error('[transition] AI draw review trigger failed:', err)
+    })
+  } catch (err) {
+    console.error('[transition] AI trigger error:', err)
+  }
+}
 
     return NextResponse.json({
       milestone: updatedMilestone,

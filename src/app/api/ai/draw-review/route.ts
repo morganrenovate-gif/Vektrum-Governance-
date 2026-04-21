@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
 
   // Only funder or admin can request AI reviews
   try {
-    requireRole(profile, 'funder', 'admin')
+    requireRole(profile, 'contractor', 'funder', 'admin')
   } catch (err) {
     return err as NextResponse
   }

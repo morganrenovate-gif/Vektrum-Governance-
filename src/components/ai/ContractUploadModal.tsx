@@ -1,133 +1,77 @@
 'use client'
 
-import { useRef, useState } from "react";
-import { Upload, X, FileText, AlertCircle } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { useRef, useState } from 'react'
+import { Upload, X, FileText, AlertCircle } from 'lucide-react'
+import { analyzeContract } from '@/lib/actions/analyze-contract'
+import type { ContractAnalysisResult, DealMetadata } from '@/lib/actions/analyze-contract'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-export type ProposedMilestone = {
-  name: string;
-  amount: number;
-  conditions: string[];
-  sequence_order: number;
-  retainage_pct: number;
-  notes: string;
-  flags: string[];
-};
-
-export type ContractAnalysisResult = {
-  milestones: ProposedMilestone[];
-  total_value: number;
-  retainage_summary: string;
-  missing_clauses: string[];
-  recommended_settings: {
-    dispute_isolation: boolean;
-    co_gating: boolean;
-    retainage_holdback_pct: number;
-  };
-};
-
-export type DealMetadata = {
-  deal_name: string;
-  funder_email: string;
-  contractor_email: string;
-  jurisdiction: string;
-};
+export type { ContractAnalysisResult, DealMetadata }
 
 type Props = {
-  metadata: DealMetadata;
-  onSuccess: (result: ContractAnalysisResult) => void;
-  onClose: () => void;
-};
-
-type UploadState = "idle" | "selected" | "analyzing" | "error";
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result as string;
-      resolve(result.split(",")[1]);
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
+  metadata: DealMetadata
+  onSuccess: (result: ContractAnalysisResult) => void
+  onClose: () => void
 }
+
+type UploadState = 'idle' | 'selected' | 'analyzing' | 'error'
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export function ContractUploadModal({ metadata, onSuccess, onClose }: Props) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [state, setState] = useState<UploadState>("idle");
-  const [file, setFile] = useState<File | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [dragOver, setDragOver] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [state, setState] = useState<UploadState>('idle')
+  const [file, setFile] = useState<File | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [dragOver, setDragOver] = useState(false)
 
   function handleFile(f: File) {
-    if (f.type !== "application/pdf") {
-      setError("Only PDF files are supported.");
-      return;
+    if (f.type !== 'application/pdf') {
+      setError('Only PDF files are supported.')
+      return
     }
     if (f.size > 20 * 1024 * 1024) {
-      setError("File must be under 20MB.");
-      return;
+      setError('File must be under 20MB.')
+      return
     }
-    setError(null);
-    setFile(f);
-    setState("selected");
+    setError(null)
+    setFile(f)
+    setState('selected')
   }
 
   function handleDrop(e: React.DragEvent) {
-    e.preventDefault();
-    setDragOver(false);
-    const f = e.dataTransfer.files[0];
-    if (f) handleFile(f);
+    e.preventDefault()
+    setDragOver(false)
+    const f = e.dataTransfer.files[0]
+    if (f) handleFile(f)
   }
 
   async function handleAnalyze() {
-    if (!file) return;
-    setState("analyzing");
-    setError(null);
+    if (!file) return
+    setState('analyzing')
+    setError(null)
 
-    try {
-      const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Not authenticated");
+    const formData = new FormData()
+    formData.append('contract', file)
+    formData.append('metadata', JSON.stringify(metadata))
 
-      const pdf_base64 = await fileToBase64(file);
+    const result = await analyzeContract(formData)
 
-      // Use supabase.functions.invoke — no need to manage SUPABASE_URL directly
-      const { data, error: fnError } = await supabase.functions.invoke("analyze-contract", {
-        body: {
-          pdf_base64,
-          file_name: file.name,
-          deal_name: metadata.deal_name,
-          funder_email: metadata.funder_email,
-          contractor_email: metadata.contractor_email,
-          jurisdiction: metadata.jurisdiction,
-        },
-      });
-
-      if (fnError || !data?.success) {
-        throw new Error(data?.error ?? fnError?.message ?? "Analysis failed");
-      }
-
-      onSuccess(data.data);
-    } catch (err) {
-      setState("error");
-      setError(err instanceof Error ? err.message : "Analysis failed. Please try again or enter milestones manually.");
+    if (result.success) {
+      onSuccess(result.data)
+    } else {
+      setState('error')
+      setError(result.error)
     }
   }
 
-  const fileSizeMB = file ? (file.size / 1024 / 1024).toFixed(1) : null;
+  const fileSizeMB = file ? (file.size / 1024 / 1024).toFixed(1) : null
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
-      onClick={(e) => { if (e.target === e.currentTarget && state !== "analyzing") onClose(); }}
+      onClick={(e) => { if (e.target === e.currentTarget && state !== 'analyzing') onClose() }}
     >
       <div className="w-full max-w-lg rounded-2xl border border-vektrum-border bg-vektrum-surface shadow-2xl shadow-black/40 overflow-hidden">
 
@@ -141,7 +85,7 @@ export function ContractUploadModal({ metadata, onSuccess, onClose }: Props) {
               Upload construction contract
             </h2>
           </div>
-          {state !== "analyzing" && (
+          {state !== 'analyzing' && (
             <button onClick={onClose} className="text-vektrum-faint hover:text-vektrum-text transition-colors">
               <X size={18} />
             </button>
@@ -150,7 +94,7 @@ export function ContractUploadModal({ metadata, onSuccess, onClose }: Props) {
 
         <div className="p-6 space-y-4">
 
-          {state === "analyzing" ? (
+          {state === 'analyzing' ? (
             <div className="flex flex-col items-center justify-center py-10 space-y-4">
               <div className="relative">
                 <div className="h-12 w-12 rounded-full border-2 border-vektrum-blue/20 border-t-vektrum-blue animate-spin" />
@@ -171,16 +115,16 @@ export function ContractUploadModal({ metadata, onSuccess, onClose }: Props) {
             <>
               {/* Drop zone */}
               <div
-                onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
                 onDragLeave={() => setDragOver(false)}
                 onDrop={handleDrop}
                 onClick={() => inputRef.current?.click()}
                 className={`relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-10 cursor-pointer transition-all ${
                   dragOver
-                    ? "border-vektrum-blue bg-vektrum-blue/5"
-                    : state === "selected"
-                    ? "border-vektrum-blue/40 bg-vektrum-blue/[0.03]"
-                    : "border-vektrum-border hover:border-vektrum-blue/40 hover:bg-vektrum-surface-alt"
+                    ? 'border-vektrum-blue bg-vektrum-blue/5'
+                    : state === 'selected'
+                    ? 'border-vektrum-blue/40 bg-vektrum-blue/[0.03]'
+                    : 'border-vektrum-border hover:border-vektrum-blue/40 hover:bg-vektrum-surface-alt'
                 }`}
               >
                 <input
@@ -188,9 +132,9 @@ export function ContractUploadModal({ metadata, onSuccess, onClose }: Props) {
                   type="file"
                   accept=".pdf,application/pdf"
                   className="hidden"
-                  onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f) }}
                 />
-                {state === "selected" && file ? (
+                {state === 'selected' && file ? (
                   <>
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-vektrum-blue/10 mb-3">
                       <FileText size={20} className="text-vektrum-blue" />
@@ -215,9 +159,9 @@ export function ContractUploadModal({ metadata, onSuccess, onClose }: Props) {
                   <AlertCircle size={14} className="text-red-400 flex-shrink-0 mt-0.5" />
                   <div>
                     <p className="text-[13px] text-red-400">{error}</p>
-                    {state === "error" && (
+                    {state === 'error' && (
                       <button
-                        onClick={() => { setState("idle"); setFile(null); setError(null); }}
+                        onClick={() => { setState('idle'); setFile(null); setError(null) }}
                         className="text-[12px] text-red-400/70 hover:text-red-400 mt-1 underline"
                       >
                         Try again or enter milestones manually
@@ -232,10 +176,10 @@ export function ContractUploadModal({ metadata, onSuccess, onClose }: Props) {
                   What gets extracted
                 </p>
                 {[
-                  "Project phases and payment amounts",
-                  "Completion conditions per phase",
-                  "Retainage terms and lien waiver requirements",
-                  "Change order provisions",
+                  'Project phases and payment amounts',
+                  'Completion conditions per phase',
+                  'Retainage terms and lien waiver requirements',
+                  'Change order provisions',
                 ].map((item) => (
                   <p key={item} className="text-[12px] text-vektrum-muted">· {item}</p>
                 ))}
@@ -247,7 +191,7 @@ export function ContractUploadModal({ metadata, onSuccess, onClose }: Props) {
               <div className="flex gap-3 pt-1">
                 <button
                   onClick={handleAnalyze}
-                  disabled={state !== "selected"}
+                  disabled={state !== 'selected'}
                   className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-5 py-3 text-[14px] font-semibold text-white shadow-lg shadow-vektrum-blue/25 hover:bg-vektrum-blue-hover disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                 >
                   <FileText size={14} />
@@ -265,5 +209,5 @@ export function ContractUploadModal({ metadata, onSuccess, onClose }: Props) {
         </div>
       </div>
     </div>
-  );
+  )
 }

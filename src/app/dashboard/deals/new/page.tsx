@@ -1,5 +1,6 @@
 "use client";
 
+import { ContractImportFlow } from '@/components/ai/ContractImportFlow'
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -24,6 +25,7 @@ export default function NewDealPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [serverError, setServerError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [metadata, setMetadata] = useState<any>({})
 
   const update =
     (field: string) =>
@@ -104,8 +106,9 @@ export default function NewDealPage() {
           <CardHeader>
             <CardTitle>Deal Details</CardTitle>
           </CardHeader>
-          <CardBody>
-            <form onSubmit={handleSubmit} noValidate className="space-y-5">
+         <CardBody>
+         <ContractImportFlow metadata={metadata}>
+          <form onSubmit={handleSubmit} noValidate className="space-y-5">
               <Input
                 label="Deal Title"
                 placeholder="e.g. Riverside Apartments — Foundation Phase"
@@ -185,6 +188,7 @@ export default function NewDealPage() {
                 invite a funder.
               </p>
             </form>
+           </ContractImportFlow>
           </CardBody>
         </Card>
       </div>

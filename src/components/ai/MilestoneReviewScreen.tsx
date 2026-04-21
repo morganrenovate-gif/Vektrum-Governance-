@@ -1,234 +1,394 @@
 'use client'
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { ArrowLeft, CheckCircle, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
-import type { ContractAnalysisResult, DealMetadata, ProposedMilestone } from "./ContractUploadModal";
+import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
+import {
+  AlertTriangle,
+  Plus,
+  Trash2,
+  ChevronDown,
+  ChevronUp,
+  CheckCircle2,
+  ArrowLeft,
+} from 'lucide-react'
+import {
+  confirmDealFromContract,
+} from '@/lib/actions/analyze-contract'
+import type { ProposedMilestone, DealMetadata } from '@/lib/actions/analyze-contract'
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+type EditableMilestone = ProposedMilestone & { _id: string }
 
 type Props = {
-  metadata: DealMetadata;
-  analysis: ContractAnalysisResult;
-  onBack: () => void;
-  onClose: () => void;
-};
+  initialMilestones: ProposedMilestone[]
+  totalValue: number
+  missingClauses: string[]
+  retainageSummary: string
+  metadata: DealMetadata
+  onStartOver: () => void
+}
 
-type SaveState = "idle" | "saving" | "error";
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
-export function MilestoneReviewScreen({ metadata, analysis, onBack, onClose }: Props) {
-  const router = useRouter();
-  const [saveState, setSaveState] = useState<SaveState>("idle");
-  const [error, setError] = useState<string | null>(null);
-  const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
+function uid() {
+  return Math.random().toString(36).slice(2)
+}
 
-  const runningTotal = analysis.milestones.reduce((sum, m) => sum + m.amount, 0);
+function formatCurrency(n: number) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(n)
+}
 
-  async function handleCreateDeal() {
-    setSaveState("saving");
-    setError(null);
+// ── Condition editor ──────────────────────────────────────────────────────────
 
-    const supabase = createClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      setError("Not authenticated");
-      setSaveState("error");
-      return;
-    }
+function ConditionList({
+  conditions,
+  onChange,
+}: {
+  conditions: string[]
+  onChange: (updated: string[]) => void
+}) {
+  return (
+    <div className="space-y-1.5">
+      {conditions.map((c, i) => (
+        <div key={i} className="flex items-center gap-2">
+          <input
+            value={c}
+            onChange={(e) => {
+              const next = [...conditions]
+              next[i] = e.target.value
+              onChange(next)
+            }}
+            className="flex-1 rounded-lg border border-vektrum-border bg-vektrum-bg px-3 py-1.5 text-[13px] text-vektrum-text placeholder:text-vektrum-faint focus:border-vektrum-blue focus:outline-none"
+            placeholder="Completion condition"
+          />
+          <button
+            onClick={() => onChange(conditions.filter((_, j) => j !== i))}
+            className="text-vektrum-faint hover:text-red-400 transition-colors"
+          >
+            <Trash2 size={13} />
+          </button>
+        </div>
+      ))}
+      <button
+        onClick={() => onChange([...conditions, ''])}
+        className="text-[12px] text-vektrum-blue hover:text-vektrum-blue-hover transition-colors flex items-center gap-1"
+      >
+        <Plus size={12} /> Add condition
+      </button>
+    </div>
+  )
+}
 
-    try {
-      // Create the deal
-      const { data: deal, error: dealError } = await supabase
-        .from("deals")
-        .insert({
-          title: metadata.deal_name,
-          total_amount: runningTotal,
-          status: "draft",
-          contractor_id: session.user.id,
-        })
-        .select("id")
-        .single();
+// ── Single milestone card ─────────────────────────────────────────────────────
 
-      if (dealError || !deal) throw new Error(dealError?.message ?? "Failed to create deal");
+function MilestoneEditCard({
+  milestone,
+  index,
+  onChange,
+  onRemove,
+}: {
+  milestone: EditableMilestone
+  index: number
+  onChange: (updated: EditableMilestone) => void
+  onRemove: () => void
+}) {
+  const [expanded, setExpanded] = useState(index === 0)
 
-      // Insert milestones in order
-      const milestoneRows = analysis.milestones.map((m: ProposedMilestone) => ({
-        deal_id: deal.id,
-        title: m.name,
-        description: m.notes || null,
-        amount: m.amount,
-        order_index: m.sequence_order - 1,
-      }));
+  return (
+    <div className="rounded-2xl border border-vektrum-border bg-vektrum-surface overflow-hidden">
+      <div className="flex items-center gap-3 px-5 py-3.5 border-b border-vektrum-border/50">
+        <span className="font-mono text-[11px] font-semibold text-vektrum-faint w-5 text-center">
+          {String(index + 1).padStart(2, '0')}
+        </span>
+        <input
+          value={milestone.name}
+          onChange={(e) => onChange({ ...milestone, name: e.target.value })}
+          className="flex-1 bg-transparent text-[14px] font-semibold text-vektrum-text focus:outline-none placeholder:text-vektrum-faint"
+          placeholder="Milestone name"
+        />
+        <div className="flex items-center gap-1 mr-1">
+          <span className="text-[13px] text-vektrum-faint">$</span>
+          <input
+            type="number"
+            value={milestone.amount || ''}
+            onChange={(e) => onChange({ ...milestone, amount: parseFloat(e.target.value) || 0 })}
+            className="w-28 bg-transparent text-right text-[14px] font-semibold tabular-nums text-vektrum-text focus:outline-none"
+            placeholder="0"
+          />
+        </div>
+        {milestone.flags.length > 0 && (
+          <AlertTriangle size={14} className="text-amber-400 flex-shrink-0" />
+        )}
+        <button
+          onClick={() => setExpanded((v) => !v)}
+          className="text-vektrum-faint hover:text-vektrum-text transition-colors"
+        >
+          {expanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+        </button>
+        <button
+          onClick={onRemove}
+          className="text-vektrum-faint hover:text-red-400 transition-colors ml-1"
+        >
+          <Trash2 size={14} />
+        </button>
+      </div>
 
-      const { error: msError } = await supabase.from("milestones").insert(milestoneRows);
-      if (msError) throw new Error(msError.message);
+      {expanded && (
+        <div className="px-5 py-4 space-y-4">
+          {milestone.flags.length > 0 && (
+            <div className="space-y-1.5">
+              {milestone.flags.map((flag, i) => (
+                <div
+                  key={i}
+                  className="flex items-start gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2"
+                >
+                  <AlertTriangle size={12} className="text-amber-400 flex-shrink-0 mt-0.5" />
+                  <p className="text-[12px] text-amber-300/80 leading-relaxed">{flag}</p>
+                </div>
+              ))}
+            </div>
+          )}
 
-      router.push(`/dashboard/deals/${deal.id}`);
-      onClose();
-    } catch (err) {
-      setSaveState("error");
-      setError(err instanceof Error ? err.message : "Failed to create deal");
-    }
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-faint mb-2">
+              Release conditions
+            </p>
+            <ConditionList
+              conditions={milestone.conditions}
+              onChange={(conditions) => onChange({ ...milestone, conditions })}
+            />
+          </div>
+
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-faint mb-1">
+              Retainage %
+            </p>
+            <div className="flex items-center gap-1">
+              <input
+                type="number"
+                min="0"
+                max="100"
+                value={milestone.retainage_pct || ''}
+                onChange={(e) =>
+                  onChange({ ...milestone, retainage_pct: parseFloat(e.target.value) || 0 })
+                }
+                className="w-16 rounded-lg border border-vektrum-border bg-vektrum-bg px-2.5 py-1.5 text-[13px] text-vektrum-text focus:border-vektrum-blue focus:outline-none"
+              />
+              <span className="text-[13px] text-vektrum-faint">%</span>
+            </div>
+          </div>
+
+          {milestone.notes && (
+            <div className="rounded-lg border border-vektrum-border/50 bg-vektrum-bg/50 px-3 py-2">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-vektrum-faint mb-1">
+                Contract note
+              </p>
+              <p className="text-[12px] text-vektrum-muted leading-relaxed">{milestone.notes}</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
+
+export function MilestoneReviewScreen({
+  initialMilestones,
+  totalValue,
+  missingClauses,
+  retainageSummary,
+  metadata,
+  onStartOver,
+}: Props) {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [milestones, setMilestones] = useState<EditableMilestone[]>(
+    initialMilestones.map((m) => ({ ...m, _id: uid() })),
+  )
+
+  const runningTotal = milestones.reduce((sum, m) => sum + (m.amount || 0), 0)
+  const totalMismatch = Math.abs(runningTotal - totalValue) > 1 && totalValue > 0
+
+  function updateMilestone(id: string, updated: EditableMilestone) {
+    setMilestones((prev) => prev.map((m) => (m._id === id ? updated : m)))
+  }
+
+  function removeMilestone(id: string) {
+    setMilestones((prev) => prev.filter((m) => m._id !== id))
+  }
+
+  function addMilestone() {
+    setMilestones((prev) => [
+      ...prev,
+      {
+        _id: uid(),
+        name: '',
+        amount: 0,
+        conditions: [],
+        sequence_order: prev.length + 1,
+        retainage_pct: 0,
+        notes: '',
+        flags: [],
+      },
+    ])
+  }
+
+  function handleConfirm() {
+    setSubmitError(null)
+    startTransition(async () => {
+      const result = await confirmDealFromContract({
+        metadata,
+        milestones: milestones.map(({ _id, ...m }) => m),
+        totalValue: runningTotal,
+        importedViaAI: true,
+      })
+
+      if (result.success) {
+        router.push(`/dashboard/deals/${result.dealId}`)
+      } else {
+        setSubmitError(result.error)
+      }
+    })
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
-      <div className="w-full max-w-2xl rounded-2xl border border-vektrum-border bg-vektrum-surface shadow-2xl shadow-black/40 overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
 
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-vektrum-border flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <button onClick={onBack} className="text-vektrum-faint hover:text-vektrum-text transition-colors">
-              <ArrowLeft size={16} />
-            </button>
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-vektrum-blue mb-0.5">
-                AI Contract Import
-              </p>
-              <h2 className="text-[16px] font-semibold text-vektrum-text tracking-[-0.01em]">
-                Review extracted milestones
-              </h2>
-            </div>
-          </div>
-          <div className="text-right">
-            <p className="text-[11px] text-vektrum-faint">Total value</p>
-            <p className="text-[15px] font-semibold text-vektrum-text">
-              ${runningTotal.toLocaleString()}
-            </p>
-          </div>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-vektrum-blue mb-1">
+            AI Contract Import
+          </p>
+          <h1 className="text-[1.75rem] font-bold tracking-[-0.03em] text-vektrum-text">
+            Review proposed milestones
+          </h1>
         </div>
-
-        {/* Body */}
-        <div className="overflow-y-auto flex-1 p-6 space-y-3">
-
-          {/* Missing clauses warning */}
-          {analysis.missing_clauses.length > 0 && (
-            <div className="flex items-start gap-2.5 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 mb-4">
-              <AlertTriangle size={14} className="text-amber-400 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="text-[12px] font-semibold text-amber-400 mb-1">Missing or unclear clauses</p>
-                {analysis.missing_clauses.map((c) => (
-                  <p key={c} className="text-[12px] text-amber-400/80">· {c}</p>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Milestones */}
-          {analysis.milestones.map((m, i) => (
-            <div
-              key={i}
-              className="rounded-xl border border-vektrum-border bg-vektrum-bg overflow-hidden"
-            >
-              <button
-                className="w-full flex items-center justify-between px-4 py-3 text-left"
-                onClick={() => setExpandedIdx(expandedIdx === i ? null : i)}
-              >
-                <div className="flex items-center gap-3">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-vektrum-blue/10 text-[11px] font-bold text-vektrum-blue">
-                    {m.sequence_order}
-                  </span>
-                  <span className="text-[13px] font-semibold text-vektrum-text">{m.name}</span>
-                  {m.flags.length > 0 && (
-                    <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-400">
-                      {m.flags.length} flag{m.flags.length !== 1 ? "s" : ""}
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-[13px] font-semibold text-vektrum-text">
-                    ${m.amount.toLocaleString()}
-                  </span>
-                  {expandedIdx === i ? (
-                    <ChevronUp size={14} className="text-vektrum-faint" />
-                  ) : (
-                    <ChevronDown size={14} className="text-vektrum-faint" />
-                  )}
-                </div>
-              </button>
-
-              {expandedIdx === i && (
-                <div className="border-t border-vektrum-border px-4 py-3 space-y-2.5">
-                  {m.conditions.length > 0 && (
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-faint mb-1">
-                        Conditions
-                      </p>
-                      {m.conditions.map((c, ci) => (
-                        <p key={ci} className="text-[12px] text-vektrum-muted">· {c}</p>
-                      ))}
-                    </div>
-                  )}
-                  {m.notes && (
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-faint mb-1">
-                        Notes
-                      </p>
-                      <p className="text-[12px] text-vektrum-muted">{m.notes}</p>
-                    </div>
-                  )}
-                  {m.flags.length > 0 && (
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-amber-400/70 mb-1">
-                        Flags
-                      </p>
-                      {m.flags.map((f, fi) => (
-                        <p key={fi} className="text-[12px] text-amber-400/80">· {f}</p>
-                      ))}
-                    </div>
-                  )}
-                  {m.retainage_pct > 0 && (
-                    <p className="text-[12px] text-vektrum-muted">
-                      Retainage: {m.retainage_pct}%
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
-
-          {/* Retainage summary */}
-          {analysis.retainage_summary && (
-            <div className="rounded-xl border border-vektrum-border/50 bg-vektrum-bg px-4 py-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-faint mb-1">
-                Retainage summary
-              </p>
-              <p className="text-[12px] text-vektrum-muted">{analysis.retainage_summary}</p>
-            </div>
-          )}
-
-          {error && (
-            <p className="text-[13px] text-red-400 text-center">{error}</p>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="flex gap-3 px-6 py-4 border-t border-vektrum-border flex-shrink-0">
-          <button
-            onClick={handleCreateDeal}
-            disabled={saveState === "saving"}
-            className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-5 py-3 text-[14px] font-semibold text-white shadow-lg shadow-vektrum-blue/25 hover:bg-vektrum-blue-hover disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-          >
-            {saveState === "saving" ? (
-              <>
-                <div className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                Creating deal...
-              </>
-            ) : (
-              <>
-                <CheckCircle size={14} />
-                Create deal with {analysis.milestones.length} milestones
-              </>
-            )}
-          </button>
-          <button
-            onClick={onBack}
-            disabled={saveState === "saving"}
-            className="rounded-xl border border-vektrum-border px-4 py-3 text-[14px] font-semibold text-vektrum-muted hover:bg-vektrum-surface-alt transition-all disabled:opacity-40"
-          >
-            Back
-          </button>
-        </div>
+        <button
+          onClick={onStartOver}
+          className="flex items-center gap-1.5 text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors"
+        >
+          <ArrowLeft size={14} />
+          Start over
+        </button>
       </div>
+
+      {/* Missing clauses banner */}
+      {missingClauses.length > 0 && (
+        <div className="rounded-xl border border-amber-500/25 bg-amber-500/[0.08] px-4 py-3">
+          <div className="flex items-start gap-2.5">
+            <AlertTriangle size={15} className="text-amber-400 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-[13px] font-semibold text-amber-300 mb-1.5">
+                Missing or ambiguous clauses detected
+              </p>
+              <ul className="space-y-0.5">
+                {missingClauses.map((c, i) => (
+                  <li key={i} className="text-[12px] text-amber-300/70 leading-relaxed">
+                    · {c}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Retainage summary */}
+      {retainageSummary && (
+        <div className="rounded-xl border border-vektrum-border/60 bg-vektrum-surface px-4 py-3">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-vektrum-faint mb-1">
+            Retainage terms (from contract)
+          </p>
+          <p className="text-[13px] text-vektrum-muted leading-relaxed">{retainageSummary}</p>
+        </div>
+      )}
+
+      {/* Milestone cards */}
+      <div className="space-y-3">
+        {milestones.map((m, i) => (
+          <MilestoneEditCard
+            key={m._id}
+            milestone={m}
+            index={i}
+            onChange={(updated) => updateMilestone(m._id, updated)}
+            onRemove={() => removeMilestone(m._id)}
+          />
+        ))}
+      </div>
+
+      {/* Add milestone */}
+      <button
+        onClick={addMilestone}
+        className="w-full rounded-2xl border border-dashed border-vektrum-border py-3.5 text-[13px] font-semibold text-vektrum-muted hover:border-vektrum-blue/50 hover:text-vektrum-blue transition-all flex items-center justify-center gap-2"
+      >
+        <Plus size={15} />
+        Add milestone
+      </button>
+
+      {/* Running total */}
+      <div className="rounded-xl border border-vektrum-border bg-vektrum-surface px-5 py-4 flex items-center justify-between">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-faint">
+            Total milestone value
+          </p>
+          {totalMismatch && (
+            <p className="text-[11px] text-amber-400 mt-0.5">
+              Contract total: {formatCurrency(totalValue)} · Difference:{' '}
+              {formatCurrency(Math.abs(runningTotal - totalValue))}
+            </p>
+          )}
+        </div>
+        <p className={`text-[22px] font-bold tracking-[-0.03em] ${totalMismatch ? 'text-amber-400' : 'text-vektrum-text'}`}>
+          {formatCurrency(runningTotal)}
+        </p>
+      </div>
+
+      {submitError && (
+        <div className="rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3">
+          <p className="text-[13px] text-red-400">{submitError}</p>
+        </div>
+      )}
+
+      {/* Confirm */}
+      <div className="flex items-center gap-3 pt-2">
+        <button
+          onClick={handleConfirm}
+          disabled={isPending || milestones.length === 0}
+          className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-6 py-3.5 text-[14px] font-semibold text-white shadow-lg shadow-vektrum-blue/25 hover:bg-vektrum-blue-hover disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+        >
+          {isPending ? (
+            <>
+              <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+              Creating deal...
+            </>
+          ) : (
+            <>
+              <CheckCircle2 size={15} />
+              Confirm &amp; create deal
+            </>
+          )}
+        </button>
+        <button
+          onClick={onStartOver}
+          className="rounded-xl border border-vektrum-border px-5 py-3.5 text-[14px] font-semibold text-vektrum-muted hover:bg-vektrum-surface-alt transition-all"
+        >
+          Cancel
+        </button>
+      </div>
+
+      <p className="text-center text-[11px] text-vektrum-faint">
+        AI-generated milestones. Review all amounts and conditions before confirming.
+        The release gate runs independently server-side.
+      </p>
     </div>
-  );
+  )
 }

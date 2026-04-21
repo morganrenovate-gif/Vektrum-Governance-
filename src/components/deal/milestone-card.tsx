@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn, formatMoney } from "@/lib/utils";
 import { MilestoneStatusBadge, ProtectionStatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -46,6 +46,17 @@ export function MilestoneCard({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const handleAction = async (action: string) => {
+  const [aiAssessment, setAiAssessment] = useState<{
+  assessment_id?: string
+  risk_level?: string
+  score?: number
+  findings?: string[]
+  recommendation?: string
+  reasoning?: string
+  reviewed_at?: string
+} | null>(null)
+
+const [aiLoading, setAiLoading] = useState(false)
     setLoading(action);
     setError(null);
     setSuccess(null);
@@ -88,6 +99,9 @@ export function MilestoneCard({
   const isReleased = milestone.status === "released";
   const borderColor = statusBorderColor[milestone.status] ?? "border-l-vektrum-border";
   const shadowClass = statusShadow[milestone.status] ?? "shadow-xs";
+  const isReadyForReview = milestone.status === 'ready_for_review'
+  const showAiPanel =
+    milestone.status === 'ready_for_review' || milestone.status === 'approved'
 
   if (isReleased) {
     return (
