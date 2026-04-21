@@ -41,10 +41,12 @@ type AnalyzeContractResult =
 // ── PDF text extraction ───────────────────────────────────────────────────────
 
 async function extractPdfText(buffer: Buffer): Promise<string> {
-  // pdf-parse is CJS-only; require avoids the ESM .default mismatch
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const pdfParse = require('pdf-parse') as (buf: Buffer) => Promise<{ text: string }>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const pdfParse = ((await import('pdf-parse')) as any).default as (buf: Buffer) => Promise<{ text: string }>
+  console.log('buffer length:', buffer.length)
   const parsed = await pdfParse(buffer)
+  console.log('parsed text length:', parsed.text?.length)
+  console.log('parsed text preview:', parsed.text?.slice(0, 300))
   return parsed.text
 }
 
@@ -141,8 +143,8 @@ export async function analyzeContract(formData: FormData): Promise<AnalyzeContra
     const buffer = Buffer.from(arrayBuffer)
     contractText = await extractPdfText(buffer)
   } catch (err) {
-    console.error('[analyzeContract] PDF extraction failed:', err)
-    return { success: false, error: 'Could not read PDF. Please check the file and try again.' }
+    console.error('[analyzeContract] PDF extraction failed — full error:', err)
+    return { success: false, error: `PDF parsing failed: ${err instanceof Error ? err.message : String(err)}` }
   }
 
   if (!contractText || contractText.trim().length < 100) {
