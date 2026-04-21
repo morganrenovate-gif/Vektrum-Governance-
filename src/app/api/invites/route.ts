@@ -124,42 +124,34 @@ export async function POST(request: NextRequest) {
     .eq('status', 'pending')
     .single()
 
-  if (existingInvite) {
-    // If the existing invite hasn't expired, return it rather than conflicting
-    const expiresAt = new Date(existingInvite.expires_at)
-    if (expiresAt > new Date()) {
-      const inviteUrl = buildInviteUrl(request, existingInvite.token)
-      return NextResponse.json(
-        {
-          invite_url: inviteUrl,
-          invite: existingInvite,
-          reused: true,
-          message:
-            'An active invite link already exists for this deal. The existing link has been returned. Use the revoke endpoint to generate a new one.',
-        },
-        { status: 200 },
-      )
-    }
-
-    // Existing invite is expired — revoke it before creating a new one
-    await admin
-      .from('deal_invites')
-      .update({ status: 'expired' })
-      .eq('id', existingInvite.id)
-  }
+ if (existingInvite) {
+  await admin
+    .from('deal_invites')
+    .update({ status: 'expired' })
+    .eq('id', existingInvite.id)
+}
 
   // ── Create invite ──────────────────────────────────────────────────────────
-  const { data: invite, error: insertError } = await admin
-    .from('deal_invites')
-    .insert({
-      deal_id: dealId,
-      invited_by: user.id,
-      invited_email: invitedEmail,
-      status: 'pending',
-      // token and expires_at use DB defaults (gen_random_uuid(), now() + 7 days)
-    })
-    .select('id, token, deal_id, invited_email, status, expires_at, created_at')
-    .single()
+  const baseName = "funder-invite";
+
+const slug = baseName
+  .toLowerCase()
+  .trim()
+  .replace(/\s+/g, "-")
+  .replace(/[^a-z0-9-]/g, "");
+
+const { data: invite, error: insertError } = await admin
+  .from("deal_invites")
+  .insert({
+    deal_id: dealId,
+    invited_by: user.id,
+    invited_email: invitedEmail,
+    slug,
+    status: "pending",
+    // token and expires_at use DB defaults
+  })
+  .select("id, token, slug, deal_id, invited_email, status, expires_at, created_at")
+  .single();
 
   if (insertError || !invite) {
     return internalError(
@@ -181,7 +173,7 @@ export async function POST(request: NextRequest) {
     },
   })
 
-  const inviteUrl = buildInviteUrl(request, invite.token)
+  const inviteUrl = buildInviteUrl(request, invite.token, invite.slug)
 
   return NextResponse.json(
     {
@@ -264,9 +256,14 @@ export async function GET(request: NextRequest) {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function buildInviteUrl(request: NextRequest, token: string): string {
+function buildInviteUrl(
+  request: NextRequest,
+  token: string,
+  slug?: string | null
+) {
   const origin =
-    process.env.NEXT_PUBLIC_APP_URL ??
-    `${request.nextUrl.protocol}//${request.nextUrl.host}`
-  return `${origin}/invite/${token}`
+    process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
+
+  const pathPart = slug || token;
+  return `${origin}/invite/${pathPart}?token=${token}`;
 }
