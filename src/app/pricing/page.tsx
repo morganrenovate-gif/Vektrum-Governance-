@@ -84,8 +84,7 @@ function TierCard({
       {/* CRF Rate */}
       <div className="mb-4 rounded-xl border border-vektrum-border bg-vektrum-surface-alt px-4 py-3">
         <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-vektrum-faint mb-1">
-          Vektrum Compliance Review Fee
-        </p>
+          Draw Governance Fee        </p>
         <p className="text-[20px] font-bold tracking-[-0.03em] text-vektrum-text tabular-nums">
           {crfRate}
         </p>
@@ -207,7 +206,7 @@ export default function PricingPage() {
               name="Standalone Project"
               target="Individual contractors · Developers · Private projects"
               crfRate="100 bps"
-              crfNote="per verified milestone disbursement"
+              crfNote="per release"
               retainer="None"
               retainerNote="Pure performance model — pay only when money moves"
               implementation="Self-service — no implementation fee"
@@ -227,7 +226,7 @@ export default function PricingPage() {
               name="Institutional Portfolio"
               target="Banks · Private credit funds · Regional lenders"
               crfRate="70 bps"
-              crfNote="per verified disbursement (retainer rate)"
+              crfNote="per verified release (retainer rate)"
               retainer="7.5 bps of ACV / year"
               retainerNote="Floor: $5,000 / yr · Cap: $50,000 / yr"
               implementation="$5,000–$15,000 one-time setup"
@@ -249,7 +248,7 @@ export default function PricingPage() {
               name="Enterprise / Platform"
               target="Large contractors · Owners · Construction lenders at scale"
               crfRate="65 bps"
-              crfNote="per verified disbursement — negotiated annually"
+              crfNote="per verified release — negotiated annually"
               retainer="50 - 100 bps of ACV / year"
               retainerNote="Floor: $25,000 / yr — negotiated"
               implementation="$15,000–$50,000 — includes integration & training"
