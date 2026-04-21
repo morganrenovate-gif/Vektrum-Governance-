@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { MoneySummary } from "@/components/deal/money-summary";
 import { MilestoneCard } from "@/components/deal/milestone-card";
+import { MilestoneDisputeSection } from "@/components/ai/MilestoneDisputeSection";
 import { ReleaseButton } from "@/components/deal/release-button";
 import { InviteFunderButton } from "@/components/deal/invite-funder-button";
 import { DealStatusBadge } from "@/components/ui/badge";
@@ -106,6 +107,23 @@ export default async function DealDetailPage({
   }
 
   const milestones = (typedDeal.milestones ?? []) as Milestone[];
+
+  const milestoneIds = milestones.map((m) => m.id);
+  const { data: disputeBriefs } = milestoneIds.length
+    ? await supabase
+        .from("dispute_briefs")
+        .select("*")
+        .in("milestone_id", milestoneIds)
+        .order("created_at", { ascending: false })
+    : { data: [] };
+
+  const briefMap = new Map<string, any>();
+  for (const brief of disputeBriefs ?? []) {
+    if (!briefMap.has(brief.milestone_id)) {
+      briefMap.set(brief.milestone_id, brief);
+    }
+  }
+
   const milestonesTotal = milestones.reduce((s, m) => s + m.amount, 0);
   const remaining = Math.max(0, typedDeal.total_amount - milestonesTotal);
   const isDraftContractor =
@@ -236,6 +254,7 @@ export default async function DealDetailPage({
           <div className="space-y-3">
             {milestones.map((milestone) => {
               const gate = computeReleaseGate(milestone, typedDeal);
+              const latestBrief = briefMap.get(milestone.id) ?? null;
               const contractorName =
                 typedDeal.contractor?.full_name ?? "Contractor";
 
@@ -246,6 +265,20 @@ export default async function DealDetailPage({
                     role={typedProfile.role}
                     dealId={typedDeal.id}
                   />
+                  <MilestoneDisputeSection
+                    milestone={{
+                    id: milestone.id,
+                    title: milestone.title,
+                    amount: milestone.amount,
+                    status: milestone.status,
+        }}
+        brief={
+          latestBrief
+            ? { ...latestBrief, milestone_amount: milestone.amount }
+            : null
+        }
+        role={typedProfile.role}
+     />
 
                   {/* Release button — funder only, approved milestones */}
                   {typedProfile.role === "funder" &&
