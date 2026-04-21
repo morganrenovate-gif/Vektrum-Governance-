@@ -43,6 +43,8 @@ export default function DemoLivePage() {
           Choose a role to explore the platform. All data is simulated.
         </p>
       </div>
+      </div>
+      
 
       <div className="grid gap-5 sm:grid-cols-3 max-w-3xl mx-auto">
         {roles.map((r) => (
