@@ -1,5 +1,4 @@
 "use client";
-
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import React from "react";
@@ -14,24 +13,33 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
 }
 
+// ── Dark-first variant classes ────────────────────────────────────────────────
+//
+// primary   — unchanged, already correct
+// secondary — was bg-vektrum-surface (white) + text-vektrum-muted (near-black)
+//             now bg-white/[0.06] + text-white/70 — correct on dark navy
+// ghost     — was bg-transparent + text-vektrum-muted (near-black)
+//             now bg-transparent + text-white/55 — correct on dark navy
+// danger    — unchanged
+// success   — unchanged
+//
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    "bg-vektrum-blue text-white hover:bg-vektrum-blue-hover focus-visible:ring-vektrum-blue disabled:opacity-50",
+    "bg-vektrum-blue text-white shadow-lg shadow-vektrum-blue/30 hover:bg-vektrum-blue-hover hover:shadow-xl hover:shadow-vektrum-blue/40 hover:-translate-y-0.5 focus-visible:ring-vektrum-blue disabled:opacity-50",
   secondary:
-    "bg-vektrum-surface text-vektrum-muted border border-vektrum-border hover:bg-vektrum-surface-alt focus-visible:ring-vektrum-blue disabled:opacity-40",
+    "border border-white/15 bg-white/[0.05] text-white/70 hover:bg-white/10 hover:text-white focus-visible:ring-vektrum-blue disabled:opacity-40",
   danger:
-    "bg-vektrum-red text-white hover:bg-vektrum-red/80 focus-visible:ring-vektrum-red disabled:opacity-50",
+    "bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 focus-visible:ring-red-500 disabled:opacity-50",
   success:
-    "bg-vektrum-green text-white hover:bg-vektrum-green/80 focus-visible:ring-vektrum-green disabled:opacity-50",
+    "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 focus-visible:ring-emerald-500 disabled:opacity-50",
   ghost:
-    "bg-transparent text-vektrum-muted hover:bg-vektrum-surface-alt focus-visible:ring-vektrum-blue disabled:opacity-30",
+    "bg-transparent text-white/55 hover:bg-white/[0.06] hover:text-white/80 focus-visible:ring-vektrum-blue disabled:opacity-30",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
-  // All sizes have a minimum height of 44px for mobile touch targets
-  sm: "min-h-[44px] px-3 py-2 text-sm gap-1.5",
-  md: "min-h-[44px] px-4 py-2.5 text-sm gap-2",
-  lg: "min-h-[44px] px-6 py-3 text-base gap-2",
+  sm: "min-h-[40px] px-4 py-2 text-[13px] gap-1.5 rounded-xl",
+  md: "min-h-[44px] px-5 py-2.5 text-[14px] gap-2 rounded-xl",
+  lg: "min-h-[52px] px-8 py-3.5 text-[15px] gap-2 rounded-xl",
 };
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -55,12 +63,10 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={isDisabled}
         aria-disabled={isDisabled}
         className={cn(
-          // Base styles
-          "inline-flex items-center justify-center rounded-md font-medium",
-          "transition-colors duration-150 ease-in-out",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+          "inline-flex items-center justify-center font-semibold",
+          "transition-all duration-150 ease-in-out",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0D1B2A]",
           "disabled:cursor-not-allowed disabled:opacity-60",
-          // Variant + size
           variantClasses[variant],
           sizeClasses[size],
           className
