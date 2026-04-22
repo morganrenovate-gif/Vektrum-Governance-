@@ -59,23 +59,26 @@ async function getProfileAndDeals(userId: string) {
 
 // ─── Stat tile ────────────────────────────────────────────────────────────────
 
-// Tier 2 upgrade: text-4xl numbers for stat tiles (previously text-2xl)
-// Numbers are the primary anchor — make them visually dominant.
 function StatTile({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-lg border border-vektrum-border bg-vektrum-surface px-5 py-5 shadow-sm hover:shadow-md transition-shadow">
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">
+    <div
+      className="rounded-2xl border border-white/[0.08] bg-[#111827] px-5 py-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/[0.14]"
+      style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+    >
+      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">
         {label}
       </p>
-      <p className="mt-1.5 font-display text-4xl font-bold tabular-nums text-vektrum-text leading-none">{value}</p>
+      <p className="mt-2 font-display text-4xl font-bold tabular-nums text-white leading-none">{value}</p>
     </div>
   )
 }
 
-// Money stat tile: upgrade label text and use xl size for visual weight
 function MoneyStatTile({ label, amount }: { label: string; amount: number }) {
   return (
-    <div className="rounded-lg border border-vektrum-border bg-vektrum-surface px-5 py-5 shadow-sm hover:shadow-md transition-shadow">
+    <div
+      className="rounded-2xl border border-white/[0.08] bg-[#111827] px-5 py-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/[0.14]"
+      style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+    >
       <Money label={label} amount={amount} size="xl" />
     </div>
   )
@@ -83,18 +86,22 @@ function MoneyStatTile({ label, amount }: { label: string; amount: number }) {
 
 function EmptyDeals({ role }: { role: string }) {
   return (
-    <div className="text-center py-16 border border-dashed border-vektrum-border rounded-2xl">
-      <FolderOpen size={40} className="mx-auto text-vektrum-faint mb-3" aria-hidden="true" />
-      <p className="text-vektrum-text font-medium mb-1">No deals yet</p>
-      <p className="text-vektrum-muted text-sm mb-4">
+    <div className="text-center py-16 rounded-2xl border border-dashed border-white/[0.08]">
+      <FolderOpen size={40} className="mx-auto text-white/25 mb-3" aria-hidden="true" />
+      <p className="text-white font-medium mb-1">No deals yet</p>
+      <p className="text-white/50 text-sm mb-5">
         {role === 'contractor'
           ? 'Create your first deal to start tracking milestones and receiving payments.'
           : 'Deals will appear here once a contractor invites you to a project.'}
       </p>
       {role === 'contractor' && (
-        <Link href="/dashboard/deals/new" className="inline-flex items-center gap-1.5 bg-vektrum-blue text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-vektrum-blue-hover transition-colors">
+        <Link
+          href="/dashboard/deals/new"
+          className="group inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-6 py-2.5 text-[14px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 transition-all hover:bg-vektrum-blue-hover hover:shadow-xl hover:shadow-vektrum-blue/40 hover:-translate-y-0.5"
+        >
           <Plus size={14} aria-hidden="true" />
-          Create Deal →
+          Create Deal
+          <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
         </Link>
       )}
     </div>
@@ -122,7 +129,7 @@ export default async function DashboardPage() {
 
   if (!profile) {
     return (
-      <div className="page-container py-12">
+      <div className="min-h-screen bg-[#0D1B2A] flex items-center justify-center">
         <Card>
           <CardBody>
             <p className="text-sm text-vektrum-muted">
@@ -150,19 +157,18 @@ export default async function DashboardPage() {
         {/* Persistent AI assistant */}
         <AssistantPanel actionRequired={pendingMilestones} />
 
-        <div className="page-container section space-y-8">
+        <div className="min-h-screen bg-[#0D1B2A]">
+        <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-12 sm:py-16 space-y-8">
           {/* Header */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <h1 className="font-display text-2xl font-bold text-vektrum-text">
+              <div className="mb-3 flex items-center gap-3">
+                <div className="h-px w-5 bg-vektrum-blue" />
+                <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">Contractor Dashboard</p>
+              </div>
+              <h1 className="font-display text-[2.25rem] font-bold tracking-[-0.04em] text-white leading-[1.05]">
                 Welcome back, {profile.full_name?.split(' ')[0] ?? 'there'}
               </h1>
-              <div className="mt-1.5 flex items-center gap-2">
-                <p className="text-sm text-vektrum-muted">Contractor dashboard</p>
-                <span className="inline-flex items-center rounded-full bg-vektrum-blue-subtle border border-vektrum-blue-border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-vektrum-blue">
-                  Contractor
-                </span>
-              </div>
             </div>
             {profile.stripe_account_id ? (
               <Link href="/dashboard/deals/new">
@@ -221,13 +227,20 @@ export default async function DashboardPage() {
             if (!actionTitle) return null
 
             return (
-              <div className={`border-l-4 ${borderColor} ${bgColor} rounded-r-xl p-4 mb-6 flex items-center justify-between`}>
+              <div
+                className={`border-l-4 ${borderColor} rounded-xl p-4 flex items-center justify-between`}
+                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderLeftWidth: '4px' }}
+              >
                 <div>
-                  <p className="font-semibold text-vektrum-text">{actionTitle}</p>
-                  <p className="text-sm text-vektrum-muted">{actionDescription}</p>
+                  <p className="font-semibold text-white">{actionTitle}</p>
+                  <p className="text-sm text-white/55">{actionDescription}</p>
                 </div>
-                <Link href={actionHref} className="bg-vektrum-blue text-white px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap ml-4 hover:bg-vektrum-blue-hover transition-colors">
-                  {actionCTA} →
+                <Link
+                  href={actionHref}
+                  className="group inline-flex items-center gap-1.5 bg-vektrum-blue text-white px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap ml-4 hover:bg-vektrum-blue-hover transition-all hover:-translate-y-0.5"
+                >
+                  {actionCTA}
+                  <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
                 </Link>
               </div>
             )
@@ -264,27 +277,30 @@ export default async function DashboardPage() {
           </div>
 
           {/* Draw Review Status Panel */}
-          <div className="rounded-xl border border-vektrum-border bg-vektrum-surface shadow-sm overflow-hidden">
-            <div className="border-l-4 border-vektrum-blue px-5 py-4 border-b border-vektrum-border-subtle">
-              <p className="text-[13px] font-semibold text-vektrum-text">Draw Review Status</p>
+          <div
+            className="rounded-2xl border border-white/[0.08] overflow-hidden"
+            style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+          >
+            <div className="border-l-4 border-vektrum-blue px-5 py-4 border-b border-white/[0.06] bg-[#111827]">
+              <p className="text-[13px] font-semibold text-white">Draw Review Status</p>
             </div>
-            <div className="p-4">
+            <div className="p-4 bg-[#111827]">
               <DrawReviewPanel deals={deals} embedded />
             </div>
           </div>
 
           {/* Lien Waiver Tracker — feature-flagged */}
           {process.env.NEXT_PUBLIC_FEATURE_LIEN_WAIVER === 'true' && (
-            <div className="rounded-xl border border-dashed border-vektrum-border bg-vektrum-surface-alt p-6 opacity-60 cursor-not-allowed select-none">
+            <div className="rounded-2xl border border-dashed border-white/[0.08] bg-[#111827] p-6 opacity-60 cursor-not-allowed select-none">
               <div className="flex items-center gap-3 pointer-events-none">
-                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-vektrum-border">
-                  <Lock size={16} className="text-vektrum-faint" />
+                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08]">
+                  <Lock size={16} className="text-white/40" />
                 </div>
                 <div>
-                  <p className="text-[13px] font-semibold text-vektrum-muted">
+                  <p className="text-[13px] font-semibold text-white/60">
                     Lien Waiver Tracker
                   </p>
-                  <p className="text-[12px] text-vektrum-faint">
+                  <p className="text-[12px] text-white/35">
                     Track lien waivers per deal — required before final release. Coming soon.
                   </p>
                 </div>
@@ -297,7 +313,7 @@ export default async function DashboardPage() {
 
           {/* Deals */}
           <section>
-            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-vektrum-muted">
+            <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
               Your Deals
             </h2>
             {deals.length === 0 ? (
@@ -310,6 +326,7 @@ export default async function DashboardPage() {
               </div>
             )}
           </section>
+        </div>
         </div>
       </>
     )
@@ -346,18 +363,17 @@ export default async function DashboardPage() {
         {/* Persistent AI assistant */}
         <AssistantPanel actionRequired={pendingMilestones} />
 
-        <div className="page-container section space-y-8">
+        <div className="min-h-screen bg-[#0D1B2A]">
+        <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-12 sm:py-16 space-y-8">
           {/* Header */}
           <div>
-            <h1 className="font-display text-2xl font-bold text-vektrum-text">
+            <div className="mb-3 flex items-center gap-3">
+              <div className="h-px w-5 bg-vektrum-blue" />
+              <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">Funder Dashboard</p>
+            </div>
+            <h1 className="font-display text-[2.25rem] font-bold tracking-[-0.04em] text-white leading-[1.05]">
               Welcome back, {profile.full_name?.split(' ')[0] ?? 'there'}
             </h1>
-            <div className="mt-1.5 flex items-center gap-2">
-              <p className="text-sm text-vektrum-muted">Funder dashboard</p>
-              <span className="inline-flex items-center rounded-full bg-vektrum-blue-subtle border border-vektrum-blue-border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-vektrum-blue">
-                Funder
-              </span>
-            </div>
           </div>
 
           {/* Weekly briefing card */}
@@ -372,7 +388,7 @@ export default async function DashboardPage() {
           {/* Action Queue — sorted by amount */}
           {actionRequiredSorted.length > 0 && (
             <section>
-              <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-vektrum-amber">
+              <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-vektrum-amber">
                 Action Queue ({actionRequiredSorted.length})
               </h2>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -391,7 +407,7 @@ export default async function DashboardPage() {
 
           {/* Funded Deals */}
           <section>
-            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-vektrum-muted">
+            <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
               Funded Deals
             </h2>
             {funded.length === 0 ? (
@@ -404,6 +420,7 @@ export default async function DashboardPage() {
               </div>
             )}
           </section>
+        </div>
         </div>
       </>
     )

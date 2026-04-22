@@ -147,17 +147,20 @@ function AdminStatTile({
   warning?: boolean
 }) {
   return (
-    <div className={`rounded-xl border bg-vektrum-surface px-5 py-5 shadow-sm ${warning ? 'border-vektrum-amber-border' : 'border-vektrum-border'}`}>
+    <div
+      className={`rounded-2xl border bg-[#111827] px-5 py-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/[0.14] ${warning ? 'border-vektrum-amber/30' : 'border-white/[0.08]'}`}
+      style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+    >
       <div className="flex items-start justify-between gap-3 mb-3">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">{label}</p>
-        <div className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg ${warning ? 'bg-vektrum-amber-bg' : 'bg-vektrum-blue-subtle'}`}>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">{label}</p>
+        <div className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08]`}>
           <Icon size={13} className={warning ? 'text-vektrum-amber' : 'text-vektrum-blue'} aria-hidden="true" />
         </div>
       </div>
-      <p className={`font-display text-2xl font-bold tabular-nums leading-none break-all ${accent ? 'text-vektrum-blue' : warning ? 'text-vektrum-amber' : 'text-vektrum-text'}`}>
+      <p className={`font-display text-2xl font-bold tabular-nums leading-none break-all ${accent ? 'text-vektrum-blue' : warning ? 'text-vektrum-amber' : 'text-white'}`}>
         {value}
       </p>
-      {sub && <p className="mt-1.5 text-[11px] text-vektrum-faint">{sub}</p>}
+      {sub && <p className="mt-1.5 text-[11px] text-white/30">{sub}</p>}
     </div>
   )
 }
@@ -193,24 +196,30 @@ export default async function AdminDashboardPage() {
   const openDisputes   = disputes.filter(d => d.status === 'open')
 
   return (
-    <div className="page-container section space-y-8">
+    <div className="min-h-screen bg-[#0D1B2A]">
+
+      {/* Ambient glow */}
+      <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-gradient-to-b from-vektrum-blue/10 to-transparent rounded-full blur-3xl" />
+
+    <div className="relative max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-12 sm:py-16 space-y-8">
 
       {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <div className="flex items-center gap-2.5 mb-1">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-vektrum-blue">
-              <Shield size={14} className="text-white" aria-hidden="true" />
-            </div>
-            <h1 className="font-display text-2xl font-bold text-vektrum-text">Admin Dashboard</h1>
+          <div className="mb-3 flex items-center gap-3">
+            <div className="h-px w-5 bg-vektrum-blue" />
+            <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">Admin Dashboard</p>
           </div>
-          <p className="text-sm text-vektrum-muted">
-            Platform-wide oversight. Read-only. All financial actions require the 7-condition release gate.
+          <h1 className="font-display text-[2.25rem] font-bold tracking-[-0.04em] text-white leading-[1.05]">
+            Platform Overview
+          </h1>
+          <p className="mt-2 text-[15px] text-white/55">
+            Read-only. All financial actions require the 7-condition release gate.
           </p>
         </div>
         <Link
           href="/dashboard/audit"
-          className="inline-flex items-center gap-2 rounded-lg border border-vektrum-border bg-vektrum-surface px-4 py-2 text-[13px] font-medium text-vektrum-muted hover:bg-vektrum-surface-alt transition-all"
+          className="inline-flex items-center gap-2 rounded-xl border border-white/[0.1] bg-white/[0.05] px-4 py-2.5 text-[13px] font-medium text-white/60 hover:bg-white/[0.08] hover:text-white transition-all self-start"
         >
           <FileText size={14} aria-hidden="true" />
           Full Audit Log
@@ -218,10 +227,13 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Admin access info */}
-      <div className="bg-vektrum-surface-alt border border-vektrum-border rounded-xl p-4 text-sm text-vektrum-muted">
-        <p className="font-medium text-vektrum-text mb-1">Admin Access</p>
+      <div
+        className="rounded-2xl border border-white/[0.08] bg-[#111827] p-5 text-sm text-white/55"
+        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+      >
+        <p className="font-semibold text-white mb-1.5">Admin Access</p>
         <p>You can manage users, invite new admins, review audit logs, and monitor platform health.
-        <strong className="text-vektrum-text"> Financial actions (fund releases, payment processing) are governed by the 7-condition milestone gate</strong>
+        <strong className="text-white/80"> Financial actions (fund releases, payment processing) are governed by the 7-condition milestone gate</strong>
         {' '}and cannot be overridden from this dashboard. All admin actions are permanently logged.</p>
       </div>
 
@@ -247,7 +259,7 @@ export default async function AdminDashboardPage() {
 
       {/* ── Section 1: Platform Overview ──────────────────────────────────── */}
       <section>
-        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-vektrum-muted">
+        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
           Platform Overview
         </h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
@@ -290,7 +302,7 @@ export default async function AdminDashboardPage() {
 
       {/* ── Section: Invite New Admin ────────────────────────────────────── */}
       <section>
-        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-vektrum-muted">
+        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
           Admin Management
         </h2>
         <InviteAdminForm />
@@ -300,7 +312,7 @@ export default async function AdminDashboardPage() {
       <section>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-[11px] font-semibold uppercase tracking-widest text-vektrum-muted">
+            <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
               Open Disputes
             </h2>
             {openDisputes.length > 0 && (
@@ -315,7 +327,7 @@ export default async function AdminDashboardPage() {
 
       {/* ── Section 3: User Management ───────────────────────────────────── */}
       <section>
-        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-vektrum-muted">
+        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
           User Management
         </h2>
         <UserTable profiles={profiles} deals={deals} emailMap={emailMap} />
@@ -323,7 +335,7 @@ export default async function AdminDashboardPage() {
 
       {/* ── Section 4: Platform Health ───────────────────────────────────── */}
       <section>
-        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-vektrum-muted">
+        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
           Platform Health
         </h2>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -375,22 +387,25 @@ export default async function AdminDashboardPage() {
 
       {/* ── Section 5: Recent Audit Activity ─────────────────────────────── */}
       <section>
-        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-vektrum-muted">
+        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
           Recent Audit Activity
         </h2>
         {recentAudit.length === 0 ? (
-          <p className="text-sm text-vektrum-faint">No audit activity yet</p>
+          <p className="text-sm text-white/35">No audit activity yet</p>
         ) : (
-          <div className="rounded-xl border border-vektrum-border bg-vektrum-surface shadow-sm overflow-hidden">
-            <ul className="divide-y divide-vektrum-border-subtle">
+          <div
+            className="rounded-2xl border border-white/[0.08] bg-[#111827] overflow-hidden"
+            style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+          >
+            <ul className="divide-y divide-white/[0.05]">
               {recentAudit.map((entry) => {
                 const actionColor = entry.action?.includes('release') || entry.action?.includes('released')
-                  ? 'text-vektrum-green'
+                  ? 'text-emerald-400'
                   : entry.action?.includes('blocked') || entry.action?.includes('dispute')
                   ? 'text-vektrum-amber'
                   : entry.action?.includes('ai_draw_review')
                   ? 'text-vektrum-blue'
-                  : 'text-vektrum-muted'
+                  : 'text-white/50'
 
                 const createdAt = new Date(entry.created_at)
                 const now = new Date()
@@ -407,21 +422,21 @@ export default async function AdminDashboardPage() {
                   : 'just now'
 
                 return (
-                  <li key={entry.id} className="flex items-center gap-4 px-5 py-3 hover:bg-vektrum-surface-alt transition-colors">
+                  <li key={entry.id} className="flex items-center gap-4 px-5 py-3 hover:bg-white/[0.03] transition-colors">
                     <span className={`font-mono text-[13px] font-medium ${actionColor} min-w-[160px]`}>
                       {entry.action}
                     </span>
-                    <span className="text-[12px] text-vektrum-muted truncate flex-1">
+                    <span className="text-[12px] text-white/35 truncate flex-1">
                       {entry.entity_type}/{entry.entity_id?.slice(0, 8)}
                     </span>
-                    <span className="text-[11px] text-vektrum-faint tabular-nums flex-shrink-0">
+                    <span className="text-[11px] text-white/25 tabular-nums flex-shrink-0">
                       {relativeTime}
                     </span>
                   </li>
                 )
               })}
             </ul>
-            <div className="border-t border-vektrum-border-subtle px-5 py-3 bg-vektrum-surface-alt">
+            <div className="border-t border-white/[0.05] px-5 py-3 bg-white/[0.02]">
               <Link
                 href="/dashboard/audit"
                 className="text-[13px] font-medium text-vektrum-blue hover:text-vektrum-blue-hover transition-colors"
@@ -433,6 +448,7 @@ export default async function AdminDashboardPage() {
         )}
       </section>
 
+    </div>
     </div>
   )
 }

@@ -95,21 +95,28 @@ export default function NewDealPage() {
   };
 
   return (
-    <div className="page-container py-8">
+    <div className="min-h-screen bg-[#0D1B2A]">
+    <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-12 sm:py-16">
       <ContractImportFlow metadata={metadata}>
         <div className="max-w-xl">
           {/* Back link */}
           <Link
             href="/dashboard"
-            className="mb-6 inline-flex items-center gap-1.5 text-sm text-vektrum-muted hover:text-vektrum-text transition-colors"
+            className="mb-8 inline-flex items-center gap-1.5 text-sm text-white/40 hover:text-white/70 transition-colors"
           >
             <ArrowLeft size={14} aria-hidden="true" />
             Back to dashboard
           </Link>
 
-          <h1 className="mb-6 font-display text-2xl font-bold text-vektrum-text">
-            Create New Deal
-          </h1>
+          <div className="mb-8">
+            <div className="mb-3 flex items-center gap-3">
+              <div className="h-px w-5 bg-vektrum-blue" />
+              <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">New Deal</p>
+            </div>
+            <h1 className="font-display text-[2rem] font-bold tracking-[-0.04em] text-white leading-[1.05]">
+              Create New Deal
+            </h1>
+          </div>
 
           <Card>
             <CardHeader>
@@ -182,7 +189,7 @@ export default function NewDealPage() {
                   </Link>
                 </div>
 
-                <p className="text-xs text-vektrum-faint">
+                <p className="text-xs text-white/30">
                   After creating the deal, you&rsquo;ll be able to add milestones and
                   invite a funder.
                 </p>
@@ -191,6 +198,7 @@ export default function NewDealPage() {
           </Card>
         </div>
       </ContractImportFlow>
+    </div>
     </div>
   );
 }

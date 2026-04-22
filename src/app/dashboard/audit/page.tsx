@@ -114,11 +114,11 @@ function actionVariant(action: string) {
 function roleBadgeClasses(role: string | null | undefined): string {
   switch (role) {
     case "contractor":
-      return "bg-vektrum-amber-bg text-vektrum-amber";
+      return "bg-vektrum-amber/10 text-vektrum-amber border border-vektrum-amber/20";
     case "funder":
-      return "bg-vektrum-blue-subtle text-vektrum-blue";
+      return "bg-vektrum-blue/15 text-vektrum-blue border border-vektrum-blue/20";
     case "admin":
-      return "bg-vektrum-surface-alt text-vektrum-text";
+      return "bg-white/[0.08] text-white/60 border border-white/[0.1]";
     default:
       return "";
   }
@@ -244,25 +244,24 @@ export default async function AuditLogPage({
   );
 
   return (
-    <div className="page-container section space-y-6">
+    <div className="min-h-screen bg-[#0D1B2A]">
+    <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-12 sm:py-16 space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-vektrum-blue-subtle">
-          <Shield size={18} className="text-vektrum-blue" aria-hidden="true" />
+      <div>
+        <div className="mb-3 flex items-center gap-3">
+          <div className="h-px w-5 bg-vektrum-blue" />
+          <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">Audit Log</p>
         </div>
-        <div>
-          <h1 className="font-display text-2xl font-bold text-vektrum-text">
-            Audit Log
-          </h1>
-          <p className="text-sm text-vektrum-muted">
-            All platform events — newest first
-            {count !== null && ` · ${count.toLocaleString()} total`}
-          </p>
-        </div>
+        <h1 className="font-display text-[2.25rem] font-bold tracking-[-0.04em] text-white leading-[1.05]">
+          Platform Events
+        </h1>
+        <p className="mt-2 text-[15px] text-white/55">
+          All platform events — newest first{count !== null && ` · ${count.toLocaleString()} total`}
+        </p>
       </div>
 
       {/* Category tabs */}
-      <div className="flex flex-wrap gap-1">
+      <div className="flex flex-wrap gap-1.5">
         {CATEGORY_TABS.map((tab) => {
           const isActive =
             tab.key === "all"
@@ -275,10 +274,10 @@ export default async function AuditLogPage({
                 category: tab.key === "all" ? undefined : tab.key,
                 page: undefined,
               })}
-              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
                 isActive
-                  ? "bg-vektrum-blue text-white"
-                  : "bg-vektrum-surface-alt text-vektrum-muted hover:bg-vektrum-border-subtle hover:text-vektrum-text"
+                  ? "bg-vektrum-blue text-white shadow-sm shadow-vektrum-blue/30"
+                  : "bg-white/[0.05] border border-white/[0.08] text-white/50 hover:bg-white/[0.08] hover:text-white"
               }`}
             >
               {tab.label}
@@ -299,7 +298,7 @@ export default async function AuditLogPage({
         <select
           name="role"
           defaultValue={role ?? ""}
-          className="h-9 rounded-lg border border-vektrum-border bg-vektrum-surface px-3 pr-8 text-xs text-vektrum-text focus:border-vektrum-blue focus:outline-none focus:ring-1 focus:ring-vektrum-blue"
+          className="h-9 rounded-lg border border-white/[0.1] bg-white/[0.05] px-3 pr-8 text-xs text-white/70 focus:border-vektrum-blue focus:outline-none focus:ring-1 focus:ring-vektrum-blue"
         >
           <option value="">All Roles</option>
           <option value="contractor">Contractor</option>
@@ -312,20 +311,20 @@ export default async function AuditLogPage({
         <div className="relative">
           <Search
             size={14}
-            className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-vektrum-faint"
+            className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-white/30"
           />
           <input
             type="text"
             name="search"
             defaultValue={search ?? ""}
             placeholder="Search action or entity ID..."
-            className="h-9 w-64 rounded-lg border border-vektrum-border bg-vektrum-surface pl-8 pr-3 text-xs text-vektrum-text placeholder:text-vektrum-faint focus:border-vektrum-blue focus:outline-none focus:ring-1 focus:ring-vektrum-blue"
+            className="h-9 w-64 rounded-lg border border-white/[0.1] bg-white/[0.05] pl-8 pr-3 text-xs text-white/70 placeholder:text-white/25 focus:border-vektrum-blue focus:outline-none focus:ring-1 focus:ring-vektrum-blue"
           />
         </div>
 
         <button
           type="submit"
-          className="h-9 rounded-lg bg-vektrum-blue px-3 text-xs font-medium text-white hover:bg-vektrum-blue-hover transition-colors"
+          className="h-9 rounded-lg bg-vektrum-blue px-4 text-xs font-semibold text-white hover:bg-vektrum-blue-hover transition-colors shadow-sm shadow-vektrum-blue/30"
         >
           Apply
         </button>
@@ -334,7 +333,7 @@ export default async function AuditLogPage({
         {hasFilters && (
           <Link
             href="?"
-            className="inline-flex items-center gap-1 text-xs text-vektrum-muted hover:text-vektrum-blue transition-colors"
+            className="inline-flex items-center gap-1 text-xs text-white/40 hover:text-vektrum-blue transition-colors"
           >
             <X size={12} />
             Clear filters
@@ -343,37 +342,40 @@ export default async function AuditLogPage({
       </form>
 
       {/* Table */}
-      <Card noPadding>
-        <CardHeader>
-          <CardTitle>Events</CardTitle>
-        </CardHeader>
+      <div
+        className="rounded-2xl border border-white/[0.08] bg-[#111827] overflow-hidden"
+        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+      >
+        <div className="border-b border-white/[0.06] px-5 py-4">
+          <p className="text-[13px] font-semibold text-white">Events</p>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[740px] text-sm">
             <thead>
-              <tr className="border-b border-vektrum-border bg-vektrum-surface-alt">
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-vektrum-muted">
+              <tr className="border-b border-white/[0.06] bg-white/[0.02]">
+                <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">
                   Timestamp
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-vektrum-muted">
+                <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">
                   Actor
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-vektrum-muted">
+                <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">
                   Action
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-vektrum-muted">
+                <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">
                   Entity
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-vektrum-muted">
+                <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">
                   Details
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-vektrum-border-subtle">
+            <tbody className="divide-y divide-white/[0.04]">
               {entries.length === 0 ? (
                 <tr>
                   <td
                     colSpan={5}
-                    className="px-4 py-12 text-center text-sm text-vektrum-faint"
+                    className="px-4 py-12 text-center text-sm text-white/30"
                   >
                     No audit events match your filters.
                   </td>
@@ -389,7 +391,7 @@ export default async function AuditLogPage({
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="border-t border-vektrum-border bg-vektrum-surface-alt px-4 py-3">
+          <div className="border-t border-white/[0.06] bg-white/[0.02] px-4 py-3">
             <Pagination
               page={page}
               totalPages={totalPages}
@@ -397,7 +399,8 @@ export default async function AuditLogPage({
             />
           </div>
         )}
-      </Card>
+      </div>
+    </div>
     </div>
   );
 }
@@ -408,14 +411,14 @@ function AuditRow({ log }: { log: AuditLog }) {
   const displayRole = log.actor_role ?? log.actor?.role ?? null;
 
   return (
-    <tr className="hover:bg-vektrum-surface-alt transition-colors">
+    <tr className="hover:bg-white/[0.025] transition-colors">
       {/* Timestamp */}
-      <td className="whitespace-nowrap px-4 py-3 font-numeric tabular-nums text-xs text-vektrum-muted">
+      <td className="whitespace-nowrap px-4 py-3 font-numeric tabular-nums text-xs text-white/40">
         <LocalTime iso={log.created_at} />
       </td>
 
       {/* Actor */}
-      <td className="px-4 py-3 text-xs text-vektrum-text">
+      <td className="px-4 py-3 text-xs text-white/70">
         {log.actor ? (
           <div className="flex items-center gap-1.5">
             <span>{log.actor.full_name ?? "Unknown"}</span>
@@ -428,7 +431,6 @@ function AuditRow({ log }: { log: AuditLog }) {
             )}
           </div>
         ) : !log.actor_id && log.entity_type === "profile" && log.entity_profile ? (
-          // System-triggered events (e.g. signups) — show the subject user's name
           <div className="flex items-center gap-1.5">
             <span>{log.entity_profile.full_name ?? "Unknown"}</span>
             {log.entity_profile.role && (
@@ -440,9 +442,9 @@ function AuditRow({ log }: { log: AuditLog }) {
             )}
           </div>
         ) : displayRole === "system" || !log.actor_id ? (
-          <span className="italic text-vektrum-faint">System</span>
+          <span className="italic text-white/25">System</span>
         ) : (
-          <span className="text-vektrum-faint">Unknown</span>
+          <span className="text-white/25">Unknown</span>
         )}
       </td>
 
@@ -456,11 +458,11 @@ function AuditRow({ log }: { log: AuditLog }) {
       {/* Entity */}
       <td className="px-4 py-3">
         <div className="text-xs">
-          <span className="font-medium text-vektrum-text">
+          <span className="font-medium text-white/60">
             {log.entity_type}
           </span>
           <br />
-          <span className="font-mono text-vektrum-faint text-[10px]">
+          <span className="font-mono text-white/25 text-[10px]">
             {log.entity_id.slice(0, 8)}...
           </span>
         </div>
@@ -473,14 +475,14 @@ function AuditRow({ log }: { log: AuditLog }) {
             <summary className="select-none list-none text-xs text-vektrum-blue hover:underline">
               View details
             </summary>
-            <div className="mt-2 max-w-xs overflow-auto rounded-md bg-vektrum-surface-alt border border-vektrum-border p-2">
+            <div className="mt-2 max-w-xs overflow-auto rounded-xl bg-white/[0.05] border border-white/[0.08] p-2.5">
               <dl className="space-y-1">
                 {Object.entries(log.metadata).map(([key, value]) => (
                   <div key={key} className="flex items-baseline gap-1.5 text-[11px]">
-                    <dt className="font-medium text-vektrum-muted capitalize whitespace-nowrap">
+                    <dt className="font-medium text-white/40 capitalize whitespace-nowrap">
                       {key.replace(/_/g, ' ')}:
                     </dt>
-                    <dd className="text-vektrum-text truncate">
+                    <dd className="text-white/70 truncate">
                       {typeof value === 'object' && value !== null ? JSON.stringify(value) : String(value ?? '—')}
                     </dd>
                   </div>
@@ -489,7 +491,7 @@ function AuditRow({ log }: { log: AuditLog }) {
             </div>
           </details>
         ) : (
-          <span className="text-xs text-vektrum-faint">&mdash;</span>
+          <span className="text-xs text-white/20">&mdash;</span>
         )}
       </td>
     </tr>
@@ -512,14 +514,14 @@ function Pagination({
       className="flex items-center justify-between"
       aria-label="Audit log pagination"
     >
-      <p className="text-xs text-vektrum-muted">
+      <p className="text-xs text-white/35">
         Page {page} of {totalPages}
       </p>
       <div className="flex gap-2">
         {page > 1 && (
           <Link
             href={buildUrl(currentParams, { page: String(page - 1) })}
-            className="rounded-md border border-vektrum-border bg-vektrum-surface px-3 py-1.5 text-xs font-medium text-vektrum-muted hover:bg-vektrum-surface-alt transition-colors"
+            className="rounded-lg border border-white/[0.1] bg-white/[0.05] px-3 py-1.5 text-xs font-medium text-white/50 hover:bg-white/[0.08] hover:text-white transition-all"
           >
             Previous
           </Link>
@@ -527,7 +529,7 @@ function Pagination({
         {page < totalPages && (
           <Link
             href={buildUrl(currentParams, { page: String(page + 1) })}
-            className="rounded-md border border-vektrum-border bg-vektrum-surface px-3 py-1.5 text-xs font-medium text-vektrum-muted hover:bg-vektrum-surface-alt transition-colors"
+            className="rounded-lg border border-white/[0.1] bg-white/[0.05] px-3 py-1.5 text-xs font-medium text-white/50 hover:bg-white/[0.08] hover:text-white transition-all"
           >
             Next
           </Link>

@@ -46,40 +46,39 @@ export default function DemoContractorPage() {
   const pendingReview = 1
 
   return (
-    <div className="page-container section space-y-8">
+    <div className="min-h-screen bg-[#0D1B2A]">
+    <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-12 sm:py-16 space-y-8">
       {/* Back link */}
       <Link
         href="/demo-live"
-        className="inline-flex items-center gap-1.5 text-sm text-vektrum-muted hover:text-vektrum-text transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm text-white/40 hover:text-white/70 transition-colors"
       >
         <ArrowLeft size={14} aria-hidden="true" />
         Back to role selector
       </Link>
 
       {/* Demo info */}
-      <div className="rounded-xl border border-vektrum-blue-border bg-vektrum-blue-subtle px-5 py-4">
+      <div className="rounded-xl border border-vektrum-blue/20 bg-vektrum-blue/10 px-5 py-4">
         <p className="text-[13px] text-vektrum-blue leading-relaxed">
           You&apos;re viewing the Contractor dashboard as <strong>Marcus Webb</strong>. In the live app, this connects to your real deals and payments.
         </p>
       </div>
 
       {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="font-display text-2xl font-bold text-vektrum-text">
+          <div className="mb-3 flex items-center gap-3">
+            <div className="h-px w-5 bg-vektrum-blue" />
+            <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">Contractor Dashboard</p>
+          </div>
+          <h1 className="font-display text-[2.25rem] font-bold tracking-[-0.04em] text-white leading-[1.05]">
             Welcome back, Marcus
           </h1>
-          <div className="mt-1.5 flex items-center gap-2">
-            <p className="text-sm text-vektrum-muted">Contractor dashboard</p>
-            <span className="inline-flex items-center rounded-full bg-vektrum-green-bg border border-vektrum-green-border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-vektrum-green">
-              Contractor
-            </span>
-          </div>
         </div>
         <button
           type="button"
           disabled
-          className="inline-flex items-center gap-2 rounded-lg bg-vektrum-blue px-4 py-2.5 text-[13px] font-medium text-white opacity-60 cursor-not-allowed"
+          className="inline-flex items-center gap-2 self-start rounded-xl bg-vektrum-blue/40 px-4 py-2.5 text-[13px] font-semibold text-white/50 cursor-not-allowed"
           title="Demo mode — deal creation disabled"
         >
           <HardHat size={15} aria-hidden="true" />
@@ -96,21 +95,25 @@ export default function DemoContractorPage() {
       </div>
 
       {/* Draw Review Status */}
-      <section id="draw-review" className="rounded-xl border border-vektrum-border bg-vektrum-surface shadow-sm overflow-hidden">
-        <div className="border-l-4 border-vektrum-blue px-5 py-4 border-b border-vektrum-border-subtle">
-          <p className="text-[13px] font-semibold text-vektrum-text">Draw Review Status</p>
+      <section
+        id="draw-review"
+        className="rounded-2xl border border-white/[0.08] bg-[#111827] overflow-hidden"
+        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+      >
+        <div className="border-l-4 border-vektrum-blue px-5 py-4 border-b border-white/[0.06]">
+          <p className="text-[13px] font-semibold text-white">Draw Review Status</p>
         </div>
         <div className="p-5">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-[13px] font-medium text-vektrum-text">MEP Rough-In &mdash; Riverside Mixed-Use Development</p>
-              <p className="text-[12px] text-vektrum-muted mt-0.5">Status: Awaiting AI Review &middot; Amount: {formatCurrency(680_000)}</p>
+              <p className="text-[13px] font-medium text-white/80">MEP Rough-In &mdash; Riverside Mixed-Use Development</p>
+              <p className="text-[12px] text-white/45 mt-0.5">Status: Awaiting AI Review &middot; Amount: {formatCurrency(680_000)}</p>
             </div>
             <Link
               href="/demo-live/deal/riverside?from=contractor"
-              className="inline-flex items-center gap-1 rounded-lg bg-vektrum-blue px-3 py-2 text-[12px] font-medium text-white hover:bg-vektrum-blue-hover transition-colors"
+              className="group inline-flex items-center gap-1.5 rounded-xl bg-vektrum-blue px-3 py-2 text-[12px] font-semibold text-white whitespace-nowrap hover:bg-vektrum-blue-hover transition-all hover:-translate-y-0.5"
             >
-              View Deal <ArrowRight size={12} aria-hidden="true" />
+              View Deal <ArrowRight size={12} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
             </Link>
           </div>
         </div>
@@ -118,7 +121,7 @@ export default function DemoContractorPage() {
 
       {/* Your Deals */}
       <section id="your-deals">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-vektrum-muted">
+        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
           Your Deals
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -126,27 +129,29 @@ export default function DemoContractorPage() {
             <Link
               key={deal.slug}
               href={`/demo-live/deal/${deal.slug}?from=contractor`}
-              className="group rounded-xl border border-vektrum-border bg-vektrum-surface p-5 shadow-sm hover:shadow-md transition-all"
+              className="group rounded-2xl border border-white/[0.08] bg-[#111827] p-5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.14]"
+              style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
             >
               <div className="flex items-center justify-between mb-3">
-                <span className="inline-flex items-center rounded-full border border-vektrum-green-border bg-vektrum-green-bg px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-vektrum-green">
+                <span className="inline-flex items-center rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">
                   Active
                 </span>
-                <span className="text-[11px] text-vektrum-faint">{deal.milestonesCompleted}/{deal.milestonesTotal} milestones</span>
+                <span className="text-[11px] text-white/30">{deal.milestonesCompleted}/{deal.milestonesTotal} milestones</span>
               </div>
-              <p className="text-[14px] font-semibold text-vektrum-text group-hover:text-vektrum-blue transition-colors">{deal.title}</p>
-              <p className="mt-1 text-[12px] text-vektrum-muted">{deal.funder} &middot; {deal.funderCompany}</p>
-              <p className="mt-0.5 text-[12px] text-vektrum-muted">Total: {formatCurrency(deal.total)}</p>
+              <p className="text-[14px] font-semibold text-white/80 group-hover:text-white transition-colors leading-snug">{deal.title}</p>
+              <p className="mt-1 text-[12px] text-white/40">{deal.funder} &middot; {deal.funderCompany}</p>
+              <p className="mt-0.5 text-[12px] text-white/35">Total: {formatCurrency(deal.total)}</p>
               <div className="mt-4 flex items-center gap-3">
-                <div className="flex-1 h-1.5 rounded-full bg-vektrum-surface-alt overflow-hidden">
-                  <div className="h-full rounded-full bg-vektrum-green" style={{ width: `${deal.pct}%` }} />
+                <div className="flex-1 h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
+                  <div className="h-full rounded-full bg-emerald-500" style={{ width: `${deal.pct}%` }} />
                 </div>
-                <span className="text-[11px] text-vektrum-faint tabular-nums">{deal.pct}%</span>
+                <span className="text-[11px] text-white/30 tabular-nums">{deal.pct}%</span>
               </div>
             </Link>
           ))}
         </div>
       </section>
+    </div>
     </div>
   )
 }
@@ -155,9 +160,12 @@ export default function DemoContractorPage() {
 
 function StatTile({ label, value, warning = false, href }: { label: string; value: string | number; warning?: boolean; href?: string }) {
   const inner = (
-    <div className={`rounded-lg border bg-vektrum-surface px-5 py-5 shadow-sm transition-all ${warning ? 'border-vektrum-amber-border' : 'border-vektrum-border'} ${href ? 'hover:border-vektrum-blue hover:shadow-md cursor-pointer' : ''}`}>
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">{label}</p>
-      <p className={`mt-1.5 font-display text-4xl font-bold tabular-nums leading-none ${warning ? 'text-vektrum-amber' : 'text-vektrum-text'}`}>{value}</p>
+    <div
+      className={`rounded-2xl border bg-[#111827] px-5 py-5 transition-all duration-300 ${warning ? 'border-vektrum-amber/30' : 'border-white/[0.08]'} ${href ? 'hover:-translate-y-0.5 hover:border-white/[0.14] cursor-pointer' : ''}`}
+      style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+    >
+      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">{label}</p>
+      <p className={`mt-2 font-display text-4xl font-bold tabular-nums leading-none ${warning ? 'text-vektrum-amber' : 'text-white'}`}>{value}</p>
     </div>
   )
   return href ? <Link href={href}>{inner}</Link> : inner
@@ -165,9 +173,12 @@ function StatTile({ label, value, warning = false, href }: { label: string; valu
 
 function MoneyTile({ label, amount, href }: { label: string; amount: number; href?: string }) {
   const inner = (
-    <div className={`rounded-lg border border-vektrum-border bg-vektrum-surface px-5 py-5 shadow-sm transition-all ${href ? 'hover:border-vektrum-blue hover:shadow-md cursor-pointer' : ''}`}>
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">{label}</p>
-      <p className="mt-1.5 font-display text-xl font-bold tabular-nums leading-none text-vektrum-text">{formatCurrency(amount)}</p>
+    <div
+      className={`rounded-2xl border border-white/[0.08] bg-[#111827] px-5 py-5 transition-all duration-300 ${href ? 'hover:-translate-y-0.5 hover:border-white/[0.14] cursor-pointer' : ''}`}
+      style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+    >
+      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">{label}</p>
+      <p className="mt-2 font-display text-xl font-bold tabular-nums leading-none text-white">{formatCurrency(amount)}</p>
     </div>
   )
   return href ? <Link href={href}>{inner}</Link> : inner

@@ -139,21 +139,22 @@ export default async function DealDetailPage({
     !typedDeal.funder_id;
 
   return (
-    <div className="page-container py-8 space-y-8">
+    <div className="min-h-screen bg-[#0D1B2A]">
+    <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-10 space-y-8">
       {/* Breadcrumb */}
       <nav aria-label="Breadcrumb">
-        <ol className="flex items-center gap-1.5 text-sm text-vektrum-faint">
+        <ol className="flex items-center gap-1.5 text-sm text-white/30">
           <li>
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-1 hover:text-vektrum-text transition-colors"
+              className="inline-flex items-center gap-1 hover:text-white/60 transition-colors"
             >
               <ArrowLeft size={13} aria-hidden="true" />
               Dashboard
             </Link>
           </li>
-          <li aria-hidden="true" className="text-vektrum-border">/</li>
-          <li className="text-vektrum-muted font-medium truncate max-w-[200px] sm:max-w-xs">
+          <li aria-hidden="true" className="text-white/15">/</li>
+          <li className="text-white/50 font-medium truncate max-w-[200px] sm:max-w-xs">
             {typedDeal.title}
           </li>
         </ol>
@@ -161,21 +162,21 @@ export default async function DealDetailPage({
 
       {/* ── Header ── */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-1">
+        <div className="space-y-1.5">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="font-display text-2xl font-bold text-vektrum-text">{typedDeal.title}</h1>
+            <h1 className="font-display text-[1.875rem] font-bold tracking-[-0.03em] text-white">{typedDeal.title}</h1>
             <DealStatusBadge status={typedDeal.status} />
           </div>
           {typedDeal.description && (
-            <p className="max-w-2xl text-sm text-vektrum-muted">
+            <p className="max-w-2xl text-sm text-white/55">
               {typedDeal.description}
             </p>
           )}
-          <div className="flex flex-wrap gap-x-4 gap-y-0.5 pt-1 text-xs text-vektrum-faint">
+          <div className="flex flex-wrap gap-x-4 gap-y-0.5 pt-1 text-xs text-white/35">
             {typedDeal.contractor && (
               <span>
                 Contractor:{" "}
-                <strong className="text-vektrum-muted">
+                <strong className="text-white/55">
                   {typedDeal.contractor.company_name ??
                     typedDeal.contractor.full_name}
                 </strong>
@@ -184,7 +185,7 @@ export default async function DealDetailPage({
             {typedDeal.funder ? (
               <span>
                 Funder:{" "}
-                <strong className="text-vektrum-muted">
+                <strong className="text-white/55">
                   {typedDeal.funder.full_name}
                 </strong>
               </span>
@@ -237,14 +238,14 @@ export default async function DealDetailPage({
       {/* ── Milestones ── */}
       <section>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-vektrum-muted">
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
             Milestones ({milestones.length})
           </h2>
         </div>
 
         {milestones.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-vektrum-border bg-vektrum-surface-alt px-8 py-12 text-center">
-            <p className="text-sm text-vektrum-faint">
+          <div className="rounded-2xl border border-dashed border-white/[0.08] bg-[#111827] px-8 py-12 text-center">
+            <p className="text-sm text-white/35">
               {isDraftContractor
                 ? "No milestones yet. Add the first one below."
                 : "No milestones have been added to this deal."}
@@ -303,7 +304,7 @@ export default async function DealDetailPage({
       {/* ── Add milestone (contractor, draft deals) ── */}
       {isDraftContractor && (
         <section>
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-vektrum-muted">
+          <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
             Add Milestone
           </h2>
           <Card>
@@ -331,6 +332,7 @@ export default async function DealDetailPage({
           </Card>
         </section>
       )}
+    </div>
     </div>
   );
 }

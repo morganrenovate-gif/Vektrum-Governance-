@@ -79,109 +79,92 @@ export default async function ContractorPaymentsPage() {
   const lastPayment = releases.length > 0 ? releases[0] : null
 
   return (
-    <div className="page-container section space-y-8">
+    <div className="min-h-screen bg-[#0D1B2A]">
+    <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-12 sm:py-16 space-y-8">
       <div>
-        <h1 className="font-display text-2xl font-bold text-vektrum-text">Payments</h1>
-        <p className="mt-1 text-sm text-vektrum-muted">
+        <div className="mb-3 flex items-center gap-3">
+          <div className="h-px w-5 bg-vektrum-blue" />
+          <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">Payments</p>
+        </div>
+        <h1 className="font-display text-[2.25rem] font-bold tracking-[-0.04em] text-white leading-[1.05]">Payment History</h1>
+        <p className="mt-2 text-[15px] text-white/55">
           Track released milestone funds
         </p>
       </div>
 
       {/* Stat tiles */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <div className="rounded-lg border border-vektrum-border bg-vektrum-surface px-5 py-5 shadow-sm">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">
-            Total Earned
-          </p>
-          <p className="mt-1.5 font-display text-4xl font-bold tabular-nums text-vektrum-text leading-none">
-            {formatMoney(totalEarned)}
-          </p>
+        <div
+          className="rounded-2xl border border-white/[0.08] bg-[#111827] px-5 py-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/[0.14]"
+          style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+        >
+          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">Total Earned</p>
+          <p className="mt-2 font-display text-4xl font-bold tabular-nums text-white leading-none">{formatMoney(totalEarned)}</p>
         </div>
-        <div className="rounded-lg border border-vektrum-border bg-vektrum-surface px-5 py-5 shadow-sm">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">
-            Pending Release
-          </p>
-          <p className="mt-1.5 font-display text-4xl font-bold tabular-nums text-vektrum-amber leading-none">
-            {formatMoney(pendingRelease)}
-          </p>
+        <div
+          className="rounded-2xl border border-white/[0.08] bg-[#111827] px-5 py-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/[0.14]"
+          style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+        >
+          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">Pending Release</p>
+          <p className="mt-2 font-display text-4xl font-bold tabular-nums text-vektrum-amber leading-none">{formatMoney(pendingRelease)}</p>
         </div>
-        <div className="rounded-lg border border-vektrum-border bg-vektrum-surface px-5 py-5 shadow-sm">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">
-            Last Payment
-          </p>
-          <p className="mt-1.5 font-display text-4xl font-bold tabular-nums text-vektrum-green leading-none">
+        <div
+          className="rounded-2xl border border-white/[0.08] bg-[#111827] px-5 py-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/[0.14]"
+          style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+        >
+          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">Last Payment</p>
+          <p className="mt-2 font-display text-4xl font-bold tabular-nums text-emerald-400 leading-none">
             {lastPayment ? formatMoney(lastPayment.amount) : '—'}
           </p>
           {lastPayment && (
-            <p className="mt-1 text-[11px] text-vektrum-muted">
-              {new Intl.DateTimeFormat('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
-              }).format(new Date(lastPayment.released_at))}
+            <p className="mt-1.5 text-[11px] text-white/30">
+              {new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(lastPayment.released_at))}
             </p>
           )}
         </div>
       </div>
 
       {releases.length === 0 ? (
-        <div className="text-center py-16 border border-dashed border-vektrum-border rounded-2xl">
-          <DollarSign size={40} className="mx-auto text-vektrum-faint mb-3" />
-          <p className="text-vektrum-text font-medium mb-1">No payments yet</p>
-          <p className="text-vektrum-muted text-sm mb-4">
+        <div className="text-center py-16 rounded-2xl border border-dashed border-white/[0.08]">
+          <DollarSign size={40} className="mx-auto text-white/20 mb-3" />
+          <p className="text-white font-medium mb-1">No payments yet</p>
+          <p className="text-white/50 text-sm mb-5">
             Payments will appear here once milestone funds are released.
           </p>
           <Link
             href="/dashboard"
-            className="inline-flex items-center gap-1.5 bg-vektrum-blue text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-vektrum-blue-hover transition-colors"
+            className="group inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-6 py-2.5 text-[14px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 transition-all hover:bg-vektrum-blue-hover hover:shadow-xl hover:shadow-vektrum-blue/40 hover:-translate-y-0.5"
           >
             Go to Dashboard
-            <ArrowRight size={14} />
+            <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
           </Link>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-vektrum-border bg-vektrum-surface shadow-sm">
+        <div
+          className="overflow-x-auto rounded-2xl border border-white/[0.08] bg-[#111827]"
+          style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+        >
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-vektrum-border bg-vektrum-surface-alt">
-                <th className="text-left px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-vektrum-muted">
-                  Milestone
-                </th>
-                <th className="text-left px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-vektrum-muted">
-                  Deal
-                </th>
-                <th className="text-left px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-vektrum-muted">
-                  Amount
-                </th>
-                <th className="text-left px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-vektrum-muted">
-                  Date Released
-                </th>
-                <th className="text-left px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-vektrum-muted">
-                  Status
-                </th>
+              <tr className="border-b border-white/[0.06] bg-white/[0.02]">
+                <th className="text-left px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">Milestone</th>
+                <th className="text-left px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">Deal</th>
+                <th className="text-left px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">Amount</th>
+                <th className="text-left px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">Date Released</th>
+                <th className="text-left px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-vektrum-border-subtle">
+            <tbody className="divide-y divide-white/[0.04]">
               {releases.map((rel) => (
-                <tr key={rel.id} className="hover:bg-vektrum-surface-alt transition-colors">
-                  <td className="px-4 py-3 font-medium text-vektrum-text">
-                    {rel.milestone?.title ?? 'Unknown'}
-                  </td>
-                  <td className="px-4 py-3 text-vektrum-muted">
-                    {(dealMap.get(rel.deal_id) as string) ?? 'Unknown Deal'}
-                  </td>
-                  <td className="px-4 py-3 font-semibold tabular-nums text-vektrum-green">
-                    {formatMoney(rel.amount)}
-                  </td>
-                  <td className="px-4 py-3 text-vektrum-muted">
-                    {new Intl.DateTimeFormat('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                    }).format(new Date(rel.released_at))}
+                <tr key={rel.id} className="hover:bg-white/[0.025] transition-colors">
+                  <td className="px-4 py-3 font-medium text-white/80">{rel.milestone?.title ?? 'Unknown'}</td>
+                  <td className="px-4 py-3 text-white/45">{(dealMap.get(rel.deal_id) as string) ?? 'Unknown Deal'}</td>
+                  <td className="px-4 py-3 font-semibold tabular-nums text-emerald-400">{formatMoney(rel.amount)}</td>
+                  <td className="px-4 py-3 text-white/45">
+                    {new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(rel.released_at))}
                   </td>
                   <td className="px-4 py-3">
-                    <span className="inline-flex items-center rounded-full bg-vektrum-green-bg border border-vektrum-green-border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-vektrum-green">
+                    <span className="inline-flex items-center rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">
                       Released
                     </span>
                   </td>
@@ -191,6 +174,7 @@ export default async function ContractorPaymentsPage() {
           </table>
         </div>
       )}
+    </div>
     </div>
   )
 }
