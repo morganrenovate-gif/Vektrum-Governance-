@@ -85,6 +85,15 @@ export default function InviteAcceptPage() {
     setState({ phase: 'loading' })
     try {
       const res = await fetch(`/api/invites/${token}`)
+      console.log('PREVIEW STATUS:', res.status)
+
+      const text = await res.text()
+      console.log('PREVIEW RAW:', text)
+
+      const parsed: InvitePreview = JSON.parse(text)
+
+      setPreviewData(parsed)
+      setState({ phase: 'preview', data: parsed })
       if (res.status === 404) {
         setState({ phase: 'invalid', reason: 'not_found' })
         return
@@ -110,12 +119,17 @@ export default function InviteAcceptPage() {
     setState({ phase: 'accepting' })
     try {
       const res = await fetch('/api/invites', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token }),
-      })
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+})
 
-      const body = await res.json()
+console.log('ACCEPT STATUS:', res.status)
+
+const text = await res.text()
+console.log('ACCEPT RAW:', text)
+
+      const body = JSON.parse(text)
 
       if (res.status === 401) {
         router.push(`/auth/login?redirect=/invite/${token}`)
