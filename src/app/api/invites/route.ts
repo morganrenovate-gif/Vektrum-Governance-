@@ -174,9 +174,19 @@ const { data: invite, error: insertError } = await admin
     },
   })
 
-  const inviteUrl = buildInviteUrl(request, invite.token, invite.slug)
+  function buildInviteUrl(_request: NextRequest, token: string, slug: string) {
+  const appUrl =
+    process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL
+
+  if (!appUrl) {
+    throw new Error('Missing NEXT_PUBLIC_APP_URL or APP_URL')
+  }
+
+  return `${appUrl}/invite/${token}`
+}
 
   // ── Send invite email (non-blocking — invite exists regardless of email outcome) ──
+  const inviteUrl = buildInviteUrl(request, invite.token, invite.slug)
   let emailSent = false
   if (invitedEmail) {
     try {
