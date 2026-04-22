@@ -188,7 +188,7 @@ export default async function RootLayout({
                       href="/auth/signup"
                       className="group inline-flex items-center justify-center gap-2 rounded-lg bg-vektrum-blue px-4 py-2 text-[13px] font-medium text-white hover:bg-vektrum-blue-hover transition-all shadow-sm"
                     >
-                      Protect your first payment — free
+                      Get Started 
                       <ArrowRight
                         size={15}
                         className="transition-transform group-hover:translate-x-0.5"
