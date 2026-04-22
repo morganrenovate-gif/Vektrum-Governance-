@@ -92,8 +92,7 @@ export default function InviteAcceptPage() {
 
       const parsed: InvitePreview = JSON.parse(text)
 
-      setPreviewData(parsed)
-      setState({ phase: 'preview', data: parsed })
+
       if (res.status === 404) {
         setState({ phase: 'invalid', reason: 'not_found' })
         return
@@ -102,10 +101,9 @@ export default function InviteAcceptPage() {
         setState({ phase: 'error', message: 'Something went wrong loading this invite. Try refreshing.' })
         return
       }
-      const data: InvitePreview = await res.json()
-      setPreviewData(data)
-      setState({ phase: 'preview', data })
-    } catch {
+        setPreviewData(parsed)
+        setState({ phase: 'preview', data: parsed })
+      } catch {
       setState({ phase: 'error', message: 'Network error. Check your connection and try again.' })
     }
   }, [token])

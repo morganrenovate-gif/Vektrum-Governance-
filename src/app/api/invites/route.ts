@@ -190,8 +190,11 @@ const { data: invite, error: insertError } = await admin
   let emailSent = false
   if (invitedEmail) {
     try {
+      console.log('HAS RESEND KEY:', !!process.env.RESEND_API_KEY)
       const resend = new Resend(process.env.RESEND_API_KEY)
+      console.log('RAW EMAIL_FROM:', process.env.EMAIL_FROM)
       const from = process.env.EMAIL_FROM ?? 'Vektrum <invites@vektrum.io>'
+      console.log('SENDING FROM:', from)
       const expiryDate = new Date(invite.expires_at).toLocaleDateString('en-US', {
         month: 'long', day: 'numeric', year: 'numeric',
       })
