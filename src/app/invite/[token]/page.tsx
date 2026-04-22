@@ -116,7 +116,7 @@ export default function InviteAcceptPage() {
   const handleAccept = async () => {
     setState({ phase: 'accepting' })
     try {
-      const res = await fetch('/api/invites', {
+      const res = await fetch('/api/invites/$(token)/accept', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token }),
