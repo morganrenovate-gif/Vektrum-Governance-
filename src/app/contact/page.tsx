@@ -22,7 +22,7 @@ export default function ContactPage() {
               href="mailto:operations@vektrum.io"
               className="text-[15px] text-vektrum-blue hover:underline"
             >
-              operations@vektrum.io
+              Adam@vektrum.io
             </a>
           </div>
           <div className="rounded-xl border border-vektrum-border bg-vektrum-surface p-6">
