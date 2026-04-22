@@ -69,10 +69,10 @@ export default async function HomePage() {
                   <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
                 </Link>
                 <a
-                  href="#demo"
+                  href="https://cal.com/vektrum"
                   className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 px-7 py-3 text-[14px] font-semibold text-white/70 hover:bg-white/10 hover:text-white transition-all"
                 >
-                  See how it works
+                  Schedule a Call
                   <span className="text-white/40">↓</span>
                 </a>
               </div>
