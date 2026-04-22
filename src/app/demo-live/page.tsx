@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Landmark, HardHat, Shield } from 'lucide-react'
+import { Landmark, HardHat, Shield, ArrowRight } from 'lucide-react'
 
 const roles = [
   {
@@ -9,7 +9,8 @@ const roles = [
     description: 'See portfolio overview, capital deployed, deal action queue, and AI draw review approvals.',
     href: '/demo-live/funder',
     icon: Landmark,
-    badge: 'bg-vektrum-blue-subtle text-vektrum-blue border-vektrum-blue-border',
+    badge: 'bg-vektrum-blue/10 text-vektrum-blue border-vektrum-blue/20',
+    dot: 'bg-vektrum-blue',
   },
   {
     role: 'Contractor',
@@ -18,7 +19,8 @@ const roles = [
     description: 'See your deals, milestone status, draw request flow, and payment history.',
     href: '/demo-live/contractor',
     icon: HardHat,
-    badge: 'bg-vektrum-green-bg text-vektrum-green border-vektrum-green-border',
+    badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    dot: 'bg-emerald-400',
   },
   {
     role: 'Admin',
@@ -28,49 +30,84 @@ const roles = [
     href: '/demo-live/admin',
     icon: Shield,
     badge: 'bg-vektrum-amber-bg text-vektrum-amber border-vektrum-amber-border',
+    dot: 'bg-vektrum-amber',
   },
 ] as const
 
 export default function DemoLivePage() {
   return (
-    <div className="min-h-screen bg-[#0D1B2A]">
-    <div className="page-container section space-y-8">
-      <div className="text-center">
-        <h1 className="font-display text-3xl font-bold text-white sm:text-4xl">
-          Vektrum &mdash; Interactive Demo
-        </h1>
-        <p className="mt-3 text-[15px] text-white/60 max-w-md mx-auto">
-          Choose a role to explore the platform. All data is simulated.
-        </p>
-      </div>
-      </div>
-      
+    <div className="relative min-h-screen bg-[#0D1B2A] overflow-hidden">
 
-      <div className="grid gap-5 sm:grid-cols-3 max-w-3xl mx-auto">
-        {roles.map((r) => (
-          <Link
-            key={r.role}
-            href={r.href}
-            className="group rounded-xl border border-vektrum-border bg-vektrum-surface p-6 shadow-sm hover:shadow-md transition-all"
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-vektrum-blue-subtle">
-                <r.icon size={16} className="text-vektrum-blue" aria-hidden="true" />
-              </div>
-              <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${r.badge}`}>
-                {r.role}
-              </span>
-            </div>
-            <p className="text-[15px] font-semibold text-vektrum-text">{r.name}</p>
-            <p className="text-[12px] text-vektrum-faint">{r.company}</p>
-            <p className="mt-3 text-[13px] text-vektrum-muted leading-relaxed">
-              {r.description}
+      {/* Ambient glow — matches hero */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-gradient-to-b from-vektrum-blue/12 to-transparent rounded-full blur-3xl pointer-events-none" />
+
+      <div className="relative max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 pt-24 pb-24 sm:pt-32 sm:pb-32">
+
+        {/* ─── Header ──────────────────────────────────────────────────── */}
+        <div className="text-center mb-16">
+          <div className="mb-5 inline-flex items-center gap-3">
+            <div className="h-px w-5 bg-vektrum-blue" />
+            <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">
+              Interactive Demo
             </p>
-            <div className="mt-4 text-[13px] font-medium text-vektrum-blue group-hover:text-vektrum-blue-hover transition-colors">
-              Enter demo &rarr;
-            </div>
-          </Link>
-        ))}
+            <div className="h-px w-5 bg-vektrum-blue" />
+          </div>
+
+          <h1 className="font-display text-[2.75rem] sm:text-5xl font-bold tracking-[-0.04em] text-white leading-[1.05]">
+            Explore the platform.
+          </h1>
+          <p className="mt-5 text-[16px] leading-relaxed text-white/55 max-w-sm mx-auto">
+            Choose a role to walk through a live deal. All data is simulated.
+          </p>
+        </div>
+
+        {/* ─── Role Cards ──────────────────────────────────────────────── */}
+        <div className="grid gap-5 sm:grid-cols-3 max-w-4xl mx-auto">
+          {roles.map((r) => (
+            <Link
+              key={r.role}
+              href={r.href}
+              className="group rounded-2xl border border-white/[0.08] bg-[#111827] p-7 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.14]"
+              style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+            >
+              {/* Icon + badge row */}
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08]">
+                  <r.icon size={17} className="text-white/70" aria-hidden="true" />
+                </div>
+                <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em] ${r.badge}`}>
+                  {r.role}
+                </span>
+              </div>
+
+              {/* Identity */}
+              <p className="text-[15px] font-semibold text-white leading-snug">{r.name}</p>
+              <p className="text-[12px] text-white/35 mt-0.5">{r.company}</p>
+
+              {/* Description */}
+              <p className="mt-4 text-[13px] text-white/50 leading-relaxed flex-1">
+                {r.description}
+              </p>
+
+              {/* CTA */}
+              <div className="mt-6 pt-5 border-t border-white/[0.06] flex items-center justify-between">
+                <span className="text-[13px] font-semibold text-vektrum-blue">
+                  Enter demo
+                </span>
+                <ArrowRight
+                  size={14}
+                  className="text-vektrum-blue transition-transform duration-200 group-hover:translate-x-1"
+                />
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        {/* ─── Footer note ─────────────────────────────────────────────── */}
+        <p className="mt-12 text-center text-[12px] text-white/25 tracking-wide">
+          No account required &nbsp;·&nbsp; Simulated data only &nbsp;·&nbsp; No real funds
+        </p>
+
       </div>
     </div>
   )
