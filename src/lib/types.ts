@@ -63,6 +63,8 @@ export interface Profile {
   stripe_account_id: string | null;
   stripe_payouts_enabled: boolean;
   onboarding_complete: boolean;
+  /** Billing plan tier. Determines billing_rate_bps written to a deal at funding time. */
+  subscription_tier: 'standalone' | 'institutional' | 'enterprise';
   created_at: string;
   updated_at: string;
 }

@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { logAudit } from '@/lib/engine/audit'
+import { BILLING_RATES } from '@/lib/engine/billing'
 
 // ─── Shared types ─────────────────────────────────────────────────────────────
 // These types are the contract between the API route, the upload modal,
@@ -65,10 +66,14 @@ export async function confirmDealFromContract(
     const { data: deal, error: dealError } = await supabase
       .from('deals')
       .insert({
-        title: input.metadata.dealName,
-        total_amount: input.totalValue,
-        status: 'draft',
-        contractor_id: user.id,
+        title:            input.metadata.dealName,
+        total_amount:     input.totalValue,
+        status:           'draft',
+        contractor_id:    user.id,
+        // billing_rate_bps is always set server-side — never from user input.
+        // Default to STANDALONE (100 bps). Overwritten at funding time with the
+        // funder's actual subscription tier rate.
+        billing_rate_bps: BILLING_RATES.STANDALONE,
       })
       .select('id')
       .single()

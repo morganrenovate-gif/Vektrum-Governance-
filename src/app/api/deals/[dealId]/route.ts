@@ -177,8 +177,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
   }
 
-  // Guard: reject any attempts to directly mutate protected financial or status fields
-  const protectedFields = ['total_amount', 'funded_amount', 'released_amount', 'status']
+  // Guard: reject any attempts to directly mutate protected financial or status fields.
+  // billing_rate_bps is set server-side at funding time from the funder's subscription
+  // tier — it must never be accepted from user input through this endpoint.
+  const protectedFields = ['total_amount', 'funded_amount', 'released_amount', 'status', 'billing_rate_bps']
   const attemptedProtectedFields = protectedFields.filter((f) => f in body)
 
   if (attemptedProtectedFields.length > 0) {

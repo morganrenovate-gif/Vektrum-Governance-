@@ -3,7 +3,7 @@ import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { logAudit } from '@/lib/engine/audit'
 import { stripe } from '@/lib/stripe'
 import { notifyTransferFailure } from '@/lib/engine/notifications'
-import { failTransactionReceipt } from '@/lib/engine/receipts'
+import { confirmTransactionReceipt, failTransactionReceipt } from '@/lib/engine/receipts'
 import type Stripe from 'stripe'
 
 export const dynamic = 'force-dynamic'
@@ -19,6 +19,7 @@ export const dynamic = 'force-dynamic'
 // Handled events:
 //   - account.updated          → update stripe_payouts_enabled on the contractor profile
 //   - payment_intent.succeeded → confirm deal funding (update funded_amount ledger)
+//   - transfer.succeeded       → mark release 'confirmed', mark receipt 'confirmed'
 //   - transfer.failed          → mark release/milestone as payout_failed, reverse financials
 //   - transfer.reversed        → same as transfer.failed (full reversal path)
 //   - transfer.updated         → inspect if reversal is attached; treat as reversed if so
@@ -83,6 +84,10 @@ export async function POST(request: NextRequest) {
 
       case 'payment_intent.succeeded':
         await handlePaymentIntentSucceeded(event.data.object as Stripe.PaymentIntent)
+        break
+
+      case 'transfer.succeeded':
+        await handleTransferSucceeded(event.data.object as Stripe.Transfer)
         break
 
       case 'transfer.failed':
@@ -196,12 +201,177 @@ async function handleAccountUpdated(account: Stripe.Account): Promise<void> {
   )
 }
 
-// ─── Handler: transfer.confirmed (implicit) ───────────────────────────────────
-// Stripe does not send a transfer.succeeded event — transfers are considered
-// confirmed once created unless a failure event arrives. However, we mark
-// releases as 'confirmed' at creation time and only update to 'failed'/'reversed'
-// if the webhook fires. For completeness, this would be the place to mark
-// releases as explicitly confirmed if we needed a two-phase confirmation flow.
+// ─── Handler: transfer.succeeded ─────────────────────────────────────────────
+// Fired by Stripe when a Connect transfer is confirmed — i.e. funds have been
+// applied to the destination (contractor's) Connect account.
+//
+// Updates:
+//   releases.transfer_status         pending → confirmed
+//   transaction_receipts.status      pending → confirmed
+//   billing_records.transfer_status  pending → confirmed
+//
+// Idempotency:
+//   All three writes are conditional on the current status being 'pending'.
+//   A second delivery of the same event is a safe no-op:
+//     - 'confirmed' rows are skipped by the .eq('transfer_status', 'pending') guard.
+//     - 'failed'/'reversed' rows are intentionally left alone — a failure event
+//       has higher authority than a late-arriving success. Stripe can deliver events
+//       out of order in rare network-partition scenarios; the failure state wins.
+//
+// Non-fatal handling:
+//   billing_records update failure is logged but does not cause a retry (no throw).
+//   The release and receipt are the authoritative records; billing_records is
+//   informational for fee tracking and reconciliation.
+
+async function handleTransferSucceeded(transfer: Stripe.Transfer): Promise<void> {
+  const transferId = transfer.id
+
+  // Only process Vektrum milestone release transfers — skip anything else
+  // (platform-initiated payouts, Connect account top-ups, etc.)
+  if (transfer.metadata?.vektrum_action !== 'milestone_release') {
+    console.log(
+      `[webhook] transfer.succeeded: ${transferId} is not a Vektrum milestone release — skipping`,
+    )
+    return
+  }
+
+  const milestoneId = transfer.metadata?.milestone_id
+  const dealId      = transfer.metadata?.deal_id
+
+  if (!milestoneId || !dealId) {
+    console.error(
+      `[webhook] transfer.succeeded: Missing milestone_id or deal_id in metadata for transfer ${transferId}`,
+    )
+    // Do not throw — missing metadata means this is likely not our transfer.
+    // Returning 200 prevents Stripe from retrying indefinitely.
+    return
+  }
+
+  const adminClient = createSupabaseAdminClient()
+
+  // ── 1. Locate the release record ──────────────────────────────────────────
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: release, error: releaseQueryError } = await (adminClient as any)
+    .from('releases')
+    .select('id, transfer_status')
+    .eq('stripe_transfer_id', transferId)
+    .maybeSingle()
+
+  if (releaseQueryError) {
+    console.error(
+      `[webhook] transfer.succeeded: Error querying release for transfer ${transferId}:`,
+      releaseQueryError.message,
+    )
+    throw releaseQueryError
+  }
+
+  if (!release) {
+    // No matching release. Two legitimate causes:
+    //   a) Webhook arrived before the release route finished its DB insert
+    //      (narrow race window — Stripe retries will resolve this).
+    //   b) Transfer was not created by this platform.
+    // Either way: log, return 200, let Stripe retry if needed.
+    console.warn(
+      `[webhook] transfer.succeeded: No release found for transfer ${transferId} — no-op`,
+    )
+    return
+  }
+
+  // ── Idempotency guards ─────────────────────────────────────────────────────
+
+  // Already confirmed — this is a duplicate webhook delivery. No-op.
+  if (release.transfer_status === 'confirmed') {
+    console.log(
+      `[webhook] transfer.succeeded: Release ${release.id} already confirmed — skipping`,
+    )
+    return
+  }
+
+  // Already failed or reversed — a failure event arrived first.
+  // Do NOT overwrite with confirmed: the failure state has higher authority.
+  if (release.transfer_status === 'failed' || release.transfer_status === 'reversed') {
+    console.warn(
+      `[webhook] transfer.succeeded: Release ${release.id} is already '${release.transfer_status}'. ` +
+        `Late-arriving transfer.succeeded ignored — failure state takes precedence.`,
+    )
+    await logAudit({
+      entity_type: 'release',
+      entity_id:   release.id,
+      action:      'transfer_succeeded_ignored_after_failure',
+      actor_id:    'system',
+      old_values:  { transfer_status: release.transfer_status },
+      new_values:  null,
+      metadata: {
+        stripe_transfer_id: transferId,
+        milestone_id:       milestoneId,
+        deal_id:            dealId,
+        note:               'transfer.succeeded arrived after failure event — not applied',
+      },
+    })
+    return
+  }
+
+  // ── 2. Confirm the release record ──────────────────────────────────────────
+  // Conditional write: only from 'pending'. Guards against the race where a
+  // failure event processes concurrently and wins the status update.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error: releaseUpdateError } = await (adminClient as any)
+    .from('releases')
+    .update({ transfer_status: 'confirmed' })
+    .eq('id', release.id)
+    .eq('transfer_status', 'pending')
+
+  if (releaseUpdateError) {
+    console.error(
+      `[webhook] transfer.succeeded: Failed to confirm release ${release.id}:`,
+      releaseUpdateError.message,
+    )
+    throw releaseUpdateError
+  }
+
+  // ── 3. Confirm the transaction receipt ────────────────────────────────────
+  // confirmTransactionReceipt() is internally guarded: only transitions from
+  // 'pending', never overwrites 'failed'/'reversed'. Never throws.
+  await confirmTransactionReceipt(release.id)
+
+  // ── 4. Confirm the billing record (non-fatal) ─────────────────────────────
+  // Keeps billing_records.transfer_status consistent with the release.
+  // Non-fatal: a failure here does not cause Stripe to retry and does not
+  // affect the release or receipt, which are the authoritative records.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error: billingUpdateError } = await (adminClient as any)
+    .from('billing_records')
+    .update({ transfer_status: 'confirmed' })
+    .eq('release_id', release.id)
+    .eq('transfer_status', 'pending')
+
+  if (billingUpdateError) {
+    console.warn(
+      `[webhook] transfer.succeeded: billing_records update failed for release ${release.id} — non-fatal:`,
+      billingUpdateError.message,
+    )
+  }
+
+  // ── 5. Audit log ───────────────────────────────────────────────────────────
+  await logAudit({
+    entity_type: 'release',
+    entity_id:   release.id,
+    action:      'transfer_confirmed',
+    actor_id:    'system',
+    old_values:  { transfer_status: 'pending' },
+    new_values:  { transfer_status: 'confirmed' },
+    metadata: {
+      stripe_transfer_id:      transferId,
+      milestone_id:            milestoneId,
+      deal_id:                 dealId,
+      billing_record_updated:  !billingUpdateError,
+    },
+  })
+
+  console.log(
+    `[webhook] transfer.succeeded: Release ${release.id} confirmed — Transfer ${transferId}`,
+  )
+}
 
 // ─── Handler: transfer.failed / transfer.reversed ────────────────────────────
 // Called for both transfer.failed and transfer.reversed events (and transfer.updated

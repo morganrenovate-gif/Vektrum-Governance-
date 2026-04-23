@@ -68,9 +68,11 @@ export async function validateRelease(
   }
 
   // ── Fetch Deal ──────────────────────────────────────────────────────────────
+  // Include reserved_amount so the balance check reflects in-flight releases
+  // that have been reserved but whose Stripe transfers haven't completed yet.
   const { data: deal, error: dealError } = await supabase
     .from('deals')
-    .select('id, contractor_id, funded_amount, released_amount, fees_collected, billing_rate_bps, total_amount')
+    .select('id, contractor_id, funded_amount, released_amount, fees_collected, reserved_amount, billing_rate_bps, total_amount')
     .eq('id', milestone.deal_id)
     .single()
 
@@ -149,15 +151,23 @@ export async function validateRelease(
 
   // ─────────────────────────────────────────────────────────────────────────────
   // CONDITION 3: Deal must have sufficient funded balance to cover this milestone
-  //              INCLUDING the platform fee.
+  //              INCLUDING the platform fee AND any in-flight reservations.
   //
-  // Available = funded_amount − released_amount − fees_collected
+  // Available = funded_amount − released_amount − fees_collected − reserved_amount
   // Required  = milestone.amount + platform fee
   //
-  // The fee is charged ON TOP of the milestone amount — the contractor always
-  // receives the full gross, and the fee is retained in the platform account.
+  // reserved_amount represents funds committed to concurrent in-flight releases
+  // (reserved before their Stripe transfers complete). Subtracting it here gives
+  // the user an accurate picture of what's actually available, even if another
+  // release is being processed simultaneously.
+  //
+  // NOTE: This check is a fast user-facing pre-check with helpful error messages.
+  //       The authoritative atomic gate is reserve_release_funds() in the route,
+  //       which uses SELECT FOR UPDATE to prevent race conditions. These two checks
+  //       are complementary — this one catches the obvious case early; the RPC
+  //       catches the concurrent edge case.
   // ─────────────────────────────────────────────────────────────────────────────
-  const available  = deal.funded_amount - deal.released_amount - deal.fees_collected
+  const available  = deal.funded_amount - deal.released_amount - deal.fees_collected - (deal.reserved_amount ?? 0)
   const fee        = calculateFee(milestone.amount, deal.billing_rate_bps)
   const totalDebit = fee.totalDebit   // milestone.amount + fee.feeAmount
   const shortfall  = totalDebit - available

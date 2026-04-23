@@ -59,7 +59,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   // ── Fetch Deal (needed for contractor_id, billing rate, and access check) ──
   const { data: deal, error: dealError } = await supabase
     .from('deals')
-    .select('id, title, contractor_id, funder_id, funded_amount, released_amount, fees_collected, billing_rate_bps, total_amount')
+    .select('id, title, contractor_id, funder_id, funded_amount, released_amount, fees_collected, reserved_amount, billing_rate_bps, total_amount')
     .eq('id', milestone.deal_id)
     .single()
 
@@ -135,8 +135,95 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   // Fee is retained naturally in the platform Stripe account.
   const amountInCents = toStripeCents(milestone.amount)
 
+  // ── STEP 2.5: Atomically Reserve Funded Balance ──────────────────────────────
+  // This is the ACTUAL concurrency gate. validateRelease() above is a fast
+  // user-facing pre-check with helpful error messages; this RPC is the hard lock.
+  //
+  // reserve_release_funds() uses SELECT FOR UPDATE NOWAIT on the deal row so
+  // that only one release per deal can pass the funded-balance check at a time:
+  //
+  //   - Concurrent request on the same deal: blocked until this transaction
+  //     commits, then sees the updated reserved_amount and fails if insufficient.
+  //   - NOWAIT: if the lock is already held, the RPC raises lock_not_available
+  //     (Postgres error code 55P03) which we catch and return as a 409.
+  //
+  // The reservation is converted to released_amount by increment_deal_financials()
+  // on success, or freed by cancel_release_reservation() on Stripe failure.
+  const { data: reservationRows, error: reservationError } = await supabase.rpc(
+    'reserve_release_funds',
+    {
+      p_deal_id: milestone.deal_id,
+      p_gross:   fee.grossAmount,
+      p_fee:     fee.feeAmount,
+    },
+  )
+
+  if (reservationError) {
+    // Postgres lock_not_available (55P03) = another release is already in progress
+    // for this deal. Return 409 so the client can retry after a short delay.
+    const isLockConflict = reservationError.code === '55P03'
+    await logAudit({
+      entity_type: 'milestone',
+      entity_id:   milestoneId,
+      action:      'release_reservation_failed',
+      actor_id:    user.id,
+      old_values:  null,
+      new_values:  null,
+      metadata: {
+        deal_id:          milestone.deal_id,
+        gross_amount:     fee.grossAmount,
+        fee_amount:       fee.feeAmount,
+        is_lock_conflict: isLockConflict,
+        error:            reservationError.message,
+        error_code:       reservationError.code,
+      },
+    })
+
+    if (isLockConflict) {
+      return NextResponse.json(
+        {
+          error:
+            'Another release is currently being processed for this deal. ' +
+            'Please wait a moment and try again.',
+          code: 'RELEASE_LOCK_CONFLICT',
+        },
+        { status: 409 },
+      )
+    }
+
+    return internalError(
+      'The funded balance could not be reserved. Please try again.',
+      reservationError.message,
+    )
+  }
+
+  const reservation = Array.isArray(reservationRows) ? reservationRows[0] : reservationRows
+  if (!reservation?.ok) {
+    // Another in-flight release already reserved the remaining capacity,
+    // or the deal is genuinely underfunded at this moment.
+    const available = reservation?.available ?? 0
+    const required  = reservation?.required  ?? fee.totalDebit
+    return NextResponse.json(
+      {
+        error:
+          `Insufficient funded balance after accounting for in-flight releases. ` +
+          `Available: $${Number(available).toFixed(2)}. ` +
+          `Required: $${Number(required).toFixed(2)}. ` +
+          `If another release is in progress, try again once it completes.`,
+        code: 'INSUFFICIENT_BALANCE',
+      },
+      { status: 422 },
+    )
+  }
+
+  // Reservation acquired — reserved_amount on the deal is now incremented.
+  // From this point forward, every error path that does NOT result in a
+  // successful Stripe transfer MUST call cancel_release_reservation() to
+  // free the reservation and restore the deal's available balance.
+  const reservationMade = true  // reservation succeeded; used in catch block to decide whether to cancel
+
   // ── STEPS 3–7: Wrapped in a Single Try/Catch ────────────────────────────────
-  // If Stripe fails → no DB writes occur.
+  // If Stripe fails → cancel reservation, no DB writes occur.
   // If DB writes fail after Stripe succeeds → return 500 with Stripe transfer ID
   // so that support can reconcile the partial state.
 
@@ -501,6 +588,29 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
 
+    // ── Cancel the reservation if Stripe never completed ──────────────────────
+    // If stripeTransferId is null, the transfer either failed or was never
+    // attempted. In either case no money moved, so we can safely free the
+    // reservation and restore the deal's available balance.
+    //
+    // If stripeTransferId is set, Stripe succeeded but a DB step failed.
+    // We do NOT cancel the reservation here — the funds have actually moved,
+    // and support must reconcile the partial state. Cancelling would make
+    // the deal's reserved_amount inaccurate relative to what Stripe holds.
+    if (!stripeTransferId && reservationMade) {
+      try {
+        await supabase.rpc('cancel_release_reservation', {
+          p_deal_id: milestone.deal_id,
+          p_gross:   fee.grossAmount,
+          p_fee:     fee.feeAmount,
+        })
+      } catch (cancelErr) {
+        // Non-fatal: log but do not mask the original error.
+        // A stale reserved_amount will be detected by the reconciliation engine.
+        console.error('[release] cancel_release_reservation failed:', cancelErr)
+      }
+    }
+
     // Log the failure with as much context as possible
     await logAudit({
       entity_type: 'milestone',
@@ -510,14 +620,17 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       old_values: null,
       new_values: null,
       metadata: {
-        error: message,
+        error:              message,
         stripe_transfer_id: stripeTransferId,
-        idempotency_key: idempotencyKey,
+        idempotency_key:    idempotencyKey,
+        reservation_made:   reservationMade,
+        reservation_cancelled: !stripeTransferId && reservationMade,
       },
     })
 
     if (stripeTransferId) {
-      // Stripe transfer succeeded but a subsequent DB step failed
+      // Stripe transfer succeeded but a subsequent DB step failed.
+      // The reservation was NOT cancelled — support must reconcile.
       return internalError(
         `A Stripe transfer was completed (ID: ${stripeTransferId}) but a subsequent database operation failed. ` +
           `Contact support immediately with this transfer ID to prevent partial state. ` +
@@ -526,7 +639,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       )
     }
 
-    // Stripe itself failed — no money moved, no DB writes needed
+    // Stripe itself failed (or was never called) — no money moved.
+    // Reservation has been cancelled; the deal's balance is restored.
     return internalError(
       'The Stripe transfer could not be completed. No funds have been moved. ' +
         'Please try again. If this problem persists, contact support.',

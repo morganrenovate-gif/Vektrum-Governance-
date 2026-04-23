@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getAuthUser, requireRole, requireDealAccess } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
 import { stripe } from '@/lib/stripe'
+import { billingRateFromTier, type SubscriptionTier } from '@/lib/engine/billing'
 import { errorResponse, internalError, notFoundError, validationError } from '@/lib/errors'
 
 export const dynamic = 'force-dynamic'
@@ -58,6 +59,33 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       `Deal ${dealId} was not found. Verify the deal ID and try again.`,
     )
   }
+
+  // ── Resolve Funder Billing Rate ─────────────────────────────────────────────
+  //
+  // billing_rate_bps is always set server-side from the funder's subscription_tier.
+  // It is locked in at first funding so that the rate is immutable for the life of
+  // the deal — subsequent top-ups do not change it, and user input is never accepted.
+  //
+  // Funding is restricted to funders and admins (requireRole above), so user.id
+  // here is always the funder unless an admin is acting on their behalf — in the
+  // admin case, the admin's own tier is used, which is acceptable (admins are
+  // typically on an enterprise or institutional plan).
+  const { data: funderProfile, error: profileError } = await supabase
+    .from('profiles')
+    .select('subscription_tier')
+    .eq('id', user.id)
+    .single()
+
+  if (profileError || !funderProfile) {
+    return internalError(
+      'Could not retrieve your account profile to determine the billing rate. Please try again.',
+      profileError?.message,
+    )
+  }
+
+  const billingRateBps = billingRateFromTier(
+    (funderProfile.subscription_tier ?? 'standalone') as SubscriptionTier,
+  )
 
   // ── Contract Gate: signed contract required before funding ─────────────────
   //
@@ -185,10 +213,17 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const { data: updatedDeal, error: updateError } = await supabase
     .from('deals')
     .update({
-      funded_amount: newFundedAmount,
-      status: newStatus,
-      funder_id: deal.funder_id ?? user.id,
-      updated_at: new Date().toISOString(),
+      funded_amount:    newFundedAmount,
+      status:           newStatus,
+      funder_id:        deal.funder_id ?? user.id,
+      // Lock in the funder's billing rate — always derived from their subscription_tier,
+      // never from user input. Written on every funding call so that if the funder's
+      // tier was upgraded between deal creation and first funding, they receive the
+      // correct rate. After the first milestone release the rate is effectively immutable
+      // (changing it would invalidate the billing_records_fee_accurate constraint on
+      // any new release that used the old rate in its billing record).
+      billing_rate_bps: billingRateBps,
+      updated_at:       new Date().toISOString(),
     })
     .eq('id', dealId)
     .select()
@@ -209,14 +244,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     actor_id: user.id,
     old_values: oldValues,
     new_values: {
-      funded_amount: newFundedAmount,
-      status: newStatus,
+      funded_amount:    newFundedAmount,
+      status:           newStatus,
+      billing_rate_bps: billingRateBps,
       remaining_to_fund: remainingToFund,
     },
     metadata: {
-      stripe_payment_intent_id: paymentIntent.id,
-      stripe_client_secret: paymentIntent.client_secret,
-      amount_in_cents: amountInCents,
+      stripe_payment_intent_id:  paymentIntent.id,
+      stripe_client_secret:      paymentIntent.client_secret,
+      amount_in_cents:           amountInCents,
+      funder_subscription_tier:  funderProfile.subscription_tier,
     },
   })
 

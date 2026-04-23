@@ -18,7 +18,7 @@ export interface TransactionReceipt {
   milestone_id:      string
   deal_id:           string
   billing_record_id: string | null
-  status:            'pending' | 'failed' | 'reversed'
+  status:            'pending' | 'confirmed' | 'failed' | 'reversed'
 
   // Financial snapshot
   gross_amount:      number
@@ -112,6 +112,37 @@ export async function createTransactionReceipt(
   } catch (err) {
     console.error('[receipts] createTransactionReceipt unexpected error:', err)
     return null
+  }
+}
+
+// ─── confirmTransactionReceipt ───────────────────────────────────────────────
+//
+// Called from the transfer.succeeded webhook handler when Stripe confirms that
+// funds reached the contractor's Connect account.
+//
+// Transitions status: 'pending' → 'confirmed'.
+// Guards against overwriting 'failed' or 'reversed' (Stripe can deliver events
+// out of order; a prior failure event takes precedence over a late success).
+// Idempotent: a second call for an already-confirmed receipt is a no-op.
+
+export async function confirmTransactionReceipt(releaseId: string): Promise<void> {
+  const admin = createSupabaseAdminClient()
+
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (admin as any)
+      .from('transaction_receipts')
+      .update({ status: 'confirmed' })
+      .eq('release_id', releaseId)
+      // Only transition from pending — do not overwrite a failure status,
+      // and treat an already-confirmed receipt as a no-op.
+      .eq('status', 'pending')
+
+    if (error) {
+      console.error('[receipts] confirmTransactionReceipt update failed:', error.message)
+    }
+  } catch (err) {
+    console.error('[receipts] confirmTransactionReceipt unexpected error:', err)
   }
 }
 

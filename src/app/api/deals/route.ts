@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getAuthUser, requireRole } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
+import { BILLING_RATES } from '@/lib/engine/billing'
 import {
   errorResponse,
   forbiddenError,
@@ -144,13 +145,17 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient()
 
     const insertPayload = {
-      contractor_id: user.id,
-      title: body.title!.trim(),
-      description: body.description?.trim() ?? null,
-      total_amount: body.total_amount!,
-      funded_amount: 0,
-      released_amount: 0,
-      status: 'draft',
+      contractor_id:    user.id,
+      title:            body.title!.trim(),
+      description:      body.description?.trim() ?? null,
+      total_amount:     body.total_amount!,
+      funded_amount:    0,
+      released_amount:  0,
+      // billing_rate_bps is always set server-side — never from user input.
+      // Default to STANDALONE (100 bps). Overwritten at funding time with the
+      // funder's actual subscription tier rate.
+      billing_rate_bps: BILLING_RATES.STANDALONE,
+      status:           'draft',
       ...(body.funder_id && { funder_id: body.funder_id }),
     }
 

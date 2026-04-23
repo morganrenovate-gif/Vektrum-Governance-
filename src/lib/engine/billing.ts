@@ -22,6 +22,27 @@ export const BILLING_RATES = {
 
 export type BillingRateBps = typeof BILLING_RATES[keyof typeof BILLING_RATES]
 
+/** Values that match the profiles.subscription_tier DB CHECK constraint. */
+export type SubscriptionTier = 'standalone' | 'institutional' | 'enterprise'
+
+/**
+ * Maps a funder's subscription tier to the correct billing rate in basis points.
+ *
+ * Called at deal-funding time so the deal's billing_rate_bps is always derived
+ * from the funder's actual tier — never from user-supplied input.
+ *
+ * @param tier - The funder's subscription_tier from their profile row.
+ * @returns The corresponding BillingRateBps value.
+ */
+export function billingRateFromTier(tier: SubscriptionTier): BillingRateBps {
+  switch (tier) {
+    case 'institutional': return BILLING_RATES.INSTITUTIONAL
+    case 'enterprise':    return BILLING_RATES.ENTERPRISE
+    case 'standalone':
+    default:              return BILLING_RATES.STANDALONE
+  }
+}
+
 /** Human-readable label for a given rate in basis points. */
 export function rateLabel(bps: number): string {
   switch (bps) {
