@@ -111,7 +111,7 @@ export default function DemoContractorPage() {
 
       {/* Your Deals */}
       <section id="your-deals">
-        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
+        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/55">
           Your Deals
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -126,16 +126,16 @@ export default function DemoContractorPage() {
                 <span className="inline-flex items-center rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">
                   Active
                 </span>
-                <span className="text-[11px] text-white/30">{deal.milestonesCompleted}/{deal.milestonesTotal} milestones</span>
+                <span className="text-[11px] text-white/45">{deal.milestonesCompleted}/{deal.milestonesTotal} milestones</span>
               </div>
               <p className="text-[14px] font-semibold text-white/80 group-hover:text-white transition-colors leading-snug">{deal.title}</p>
-              <p className="mt-1 text-[12px] text-white/40">{deal.funder} &middot; {deal.funderCompany}</p>
-              <p className="mt-0.5 text-[12px] text-white/35">Total: {formatCurrency(deal.total)}</p>
+              <p className="mt-1 text-[12px] text-white/55">{deal.funder} &middot; {deal.funderCompany}</p>
+              <p className="mt-0.5 text-[12px] text-white/50">Total: {formatCurrency(deal.total)}</p>
               <div className="mt-4 flex items-center gap-3">
                 <div className="flex-1 h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
                   <div className="h-full rounded-full bg-emerald-500" style={{ width: `${deal.pct}%` }} />
                 </div>
-                <span className="text-[11px] text-white/30 tabular-nums">{deal.pct}%</span>
+                <span className="text-[11px] text-white/45 tabular-nums">{deal.pct}%</span>
               </div>
             </Link>
           ))}

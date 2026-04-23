@@ -29,22 +29,24 @@ export function FundDealModal({ open, onConfirm, onClose }: FundDealModalProps) 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/70" onClick={onClose} />
 
-      <div className="relative max-w-md w-full mx-4 rounded-2xl bg-white shadow-2xl p-6 max-h-[90vh] overflow-y-auto">
+      <div className="relative max-w-md w-full mx-4 rounded-2xl bg-surface-2 border border-white/[0.08] shadow-2xl p-6 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-semibold text-gray-900">Fund New Deal</h2>
-          <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+          <h2 className="text-lg font-semibold text-white">Fund New Deal</h2>
+          <button type="button" onClick={onClose} className="text-white/35 hover:text-white/60 transition-colors">
             <X size={20} />
           </button>
         </div>
 
         {phase === 'success' ? (
           <div className="text-center py-8">
-            <CheckCircle2 size={48} className="text-green-500 mx-auto mb-3" />
-            <p className="text-lg font-semibold text-green-700">Funding Confirmed!</p>
-            <p className="text-sm text-gray-600 mt-1">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-500/[0.08] border-2 border-emerald-500/25 mb-3">
+              <CheckCircle2 size={28} className="text-emerald-400" />
+            </div>
+            <p className="text-lg font-semibold text-emerald-400">Funding Confirmed!</p>
+            <p className="text-sm text-white/55 mt-1">
               {formatCurrency(4_750_000)} committed to Westside Medical Office Campus.
             </p>
           </div>
@@ -52,45 +54,45 @@ export function FundDealModal({ open, onConfirm, onClose }: FundDealModalProps) 
           <>
             {/* Funder */}
             <div className="mb-4">
-              <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1">Funder</label>
-              <div className="rounded-lg bg-gray-50 border border-gray-200 px-4 py-3 text-sm text-gray-700">
+              <label className="block text-xs font-semibold uppercase tracking-wide text-white/40 mb-1">Funder</label>
+              <div className="rounded-lg bg-surface-3 border border-white/[0.08] px-4 py-3 text-sm text-white/70">
                 Sarah Chen — Meridian Capital Partners
               </div>
             </div>
 
             {/* Deal */}
             <div className="mb-4">
-              <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1">Deal</label>
-              <div className="rounded-lg bg-gray-50 border border-gray-200 px-4 py-3 text-sm text-gray-700 cursor-not-allowed">
+              <label className="block text-xs font-semibold uppercase tracking-wide text-white/40 mb-1">Deal</label>
+              <div className="rounded-lg bg-surface-3 border border-white/[0.08] px-4 py-3 text-sm text-white/70 cursor-not-allowed">
                 Westside Medical Office Campus — {formatCurrency(4_750_000)}
               </div>
             </div>
 
             {/* Amount */}
             <div className="mb-5">
-              <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1">Amount</label>
-              <p className="text-2xl font-bold text-blue-600">{formatCurrency(4_750_000)}</p>
+              <label className="block text-xs font-semibold uppercase tracking-wide text-white/40 mb-1">Amount</label>
+              <p className="text-2xl font-bold text-vektrum-blue">{formatCurrency(4_750_000)}</p>
             </div>
 
             {/* Checkboxes */}
             <div className="space-y-2 mb-5">
-              <label className="flex items-center gap-2 text-sm text-gray-600">
-                <input type="checkbox" checked disabled className="accent-blue-600" />
+              <label className="flex items-center gap-2 text-sm text-white/60">
+                <input type="checkbox" checked disabled className="accent-vektrum-blue" />
                 Funding terms acknowledged and accepted
               </label>
-              <label className="flex items-center gap-2 text-sm text-gray-600">
-                <input type="checkbox" checked disabled className="accent-blue-600" />
+              <label className="flex items-center gap-2 text-sm text-white/60">
+                <input type="checkbox" checked disabled className="accent-vektrum-blue" />
                 Project Trust Account authorization confirmed
               </label>
-              <label className="flex items-center gap-2 text-sm text-gray-600">
-                <input type="checkbox" checked disabled className="accent-blue-600" />
+              <label className="flex items-center gap-2 text-sm text-white/60">
+                <input type="checkbox" checked disabled className="accent-vektrum-blue" />
                 Milestone release conditions reviewed
               </label>
             </div>
 
             {/* Info box */}
-            <div className="rounded-lg bg-blue-50 border border-blue-200 px-4 py-3 mb-5">
-              <p className="text-xs text-blue-700 leading-relaxed">
+            <div className="rounded-lg bg-vektrum-blue/[0.08] border border-vektrum-blue/20 px-4 py-3 mb-5">
+              <p className="text-xs text-vektrum-blue/80 leading-relaxed">
                 Funds will be held in a Vektrum Project Trust Account and released only when milestone conditions are met and AI review passes.
               </p>
             </div>
@@ -100,7 +102,7 @@ export function FundDealModal({ open, onConfirm, onClose }: FundDealModalProps) 
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                className="flex-1 rounded-lg border border-white/[0.12] bg-surface-3 px-4 py-2 text-sm font-medium text-white/60 hover:bg-white/[0.06] transition-colors"
               >
                 Cancel
               </button>
@@ -108,7 +110,7 @@ export function FundDealModal({ open, onConfirm, onClose }: FundDealModalProps) 
                 type="button"
                 onClick={handleConfirm}
                 disabled={phase === 'loading'}
-                className="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-70 transition-colors"
+                className="flex-1 rounded-lg bg-vektrum-blue px-4 py-2 text-sm font-semibold text-white hover:bg-vektrum-blue-hover disabled:opacity-70 transition-colors"
               >
                 {phase === 'loading' ? 'Processing...' : 'Confirm Funding'}
               </button>

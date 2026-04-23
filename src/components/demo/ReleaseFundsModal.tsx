@@ -100,22 +100,22 @@ export function ReleaseFundsModal({
       aria-modal="true"
       aria-labelledby="release-modal-title"
     >
-      <div className="absolute inset-0 bg-black/60" onClick={handleClose} />
+      <div className="absolute inset-0 bg-black/70" onClick={handleClose} />
 
-      <div className="relative max-w-md w-full mx-4 rounded-2xl bg-white shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div className="relative max-w-md w-full mx-4 rounded-2xl bg-surface-2 border border-white/[0.08] shadow-2xl max-h-[90vh] overflow-y-auto">
 
         {/* ── Phase: REVIEW ─────────────────────────────────────────── */}
         {phase === 'review' && (
           <div className="p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-5">
-              <h2 id="release-modal-title" className="text-lg font-semibold text-gray-900">
+              <h2 id="release-modal-title" className="text-lg font-semibold text-white">
                 Release Funds — 8-Condition Gate
               </h2>
               <button
                 type="button"
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 transition-colors rounded-lg p-1"
+                className="text-white/35 hover:text-white/60 transition-colors rounded-lg p-1"
                 aria-label="Close"
               >
                 <X size={20} />
@@ -126,47 +126,47 @@ export function ReleaseFundsModal({
             <div className="space-y-2.5 mb-5">
               {conditions.map((c, i) => (
                 <div key={i} className="flex items-start gap-2.5 text-sm">
-                  <span className="text-green-600 font-semibold flex-shrink-0 tabular-nums w-4">
+                  <span className="text-emerald-400 font-semibold flex-shrink-0 tabular-nums w-4">
                     {i + 1}.
                   </span>
-                  <CheckCircle2 size={14} className="text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-gray-700 leading-snug">{c}</span>
+                  <CheckCircle2 size={14} className="text-emerald-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-white/70 leading-snug">{c}</span>
                 </div>
               ))}
             </div>
 
             {/* All-clear callout */}
-            <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 mb-5">
+            <div className="rounded-lg bg-emerald-500/[0.08] border border-emerald-500/20 px-4 py-3 mb-5">
               <div className="flex items-center gap-2">
-                <ShieldCheck size={15} className="text-green-600 flex-shrink-0" />
-                <p className="text-sm font-medium text-green-700">
+                <ShieldCheck size={15} className="text-emerald-400 flex-shrink-0" />
+                <p className="text-sm font-medium text-emerald-400">
                   All 8 conditions satisfied. Ready to release.
                 </p>
               </div>
             </div>
 
             {/* Amount & recipient */}
-            <div className="rounded-lg border border-gray-100 bg-gray-50 px-4 py-3 mb-5">
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 mb-1">
+            <div className="rounded-lg border border-white/[0.08] bg-surface-3 px-4 py-3 mb-5">
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35 mb-1">
                 Transfer
               </p>
-              <p className="text-2xl font-bold text-gray-900 tabular-nums">
+              <p className="text-2xl font-bold text-white tabular-nums">
                 {formatCurrency(milestone.amount)}
               </p>
-              <p className="text-sm text-gray-500 mt-0.5">
+              <p className="text-sm text-white/50 mt-0.5">
                 {milestone.name} → Marcus Webb — Webb Construction Group
               </p>
-              <div className="mt-2.5 pt-2.5 border-t border-gray-200 flex items-center justify-between">
-                <p className="text-xs text-gray-400">
+              <div className="mt-2.5 pt-2.5 border-t border-white/[0.06] flex items-center justify-between">
+                <p className="text-xs text-white/35">
                   + {fee.rateLabel} platform fee
                 </p>
-                <p className="text-xs font-medium text-gray-500 tabular-nums">
+                <p className="text-xs font-medium text-white/50 tabular-nums">
                   {formatCurrency(fee.feeAmount)}
                 </p>
               </div>
               <div className="flex items-center justify-between mt-1">
-                <p className="text-xs font-semibold text-gray-500">Total deducted from balance</p>
-                <p className="text-xs font-semibold text-gray-700 tabular-nums">
+                <p className="text-xs font-semibold text-white/50">Total deducted from balance</p>
+                <p className="text-xs font-semibold text-white/70 tabular-nums">
                   {formatCurrency(fee.totalDebit)}
                 </p>
               </div>
@@ -177,14 +177,14 @@ export function ReleaseFundsModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+                className="flex-1 rounded-xl border border-white/[0.12] bg-surface-3 px-4 py-2.5 text-sm font-medium text-white/60 hover:bg-white/[0.06] transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleProceedToConfirm}
-                className="flex-1 rounded-xl bg-gray-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-800 transition-colors"
+                className="flex-1 rounded-xl bg-vektrum-blue px-4 py-2.5 text-sm font-semibold text-white hover:bg-vektrum-blue-hover transition-colors"
               >
                 Continue →
               </button>
@@ -197,21 +197,21 @@ export function ReleaseFundsModal({
           <div className="p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-5">
-              <h2 id="release-modal-title" className="text-lg font-semibold text-gray-900">
+              <h2 id="release-modal-title" className="text-lg font-semibold text-white">
                 Confirm Release
               </h2>
               {/* No close button on confirm — must choose Back or Confirm */}
             </div>
 
             {/* Irreversibility warning — top of decision screen */}
-            <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3.5 mb-5">
+            <div className="rounded-xl bg-amber-500/[0.08] border border-amber-500/20 px-4 py-3.5 mb-5">
               <div className="flex items-start gap-2.5">
-                <AlertTriangle size={16} className="text-amber-600 flex-shrink-0 mt-0.5" />
+                <AlertTriangle size={16} className="text-amber-400 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm font-semibold text-amber-800">
+                  <p className="text-sm font-semibold text-amber-300">
                     This action is permanent and cannot be undone
                   </p>
-                  <p className="text-sm text-amber-700 mt-0.5 leading-relaxed">
+                  <p className="text-sm text-amber-400/80 mt-0.5 leading-relaxed">
                     Once confirmed, funds will be transferred immediately via Stripe Connect and
                     cannot be recalled.
                   </p>
@@ -220,50 +220,50 @@ export function ReleaseFundsModal({
             </div>
 
             {/* Transfer detail block */}
-            <div className="rounded-xl border border-gray-200 bg-gray-50 divide-y divide-gray-100 mb-5 overflow-hidden">
+            <div className="rounded-xl border border-white/[0.08] bg-surface-3 divide-y divide-white/[0.06] mb-5 overflow-hidden">
               <div className="px-4 py-3">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">
                   Milestone
                 </p>
-                <p className="text-sm font-medium text-gray-800 mt-0.5">{milestone.name}</p>
+                <p className="text-sm font-medium text-white/80 mt-0.5">{milestone.name}</p>
               </div>
               <div className="px-4 py-3">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">
                   Recipient
                 </p>
-                <p className="text-sm font-medium text-gray-800 mt-0.5">
+                <p className="text-sm font-medium text-white/80 mt-0.5">
                   Marcus Webb — Webb Construction Group
                 </p>
               </div>
               <div className="px-4 py-3 flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">
                   Contractor payout
                 </p>
-                <p className="text-sm font-semibold text-gray-800 tabular-nums">
+                <p className="text-sm font-semibold text-white/80 tabular-nums">
                   {formatCurrency(fee.grossAmount)}
                 </p>
               </div>
               <div className="px-4 py-3 flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">
                   Platform fee ({fee.rateLabel})
                 </p>
-                <p className="text-sm font-medium text-gray-500 tabular-nums">
+                <p className="text-sm font-medium text-white/50 tabular-nums">
                   + {formatCurrency(fee.feeAmount)}
                 </p>
               </div>
-              <div className="px-4 py-3 flex items-center justify-between bg-gray-100">
-                <p className="text-[11px] font-bold uppercase tracking-widest text-gray-600">
+              <div className="px-4 py-3 flex items-center justify-between bg-white/[0.04]">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-white/55">
                   Total deducted
                 </p>
-                <p className="text-base font-bold text-gray-900 tabular-nums">
+                <p className="text-base font-bold text-white tabular-nums">
                   {formatCurrency(fee.totalDebit)}
                 </p>
               </div>
               <div className="px-4 py-3">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">
                   Transfer method
                 </p>
-                <p className="text-sm font-medium text-gray-800 mt-0.5">
+                <p className="text-sm font-medium text-white/80 mt-0.5">
                   Stripe Connect — instant payout
                 </p>
               </div>
@@ -275,7 +275,7 @@ export function ReleaseFundsModal({
                 ref={cancelRef}
                 type="button"
                 onClick={() => setPhase('review')}
-                className="flex-1 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors flex items-center justify-center gap-1.5"
+                className="flex-1 rounded-xl border border-white/[0.12] bg-surface-3 px-4 py-2.5 text-sm font-medium text-white/60 hover:bg-white/[0.06] transition-colors flex items-center justify-center gap-1.5"
               >
                 <ArrowLeft size={13} />
                 Go Back
@@ -283,14 +283,14 @@ export function ReleaseFundsModal({
               <button
                 type="button"
                 onClick={handleRelease}
-                className="flex-1 rounded-xl bg-green-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-700 active:bg-green-800 transition-colors"
+                className="flex-1 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-500 active:bg-emerald-700 transition-colors"
               >
                 Release {formatCurrency(fee.grossAmount)}
               </button>
             </div>
 
             {/* Fine print below buttons */}
-            <p className="text-center text-[11px] text-gray-400 mt-3 leading-relaxed">
+            <p className="text-center text-[11px] text-white/30 mt-3 leading-relaxed">
               By confirming you authorize this transfer under the terms of the Vektrum Project Trust Agreement.
             </p>
           </div>
@@ -299,9 +299,9 @@ export function ReleaseFundsModal({
         {/* ── Phase: LOADING ────────────────────────────────────────── */}
         {phase === 'loading' && (
           <div className="p-6 text-center py-14">
-            <Loader2 size={36} className="text-green-500 mx-auto mb-4 animate-spin" />
-            <p className="text-base font-semibold text-gray-800">Processing transfer...</p>
-            <p className="text-sm text-gray-400 mt-1">
+            <Loader2 size={36} className="text-emerald-400 mx-auto mb-4 animate-spin" />
+            <p className="text-base font-semibold text-white">Processing transfer...</p>
+            <p className="text-sm text-white/40 mt-1">
               Initiating Stripe Connect payout to Marcus Webb
             </p>
           </div>
@@ -312,13 +312,13 @@ export function ReleaseFundsModal({
           <div className="p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-5">
-              <h2 id="release-modal-title" className="text-lg font-semibold text-gray-900">
+              <h2 id="release-modal-title" className="text-lg font-semibold text-white">
                 Transfer Complete
               </h2>
               <button
                 type="button"
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 transition-colors rounded-lg p-1"
+                className="text-white/35 hover:text-white/60 transition-colors rounded-lg p-1"
                 aria-label="Close"
               >
                 <X size={20} />
@@ -327,85 +327,85 @@ export function ReleaseFundsModal({
 
             {/* Success icon + amount */}
             <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-green-50 border-2 border-green-200 mb-3">
-                <CheckCircle2 size={28} className="text-green-500" />
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-500/[0.08] border-2 border-emerald-500/25 mb-3">
+                <CheckCircle2 size={28} className="text-emerald-400" />
               </div>
-              <p className="text-3xl font-bold text-gray-900 tabular-nums">
+              <p className="text-3xl font-bold text-white tabular-nums">
                 {formatCurrency(fee.grossAmount)}
               </p>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-white/50 mt-1">
                 sent to Marcus Webb
               </p>
             </div>
 
             {/* Receipt block */}
-            <div className="rounded-xl border border-gray-200 bg-gray-50 divide-y divide-gray-100 mb-5 overflow-hidden">
+            <div className="rounded-xl border border-white/[0.08] bg-surface-3 divide-y divide-white/[0.06] mb-5 overflow-hidden">
               <div className="px-4 py-3 flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">
                   Milestone
                 </p>
-                <p className="text-sm font-medium text-gray-800 text-right">{milestone.name}</p>
+                <p className="text-sm font-medium text-white/80 text-right">{milestone.name}</p>
               </div>
               <div className="px-4 py-3 flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">
                   Recipient
                 </p>
-                <p className="text-sm font-medium text-gray-800 text-right">
+                <p className="text-sm font-medium text-white/80 text-right">
                   Marcus Webb
                 </p>
               </div>
               <div className="px-4 py-3 flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">
                   Contractor payout
                 </p>
-                <p className="text-sm font-semibold text-gray-800 tabular-nums text-right">
+                <p className="text-sm font-semibold text-white/80 tabular-nums text-right">
                   {formatCurrency(fee.grossAmount)}
                 </p>
               </div>
               <div className="px-4 py-3 flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">
                   Platform fee ({fee.rateLabel})
                 </p>
-                <p className="text-sm font-medium text-gray-500 tabular-nums text-right">
+                <p className="text-sm font-medium text-white/50 tabular-nums text-right">
                   {formatCurrency(fee.feeAmount)}
                 </p>
               </div>
               <div className="px-4 py-3 flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">
                   Total charged
                 </p>
-                <p className="text-sm font-semibold text-gray-800 tabular-nums text-right">
+                <p className="text-sm font-semibold text-white/80 tabular-nums text-right">
                   {formatCurrency(fee.totalDebit)}
                 </p>
               </div>
               <div className="px-4 py-3 flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">
                   Timestamp
                 </p>
-                <p className="text-sm font-medium text-gray-800 text-right tabular-nums">
+                <p className="text-sm font-medium text-white/80 text-right tabular-nums">
                   {releaseTimestamp}
                 </p>
               </div>
               <div className="px-4 py-3 flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">
                   Reference ID
                 </p>
-                <p className="text-sm font-mono font-medium text-gray-800 tracking-wide">
+                <p className="text-sm font-mono font-medium text-white/80 tracking-wide">
                   {refId}
                 </p>
               </div>
               <div className="px-4 py-3 flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">
                   Transfer via
                 </p>
-                <p className="text-sm font-medium text-gray-800">Stripe Connect</p>
+                <p className="text-sm font-medium text-white/80">Stripe Connect</p>
               </div>
             </div>
 
             <button
               type="button"
               onClick={onClose}
-              className="w-full rounded-xl bg-gray-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-800 transition-colors"
+              className="w-full rounded-xl bg-vektrum-blue px-4 py-2.5 text-sm font-semibold text-white hover:bg-vektrum-blue-hover transition-colors"
             >
               Done
             </button>

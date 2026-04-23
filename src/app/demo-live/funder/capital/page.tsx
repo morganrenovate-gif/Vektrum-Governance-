@@ -193,7 +193,7 @@ export default function CapitalPage() {
       {/* Section 5: Portfolio Health */}
       <section className="mt-6">
         <h2 className="text-lg font-semibold text-white mb-3">Portfolio Health</h2>
-        <div className="border rounded-xl overflow-hidden">
+        <div className="border border-white/[0.08] rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-surface-3">
               <tr>
@@ -205,12 +205,12 @@ export default function CapitalPage() {
             </thead>
             <tbody>
               {[
-                { name: 'Riverside Mixed-Use Development', href: '/demo-live/deal/riverside?from=funder', risk: 'Low', riskColor: 'text-green-600', score: '89/100', status: 'On Schedule' },
-                { name: 'Harbor Logistics Center', href: '/demo-live/deal/harbor-dispute?from=funder', risk: 'Medium', riskColor: 'text-amber-600', score: '91/100', status: 'Dispute Active' },
-                { name: 'Westside Medical Office Campus', href: '/demo-live/deal/westside?from=funder', risk: 'Low', riskColor: 'text-green-600', score: '74/100', status: 'On Schedule' },
+                { name: 'Riverside Mixed-Use Development', href: '/demo-live/deal/riverside?from=funder', risk: 'Low', riskColor: 'text-emerald-400', score: '89/100', status: 'On Schedule' },
+                { name: 'Harbor Logistics Center', href: '/demo-live/deal/harbor-dispute?from=funder', risk: 'Medium', riskColor: 'text-amber-400', score: '91/100', status: 'Dispute Active' },
+                { name: 'Westside Medical Office Campus', href: '/demo-live/deal/westside?from=funder', risk: 'Low', riskColor: 'text-emerald-400', score: '74/100', status: 'On Schedule' },
               ].map(p => (
-                <tr key={p.name} className="border-t hover:bg-surface-3/50">
-                  <td className="px-4 py-3"><Link href={p.href} className="text-blue-600 hover:underline">{p.name}</Link></td>
+                <tr key={p.name} className="border-t border-white/[0.06] hover:bg-white/[0.03]">
+                  <td className="px-4 py-3"><Link href={p.href} className="text-vektrum-blue hover:underline">{p.name}</Link></td>
                   <td className={`px-4 py-3 font-medium ${p.riskColor}`}>{p.risk}</td>
                   <td className="px-4 py-3 text-white">{p.score}</td>
                   <td className="px-4 py-3 text-white/55">{p.status}</td>
@@ -218,7 +218,7 @@ export default function CapitalPage() {
               ))}
             </tbody>
           </table>
-          <div className="px-4 py-3 bg-green-50 border-t border-green-100 text-sm text-green-700 font-medium">
+          <div className="px-4 py-3 bg-emerald-500/[0.08] border-t border-emerald-500/20 text-sm text-emerald-400 font-medium">
             Overall portfolio health: Good — 2 of 3 projects on schedule · 1 dispute in resolution
           </div>
         </div>

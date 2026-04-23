@@ -162,11 +162,11 @@ export default function DemoFunderPage() {
                 <span className="inline-flex items-center rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400 flex-shrink-0">
                   Active
                 </span>
-                <span className="text-[12px] text-white/35 tabular-nums flex-shrink-0">{formatCurrency(deal.total)}</span>
+                <span className="text-[12px] text-white/50 tabular-nums flex-shrink-0">{formatCurrency(deal.total)}</span>
                 <div className="w-24 h-1.5 rounded-full bg-white/[0.08] flex-shrink-0 overflow-hidden">
                   <div className="h-full rounded-full bg-emerald-500" style={{ width: `${pct}%` }} />
                 </div>
-                <span className="text-[12px] text-white/35 tabular-nums w-20 text-right flex-shrink-0">{pct}% released</span>
+                <span className="text-[12px] text-white/50 tabular-nums w-20 text-right flex-shrink-0">{pct}% released</span>
               </Link>
             )
           })}
@@ -201,11 +201,11 @@ export default function DemoFunderPage() {
           >
             <div>
               <p className="font-semibold text-white">Harbor Logistics Center</p>
-              <p className="text-sm text-red-400/80 mt-0.5">HVAC Equipment Procurement — {formatCurrency(487_000)} · Dispute Active</p>
+              <p className="text-sm text-red-400 mt-0.5">HVAC Equipment Procurement — {formatCurrency(487_000)} · Dispute Active</p>
             </div>
             <Link
               href="/demo-live/deal/harbor-dispute?from=funder"
-              className="group inline-flex items-center gap-1.5 bg-red-500/80 text-white px-4 py-2 rounded-xl text-sm font-semibold ml-4 whitespace-nowrap hover:bg-red-500 transition-all hover:-translate-y-0.5"
+              className="group inline-flex items-center gap-1.5 bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-semibold ml-4 whitespace-nowrap hover:bg-red-500 transition-all hover:-translate-y-0.5"
             >
               View Dispute
               <ArrowRight size={12} className="transition-transform group-hover:translate-x-0.5" />
@@ -216,7 +216,7 @@ export default function DemoFunderPage() {
 
       {/* Funded Deals */}
       <section id="funded-deals">
-        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
+        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/55">
           Funded Deals
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -228,7 +228,7 @@ export default function DemoFunderPage() {
 
       {/* Featured Scenario */}
       <section>
-        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
+        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/55">
           Featured Scenario
         </h2>
         <Link
@@ -310,18 +310,18 @@ function DealCard({ deal }: { deal: typeof MOCK_DEALS[number] }) {
         <span className="inline-flex items-center rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">
           {deal.status}
         </span>
-        <span className="text-[11px] text-white/30">{deal.milestoneCount} milestones</span>
+        <span className="text-[11px] text-white/45">{deal.milestoneCount} milestones</span>
       </div>
       <p className="text-[14px] font-semibold text-white/80 group-hover:text-white transition-colors leading-snug">{deal.title}</p>
-      <p className="mt-1 text-[12px] text-white/35">{deal.contractor} &middot; {deal.contractorCompany}</p>
+      <p className="mt-1 text-[12px] text-white/50">{deal.contractor} &middot; {deal.contractorCompany}</p>
       <div className="mt-4 flex items-center gap-3">
         <div className="flex-1 h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
           <div className="h-full rounded-full bg-emerald-500" style={{ width: `${pct}%` }} />
         </div>
-        <span className="text-[11px] text-white/35 tabular-nums">{pct}%</span>
+        <span className="text-[11px] text-white/50 tabular-nums">{pct}%</span>
       </div>
       <div className="mt-3 flex items-center justify-between text-[12px]">
-        <span className="text-white/35">Total: {formatCurrency(deal.total)}</span>
+        <span className="text-white/50">Total: {formatCurrency(deal.total)}</span>
         <span className="text-emerald-400 font-medium">Released: {formatCurrency(deal.released)}</span>
       </div>
     </Link>

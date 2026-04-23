@@ -96,7 +96,7 @@ export default function DemoAdminPage() {
                 <p className="text-sm text-white/55 mt-0.5">Marcus Webb vs. Sarah Chen · Flagged 3 days ago</p>
               </div>
             </div>
-            <Link href="/demo-live/deal/harbor-dispute?from=admin" className="bg-vektrum-amber/20 border border-vektrum-amber/30 text-amber-400 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap hover:bg-vektrum-amber/30 transition-all">
+            <Link href="/demo-live/deal/harbor-dispute?from=admin" className="bg-amber-500/25 border border-amber-500/40 text-amber-300 px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap hover:bg-amber-500/35 hover:text-amber-200 transition-all">
               View Dispute →
             </Link>
           </div>
@@ -240,11 +240,11 @@ export default function DemoAdminPage() {
               { time: '20 days ago', actor: 'Sarah Chen',   role: 'funder',     action: 'Milestone Approved', entity: 'Harbor Logistics Center',         details: 'Building Envelope' },
             ].map((e, i) => (
               <div key={i} className="px-4 py-3 flex items-center gap-4">
-                <span className="text-white/35 w-24 shrink-0">{e.time}</span>
+                <span className="text-white/50 w-24 shrink-0">{e.time}</span>
                 <span className="font-medium text-white w-28 shrink-0">{e.actor}</span>
                 <span className="bg-vektrum-blue/10 text-vektrum-blue border border-vektrum-blue/20 px-2 py-0.5 rounded-full text-xs">{e.action}</span>
                 <span className="text-white/55 flex-1 truncate">{e.entity}</span>
-                <span className="text-white/35 text-xs">{e.details}</span>
+                <span className="text-white/50 text-xs">{e.details}</span>
               </div>
             ))}
           </div>
@@ -270,7 +270,7 @@ function AdminTile({
   const inner = (
     <div className={`rounded-2xl border bg-surface-2 shadow-card px-5 py-5 transition-all duration-300 hover:-translate-y-0.5 ${warning ? 'border-vektrum-amber/30' : 'border-white/[0.08] hover:border-white/[0.14]'} ${href ? 'cursor-pointer' : ''}`} >
       <div className="flex items-start justify-between gap-3 mb-3">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-white/25">{label}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">{label}</p>
         <div className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg ${warning ? 'bg-vektrum-amber/10' : 'bg-vektrum-blue/10'}`}>
           <Icon size={13} className={warning ? 'text-amber-400' : 'text-vektrum-blue'} aria-hidden="true" />
         </div>
