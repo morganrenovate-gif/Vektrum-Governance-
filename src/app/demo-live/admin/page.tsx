@@ -16,7 +16,7 @@ const MOCK_USERS = [
 
 export default function DemoAdminPage() {
   return (
-    <div className="min-h-screen bg-[#0D1B2A]">
+    <div className="min-h-screen bg-surface-0">
       <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-12 sm:py-16 space-y-8">
         {/* Back link */}
         <Link
@@ -48,7 +48,7 @@ export default function DemoAdminPage() {
           </div>
           <Link
             href="/demo-live/audit"
-            className="inline-flex items-center gap-2 rounded-lg border border-white/[0.08] bg-[#111827] px-4 py-2 text-[13px] font-medium text-white/55 hover:border-white/[0.14] transition-all"
+            className="inline-flex items-center gap-2 rounded-lg border border-white/[0.08] bg-surface-2 px-4 py-2 text-[13px] font-medium text-white/55 hover:border-white/[0.14] transition-all"
           >
             Full Audit Log
           </Link>
@@ -84,7 +84,7 @@ export default function DemoAdminPage() {
           <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
             Open Disputes
           </h2>
-          <div className="rounded-2xl border border-white/[0.08] bg-[#111827] p-4 flex items-start justify-between gap-4" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}>
+          <div className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card p-4 flex items-start justify-between gap-4" >
             <div className="flex items-start gap-3">
               <AlertTriangle size={18} className="text-vektrum-amber mt-0.5 shrink-0" />
               <div>
@@ -102,7 +102,7 @@ export default function DemoAdminPage() {
         {/* All Deals */}
         <section id="all-deals" className="mt-6">
           <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40 mb-4">All Deals</h2>
-          <div className="rounded-2xl border border-white/[0.08] bg-[#111827] overflow-hidden" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}>
+          <div className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden" >
             <table className="w-full text-sm">
               <thead className="bg-white/[0.04]">
                 <tr>
@@ -139,7 +139,7 @@ export default function DemoAdminPage() {
           <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
             User Management
           </h2>
-          <div className="rounded-2xl border border-white/[0.08] bg-[#111827] overflow-hidden" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}>
+          <div className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden" >
             <div className="overflow-x-auto">
               <table className="w-full min-w-[480px] text-sm">
                 <thead>
@@ -222,7 +222,7 @@ export default function DemoAdminPage() {
             <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">Recent Audit Activity</h2>
             <Link href="/demo-live/audit" className="text-sm text-vektrum-blue hover:underline">View full audit log →</Link>
           </div>
-          <div className="rounded-2xl border border-white/[0.08] bg-[#111827] divide-y divide-white/[0.06] text-sm overflow-hidden" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}>
+          <div className="rounded-2xl border border-white/[0.08] bg-surface-2 divide-y divide-white/[0.06] text-sm overflow-hidden" >
             {[
               { time: '3 days ago', actor: 'System', role: 'system', action: 'Dispute Opened', entity: 'Harbor Logistics Center', details: 'HVAC $487K' },
               { time: '14 days ago', actor: 'Sarah Chen', role: 'funder', action: 'Funds Released', entity: 'Harbor Logistics Center', details: '$2,640,000' },
@@ -259,7 +259,7 @@ function AdminTile({
   href?: string
 }) {
   const inner = (
-    <div className={`rounded-2xl border bg-[#111827] px-5 py-5 transition-all duration-300 hover:-translate-y-0.5 ${warning ? 'border-vektrum-amber/30' : 'border-white/[0.08] hover:border-white/[0.14]'} ${href ? 'cursor-pointer' : ''}`} style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}>
+    <div className={`rounded-2xl border bg-surface-2 shadow-card px-5 py-5 transition-all duration-300 hover:-translate-y-0.5 ${warning ? 'border-vektrum-amber/30' : 'border-white/[0.08] hover:border-white/[0.14]'} ${href ? 'cursor-pointer' : ''}`} >
       <div className="flex items-start justify-between gap-3 mb-3">
         <p className="text-[10px] font-semibold uppercase tracking-widest text-white/25">{label}</p>
         <div className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg ${warning ? 'bg-vektrum-amber/10' : 'bg-vektrum-blue/10'}`}>

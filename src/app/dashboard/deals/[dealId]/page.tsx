@@ -12,7 +12,8 @@ import { AddMilestoneForm } from "./add-milestone-form";
 import { FundDealButton } from "./fund-deal-button";
 import type { Deal, Profile, Milestone, ReleaseGateResult } from "@/lib/types";
 import { formatMoney } from "@/lib/utils";
-import { ArrowLeft, Info } from "lucide-react";
+import { ArrowLeft, Info, FolderOpen } from "lucide-react";
+import { SectionHeader, EmptyState } from "@/components/layout";
 
 // ─── Release gate computation (server-side) ───────────────────────────────────
 
@@ -139,11 +140,11 @@ export default async function DealDetailPage({
     !typedDeal.funder_id;
 
   return (
-    <div className="min-h-screen bg-[#0D1B2A]">
-    <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-10 space-y-8">
+    <div className="min-h-screen bg-surface-0">
+    <div className="dash-page">
       {/* Breadcrumb */}
       <nav aria-label="Breadcrumb">
-        <ol className="flex items-center gap-1.5 text-sm text-white/30">
+        <ol className="flex items-center gap-1.5 text-sm text-white/50">
           <li>
             <Link
               href="/dashboard"
@@ -164,7 +165,7 @@ export default async function DealDetailPage({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1.5">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="font-display text-[1.875rem] font-bold tracking-[-0.03em] text-white">{typedDeal.title}</h1>
+            <h1 className="font-display text-[2rem] sm:text-[2.25rem] font-bold tracking-[-0.03em] text-white leading-[1.1]">{typedDeal.title}</h1>
             <DealStatusBadge status={typedDeal.status} />
           </div>
           {typedDeal.description && (
@@ -237,20 +238,17 @@ export default async function DealDetailPage({
 
       {/* ── Milestones ── */}
       <section>
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
-            Milestones ({milestones.length})
-          </h2>
-        </div>
+        <SectionHeader label="Milestones" count={milestones.length > 0 ? milestones.length : undefined} />
 
         {milestones.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-white/[0.08] bg-[#111827] px-8 py-12 text-center">
-            <p className="text-sm text-white/35">
-              {isDraftContractor
-                ? "No milestones yet. Add the first one below."
-                : "No milestones have been added to this deal."}
-            </p>
-          </div>
+          <EmptyState
+            icon={FolderOpen}
+            title="No milestones yet"
+            description={isDraftContractor
+              ? "Add the first milestone below to begin structuring this deal."
+              : "No milestones have been added to this deal."}
+            variant="dashed"
+          />
         ) : (
           <div className="space-y-3">
             {milestones.map((milestone) => {
@@ -304,9 +302,7 @@ export default async function DealDetailPage({
       {/* ── Add milestone (contractor, draft deals) ── */}
       {isDraftContractor && (
         <section>
-          <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
-            Add Milestone
-          </h2>
+          <SectionHeader label="Add Milestone" />
           <Card>
             <CardHeader border>
               <CardTitle>New Milestone</CardTitle>

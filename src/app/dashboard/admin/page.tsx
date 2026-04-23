@@ -20,6 +20,7 @@ import {
 import { DisputeQueue } from '@/components/admin/dispute-queue'
 import { UserTable } from '@/components/admin/user-table'
 import { InviteAdminForm } from '@/components/admin/invite-admin-form'
+import { PageHeader, SectionHeader } from '@/components/layout'
 
 export const metadata = {
   title: 'Admin Dashboard — Vektrum',
@@ -148,8 +149,7 @@ function AdminStatTile({
 }) {
   return (
     <div
-      className={`rounded-2xl border bg-[#111827] px-5 py-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/[0.14] ${warning ? 'border-vektrum-amber/30' : 'border-white/[0.08]'}`}
-      style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+      className={`rounded-2xl border bg-surface-2 shadow-card px-5 py-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-card-hover hover:border-white/[0.14] ${warning ? 'border-vektrum-amber/30' : 'border-white/[0.08]'}`}
     >
       <div className="flex items-start justify-between gap-3 mb-3">
         <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">{label}</p>
@@ -196,41 +196,27 @@ export default async function AdminDashboardPage() {
   const openDisputes   = disputes.filter(d => d.status === 'open')
 
   return (
-    <div className="min-h-screen bg-[#0D1B2A]">
-
-      {/* Ambient glow */}
-      <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-gradient-to-b from-vektrum-blue/10 to-transparent rounded-full blur-3xl" />
-
-    <div className="relative max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-12 sm:py-16 space-y-8">
+    <div className="min-h-screen bg-surface-0">
+    <div className="dash-page">
 
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <div className="mb-3 flex items-center gap-3">
-            <div className="h-px w-5 bg-vektrum-blue" />
-            <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">Admin Dashboard</p>
-          </div>
-          <h1 className="font-display text-[2.25rem] font-bold tracking-[-0.04em] text-white leading-[1.05]">
-            Platform Overview
-          </h1>
-          <p className="mt-2 text-[15px] text-white/55">
-            Read-only. All financial actions require the 7-condition release gate.
-          </p>
-        </div>
-        <Link
-          href="/dashboard/audit"
-          className="inline-flex items-center gap-2 rounded-xl border border-white/[0.1] bg-white/[0.05] px-4 py-2.5 text-[13px] font-medium text-white/60 hover:bg-white/[0.08] hover:text-white transition-all self-start"
-        >
-          <FileText size={14} aria-hidden="true" />
-          Full Audit Log
-        </Link>
-      </div>
+      <PageHeader
+        eyebrow="Admin Dashboard"
+        title="Platform Overview"
+        description="Read-only. All financial actions require the 7-condition release gate."
+        action={
+          <Link
+            href="/dashboard/audit"
+            className="inline-flex items-center gap-2 rounded-xl border border-white/[0.1] bg-white/[0.05] px-4 py-2.5 text-[13px] font-medium text-white/60 hover:bg-white/[0.08] hover:text-white transition-all self-start"
+          >
+            <FileText size={14} aria-hidden="true" />
+            Full Audit Log
+          </Link>
+        }
+      />
 
       {/* Admin access info */}
-      <div
-        className="rounded-2xl border border-white/[0.08] bg-[#111827] p-5 text-sm text-white/55"
-        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
-      >
+      <div className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card p-5 text-sm text-white/55">
         <p className="font-semibold text-white mb-1.5">Admin Access</p>
         <p>You can manage users, invite new admins, review audit logs, and monitor platform health.
         <strong className="text-white/80"> Financial actions (fund releases, payment processing) are governed by the 7-condition milestone gate</strong>
@@ -259,9 +245,7 @@ export default async function AdminDashboardPage() {
 
       {/* ── Section 1: Platform Overview ──────────────────────────────────── */}
       <section>
-        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
-          Platform Overview
-        </h2>
+        <SectionHeader label="Platform Overview" />
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           <AdminStatTile
             label="Contractors"
@@ -302,42 +286,29 @@ export default async function AdminDashboardPage() {
 
       {/* ── Section: Invite New Admin ────────────────────────────────────── */}
       <section>
-        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
-          Admin Management
-        </h2>
+        <SectionHeader label="Admin Management" />
         <InviteAdminForm />
       </section>
 
       {/* ── Section 2: Dispute Queue ──────────────────────────────────────── */}
       <section>
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
-              Open Disputes
-            </h2>
-            {openDisputes.length > 0 && (
-              <p className="text-[11px] text-vektrum-amber mt-0.5">
-                {openDisputes.length} dispute{openDisputes.length !== 1 ? 's' : ''} require attention
-              </p>
-            )}
-          </div>
-        </div>
+        <SectionHeader
+          label="Open Disputes"
+          count={openDisputes.length > 0 ? openDisputes.length : undefined}
+          variant={openDisputes.length > 0 ? 'warning' : 'default'}
+        />
         <DisputeQueue disputes={disputes} />
       </section>
 
       {/* ── Section 3: User Management ───────────────────────────────────── */}
       <section>
-        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
-          User Management
-        </h2>
+        <SectionHeader label="User Management" count={profiles.length} />
         <UserTable profiles={profiles} deals={deals} emailMap={emailMap} />
       </section>
 
       {/* ── Section 4: Platform Health ───────────────────────────────────── */}
       <section>
-        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
-          Platform Health
-        </h2>
+        <SectionHeader label="Platform Health" />
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <AdminStatTile
             label="Release Gate Status"
@@ -387,16 +358,11 @@ export default async function AdminDashboardPage() {
 
       {/* ── Section 5: Recent Audit Activity ─────────────────────────────── */}
       <section>
-        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
-          Recent Audit Activity
-        </h2>
+        <SectionHeader label="Recent Audit Activity" />
         {recentAudit.length === 0 ? (
           <p className="text-sm text-white/35">No audit activity yet</p>
         ) : (
-          <div
-            className="rounded-2xl border border-white/[0.08] bg-[#111827] overflow-hidden"
-            style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
-          >
+          <div className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden">
             <ul className="divide-y divide-white/[0.05]">
               {recentAudit.map((entry) => {
                 const actionColor = entry.action?.includes('release') || entry.action?.includes('released')

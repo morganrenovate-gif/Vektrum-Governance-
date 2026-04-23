@@ -106,27 +106,27 @@ export function MilestoneCard({
 
   if (isReleased) {
     return (
-      <details className={cn("rounded-lg border border-vektrum-border bg-vektrum-surface overflow-hidden border-l-[3px]", borderColor, shadowClass)}>
-        <summary className="flex cursor-pointer list-none items-center justify-between px-5 py-3 hover:bg-vektrum-surface-alt transition-colors">
+      <details className={cn("rounded-lg border border-white/[0.08] bg-surface-2 overflow-hidden border-l-[3px]", borderColor, shadowClass)}>
+        <summary className="flex cursor-pointer list-none items-center justify-between px-5 py-3 hover:bg-surface-3 transition-colors">
           <div className="flex items-center gap-2 min-w-0">
             <CheckCircle2 size={14} className="text-vektrum-green flex-shrink-0" aria-hidden="true" />
-            <span className="text-sm font-semibold text-vektrum-text truncate">{milestone.title}</span>
+            <span className="text-sm font-semibold text-white truncate">{milestone.title}</span>
             <MilestoneStatusBadge status={milestone.status} />
           </div>
           <div className="flex items-center gap-3 flex-shrink-0 ml-3">
-            <span className="text-sm font-bold tabular-nums text-vektrum-text">{formatMoney(milestone.amount)}</span>
-            <ChevronDown size={14} className="text-vektrum-faint" aria-hidden="true" />
+            <span className="text-sm font-bold tabular-nums text-white">{formatMoney(milestone.amount)}</span>
+            <ChevronDown size={14} className="text-white/30" aria-hidden="true" />
           </div>
         </summary>
-        <div className="border-t border-vektrum-border-subtle px-5 py-4">
+        <div className="border-t border-white/[0.06] px-5 py-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0 flex-1 space-y-1.5">
               <div className="flex flex-wrap items-center gap-2">
                 <CheckCircle2 size={15} className="text-vektrum-green flex-shrink-0" aria-hidden="true" />
-                <h4 className="text-sm font-semibold text-vektrum-text">{milestone.title}</h4>
+                <h4 className="text-sm font-semibold text-white">{milestone.title}</h4>
               </div>
               {milestone.description && (
-                <p className="text-sm text-vektrum-muted">{milestone.description}</p>
+                <p className="text-sm text-white/55">{milestone.description}</p>
               )}
               <div className="flex flex-wrap items-center gap-2">
                 <MilestoneStatusBadge status={milestone.status} />
@@ -135,8 +135,8 @@ export function MilestoneCard({
             </div>
             <div className="flex flex-col items-start gap-3 sm:items-end">
               <div className="text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">Amount</p>
-                <p className="text-xl font-bold tabular-nums text-vektrum-text">{formatMoney(milestone.amount)}</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">Amount</p>
+                <p className="text-xl font-bold tabular-nums text-white">{formatMoney(milestone.amount)}</p>
               </div>
             </div>
           </div>
@@ -160,7 +160,7 @@ export function MilestoneCard({
   return (
     <div
       className={cn(
-        "rounded-lg border border-vektrum-border bg-vektrum-surface overflow-hidden",
+        "rounded-lg border border-white/[0.08] bg-surface-2 overflow-hidden",
         "border-l-[3px]",
         borderColor,
         shadowClass,
@@ -172,13 +172,13 @@ export function MilestoneCard({
           {/* Left: info */}
           <div className="min-w-0 flex-1 space-y-1.5">
             <div className="flex flex-wrap items-center gap-2">
-              <h4 className="text-sm font-semibold text-vektrum-text">
+              <h4 className="text-sm font-semibold text-white">
                 {milestone.title}
               </h4>
             </div>
 
             {milestone.description && (
-              <p className="text-sm text-vektrum-muted">{milestone.description}</p>
+              <p className="text-sm text-white/55">{milestone.description}</p>
             )}
 
             <div className="flex flex-wrap items-center gap-2">
@@ -190,10 +190,10 @@ export function MilestoneCard({
           {/* Right: amount + actions */}
           <div className="flex flex-col items-start gap-3 sm:items-end">
             <div className="text-right">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">
                 Amount
               </p>
-              <p className="text-xl font-bold tabular-nums text-vektrum-text">
+              <p className="text-xl font-bold tabular-nums text-white">
                 {formatMoney(milestone.amount)}
               </p>
             </div>

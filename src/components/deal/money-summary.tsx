@@ -30,7 +30,7 @@ export function MoneySummary({
       {/* Progress bar — h-4 per Tier 2 spec, featured size */}
       <div className="space-y-2">
         <div
-          className="relative h-4 w-full overflow-hidden rounded-full bg-vektrum-surface-alt shadow-inner"
+          className="relative h-4 w-full overflow-hidden rounded-full bg-white/[0.07] shadow-inner"
           role="progressbar"
           aria-label="Payment progress"
           aria-valuenow={releasedPct}
@@ -48,7 +48,7 @@ export function MoneySummary({
             style={{ width: `${Math.min(100, releasedPct)}%` }}
           />
         </div>
-        <div className="flex justify-between text-xs text-vektrum-muted">
+        <div className="flex justify-between text-xs text-white/40">
           <span className="tabular-nums">
             {releasedPct.toFixed(0)}% released
           </span>

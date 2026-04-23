@@ -102,6 +102,59 @@
     @apply py-8 sm:py-12;
   }
 
+  /* ── Dashboard shell standard ────────────────────────────────────────────── */
+  /* Replaces the repeated min-h-screen + max-w-6xl copy-paste pattern.        */
+  /* Use .dash-page on the inner content div inside any DashboardShell.        */
+  .dash-page {
+    @apply max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-10 sm:py-14 space-y-8;
+  }
+
+  /* ── Dark card — use instead of inline style={{ boxShadow }} ──────────────── */
+  .card-dark {
+    @apply rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card;
+  }
+  .card-dark-hover {
+    @apply rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card
+           transition-all duration-200 hover:-translate-y-0.5 hover:border-white/[0.14] hover:shadow-card-hover;
+  }
+  .card-feature {
+    @apply rounded-2xl border border-white/[0.08] bg-surface-2 shadow-feature;
+  }
+
+  /* ── Section eyebrow — the horizontal-rule + label pattern ──────────────── */
+  .eyebrow {
+    @apply flex items-center gap-3;
+  }
+  .eyebrow-line {
+    @apply h-px w-5 bg-vektrum-blue flex-shrink-0;
+  }
+  .eyebrow-label {
+    @apply text-[11px] font-semibold uppercase tracking-[0.12em] text-vektrum-blue;
+  }
+
+  /* ── Section header label (for within-page sections) ────────────────────── */
+  .section-label {
+    @apply text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40;
+  }
+
+  /* ── Table standard — applies inside DataTable containers ───────────────── */
+  .data-table th {
+    @apply px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-white/35;
+  }
+  .data-table th.col-right,
+  .data-table td.col-right {
+    @apply text-right;
+  }
+  .data-table td {
+    @apply px-4 py-3.5 text-sm text-white/70;
+  }
+  .data-table tbody tr {
+    @apply border-b border-white/[0.04] transition-colors hover:bg-surface-4;
+  }
+  .data-table tbody tr:last-child {
+    @apply border-b-0;
+  }
+
   /* ── Status badges ──────────────────────────────────────────────────────── */
   /* Milestone workflow status */
   .status-not-started    { background-color: var(--surface-alt); color: var(--muted); }

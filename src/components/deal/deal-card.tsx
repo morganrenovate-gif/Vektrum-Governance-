@@ -62,19 +62,19 @@ export function DealCard({ deal, className, viewerRole }: DealCardProps) {
       href={`/dashboard/deals/${deal.id}`}
       className={cn("block group focus:outline-none", className)}
     >
-      <Card className="transition-shadow duration-150 group-hover:shadow-md group-focus-visible:ring-2 group-focus-visible:ring-vektrum-blue group-focus-visible:ring-offset-2">
+      <Card className="transition-all duration-200 group-hover:shadow-card-hover group-hover:-translate-y-0.5 group-focus-visible:ring-2 group-focus-visible:ring-vektrum-blue group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-surface-0">
         <CardBody>
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="truncate text-sm font-semibold text-vektrum-text group-hover:text-vektrum-blue transition-colors">
+                <h3 className="truncate text-sm font-semibold text-white group-hover:text-vektrum-blue transition-colors">
                   {deal.title}
                 </h3>
                 <DealStatusBadge status={deal.status} />
               </div>
 
               {/* Participants */}
-              <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-vektrum-muted">
+              <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-white/45">
                 {deal.contractor && (
                   <span className="flex items-center gap-1">
                     <Building2 size={11} aria-hidden="true" />
@@ -92,7 +92,7 @@ export function DealCard({ deal, className, viewerRole }: DealCardProps) {
 
             <ChevronRight
               size={16}
-              className="mt-0.5 flex-shrink-0 text-vektrum-faint group-hover:text-vektrum-blue transition-colors"
+              className="mt-0.5 flex-shrink-0 text-white/25 group-hover:text-vektrum-blue transition-colors"
               aria-hidden="true"
             />
           </div>
@@ -100,15 +100,15 @@ export function DealCard({ deal, className, viewerRole }: DealCardProps) {
           {/* Money summary row */}
           <div className="mt-3 grid grid-cols-3 gap-3 text-center">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30">
                 Total
               </p>
-              <p className="mt-0.5 text-sm font-semibold tabular-nums text-vektrum-text">
+              <p className="mt-0.5 text-sm font-semibold tabular-nums text-white/80">
                 {formatMoney(deal.total_amount)}
               </p>
             </div>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30">
                 Funded
               </p>
               <p className="mt-0.5 text-sm font-semibold tabular-nums text-vektrum-blue">
@@ -116,10 +116,10 @@ export function DealCard({ deal, className, viewerRole }: DealCardProps) {
               </p>
             </div>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30">
                 Released
               </p>
-              <p className="mt-0.5 text-sm font-semibold tabular-nums text-vektrum-green">
+              <p className="mt-0.5 text-sm font-semibold tabular-nums text-emerald-400">
                 {formatMoney(deal.released_amount)}
               </p>
             </div>
@@ -127,13 +127,13 @@ export function DealCard({ deal, className, viewerRole }: DealCardProps) {
 
           {/* Mini progress bar */}
           <div className="mt-3">
-            <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-vektrum-surface-alt">
+            <div className="relative h-1 w-full overflow-hidden rounded-full bg-white/[0.07]">
               <div
-                className="absolute left-0 top-0 h-full rounded-full bg-vektrum-green"
+                className="absolute left-0 top-0 h-full rounded-full bg-emerald-500/70"
                 style={{ width: `${Math.min(100, releasedPct)}%` }}
               />
             </div>
-            <p className="mt-1 text-right text-[10px] text-vektrum-faint">
+            <p className="mt-1 text-right text-[10px] text-white/25">
               {formatMoney(remaining)} remaining
             </p>
           </div>
@@ -141,7 +141,7 @@ export function DealCard({ deal, className, viewerRole }: DealCardProps) {
 
         <CardFooter>
           <div className="flex items-center justify-between w-full gap-2">
-            <p className="text-xs text-vektrum-muted">
+            <p className="text-xs text-white/35">
               {deal.milestones && deal.milestones.length > 0 ? (
                 <>
                   {deal.milestones.length} milestone
@@ -160,10 +160,10 @@ export function DealCard({ deal, className, viewerRole }: DealCardProps) {
               if (action.variant === 'status') {
                 return (
                   <span className={cn(
-                    "text-[11px] font-semibold px-2.5 py-1 rounded-full",
+                    "text-[11px] font-medium px-2.5 py-1 rounded-full border",
                     action.label === 'Project Complete'
-                      ? "bg-green-50 text-green-700 border border-green-200"
-                      : "bg-amber-50 text-amber-700 border border-amber-200"
+                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                      : "bg-amber-500/10 text-amber-400 border-amber-500/20"
                   )}>
                     {action.label}
                   </span>
@@ -171,10 +171,10 @@ export function DealCard({ deal, className, viewerRole }: DealCardProps) {
               }
               return (
                 <span className={cn(
-                  "text-[11px] font-semibold px-2.5 py-1 rounded-full",
+                  "text-[11px] font-medium px-2.5 py-1 rounded-full border",
                   action.variant === 'danger'
-                    ? "bg-red-50 text-red-700 border border-red-200"
-                    : "bg-blue-50 text-blue-700 border border-blue-200"
+                    ? "bg-red-500/10 text-red-400 border-red-500/20"
+                    : "bg-vektrum-blue/10 text-vektrum-blue border-vektrum-blue/20"
                 )}>
                   {action.label} →
                 </span>

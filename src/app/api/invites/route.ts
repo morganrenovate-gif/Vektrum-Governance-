@@ -13,18 +13,44 @@ import {
 
 export const dynamic = 'force-dynamic'
 
+// ─── URL builder ──────────────────────────────────────────────────────────────
+// Always derives the base URL from env vars — never from the request origin,
+// which is unstable (localhost in dev, internal Vercel proxy URL in prod).
+//
+// Required env: NEXT_PUBLIC_APP_URL  (e.g. https://app.vektrum.io)
+//   Fallback:   APP_URL              (server-only equivalent)
+//
+// Generated URL format: ${appUrl}/invite/${token}
+// The invite page route is /invite/[token] — the path segment IS the token UUID.
+// No slug, no query string.
+
+function buildInviteUrl(token: string): string {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL
+
+  if (!appUrl) {
+    throw new Error(
+      '[buildInviteUrl] Neither NEXT_PUBLIC_APP_URL nor APP_URL is set. ' +
+      'Set one of these environment variables to the canonical app URL (e.g. https://app.vektrum.io).',
+    )
+  }
+
+  // Strip trailing slash so we never produce double-slashes
+  return `${appUrl.replace(/\/$/, '')}/invite/${token}`
+}
+
 // ─── POST /api/invites ────────────────────────────────────────────────────────
-// Generate a secure funder invite link for a deal.
+// Generate a secure, single-use funder invite link for a deal.
 //
 // Security model:
 //   - Caller must be authenticated as a contractor
-//   - Caller must be the contractor on the specified deal
-//   - Only one PENDING invite is allowed per deal (unique partial index in DB)
+//   - Caller must own the specified deal
+//   - Only one PENDING invite per deal — any existing pending invite is expired
+//     before the new one is created (guarantees fresh token each time)
 //   - Token is generated server-side by the DB (gen_random_uuid()) — never client-supplied
 //   - Token is single-use and expires in 7 days
 //
 // Body: { deal_id, invited_email? }
-// Returns: { invite_url, invite: { id, token, deal_id, expires_at, status } }
+// Returns: { invite_url, email_sent, invite: { id, token, deal_id, expires_at, ... } }
 
 export async function POST(request: NextRequest) {
   // ── Auth ───────────────────────────────────────────────────────────────────
@@ -76,10 +102,6 @@ export async function POST(request: NextRequest) {
   const dealId = body.deal_id!.trim()
   const invitedEmail = body.invited_email?.trim() || null
 
-  // ── Use admin client — bypasses RLS for the deal ownership check + insert ──
-  // We need to verify the contractor owns this deal, then insert an invite.
-  // The invite insert RLS requires invited_by = auth.uid(), but since we're
-  // using the admin client we enforce the ownership check ourselves here.
   const admin = createSupabaseAdminClient()
 
   // ── Verify deal exists and caller is the contractor ────────────────────────
@@ -115,44 +137,38 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  // ── Check for existing pending invite ─────────────────────────────────────
-  // The DB has a partial unique index (status = 'pending') but we surface a
-  // human-readable conflict here before hitting the constraint.
+  // ── Invalidate any existing pending invite ─────────────────────────────────
+  // We expire the old invite before creating a new one so there is never more
+  // than one valid link in circulation. This ensures a regenerated invite
+  // always produces a fresh, unguessable token — the old link stops working
+  // immediately.
   const { data: existingInvite } = await admin
     .from('deal_invites')
-    .select('id, token, expires_at, status')
+    .select('id')
     .eq('deal_id', dealId)
     .eq('status', 'pending')
     .single()
 
- if (existingInvite) {
-  await admin
-    .from('deal_invites')
-    .update({ status: 'expired' })
-    .eq('id', existingInvite.id)
-}
+  if (existingInvite) {
+    await admin
+      .from('deal_invites')
+      .update({ status: 'expired' })
+      .eq('id', existingInvite.id)
+  }
 
   // ── Create invite ──────────────────────────────────────────────────────────
-  const baseName = "funder-invite";
-
-const slug = baseName
-  .toLowerCase()
-  .trim()
-  .replace(/\s+/g, "-")
-  .replace(/[^a-z0-9-]/g, "");
-
-const { data: invite, error: insertError } = await admin
-  .from("deal_invites")
-  .insert({
-    deal_id: dealId,
-    invited_by: user.id,
-    invited_email: invitedEmail,
-    slug,
-    status: "pending",
-    // token and expires_at use DB defaults
-  })
-  .select("id, token, slug, deal_id, invited_email, status, expires_at, created_at")
-  .single();
+  // token and expires_at are set by DB defaults (gen_random_uuid(), now()+7d).
+  // We never supply a token from the application layer.
+  const { data: invite, error: insertError } = await admin
+    .from('deal_invites')
+    .insert({
+      deal_id: dealId,
+      invited_by: user.id,
+      invited_email: invitedEmail,
+      status: 'pending',
+    })
+    .select('id, token, deal_id, invited_email, status, expires_at, created_at')
+    .single()
 
   if (insertError || !invite) {
     return internalError(
@@ -161,6 +177,19 @@ const { data: invite, error: insertError } = await admin
     )
   }
 
+  // ── Build the invite URL ───────────────────────────────────────────────────
+  let inviteUrl: string
+  try {
+    inviteUrl = buildInviteUrl(invite.token)
+  } catch (err) {
+    console.error('[invites] URL build failed:', err)
+    return internalError(
+      'Invite was created but the invite URL could not be generated. ' +
+      'Contact support — NEXT_PUBLIC_APP_URL may not be configured.',
+    )
+  }
+
+  // ── Audit log ──────────────────────────────────────────────────────────────
   await logAudit({
     entity_type: 'deal',
     entity_id: dealId,
@@ -174,44 +203,40 @@ const { data: invite, error: insertError } = await admin
     },
   })
 
-  function buildInviteUrl(_request: NextRequest, token: string, slug: string) {
-  const appUrl =
-    process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL
-
-  if (!appUrl) {
-    throw new Error('Missing NEXT_PUBLIC_APP_URL or APP_URL')
-  }
-
-  return `${appUrl}/invite/${token}`
-}
-
-  // ── Send invite email (non-blocking — invite exists regardless of email outcome) ──
-  const inviteUrl = buildInviteUrl(request, invite.token, invite.slug)
+  // ── Send invite email (non-blocking) ──────────────────────────────────────
+  // The invite record already exists regardless of email outcome. If email
+  // fails, the contractor can copy-paste the link from the response.
   let emailSent = false
+
   if (invitedEmail) {
     try {
-      console.log('HAS RESEND KEY:', !!process.env.RESEND_API_KEY)
       const resend = new Resend(process.env.RESEND_API_KEY)
-      console.log('RAW EMAIL_FROM:', process.env.EMAIL_FROM)
       const from = process.env.EMAIL_FROM ?? 'Vektrum <invites@vektrum.io>'
-      console.log('SENDING FROM:', from)
+
       const expiryDate = new Date(invite.expires_at).toLocaleDateString('en-US', {
-        month: 'long', day: 'numeric', year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
       })
+
       const { error: emailError } = await resend.emails.send({
         from,
         to: invitedEmail,
         subject: `You've been invited to fund "${deal.title}" on Vektrum`,
         html: `
           <p>Hi,</p>
-          <p>You've been invited to join <strong>${deal.title}</strong> as a funder on Vektrum.</p>
-          <p>Click the link below to accept your invitation and get started:</p>
-          <p><a href="${inviteUrl}" style="color:#1A3A96;font-weight:bold">${inviteUrl}</a></p>
-          <p style="color:#9AA3B5;font-size:13px">This link expires on ${expiryDate}. It is single-use — once accepted, it cannot be reused.</p>
-          <p style="color:#9AA3B5;font-size:13px">If you were not expecting this invitation, you can safely ignore this email.</p>
-          <p>— The Vektrum Team</p>
+          <p>You've been invited to join <strong>${deal.title}</strong> as a funder on Vektrum — a construction payment governance platform.</p>
+          <p>Click the link below to review the deal and accept your invitation:</p>
+          <p style="margin:20px 0">
+            <a href="${inviteUrl}" style="color:#1A3A96;font-weight:bold;font-size:16px">${inviteUrl}</a>
+          </p>
+          <p style="color:#6B7280;font-size:13px">This link expires on <strong>${expiryDate}</strong>. It is single-use — once accepted, it cannot be reused.</p>
+          <p style="color:#6B7280;font-size:13px">If you were not expecting this invitation, you can safely ignore this email.</p>
+          <hr style="border:none;border-top:1px solid #E5E7EB;margin:20px 0" />
+          <p style="color:#9CA3AF;font-size:12px">Vektrum · Construction payment governance · Powered by Stripe Connect</p>
         `,
       })
+
       if (emailError) {
         console.error('[invites] email send failed:', emailError)
       } else {
@@ -241,7 +266,8 @@ const { data: invite, error: insertError } = await admin
 }
 
 // ─── GET /api/invites?deal_id=xxx ─────────────────────────────────────────────
-// Fetch the current invite status for a deal (contractor only).
+// Returns invite history for a deal (contractor or admin only).
+// Active invites include the current invite_url.
 
 export async function GET(request: NextRequest) {
   let authContext
@@ -266,7 +292,7 @@ export async function GET(request: NextRequest) {
 
   const admin = createSupabaseAdminClient()
 
-  // Verify contractor owns this deal (or is admin)
+  // Verify contractor owns this deal (admin bypasses)
   if (profile.role !== 'admin') {
     const { data: deal } = await admin
       .from('deals')
@@ -275,10 +301,7 @@ export async function GET(request: NextRequest) {
       .single()
 
     if (!deal || deal.contractor_id !== user.id) {
-      return errorResponse(
-        403,
-        'You are not the contractor on this deal.',
-      )
+      return errorResponse(403, 'You are not the contractor on this deal.')
     }
   }
 
@@ -292,26 +315,19 @@ export async function GET(request: NextRequest) {
     return internalError('Failed to retrieve invites.', error.message)
   }
 
-  // Attach the invite URL for active invites
-  const invitesWithUrls = (invites ?? []).map((inv) => ({
-    ...inv,
-    invite_url:
-      inv.status === 'pending' ? buildInviteUrl(request, inv.token) : null,
-  }))
+  // Only active (pending, non-expired) invites get an invite_url
+  const invitesWithUrls = (invites ?? []).map((inv) => {
+    let inviteUrl: string | null = null
+    if (inv.status === 'pending') {
+      try {
+        inviteUrl = buildInviteUrl(inv.token)
+      } catch {
+        // URL build failed (missing env) — return null, don't crash the GET
+        inviteUrl = null
+      }
+    }
+    return { ...inv, invite_url: inviteUrl }
+  })
 
   return NextResponse.json({ invites: invitesWithUrls })
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function buildInviteUrl(
-  request: NextRequest,
-  token: string,
-  slug?: string | null
-) {
-  const origin =
-    process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
-
-  const pathPart = slug || token;
-  return `${origin}/invite/${pathPart}?token=${token}`;
 }

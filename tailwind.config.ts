@@ -60,6 +60,14 @@ const config: Config = {
         "vektrum-score-med":    "#9A5A0A",  // Dispute risk — medium (amber)
         "vektrum-score-high":   "#B01C1C",  // Dispute risk — high (red)
         "vektrum-surface-raised": "#F9FAFB", // Wizard overlay panels
+
+        // ── Dark surface hierarchy ────────────────────────────────────────────
+        // Use these instead of hardcoded hex to keep the dark theme coherent
+        "surface-0":  "#0D1B2A",   // Page / app background
+        "surface-1":  "#0F1F30",   // Sidebar, nav strips
+        "surface-2":  "#111827",   // Cards, panels (standard)
+        "surface-3":  "#1A2535",   // Nested content, subtle separators
+        "surface-4":  "#232D3F",   // Hover states, selected rows
       },
 
       fontFamily: {
@@ -68,12 +76,12 @@ const config: Config = {
         mono:    ["var(--font-mono)", "monospace"],
       },
 
-      // ── 5-Level Shadow Hierarchy ────────────────────────────────────────────
-      // Level 1 (xs): hairline lift — table rows, minor UI elements
-      // Level 2 (sm): card resting state — the default card shadow
-      // Level 3 (md): card hover / active state — actionable cards
-      // Level 4 (lg): modals, drawers, popovers
-      // Level 5 (xl): feature-hero cards, release confirmation modal
+      // ── Shadow Hierarchy ────────────────────────────────────────────────────
+      // Light-context:  xs → sm → md → lg → xl  (standard elevation scale)
+      // Dark-context:   card → card-hover → feature  (semantic dark shadows)
+      //
+      // Always use the named dark-context shadows on navy backgrounds —
+      // never use inline style={{ boxShadow: '...' }} for dark cards.
       boxShadow: {
         xs:  "0 1px 2px 0 rgba(20,20,20,0.04)",
         sm:  "0 1px 3px 0 rgba(20,20,20,0.07), 0 1px 2px -1px rgba(20,20,20,0.04)",
@@ -81,6 +89,10 @@ const config: Config = {
         lg:  "0 10px 15px -3px rgba(20,20,20,0.10), 0 4px 6px -4px rgba(20,20,20,0.06)",
         xl:  "0 20px 25px -5px rgba(20,20,20,0.12), 0 8px 10px -6px rgba(20,20,20,0.07)",
         "2xl": "0 25px 50px -12px rgba(20,20,20,0.20)",
+        // Dark-surface card shadows — use instead of inline style on bg-surface-2 cards
+        "card":       "0 1px 3px rgba(0,0,0,0.20), 0 0 0 1px rgba(255,255,255,0.04)",
+        "card-hover": "0 4px 16px rgba(0,0,0,0.32), 0 0 0 1px rgba(255,255,255,0.06)",
+        "feature":    "0 8px 32px rgba(0,0,0,0.40), 0 0 0 1px rgba(255,255,255,0.05)",
         // Brand-tinted shadow for primary CTAs
         blue: "0 4px 14px 0 rgba(26,58,150,0.30)",
         // Inner shadow for inset wells

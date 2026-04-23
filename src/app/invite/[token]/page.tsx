@@ -85,13 +85,6 @@ export default function InviteAcceptPage() {
     setState({ phase: 'loading' })
     try {
       const res = await fetch(`/api/invites/${token}`)
-      console.log('PREVIEW STATUS:', res.status)
-
-      const text = await res.text()
-      console.log('PREVIEW RAW:', text)
-
-      const parsed: InvitePreview = JSON.parse(text)
-
 
       if (res.status === 404) {
         setState({ phase: 'invalid', reason: 'not_found' })
@@ -101,9 +94,11 @@ export default function InviteAcceptPage() {
         setState({ phase: 'error', message: 'Something went wrong loading this invite. Try refreshing.' })
         return
       }
-        setPreviewData(parsed)
-        setState({ phase: 'preview', data: parsed })
-      } catch {
+
+      const parsed: InvitePreview = await res.json()
+      setPreviewData(parsed)
+      setState({ phase: 'preview', data: parsed })
+    } catch {
       setState({ phase: 'error', message: 'Network error. Check your connection and try again.' })
     }
   }, [token])
@@ -116,21 +111,14 @@ export default function InviteAcceptPage() {
   const handleAccept = async () => {
     setState({ phase: 'accepting' })
     try {
-      const res = await fetch('/api/invites/$(token)/accept', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token }),
-})
+      const res = await fetch(`/api/invites/${token}/accept`, {
+        method: 'POST',
+      })
 
-console.log('ACCEPT STATUS:', res.status)
-
-const text = await res.text()
-console.log('ACCEPT RAW:', text)
-
-      const body = JSON.parse(text)
+      const body = await res.json()
 
       if (res.status === 401) {
-        router.push(`/auth/login?redirect=/invite/${token}`)
+        router.push(`/auth/login?next=/invite/${token}`)
         return
       }
 
@@ -165,7 +153,7 @@ console.log('ACCEPT RAW:', text)
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="relative min-h-screen bg-[#0D1B2A] flex flex-col items-center justify-center px-4 py-16 overflow-hidden">
+    <div className="relative min-h-screen bg-surface-0 flex flex-col items-center justify-center px-4 py-16 overflow-hidden">
       {/* Ambient glow */}
       <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-gradient-to-b from-vektrum-blue/10 to-transparent rounded-full blur-3xl" />
 
@@ -179,8 +167,8 @@ console.log('ACCEPT RAW:', text)
         {/* ── Loading ── */}
         {state.phase === 'loading' && (
           <div
-            className="rounded-2xl border border-white/[0.08] bg-[#111827] p-10 text-center"
-            style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+            className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card p-10 text-center"
+            
           >
             <Loader2 className="mx-auto mb-4 h-8 w-8 animate-spin text-vektrum-blue" aria-hidden="true" />
             <p className="text-sm font-medium text-white">Loading your invite…</p>
@@ -191,8 +179,8 @@ console.log('ACCEPT RAW:', text)
         {/* ── Invalid / not found ── */}
         {state.phase === 'invalid' && (
           <div
-            className="rounded-2xl border border-red-500/20 bg-[#111827] p-8 text-center"
-            style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+            className="rounded-2xl border border-red-500/20 bg-surface-2 shadow-card p-8 text-center"
+            
           >
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10">
               <AlertCircle className="h-6 w-6 text-red-400" aria-hidden="true" />
@@ -216,8 +204,8 @@ console.log('ACCEPT RAW:', text)
         {/* ── Error ── */}
         {state.phase === 'error' && (
           <div
-            className="rounded-2xl border border-red-500/20 bg-[#111827] p-8 text-center"
-            style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+            className="rounded-2xl border border-red-500/20 bg-surface-2 shadow-card p-8 text-center"
+            
           >
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10">
               <AlertCircle className="h-6 w-6 text-red-400" aria-hidden="true" />
@@ -236,8 +224,8 @@ console.log('ACCEPT RAW:', text)
         {/* ── Preview (main state) — #1 growth surface ── */}
         {state.phase === 'preview' && (
           <div
-            className="rounded-2xl border border-white/[0.08] bg-[#111827] overflow-hidden"
-            style={{ boxShadow: '0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04)' }}
+            className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden"
+            
           >
             {/* Top accent bar */}
             <div className="h-[3px] w-full bg-vektrum-blue" />
@@ -344,8 +332,8 @@ console.log('ACCEPT RAW:', text)
         {/* ── Accepting (processing) ── */}
         {state.phase === 'accepting' && (
           <div
-            className="rounded-2xl border border-white/[0.08] bg-[#111827] p-10 text-center"
-            style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+            className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card p-10 text-center"
+            
           >
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-vektrum-blue/10">
               <Loader2 className="h-6 w-6 animate-spin text-vektrum-blue" aria-hidden="true" />
@@ -358,8 +346,8 @@ console.log('ACCEPT RAW:', text)
         {/* ── Accepted ── */}
         {state.phase === 'accepted' && (
           <div
-            className="rounded-2xl border border-emerald-500/20 bg-[#111827] overflow-hidden"
-            style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+            className="rounded-2xl border border-emerald-500/20 bg-surface-2 shadow-card overflow-hidden"
+            
           >
             <div className="h-[3px] w-full bg-emerald-500" />
             <div className="p-8 text-center space-y-4">

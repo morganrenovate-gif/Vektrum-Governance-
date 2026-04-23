@@ -36,7 +36,7 @@ const roles = [
 
 export default function DemoLivePage() {
   return (
-    <div className="relative min-h-screen bg-[#0D1B2A] overflow-hidden">
+    <div className="relative min-h-screen bg-surface-0 overflow-hidden">
 
       {/* Ambient glow — matches hero */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-gradient-to-b from-vektrum-blue/12 to-transparent rounded-full blur-3xl pointer-events-none" />
@@ -67,8 +67,8 @@ export default function DemoLivePage() {
             <Link
               key={r.role}
               href={r.href}
-              className="group rounded-2xl border border-white/[0.08] bg-[#111827] p-7 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.14]"
-              style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+              className="group rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card p-7 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.14]"
+              
             >
               {/* Icon + badge row */}
               <div className="flex items-center justify-between mb-6">

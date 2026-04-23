@@ -54,7 +54,7 @@ export default function DemoFunderPage() {
   const totalReleased = MOCK_DEALS.reduce((s, d) => s + d.released, 0)
 
   return (
-    <div className="min-h-screen bg-[#0D1B2A]">
+    <div className="min-h-screen bg-surface-0">
     <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-12 sm:py-16 space-y-8">
       {/* Back link */}
       <Link
@@ -96,8 +96,8 @@ export default function DemoFunderPage() {
 
       {/* Weekly Intelligence Briefing */}
       <div
-        className="rounded-2xl border border-white/[0.08] bg-[#111827] overflow-hidden"
-        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+        className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden"
+        
       >
         <div className="border-l-4 border-vektrum-blue px-5 py-4 border-b border-white/[0.06]">
           <div className="flex items-center gap-2">
@@ -122,8 +122,8 @@ export default function DemoFunderPage() {
         <MoneyTile label="Total Released" amount={totalReleased} icon={CheckCircle2} href="#portfolio-overview" />
         <Link href="/demo-live/deal/harbor-dispute?from=funder">
           <div
-            className="rounded-2xl border border-vektrum-amber/30 bg-[#111827] px-5 py-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-vektrum-amber/50 cursor-pointer"
-            style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+            className="rounded-2xl border border-vektrum-amber/30 bg-surface-2 shadow-card px-5 py-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-vektrum-amber/50 cursor-pointer"
+            
           >
             <div className="flex items-start justify-between gap-3 mb-2">
               <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">Action Queue</p>
@@ -139,8 +139,8 @@ export default function DemoFunderPage() {
       {/* Portfolio Overview */}
       <div
         id="portfolio-overview"
-        className="rounded-2xl border border-white/[0.08] bg-[#111827] overflow-hidden"
-        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+        className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden"
+        
       >
         <div className="px-5 py-4 border-b border-white/[0.06]">
           <p className="text-[13px] font-semibold text-white">Portfolio Overview</p>
@@ -174,8 +174,8 @@ export default function DemoFunderPage() {
         </h2>
         <div className="space-y-3">
           <div
-            className="rounded-2xl border border-vektrum-amber/25 bg-[#111827] p-4 flex items-center justify-between"
-            style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35)' }}
+            className="rounded-2xl border border-vektrum-amber/25 bg-surface-2 shadow-card p-4 flex items-center justify-between"
+            
           >
             <div>
               <p className="font-semibold text-white">Riverside Mixed-Use Development</p>
@@ -190,8 +190,8 @@ export default function DemoFunderPage() {
             </Link>
           </div>
           <div
-            className="rounded-2xl border border-red-500/20 bg-[#111827] p-4 flex items-center justify-between"
-            style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35)' }}
+            className="rounded-2xl border border-red-500/20 bg-surface-2 shadow-card p-4 flex items-center justify-between"
+            
           >
             <div>
               <p className="font-semibold text-white">Harbor Logistics Center</p>
@@ -227,8 +227,8 @@ export default function DemoFunderPage() {
         </h2>
         <Link
           href="/demo-live/deal/harbor-dispute?from=funder"
-          className="group block rounded-2xl border border-white/[0.08] bg-[#111827] p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/[0.14]"
-          style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+          className="group block rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/[0.14]"
+          
         >
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08] flex-shrink-0">
@@ -259,8 +259,8 @@ export default function DemoFunderPage() {
 function StatTile({ label, value, icon: Icon, href }: { label: string; value: string | number; icon: React.ElementType; href?: string }) {
   const inner = (
     <div
-      className={`rounded-2xl border border-white/[0.08] bg-[#111827] px-5 py-5 transition-all duration-300 ${href ? 'hover:-translate-y-0.5 hover:border-white/[0.14] cursor-pointer' : ''}`}
-      style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+      className={`rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card px-5 py-5 transition-all duration-300 ${href ? 'hover:-translate-y-0.5 hover:border-white/[0.14] cursor-pointer' : ''}`}
+      
     >
       <div className="flex items-start justify-between gap-3 mb-2">
         <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">{label}</p>
@@ -277,8 +277,8 @@ function StatTile({ label, value, icon: Icon, href }: { label: string; value: st
 function MoneyTile({ label, amount, icon: Icon, href }: { label: string; amount: number; icon: React.ElementType; href?: string }) {
   const inner = (
     <div
-      className={`rounded-2xl border border-white/[0.08] bg-[#111827] px-5 py-5 transition-all duration-300 ${href ? 'hover:-translate-y-0.5 hover:border-white/[0.14] cursor-pointer' : ''}`}
-      style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+      className={`rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card px-5 py-5 transition-all duration-300 ${href ? 'hover:-translate-y-0.5 hover:border-white/[0.14] cursor-pointer' : ''}`}
+      
     >
       <div className="flex items-start justify-between gap-3 mb-2">
         <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">{label}</p>
@@ -297,8 +297,8 @@ function DealCard({ deal }: { deal: typeof MOCK_DEALS[number] }) {
   return (
     <Link
       href={`/demo-live/deal/${deal.id}?from=funder`}
-      className="group rounded-2xl border border-white/[0.08] bg-[#111827] p-5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.14]"
-      style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+      className="group rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card p-5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.14]"
+      
     >
       <div className="flex items-center justify-between mb-3">
         <span className="inline-flex items-center rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">

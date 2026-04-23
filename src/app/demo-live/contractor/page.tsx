@@ -46,7 +46,7 @@ export default function DemoContractorPage() {
   const pendingReview = 1
 
   return (
-    <div className="min-h-screen bg-[#0D1B2A]">
+    <div className="min-h-screen bg-surface-0">
     <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-12 sm:py-16 space-y-8">
       {/* Back link */}
       <Link
@@ -97,8 +97,8 @@ export default function DemoContractorPage() {
       {/* Draw Review Status */}
       <section
         id="draw-review"
-        className="rounded-2xl border border-white/[0.08] bg-[#111827] overflow-hidden"
-        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+        className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden"
+        
       >
         <div className="border-l-4 border-vektrum-blue px-5 py-4 border-b border-white/[0.06]">
           <p className="text-[13px] font-semibold text-white">Draw Review Status</p>
@@ -129,8 +129,8 @@ export default function DemoContractorPage() {
             <Link
               key={deal.slug}
               href={`/demo-live/deal/${deal.slug}?from=contractor`}
-              className="group rounded-2xl border border-white/[0.08] bg-[#111827] p-5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.14]"
-              style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+              className="group rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card p-5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.14]"
+              
             >
               <div className="flex items-center justify-between mb-3">
                 <span className="inline-flex items-center rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">
@@ -161,8 +161,8 @@ export default function DemoContractorPage() {
 function StatTile({ label, value, warning = false, href }: { label: string; value: string | number; warning?: boolean; href?: string }) {
   const inner = (
     <div
-      className={`rounded-2xl border bg-[#111827] px-5 py-5 transition-all duration-300 ${warning ? 'border-vektrum-amber/30' : 'border-white/[0.08]'} ${href ? 'hover:-translate-y-0.5 hover:border-white/[0.14] cursor-pointer' : ''}`}
-      style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+      className={`rounded-2xl border bg-surface-2 shadow-card px-5 py-5 transition-all duration-300 ${warning ? 'border-vektrum-amber/30' : 'border-white/[0.08]'} ${href ? 'hover:-translate-y-0.5 hover:border-white/[0.14] cursor-pointer' : ''}`}
+      
     >
       <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">{label}</p>
       <p className={`mt-2 font-display text-4xl font-bold tabular-nums leading-none ${warning ? 'text-vektrum-amber' : 'text-white'}`}>{value}</p>
@@ -174,8 +174,8 @@ function StatTile({ label, value, warning = false, href }: { label: string; valu
 function MoneyTile({ label, amount, href }: { label: string; amount: number; href?: string }) {
   const inner = (
     <div
-      className={`rounded-2xl border border-white/[0.08] bg-[#111827] px-5 py-5 transition-all duration-300 ${href ? 'hover:-translate-y-0.5 hover:border-white/[0.14] cursor-pointer' : ''}`}
-      style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
+      className={`rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card px-5 py-5 transition-all duration-300 ${href ? 'hover:-translate-y-0.5 hover:border-white/[0.14] cursor-pointer' : ''}`}
+      
     >
       <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">{label}</p>
       <p className="mt-2 font-display text-xl font-bold tabular-nums leading-none text-white">{formatCurrency(amount)}</p>

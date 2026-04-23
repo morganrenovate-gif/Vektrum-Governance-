@@ -22,16 +22,11 @@ export function Card({ children, className, noPadding, variant = "dark" }: CardP
       className={cn(
         "rounded-2xl border overflow-hidden",
         variant === "dark"
-          ? "border-white/[0.08] bg-[#111827]"
-          : "border-black/[0.07] bg-white",
+          ? "border-white/[0.08] bg-surface-2 shadow-card"
+          : "border-black/[0.07] bg-white shadow-sm",
         !noPadding && "overflow-hidden",
         className
       )}
-      style={
-        variant === "dark"
-          ? { boxShadow: "0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)" }
-          : { boxShadow: "0 4px 24px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04)" }
-      }
     >
       {children}
     </div>

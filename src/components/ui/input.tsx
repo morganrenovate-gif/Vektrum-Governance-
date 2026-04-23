@@ -55,17 +55,15 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           }
           aria-invalid={error ? "true" : undefined}
           className={cn(
-            // VISUAL: was bg-vektrum-surface (white) + text-vektrum-text (black)
-            // now bg-white/[0.06] + text-white — correct on dark navy
             "block rounded-xl border px-3.5 py-2.5 text-[14px] text-white",
-            "placeholder:text-white/25",
+            "placeholder:text-white/20",
             "transition-colors duration-150",
             "focus:outline-none focus:ring-2 focus:ring-offset-0",
             "min-h-[44px]",
             fullWidth && "w-full",
             error
               ? "border-red-500/40 bg-red-500/[0.07] focus:border-red-500/60 focus:ring-red-500/20"
-              : "border-white/[0.10] bg-white/[0.06] focus:border-vektrum-blue/60 focus:ring-vektrum-blue/20",
+              : "border-white/[0.10] bg-surface-3 focus:border-vektrum-blue/60 focus:ring-vektrum-blue/20",
             props.disabled && "cursor-not-allowed opacity-50",
             className
           )}
@@ -136,7 +134,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             fullWidth && "w-full",
             error
               ? "border-red-500/40 bg-red-500/[0.07] focus:border-red-500/60 focus:ring-red-500/20"
-              : "border-white/[0.10] bg-white/[0.06] focus:border-vektrum-blue/60 focus:ring-vektrum-blue/20",
+              : "border-white/[0.10] bg-surface-3 focus:border-vektrum-blue/60 focus:ring-vektrum-blue/20",
             className
           )}
           {...props}
@@ -147,7 +145,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           </p>
         )}
         {!error && helperText && (
-          <p className="text-[12px] text-white/35">{helperText}</p>
+          <p className="text-[12px] text-white/40">{helperText}</p>
         )}
       </div>
     );

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { FileBox, ArrowRight, Download } from 'lucide-react'
 import type { Profile } from '@/lib/types'
+import { PageHeader, EmptyState } from '@/components/layout'
 
 export default async function ContractorDocumentsPage() {
   const supabase = await createClient()
@@ -58,37 +59,24 @@ export default async function ContractorDocumentsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0D1B2A]">
-    <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-12 sm:py-16 space-y-8">
-      <div>
-        <div className="mb-3 flex items-center gap-3">
-          <div className="h-px w-5 bg-vektrum-blue" />
-          <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">Documents</p>
-        </div>
-        <h1 className="font-display text-[2.25rem] font-bold tracking-[-0.04em] text-white leading-[1.05]">Deal Documents</h1>
-        <p className="mt-2 text-[15px] text-white/55">Files uploaded to your deal milestones</p>
-      </div>
+    <div className="min-h-screen bg-surface-0">
+    <div className="dash-page">
+      <PageHeader
+        eyebrow="Documents"
+        title="Deal Documents"
+        description="Files uploaded to your deal milestones"
+      />
 
       {documents.length === 0 ? (
-        <div className="text-center py-16 rounded-2xl border border-dashed border-white/[0.08]">
-          <FileBox size={40} className="mx-auto text-white/20 mb-3" />
-          <p className="text-white font-medium mb-1">No documents yet</p>
-          <p className="text-white/50 text-sm mb-5">
-            Your deal documents will appear here once you create a deal and attach files.
-          </p>
-          <Link
-            href="/dashboard/deals/new"
-            className="group inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-6 py-2.5 text-[14px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 transition-all hover:bg-vektrum-blue-hover hover:shadow-xl hover:shadow-vektrum-blue/40 hover:-translate-y-0.5"
-          >
-            Go to Deals
-            <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
-          </Link>
-        </div>
+        <EmptyState
+          icon={FileBox}
+          title="No documents yet"
+          description="Your deal documents will appear here once you create a deal and attach files."
+          action={{ label: 'Go to Deals', href: '/dashboard/deals/new' }}
+          variant="dashed"
+        />
       ) : (
-        <div
-          className="overflow-x-auto rounded-2xl border border-white/[0.08] bg-[#111827]"
-          style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
-        >
+        <div className="overflow-x-auto rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-white/[0.06] bg-white/[0.02]">

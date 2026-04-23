@@ -6,8 +6,6 @@ import { ContractUploadModal } from '@/components/ai/ContractUploadModal'
 import { MilestoneReviewScreen } from '@/components/ai/MilestoneReviewScreen'
 import type { ContractAnalysisResult, DealMetadata } from '@/lib/actions/analyze-contract'
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-
 type FlowState =
   | { stage: 'manual' }
   | { stage: 'upload_modal' }
@@ -16,12 +14,13 @@ type FlowState =
 type Props = {
   metadata: DealMetadata
   children: React.ReactNode
+  renderTrigger?: (openImport: () => void) => React.ReactNode
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
-
-export function ContractImportFlow({ metadata, children }: Props) {
+export function ContractImportFlow({ metadata, children, renderTrigger }: Props) {
   const [flow, setFlow] = useState<FlowState>({ stage: 'manual' })
+
+  const openImport = () => setFlow({ stage: 'upload_modal' })
 
   if (flow.stage === 'review') {
     return (
@@ -38,23 +37,25 @@ export function ContractImportFlow({ metadata, children }: Props) {
 
   return (
     <>
-      {/* Import from contract button */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="flex-1 h-px bg-vektrum-border" />
-        <button
-          onClick={() => setFlow({ stage: 'upload_modal' })}
-          className="inline-flex items-center gap-2 rounded-xl border border-vektrum-blue/30 bg-vektrum-blue/5 px-4 py-2 text-[13px] font-semibold text-vektrum-blue hover:bg-vektrum-blue/10 hover:border-vektrum-blue/50 transition-all"
-        >
-          <FileUp size={14} />
-          Import from contract
-        </button>
-        <div className="flex-1 h-px bg-vektrum-border" />
-      </div>
+      {!renderTrigger && (
+        <div className="flex items-center gap-3 mb-6">
+          <div className="flex-1 h-px bg-vektrum-border" />
+          <button
+            type="button"
+            onClick={openImport}
+            className="inline-flex items-center gap-2 rounded-xl border border-vektrum-blue/30 bg-vektrum-blue/5 px-4 py-2 text-[13px] font-semibold text-vektrum-blue hover:bg-vektrum-blue/10 hover:border-vektrum-blue/50 transition-all"
+          >
+            <FileUp size={14} />
+            Import from contract
+          </button>
+          <div className="flex-1 h-px bg-vektrum-border" />
+        </div>
+      )}
 
-      {/* Existing manual milestone form */}
       {children}
 
-      {/* Upload modal */}
+      {renderTrigger?.(openImport)}
+
       {flow.stage === 'upload_modal' && (
         <ContractUploadModal
           metadata={metadata}

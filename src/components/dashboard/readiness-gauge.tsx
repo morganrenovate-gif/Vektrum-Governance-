@@ -68,7 +68,7 @@ function CircularGauge({ score }: { score: number }) {
         >
           {score}
         </span>
-        <span className="text-[9px] text-vektrum-faint uppercase tracking-wider">/ 100</span>
+        <span className="text-[9px] text-white/30 uppercase tracking-wider">/ 100</span>
       </div>
     </div>
   )
@@ -96,10 +96,10 @@ export function ReadinessGauge({ dealId, preview = false }: ReadinessGaugeProps)
   if (loading) {
     return (
       <div className="flex items-center gap-4">
-        <div className="h-[88px] w-[88px] animate-pulse rounded-full bg-vektrum-surface-alt" />
+        <div className="h-[88px] w-[88px] animate-pulse rounded-full bg-white/[0.07]" />
         <div className="flex-1 space-y-2">
-          <div className="h-2.5 w-24 animate-pulse rounded bg-vektrum-surface-alt" />
-          <div className="h-2 w-16 animate-pulse rounded bg-vektrum-surface-alt" />
+          <div className="h-2.5 w-24 animate-pulse rounded bg-white/[0.07]" />
+          <div className="h-2 w-16 animate-pulse rounded bg-white/[0.07]" />
         </div>
       </div>
     )
@@ -107,8 +107,8 @@ export function ReadinessGauge({ dealId, preview = false }: ReadinessGaugeProps)
 
   if (error || !data) {
     return (
-      <div className="flex items-center gap-3 rounded-lg bg-vektrum-surface-alt px-4 py-3">
-        <span className="text-[12px] text-vektrum-faint">
+      <div className="flex items-center gap-3 rounded-lg bg-surface-3 px-4 py-3">
+        <span className="text-[12px] text-white/30">
           Readiness score unavailable
         </span>
       </div>
@@ -119,11 +119,11 @@ export function ReadinessGauge({ dealId, preview = false }: ReadinessGaugeProps)
     <div className="flex items-center gap-4">
       <CircularGauge score={data.score} />
       <div className="flex-1 space-y-1.5">
-        <p className="text-[13px] font-semibold text-vektrum-text">Release Readiness</p>
+        <p className="text-[13px] font-semibold text-white">Release Readiness</p>
         {data.breakdown.map((b) => (
           <div key={b.label} className="flex items-center justify-between gap-2">
-            <span className="text-[11px] text-vektrum-faint truncate">{b.label}</span>
-            <span className="text-[11px] font-medium tabular-nums text-vektrum-muted flex-shrink-0">
+            <span className="text-[11px] text-white/30 truncate">{b.label}</span>
+            <span className="text-[11px] font-medium tabular-nums text-white/50 flex-shrink-0">
               {b.points}/{b.max}
             </span>
           </div>

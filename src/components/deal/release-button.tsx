@@ -70,13 +70,13 @@ export function ReleaseButton({
   // ── Success state ──────────────────────────────────────────────────────────
   if (uiState === "success") {
     return (
-      <div className="flex items-start gap-3 rounded-xl bg-vektrum-green-bg border border-vektrum-green-border px-5 py-4">
-        <CheckCircle2 size={20} className="text-vektrum-green mt-0.5 flex-shrink-0" aria-hidden="true" />
+      <div className="flex items-start gap-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-5 py-4">
+        <CheckCircle2 size={20} className="text-emerald-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
         <div>
-          <p className="text-sm font-semibold text-vektrum-green">
+          <p className="text-sm font-semibold text-emerald-400">
             Payment released successfully
           </p>
-          <p className="mt-0.5 text-sm text-vektrum-green/70">
+          <p className="mt-0.5 text-sm text-emerald-400/70">
             <span className="tabular-nums font-bold">{formatMoney(amount)}</span> sent to {contractorName}
           </p>
         </div>
@@ -109,7 +109,7 @@ export function ReleaseButton({
           <button
             type="button"
             onClick={() => { setUiState("idle"); setServerError(null); }}
-            className="inline-flex items-center rounded-lg border border-vektrum-border px-4 py-2 text-sm text-vektrum-muted hover:bg-vektrum-surface-alt transition-colors"
+            className="inline-flex items-center rounded-lg border border-white/[0.08] px-4 py-2 text-sm text-white/55 hover:bg-surface-4 transition-colors"
           >
             Cancel
           </button>
@@ -121,11 +121,11 @@ export function ReleaseButton({
   // ── Loading state ──────────────────────────────────────────────────────────
   if (uiState === "loading") {
     return (
-      <div className="relative rounded-xl border-2 border-vektrum-blue bg-vektrum-surface shadow-xl overflow-hidden">
+      <div className="relative rounded-xl border-2 border-vektrum-blue bg-surface-2 shadow-feature overflow-hidden">
         <div className="h-1 w-full bg-vektrum-blue" />
         <div className="px-6 py-5 flex items-center justify-center gap-3">
           <span className="h-5 w-5 animate-spin rounded-full border-2 border-vektrum-blue/30 border-t-vektrum-blue" aria-hidden="true" />
-          <p className="text-sm font-semibold text-vektrum-text">Processing release...</p>
+          <p className="text-sm font-semibold text-white">Processing release...</p>
         </div>
       </div>
     );
@@ -138,7 +138,7 @@ export function ReleaseButton({
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirm-release-title"
-        className="relative rounded-xl border-2 border-vektrum-blue bg-vektrum-surface shadow-xl overflow-hidden"
+        className="relative rounded-xl border-2 border-vektrum-blue bg-surface-2 shadow-feature overflow-hidden"
       >
         {/* Top accent bar */}
         <div className="h-1 w-full bg-vektrum-blue" />
@@ -153,11 +153,11 @@ export function ReleaseButton({
               <div>
                 <h3
                   id="confirm-release-title"
-                  className="font-display text-base font-bold text-vektrum-text"
+                  className="font-display text-base font-bold text-white"
                 >
                   Confirm Payment Release
                 </h3>
-                <p className="text-xs text-vektrum-muted mt-0.5">
+                <p className="text-xs text-white/50 mt-0.5">
                   This action is irreversible once confirmed
                 </p>
               </div>
@@ -165,7 +165,7 @@ export function ReleaseButton({
             <button
               type="button"
               onClick={() => setUiState("idle")}
-              className="rounded-md p-1 text-vektrum-faint hover:text-vektrum-muted hover:bg-vektrum-surface-alt transition-colors"
+              className="rounded-md p-1 text-white/30 hover:text-white/50 hover:bg-surface-4 transition-colors"
               aria-label="Cancel release"
             >
               <X size={16} aria-hidden="true" />
@@ -173,21 +173,21 @@ export function ReleaseButton({
           </div>
 
           {/* Amount — the hero element */}
-          <div className="rounded-lg bg-vektrum-bg border border-vektrum-border px-5 py-4 text-center">
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-vektrum-muted">
+          <div className="rounded-lg bg-surface-3 border border-white/[0.08] px-5 py-4 text-center">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-white/55">
               Amount to be released
             </p>
-            <p className="mt-1.5 font-display text-5xl font-bold tabular-nums tracking-tight text-vektrum-text">
+            <p className="mt-1.5 font-display text-5xl font-bold tabular-nums tracking-tight text-white">
               {formatMoney(amount)}
             </p>
             <div className="mt-2 flex items-center justify-center gap-1.5">
               <ArrowRight size={12} className="text-vektrum-blue" aria-hidden="true" />
-              <p className="text-sm text-vektrum-muted">
-                to <span className="font-semibold text-vektrum-text">{contractorName}</span>
+              <p className="text-sm text-white/55">
+                to <span className="font-semibold text-white">{contractorName}</span>
               </p>
             </div>
             {milestoneTitle && (
-              <p className="mt-1 text-xs text-vektrum-faint">
+              <p className="mt-1 text-xs text-white/30">
                 Milestone: {milestoneTitle}
               </p>
             )}
@@ -201,8 +201,8 @@ export function ReleaseButton({
               "Action recorded in immutable audit log",
             ].map((item) => (
               <li key={item} className="flex items-start gap-2.5">
-                <CheckCircle2 size={14} className="text-vektrum-green mt-0.5 flex-shrink-0" aria-hidden="true" />
-                <span className="text-xs text-vektrum-muted">{item}</span>
+                <CheckCircle2 size={14} className="text-emerald-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
+                <span className="text-xs text-white/55">{item}</span>
               </li>
             ))}
           </ul>
@@ -229,9 +229,9 @@ export function ReleaseButton({
               onClick={() => { setUiState("idle"); setServerError(null); }}
               className={cn(
                 "inline-flex items-center justify-center",
-                "min-h-[48px] rounded-lg border border-vektrum-border bg-vektrum-surface px-5 py-3",
-                "text-sm font-semibold text-vektrum-muted shadow-xs",
-                "transition-all hover:bg-vektrum-surface-alt hover:text-vektrum-text",
+                "min-h-[48px] rounded-lg border border-white/[0.08] bg-surface-3 px-5 py-3",
+                "text-sm font-semibold text-white/60",
+                "transition-all hover:bg-surface-3 hover:text-white",
               )}
             >
               Cancel
@@ -282,25 +282,25 @@ export function ReleaseButton({
         className={cn(
           "inline-flex items-center justify-between gap-3 w-full sm:w-auto",
           "min-h-[52px] rounded-xl px-6 py-3",
-          "bg-vektrum-surface-alt text-vektrum-faint cursor-not-allowed",
-          "border border-vektrum-border shadow-xs"
+          "bg-surface-3/50 text-white/25 cursor-not-allowed",
+          "border border-white/[0.08] shadow-sm"
         )}
       >
         <div className="flex items-center gap-2.5">
           <Lock size={15} aria-hidden="true" />
           <span className="text-sm font-semibold">Release to {contractorName}</span>
         </div>
-        <span className="rounded-md bg-vektrum-border px-2.5 py-1 text-sm font-bold tabular-nums text-vektrum-faint">
+        <span className="rounded-md bg-white/[0.06] px-2.5 py-1 text-sm font-bold tabular-nums text-white/30">
           {formatMoney(amount)}
         </span>
       </button>
 
       {/* Blockers */}
-      <div id="release-blockers" className="rounded-xl border border-vektrum-amber-border bg-vektrum-amber-bg overflow-hidden">
+      <div id="release-blockers" className="rounded-xl border border-amber-500/25 bg-amber-500/[0.08] overflow-hidden">
         <button
           type="button"
           onClick={() => setBlockersOpen((o) => !o)}
-          className="flex w-full items-center justify-between px-4 py-3 text-left text-xs font-semibold text-vektrum-amber hover:bg-vektrum-amber-border/20 transition-colors"
+          className="flex w-full items-center justify-between px-4 py-3 text-left text-xs font-semibold text-amber-400 hover:bg-amber-500/10 transition-colors"
           aria-expanded={blockersOpen}
           aria-controls="blockers-list"
         >
@@ -318,7 +318,7 @@ export function ReleaseButton({
         <ul
           id="blockers-list"
           className={cn(
-            "divide-y divide-vektrum-amber-border/50 border-t border-vektrum-amber-border",
+            "divide-y divide-amber-500/20 border-t border-amber-500/20",
             blockersOpen ? "block" : "hidden sm:block"
           )}
           aria-label="Release blockers"
@@ -326,10 +326,10 @@ export function ReleaseButton({
           {gate.blockers.map((blocker, i) => (
             <li
               key={i}
-              className="flex items-start gap-2.5 px-4 py-2.5 text-xs text-vektrum-amber"
+              className="flex items-start gap-2.5 px-4 py-2.5 text-xs text-amber-400"
             >
               <span
-                className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-vektrum-amber"
+                className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-400"
                 aria-hidden="true"
               />
               {blocker}

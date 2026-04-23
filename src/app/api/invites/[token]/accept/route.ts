@@ -126,23 +126,23 @@ export async function POST(
   // Step A: assign funder to deal
   // .is('funder_id', null) ensures atomicity — if another funder accepted between
   // our validation check and this update, the update will match 0 rows and fail
-  const { error: dealUpdateError, count } = await admin
+  const { data: updatedRows, error: dealUpdateError } = await admin
     .from('deals')
     .update({ funder_id: user.id })
     .eq('id', invite.deal_id)
     .is('funder_id', null)
     .select('id')
 
-  if (count === 0 && !dealUpdateError) {
-    return conflictError(
-      'Another funder accepted this deal just before you. The deal is no longer available.',
-    )
-  }
-
   if (dealUpdateError) {
     return internalError(
       'Failed to assign you as funder. Please try again.',
       dealUpdateError.message,
+    )
+  }
+
+  if (!updatedRows || updatedRows.length === 0) {
+    return conflictError(
+      'Another funder accepted this deal just before you. The deal is no longer available.',
     )
   }
 

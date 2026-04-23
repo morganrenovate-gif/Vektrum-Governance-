@@ -7,6 +7,7 @@ import { formatDate } from "@/lib/utils";
 import { LocalTime } from "@/components/ui/local-time";
 import type { AuditLog } from "@/lib/types";
 import { Shield, Search, X } from "lucide-react";
+import { PageHeader } from "@/components/layout";
 
 export const dynamic = "force-dynamic";
 
@@ -244,21 +245,14 @@ export default async function AuditLogPage({
   );
 
   return (
-    <div className="min-h-screen bg-[#0D1B2A]">
-    <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-12 sm:py-16 space-y-6">
+    <div className="min-h-screen bg-surface-0">
+    <div className="dash-page">
       {/* Header */}
-      <div>
-        <div className="mb-3 flex items-center gap-3">
-          <div className="h-px w-5 bg-vektrum-blue" />
-          <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">Audit Log</p>
-        </div>
-        <h1 className="font-display text-[2.25rem] font-bold tracking-[-0.04em] text-white leading-[1.05]">
-          Platform Events
-        </h1>
-        <p className="mt-2 text-[15px] text-white/55">
-          All platform events — newest first{count !== null && ` · ${count.toLocaleString()} total`}
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Audit Log"
+        title="Platform Events"
+        description={`All platform events — newest first${count !== null ? ` · ${count.toLocaleString()} total` : ''}`}
+      />
 
       {/* Category tabs */}
       <div className="flex flex-wrap gap-1.5">
@@ -342,10 +336,7 @@ export default async function AuditLogPage({
       </form>
 
       {/* Table */}
-      <div
-        className="rounded-2xl border border-white/[0.08] bg-[#111827] overflow-hidden"
-        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)' }}
-      >
+      <div className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden">
         <div className="border-b border-white/[0.06] px-5 py-4">
           <p className="text-[13px] font-semibold text-white">Events</p>
         </div>
