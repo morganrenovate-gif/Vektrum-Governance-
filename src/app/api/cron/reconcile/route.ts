@@ -6,7 +6,8 @@ export const dynamic = 'force-dynamic'
 // ─── POST /api/cron/reconcile ─────────────────────────────────────────────────
 //
 // Vercel Cron endpoint. Runs the Stripe ↔ DB reconciliation job.
-// Schedule: every hour (configured in vercel.json).
+// Schedule: daily at 02:00 UTC (configured in vercel.json).
+// Note: Vercel Hobby plan permits at most one execution per day per cron job.
 //
 // Security: Vercel automatically adds "Authorization: Bearer {CRON_SECRET}"
 // when invoking cron routes. Any other caller must present the same token.
