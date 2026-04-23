@@ -1,7 +1,7 @@
 /**
  * End-to-end release gate test suite.
  *
- * Tests all 7 blocking conditions + role check against a mock Supabase client.
+ * Tests all 8 blocking conditions + role check against a mock Supabase client.
  * Each test confirms:
  *   - allowed: false
  *   - errors contains a human-readable string (not a stack trace or 500)

@@ -44,7 +44,7 @@ export function DisputeQueue({ disputes }: DisputeQueueProps) {
   return (
     <div className="rounded-xl border border-white/[0.08] bg-surface-2 overflow-hidden shadow-sm">
       {/* Table header */}
-      <div className="hidden sm:grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-5 py-3 border-b border-white/[0.05] bg-vektrum-bg">
+      <div className="hidden sm:grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-5 py-3 border-b border-white/[0.05] bg-white/[0.015]">
         <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Deal / Milestone</p>
         <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Amount</p>
         <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Days Open</p>
@@ -60,7 +60,7 @@ export function DisputeQueue({ disputes }: DisputeQueueProps) {
           return (
             <div
               key={dispute.id}
-              className="flex flex-col gap-3 sm:grid sm:grid-cols-[2fr_1fr_1fr_1fr_auto] sm:items-center gap-4 px-5 py-4 hover:bg-vektrum-bg transition-colors"
+              className="flex flex-col gap-3 sm:grid sm:grid-cols-[2fr_1fr_1fr_1fr_auto] sm:items-center gap-4 px-5 py-4 hover:bg-white/[0.03] transition-colors"
             >
               {/* Deal / Milestone */}
               <div className="flex items-start gap-2.5">

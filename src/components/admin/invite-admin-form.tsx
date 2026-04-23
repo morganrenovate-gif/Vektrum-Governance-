@@ -71,7 +71,7 @@ export function InviteAdminForm() {
               setSuccess(null)
             }}
             placeholder="admin@company.com"
-            className="w-full rounded-lg border border-white/[0.08] bg-vektrum-bg px-3 py-2 text-[13px] text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-vektrum-blue/30 focus:border-vektrum-blue transition-all"
+            className="w-full rounded-lg border border-white/[0.08] bg-surface-3 px-3 py-2 text-[13px] text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-vektrum-blue/30 focus:border-vektrum-blue transition-all"
           />
           <p className="text-xs text-white/55 mt-1">
             Invited users will receive admin access upon accepting. This action is logged in the audit trail.

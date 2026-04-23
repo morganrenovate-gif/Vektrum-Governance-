@@ -111,7 +111,7 @@ export function DisputeFlagModal({
                 value={reason}
                 onChange={(e) => setReason(e.target.value as DisputeReason)}
                 disabled={isPending}
-                className="w-full appearance-none rounded-xl border border-white/[0.08] bg-vektrum-bg px-4 py-2.5 pr-9 text-[13px] text-white focus:border-vektrum-blue focus:outline-none disabled:opacity-50 cursor-pointer"
+                className="w-full appearance-none rounded-xl border border-white/[0.08] bg-surface-3 px-4 py-2.5 pr-9 text-[13px] text-white focus:border-vektrum-blue focus:outline-none disabled:opacity-50 cursor-pointer"
               >
                 <option value="" disabled>Select a reason...</option>
                 {(Object.entries(REASON_LABELS) as [DisputeReason, string][]).map(([val, label]) => (
@@ -141,7 +141,7 @@ export function DisputeFlagModal({
                   ? 'Describe the specific issue...'
                   : 'Any additional context to help resolve quickly...'
               }
-              className="w-full rounded-xl border border-white/[0.08] bg-vektrum-bg px-4 py-3 text-[13px] text-white placeholder:text-white/30 focus:border-vektrum-blue focus:outline-none resize-none disabled:opacity-50"
+              className="w-full rounded-xl border border-white/[0.08] bg-surface-3 px-4 py-3 text-[13px] text-white placeholder:text-white/30 focus:border-vektrum-blue focus:outline-none resize-none disabled:opacity-50"
             />
             <p className="text-right text-[11px] text-white/30 mt-1">{contextLength}/500</p>
           </div>

@@ -80,7 +80,7 @@ export default async function HomePage() {
               {/* Proof stats */}
               <div className="mt-10 flex gap-8 justify-center lg:justify-start pt-8 border-t border-white/[0.08]">
                 <div className="flex flex-col gap-1">
-                  <span className="font-display text-[28px] font-bold text-white leading-none tracking-[-0.03em]">7</span>
+                  <span className="font-display text-[28px] font-bold text-white leading-none tracking-[-0.03em]">8</span>
                   <span className="text-[12px] text-white/55">Server-side release conditions</span>
                 </div>
                 <div className="flex flex-col gap-1">

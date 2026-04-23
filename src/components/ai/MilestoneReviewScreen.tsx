@@ -63,7 +63,7 @@ function ConditionList({
               next[i] = e.target.value
               onChange(next)
             }}
-            className="flex-1 rounded-lg border border-white/[0.08] bg-vektrum-bg px-3 py-1.5 text-[13px] text-white placeholder:text-white/30 focus:border-vektrum-blue focus:outline-none"
+            className="flex-1 rounded-lg border border-white/[0.08] bg-surface-3 px-3 py-1.5 text-[13px] text-white placeholder:text-white/30 focus:border-vektrum-blue focus:outline-none"
             placeholder="Completion condition"
           />
           <button
@@ -177,14 +177,14 @@ function MilestoneEditCard({
                 onChange={(e) =>
                   onChange({ ...milestone, retainage_pct: parseFloat(e.target.value) || 0 })
                 }
-                className="w-16 rounded-lg border border-white/[0.08] bg-vektrum-bg px-2.5 py-1.5 text-[13px] text-white focus:border-vektrum-blue focus:outline-none"
+                className="w-16 rounded-lg border border-white/[0.08] bg-surface-3 px-2.5 py-1.5 text-[13px] text-white focus:border-vektrum-blue focus:outline-none"
               />
               <span className="text-[13px] text-white/30">%</span>
             </div>
           </div>
 
           {milestone.notes && (
-            <div className="rounded-lg border border-white/[0.08]/50 bg-vektrum-bg/50 px-3 py-2">
+            <div className="rounded-lg border border-white/[0.08]/50 bg-surface-3/50 px-3 py-2">
               <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-white/30 mb-1">
                 Contract note
               </p>

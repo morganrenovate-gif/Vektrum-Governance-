@@ -243,7 +243,7 @@ export function UserTable({ profiles, deals, emailMap = {} }: UserTableProps) {
       )}
 
       {/* Footer count */}
-      <div className="px-5 py-3 border-t border-white/[0.05] bg-vektrum-bg">
+      <div className="px-5 py-3 border-t border-white/[0.05] bg-white/[0.015]">
         <p className="text-[11px] text-white/30">
           Showing {filtered.length} of {profiles.length} users
         </p>
