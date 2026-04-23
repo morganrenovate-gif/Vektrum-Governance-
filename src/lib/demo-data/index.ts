@@ -66,10 +66,10 @@ export const riverside: DemoDeal = {
       name: 'Foundation & Site Prep',
       amount: 480_000,
       status: 'released',
-      releasedAt: 'March 14, 2025',
+      releasedAt: 'February 21, 2026',
       documents: [
-        'Inspection Report — March 10, 2025',
-        'Lien Waiver — March 12, 2025',
+        'Inspection Report — February 14, 2026',
+        'Lien Waiver — February 18, 2026',
         'Draw Request #1 — $480,000',
       ],
     },
@@ -82,8 +82,8 @@ export const riverside: DemoDeal = {
       aiRisk: 'low',
       aiRecommendation: 'Approve',
       documents: [
-        'Inspection Report — April 1, 2025',
-        'Lien Waiver — April 3, 2025',
+        'Inspection Report — March 5, 2026',
+        'Lien Waiver — March 8, 2026',
         'Draw Request #2 — $720,000',
       ],
     },
@@ -93,8 +93,8 @@ export const riverside: DemoDeal = {
       amount: 680_000,
       status: 'ready_for_review',
       documents: [
-        'Inspection Report — April 28, 2025',
-        'Lien Waiver — April 29, 2025',
+        'Inspection Report — April 15, 2026',
+        'Lien Waiver — April 17, 2026',
       ],
     },
     {
@@ -188,7 +188,7 @@ export const westside: DemoDeal = {
   released: 950_000,
   status: 'active',
   startedAgo: '30 days ago',
-  contractor: 'Marcus Webb',
+  contractor: 'Diane Reyes',
   funder: 'Sarah Chen',
   milestones: [
     {
@@ -199,7 +199,7 @@ export const westside: DemoDeal = {
       releasedAt: '15 days ago',
       documents: [
         'Inspection Report — Site Work',
-        'Lien Waiver — Webb Construction',
+        'Lien Waiver — Reyes Development',
         'Draw Request #1 — $475,000',
       ],
     },

@@ -80,14 +80,14 @@ export function ProfileTab({ profile, userEmail }: ProfileTabProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-display text-lg font-bold text-vektrum-text">Profile</h2>
-        <p className="mt-1 text-sm text-vektrum-muted">
+        <h2 className="font-display text-lg font-bold text-white">Profile</h2>
+        <p className="mt-1 text-sm text-white/55">
           Your name and company as they appear to counterparties in your deals.
         </p>
       </div>
 
       {/* Profile form */}
-      <div className="rounded-xl border border-vektrum-border bg-vektrum-surface p-6 shadow-sm">
+      <div className="rounded-xl border border-white/[0.08] bg-surface-2 p-6 shadow-sm">
         <form onSubmit={handleProfileSave} className="space-y-4">
           <Input
             label="Full Name"
@@ -109,13 +109,13 @@ export function ProfileTab({ profile, userEmail }: ProfileTabProps) {
 
           {/* Save feedback */}
           {saveStatus === 'success' && (
-            <div className="flex items-center gap-2 rounded-md bg-vektrum-green-bg border border-vektrum-green-border px-3 py-2.5 text-sm text-vektrum-green" role="status">
+            <div className="flex items-center gap-2 rounded-md bg-emerald-500/[0.08] border border-emerald-500/20 px-3 py-2.5 text-sm text-emerald-400" role="status">
               <CheckCircle2 size={14} aria-hidden="true" />
               Profile saved successfully.
             </div>
           )}
           {saveStatus === 'error' && (
-            <div className="flex items-start gap-2 rounded-md bg-vektrum-red-bg border border-vektrum-red-border px-3 py-2.5 text-sm text-vektrum-red" role="alert">
+            <div className="flex items-start gap-2 rounded-md bg-red-500/[0.08] border border-red-500/20 px-3 py-2.5 text-sm text-red-400" role="alert">
               <AlertCircle size={14} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
               {saveError ?? 'Failed to save. Please try again.'}
             </div>
@@ -130,16 +130,16 @@ export function ProfileTab({ profile, userEmail }: ProfileTabProps) {
       </div>
 
       {/* Email section */}
-      <div className="rounded-xl border border-vektrum-border bg-vektrum-surface p-6 shadow-sm">
+      <div className="rounded-xl border border-white/[0.08] bg-surface-2 p-6 shadow-sm">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-3">
-            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-vektrum-blue-subtle mt-0.5">
+            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-vektrum-blue/10 mt-0.5">
               <Mail size={15} className="text-vektrum-blue" aria-hidden="true" />
             </div>
             <div>
-              <p className="text-[13px] font-semibold text-vektrum-text">Email Address</p>
-              <p className="text-[13px] text-vektrum-muted mt-0.5">{userEmail}</p>
-              <p className="text-[11px] text-vektrum-faint mt-1">
+              <p className="text-[13px] font-semibold text-white">Email Address</p>
+              <p className="text-[13px] text-white/55 mt-0.5">{userEmail}</p>
+              <p className="text-[11px] text-white/30 mt-1">
                 Used for sign-in and all platform notifications.
               </p>
             </div>
@@ -157,7 +157,7 @@ export function ProfileTab({ profile, userEmail }: ProfileTabProps) {
         </div>
 
         {showEmailForm && (
-          <form onSubmit={handleEmailChange} className="mt-5 space-y-3 border-t border-vektrum-border-subtle pt-5">
+          <form onSubmit={handleEmailChange} className="mt-5 space-y-3 border-t border-white/[0.05] pt-5">
             <Input
               label="New Email Address"
               type="email"
@@ -168,7 +168,7 @@ export function ProfileTab({ profile, userEmail }: ProfileTabProps) {
               required
             />
             {emailStatus === 'error' && (
-              <div className="flex items-start gap-2 rounded-md bg-vektrum-red-bg border border-vektrum-red-border px-3 py-2.5 text-sm text-vektrum-red" role="alert">
+              <div className="flex items-start gap-2 rounded-md bg-red-500/[0.08] border border-red-500/20 px-3 py-2.5 text-sm text-red-400" role="alert">
                 <AlertCircle size={14} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
                 {emailError ?? 'Failed to send verification. Please try again.'}
               </div>
@@ -185,24 +185,12 @@ export function ProfileTab({ profile, userEmail }: ProfileTabProps) {
         )}
 
         {emailStatus === 'sent' && (
-          <div className="mt-4 flex items-center gap-2 rounded-md bg-vektrum-green-bg border border-vektrum-green-border px-3 py-2.5 text-sm text-vektrum-green" role="status">
+          <div className="mt-4 flex items-center gap-2 rounded-md bg-emerald-500/[0.08] border border-emerald-500/20 px-3 py-2.5 text-sm text-emerald-400" role="status">
             <CheckCircle2 size={14} aria-hidden="true" />
             Verification email sent. Click the link in your inbox to confirm the change.
           </div>
         )}
 
-        {/* Profile photo — coming soon */}
-        <div className="mt-5 border-t border-vektrum-border-subtle pt-5">
-          <div className="flex items-center justify-between opacity-60 cursor-not-allowed select-none">
-            <div className="pointer-events-none">
-              <p className="text-[13px] font-semibold text-vektrum-muted">Profile Photo</p>
-              <p className="text-[11px] text-vektrum-faint mt-0.5">Upload a photo to personalize your account.</p>
-            </div>
-            <span className="flex-shrink-0 rounded-full border border-vektrum-amber-border bg-vektrum-amber-bg px-2.5 py-0.5 text-[10px] font-semibold text-vektrum-amber">
-              Coming soon
-            </span>
-          </div>
-        </div>
       </div>
     </div>
   )

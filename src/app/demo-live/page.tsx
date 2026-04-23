@@ -29,7 +29,7 @@ const roles = [
     description: 'See platform-wide stats, open disputes, user management, and audit log.',
     href: '/demo-live/admin',
     icon: Shield,
-    badge: 'bg-vektrum-amber-bg text-vektrum-amber border-vektrum-amber-border',
+    badge: 'bg-amber-500/[0.08] text-amber-400 border-amber-500/20',
     dot: 'bg-vektrum-amber',
   },
 ] as const

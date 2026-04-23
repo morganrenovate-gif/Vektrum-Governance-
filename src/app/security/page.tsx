@@ -10,16 +10,16 @@ export default function SecurityPage() {
   return (
     <div className="bg-vektrum-bg">
       <div className="mx-auto max-w-3xl px-6 sm:px-8 py-16 sm:py-20">
-        <h1 className="font-display text-2xl sm:text-3xl font-bold text-vektrum-text tracking-[-0.025em]">
+        <h1 className="font-display text-2xl sm:text-3xl font-bold text-white tracking-[-0.025em]">
           Security at Vektrum
         </h1>
 
         {/* SOC2 Status Badge */}
-        <div className="mt-8 rounded-xl border border-vektrum-border bg-vektrum-surface p-6">
+        <div className="mt-8 rounded-xl border border-white/[0.08] bg-surface-2 p-6">
           <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-vektrum-blue mb-2">
             SOC 2 Type I Audit
           </p>
-          <p className="text-[15px] leading-relaxed text-vektrum-muted">
+          <p className="text-[15px] leading-relaxed text-white/55">
               SOC 2 Type I audit in progress. Security documentation available to institutional clients upon request.
           </p>
         </div>
@@ -40,7 +40,7 @@ export default function SecurityPage() {
             {
               icon: Server,
               title: 'Server-Side Enforcement',
-              desc: 'The 7-condition release gate runs server-side, atomically. Client state is display only.',
+              desc: 'The 8-condition release gate runs server-side, atomically. Client state is display only.',
             },
             {
               icon: Users,
@@ -50,18 +50,18 @@ export default function SecurityPage() {
           ].map((pillar) => (
             <div
               key={pillar.title}
-              className="rounded-xl border border-vektrum-border bg-vektrum-surface p-6"
+              className="rounded-xl border border-white/[0.08] bg-surface-2 p-6"
             >
-              <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-vektrum-blue-subtle">
+              <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-vektrum-blue/10">
                 <pillar.icon size={18} className="text-vektrum-blue" />
               </div>
-              <h3 className="text-[15px] font-semibold text-vektrum-text mb-1">{pillar.title}</h3>
-              <p className="text-[13px] leading-relaxed text-vektrum-muted">{pillar.desc}</p>
+              <h3 className="text-[15px] font-semibold text-white mb-1">{pillar.title}</h3>
+              <p className="text-[13px] leading-relaxed text-white/55">{pillar.desc}</p>
             </div>
           ))}
         </div>
 
-        <p className="mt-10 text-[15px] leading-relaxed text-vektrum-muted">
+        <p className="mt-10 text-[15px] leading-relaxed text-white/55">
           {'For security inquiries, vendor due diligence packages, or penetration test scope discussions: '}
           <a href="mailto:operations@vektrum.io" className="text-vektrum-blue hover:underline">
             operations@vektrum.io

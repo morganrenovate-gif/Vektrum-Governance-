@@ -5,16 +5,12 @@ import type { LucideIcon } from "lucide-react";
 
 // ─── EmptyState ────────────────────────────────────────────────────────────────
 //
-// Canonical empty state for lists, tables, and sections that have no data.
-// Replaces ad-hoc empty state divs scattered across pages.
-//
-// Usage:
-//   <EmptyState
-//     icon={FolderOpen}
-//     title="No deals yet"
-//     description="Create your first deal to start tracking milestones."
-//     action={{ label: "Create Deal", href: "/dashboard/deals/new" }}
-//   />
+// Intentional empty state — not a placeholder, a deliberate system state.
+// Design principles:
+//   - Icon: contained in a structured icon box, not floating
+//   - Title: clear statement of state, not apology
+//   - Description: actionable context, max 1 sentence
+//   - CTA: secondary weight — never as prominent as primary page actions
 //
 interface EmptyStateAction {
   label: string;
@@ -43,28 +39,33 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center px-8 py-12 text-center",
+        "flex flex-col items-center justify-center px-8 py-14 text-center",
         variant === "dashed"
-          ? "rounded-2xl border-2 border-dashed border-white/[0.07]"
-          : "rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card",
+          ? "rounded-xl border border-dashed border-white/[0.08]"
+          : "rounded-xl border border-white/[0.08] bg-surface-2 shadow-card",
         className
       )}
     >
-      <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04] mb-4">
-        <Icon size={22} className="text-white/25" aria-hidden="true" />
+      {/* Icon */}
+      <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.03] mb-4">
+        <Icon size={20} className="text-white/20" aria-hidden="true" />
       </div>
-      <p className="text-[15px] font-semibold text-white/60">{title}</p>
+
+      {/* Text */}
+      <p className="text-[14px] font-semibold text-white/50">{title}</p>
       {description && (
-        <p className="mt-2 max-w-xs text-sm text-white/35 leading-relaxed">
+        <p className="mt-2 max-w-[280px] text-[13px] text-white/30 leading-relaxed">
           {description}
         </p>
       )}
+
+      {/* Action */}
       {action && (
         <div className="mt-6">
           {action.href ? (
             <Link
               href={action.href}
-              className="inline-flex min-h-[36px] items-center justify-center gap-1.5 rounded-xl border border-white/[0.12] bg-white/[0.05] px-4 py-1.5 text-[13px] font-medium text-white/70 hover:bg-white/[0.08] hover:text-white transition-all"
+              className="inline-flex min-h-[34px] items-center justify-center gap-1.5 rounded-lg border border-white/[0.1] bg-white/[0.04] px-4 py-1.5 text-[12px] font-medium text-white/55 hover:bg-white/[0.07] hover:text-white/80 transition-all"
             >
               {action.label}
             </Link>
@@ -72,7 +73,7 @@ export function EmptyState({
             <button
               type="button"
               onClick={action.onClick}
-              className="inline-flex min-h-[36px] items-center justify-center gap-1.5 rounded-xl border border-white/[0.12] bg-white/[0.05] px-4 py-1.5 text-[13px] font-medium text-white/70 hover:bg-white/[0.08] hover:text-white transition-all"
+              className="inline-flex min-h-[34px] items-center justify-center gap-1.5 rounded-lg border border-white/[0.1] bg-white/[0.04] px-4 py-1.5 text-[12px] font-medium text-white/55 hover:bg-white/[0.07] hover:text-white/80 transition-all"
             >
               {action.label}
             </button>

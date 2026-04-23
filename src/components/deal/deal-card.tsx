@@ -9,7 +9,6 @@ import { ChevronRight, Building2, User } from "lucide-react";
 interface DealCardProps {
   deal: Deal;
   className?: string;
-  /** When set, shows role-specific action button based on milestone state */
   viewerRole?: 'contractor' | 'funder' | 'admin';
 }
 
@@ -20,17 +19,14 @@ function getContractorAction(deal: Deal): { label: string; href: string; variant
     return { label: 'Continue Setup', href: `/dashboard/deals/${deal.id}/milestones`, variant: 'default' }
   }
 
-  // Check for disputed first (highest priority alert)
   if (milestones.some((m) => m.status === 'disputed')) {
     return { label: 'View Dispute', href: `/dashboard/deals/${deal.id}`, variant: 'danger' }
   }
 
-  // All released
   if (milestones.every((m) => m.status === 'released')) {
     return { label: 'Project Complete', href: `/dashboard/deals/${deal.id}`, variant: 'status' }
   }
 
-  // Priority order for active milestones
   const statusPriority: MilestoneStatus[] = ['ready_for_review', 'in_progress', 'not_started', 'approved']
   for (const status of statusPriority) {
     const ms = milestones.find((m) => m.status === status)
@@ -57,110 +53,112 @@ export function DealCard({ deal, className, viewerRole }: DealCardProps) {
       ? (deal.released_amount / deal.total_amount) * 100
       : 0;
 
+  const milestones = deal.milestones ?? [];
+  const releasedCount = milestones.filter((m) => m.status === "released").length;
+
   return (
     <Link
       href={`/dashboard/deals/${deal.id}`}
       className={cn("block group focus:outline-none", className)}
     >
-      <Card className="transition-all duration-200 group-hover:shadow-card-hover group-hover:-translate-y-0.5 group-focus-visible:ring-2 group-focus-visible:ring-vektrum-blue group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-surface-0">
-        <CardBody>
+      <Card className="transition-all duration-200 group-hover:shadow-card-hover group-hover:-translate-y-[2px] group-hover:border-white/[0.14] group-focus-visible:ring-2 group-focus-visible:ring-vektrum-blue group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-surface-0">
+        <CardBody className="pb-3">
+          {/* Title row */}
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="truncate text-sm font-semibold text-white group-hover:text-vektrum-blue transition-colors">
-                  {deal.title}
-                </h3>
-                <DealStatusBadge status={deal.status} />
-              </div>
+              <h3 className="text-[14px] font-semibold tracking-[-0.01em] text-white group-hover:text-vektrum-blue transition-colors leading-tight truncate">
+                {deal.title}
+              </h3>
 
               {/* Participants */}
-              <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-white/45">
+              <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[12px] text-white/35">
                 {deal.contractor && (
                   <span className="flex items-center gap-1">
-                    <Building2 size={11} aria-hidden="true" />
+                    <Building2 size={10} aria-hidden="true" />
                     {deal.contractor.company_name ?? deal.contractor.full_name}
                   </span>
                 )}
                 {deal.funder && (
                   <span className="flex items-center gap-1">
-                    <User size={11} aria-hidden="true" />
+                    <User size={10} aria-hidden="true" />
                     {deal.funder.full_name}
                   </span>
                 )}
               </div>
             </div>
 
-            <ChevronRight
-              size={16}
-              className="mt-0.5 flex-shrink-0 text-white/25 group-hover:text-vektrum-blue transition-colors"
-              aria-hidden="true"
-            />
+            <div className="flex flex-shrink-0 items-center gap-1.5 mt-0.5">
+              <DealStatusBadge status={deal.status} />
+              <ChevronRight
+                size={14}
+                className="text-white/20 group-hover:text-vektrum-blue transition-colors"
+                aria-hidden="true"
+              />
+            </div>
           </div>
 
-          {/* Money summary row */}
-          <div className="mt-3 grid grid-cols-3 gap-3 text-center">
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30">
+          {/* Financial data row — 3 columns, tight */}
+          <div className="mt-4 grid grid-cols-3 gap-0 divide-x divide-white/[0.06] -mx-1">
+            <div className="px-1 text-center">
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/25 mb-1">
                 Total
               </p>
-              <p className="mt-0.5 text-sm font-semibold tabular-nums text-white/80">
+              <p className="text-[13px] font-semibold tabular-nums text-white/65 font-mono tracking-tight">
                 {formatMoney(deal.total_amount)}
               </p>
             </div>
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30">
+            <div className="px-1 text-center">
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/25 mb-1">
                 Funded
               </p>
-              <p className="mt-0.5 text-sm font-semibold tabular-nums text-vektrum-blue">
+              <p className="text-[13px] font-semibold tabular-nums text-vektrum-blue font-mono tracking-tight">
                 {formatMoney(deal.funded_amount)}
               </p>
             </div>
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30">
+            <div className="px-1 text-center">
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/25 mb-1">
                 Released
               </p>
-              <p className="mt-0.5 text-sm font-semibold tabular-nums text-emerald-400">
+              <p className="text-[13px] font-semibold tabular-nums text-emerald-400 font-mono tracking-tight">
                 {formatMoney(deal.released_amount)}
               </p>
             </div>
           </div>
 
-          {/* Mini progress bar */}
-          <div className="mt-3">
-            <div className="relative h-1 w-full overflow-hidden rounded-full bg-white/[0.07]">
+          {/* Progress bar */}
+          <div className="mt-4">
+            <div className="relative h-[3px] w-full overflow-hidden rounded-full bg-white/[0.06]">
               <div
-                className="absolute left-0 top-0 h-full rounded-full bg-emerald-500/70"
+                className="absolute left-0 top-0 h-full rounded-full bg-emerald-500/60 transition-all duration-500"
                 style={{ width: `${Math.min(100, releasedPct)}%` }}
               />
+              {deal.funded_amount > 0 && deal.total_amount > 0 && (
+                <div
+                  className="absolute left-0 top-0 h-full rounded-full bg-vektrum-blue/30"
+                  style={{ width: `${Math.min(100, (deal.funded_amount / deal.total_amount) * 100)}%` }}
+                />
+              )}
             </div>
-            <p className="mt-1 text-right text-[10px] text-white/25">
-              {formatMoney(remaining)} remaining
-            </p>
           </div>
         </CardBody>
 
         <CardFooter>
           <div className="flex items-center justify-between w-full gap-2">
-            <p className="text-xs text-white/35">
-              {deal.milestones && deal.milestones.length > 0 ? (
-                <>
-                  {deal.milestones.length} milestone
-                  {deal.milestones.length !== 1 ? "s" : ""}
-                  {" · "}
-                  {deal.milestones.filter((m) => m.status === "released").length}{" "}
-                  released
-                </>
+            <p className="text-[11px] text-white/30 tabular-nums">
+              {milestones.length > 0 ? (
+                <>{milestones.length} milestone{milestones.length !== 1 ? "s" : ""} · {releasedCount} released</>
               ) : (
-                'No milestones'
+                "No milestones"
               )}
             </p>
+
             {viewerRole === 'contractor' && (() => {
               const action = getContractorAction(deal)
               if (!action) return null
               if (action.variant === 'status') {
                 return (
                   <span className={cn(
-                    "text-[11px] font-medium px-2.5 py-1 rounded-full border",
+                    "text-[10px] font-semibold px-2 py-0.5 rounded-full border tracking-wide uppercase",
                     action.label === 'Project Complete'
                       ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                       : "bg-amber-500/10 text-amber-400 border-amber-500/20"
@@ -171,12 +169,12 @@ export function DealCard({ deal, className, viewerRole }: DealCardProps) {
               }
               return (
                 <span className={cn(
-                  "text-[11px] font-medium px-2.5 py-1 rounded-full border",
+                  "text-[10px] font-semibold px-2 py-0.5 rounded-full border tracking-wide uppercase",
                   action.variant === 'danger'
                     ? "bg-red-500/10 text-red-400 border-red-500/20"
                     : "bg-vektrum-blue/10 text-vektrum-blue border-vektrum-blue/20"
                 )}>
-                  {action.label} →
+                  {action.label}
                 </span>
               )
             })()}

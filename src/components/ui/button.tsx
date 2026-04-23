@@ -31,10 +31,11 @@ const variantClasses: Record<ButtonVariant, string> = {
     "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 hover:border-emerald-500/30 focus-visible:ring-emerald-500",
   ghost:
     "bg-transparent text-white/55 hover:bg-white/[0.06] hover:text-white/80 focus-visible:ring-vektrum-blue",
-  // release — for fund release, high-value approvals, and irreversible financial actions.
-  // Distinct from primary: heavier shadow, subtle amber glow communicates consequence.
+  // release — irreversible financial payment actions only (fund release, Stripe transfer).
+  // Deliberately distinct from primary blue: emerald signals "money moving" not "navigation".
+  // Do NOT use for general approvals. Use success variant for non-destructive approvals.
   release:
-    "bg-vektrum-blue text-white shadow-lg shadow-vektrum-blue/30 ring-1 ring-inset ring-amber-400/20 hover:bg-vektrum-blue-hover hover:shadow-xl hover:shadow-vektrum-blue/40 hover:-translate-y-0.5 focus-visible:ring-vektrum-blue",
+    "bg-emerald-600 text-white shadow-lg shadow-emerald-600/25 hover:bg-emerald-500 hover:shadow-xl hover:shadow-emerald-500/30 hover:-translate-y-0.5 focus-visible:ring-emerald-500",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -66,7 +67,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         className={cn(
           "inline-flex items-center justify-center font-semibold",
           "transition-all duration-150 ease-in-out",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0D1B2A]",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-0",
           "disabled:cursor-not-allowed disabled:opacity-60",
           variantClasses[variant],
           sizeClasses[size],

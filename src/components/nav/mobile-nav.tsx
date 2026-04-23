@@ -61,7 +61,7 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
       {/* Hamburger button — visible only on mobile */}
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex sm:hidden items-center justify-center w-9 h-9 rounded-lg text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-colors"
+        className="flex sm:hidden items-center justify-center w-9 h-9 rounded-lg text-white/55 hover:text-white hover:bg-surface-3 transition-colors"
         aria-label={open ? 'Close menu' : 'Open menu'}
         aria-expanded={open}
       >
@@ -79,7 +79,7 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
           />
 
           {/* Drawer */}
-          <div className="fixed inset-x-0 top-[65px] z-50 sm:hidden border-b border-vektrum-border bg-vektrum-surface shadow-xl">
+          <div className="fixed inset-x-0 top-[65px] z-50 sm:hidden border-b border-white/[0.08] bg-surface-2 shadow-xl">
             <nav className="flex flex-col px-4 py-4 gap-1">
 
               {isLoggedIn ? (
@@ -91,10 +91,10 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
                       {getInitials()}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[13px] font-semibold text-vektrum-text truncate">
+                      <p className="text-[13px] font-semibold text-white truncate">
                         {userName ?? 'Your account'}
                       </p>
-                      <p className="text-[11px] text-vektrum-muted truncate">
+                      <p className="text-[11px] text-white/55 truncate">
                         {userEmail ?? ''}
                       </p>
                     </div>
@@ -102,7 +102,7 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
 
                   <Link
                     href="/dashboard"
-                    className="flex items-center min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                    className="flex items-center min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-white/55 hover:text-white hover:bg-surface-3 transition-all"
                     onClick={() => setOpen(false)}
                   >
                     Dashboard
@@ -112,7 +112,7 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
                     <>
                       <Link
                         href="/dashboard/deals/new"
-                        className="flex items-center gap-3 min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                        className="flex items-center gap-3 min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-white/55 hover:text-white hover:bg-surface-3 transition-all"
                         onClick={() => setOpen(false)}
                       >
                         <Briefcase size={16} aria-hidden="true" />
@@ -120,7 +120,7 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
                       </Link>
                       <Link
                         href="/dashboard/contractor/documents"
-                        className="flex items-center gap-3 min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                        className="flex items-center gap-3 min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-white/55 hover:text-white hover:bg-surface-3 transition-all"
                         onClick={() => setOpen(false)}
                       >
                         <FileBox size={16} aria-hidden="true" />
@@ -128,7 +128,7 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
                       </Link>
                       <Link
                         href="/dashboard/contractor/payments"
-                        className="flex items-center gap-3 min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                        className="flex items-center gap-3 min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-white/55 hover:text-white hover:bg-surface-3 transition-all"
                         onClick={() => setOpen(false)}
                       >
                         <DollarSign size={16} aria-hidden="true" />
@@ -139,7 +139,7 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
 
                   <Link
                     href="/dashboard/audit"
-                    className="flex items-center gap-3 min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                    className="flex items-center gap-3 min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-white/55 hover:text-white hover:bg-surface-3 transition-all"
                     onClick={() => setOpen(false)}
                   >
                     <FileText size={16} aria-hidden="true" />
@@ -148,7 +148,7 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
 
                   <Link
                     href="/dashboard/settings"
-                    className="flex items-center gap-3 min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                    className="flex items-center gap-3 min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-white/55 hover:text-white hover:bg-surface-3 transition-all"
                     onClick={() => setOpen(false)}
                   >
                     <Settings size={16} aria-hidden="true" />
@@ -158,7 +158,7 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
                   {userRole === 'admin' && (
                     <Link
                       href="/dashboard/admin"
-                      className="flex items-center gap-3 min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                      className="flex items-center gap-3 min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-white/55 hover:text-white hover:bg-surface-3 transition-all"
                       onClick={() => setOpen(false)}
                     >
                       <Shield size={16} className="text-vektrum-blue" aria-hidden="true" />
@@ -168,18 +168,18 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
 
                   <Link
                     href="/contact"
-                    className="flex items-center gap-3 min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                    className="flex items-center gap-3 min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-white/55 hover:text-white hover:bg-surface-3 transition-all"
                     onClick={() => setOpen(false)}
                   >
                     <HelpCircle size={16} aria-hidden="true" />
                     Support
                   </Link>
 
-                  <div className="mt-2 pt-2 border-t border-vektrum-border">
+                  <div className="mt-2 pt-2 border-t border-white/[0.08]">
                     <button
                       onClick={handleSignOut}
                       disabled={signingOut}
-                      className="flex items-center gap-3 w-full min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-red hover:bg-vektrum-red-bg transition-all disabled:opacity-50"
+                      className="flex items-center gap-3 w-full min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-red-400 hover:bg-red-500/[0.08] transition-all disabled:opacity-50"
                     >
                       <LogOut size={16} aria-hidden="true" />
                       {signingOut ? 'Signing out…' : 'Sign out'}
@@ -190,41 +190,41 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
                 // ── Logged-out drawer ───────────────────────────────────────
                 <>
                   <Link
-                    href="/lenders"
-                    className="flex items-center min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                    href="/funders"
+                    className="flex items-center min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-white/55 hover:text-white hover:bg-surface-3 transition-all"
                     onClick={() => setOpen(false)}
                   >
                     Funders
                   </Link>
                   <Link
                     href="/contractors"
-                    className="flex items-center min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                    className="flex items-center min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-white/55 hover:text-white hover:bg-surface-3 transition-all"
                     onClick={() => setOpen(false)}
                   >
                     For Contractors
                   </Link>
                   <Link
                     href="/pricing"
-                    className="flex items-center min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                    className="flex items-center min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-white/55 hover:text-white hover:bg-surface-3 transition-all"
                     onClick={() => setOpen(false)}
                   >
                     Pricing
                   </Link>
                   <Link
                     href="/dashboard"
-                    className="flex items-center min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                    className="flex items-center min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-white/55 hover:text-white hover:bg-surface-3 transition-all"
                     onClick={() => setOpen(false)}
                   >
                     Dashboard
                   </Link>
                   <Link
                     href="/auth/login"
-                    className="flex items-center min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                    className="flex items-center min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-white/55 hover:text-white hover:bg-surface-3 transition-all"
                     onClick={() => setOpen(false)}
                   >
                     Sign in
                   </Link>
-                  <div className="mt-3 pt-3 border-t border-vektrum-border">
+                  <div className="mt-3 pt-3 border-t border-white/[0.08]">
                     <Link
                       href="/auth/signup"
                       className="flex items-center justify-center min-h-[48px] w-full rounded-xl bg-vektrum-blue text-[15px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 hover:bg-vektrum-blue-hover transition-all"

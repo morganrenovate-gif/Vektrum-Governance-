@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import type { UserRole } from "@/lib/types";
 
 const AUTH_TRUST = [
-  { icon: Lock, title: "7-condition release gate", desc: "Payments move only with your explicit approval." },
+  { icon: Lock, title: "8-condition release gate", desc: "Payments move only with your explicit approval." },
   { icon: Shield, title: "Funds held by Stripe", desc: "Vektrum governs — never holds your capital." },
   { icon: FileCheck, title: "Immutable audit trail", desc: "Every action logged. No edits. No deletes." },
   { icon: CheckCircle2, title: "Contractors join free", desc: "Funders pay. Contractors are always free." },
@@ -81,16 +81,16 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12 bg-vektrum-bg">
+      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12 bg-[#0D1B2A]">
         <div className="w-full max-w-sm text-center space-y-5">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-vektrum-green-bg">
-            <CheckCircle2 size={28} className="text-vektrum-green" aria-hidden="true" />
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/[0.08]">
+            <CheckCircle2 size={28} className="text-emerald-400" aria-hidden="true" />
           </div>
           <div>
-            <h2 className="font-display text-2xl font-bold text-vektrum-text">Check your inbox</h2>
-            <p className="mt-2 text-sm text-vektrum-muted">
+            <h2 className="font-display text-2xl font-bold text-white">Check your inbox</h2>
+            <p className="mt-2 text-sm text-white/55">
               We sent a confirmation link to{" "}
-              <strong className="text-vektrum-text">{formData.email}</strong>. Click it
+              <strong className="text-white">{formData.email}</strong>. Click it
               to activate your account and sign in.
             </p>
           </div>
@@ -143,25 +143,25 @@ export default function SignupPage() {
       </div>
 
       {/* ── Right: Signup form ────────────────────────────────────────────── */}
-      <div className="flex flex-1 items-start justify-center overflow-y-auto px-4 py-12 sm:px-8 bg-vektrum-bg">
+      <div className="flex flex-1 items-start justify-center overflow-y-auto px-4 py-12 sm:px-8 bg-[#0D1B2A]">
         <div className="w-full max-w-sm">
           <div className="mb-8">
-            <h1 className="font-display text-2xl font-bold text-vektrum-text">
+            <h1 className="font-display text-2xl font-bold text-white">
               Create your account
             </h1>
-            <p className="mt-1.5 text-sm text-vektrum-muted">
+            <p className="mt-1.5 text-sm text-white/55">
               Join Vektrum — construction payment governance
             </p>
           </div>
 
-          <div className="rounded-xl border border-vektrum-border bg-vektrum-surface p-6 shadow-sm">
+          <div className="rounded-xl border border-white/[0.08] bg-surface-2 p-6 shadow-sm">
             <form onSubmit={handleSubmit} noValidate className="space-y-4">
 
               {/* Visual role selection cards */}
               <div className="space-y-2">
-                <p className="text-sm font-medium text-vektrum-text">
+                <p className="text-sm font-medium text-white">
                   I am a…{" "}
-                  <span className="text-vektrum-red text-xs" aria-hidden="true">*</span>
+                  <span className="text-red-400 text-xs" aria-hidden="true">*</span>
                 </p>
                 <div className="grid grid-cols-2 gap-2.5">
                   {(["contractor", "funder"] as UserRole[]).map((role) => {
@@ -177,32 +177,32 @@ export default function SignupPage() {
                         className={cn(
                           "flex flex-col items-center gap-2 rounded-lg border-2 px-3 py-3.5 text-center transition-all",
                           isSelected
-                            ? "border-vektrum-blue bg-vektrum-blue-subtle"
-                            : "border-vektrum-border bg-vektrum-bg hover:border-vektrum-blue/40 hover:bg-vektrum-surface"
+                            ? "border-vektrum-blue bg-vektrum-blue/10"
+                            : "border-white/[0.08] bg-surface-3 hover:border-vektrum-blue/40 hover:bg-surface-2"
                         )}
                         aria-pressed={isSelected}
                       >
                         <div className={cn(
                           "flex h-8 w-8 items-center justify-center rounded-lg",
-                          isSelected ? "bg-vektrum-blue" : "bg-vektrum-surface-alt"
+                          isSelected ? "bg-vektrum-blue" : "bg-surface-3"
                         )}>
-                          <Icon size={16} className={isSelected ? "text-white" : "text-vektrum-muted"} aria-hidden="true" />
+                          <Icon size={16} className={isSelected ? "text-white" : "text-white/55"} aria-hidden="true" />
                         </div>
                         <div>
                           <p className={cn(
                             "text-[13px] font-semibold",
-                            isSelected ? "text-vektrum-blue" : "text-vektrum-text"
+                            isSelected ? "text-vektrum-blue" : "text-white"
                           )}>
                             {label}
                           </p>
-                          <p className="text-[11px] text-vektrum-faint">{sub}</p>
+                          <p className="text-[11px] text-white/30">{sub}</p>
                         </div>
                       </button>
                     );
                   })}
                 </div>
                 {formData.role === "contractor" && (
-                  <p className="text-[11px] text-vektrum-green flex items-center gap-1">
+                  <p className="text-[11px] text-emerald-400 flex items-center gap-1">
                     <CheckCircle2 size={11} aria-hidden="true" />
                     Contractors always join free — no subscription, no fees.
                   </p>
@@ -262,7 +262,7 @@ export default function SignupPage() {
               {error && (
                 <div
                   role="alert"
-                  className="flex items-start gap-2 rounded-md bg-vektrum-red-bg border border-vektrum-red-border px-3 py-2.5 text-sm text-vektrum-red"
+                  className="flex items-start gap-2 rounded-md bg-red-500/[0.08] border border-red-500/20 px-3 py-2.5 text-sm text-red-400"
                 >
                   <AlertCircle size={15} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
                   {error}
@@ -281,7 +281,7 @@ export default function SignupPage() {
             </form>
           </div>
 
-          <p className="mt-5 text-center text-sm text-vektrum-muted">
+          <p className="mt-5 text-center text-sm text-white/55">
             Already have an account?{" "}
             <Link
               href="/auth/login"
@@ -291,9 +291,9 @@ export default function SignupPage() {
             </Link>
           </p>
 
-          <div className="mt-6 lg:hidden flex items-start gap-2 rounded-lg border border-vektrum-border bg-vektrum-surface px-4 py-3">
+          <div className="mt-6 lg:hidden flex items-start gap-2 rounded-lg border border-white/[0.08] bg-surface-2 px-4 py-3">
             <Shield size={14} className="text-vektrum-blue mt-0.5 flex-shrink-0" aria-hidden="true" />
-            <p className="text-xs text-vektrum-muted">
+            <p className="text-xs text-white/55">
               Payments powered by Stripe Connect. Vektrum governs release — never holds your funds.
             </p>
           </div>

@@ -15,9 +15,17 @@
 // The text is never persisted — only the resulting milestone structure is saved
 // (by confirmDealFromContract in src/lib/actions/analyze-contract.ts).
 
+// POST /api/analyze-contract
+//
+// SECURITY: Requires an authenticated session — any logged-in user (any role)
+// may use this endpoint to analyse a contract PDF before creating a deal.
+// Unauthenticated requests are rejected with 401 to prevent anonymous API
+// abuse that would burn Perplexity API credits.
+
 export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
+import { getAuthUser } from '@/lib/auth/middleware'
 import type { ContractAnalysisResult, ProposedMilestone } from '@/lib/actions/analyze-contract'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -30,6 +38,16 @@ const PERPLEXITY_URL = 'https://api.perplexity.ai/chat/completions'
 // ─── POST handler ─────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  // ── 0. Authentication gate ─────────────────────────────────────────────────
+  // Any authenticated user may analyse a contract. We do NOT require a specific
+  // role because this endpoint is used during deal creation, before a deal (and
+  // therefore a role context) exists. The gate solely prevents anonymous abuse.
+  try {
+    await getAuthUser(req)
+  } catch (err) {
+    return err as NextResponse
+  }
+
   // ── 1. Parse multipart form ────────────────────────────────────────────────
   let formData: FormData
   try {

@@ -12,7 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
     },
     {
-      url: `${baseUrl}/lenders`,
+      url: `${baseUrl}/funders`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.9,

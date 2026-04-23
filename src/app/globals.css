@@ -15,45 +15,49 @@
      * ────────────────────────────────────────────────────────────────────── */
 
     /* Surfaces */
-    --background:   #F4F6FA;   /* Light blue-grey — construction blueprint feel */
+    --background:   #F4F6FA;
     --surface:      #FFFFFF;
-    --surface-alt:  #EEF2F8;   /* Slightly deeper blue-grey for section contrast */
+    --surface-alt:  #EEF2F8;
 
     /* Borders */
-    --border:       #D0D8E8;   /* Blue-tinted border — echoes brand blue subtly */
+    --border:       #D0D8E8;
     --border-subtle:#E4E8F0;
 
     /* Text */
-    --foreground:   #141414;   /* Logo wordmark black — primary text */
-    --muted:        #5A6478;   /* Blue-grey muted text */
-    --faint:        #9AA3B5;   /* Tertiary text */
+    --foreground:   #141414;
+    --muted:        #5A6478;
+    --faint:        #9AA3B5;
 
-    /* Brand accent — logo cobalt blue */
+    /* Brand accent */
     --accent:       #1A3A96;
-    --accent-hover: #132D78;   /* 10% darker for hover */
-    --accent-subtle:#E8EDF8;   /* Tinted blue bg for badges / highlights */
+    --accent-hover: #132D78;
+    --accent-subtle:#E8EDF8;
 
-    /* Dark canvas — logo near-black, used in dark hero sections */
+    /* Dark canvas */
     --canvas:       #141414;
     --canvas-text:  #F0F2F7;
     --canvas-muted: #8A93A8;
 
-    /* Semantic — status colors (accessible, distinct from brand blue) */
-    --success:      #1A7A4A;   /* Deep green */
-    --success-bg:   #EAF7F0;
+    /* Semantic */
+    --success:       #1A7A4A;
+    --success-bg:    #EAF7F0;
     --success-border:#B0DFC4;
-
-    --warning:      #9A5A0A;   /* Warm amber */
-    --warning-bg:   #FEF3E2;
+    --warning:       #9A5A0A;
+    --warning-bg:    #FEF3E2;
     --warning-border:#F0CC80;
+    --error:         #B01C1C;
+    --error-bg:      #FEF0F0;
+    --error-border:  #F0AAAA;
+    --info:          #1A3A96;
+    --info-bg:       #E8EDF8;
+    --info-border:   #A8BAEA;
 
-    --error:        #B01C1C;   /* Deep red */
-    --error-bg:     #FEF0F0;
-    --error-border: #F0AAAA;
-
-    --info:         #1A3A96;   /* Same as accent — blue IS info */
-    --info-bg:      #E8EDF8;
-    --info-border:  #A8BAEA;
+    /* Dark surface hierarchy */
+    --surface-0: #0D1B2A;
+    --surface-1: #0F1F30;
+    --surface-2: #111827;
+    --surface-3: #1A2535;
+    --surface-4: #232D3F;
   }
 
   html {
@@ -89,39 +93,38 @@
     @apply transition-all duration-200 ease-out;
   }
 
-  /* Touch optimization for all interactive elements */
   button, a, [role="button"] {
     touch-action: manipulation;
   }
 
   .page-container {
-    @apply max-w-6xl mx-auto px-6 sm:px-8 lg:px-12;
+    @apply max-w-7xl mx-auto px-6 sm:px-8 lg:px-12;
   }
 
   .section {
     @apply py-8 sm:py-12;
   }
 
-  /* ── Dashboard shell standard ────────────────────────────────────────────── */
-  /* Replaces the repeated min-h-screen + max-w-6xl copy-paste pattern.        */
-  /* Use .dash-page on the inner content div inside any DashboardShell.        */
+  /* ── Dashboard shell ─────────────────────────────────────────────────────── */
+  /* Max-w-7xl (1280px) for data-dense institutional dashboards.               */
+  /* Wider than typical SaaS: institutional tools show more data, less margin. */
   .dash-page {
-    @apply max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-10 sm:py-14 space-y-8;
+    @apply max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-10 sm:py-14 space-y-10;
   }
 
-  /* ── Dark card — use instead of inline style={{ boxShadow }} ──────────────── */
+  /* ── Card system ─────────────────────────────────────────────────────────── */
   .card-dark {
-    @apply rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card;
+    @apply rounded-xl border border-white/[0.08] bg-surface-2 shadow-card;
   }
   .card-dark-hover {
-    @apply rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card
+    @apply rounded-xl border border-white/[0.08] bg-surface-2 shadow-card
            transition-all duration-200 hover:-translate-y-0.5 hover:border-white/[0.14] hover:shadow-card-hover;
   }
   .card-feature {
-    @apply rounded-2xl border border-white/[0.08] bg-surface-2 shadow-feature;
+    @apply rounded-xl border border-white/[0.08] bg-surface-2 shadow-feature;
   }
 
-  /* ── Section eyebrow — the horizontal-rule + label pattern ──────────────── */
+  /* ── Section eyebrow ─────────────────────────────────────────────────────── */
   .eyebrow {
     @apply flex items-center gap-3;
   }
@@ -129,40 +132,101 @@
     @apply h-px w-5 bg-vektrum-blue flex-shrink-0;
   }
   .eyebrow-label {
-    @apply text-[11px] font-semibold uppercase tracking-[0.12em] text-vektrum-blue;
+    @apply text-[11px] font-semibold uppercase tracking-[0.14em] text-vektrum-blue;
   }
 
-  /* ── Section header label (for within-page sections) ────────────────────── */
+  /* ── Section label ───────────────────────────────────────────────────────── */
   .section-label {
-    @apply text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40;
+    @apply text-[10px] font-semibold uppercase tracking-[0.14em] text-white/35;
   }
 
-  /* ── Table standard — applies inside DataTable containers ───────────────── */
+  /* ── Panel header ────────────────────────────────────────────────────────── */
+  /* Standard header row inside a card/panel. */
+  .panel-header {
+    @apply flex items-center justify-between px-5 py-4 border-b border-white/[0.06];
+  }
+  .panel-header-title {
+    @apply text-[13px] font-semibold text-white;
+  }
+
+  /* ── Data table ──────────────────────────────────────────────────────────── */
+  /* Institutional: tight rows, clear column headers, minimal noise.           */
+  .data-table {
+    @apply w-full border-collapse;
+  }
   .data-table th {
-    @apply px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-white/35;
+    @apply px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-white/30;
+    white-space: nowrap;
   }
   .data-table th.col-right,
   .data-table td.col-right {
     @apply text-right;
   }
   .data-table td {
-    @apply px-4 py-3.5 text-sm text-white/70;
+    @apply px-4 py-3 text-[13px] text-white/65;
+  }
+  .data-table thead {
+    @apply border-b border-white/[0.06] bg-white/[0.015];
   }
   .data-table tbody tr {
-    @apply border-b border-white/[0.04] transition-colors hover:bg-surface-4;
+    @apply border-b border-white/[0.035] transition-colors;
+  }
+  .data-table tbody tr:hover {
+    @apply bg-white/[0.025];
   }
   .data-table tbody tr:last-child {
     @apply border-b-0;
   }
+  .data-table tfoot {
+    @apply border-t border-white/[0.08] bg-white/[0.02];
+  }
 
-  /* ── Status badges ──────────────────────────────────────────────────────── */
-  /* Milestone workflow status */
-  .status-not-started    { background-color: var(--surface-alt); color: var(--muted); }
-  .status-in-progress    { background-color: var(--accent-subtle); color: var(--accent); }
-  .status-ready-for-review { background-color: var(--warning-bg); color: var(--warning); }
-  .status-approved       { background-color: var(--success-bg); color: var(--success); }
-  .status-released       { background-color: var(--success-bg); color: var(--success); }
-  .status-disputed       { background-color: var(--error-bg); color: var(--error); }
+  /* ── Status badges (dark-context) ───────────────────────────────────────── */
+  /* These replace the broken light-mode status CSS classes.                  */
+  .status-not-started    { @apply bg-white/[0.05] text-white/40 border border-white/[0.08]; }
+  .status-in-progress    { @apply bg-vektrum-blue/10 text-vektrum-blue border border-vektrum-blue/20; }
+  .status-ready-for-review { @apply bg-amber-500/10 text-amber-400 border border-amber-500/20; }
+  .status-approved       { @apply bg-emerald-500/10 text-emerald-400 border border-emerald-500/20; }
+  .status-released       { @apply bg-emerald-500/10 text-emerald-400 border border-emerald-500/20; }
+  .status-disputed       { @apply bg-red-500/10 text-red-400 border border-red-500/20; }
+
+  /* ── Alert/notice banners (dark-context) ────────────────────────────────── */
+  .notice-info {
+    @apply flex items-start gap-2.5 rounded-lg border border-vektrum-blue/20 bg-vektrum-blue/[0.07] px-4 py-3 text-[13px] text-vektrum-blue;
+  }
+  .notice-warning {
+    @apply flex items-start gap-2.5 rounded-lg border border-amber-500/25 bg-amber-500/[0.07] px-4 py-3 text-[13px] text-amber-400;
+  }
+  .notice-success {
+    @apply flex items-start gap-2.5 rounded-lg border border-emerald-500/20 bg-emerald-500/[0.07] px-4 py-3 text-[13px] text-emerald-400;
+  }
+  .notice-error {
+    @apply flex items-start gap-2.5 rounded-lg border border-red-500/20 bg-red-500/[0.07] px-4 py-3 text-[13px] text-red-400;
+  }
+
+  /* ── Metric strip ────────────────────────────────────────────────────────── */
+  /* A horizontal bar of key stats separated by vertical dividers.             */
+  /* More data-dense and institutional than floating cards.                   */
+  .metric-strip {
+    @apply flex divide-x divide-white/[0.06] rounded-xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden;
+  }
+  .metric-strip-item {
+    @apply flex-1 px-5 py-4;
+  }
+  .metric-strip-label {
+    @apply text-[10px] font-semibold uppercase tracking-[0.14em] text-white/35 mb-1.5;
+  }
+  .metric-strip-value {
+    @apply font-mono text-[1.625rem] font-bold leading-none tabular-nums tracking-tight text-white;
+  }
+  .metric-strip-sub {
+    @apply mt-1 text-[11px] text-white/30;
+  }
+
+  /* ── Section divider ─────────────────────────────────────────────────────── */
+  .section-divider {
+    @apply h-px w-full bg-white/[0.05];
+  }
 
   /* ── Gradient border for feature cards ─────────────────────────────────── */
   .gradient-border {
@@ -195,5 +259,67 @@
 
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* ── Type scale ──────────────────────────────────────────────────────────────
+   *
+   * Strict 6-step scale. Do NOT use arbitrary px/rem values in components.
+   * Use these classes instead of text-[13px], text-[10px], etc.
+   *
+   *   .text-2xs   → 10px  — column headers, badge labels, eyebrows
+   *   .text-xs    → 12px  — secondary meta, helper text       (Tailwind built-in)
+   *   .text-sm    → 13px  — body copy, table cells, captions  (overridden below)
+   *   .text-base  → 15px  — primary body, button labels       (Tailwind built-in)
+   *   .text-lg    → 18px  — card titles, section leads
+   *   .type-page-title    — responsive page heading (clamp)
+   * ─────────────────────────────────────────────────────────────────────────── */
+
+  /* 10px — smallest legible step (headers, eyebrows, badge text) */
+  .text-2xs {
+    font-size: 0.625rem;
+    line-height: 1rem;
+  }
+
+  /* 13px — override Tailwind's text-sm (14px) for tighter table/caption copy */
+  .text-sm {
+    font-size: 0.8125rem;
+    line-height: 1.5rem;
+  }
+
+  /* Type scale utilities */
+  .type-page-title {
+    font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+    font-size: clamp(1.875rem, 4vw, 2.625rem);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    color: white;
+  }
+  .type-section-title {
+    font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: white;
+  }
+  .type-label-upper {
+    @apply text-2xs font-semibold uppercase tracking-[0.14em] text-white/35;
+  }
+  .type-data-primary {
+    font-family: var(--font-mono), monospace;
+    font-size: 1.625rem;
+    font-weight: 700;
+    line-height: 1;
+    font-feature-settings: "tnum" 1, "lnum" 1;
+    letter-spacing: -0.01em;
+    color: white;
+  }
+  .type-data-secondary {
+    font-family: var(--font-mono), monospace;
+    font-size: 0.875rem;
+    font-weight: 600;
+    font-feature-settings: "tnum" 1;
+    color: rgba(255,255,255,0.7);
   }
 }

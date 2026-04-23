@@ -176,7 +176,7 @@ export default function NewDealPage() {
                     {serverError && (
                       <div
                         role="alert"
-                        className="flex items-start gap-2 rounded-md bg-vektrum-red-bg border border-vektrum-red-border px-3 py-2.5 text-sm text-vektrum-red"
+                        className="flex items-start gap-2 rounded-md bg-red-500/[0.08] border border-red-500/20 px-3 py-2.5 text-sm text-red-400"
                       >
                         <AlertCircle size={15} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
                         {serverError}

@@ -3,22 +3,20 @@ import React from "react";
 
 // ─── PageHeader ────────────────────────────────────────────────────────────────
 //
-// The unified top-of-page header for every dashboard page.
-// Replaces the ad-hoc eyebrow + h1 pattern that is copy-pasted across pages.
-//
-// Usage:
-//   <PageHeader
-//     eyebrow="Contractor Dashboard"
-//     title="Welcome back, Marcus"
-//     description="3 active deals · 1 draw pending review"
-//     action={<Button>Create Deal</Button>}
-//   />
+// Institutional-grade page header for all dashboard pages.
+// Design principles:
+//   - Eyebrow: tight uppercase label with vertical bar accent
+//   - Title: large, heavy, authority-first typography
+//   - Separator: full-width hairline below header creates clear page division
+//   - Action: always right-aligned, never competes with title
 //
 interface PageHeaderProps {
   eyebrow?: string;
   title: React.ReactNode;
   description?: React.ReactNode;
   action?: React.ReactNode;
+  /** Omit the bottom separator (use when the next element has its own top border) */
+  noSeparator?: boolean;
   className?: string;
 }
 
@@ -27,37 +25,39 @@ export function PageHeader({
   title,
   description,
   action,
+  noSeparator = false,
   className,
 }: PageHeaderProps) {
   return (
-    <div
-      className={cn(
-        "flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between",
-        className
-      )}
-    >
-      <div>
-        {eyebrow && (
-          <div className="mb-3 flex items-center gap-3">
-            <div className="h-px w-5 bg-vektrum-blue flex-shrink-0" aria-hidden="true" />
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-vektrum-blue">
-              {eyebrow}
+    <div className={cn("space-y-0", className)}>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between pb-7">
+        <div className="space-y-2.5">
+          {eyebrow && (
+            <div className="flex items-center gap-2.5">
+              {/* Vertical bar accent — more structural than horizontal line */}
+              <div className="h-4 w-[3px] rounded-full bg-vektrum-blue flex-shrink-0" aria-hidden="true" />
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-vektrum-blue">
+                {eyebrow}
+              </p>
+            </div>
+          )}
+          <h1 className="type-page-title">
+            {title}
+          </h1>
+          {description && (
+            <p className="text-[13px] text-white/45 leading-relaxed max-w-2xl mt-0.5">
+              {description}
             </p>
+          )}
+        </div>
+        {action && (
+          <div className="flex-shrink-0 self-end sm:pb-0.5">
+            {action}
           </div>
         )}
-        <h1 className="font-display text-[2rem] sm:text-[2.25rem] font-bold tracking-[-0.03em] text-white leading-[1.05]">
-          {title}
-        </h1>
-        {description && (
-          <p className="mt-2 text-sm text-white/50 leading-relaxed max-w-2xl">
-            {description}
-          </p>
-        )}
       </div>
-      {action && (
-        <div className="flex-shrink-0 self-start">
-          {action}
-        </div>
+      {!noSeparator && (
+        <div className="h-px w-full bg-white/[0.06]" aria-hidden="true" />
       )}
     </div>
   );
@@ -65,12 +65,8 @@ export function PageHeader({
 
 // ─── SectionHeader ─────────────────────────────────────────────────────────────
 //
-// The standard section label with eyebrow line used inside pages.
-// Replaces the SectionLabel inline function in dashboard/page.tsx and similar.
-//
-// Usage:
-//   <SectionHeader label="Your Deals" count={3} />
-//   <SectionHeader label="Action Queue" count={2} variant="warning" />
+// Section-level label. Institutional: full-width rule with embedded label.
+// Replaces the previous tiny-line + text pattern with a more structural element.
 //
 interface SectionHeaderProps {
   label: string;
@@ -92,25 +88,35 @@ export function SectionHeader({
       ? "text-amber-400"
       : variant === "blue"
       ? "text-vektrum-blue"
-      : "text-white/40";
+      : "text-white/35";
 
-  const lineColor =
+  const barColor =
     variant === "warning"
       ? "bg-amber-400"
-      : "bg-vektrum-blue";
+      : variant === "blue"
+      ? "bg-vektrum-blue"
+      : "bg-white/[0.12]";
 
   return (
-    <div className={cn("mb-5 flex items-center justify-between", className)}>
-      <div className="flex items-center gap-3">
-        <div className={cn("h-px w-5 flex-shrink-0", lineColor)} aria-hidden="true" />
-        <p className={cn("text-[11px] font-semibold uppercase tracking-[0.12em]", labelColor)}>
+    <div className={cn("mb-5 flex items-center justify-between gap-4", className)}>
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        {/* Full-width separator with label — reads as a genuine section break */}
+        <div className={cn("h-px w-7 flex-shrink-0", barColor)}
+             aria-hidden="true" />
+        <p className={cn("text-[10px] font-bold uppercase tracking-[0.16em] whitespace-nowrap", labelColor)}>
           {label}
           {count !== undefined && (
-            <span className="ml-2 font-mono tabular-nums text-white/25">· {count}</span>
+            <span className="ml-2.5 font-mono tabular-nums font-normal text-white/20">
+              {count}
+            </span>
           )}
         </p>
+        <div className={cn("h-px flex-1", variant === "default" ? "bg-white/[0.05]" : "bg-transparent")}
+             aria-hidden="true" />
       </div>
-      {action && <div className="ml-auto">{action}</div>}
+      {action && (
+        <div className="flex-shrink-0">{action}</div>
+      )}
     </div>
   );
 }

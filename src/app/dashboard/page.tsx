@@ -4,16 +4,14 @@ import { createClient } from '@/lib/supabase/server'
 import { DealCard } from '@/components/deal/deal-card'
 import { Button } from '@/components/ui/button'
 import type { Deal, Profile } from '@/lib/types'
-import { Plus, FolderOpen, Lock, AlertCircle, ArrowRight } from 'lucide-react'
+import { Plus, FolderOpen, AlertCircle, ArrowRight } from 'lucide-react'
 // Shared layout primitives
-import { PageHeader, SectionHeader, StatBlock, EmptyState } from '@/components/layout'
-// Phase 6/7 dashboard sub-components
+import { PageHeader, SectionHeader, StatBlock, MetricStrip, EmptyState } from '@/components/layout'
 import { DrawReviewPanel } from '@/components/dashboard/draw-review-panel'
 import { CapitalSummary } from '@/components/dashboard/capital-summary'
 import { ReadinessGauge } from '@/components/dashboard/readiness-gauge'
 import { IntelBriefing } from '@/components/dashboard/intel-briefing'
 import { PortfolioRiskChart } from '@/components/dashboard/portfolio-risk-chart'
-// Phase 2/3 overlay + assistant (client components — imported dynamically)
 import { OnboardingWizard } from '@/components/onboarding/onboarding-wizard'
 import { AssistantPanel } from '@/components/assistant/assistant-panel'
 import { formatMoney } from '@/lib/utils'
@@ -54,12 +52,6 @@ async function getProfileAndDeals(userId: string) {
   return { profile, deals: (deals ?? []) as Deal[] }
 }
 
-// Inline helpers removed — replaced by shared layout primitives:
-// StatTile        → <StatBlock>
-// MoneyStatTile   → <StatBlock money>
-// EmptyDeals      → <EmptyState>
-// SectionLabel    → <SectionHeader>
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -80,11 +72,25 @@ export default async function DashboardPage() {
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-surface-0 flex items-center justify-center">
-        <div className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card px-8 py-7 max-w-sm w-full">
-          <p className="text-[14px] text-white/55">
-            Your profile could not be loaded. Please sign out and try again.
-          </p>
+      <div className="min-h-screen bg-surface-0 flex items-center justify-center px-4">
+        <div className="rounded-xl border border-white/[0.08] bg-surface-2 shadow-card px-8 py-7 max-w-sm w-full space-y-4">
+          <div className="notice-error">
+            <span>Your profile could not be loaded. This is usually a temporary issue.</span>
+          </div>
+          <div className="flex gap-3">
+            <a
+              href="/dashboard"
+              className="inline-flex items-center justify-center min-h-[36px] px-4 rounded-xl bg-vektrum-blue text-white text-sm font-semibold hover:bg-vektrum-blue-hover transition-colors"
+            >
+              Retry
+            </a>
+            <a
+              href="/auth/logout"
+              className="inline-flex items-center justify-center min-h-[36px] px-4 rounded-xl border border-white/[0.12] text-sm text-white/60 hover:bg-white/[0.06] transition-colors"
+            >
+              Sign out
+            </a>
+          </div>
         </div>
       </div>
     )
@@ -173,7 +179,7 @@ export default async function DashboardPage() {
 
               return (
                 <div
-                  className={`rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card px-5 py-4 flex items-center justify-between border-l-4 ${accentColor}`}
+                  className={`rounded-xl border border-white/[0.08] bg-surface-2 shadow-card px-5 py-4 flex items-center justify-between border-l-4 ${accentColor}`}
                 >
                   <div className="flex items-start gap-3">
                     <div className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${dotColor}`} />
@@ -182,12 +188,11 @@ export default async function DashboardPage() {
                       <p className="text-[13px] text-white/55 mt-0.5">{actionDescription}</p>
                     </div>
                   </div>
-                  <Link
-                    href={actionHref}
-                    className="group inline-flex min-h-[40px] items-center gap-1.5 bg-vektrum-blue text-white px-4 py-2 rounded-xl text-[13px] font-semibold whitespace-nowrap ml-4 hover:bg-vektrum-blue-hover transition-all hover:-translate-y-0.5 shadow-sm shadow-vektrum-blue/20"
-                  >
-                    {actionCTA}
-                    <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
+                  <Link href={actionHref} className="ml-4 flex-shrink-0">
+                    <Button variant="primary" size="sm">
+                      {actionCTA}
+                      <ArrowRight size={13} aria-hidden="true" />
+                    </Button>
                   </Link>
                 </div>
               )
@@ -195,36 +200,35 @@ export default async function DashboardPage() {
 
             {/* Stripe setup banner */}
             {!profile.stripe_account_id && (
-              <div className="flex items-start gap-3 rounded-2xl border border-amber-500/20 bg-amber-500/[0.06] px-5 py-4">
-                <AlertCircle size={18} className="text-vektrum-amber flex-shrink-0 mt-0.5" aria-hidden="true" />
+              <div className="flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-5 py-4">
+                <AlertCircle size={18} className="text-amber-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
                 <div>
-                  <p className="text-[13px] font-semibold text-vektrum-amber">
+                  <p className="text-[13px] font-semibold text-amber-400">
                     Connect your Stripe account to create deals
                   </p>
                   <p className="text-[12px] text-white/45 mt-0.5">
                     You must connect a Stripe account before you can create deals and receive milestone payments.
                   </p>
-                  <Link
-                    href="/dashboard/contractor/onboarding"
-                    className="mt-3 group inline-flex min-h-[36px] items-center gap-1.5 rounded-xl bg-vektrum-blue px-4 py-1.5 text-[12px] font-semibold text-white hover:bg-vektrum-blue-hover transition-all hover:-translate-y-0.5"
-                  >
-                    Complete Setup
-                    <ArrowRight size={12} className="transition-transform group-hover:translate-x-0.5" />
+                  <Link href="/dashboard/contractor/onboarding" className="mt-3 inline-block">
+                    <Button variant="primary" size="sm">
+                      Complete Setup
+                      <ArrowRight size={12} aria-hidden="true" />
+                    </Button>
                   </Link>
                 </div>
               </div>
             )}
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <StatBlock label="Total Deals" value={deals.length} />
-              <StatBlock label="Total Funded" value={formatMoney(totalFunded)} money />
-              <StatBlock label="Total Released" value={formatMoney(totalReleased)} money />
-              <StatBlock label="Pending Review" value={pendingMilestones} alert={pendingMilestones > 0} />
-            </div>
+            {/* Quick Stats — horizontal metric strip */}
+            <MetricStrip>
+              <StatBlock inline label="Total Deals" value={deals.length} />
+              <StatBlock inline label="Total Funded" value={formatMoney(totalFunded)} money />
+              <StatBlock inline label="Total Released" value={formatMoney(totalReleased)} money />
+              <StatBlock inline label="Pending Review" value={pendingMilestones} alert={pendingMilestones > 0} />
+            </MetricStrip>
 
             {/* Draw Review Status Panel */}
-            <div className="rounded-2xl border border-white/[0.08] bg-surface-2 overflow-hidden shadow-card">
+            <div className="rounded-xl border border-white/[0.08] bg-surface-2 overflow-hidden shadow-card">
               <div className="flex items-center gap-3 px-5 py-4 border-b border-white/[0.06]">
                 <div className="h-px w-5 bg-vektrum-blue flex-shrink-0" aria-hidden="true" />
                 <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-vektrum-blue">
@@ -235,28 +239,6 @@ export default async function DashboardPage() {
                 <DrawReviewPanel deals={deals} embedded />
               </div>
             </div>
-
-            {/* Lien Waiver Tracker — feature-flagged */}
-            {process.env.NEXT_PUBLIC_FEATURE_LIEN_WAIVER === 'true' && (
-              <div className="rounded-2xl border border-dashed border-white/[0.08] bg-surface-2 p-6 opacity-60 cursor-not-allowed select-none">
-                <div className="flex items-center gap-3 pointer-events-none">
-                  <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08]">
-                    <Lock size={16} className="text-white/40" />
-                  </div>
-                  <div>
-                    <p className="text-[13px] font-semibold text-white/60">
-                      Lien Waiver Tracker
-                    </p>
-                    <p className="text-[12px] text-white/35">
-                      Track lien waivers per deal — required before final release. Coming soon.
-                    </p>
-                  </div>
-                  <span className="ml-auto flex-shrink-0 rounded-full border border-vektrum-amber-border bg-vektrum-amber-bg px-2.5 py-0.5 text-[10px] font-medium text-vektrum-amber">
-                    Coming soon
-                  </span>
-                </div>
-              </div>
-            )}
 
             {/* Deals */}
             <section>
@@ -346,7 +328,7 @@ export default async function DashboardPage() {
                   {actionRequiredSorted.map((deal) => (
                     <div key={deal.id} className="space-y-3">
                       <DealCard deal={deal} />
-                      <div className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card px-4 py-4">
+                      <div className="rounded-xl border border-white/[0.08] bg-surface-2 shadow-card px-4 py-4">
                         <ReadinessGauge dealId={deal.id} />
                       </div>
                     </div>

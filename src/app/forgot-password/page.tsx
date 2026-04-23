@@ -40,33 +40,33 @@ export default function ForgotPasswordPage() {
       <div className="w-full max-w-sm">
         <Link
           href="/auth/login"
-          className="inline-flex items-center gap-1.5 text-sm text-vektrum-muted hover:text-vektrum-text transition-colors mb-6"
+          className="inline-flex items-center gap-1.5 text-sm text-white/55 hover:text-white transition-colors mb-6"
         >
           <ArrowLeft size={14} />
           Back to login
         </Link>
 
         <div className="mb-8">
-          <h1 className="font-display text-2xl font-bold text-vektrum-text">
+          <h1 className="font-display text-2xl font-bold text-white">
             Reset your password
           </h1>
-          <p className="mt-1.5 text-sm text-vektrum-muted">
+          <p className="mt-1.5 text-sm text-white/55">
             Enter your email address and we&rsquo;ll send you a reset link.
           </p>
         </div>
 
-        <div className="rounded-xl border border-vektrum-border bg-vektrum-surface p-6 shadow-sm">
+        <div className="rounded-xl border border-white/[0.08] bg-surface-2 p-6 shadow-sm">
           {success ? (
             <div className="flex flex-col items-center text-center py-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-vektrum-green-bg border border-vektrum-green-border mb-4">
-                <CheckCircle2 size={20} className="text-vektrum-green" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/[0.08] border border-emerald-500/20 mb-4">
+                <CheckCircle2 size={20} className="text-emerald-400" />
               </div>
-              <p className="text-sm font-medium text-vektrum-text">
+              <p className="text-sm font-medium text-white">
                 Check your email
               </p>
-              <p className="mt-1.5 text-sm text-vektrum-muted">
+              <p className="mt-1.5 text-sm text-white/55">
                 We&rsquo;ve sent a reset link to{' '}
-                <span className="font-medium text-vektrum-text">{email}</span>.
+                <span className="font-medium text-white">{email}</span>.
               </p>
               <Link
                 href="/auth/login"
@@ -90,7 +90,7 @@ export default function ForgotPasswordPage() {
               {error && (
                 <div
                   role="alert"
-                  className="flex items-start gap-2 rounded-md bg-vektrum-red-bg border border-vektrum-red-border px-3 py-2.5 text-sm text-vektrum-red"
+                  className="flex items-start gap-2 rounded-md bg-red-500/[0.08] border border-red-500/20 px-3 py-2.5 text-sm text-red-400"
                 >
                   <AlertCircle size={15} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
                   {error}

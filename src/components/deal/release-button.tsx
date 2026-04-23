@@ -89,30 +89,18 @@ export function ReleaseButton({
     return (
       <div className="space-y-3">
         {serverError && (
-          <div className="flex items-start gap-2 rounded-md bg-vektrum-red-bg border border-vektrum-red-border px-3 py-2.5 text-sm text-vektrum-red">
+          <div className="flex items-start gap-2 rounded-md bg-red-500/[0.08] border border-red-500/20 px-3 py-2.5 text-sm text-red-400">
             <AlertCircle size={14} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
             {serverError}
           </div>
         )}
         <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => setUiState("confirming")}
-            className={cn(
-              "inline-flex items-center gap-2 rounded-lg px-4 py-2",
-              "bg-vektrum-blue text-white text-sm font-semibold",
-              "hover:bg-vektrum-blue-hover transition-colors",
-            )}
-          >
+          <Button variant="primary" size="sm" onClick={() => setUiState("confirming")}>
             Try Again
-          </button>
-          <button
-            type="button"
-            onClick={() => { setUiState("idle"); setServerError(null); }}
-            className="inline-flex items-center rounded-lg border border-white/[0.08] px-4 py-2 text-sm text-white/55 hover:bg-surface-4 transition-colors"
-          >
+          </Button>
+          <Button variant="secondary" size="sm" onClick={() => { setUiState("idle"); setServerError(null); }}>
             Cancel
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -147,7 +135,7 @@ export function ReleaseButton({
           {/* Header */}
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-vektrum-blue-subtle">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-vektrum-blue/10">
                 <Shield size={18} className="text-vektrum-blue" aria-hidden="true" />
               </div>
               <div>
@@ -209,33 +197,22 @@ export function ReleaseButton({
 
           {/* Action row */}
           <div className="flex flex-col gap-2.5 sm:flex-row">
-            <button
-              type="button"
+            <Button
+              variant="release"
+              size="md"
+              className="flex-1"
               onClick={handleRelease}
-              className={cn(
-                "flex-1 inline-flex items-center justify-center gap-2",
-                "min-h-[48px] rounded-lg px-5 py-3",
-                "bg-vektrum-blue text-white text-sm font-semibold",
-                "shadow-blue transition-all",
-                "hover:bg-vektrum-blue-hover",
-                "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue",
-              )}
             >
               <Shield size={15} aria-hidden="true" />
               Release {formatMoney(amount)}
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="secondary"
+              size="md"
               onClick={() => { setUiState("idle"); setServerError(null); }}
-              className={cn(
-                "inline-flex items-center justify-center",
-                "min-h-[48px] rounded-lg border border-white/[0.08] bg-surface-3 px-5 py-3",
-                "text-sm font-semibold text-white/60",
-                "transition-all hover:bg-surface-3 hover:text-white",
-              )}
             >
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -246,27 +223,18 @@ export function ReleaseButton({
   if (canRelease) {
     return (
       <div className="space-y-2">
-        {/* Primary CTA with exact amount and elevated visual weight */}
-        <button
-          type="button"
+        <Button
+          variant="release"
+          size="lg"
           onClick={() => setUiState("confirming")}
-          className={cn(
-            "group inline-flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-start",
-            "min-h-[52px] rounded-xl px-6 py-3",
-            "bg-vektrum-blue text-white font-semibold",
-            "shadow-blue transition-all duration-200",
-            "hover:bg-vektrum-blue-hover hover:shadow-lg",
-            "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue"
-          )}
+          className="w-full sm:w-auto"
         >
-          <div className="flex items-center gap-2.5">
-            <Shield size={16} aria-hidden="true" />
-            <span className="text-sm">Release to {contractorName}</span>
-          </div>
-          <span className="rounded-md bg-white/20 px-2.5 py-1 text-sm font-bold tabular-nums">
+          <Shield size={16} aria-hidden="true" />
+          <span>Release to {contractorName}</span>
+          <span className="ml-2 rounded-md bg-white/20 px-2.5 py-1 text-sm font-bold tabular-nums">
             {formatMoney(amount)}
           </span>
-        </button>
+        </Button>
       </div>
     );
   }

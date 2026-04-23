@@ -122,7 +122,7 @@ export function AiReviewModal({ open, onClose, milestoneContext }: AiReviewModal
               <p className="text-sm font-semibold text-gray-900 mb-2">Findings</p>
               <div className="space-y-2">
                 <p className="text-sm text-green-700">✓ Invoice amount ({formattedAmount}) matches approved scope</p>
-                <p className="text-sm text-green-700">✓ MEP inspection report dated April 28, 2025 attached</p>
+                <p className="text-sm text-green-700">✓ MEP inspection report dated April 28, 2026 attached</p>
                 <p className="text-sm text-green-700">✓ Lien waiver from Webb Construction Group on file</p>
                 <p className="text-sm text-green-700">✓ No open disputes on this milestone or deal</p>
                 <p className="text-sm text-amber-600">⚠ Rough-in completion estimated at 94% per inspection (minor punch-list items remain — not release-blocking)</p>

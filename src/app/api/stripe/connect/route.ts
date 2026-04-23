@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { getAuthUser, requireRole } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
+import { notifyAdminStripeConflict } from '@/lib/engine/notifications'
 import { getStripe } from '@/lib/stripe'
 import { internalError } from '@/lib/errors'
 
@@ -115,6 +116,74 @@ export async function POST(request: NextRequest) {
       .eq('id', user.id)
 
     if (updateError) {
+      // ── Duplicate Stripe account conflict ────────────────────────────────
+      // PostgreSQL unique_violation = error code 23505.
+      // Trigger check_stripe_account_id_unique() raises this code when another
+      // profile already owns this Stripe account ID.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((updateError as any).code === '23505') {
+        // Parse the structured HINT embedded by the trigger for exact IDs
+        let existingProfileId = 'unknown'
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const hint = (updateError as any).hint
+          if (hint) {
+            const parsed = JSON.parse(hint) as Record<string, string>
+            existingProfileId = parsed.existing_profile_id ?? 'unknown'
+          }
+        } catch {
+          // HINT parsing is best-effort — use what we have
+        }
+
+        const detectedAt = new Date().toISOString()
+
+        // Audit log: this is a fresh transaction — not rolled back with the failed UPDATE
+        await logAudit({
+          entity_type: 'profile',
+          entity_id:   user.id,
+          action:      'stripe_account_conflict_attempted',
+          actor_id:    user.id,
+          old_values:  { stripe_account_id: null },
+          new_values:  { attempted_stripe_account_id: stripeAccountId },
+          metadata: {
+            conflicting_stripe_account_id: stripeAccountId,
+            existing_profile_id:           existingProfileId,
+            attempted_profile_id:          user.id,
+            operation:                     'UPDATE',
+            detected_at:                   detectedAt,
+            error_code:                    '23505',
+          },
+        })
+
+        // Admin notification (fire-and-forget — never throws)
+        await notifyAdminStripeConflict({
+          conflictingStripeAccountId: stripeAccountId,
+          attemptedProfileId:         user.id,
+          existingProfileId,
+          attemptedUserEmail:         userEmail,
+          detectedAt,
+          operation:                  'UPDATE',
+        })
+
+        console.error(
+          `[api/stripe/connect] Stripe account conflict: ${stripeAccountId} ` +
+            `already owned by profile ${existingProfileId}, attempted by ${user.id}`,
+        )
+
+        return NextResponse.json(
+          {
+            error:
+              'This Stripe account is already linked to a different Vektrum profile. ' +
+              'Each Stripe Connect account can only be associated with one user. ' +
+              'If you believe this is an error, contact support@vektrum.io.',
+            code: 'stripe_account_conflict',
+            support_reference: user.id,
+          },
+          { status: 409 },
+        )
+      }
+
+      // All other update errors
       console.error('[api/stripe/connect] Failed to persist stripe_account_id:', updateError.message)
       return internalError(
         `A Stripe account was created (ID: ${stripeAccountId}) but could not be linked to your profile. ` +

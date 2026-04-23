@@ -38,9 +38,9 @@ function AssistantPill({
     <button
       onClick={onOpen}
       className={[
-        'flex items-center gap-2 rounded-full border border-vektrum-border bg-vektrum-surface px-4 py-2.5',
+        'flex items-center gap-2 rounded-full border border-white/[0.08] bg-surface-2 px-4 py-2.5',
         'shadow-lg shadow-vektrum-canvas/10 hover:shadow-xl hover:border-vektrum-blue/40',
-        'text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text',
+        'text-[13px] font-medium text-white/55 hover:text-white',
         'transition-all duration-200',
       ].join(' ')}
       aria-label="Open AI assistant"
@@ -171,9 +171,9 @@ export function AssistantPanel({ actionRequired = 0 }: AssistantPanelProps) {
     <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3">
       {/* Panel (open state) */}
       {open && (
-        <div className="flex w-[340px] max-w-[calc(100vw-3rem)] flex-col overflow-hidden rounded-2xl border border-vektrum-border bg-vektrum-surface shadow-2xl shadow-vektrum-canvas/20 animate-slide-up">
+        <div className="flex w-[340px] max-w-[calc(100vw-3rem)] flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-surface-2 shadow-2xl shadow-vektrum-canvas/20 animate-slide-up">
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-vektrum-border bg-vektrum-canvas px-4 py-3">
+          <div className="flex items-center justify-between border-b border-white/[0.08] bg-vektrum-canvas px-4 py-3">
             <div className="flex items-center gap-2.5">
               <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-vektrum-blue">
                 <MessageCircle size={14} className="text-white" />
@@ -200,7 +200,7 @@ export function AssistantPanel({ actionRequired = 0 }: AssistantPanelProps) {
                 className={[
                   'max-w-[85%] rounded-xl px-3.5 py-2.5 text-[13px] leading-relaxed',
                   msg.role === 'assistant'
-                    ? 'self-start bg-vektrum-surface-alt text-vektrum-text'
+                    ? 'self-start bg-surface-3 text-white'
                     : 'self-end bg-vektrum-blue text-white',
                 ].join(' ')}
               >
@@ -208,9 +208,9 @@ export function AssistantPanel({ actionRequired = 0 }: AssistantPanelProps) {
               </div>
             ))}
             {loading && (
-              <div className="self-start flex items-center gap-1.5 rounded-xl bg-vektrum-surface-alt px-3.5 py-2.5">
-                <Loader2 size={13} className="animate-spin text-vektrum-faint" />
-                <span className="text-[12px] text-vektrum-faint">Thinking...</span>
+              <div className="self-start flex items-center gap-1.5 rounded-xl bg-surface-3 px-3.5 py-2.5">
+                <Loader2 size={13} className="animate-spin text-white/30" />
+                <span className="text-[12px] text-white/30">Thinking...</span>
               </div>
             )}
             <div ref={bottomRef} />
@@ -218,8 +218,8 @@ export function AssistantPanel({ actionRequired = 0 }: AssistantPanelProps) {
 
           {/* Suggested commands */}
           {!loading && (
-            <div className="border-t border-vektrum-border-subtle px-4 py-3">
-              <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-vektrum-faint">
+            <div className="border-t border-white/[0.05] px-4 py-3">
+              <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-white/30">
                 Suggested
               </p>
               <div className="flex flex-wrap gap-1.5">
@@ -227,7 +227,7 @@ export function AssistantPanel({ actionRequired = 0 }: AssistantPanelProps) {
                   <button
                     key={s}
                     onClick={() => sendCommand(s)}
-                    className="rounded-full border border-vektrum-border bg-vektrum-surface-alt px-2.5 py-1 text-[11px] font-medium text-vektrum-muted hover:border-vektrum-blue/40 hover:text-vektrum-text transition-colors"
+                    className="rounded-full border border-white/[0.08] bg-surface-3 px-2.5 py-1 text-[11px] font-medium text-white/55 hover:border-vektrum-blue/40 hover:text-white transition-colors"
                   >
                     {s}
                   </button>
@@ -239,7 +239,7 @@ export function AssistantPanel({ actionRequired = 0 }: AssistantPanelProps) {
           {/* Input */}
           <form
             onSubmit={handleSubmit}
-            className="flex items-center gap-2 border-t border-vektrum-border px-3 py-3"
+            className="flex items-center gap-2 border-t border-white/[0.08] px-3 py-3"
           >
             <input
               ref={inputRef}
@@ -247,7 +247,7 @@ export function AssistantPanel({ actionRequired = 0 }: AssistantPanelProps) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask anything about your deals..."
-              className="flex-1 bg-transparent text-[13px] text-vektrum-text placeholder:text-vektrum-faint outline-none"
+              className="flex-1 bg-transparent text-[13px] text-white placeholder:text-white/30 outline-none"
               disabled={loading}
             />
             <button

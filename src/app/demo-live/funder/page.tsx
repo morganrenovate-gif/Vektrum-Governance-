@@ -17,6 +17,8 @@ const MOCK_DEALS = [
     released: 480_000,
     status: 'active',
     milestoneCount: 4,
+    contractor: 'Marcus Webb',
+    contractorCompany: 'Webb Construction Group',
   },
   {
     id: 'harbor',
@@ -26,6 +28,8 @@ const MOCK_DEALS = [
     released: 3_460_000,
     status: 'active',
     milestoneCount: 5,
+    contractor: 'Marcus Webb',
+    contractorCompany: 'Webb Construction Group',
   },
   {
     id: 'westside',
@@ -35,6 +39,8 @@ const MOCK_DEALS = [
     released: 950_000,
     status: 'active',
     milestoneCount: 4,
+    contractor: 'Diane Reyes',
+    contractorCompany: 'Reyes Development Partners',
   },
 ]
 
@@ -128,10 +134,10 @@ export default function DemoFunderPage() {
             <div className="flex items-start justify-between gap-3 mb-2">
               <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">Action Queue</p>
               <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08]">
-                <AlertCircle size={13} className="text-vektrum-amber" aria-hidden="true" />
+                <AlertCircle size={13} className="text-amber-400" aria-hidden="true" />
               </div>
             </div>
-            <p className="font-display text-4xl font-bold tabular-nums leading-none text-vektrum-amber">1</p>
+            <p className="font-display text-4xl font-bold tabular-nums leading-none text-amber-400">1</p>
           </div>
         </Link>
       </div>
@@ -169,7 +175,7 @@ export default function DemoFunderPage() {
 
       {/* Action Queue */}
       <section id="action-queue">
-        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-vektrum-amber">
+        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-amber-400">
           Action Required
         </h2>
         <div className="space-y-3">
@@ -298,7 +304,7 @@ function DealCard({ deal }: { deal: typeof MOCK_DEALS[number] }) {
     <Link
       href={`/demo-live/deal/${deal.id}?from=funder`}
       className="group rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card p-5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.14]"
-      
+
     >
       <div className="flex items-center justify-between mb-3">
         <span className="inline-flex items-center rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">
@@ -307,7 +313,7 @@ function DealCard({ deal }: { deal: typeof MOCK_DEALS[number] }) {
         <span className="text-[11px] text-white/30">{deal.milestoneCount} milestones</span>
       </div>
       <p className="text-[14px] font-semibold text-white/80 group-hover:text-white transition-colors leading-snug">{deal.title}</p>
-      <p className="mt-1 text-[12px] text-white/35">Marcus Webb &middot; Webb Construction Group</p>
+      <p className="mt-1 text-[12px] text-white/35">{deal.contractor} &middot; {deal.contractorCompany}</p>
       <div className="mt-4 flex items-center gap-3">
         <div className="flex-1 h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
           <div className="h-full rounded-full bg-emerald-500" style={{ width: `${pct}%` }} />

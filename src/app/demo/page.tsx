@@ -50,10 +50,10 @@ export default function DemoPage() {
       {/* ── Section 2: The Problem ────────────────────────────────────────── */}
       <section className="bg-vektrum-bg py-16 sm:py-20">
         <div className="mx-auto max-w-5xl px-6">
-          <h2 className="text-center font-display text-2xl sm:text-3xl font-bold text-vektrum-text mb-4">
+          <h2 className="text-center font-display text-2xl sm:text-3xl font-bold text-white mb-4">
             The Problem
           </h2>
-          <p className="text-center text-sm text-vektrum-muted mb-10 max-w-xl mx-auto">
+          <p className="text-center text-sm text-white/55 mb-10 max-w-xl mx-auto">
             Construction payment governance is broken. The industry loses billions every year.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -76,13 +76,13 @@ export default function DemoPage() {
             ].map((item) => (
               <div
                 key={item.stat}
-                className="rounded-xl border border-vektrum-border bg-vektrum-surface p-6 text-center shadow-sm"
+                className="rounded-xl border border-white/[0.08] bg-surface-2 p-6 text-center shadow-sm"
               >
-                <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-vektrum-blue-subtle">
+                <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-vektrum-blue/10">
                   <item.icon size={18} className="text-vektrum-blue" />
                 </div>
-                <p className="font-display text-3xl font-bold text-vektrum-text">{item.stat}</p>
-                <p className="mt-2 text-sm text-vektrum-muted">{item.desc}</p>
+                <p className="font-display text-3xl font-bold text-white">{item.stat}</p>
+                <p className="mt-2 text-sm text-white/55">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -90,12 +90,12 @@ export default function DemoPage() {
       </section>
 
       {/* ── Section 3: How It Works — 5-Step Flow ─────────────────────────── */}
-      <section id="how-it-works" className="bg-vektrum-surface py-16 sm:py-20">
+      <section id="how-it-works" className="bg-surface-2 py-16 sm:py-20">
         <div className="mx-auto max-w-5xl px-6">
-          <h2 className="text-center font-display text-2xl sm:text-3xl font-bold text-vektrum-text mb-4">
+          <h2 className="text-center font-display text-2xl sm:text-3xl font-bold text-white mb-4">
             How It Works
           </h2>
-          <p className="text-center text-sm text-vektrum-muted mb-12 max-w-xl mx-auto">
+          <p className="text-center text-sm text-white/55 mb-12 max-w-xl mx-auto">
             From deal creation to fund release — every step verified, every dollar governed.
           </p>
           <div className="space-y-8 sm:space-y-0 sm:grid sm:grid-cols-5 sm:gap-4">
@@ -127,7 +127,7 @@ export default function DemoPage() {
               {
                 step: 5,
                 title: 'Funds Released',
-                desc: '7-condition gate verifies ALL requirements. Funds disbursed instantly.',
+                desc: '8-condition gate verifies ALL requirements. Funds disbursed instantly.',
                 icon: Shield,
               },
             ].map((item) => (
@@ -135,8 +135,8 @@ export default function DemoPage() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-vektrum-blue text-white font-display text-lg font-bold mb-3">
                   {item.step}
                 </div>
-                <h3 className="text-sm font-semibold text-vektrum-text mb-1">{item.title}</h3>
-                <p className="text-xs text-vektrum-muted leading-relaxed">{item.desc}</p>
+                <h3 className="text-sm font-semibold text-white mb-1">{item.title}</h3>
+                <p className="text-xs text-white/55 leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -231,33 +231,34 @@ export default function DemoPage() {
         </div>
       </section>
 
-      {/* ── Section 5: The 7-Condition Release Gate ────────────────────────── */}
+      {/* ── Section 5: The 8-Condition Release Gate ────────────────────────── */}
       <section className="bg-vektrum-bg py-16 sm:py-20">
         <div className="mx-auto max-w-5xl px-6">
-          <h2 className="text-center font-display text-2xl sm:text-3xl font-bold text-vektrum-text mb-4">
+          <h2 className="text-center font-display text-2xl sm:text-3xl font-bold text-white mb-4">
             The Release Gate
           </h2>
-          <p className="text-center text-sm text-vektrum-muted mb-10 max-w-xl mx-auto">
-            ALL 7 conditions must be true simultaneously before any payment is released.
+          <p className="text-center text-sm text-white/55 mb-10 max-w-xl mx-auto">
+            ALL 8 conditions must be true simultaneously before any payment is released.
           </p>
-          <div className="mx-auto max-w-xl rounded-xl border border-vektrum-border bg-vektrum-surface p-6 shadow-md">
+          <div className="mx-auto max-w-xl rounded-xl border border-white/[0.08] bg-surface-2 p-6 shadow-md">
             <ul className="space-y-3">
               {[
                 'Milestone status: approved',
-                'Deal status: active',
-                'No open disputes on this milestone',
-                'Funder has sufficient Project Trust Account balance',
-                'Stripe payout account verified',
-                'Release not already processed (unique per milestone)',
-                'Cryptographic integrity check passed',
+                'Milestone protection status: ready_for_release',
+                'Sufficient funded balance (including platform fee)',
+                'Contractor Stripe payouts enabled',
+                'Contractor onboarding complete',
+                'No existing active release for this milestone',
+                'No open change orders on this milestone',
+                'Signed contract on file for this deal',
               ].map((condition, i) => (
                 <li key={i} className="flex items-center gap-3">
-                  <CheckCircle2 size={16} className="text-vektrum-green flex-shrink-0" />
-                  <span className="text-sm text-vektrum-text">{condition}</span>
+                  <CheckCircle2 size={16} className="text-emerald-400 flex-shrink-0" />
+                  <span className="text-sm text-white">{condition}</span>
                 </li>
               ))}
               {/* AI precondition */}
-              <li className="flex items-center gap-3 pt-2 border-t border-vektrum-border-subtle">
+              <li className="flex items-center gap-3 pt-2 border-t border-white/[0.05]">
                 <div className="flex h-4 w-4 items-center justify-center rounded-sm bg-vektrum-blue text-white flex-shrink-0">
                   <span className="text-[8px] font-bold">+</span>
                 </div>
@@ -271,15 +272,15 @@ export default function DemoPage() {
       </section>
 
       {/* ── Section 6: Market Opportunity ──────────────────────────────────── */}
-      <section className="bg-vektrum-surface py-16 sm:py-20">
+      <section className="bg-surface-2 py-16 sm:py-20">
         <div className="mx-auto max-w-5xl px-6 text-center">
-          <h2 className="font-display text-2xl sm:text-3xl font-bold text-vektrum-text mb-2">
+          <h2 className="font-display text-2xl sm:text-3xl font-bold text-white mb-2">
             Market Opportunity
           </h2>
           <p className="font-display text-5xl sm:text-6xl font-bold text-vektrum-blue mt-4 mb-2">
             $2.19 Trillion
           </p>
-          <p className="text-sm text-vektrum-muted mb-10">Annual U.S. Construction Spend</p>
+          <p className="text-sm text-white/55 mb-10">Annual U.S. Construction Spend</p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
             {[
@@ -287,29 +288,29 @@ export default function DemoPage() {
               { value: '87%', label: 'of projects have payment disputes' },
               { value: 'Zero', label: 'standard solution exists' },
             ].map((item) => (
-              <div key={item.value} className="rounded-lg border border-vektrum-border bg-vektrum-bg p-4">
-                <p className="font-display text-2xl font-bold text-vektrum-text">{item.value}</p>
-                <p className="mt-1 text-xs text-vektrum-muted">{item.label}</p>
+              <div key={item.value} className="rounded-lg border border-white/[0.08] bg-vektrum-bg p-4">
+                <p className="font-display text-2xl font-bold text-white">{item.value}</p>
+                <p className="mt-1 text-xs text-white/55">{item.label}</p>
               </div>
             ))}
           </div>
 
-          <div className="mx-auto max-w-md rounded-xl border border-vektrum-blue-border bg-vektrum-blue-subtle p-6">
+          <div className="mx-auto max-w-md rounded-xl border border-vektrum-blue/20 bg-vektrum-blue/10 p-6">
             <p className="text-xs font-semibold uppercase tracking-widest text-vektrum-blue mb-3">
               {"Vektrum's Total Addressable Market"}
             </p>
             <div className="space-y-2 text-left">
               <div className="flex items-baseline justify-between">
-                <span className="text-sm text-vektrum-muted">SAM</span>
-                <span className="font-display text-lg font-bold text-vektrum-text">$500B</span>
+                <span className="text-sm text-white/55">SAM</span>
+                <span className="font-display text-lg font-bold text-white">$500B</span>
               </div>
-              <p className="text-xs text-vektrum-faint">Commercial + residential new construction</p>
+              <p className="text-xs text-white/30">Commercial + residential new construction</p>
               <div className="h-px bg-vektrum-blue-border" />
               <div className="flex items-baseline justify-between">
-                <span className="text-sm text-vektrum-muted">SOM Year 1</span>
-                <span className="font-display text-lg font-bold text-vektrum-text">$50M</span>
+                <span className="text-sm text-white/55">SOM Year 1</span>
+                <span className="font-display text-lg font-bold text-white">$50M</span>
               </div>
-              <p className="text-xs text-vektrum-faint">Targeting 5,000 funder-managed projects</p>
+              <p className="text-xs text-white/30">Targeting 5,000 funder-managed projects</p>
             </div>
           </div>
         </div>
@@ -341,7 +342,7 @@ export default function DemoPage() {
                 </div>
               ))}
               <div className="px-5 py-3">
-                <p className="text-[12px] font-semibold text-vektrum-green">Contractors: Always $0. No subscription. No fees. Ever.</p>
+                <p className="text-[12px] font-semibold text-emerald-400">Contractors: Always $0. No subscription. No fees. Ever.</p>
               </div>
             </div>
           </div>

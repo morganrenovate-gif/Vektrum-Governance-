@@ -1,30 +1,33 @@
 import { cn } from "@/lib/utils";
 import React from "react";
 
-// ─── Card root ────────────────────────────────────────────────────────────────
+// ─── Card ─────────────────────────────────────────────────────────────────────
 //
-// DARK-FIRST: The app is predominantly dark navy (bg-[#0D1B2A] / bg-[#031226]).
-// Card defaults to the established dark surface (bg-[#111827]).
-// Pass variant="light" only in genuine light-section contexts (marketing pages).
+// DARK-FIRST: The app is predominantly dark navy.
+// Card variants:
+//   default  — standard panel (bg-surface-2, rounded-xl, shadow-card)
+//   feature  — elevated panel for important content (shadow-feature)
+//   inset    — nested content panel (bg-surface-3, no shadow)
+//   light    — for genuine light-section marketing pages only
+//
+// Corner radius is rounded-xl (12px) rather than rounded-2xl (16px).
+// Institutional software uses slightly tighter radius than consumer apps.
 //
 interface CardProps {
   children: React.ReactNode;
   className?: string;
-  /** Remove default padding from the body area */
-  noPadding?: boolean;
-  /** Light variant for use inside bg-white / bg-[#F8F9FB] marketing sections */
-  variant?: "dark" | "light";
+  variant?: "default" | "feature" | "inset" | "light";
 }
 
-export function Card({ children, className, noPadding, variant = "dark" }: CardProps) {
+export function Card({ children, className, variant = "default" }: CardProps) {
   return (
     <div
       className={cn(
-        "rounded-2xl border overflow-hidden",
-        variant === "dark"
-          ? "border-white/[0.08] bg-surface-2 shadow-card"
-          : "border-black/[0.07] bg-white shadow-sm",
-        !noPadding && "overflow-hidden",
+        "rounded-xl overflow-hidden",
+        variant === "default" && "border border-white/[0.08] bg-surface-2 shadow-card",
+        variant === "feature" && "border border-white/[0.1] bg-surface-2 shadow-feature",
+        variant === "inset"   && "border border-white/[0.06] bg-surface-3",
+        variant === "light"   && "border border-black/[0.07] bg-white shadow-sm",
         className
       )}
     >
@@ -33,7 +36,7 @@ export function Card({ children, className, noPadding, variant = "dark" }: CardP
   );
 }
 
-// ─── Card header ─────────────────────────────────────────────────────────────
+// ─── CardHeader ───────────────────────────────────────────────────────────────
 interface CardHeaderProps {
   children: React.ReactNode;
   className?: string;
@@ -64,17 +67,17 @@ export function CardHeader({
   );
 }
 
-// ─── Card body ────────────────────────────────────────────────────────────────
+// ─── CardBody ─────────────────────────────────────────────────────────────────
 interface CardBodyProps {
   children: React.ReactNode;
   className?: string;
 }
 
 export function CardBody({ children, className }: CardBodyProps) {
-  return <div className={cn("px-5 py-4", className)}>{children}</div>;
+  return <div className={cn("px-5 py-5", className)}>{children}</div>;
 }
 
-// ─── Card footer ─────────────────────────────────────────────────────────────
+// ─── CardFooter ───────────────────────────────────────────────────────────────
 interface CardFooterProps {
   children: React.ReactNode;
   className?: string;
@@ -87,7 +90,7 @@ export function CardFooter({ children, className, variant = "dark" }: CardFooter
       className={cn(
         "px-5 py-3",
         variant === "dark"
-          ? "border-t border-white/[0.06] bg-white/[0.02]"
+          ? "border-t border-white/[0.05] bg-white/[0.015]"
           : "border-t border-black/[0.06] bg-[#F8F9FB]",
         className
       )}
@@ -97,7 +100,7 @@ export function CardFooter({ children, className, variant = "dark" }: CardFooter
   );
 }
 
-// ─── Card title ───────────────────────────────────────────────────────────────
+// ─── CardTitle ────────────────────────────────────────────────────────────────
 export function CardTitle({
   children,
   className,
@@ -110,8 +113,8 @@ export function CardTitle({
   return (
     <h3
       className={cn(
-        "text-[15px] font-semibold tracking-[-0.01em] leading-none",
-        variant === "dark" ? "text-white" : "text-vektrum-text",
+        "text-[14px] font-semibold tracking-[-0.01em] leading-none",
+        variant === "dark" ? "text-white" : "text-white",
         className
       )}
     >
@@ -133,7 +136,7 @@ export function CardDescription({
     <p
       className={cn(
         "mt-1 text-[13px] leading-relaxed",
-        variant === "dark" ? "text-white/50" : "text-vektrum-muted",
+        variant === "dark" ? "text-white/45" : "text-white/55",
         className
       )}
     >

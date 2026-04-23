@@ -3,7 +3,7 @@
 // Import from "@/components/layout" rather than individual files.
 
 export { PageHeader, SectionHeader } from "./page-header";
-export { StatBlock } from "./stat-block";
+export { StatBlock, MetricStrip } from "./stat-block";
 export { EmptyState } from "./empty-state";
 export { ActionBar, InlineActionRow } from "./action-bar";
 export {

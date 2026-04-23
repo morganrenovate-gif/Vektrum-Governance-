@@ -26,7 +26,7 @@ function StepIndicator({ current, total }: { current: Step; total: number }) {
               ? 'w-5 bg-vektrum-green'
               : i + 1 === current
                 ? 'w-8 bg-vektrum-blue'
-                : 'w-5 bg-vektrum-border',
+                : 'w-5 bg-white/[0.08]',
           ].join(' ')}
         />
       ))}
@@ -81,7 +81,7 @@ export function StripeOnboardingWizard({
     <div className="min-h-screen bg-vektrum-bg flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
         {/* Card */}
-        <div className="rounded-2xl border border-vektrum-border bg-vektrum-surface shadow-lg overflow-hidden">
+        <div className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-lg overflow-hidden">
           {/* Content */}
           <div className="p-8 pb-6">
             {/* Step 1: Welcome */}
@@ -91,10 +91,10 @@ export function StripeOnboardingWizard({
                   <Shield size={28} className="text-vektrum-blue" />
                 </div>
                 <div>
-                  <h2 className="font-display text-xl font-bold tracking-[-0.025em] text-vektrum-text">
+                  <h2 className="font-display text-xl font-bold tracking-[-0.025em] text-white">
                     Welcome{fullName ? `, ${fullName.split(' ')[0]}` : ''}
                   </h2>
-                  <p className="mt-2 text-[14px] leading-relaxed text-vektrum-muted">
+                  <p className="mt-2 text-[14px] leading-relaxed text-white/55">
                     {isContractor
                       ? 'Before you can create deals, we need to set up your payment account. This takes about 2 minutes.'
                       : 'Before you can fund deals, we need to connect your payment account. This takes about 2 minutes.'}
@@ -108,7 +108,7 @@ export function StripeOnboardingWizard({
                         'Direct deposit to your bank via Stripe Connect',
                       ]
                     : [
-                        '7-condition release gate — every check runs server-side',
+                        '8-condition release gate — every check runs server-side',
                         'Full audit trail — immutable, timestamped, actor-logged',
                         'Stripe holds funds in your Project Trust Account until every condition is met',
                       ]
@@ -116,9 +116,9 @@ export function StripeOnboardingWizard({
                     <li key={item} className="flex items-start gap-2.5">
                       <CheckCircle2
                         size={15}
-                        className="mt-0.5 flex-shrink-0 text-vektrum-green"
+                        className="mt-0.5 flex-shrink-0 text-emerald-400"
                       />
-                      <span className="text-[13px] leading-relaxed text-vektrum-muted">
+                      <span className="text-[13px] leading-relaxed text-white/55">
                         {item}
                       </span>
                     </li>
@@ -130,14 +130,14 @@ export function StripeOnboardingWizard({
             {/* Step 2: Connect Stripe */}
             {step === 2 && (
               <div className="space-y-5">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-vektrum-amber-bg">
-                  <CreditCard size={28} className="text-vektrum-amber" />
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/[0.08]">
+                  <CreditCard size={28} className="text-amber-400" />
                 </div>
                 <div>
-                  <h2 className="font-display text-xl font-bold tracking-[-0.025em] text-vektrum-text">
+                  <h2 className="font-display text-xl font-bold tracking-[-0.025em] text-white">
                     Connect Stripe
                   </h2>
-                  <p className="mt-2 text-[14px] leading-relaxed text-vektrum-muted">
+                  <p className="mt-2 text-[14px] leading-relaxed text-white/55">
                     {isContractor
                       ? 'Connect your bank account via Stripe Connect Express to receive milestone payments directly.'
                       : 'Connect your Stripe account to fund deals and manage payments securely.'}
@@ -145,24 +145,24 @@ export function StripeOnboardingWizard({
                 </div>
 
                 {stripeConnected ? (
-                  <div className="rounded-xl border border-vektrum-green-border bg-vektrum-green-bg p-4 flex items-start gap-3">
-                    <CheckCircle2 size={18} className="text-vektrum-green flex-shrink-0 mt-0.5" />
+                  <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.08] p-4 flex items-start gap-3">
+                    <CheckCircle2 size={18} className="text-emerald-400 flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-[13px] font-semibold text-vektrum-green">
+                      <p className="text-[13px] font-semibold text-emerald-400">
                         Stripe account connected
                       </p>
-                      <p className="text-[12px] text-vektrum-muted mt-0.5">
+                      <p className="text-[12px] text-white/55 mt-0.5">
                         Your Stripe account is linked. You can proceed to the next step.
                       </p>
                     </div>
                   </div>
                 ) : (
                   <>
-                    <div className="rounded-xl border border-vektrum-border bg-vektrum-surface-alt p-4">
-                      <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-vektrum-faint">
+                    <div className="rounded-xl border border-white/[0.08] bg-surface-3 p-4">
+                      <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-white/30">
                         Stripe-powered
                       </p>
-                      <p className="mt-1 text-[13px] leading-relaxed text-vektrum-muted">
+                      <p className="mt-1 text-[13px] leading-relaxed text-white/55">
                         {isContractor
                           ? 'Bank-grade security, instant payouts, zero markup on transfer fees.'
                           : 'Secure payment processing with transparent fee pass-through.'}
@@ -179,9 +179,9 @@ export function StripeOnboardingWizard({
                     </button>
 
                     {stripeError && (
-                      <div className="flex items-start gap-2.5 rounded-lg border border-vektrum-red-border bg-vektrum-red-bg px-4 py-3">
-                        <AlertCircle size={13} className="text-vektrum-red flex-shrink-0 mt-0.5" />
-                        <p className="text-[12px] text-vektrum-red leading-relaxed">{stripeError}</p>
+                      <div className="flex items-start gap-2.5 rounded-lg border border-red-500/20 bg-red-500/[0.08] px-4 py-3">
+                        <AlertCircle size={13} className="text-red-400 flex-shrink-0 mt-0.5" />
+                        <p className="text-[12px] text-red-400 leading-relaxed">{stripeError}</p>
                       </div>
                     )}
                   </>
@@ -192,24 +192,24 @@ export function StripeOnboardingWizard({
             {/* Step 3: Done */}
             {step === 3 && (
               <div className="space-y-5">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-vektrum-green-bg">
-                  <Zap size={28} className="text-vektrum-green" />
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/[0.08]">
+                  <Zap size={28} className="text-emerald-400" />
                 </div>
                 <div>
-                  <h2 className="font-display text-xl font-bold tracking-[-0.025em] text-vektrum-text">
+                  <h2 className="font-display text-xl font-bold tracking-[-0.025em] text-white">
                     You&rsquo;re all set
                   </h2>
-                  <p className="mt-2 text-[14px] leading-relaxed text-vektrum-muted">
+                  <p className="mt-2 text-[14px] leading-relaxed text-white/55">
                     {isContractor
                       ? 'Your account is ready. Create your first deal and start getting paid for verified work.'
                       : 'Your account is ready. You can now fund deals and release milestone payments.'}
                   </p>
                 </div>
-                <div className="rounded-xl border border-vektrum-green-border bg-vektrum-green-bg p-4">
-                  <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-vektrum-green">
+                <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.08] p-4">
+                  <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-emerald-400">
                     Ready to go
                   </p>
-                  <p className="mt-1 text-[13px] leading-relaxed text-vektrum-muted">
+                  <p className="mt-1 text-[13px] leading-relaxed text-white/55">
                     {isContractor
                       ? 'Head to your dashboard to create a deal, define milestones, and invite your funder.'
                       : 'Head to your dashboard to review deals, fund projects, and manage your portfolio.'}
@@ -220,14 +220,14 @@ export function StripeOnboardingWizard({
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between border-t border-vektrum-border px-8 py-5">
+          <div className="flex items-center justify-between border-t border-white/[0.08] px-8 py-5">
             <StepIndicator current={step} total={3} />
 
             <div className="flex items-center gap-3">
               {step > 1 && (
                 <button
                   onClick={() => setStep((s) => (s - 1) as Step)}
-                  className="inline-flex items-center gap-1 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text transition-colors"
+                  className="inline-flex items-center gap-1 text-[13px] font-medium text-white/55 hover:text-white transition-colors"
                 >
                   <ArrowLeft size={14} />
                   Back
@@ -269,7 +269,7 @@ export function StripeOnboardingWizard({
         </div>
 
         {/* Skip link (below card) */}
-        <p className="mt-4 text-center text-[12px] text-vektrum-faint">
+        <p className="mt-4 text-center text-[12px] text-white/30">
           Having trouble?{' '}
           <a href="/dashboard/settings" className="text-vektrum-blue hover:underline">
             Go to Settings

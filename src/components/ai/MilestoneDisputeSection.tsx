@@ -2,39 +2,45 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle, CheckCircle2 } from 'lucide-react'
 import { DisputeFlagModal } from '@/components/ai/DisputeFlagModal'
 import { DisputeBrief } from '@/components/ai/DisputeBrief'
 import type { Brief } from '@/components/ai/DisputeBrief'
-
-// ── Types ─────────────────────────────────────────────────────────────────────
+import type { MilestoneStatus, UserRole } from '@/lib/types'
 
 type MilestoneProps = {
   id: string
   title: string
   amount: number
-  status: string
+  status: MilestoneStatus
 }
 
 type Props = {
   milestone: MilestoneProps
   brief: Brief | null
-  role: 'funder' | 'contractor' | 'admin'
+  role: UserRole
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// Statuses where flagging a dispute is not permitted
+const NON_FLAGGABLE_STATUSES: MilestoneStatus[] = ['released', 'disputed', 'not_started']
 
 export function MilestoneDisputeSection({ milestone, brief, role }: Props) {
   const router = useRouter()
   const [modalOpen, setModalOpen] = useState(false)
+  const [flagged, setFlagged] = useState(false)
 
   const canFlag =
     (role === 'funder' || role === 'admin') &&
-    !['released', 'disputed', 'pending'].includes(milestone.status)
+    !NON_FLAGGABLE_STATUSES.includes(milestone.status)
+
+  const handleSuccess = () => {
+    setModalOpen(false)
+    setFlagged(true)
+    router.refresh()
+  }
 
   return (
-    <div className="mt-8 space-y-4">
-
+    <div className="space-y-3">
       {/* Show brief if dispute is active or there is a resolved one */}
       {(milestone.status === 'disputed' || brief?.status === 'RESOLVED') && (
         <DisputeBrief
@@ -45,14 +51,25 @@ export function MilestoneDisputeSection({ milestone, brief, role }: Props) {
         />
       )}
 
-      {/* Flag button — funders only, on eligible milestones */}
-      {canFlag && milestone.status !== 'disputed' && (
+      {/* Success confirmation after flagging */}
+      {flagged && (
+        <div className="notice-success">
+          <CheckCircle2 size={14} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
+          <span>
+            Dispute flagged. The milestone has been marked as disputed and both parties have been notified.
+          </span>
+        </div>
+      )}
+
+      {/* Flag button — funders and admins only, on eligible milestones */}
+      {canFlag && milestone.status !== 'disputed' && !flagged && (
         <button
+          type="button"
           onClick={() => setModalOpen(true)}
-          className="inline-flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-2.5 text-[13px] font-semibold text-red-400 hover:bg-red-500/10 hover:border-red-500/30 transition-all"
+          className="inline-flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/[0.05] px-4 py-2.5 text-sm font-semibold text-red-400 hover:bg-red-500/10 hover:border-red-500/30 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-0"
         >
-          <AlertTriangle size={14} />
-          Flag as disputed
+          <AlertTriangle size={14} aria-hidden="true" />
+          Flag as Disputed
         </button>
       )}
 
@@ -63,13 +80,9 @@ export function MilestoneDisputeSection({ milestone, brief, role }: Props) {
           milestoneName={milestone.title}
           milestoneAmount={milestone.amount}
           onClose={() => setModalOpen(false)}
-          onSuccess={() => {
-            setModalOpen(false)
-            router.refresh()
-          }}
+          onSuccess={handleSuccess}
         />
       )}
-
     </div>
   )
 }

@@ -44,7 +44,7 @@ function CircularGauge({ score }: { score: number }) {
           fill="none"
           stroke="currentColor"
           strokeWidth="8"
-          className="text-vektrum-border"
+          className="text-white/[0.08]"
         />
         {/* Progress */}
         <circle
@@ -68,7 +68,7 @@ function CircularGauge({ score }: { score: number }) {
         >
           {score}
         </span>
-        <span className="text-[9px] text-white/30 uppercase tracking-wider">/ 100</span>
+        <span className="text-[10px] text-white/30 uppercase tracking-wider">/ 100</span>
       </div>
     </div>
   )

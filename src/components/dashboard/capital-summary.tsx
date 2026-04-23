@@ -30,7 +30,7 @@ export function CapitalSummary({ totalFunded, totalReleased }: CapitalSummaryPro
           <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">
             Released
           </p>
-          <p className="mt-1 text-xl font-bold tabular-nums text-vektrum-green">
+          <p className="mt-1 text-xl font-bold tabular-nums text-emerald-400">
             {formatMoney(totalReleased)}
           </p>
         </div>

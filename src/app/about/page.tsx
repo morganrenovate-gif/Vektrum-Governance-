@@ -11,7 +11,7 @@ export default function AboutPage() {
   return (
     <div className="flex flex-col">
       {/* ─── Hero ──────────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-vektrum-bg pt-20 pb-16 sm:pt-28 sm:pb-20">
+      <section className="relative overflow-hidden bg-[#0D1B2A] pt-20 pb-16 sm:pt-28 sm:pb-20">
         <div
           className="absolute inset-0 opacity-[0.03]"
           style={{
@@ -23,10 +23,10 @@ export default function AboutPage() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-gradient-to-b from-vektrum-blue-subtle/50 to-transparent rounded-full blur-3xl" />
 
         <div className="relative max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
-          <h1 className="font-display text-4xl font-bold tracking-[-0.035em] text-vektrum-text sm:text-5xl text-balance">
+          <h1 className="font-display text-4xl font-bold tracking-[-0.035em] text-white sm:text-5xl text-balance">
             Construction payment governance.
           </h1>
-          <p className="mt-4 mx-auto max-w-2xl text-[17px] leading-relaxed text-vektrum-muted">
+          <p className="mt-4 mx-auto max-w-2xl text-[17px] leading-relaxed text-white/55">
             Vektrum protects every dollar in a construction deal. Funds release only
             when work is verified, disputes isolate to one milestone, and every
             action is permanently audited.
@@ -35,12 +35,12 @@ export default function AboutPage() {
       </section>
 
       {/* ─── Mission ───────────────────────────────────────────────────────── */}
-      <section className="bg-vektrum-surface py-16 sm:py-20">
+      <section className="bg-surface-2 py-16 sm:py-20">
         <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12">
-          <h2 className="font-display text-2xl font-bold tracking-[-0.025em] text-vektrum-text sm:text-3xl mb-6">
+          <h2 className="font-display text-2xl font-bold tracking-[-0.025em] text-white sm:text-3xl mb-6">
             Why Vektrum exists
           </h2>
-          <div className="space-y-4 text-[15px] leading-relaxed text-vektrum-muted">
+          <div className="space-y-4 text-[15px] leading-relaxed text-white/55">
             <p>
               Construction is a $2.19 trillion annual industry in the United States. Yet
               payment governance in the $500K&ndash;$25M project range is still managed
@@ -54,7 +54,7 @@ export default function AboutPage() {
             </p>
             <p>
               Vektrum fills that gap. We built a platform where every milestone is an
-              independent financial unit, every release passes 7 server-side conditions,
+              independent financial unit, every release passes 8 server-side conditions,
               and every action is recorded in an immutable audit trail.
             </p>
           </div>
@@ -87,13 +87,13 @@ export default function AboutPage() {
             ].map((item) => (
               <div
                 key={item.title}
-                className="rounded-2xl border border-vektrum-border bg-vektrum-surface p-8"
+                className="rounded-2xl border border-white/[0.08] bg-surface-2 p-8"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-vektrum-blue/10 mb-5">
                   <item.icon size={20} className="text-vektrum-blue" />
                 </div>
-                <h3 className="text-[15px] font-semibold text-vektrum-text">{item.title}</h3>
-                <p className="mt-3 text-[13px] leading-relaxed text-vektrum-muted">{item.desc}</p>
+                <h3 className="text-[15px] font-semibold text-white">{item.title}</h3>
+                <p className="mt-3 text-[13px] leading-relaxed text-white/55">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -101,12 +101,12 @@ export default function AboutPage() {
       </section>
 
       {/* ─── CTA ───────────────────────────────────────────────────────────── */}
-      <section className="border-t border-vektrum-border bg-vektrum-surface py-20 sm:py-24">
+      <section className="border-t border-white/[0.08] bg-surface-2 py-20 sm:py-24">
         <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
-          <h2 className="text-2xl font-bold tracking-[-0.025em] text-vektrum-text sm:text-3xl text-balance">
+          <h2 className="text-2xl font-bold tracking-[-0.025em] text-white sm:text-3xl text-balance">
             Protect your next deal
           </h2>
-          <p className="mt-4 mx-auto max-w-md text-[15px] text-vektrum-muted">
+          <p className="mt-4 mx-auto max-w-md text-[15px] text-white/55">
             Contractors join free. Funders start with a standalone project or contact us
             for institutional onboarding.
           </p>
@@ -120,7 +120,7 @@ export default function AboutPage() {
             </Link>
             <Link
               href="/pricing"
-              className="inline-flex min-h-[48px] items-center justify-center rounded-xl border border-vektrum-border bg-vektrum-surface px-7 py-3 text-[14px] font-semibold text-vektrum-muted shadow-sm hover:bg-vektrum-surface-alt hover:border-vektrum-blue/40 transition-all"
+              className="inline-flex min-h-[48px] items-center justify-center rounded-xl border border-white/[0.08] bg-surface-2 px-7 py-3 text-[14px] font-semibold text-white/55 shadow-sm hover:bg-surface-3 hover:border-vektrum-blue/40 transition-all"
             >
               View pricing
             </Link>

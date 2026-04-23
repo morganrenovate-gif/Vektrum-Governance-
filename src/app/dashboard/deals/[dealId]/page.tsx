@@ -191,7 +191,7 @@ export default async function DealDetailPage({
                 </strong>
               </span>
             ) : (
-              <span className="text-vektrum-amber font-medium">
+              <span className="text-amber-400 font-medium">
                 No funder assigned yet
               </span>
             )}
@@ -215,10 +215,10 @@ export default async function DealDetailPage({
             <CardTitle>Invite a Funder</CardTitle>
           </CardHeader>
           <CardBody>
-            <p className="mb-4 text-sm text-vektrum-muted">
+            <p className="mb-4 text-[13px] text-white/50 leading-relaxed">
               Share a secure invite link with your funder. When they accept, they will be
               assigned to this deal room and can begin reviewing milestones and funding the
-              project. The link is valid for 7 days.
+              project. The link is valid for 7 days and is single-use.
             </p>
             <InviteFunderButton dealId={typedDeal.id} />
           </CardBody>
@@ -309,14 +309,13 @@ export default async function DealDetailPage({
             </CardHeader>
             <CardBody>
               {/* Running total */}
-              <div className="mb-5 flex items-start gap-2 rounded-md bg-vektrum-blue-subtle border border-vektrum-blue-border px-3 py-2.5 text-sm text-vektrum-blue">
+              <div className="mb-5 flex items-start gap-2.5 rounded-lg border border-vektrum-blue/20 bg-vektrum-blue/[0.07] px-4 py-3 text-[13px] text-vektrum-blue">
                 <Info size={14} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
                 <span>
                   Milestones allocated:{" "}
-                  <strong>{formatMoney(milestonesTotal)}</strong> of{" "}
-                  <strong>{formatMoney(typedDeal.total_amount)}</strong> —{" "}
-                  <strong>{formatMoney(remaining)}</strong> remaining to
-                  allocate.
+                  <strong className="font-semibold">{formatMoney(milestonesTotal)}</strong> of{" "}
+                  <strong className="font-semibold">{formatMoney(typedDeal.total_amount)}</strong> —{" "}
+                  <strong className="font-semibold">{formatMoney(remaining)}</strong> remaining to allocate.
                 </span>
               </div>
 

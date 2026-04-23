@@ -28,8 +28,8 @@ function humanizeError(message: string): string {
 const AUTH_TRUST = [
   {
     icon: Lock,
-    title: "7-condition release gate",
-    desc: "Every payment passes 7 server-side checks before a single dollar moves.",
+    title: "8-condition release gate",
+    desc: "Every payment passes 8 server-side checks before a single dollar moves.",
   },
   {
     icon: Shield,
@@ -120,20 +120,20 @@ export default function LoginPage() {
       </div>
 
       {/* ── Right: Auth form ──────────────────────────────────────────────── */}
-      <div className="flex flex-1 items-center justify-center px-4 py-12 sm:px-8 bg-vektrum-bg">
+      <div className="flex flex-1 items-center justify-center px-4 py-12 sm:px-8 bg-[#0D1B2A]">
         <div className="w-full max-w-sm">
           {/* Heading */}
           <div className="mb-8">
-            <h1 className="font-display text-2xl font-bold text-vektrum-text">
+            <h1 className="font-display text-2xl font-bold text-white">
               Sign in to Vektrum
             </h1>
-            <p className="mt-1.5 text-sm text-vektrum-muted">
+            <p className="mt-1.5 text-sm text-white/55">
               Construction payment governance
             </p>
           </div>
 
           {/* Form card */}
-          <div className="rounded-xl border border-vektrum-border bg-vektrum-surface p-6 shadow-sm">
+          <div className="rounded-xl border border-white/[0.08] bg-surface-2 p-6 shadow-sm">
             <form onSubmit={handleSubmit} noValidate className="space-y-4">
               <Input
                 type="email"
@@ -164,7 +164,7 @@ export default function LoginPage() {
               {error && (
                 <div
                   role="alert"
-                  className="flex items-start gap-2 rounded-md bg-vektrum-red-bg border border-vektrum-red-border px-3 py-2.5 text-sm text-vektrum-red"
+                  className="flex items-start gap-2 rounded-md bg-red-500/[0.08] border border-red-500/20 px-3 py-2.5 text-sm text-red-400"
                 >
                   <AlertCircle size={15} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
                   {error}
@@ -183,7 +183,7 @@ export default function LoginPage() {
             </form>
           </div>
 
-          <p className="mt-5 text-center text-sm text-vektrum-muted">
+          <p className="mt-5 text-center text-sm text-white/55">
             Don&rsquo;t have an account?{" "}
             <Link
               href="/auth/signup"
@@ -194,9 +194,9 @@ export default function LoginPage() {
           </p>
 
           {/* Mobile trust note (only on small screens) */}
-          <div className="mt-8 lg:hidden flex items-start gap-2 rounded-lg border border-vektrum-border bg-vektrum-surface px-4 py-3">
+          <div className="mt-8 lg:hidden flex items-start gap-2 rounded-lg border border-white/[0.08] bg-surface-2 px-4 py-3">
             <Shield size={14} className="text-vektrum-blue mt-0.5 flex-shrink-0" aria-hidden="true" />
-            <p className="text-xs text-vektrum-muted">
+            <p className="text-xs text-white/55">
               Payments powered by Stripe Connect. Vektrum governs release — never holds your funds.
             </p>
           </div>

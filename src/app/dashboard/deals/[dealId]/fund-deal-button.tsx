@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { formatMoney } from "@/lib/utils";
-import { AlertCircle, ArrowRight } from "lucide-react";
+import { AlertCircle, ArrowRight, Info } from "lucide-react";
 
 interface FundDealButtonProps {
   dealId: string;
@@ -21,17 +21,19 @@ export function FundDealButton({ dealId, remaining, stripeConnected }: FundDealB
   if (!stripeConnected) {
     return (
       <div className="flex flex-col items-start gap-2 sm:items-end">
-        <div className="rounded-lg border border-vektrum-amber-border bg-vektrum-amber-bg px-4 py-3 max-w-sm">
-          <p className="text-[13px] font-medium text-vektrum-amber">
-            Connect your Stripe account to fund deals.
-          </p>
-          <button
+        <div className="notice-warning max-w-sm flex-col items-start gap-2">
+          <div className="flex items-start gap-2.5">
+            <Info size={14} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
+            <span>Connect your Stripe account before funding deals.</span>
+          </div>
+          <Button
+            variant="primary"
+            size="sm"
             onClick={() => router.push('/dashboard/funder/onboarding')}
-            className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-vektrum-blue px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-vektrum-blue-hover transition-all"
           >
             Complete Setup
-            <ArrowRight size={12} />
-          </button>
+            <ArrowRight size={12} aria-hidden="true" />
+          </Button>
         </div>
       </div>
     );
@@ -75,7 +77,7 @@ export function FundDealButton({ dealId, remaining, stripeConnected }: FundDealB
         Fund This Deal — {formatMoney(remaining)}
       </Button>
       {error && (
-        <div className="flex items-start gap-1.5 text-xs text-vektrum-red">
+        <div className="flex items-start gap-1.5 text-xs text-red-400">
           <AlertCircle size={12} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
           {error}
         </div>

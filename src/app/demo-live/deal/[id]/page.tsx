@@ -75,7 +75,7 @@ const DEALS: Record<string, Deal> = {
     released: 950_000,
     status: 'active',
     startedAgo: '30 days ago',
-    contractor: 'Marcus Webb',
+    contractor: 'Diane Reyes',
     funder: 'Sarah Chen',
     milestones: [
       { title: 'Site Work & Utilities', amount: 475_000, status: 'released', releasedAgo: '15 days ago' },
@@ -140,13 +140,14 @@ const DEALS: Record<string, Deal> = {
 }
 
 const RELEASE_GATE_CONDITIONS = [
-  'Milestone marked as approved by funder',
-  'AI draw review completed with no high-risk flags',
-  'No open disputes on this milestone',
-  'Contractor Stripe account verified and payouts enabled',
-  'Milestone amount matches funded allocation',
-  'Funder has sufficient funded balance for this draw',
-  'Audit log entry created for release action',
+  'Milestone approved by funder',
+  'Milestone protection status: ready_for_release',
+  'Funded balance covers this disbursement (incl. fee)',
+  'Contractor Stripe payouts enabled',
+  'Contractor onboarding complete',
+  'No prior release on this milestone',
+  'No pending change orders',
+  'Signed contract on file',
 ]
 
 // ── Page ─────────────────────────────────────────────────────────────────────
@@ -177,7 +178,7 @@ export default async function DemoDealPage({
       {/* Back link */}
       <Link
         href={backHref}
-        className="inline-flex items-center gap-1 text-[13px] text-vektrum-muted hover:text-vektrum-blue transition-colors"
+        className="inline-flex items-center gap-1 text-[13px] text-white/55 hover:text-vektrum-blue transition-colors"
       >
         {backLabel}
       </Link>
@@ -186,12 +187,12 @@ export default async function DemoDealPage({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="flex items-center gap-2.5 mb-1">
-            <h1 className="font-display text-2xl font-bold text-vektrum-text">{deal.title}</h1>
-            <span className="inline-flex items-center rounded-full border border-vektrum-green-border bg-vektrum-green-bg px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-vektrum-green">
+            <h1 className="font-display text-2xl font-bold text-white">{deal.title}</h1>
+            <span className="inline-flex items-center rounded-full border border-emerald-500/20 bg-emerald-500/[0.08] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">
               {deal.status}
             </span>
           </div>
-          <p className="text-sm text-vektrum-muted">
+          <p className="text-sm text-white/55">
             {deal.contractor} &middot; {deal.funder} &middot; Started {deal.startedAgo}
           </p>
         </div>
@@ -199,22 +200,22 @@ export default async function DemoDealPage({
 
       {/* Money Summary */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="rounded-lg border border-vektrum-border bg-vektrum-surface px-5 py-5 shadow-sm">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">Total</p>
-          <p className="mt-1.5 font-display text-xl font-bold tabular-nums text-vektrum-text">{fmt(deal.total)}</p>
+        <div className="rounded-lg border border-white/[0.08] bg-surface-2 px-5 py-5 shadow-sm">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Total</p>
+          <p className="mt-1.5 font-display text-xl font-bold tabular-nums text-white">{fmt(deal.total)}</p>
         </div>
-        <div className="rounded-lg border border-vektrum-border bg-vektrum-surface px-5 py-5 shadow-sm">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">Funded</p>
-          <p className="mt-1.5 font-display text-xl font-bold tabular-nums text-vektrum-text">{fmt(deal.funded)}</p>
+        <div className="rounded-lg border border-white/[0.08] bg-surface-2 px-5 py-5 shadow-sm">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Funded</p>
+          <p className="mt-1.5 font-display text-xl font-bold tabular-nums text-white">{fmt(deal.funded)}</p>
         </div>
-        <div className="rounded-lg border border-vektrum-border bg-vektrum-surface px-5 py-5 shadow-sm">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">Released</p>
-          <p className="mt-1.5 font-display text-xl font-bold tabular-nums text-vektrum-green">{fmt(deal.released)}</p>
+        <div className="rounded-lg border border-white/[0.08] bg-surface-2 px-5 py-5 shadow-sm">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Released</p>
+          <p className="mt-1.5 font-display text-xl font-bold tabular-nums text-emerald-400">{fmt(deal.released)}</p>
         </div>
-        <div className="rounded-lg border border-vektrum-border bg-vektrum-surface px-5 py-5 shadow-sm">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">Progress</p>
-          <p className="mt-1.5 font-display text-xl font-bold tabular-nums text-vektrum-text">{pct}%</p>
-          <div className="mt-2 h-1.5 rounded-full bg-vektrum-surface-alt overflow-hidden">
+        <div className="rounded-lg border border-white/[0.08] bg-surface-2 px-5 py-5 shadow-sm">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Progress</p>
+          <p className="mt-1.5 font-display text-xl font-bold tabular-nums text-white">{pct}%</p>
+          <div className="mt-2 h-1.5 rounded-full bg-surface-3 overflow-hidden">
             <div className="h-full rounded-full bg-vektrum-green" style={{ width: `${pct}%` }} />
           </div>
         </div>
@@ -222,7 +223,7 @@ export default async function DemoDealPage({
 
       {/* Milestones */}
       <section>
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-vektrum-muted">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white/55">
           Milestones
         </h2>
         <DemoMilestoneList milestones={deal.milestones} releaseGateConditions={RELEASE_GATE_CONDITIONS} dealTotal={deal.total} dealReleased={deal.released} />

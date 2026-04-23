@@ -68,7 +68,7 @@ export function UserMenu({ name, email, role }: UserMenuProps) {
       {/* Avatar trigger */}
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-1.5 rounded-lg p-1 hover:bg-vektrum-surface-alt transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-vektrum-blue"
+        className="flex items-center gap-1.5 rounded-lg p-1 hover:bg-surface-3 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-vektrum-blue"
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label="User menu"
@@ -78,7 +78,7 @@ export function UserMenu({ name, email, role }: UserMenuProps) {
         </div>
         <ChevronDown
           size={13}
-          className={`text-vektrum-muted transition-transform duration-150 ${open ? 'rotate-180' : ''}`}
+          className={`text-white/55 transition-transform duration-150 ${open ? 'rotate-180' : ''}`}
           aria-hidden="true"
         />
       </button>
@@ -88,14 +88,14 @@ export function UserMenu({ name, email, role }: UserMenuProps) {
         <div
           role="menu"
           aria-label="User actions"
-          className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-vektrum-border bg-vektrum-surface shadow-lg z-50 overflow-hidden"
+          className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-white/[0.08] bg-surface-2 shadow-lg z-50 overflow-hidden"
         >
           {/* User info header */}
-          <div className="px-4 py-3 border-b border-vektrum-border-subtle">
-            <p className="text-[13px] font-semibold text-vektrum-text truncate">
+          <div className="px-4 py-3 border-b border-white/[0.05]">
+            <p className="text-[13px] font-semibold text-white truncate">
               {name ?? 'Your account'}
             </p>
-            <p className="text-[11px] text-vektrum-muted truncate mt-0.5">
+            <p className="text-[11px] text-white/55 truncate mt-0.5">
               {email ?? ''}
             </p>
           </div>
@@ -106,7 +106,7 @@ export function UserMenu({ name, email, role }: UserMenuProps) {
               href="/dashboard"
               role="menuitem"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-vektrum-text hover:bg-vektrum-surface-alt transition-colors"
+              className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-white hover:bg-surface-3 transition-colors"
             >
               Dashboard
             </Link>
@@ -117,27 +117,27 @@ export function UserMenu({ name, email, role }: UserMenuProps) {
                   href="/dashboard/deals/new"
                   role="menuitem"
                   onClick={() => setOpen(false)}
-                  className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-vektrum-text hover:bg-vektrum-surface-alt transition-colors"
+                  className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-white hover:bg-surface-3 transition-colors"
                 >
-                  <Briefcase size={14} className="text-vektrum-muted" aria-hidden="true" />
+                  <Briefcase size={14} className="text-white/55" aria-hidden="true" />
                   Deals
                 </Link>
                 <Link
                   href="/dashboard/contractor/documents"
                   role="menuitem"
                   onClick={() => setOpen(false)}
-                  className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-vektrum-text hover:bg-vektrum-surface-alt transition-colors"
+                  className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-white hover:bg-surface-3 transition-colors"
                 >
-                  <FileBox size={14} className="text-vektrum-muted" aria-hidden="true" />
+                  <FileBox size={14} className="text-white/55" aria-hidden="true" />
                   Documents
                 </Link>
                 <Link
                   href="/dashboard/contractor/payments"
                   role="menuitem"
                   onClick={() => setOpen(false)}
-                  className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-vektrum-text hover:bg-vektrum-surface-alt transition-colors"
+                  className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-white hover:bg-surface-3 transition-colors"
                 >
-                  <DollarSign size={14} className="text-vektrum-muted" aria-hidden="true" />
+                  <DollarSign size={14} className="text-white/55" aria-hidden="true" />
                   Payments
                 </Link>
               </>
@@ -147,9 +147,9 @@ export function UserMenu({ name, email, role }: UserMenuProps) {
               href="/dashboard/audit"
               role="menuitem"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-vektrum-text hover:bg-vektrum-surface-alt transition-colors"
+              className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-white hover:bg-surface-3 transition-colors"
             >
-              <FileText size={14} className="text-vektrum-muted" aria-hidden="true" />
+              <FileText size={14} className="text-white/55" aria-hidden="true" />
               Audit Log
             </Link>
 
@@ -157,9 +157,9 @@ export function UserMenu({ name, email, role }: UserMenuProps) {
               href="/dashboard/settings"
               role="menuitem"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-vektrum-text hover:bg-vektrum-surface-alt transition-colors"
+              className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-white hover:bg-surface-3 transition-colors"
             >
-              <Settings size={14} className="text-vektrum-muted" aria-hidden="true" />
+              <Settings size={14} className="text-white/55" aria-hidden="true" />
               Account Settings
             </Link>
 
@@ -167,9 +167,9 @@ export function UserMenu({ name, email, role }: UserMenuProps) {
               href="/contact"
               role="menuitem"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-vektrum-text hover:bg-vektrum-surface-alt transition-colors"
+              className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-white hover:bg-surface-3 transition-colors"
             >
-              <HelpCircle size={14} className="text-vektrum-muted" aria-hidden="true" />
+              <HelpCircle size={14} className="text-white/55" aria-hidden="true" />
               Support
             </Link>
 
@@ -178,7 +178,7 @@ export function UserMenu({ name, email, role }: UserMenuProps) {
                 href="/dashboard/admin"
                 role="menuitem"
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-vektrum-text hover:bg-vektrum-surface-alt transition-colors"
+                className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-white hover:bg-surface-3 transition-colors"
               >
                 <Shield size={14} className="text-vektrum-blue" aria-hidden="true" />
                 Admin Dashboard
@@ -187,12 +187,12 @@ export function UserMenu({ name, email, role }: UserMenuProps) {
           </div>
 
           {/* Divider + sign out */}
-          <div className="border-t border-vektrum-border-subtle py-1">
+          <div className="border-t border-white/[0.05] py-1">
             <button
               role="menuitem"
               onClick={handleSignOut}
               disabled={signingOut}
-              className="flex w-full items-center gap-2.5 px-4 py-2.5 text-[13px] text-vektrum-red hover:bg-vektrum-red-bg transition-colors disabled:opacity-50"
+              className="flex w-full items-center gap-2.5 px-4 py-2.5 text-[13px] text-red-400 hover:bg-red-500/[0.08] transition-colors disabled:opacity-50"
             >
               <LogOut size={14} aria-hidden="true" />
               {signingOut ? 'Signing out…' : 'Sign out'}

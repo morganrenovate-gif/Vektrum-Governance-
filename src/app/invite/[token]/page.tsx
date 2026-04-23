@@ -55,7 +55,7 @@ const TRUST_SIGNALS = [
   },
   {
     icon: Shield,
-    label: '7-condition release gate',
+    label: '8-condition release gate',
     desc: 'Payments move only with your explicit approval',
   },
   {
@@ -257,7 +257,7 @@ export default function InviteAcceptPage() {
                 {formatMoney(state.data.deal.total_amount)}
               </p>
               <p className="mt-1.5 text-sm text-white/40">
-                Protected by Vektrum&rsquo;s 7-condition release gate
+                Protected by Vektrum&rsquo;s 8-condition release gate
               </p>
             </div>
 
@@ -275,7 +275,7 @@ export default function InviteAcceptPage() {
 
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-vektrum-amber/10 border border-vektrum-amber/20">
-                  <Clock className="h-4 w-4 text-vektrum-amber" aria-hidden="true" />
+                  <Clock className="h-4 w-4 text-amber-400" aria-hidden="true" />
                 </div>
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/30">Invite expires</p>

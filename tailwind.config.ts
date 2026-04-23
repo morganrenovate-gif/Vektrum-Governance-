@@ -68,6 +68,9 @@ const config: Config = {
         "surface-2":  "#111827",   // Cards, panels (standard)
         "surface-3":  "#1A2535",   // Nested content, subtle separators
         "surface-4":  "#232D3F",   // Hover states, selected rows
+
+        // ── Nav ──────────────────────────────────────────────────────────────
+        "nav-bg":     "#070D18",   // App navigation background
       },
 
       fontFamily: {
@@ -95,6 +98,13 @@ const config: Config = {
         "feature":    "0 8px 32px rgba(0,0,0,0.40), 0 0 0 1px rgba(255,255,255,0.05)",
         // Brand-tinted shadow for primary CTAs
         blue: "0 4px 14px 0 rgba(26,58,150,0.30)",
+        // Deep drama shadows — hero product card, scenario cards (dark context)
+        "deep":  "0 32px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04)",
+        "scene": "0 24px 60px rgba(0,0,0,0.4)",
+        // Lifted shadows — light-surface marketing cards (Proof, AI section)
+        "lift":  "0 4px 24px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04)",
+        // Float shadow — feature / role / step cards (light context)
+        "float": "0 2px 12px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.04)",
         // Inner shadow for inset wells
         inner: "inset 0 2px 4px 0 rgba(20,20,20,0.06)",
         none: "none",

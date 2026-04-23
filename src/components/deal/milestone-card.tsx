@@ -8,15 +8,16 @@ import type { Milestone, UserRole } from "@/lib/types";
 import { CheckCircle2, AlertCircle, ChevronDown } from "lucide-react";
 import { DrawReviewAgent } from "@/components/ai/draw-review-agent";
 
-// Left-border color coding by milestone status — Tier 2 spec
+// Left-border color coding by milestone status — dark-context tokens only.
 // Actionable milestones are visually differentiated from passive ones.
 const statusBorderColor: Record<Milestone['status'], string> = {
-  not_started:       "border-l-vektrum-border",
+  not_started:       "border-l-white/[0.08]",
   in_progress:       "border-l-vektrum-blue",
-  ready_for_review:  "border-l-vektrum-amber",
-  approved:          "border-l-vektrum-green",
-  released:          "border-l-vektrum-green",
-  disputed:          "border-l-vektrum-red",
+  ready_for_review:  "border-l-amber-500",
+  approved:          "border-l-emerald-500",
+  released:          "border-l-emerald-500",
+  disputed:          "border-l-red-500",
+  payout_failed:     "border-l-red-500",
 };
 
 // Shadow elevation for actionable states
@@ -27,6 +28,7 @@ const statusShadow: Record<Milestone['status'], string> = {
   approved:          "shadow-sm",
   released:          "shadow-xs",
   disputed:          "shadow-md",
+  payout_failed:     "shadow-md",
 };
 
 interface MilestoneCardProps {
@@ -98,7 +100,7 @@ export function MilestoneCard({
   };
 
   const isReleased = milestone.status === "released";
-  const borderColor = statusBorderColor[milestone.status] ?? "border-l-vektrum-border";
+  const borderColor = statusBorderColor[milestone.status] ?? "border-l-white/[0.08]";
   const shadowClass = statusShadow[milestone.status] ?? "shadow-xs";
   const isReadyForReview = milestone.status === 'ready_for_review'
   const showAiPanel =
@@ -109,7 +111,7 @@ export function MilestoneCard({
       <details className={cn("rounded-lg border border-white/[0.08] bg-surface-2 overflow-hidden border-l-[3px]", borderColor, shadowClass)}>
         <summary className="flex cursor-pointer list-none items-center justify-between px-5 py-3 hover:bg-surface-3 transition-colors">
           <div className="flex items-center gap-2 min-w-0">
-            <CheckCircle2 size={14} className="text-vektrum-green flex-shrink-0" aria-hidden="true" />
+            <CheckCircle2 size={14} className="text-emerald-400 flex-shrink-0" aria-hidden="true" />
             <span className="text-sm font-semibold text-white truncate">{milestone.title}</span>
             <MilestoneStatusBadge status={milestone.status} />
           </div>
@@ -122,7 +124,7 @@ export function MilestoneCard({
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0 flex-1 space-y-1.5">
               <div className="flex flex-wrap items-center gap-2">
-                <CheckCircle2 size={15} className="text-vektrum-green flex-shrink-0" aria-hidden="true" />
+                <CheckCircle2 size={15} className="text-emerald-400 flex-shrink-0" aria-hidden="true" />
                 <h4 className="text-sm font-semibold text-white">{milestone.title}</h4>
               </div>
               {milestone.description && (
@@ -141,13 +143,13 @@ export function MilestoneCard({
             </div>
           </div>
           {error && (
-            <div className="mt-3 flex items-start gap-1.5 rounded-md bg-vektrum-red-bg border border-vektrum-red-border px-3 py-2 text-sm text-vektrum-red">
+            <div className="mt-3 flex items-start gap-1.5 rounded-md bg-red-500/[0.08] border border-red-500/20 px-3 py-2 text-sm text-red-400">
               <AlertCircle size={14} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
               {error}
             </div>
           )}
           {success && (
-            <div className="mt-3 flex items-start gap-1.5 rounded-md bg-vektrum-green-bg border border-vektrum-green-border px-3 py-2 text-sm text-vektrum-green">
+            <div className="mt-3 flex items-start gap-1.5 rounded-md bg-emerald-500/[0.08] border border-emerald-500/20 px-3 py-2 text-sm text-emerald-400">
               <CheckCircle2 size={14} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
               {success}
             </div>
@@ -256,13 +258,13 @@ export function MilestoneCard({
 
         {/* Error / success feedback */}
         {error && (
-          <div className="mt-3 flex items-start gap-1.5 rounded-md bg-vektrum-red-bg border border-vektrum-red-border px-3 py-2 text-sm text-vektrum-red">
+          <div className="mt-3 flex items-start gap-1.5 rounded-md bg-red-500/[0.08] border border-red-500/20 px-3 py-2 text-sm text-red-400">
             <AlertCircle size={14} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
             {error}
           </div>
         )}
         {success && (
-          <div className="mt-3 flex items-start gap-1.5 rounded-md bg-vektrum-green-bg border border-vektrum-green-border px-3 py-2 text-sm text-vektrum-green">
+          <div className="mt-3 flex items-start gap-1.5 rounded-md bg-emerald-500/[0.08] border border-emerald-500/20 px-3 py-2 text-sm text-emerald-400">
             <CheckCircle2 size={14} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
             {success}
           </div>

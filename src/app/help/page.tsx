@@ -31,8 +31,8 @@ const FAQ: FaqItem[] = [
     a: 'No. All funds are held by Stripe via Stripe Connect. Vektrum governs when and how funds are released, but never holds or touches the money directly.',
   },
   {
-    q: 'What is the 7-condition release gate?',
-    a: 'Before any milestone payment releases, 7 server-side conditions must all be true simultaneously: milestone approved, deal active, no open disputes, sufficient Project Trust Account balance, Stripe account verified, no duplicate release, and integrity check passed.',
+    q: 'What is the 8-condition release gate?',
+    a: 'Before any milestone payment releases, 8 server-side conditions must all be true simultaneously: (1) milestone approved, (2) protection status clear, (3) sufficient funded balance including platform fee, (4) contractor Stripe payouts enabled, (5) contractor onboarding complete, (6) no duplicate release, (7) no open change orders, and (8) a fully-signed contract on file.',
   },
   {
     q: 'How does dispute isolation work?',
@@ -60,7 +60,7 @@ export default function HelpPage() {
   return (
     <div className="flex flex-col">
       {/* ─── Hero ──────────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-vektrum-bg pt-20 pb-16 sm:pt-28 sm:pb-20">
+      <section className="relative overflow-hidden bg-[#0D1B2A] pt-20 pb-16 sm:pt-28 sm:pb-20">
         <div
           className="absolute inset-0 opacity-[0.03]"
           style={{
@@ -72,17 +72,17 @@ export default function HelpPage() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-gradient-to-b from-vektrum-blue-subtle/50 to-transparent rounded-full blur-3xl" />
 
         <div className="relative max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-vektrum-border bg-vektrum-surface px-4 py-1.5 shadow-sm mb-8">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-surface-2 px-4 py-1.5 shadow-sm mb-8">
             <HelpCircle size={14} className="text-vektrum-blue" />
-            <span className="text-[12px] font-medium text-vektrum-muted tracking-wide">
+            <span className="text-[12px] font-medium text-white/55 tracking-wide">
               Help center
             </span>
           </div>
 
-          <h1 className="font-display text-4xl font-bold tracking-[-0.035em] text-vektrum-text sm:text-5xl text-balance">
+          <h1 className="font-display text-4xl font-bold tracking-[-0.035em] text-white sm:text-5xl text-balance">
             Frequently asked questions
           </h1>
-          <p className="mt-4 mx-auto max-w-2xl text-[17px] leading-relaxed text-vektrum-muted">
+          <p className="mt-4 mx-auto max-w-2xl text-[17px] leading-relaxed text-white/55">
             Everything you need to know about Vektrum, milestone payments, and
             construction payment governance.
           </p>
@@ -96,10 +96,10 @@ export default function HelpPage() {
             {FAQ.map((item) => (
               <div
                 key={item.q}
-                className="rounded-xl border border-vektrum-border bg-vektrum-surface p-6"
+                className="rounded-xl border border-white/[0.08] bg-surface-2 p-6"
               >
-                <h3 className="text-[15px] font-semibold text-vektrum-text">{item.q}</h3>
-                <p className="mt-2 text-[13px] leading-relaxed text-vektrum-muted">{item.a}</p>
+                <h3 className="text-[15px] font-semibold text-white">{item.q}</h3>
+                <p className="mt-2 text-[13px] leading-relaxed text-white/55">{item.a}</p>
               </div>
             ))}
           </div>
@@ -107,12 +107,12 @@ export default function HelpPage() {
       </section>
 
       {/* ─── Contact ───────────────────────────────────────────────────────── */}
-      <section className="border-t border-vektrum-border bg-vektrum-surface py-20 sm:py-24">
+      <section className="border-t border-white/[0.08] bg-surface-2 py-20 sm:py-24">
         <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
-          <h2 className="text-2xl font-bold tracking-[-0.025em] text-vektrum-text sm:text-3xl text-balance">
+          <h2 className="text-2xl font-bold tracking-[-0.025em] text-white sm:text-3xl text-balance">
             Still have questions?
           </h2>
-          <p className="mt-4 mx-auto max-w-md text-[15px] text-vektrum-muted">
+          <p className="mt-4 mx-auto max-w-md text-[15px] text-white/55">
             Reach out to our team and we will get back to you.
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
@@ -125,7 +125,7 @@ export default function HelpPage() {
             </Link>
             <Link
               href="/auth/signup"
-              className="inline-flex min-h-[48px] items-center justify-center rounded-xl border border-vektrum-border bg-vektrum-surface px-7 py-3 text-[14px] font-semibold text-vektrum-muted shadow-sm hover:bg-vektrum-surface-alt hover:border-vektrum-blue/40 transition-all"
+              className="inline-flex min-h-[48px] items-center justify-center rounded-xl border border-white/[0.08] bg-surface-2 px-7 py-3 text-[14px] font-semibold text-white/55 shadow-sm hover:bg-surface-3 hover:border-vektrum-blue/40 transition-all"
             >
               Get started
             </Link>

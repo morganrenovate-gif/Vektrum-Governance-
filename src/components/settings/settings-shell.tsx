@@ -25,85 +25,88 @@ interface Tab {
 }
 
 const TABS: Tab[] = [
-  { id: 'profile',       label: 'Profile',       icon: User },
-  { id: 'notifications', label: 'Notifications', icon: Bell,         comingSoon: true },
-  { id: 'stripe',        label: 'Stripe Connect',  icon: CreditCard,  hideForAdmin: true },
-  { id: 'security',      label: 'Security',      icon: Shield },
-  { id: 'danger',        label: 'Danger Zone',   icon: AlertTriangle },
+  { id: 'profile',       label: 'Profile',        icon: User },
+  { id: 'notifications', label: 'Notifications',  icon: Bell,         comingSoon: true },
+  { id: 'stripe',        label: 'Stripe Connect', icon: CreditCard,   hideForAdmin: true },
+  { id: 'security',      label: 'Security',       icon: Shield },
+  { id: 'danger',        label: 'Danger Zone',    icon: AlertTriangle },
 ]
 
 export function SettingsShell({ profile, userEmail }: SettingsShellProps) {
   const [activeTab, setActiveTab] = useState<TabId>('profile')
 
   const visibleTabs = TABS.filter((tab) => {
-    // Stripe tab: relevant for contractors and funders, not admins
     if (tab.hideForAdmin && profile.role === 'admin') return false
+    if (tab.comingSoon) return false
     return true
   })
 
   return (
-    <div className="page-container section">
-      {/* Page header */}
-      <div className="mb-8">
-        <h1 className="font-display text-2xl font-bold text-vektrum-text">Account Settings</h1>
-        <p className="mt-1 text-sm text-vektrum-muted">
-          Manage your profile, security, and platform preferences.
-        </p>
-      </div>
+    <div className="min-h-screen bg-surface-0">
+      <div className="dash-page">
+        {/* Page header */}
+        <div className="pb-7 border-b border-white/[0.06]">
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className="h-4 w-[3px] rounded-full bg-vektrum-blue flex-shrink-0" aria-hidden="true" />
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-vektrum-blue">Settings</p>
+          </div>
+          <h1 className="type-page-title">
+            Account Settings
+          </h1>
+          <p className="mt-2.5 text-[13px] text-white/45 leading-relaxed">
+            Manage your profile, security, and platform preferences.
+          </p>
+        </div>
 
-      <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
-        {/* Sidebar nav */}
-        <nav
-          aria-label="Settings sections"
-          className="flex flex-row gap-1 overflow-x-auto lg:flex-col lg:w-52 lg:flex-shrink-0"
-        >
-          {visibleTabs.map((tab) => {
-            const Icon = tab.icon
-            const isActive = activeTab === tab.id
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  'flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-all whitespace-nowrap min-w-fit',
-                  isActive
-                    ? 'bg-vektrum-blue-subtle text-vektrum-blue border border-vektrum-blue-border'
-                    : 'text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt border border-transparent'
-                )}
-                aria-current={isActive ? 'page' : undefined}
-              >
-                <Icon size={15} aria-hidden="true" />
-                {tab.label}
-                {tab.comingSoon && (
-                  <span className="ml-auto text-[9px] font-semibold uppercase tracking-wide text-vektrum-amber bg-vektrum-amber-bg border border-vektrum-amber-border rounded-full px-1.5 py-0.5">
-                    Soon
-                  </span>
-                )}
-              </button>
-            )
-          })}
-        </nav>
+        <div className="flex flex-col gap-8 lg:flex-row lg:gap-10 pt-2">
+          {/* Sidebar nav */}
+          <nav
+            aria-label="Settings sections"
+            className="flex flex-row gap-1 overflow-x-auto lg:flex-col lg:w-48 lg:flex-shrink-0"
+          >
+            {visibleTabs.map((tab) => {
+              const Icon = tab.icon
+              const isActive = activeTab === tab.id
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    'flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-all whitespace-nowrap min-w-fit text-left',
+                    isActive
+                      ? 'bg-vektrum-blue/10 text-vektrum-blue border border-vektrum-blue/20'
+                      : 'text-white/45 hover:text-white/80 hover:bg-white/[0.05] border border-transparent'
+                  )}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  <Icon size={14} aria-hidden="true" />
+                  {tab.label}
+                </button>
+              )
+            })}
+          </nav>
 
-        {/* Tab content */}
-        <div className="flex-1 min-w-0">
-          {activeTab === 'profile' && (
-            <ProfileTab profile={profile} userEmail={userEmail} />
-          )}
-          {activeTab === 'notifications' && (
-            <ComingSoonTab
-              title="Notifications"
-              description="Milestone approval alerts, draw request updates, and funder activity notifications. Get notified the moment action is required on any of your deals."
-            />
-          )}
-          {activeTab === 'stripe' && (
-            <StripeTab profile={profile} />
-          )}
-          {activeTab === 'security' && (
-            <SecurityTab />
-          )}
-          {activeTab === 'danger' && (
-            <DangerTab />
-          )}
+          {/* Tab content */}
+          <div className="flex-1 min-w-0">
+            {activeTab === 'profile' && (
+              <ProfileTab profile={profile} userEmail={userEmail} />
+            )}
+            {activeTab === 'notifications' && (
+              <ComingSoonTab
+                title="Notifications"
+                description="Milestone approval alerts, draw request updates, and funder activity notifications. Get notified the moment action is required on any of your deals."
+              />
+            )}
+            {activeTab === 'stripe' && (
+              <StripeTab profile={profile} />
+            )}
+            {activeTab === 'security' && (
+              <SecurityTab />
+            )}
+            {activeTab === 'danger' && (
+              <DangerTab />
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -111,34 +114,34 @@ export function SettingsShell({ profile, userEmail }: SettingsShellProps) {
 }
 
 // ─── Danger Zone ──────────────────────────────────────────────────────────────
-// Advisor 9 (Skeptical Investor): Self-serve deletion is dangerous without
-// proper financial reconciliation. Lock it down with a clear explanation.
-// Advisor 6 (Attorney): Audit trail must be preserved — no soft-delete shortcut.
 
 function DangerTab() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div>
-        <h2 className="font-display text-lg font-bold text-vektrum-text">Danger Zone</h2>
-        <p className="mt-1 text-sm text-vektrum-muted">
+        <h2 className="text-[16px] font-semibold tracking-[-0.01em] text-white">Danger Zone</h2>
+        <p className="mt-1.5 text-[13px] text-white/45 leading-relaxed">
           Irreversible account actions. Proceed with caution.
         </p>
       </div>
 
-      <div className="rounded-xl border border-vektrum-red-border bg-vektrum-surface opacity-60 cursor-not-allowed select-none">
-        <div className="pointer-events-none p-6">
+      <div className="rounded-xl border border-red-500/20 bg-surface-2">
+        <div className="p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-[14px] font-semibold text-vektrum-text">Delete Account</p>
-              <p className="mt-1 text-[13px] text-vektrum-muted leading-relaxed max-w-md">
+              <p className="text-sm font-semibold text-white">Delete Account</p>
+              <p className="mt-1.5 text-sm text-white/45 leading-relaxed max-w-md">
                 Account deletion requires all active deals to be fully closed and all funds
                 released or returned. This action is irreversible and permanently removes
-                your deal history. Contact support to initiate.
+                your deal history.
               </p>
             </div>
-            <span className="flex-shrink-0 rounded-full border border-vektrum-amber-border bg-vektrum-amber-bg px-2.5 py-0.5 text-[10px] font-semibold text-vektrum-amber">
-              Coming soon
-            </span>
+            <a
+              href="mailto:support@vektrum.io?subject=Account%20Deletion%20Request"
+              className="flex-shrink-0 inline-flex items-center min-h-[34px] rounded-lg border border-red-500/20 bg-red-500/[0.05] px-3 py-1.5 text-xs font-semibold text-red-400 hover:bg-red-500/10 hover:border-red-500/30 transition-colors"
+            >
+              Contact Support
+            </a>
           </div>
         </div>
       </div>

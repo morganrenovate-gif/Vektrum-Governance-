@@ -59,6 +59,61 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     )
   }
 
+  // ── Contract Gate: signed contract required before funding ─────────────────
+  //
+  // A deal cannot receive funding without a fully-executed contract.
+  // Both parties must have signed via DocuSign before escrow is opened.
+  //
+  // This query intentionally uses the user-scoped client (not admin) so that
+  // RLS confirms the caller is a deal participant.
+  const { data: contract, error: contractLookupError } = await supabase
+    .from('contracts')
+    .select('status')
+    .eq('deal_id', dealId)
+    .maybeSingle()
+
+  if (contractLookupError) {
+    return internalError(
+      'Could not verify contract status before funding. Please try again.',
+      contractLookupError.message,
+    )
+  }
+
+  if (!contract) {
+    return NextResponse.json(
+      {
+        error: 'No contract on file.',
+        detail: 'A signed contract is required before funding can be accepted. ' +
+          'The contractor must upload the contract PDF and both parties must sign via DocuSign.',
+        contract_status: null,
+      },
+      { status: 403 },
+    )
+  }
+
+  if (contract.status !== 'signed') {
+    const pendingParty =
+      contract.status === 'pending_signatures' ? 'both parties' :
+      contract.status === 'funder_signed'      ? 'the contractor' :
+      contract.status === 'contractor_signed'  ? 'the funder' :
+      contract.status === 'voided'             ? null : 'both parties'
+
+    const detail =
+      contract.status === 'voided'
+        ? 'The contract has been voided. A new contract must be uploaded and signed before funding.'
+        : `Waiting for ${pendingParty} to sign. Funding is unlocked only after both parties ` +
+          'have executed the contract.'
+
+    return NextResponse.json(
+      {
+        error: 'Contract not fully signed.',
+        detail,
+        contract_status: contract.status,
+      },
+      { status: 403 },
+    )
+  }
+
   if (deal.status === 'completed' || deal.status === 'cancelled') {
     return errorResponse(
       400,

@@ -22,18 +22,8 @@ const MOCK_DEALS = [
     funderCompany: 'Meridian Capital Partners',
     total: 9_100_000,
     pct: 38,
-    milestonesCompleted: 3,
+    milestonesCompleted: 4,
     milestonesTotal: 5,
-  },
-  {
-    slug: 'westside',
-    title: 'Westside Medical Office Campus',
-    funder: 'Sarah Chen',
-    funderCompany: 'Meridian Capital Partners',
-    total: 4_750_000,
-    pct: 20,
-    milestonesCompleted: 1,
-    milestonesTotal: 4,
   },
 ]
 
@@ -42,7 +32,7 @@ const MOCK_DEALS = [
 export default function DemoContractorPage() {
   const totalDeals = MOCK_DEALS.length
   const totalFunded = MOCK_DEALS.reduce((s, d) => s + d.total, 0)
-  const totalReleased = 4_890_000
+  const totalReleased = 3_940_000   // Riverside $480K + Harbor $3.46M
   const pendingReview = 1
 
   return (
@@ -165,7 +155,7 @@ function StatTile({ label, value, warning = false, href }: { label: string; valu
       
     >
       <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">{label}</p>
-      <p className={`mt-2 font-display text-4xl font-bold tabular-nums leading-none ${warning ? 'text-vektrum-amber' : 'text-white'}`}>{value}</p>
+      <p className={`mt-2 font-display text-4xl font-bold tabular-nums leading-none ${warning ? 'text-amber-400' : 'text-white'}`}>{value}</p>
     </div>
   )
   return href ? <Link href={href}>{inner}</Link> : inner

@@ -37,7 +37,7 @@ const founders = [
 export default function FoundersPage() {
   return (
     <div>
-      <section className="relative overflow-hidden bg-vektrum-bg pt-20 pb-16 sm:pt-28 sm:pb-20">
+      <section className="relative overflow-hidden bg-[#0D1B2A] pt-20 pb-16 sm:pt-28 sm:pb-20">
         <div
           className="pointer-events-none absolute inset-0 opacity-[0.03]"
           style={{
@@ -51,16 +51,16 @@ export default function FoundersPage() {
           aria-hidden="true"
         />
         <div className="relative max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-vektrum-border bg-vektrum-surface px-4 py-1.5 shadow-sm mb-8">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-surface-2 px-4 py-1.5 shadow-sm mb-8">
             <span className="h-1.5 w-1.5 rounded-full bg-vektrum-green animate-pulse" aria-hidden="true" />
-            <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-vektrum-faint">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/30">
               The Team
             </span>
           </div>
-          <h1 className="font-display text-3xl font-bold tracking-[-0.025em] text-vektrum-text sm:text-4xl lg:text-5xl">
+          <h1 className="font-display text-3xl font-bold tracking-[-0.025em] text-white sm:text-4xl lg:text-5xl">
             Built by people who lived the problem
           </h1>
-          <p className="mt-6 text-[16px] leading-relaxed text-vektrum-muted max-w-2xl mx-auto">
+          <p className="mt-6 text-[16px] leading-relaxed text-white/55 max-w-2xl mx-auto">
             Vektrum was not founded by fintech generalists. It was built by operators from construction
             finance who watched the same preventable failures repeat — missed draws, stalled projects,
             lenders approving disbursements on trust instead of verification.
@@ -74,7 +74,7 @@ export default function FoundersPage() {
             {founders.map((founder) => (
               <article
                 key={founder.name}
-                className="rounded-2xl border border-vektrum-border bg-vektrum-surface p-8 hover:border-vektrum-blue/40 hover:shadow-lg hover:shadow-vektrum-blue/5 transition-all"
+                className="rounded-2xl border border-white/[0.08] bg-surface-2 p-8 hover:border-vektrum-blue/40 hover:shadow-lg hover:shadow-vektrum-blue/5 transition-all"
               >
                 <div className="flex items-center gap-5 mb-6">
                   <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-vektrum-blue/10 border border-vektrum-blue/20 select-none">
@@ -83,15 +83,15 @@ export default function FoundersPage() {
                     </span>
                   </div>
                   <div>
-                    <h2 className="font-display text-[18px] font-bold text-vektrum-text leading-tight">
+                    <h2 className="font-display text-[18px] font-bold text-white leading-tight">
                       {founder.name}
                     </h2>
-                    <p className="mt-0.5 text-[12px] font-semibold uppercase tracking-[0.1em] text-vektrum-faint">
+                    <p className="mt-0.5 text-[12px] font-semibold uppercase tracking-[0.1em] text-white/30">
                       {founder.title}
                     </p>
                   </div>
                 </div>
-                <div className="space-y-4 text-[14px] leading-relaxed text-vektrum-muted">
+                <div className="space-y-4 text-[14px] leading-relaxed text-white/55">
                   <p>{founder.bio1}</p>
                   <p>{founder.bio2}</p>
                   <p>{founder.bio3}</p>
@@ -102,15 +102,15 @@ export default function FoundersPage() {
         </div>
       </section>
 
-      <section className="border-t border-vektrum-border bg-vektrum-surface py-20 sm:py-24" aria-label="Get started with Vektrum">
+      <section className="border-t border-white/[0.08] bg-surface-2 py-20 sm:py-24" aria-label="Get started with Vektrum">
         <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-vektrum-faint mb-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/30 mb-4">
             Work with us
           </p>
-          <h2 className="font-display text-2xl font-bold tracking-[-0.025em] text-vektrum-text sm:text-3xl mb-4">
+          <h2 className="font-display text-2xl font-bold tracking-[-0.025em] text-white sm:text-3xl mb-4">
             The platform is live. The team is reachable.
           </h2>
-          <p className="text-[15px] leading-relaxed text-vektrum-muted mb-10 max-w-xl mx-auto">
+          <p className="text-[15px] leading-relaxed text-white/55 mb-10 max-w-xl mx-auto">
             If you're a lender evaluating construction loan software, or a contractor tired of
             payment delays, talk to us directly. No sales funnel, no demo request form routed to an
             SDR. The founders take early calls.
@@ -124,7 +124,7 @@ export default function FoundersPage() {
             </Link>
             <Link
               href="/contact"
-              className="rounded-xl border border-vektrum-border bg-vektrum-surface px-7 py-3 text-[14px] font-semibold text-vektrum-muted hover:bg-vektrum-surface-alt hover:border-vektrum-blue/40 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vektrum-blue focus-visible:ring-offset-2"
+              className="rounded-xl border border-white/[0.08] bg-surface-2 px-7 py-3 text-[14px] font-semibold text-white/55 hover:bg-surface-3 hover:border-vektrum-blue/40 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vektrum-blue focus-visible:ring-offset-2"
             >
               Contact the team
             </Link>

@@ -64,18 +64,18 @@ function SectionToggle({
       className="flex items-center justify-between w-full text-left py-1"
     >
       <div className="flex items-center gap-2">
-        <p className={`text-[11px] font-bold uppercase tracking-[0.12em] ${accent ?? 'text-vektrum-faint'}`}>
+        <p className={`text-[11px] font-bold uppercase tracking-[0.12em] ${accent ?? 'text-white/30'}`}>
           {label}
         </p>
         {count !== undefined && (
-          <span className="text-[10px] font-semibold text-vektrum-faint bg-vektrum-surface-alt px-1.5 py-0.5 rounded">
+          <span className="text-[10px] font-semibold text-white/30 bg-surface-3 px-1.5 py-0.5 rounded">
             {count}
           </span>
         )}
       </div>
       {open
-        ? <ChevronUp size={13} className="text-vektrum-faint" />
-        : <ChevronDown size={13} className="text-vektrum-faint" />
+        ? <ChevronUp size={13} className="text-white/30" />
+        : <ChevronDown size={13} className="text-white/30" />
       }
     </button>
   )
@@ -88,7 +88,7 @@ function ResponsibleBadge({ party }: { party: 'CONTRACTOR' | 'FUNDER' | 'EITHER'
     EITHER: 'bg-white/5 text-white/40 border-white/10',
   }
   return (
-    <span className={`inline-block rounded border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.06em] ${styles[party]}`}>
+    <span className={`inline-block rounded border px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] ${styles[party]}`}>
       {party}
     </span>
   )
@@ -96,7 +96,7 @@ function ResponsibleBadge({ party }: { party: 'CONTRACTOR' | 'FUNDER' | 'EITHER'
 
 function BriefUnavailable() {
   return (
-    <div className="rounded-2xl border border-white/[0.06] bg-[#0d1520] px-5 py-4 flex items-start gap-3 mb-6">
+    <div className="rounded-xl border border-white/[0.06] bg-[#0d1520] px-5 py-4 flex items-start gap-3 mb-6">
       <ShieldAlert size={15} className="text-white/30 flex-shrink-0 mt-0.5" />
       <div>
         <p className="text-[13px] font-semibold text-white/50">Dispute brief unavailable</p>
@@ -138,7 +138,7 @@ export function DisputeBrief({ brief, role, milestoneId, milestoneName }: Props)
   }
 
   return (
-    <div className="rounded-2xl border border-white/[0.08] bg-[#0d1520] overflow-hidden mb-6">
+    <div className="rounded-xl border border-white/[0.08] bg-[#0d1520] overflow-hidden mb-6">
 
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
@@ -257,7 +257,7 @@ export function DisputeBrief({ brief, role, milestoneId, milestoneName }: Props)
                   >
                     <div className="flex items-start justify-between gap-3 mb-1">
                       <p className="text-[13px] font-medium text-white/80">{item.item}</p>
-                      <span className={`flex-shrink-0 rounded border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.06em] ${
+                      <span className={`flex-shrink-0 rounded border px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] ${
                         item.severity === 'BLOCKING'
                           ? 'bg-red-500/10 text-red-400 border-red-500/20'
                           : 'bg-amber-500/10 text-amber-400 border-amber-500/20'

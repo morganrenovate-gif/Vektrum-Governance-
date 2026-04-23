@@ -1,12 +1,17 @@
 export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getAuthUser, requireRole } from '@/lib/auth/middleware'
+import { getAuthUser, requireRole, requireDealAccess } from '@/lib/auth/middleware'
 import { createClient } from '@/lib/supabase/server'
 import { logAudit } from '@/lib/engine/audit'
+import { notFoundError } from '@/lib/errors'
 
 // ─── GET /api/ai/draw-review?milestoneId=xxx ────────────────────────────────
 // Returns the most recent AI draw review assessment for a milestone.
+//
+// SECURITY: Verifies deal access before returning assessment data — prevents
+// IDOR where any funder could read AI assessments for milestones on deals
+// they do not participate in.
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
@@ -27,7 +32,29 @@ export async function GET(req: NextRequest) {
     return err as NextResponse
   }
 
+  const { user, profile } = authContext
   const supabase = await createClient()
+
+  // ── Resolve milestone → deal, then verify access ────────────────────────
+  // This prevents IDOR: any funder could otherwise supply arbitrary milestoneIds
+  // and read AI assessments for deals they have no stake in.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: milestone } = await (supabase as any)
+    .from('milestones')
+    .select('id, deal_id')
+    .eq('id', milestoneId)
+    .maybeSingle()
+
+  if (!milestone) {
+    // Return 404 rather than 403 to avoid leaking whether the milestone exists
+    return notFoundError(`Milestone ${milestoneId} not found.`)
+  }
+
+  try {
+    await requireDealAccess(supabase, milestone.deal_id, user.id, profile.role)
+  } catch (err) {
+    return err as NextResponse
+  }
 
   // Cast action filter to bypass strict AuditAction enum — ai_draw_review is a custom action
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -62,6 +89,11 @@ export async function GET(req: NextRequest) {
 
 // ─── POST /api/ai/draw-review ────────────────────────────────────────────────
 // Triggers a new Perplexity Sonar AI review of a milestone draw request.
+//
+// SECURITY: Explicitly verifies deal access before reading milestone data or
+// calling the AI service. Although Supabase RLS would block the milestone
+// SELECT for non-participants, explicit verification at the route layer ensures
+// defence-in-depth and makes the access check visible in code review.
 
 export async function POST(req: NextRequest) {
   let authContext
@@ -73,7 +105,8 @@ export async function POST(req: NextRequest) {
 
   const { user, profile } = authContext
 
-  // Only funder or admin can request AI reviews
+  // Funder, contractor, and admin can request AI reviews
+  // (contractors need to see their own assessments; funders initiate release flow)
   try {
     requireRole(profile, 'contractor', 'funder', 'admin')
   } catch (err) {
@@ -87,7 +120,7 @@ export async function POST(req: NextRequest) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = supabase as any
 
-  // Fetch milestone
+  // Fetch milestone — RLS ensures this returns null if the user has no access
   const { data: milestone } = await db
     .from('milestones')
     .select('id, title, description, amount, status, deal_id')
@@ -96,6 +129,16 @@ export async function POST(req: NextRequest) {
 
   if (!milestone) {
     return NextResponse.json({ error: 'Milestone not found' }, { status: 404 })
+  }
+
+  // ── Explicit deal access check ────────────────────────────────────────────
+  // Belt-and-suspenders: verify deal participation at the application layer.
+  // RLS on milestones/deals already protects the DB reads above, but this
+  // makes the access boundary explicit and guards against future RLS changes.
+  try {
+    await requireDealAccess(supabase, milestone.deal_id, user.id, profile.role)
+  } catch (err) {
+    return err as NextResponse
   }
 
   // Fetch deal

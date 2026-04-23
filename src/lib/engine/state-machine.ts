@@ -49,6 +49,14 @@ export const VALID_TRANSITIONS: Record<
   disputed: [
     // Terminal state — disputes are resolved through the dispute resolution flow
   ],
+  payout_failed: [
+    // Ops/funder can reset a failed payout back to 'approved' via the retry endpoint.
+    // This is system-only — no direct user transition; the retry endpoint drives it.
+    {
+      next: 'approved',
+      requiredRole: 'system',
+    },
+  ],
 }
 
 // ─── Validation ───────────────────────────────────────────────────────────────

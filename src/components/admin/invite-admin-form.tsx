@@ -49,14 +49,14 @@ export function InviteAdminForm() {
   }
 
   return (
-    <div className="rounded-xl border border-vektrum-border bg-vektrum-surface px-5 py-5 shadow-sm">
+    <div className="rounded-xl border border-white/[0.08] bg-surface-2 px-5 py-5 shadow-sm">
       <div className="flex items-center gap-2.5 mb-3">
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-vektrum-blue-subtle">
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-vektrum-blue/10">
           <Mail size={13} className="text-vektrum-blue" aria-hidden="true" />
         </div>
-        <h3 className="text-[13px] font-semibold text-vektrum-text">Invite New Admin</h3>
+        <h3 className="text-[13px] font-semibold text-white">Invite New Admin</h3>
       </div>
-      <p className="text-[12px] text-vektrum-muted mb-4">
+      <p className="text-[12px] text-white/55 mb-4">
         Send an email invite to a new user with admin privileges. They will receive a sign-up link.
       </p>
 
@@ -71,9 +71,9 @@ export function InviteAdminForm() {
               setSuccess(null)
             }}
             placeholder="admin@company.com"
-            className="w-full rounded-lg border border-vektrum-border bg-vektrum-bg px-3 py-2 text-[13px] text-vektrum-text placeholder:text-vektrum-faint focus:outline-none focus:ring-2 focus:ring-vektrum-blue/30 focus:border-vektrum-blue transition-all"
+            className="w-full rounded-lg border border-white/[0.08] bg-vektrum-bg px-3 py-2 text-[13px] text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-vektrum-blue/30 focus:border-vektrum-blue transition-all"
           />
-          <p className="text-xs text-vektrum-muted mt-1">
+          <p className="text-xs text-white/55 mt-1">
             Invited users will receive admin access upon accepting. This action is logged in the audit trail.
           </p>
         </div>
@@ -83,7 +83,7 @@ export function InviteAdminForm() {
           className={cn(
             'inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-[13px] font-medium transition-all',
             sending || !email.trim() || !EMAIL_REGEX.test(email.trim())
-              ? 'bg-vektrum-surface-alt text-vektrum-faint border border-vektrum-border cursor-not-allowed'
+              ? 'bg-surface-3 text-white/30 border border-white/[0.08] cursor-not-allowed'
               : 'bg-vektrum-blue text-white hover:bg-vektrum-blue-hover'
           )}
         >

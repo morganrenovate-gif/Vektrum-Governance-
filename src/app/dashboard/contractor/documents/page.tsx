@@ -76,7 +76,7 @@ export default async function ContractorDocumentsPage() {
           variant="dashed"
         />
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card">
+        <div className="overflow-x-auto rounded-xl border border-white/[0.08] bg-surface-2 shadow-card">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-white/[0.06] bg-white/[0.02]">

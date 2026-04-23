@@ -19,6 +19,8 @@ export async function middleware(request: NextRequest) {
   if (
     pathname.startsWith("/_next/") ||
     pathname.startsWith("/api/stripe/webhook") ||
+    pathname.startsWith("/api/webhooks/") ||
+    pathname.startsWith("/api/cron/") ||
     pathname.startsWith("/auth/") ||
     pathname === "/" ||
     pathname === "/pricing" ||
@@ -27,6 +29,7 @@ export async function middleware(request: NextRequest) {
     pathname === "/demo" ||
     pathname === "/demo-live" ||
     pathname.startsWith("/demo-live/") ||
+    pathname === "/funders" ||
     pathname === "/lenders" ||
     pathname === "/contractors" ||
     pathname === "/about" ||

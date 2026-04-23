@@ -18,14 +18,14 @@ export default function InviteError({
   return (
     <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm text-center space-y-6">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-vektrum-red-bg">
-          <AlertTriangle size={24} className="text-vektrum-red" aria-hidden="true" />
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-500/[0.08]">
+          <AlertTriangle size={24} className="text-red-400" aria-hidden="true" />
         </div>
         <div className="space-y-2">
-          <h1 className="font-display text-xl font-bold text-vektrum-text">
+          <h1 className="font-display text-xl font-bold text-white">
             Invite link error
           </h1>
-          <p className="text-sm text-vektrum-muted">
+          <p className="text-sm text-white/55">
             This invite link couldn&rsquo;t be loaded. Please check the link and try again,
             or ask the contractor to send a new invite.
           </p>
@@ -40,7 +40,7 @@ export default function InviteError({
           </button>
           <Link
             href="/"
-            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-vektrum-border bg-vektrum-surface px-5 py-2.5 text-sm font-semibold text-vektrum-muted transition-all hover:bg-vektrum-surface-alt"
+            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-white/[0.08] bg-surface-2 px-5 py-2.5 text-sm font-semibold text-white/55 transition-all hover:bg-surface-3"
           >
             Learn about Vektrum
           </Link>

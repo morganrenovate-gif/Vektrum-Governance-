@@ -24,7 +24,7 @@ export function formatMoneyPlain(amount: number): string {
   }).format(amount);
 }
 
-/** Format ISO date string for display */
+/** Format ISO date string for display (includes time and timezone) */
 export function formatDate(iso: string): string {
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
@@ -33,6 +33,15 @@ export function formatDate(iso: string): string {
     hour: "2-digit",
     minute: "2-digit",
     timeZoneName: "short",
+  }).format(new Date(iso));
+}
+
+/** Format ISO date string as a short date only (no time) — for tables and lists */
+export function formatDateShort(iso: string): string {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
   }).format(new Date(iso));
 }
 

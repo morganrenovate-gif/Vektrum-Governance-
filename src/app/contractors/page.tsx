@@ -18,7 +18,7 @@ export default function ContractorsPage() {
   return (
     <div className="flex flex-col">
       {/* ─── Hero ──────────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-vektrum-bg pt-20 pb-16 sm:pt-28 sm:pb-20">
+      <section className="relative overflow-hidden bg-[#0D1B2A] pt-20 pb-16 sm:pt-28 sm:pb-20">
         <div
           className="absolute inset-0 opacity-[0.03]"
           style={{
@@ -30,17 +30,17 @@ export default function ContractorsPage() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-gradient-to-b from-vektrum-blue-subtle/50 to-transparent rounded-full blur-3xl" />
 
         <div className="relative max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-vektrum-border bg-vektrum-surface px-4 py-1.5 shadow-sm mb-8">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-surface-2 px-4 py-1.5 shadow-sm mb-8">
             <div className="h-1.5 w-1.5 rounded-full bg-vektrum-green animate-pulse-slow" />
-            <span className="text-[12px] font-medium text-vektrum-muted tracking-wide">
+            <span className="text-[12px] font-medium text-white/55 tracking-wide">
               Always free for contractors
             </span>
           </div>
 
-          <h1 className="font-display text-4xl font-bold tracking-[-0.035em] text-vektrum-text sm:text-5xl text-balance">
+          <h1 className="font-display text-4xl font-bold tracking-[-0.035em] text-white sm:text-5xl text-balance">
             Get paid when you deliver.
           </h1>
-          <p className="mt-4 mx-auto max-w-2xl text-[17px] leading-relaxed text-vektrum-muted">
+          <p className="mt-4 mx-auto max-w-2xl text-[17px] leading-relaxed text-white/55">
             No more 90-day net terms. No more chasing invoices. Vektrum releases
             milestone payments directly to your bank the moment work is approved.
           </p>
@@ -55,7 +55,7 @@ export default function ContractorsPage() {
             </Link>
           </div>
 
-          <p className="mt-4 text-[12px] text-vektrum-faint">
+          <p className="mt-4 text-[12px] text-white/30">
             No subscription. No per-milestone charge. No onboarding fee.
           </p>
         </div>
@@ -89,13 +89,13 @@ export default function ContractorsPage() {
             ].map((item) => (
               <div
                 key={item.title}
-                className="rounded-2xl border border-vektrum-border bg-vektrum-surface p-8 hover:border-vektrum-blue/40 hover:shadow-lg hover:shadow-vektrum-blue/5 transition-all"
+                className="rounded-2xl border border-white/[0.08] bg-surface-2 p-8 hover:border-vektrum-blue/40 hover:shadow-lg hover:shadow-vektrum-blue/5 transition-all"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-vektrum-blue/10 mb-5">
                   <item.icon size={20} className="text-vektrum-blue" />
                 </div>
-                <h3 className="text-[15px] font-semibold text-vektrum-text">{item.title}</h3>
-                <p className="mt-3 text-[13px] leading-relaxed text-vektrum-muted">{item.desc}</p>
+                <h3 className="text-[15px] font-semibold text-white">{item.title}</h3>
+                <p className="mt-3 text-[13px] leading-relaxed text-white/55">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -103,9 +103,9 @@ export default function ContractorsPage() {
       </section>
 
       {/* ─── How it works ──────────────────────────────────────────────────── */}
-      <section className="bg-vektrum-surface py-16 sm:py-20">
+      <section className="bg-surface-2 py-16 sm:py-20">
         <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12">
-          <h2 className="font-display text-2xl font-bold tracking-[-0.025em] text-vektrum-text sm:text-3xl text-center mb-12">
+          <h2 className="font-display text-2xl font-bold tracking-[-0.025em] text-white sm:text-3xl text-center mb-12">
             How it works for contractors
           </h2>
           <ol className="space-y-6">
@@ -113,14 +113,14 @@ export default function ContractorsPage() {
               'You receive an invite from your funder to join a deal on Vektrum.',
               'Set up your Stripe Connect account for direct deposit — takes minutes.',
               'Complete milestones and submit draw requests with supporting documentation.',
-              'The funder reviews and approves. The 7-condition gate verifies everything server-side.',
+              'The funder reviews and approves. The 8-condition gate verifies everything server-side.',
               'Funds deposit directly to your bank. Immutable audit trail confirms every release.',
             ].map((step, i) => (
               <li key={i} className="flex items-start gap-4">
                 <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-vektrum-blue text-[12px] font-bold text-white">
                   {i + 1}
                 </span>
-                <p className="text-[14px] leading-relaxed text-vektrum-muted pt-0.5">{step}</p>
+                <p className="text-[14px] leading-relaxed text-white/55 pt-0.5">{step}</p>
               </li>
             ))}
           </ol>
@@ -128,14 +128,14 @@ export default function ContractorsPage() {
       </section>
 
       {/* ─── Always free ───────────────────────────────────────────────────── */}
-      <section className="bg-vektrum-bg py-16 sm:py-20">
+      <section className="bg-surface-2 py-16 sm:py-20">
         <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="rounded-2xl border border-vektrum-green-border bg-vektrum-green-bg p-8 sm:p-10">
+          <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.08] p-8 sm:p-10">
             <div className="flex items-start gap-4">
-              <CheckCircle2 size={24} className="flex-shrink-0 text-vektrum-green mt-0.5" />
+              <CheckCircle2 size={24} className="flex-shrink-0 text-emerald-400 mt-0.5" />
               <div>
-                <h3 className="text-lg font-bold text-vektrum-text">Contractors always join free</h3>
-                <p className="mt-2 text-[14px] leading-relaxed text-vektrum-muted">
+                <h3 className="text-lg font-bold text-white">Contractors always join free</h3>
+                <p className="mt-2 text-[14px] leading-relaxed text-white/55">
                   Vektrum charges the funder — never the contractor. No subscription fees,
                   no per-milestone charges, no onboarding costs. You get paid to build.
                 </p>
@@ -146,12 +146,12 @@ export default function ContractorsPage() {
       </section>
 
       {/* ─── CTA ───────────────────────────────────────────────────────────── */}
-      <section className="border-t border-vektrum-border bg-vektrum-surface py-20 sm:py-24">
+      <section className="border-t border-white/[0.08] bg-surface-2 py-20 sm:py-24">
         <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
-          <h2 className="text-2xl font-bold tracking-[-0.025em] text-vektrum-text sm:text-3xl text-balance">
+          <h2 className="text-2xl font-bold tracking-[-0.025em] text-white sm:text-3xl text-balance">
             Start getting paid on time
           </h2>
-          <p className="mt-4 mx-auto max-w-md text-[15px] text-vektrum-muted">
+          <p className="mt-4 mx-auto max-w-md text-[15px] text-white/55">
             Join when your funder invites you — or create your account now and be ready.
           </p>
           <div className="mt-8">

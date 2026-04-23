@@ -30,17 +30,17 @@ interface RiskScoreBadgeProps {
 const CONFIG: Record<RiskLevel, { label: string; color: string; dot: string }> = {
   low: {
     label: 'Low risk',
-    color: 'bg-vektrum-green-bg text-vektrum-score-low border-vektrum-green-border',
+    color: 'bg-emerald-500/[0.08] text-vektrum-score-low border-emerald-500/20',
     dot: 'bg-vektrum-score-low',
   },
   medium: {
     label: 'Medium risk',
-    color: 'bg-vektrum-amber-bg text-vektrum-score-med border-vektrum-amber-border',
+    color: 'bg-amber-500/[0.08] text-vektrum-score-med border-amber-500/20',
     dot: 'bg-vektrum-score-med',
   },
   high: {
     label: 'High risk',
-    color: 'bg-vektrum-red-bg text-vektrum-score-high border-vektrum-red-border',
+    color: 'bg-red-500/[0.08] text-vektrum-score-high border-red-500/20',
     dot: 'bg-vektrum-score-high',
   },
 }

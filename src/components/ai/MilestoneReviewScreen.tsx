@@ -63,12 +63,12 @@ function ConditionList({
               next[i] = e.target.value
               onChange(next)
             }}
-            className="flex-1 rounded-lg border border-vektrum-border bg-vektrum-bg px-3 py-1.5 text-[13px] text-vektrum-text placeholder:text-vektrum-faint focus:border-vektrum-blue focus:outline-none"
+            className="flex-1 rounded-lg border border-white/[0.08] bg-vektrum-bg px-3 py-1.5 text-[13px] text-white placeholder:text-white/30 focus:border-vektrum-blue focus:outline-none"
             placeholder="Completion condition"
           />
           <button
             onClick={() => onChange(conditions.filter((_, j) => j !== i))}
-            className="text-vektrum-faint hover:text-red-400 transition-colors"
+            className="text-white/30 hover:text-red-400 transition-colors"
           >
             <Trash2 size={13} />
           </button>
@@ -100,24 +100,24 @@ function MilestoneEditCard({
   const [expanded, setExpanded] = useState(index === 0)
 
   return (
-    <div className="rounded-2xl border border-vektrum-border bg-vektrum-surface overflow-hidden">
-      <div className="flex items-center gap-3 px-5 py-3.5 border-b border-vektrum-border/50">
-        <span className="font-mono text-[11px] font-semibold text-vektrum-faint w-5 text-center">
+    <div className="rounded-xl border border-white/[0.08] bg-surface-2 overflow-hidden">
+      <div className="flex items-center gap-3 px-5 py-3.5 border-b border-white/[0.08]/50">
+        <span className="font-mono text-[11px] font-semibold text-white/30 w-5 text-center">
           {String(index + 1).padStart(2, '0')}
         </span>
         <input
           value={milestone.name}
           onChange={(e) => onChange({ ...milestone, name: e.target.value })}
-          className="flex-1 bg-transparent text-[14px] font-semibold text-vektrum-text focus:outline-none placeholder:text-vektrum-faint"
+          className="flex-1 bg-transparent text-[14px] font-semibold text-white focus:outline-none placeholder:text-white/30"
           placeholder="Milestone name"
         />
         <div className="flex items-center gap-1 mr-1">
-          <span className="text-[13px] text-vektrum-faint">$</span>
+          <span className="text-[13px] text-white/30">$</span>
           <input
             type="number"
             value={milestone.amount || ''}
             onChange={(e) => onChange({ ...milestone, amount: parseFloat(e.target.value) || 0 })}
-            className="w-28 bg-transparent text-right text-[14px] font-semibold tabular-nums text-vektrum-text focus:outline-none"
+            className="w-28 bg-transparent text-right text-[14px] font-semibold tabular-nums text-white focus:outline-none"
             placeholder="0"
           />
         </div>
@@ -126,13 +126,13 @@ function MilestoneEditCard({
         )}
         <button
           onClick={() => setExpanded((v) => !v)}
-          className="text-vektrum-faint hover:text-vektrum-text transition-colors"
+          className="text-white/30 hover:text-white transition-colors"
         >
           {expanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
         </button>
         <button
           onClick={onRemove}
-          className="text-vektrum-faint hover:text-red-400 transition-colors ml-1"
+          className="text-white/30 hover:text-red-400 transition-colors ml-1"
         >
           <Trash2 size={14} />
         </button>
@@ -155,7 +155,7 @@ function MilestoneEditCard({
           )}
 
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-faint mb-2">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/30 mb-2">
               Release conditions
             </p>
             <ConditionList
@@ -165,7 +165,7 @@ function MilestoneEditCard({
           </div>
 
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-faint mb-1">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/30 mb-1">
               Retainage %
             </p>
             <div className="flex items-center gap-1">
@@ -177,18 +177,18 @@ function MilestoneEditCard({
                 onChange={(e) =>
                   onChange({ ...milestone, retainage_pct: parseFloat(e.target.value) || 0 })
                 }
-                className="w-16 rounded-lg border border-vektrum-border bg-vektrum-bg px-2.5 py-1.5 text-[13px] text-vektrum-text focus:border-vektrum-blue focus:outline-none"
+                className="w-16 rounded-lg border border-white/[0.08] bg-vektrum-bg px-2.5 py-1.5 text-[13px] text-white focus:border-vektrum-blue focus:outline-none"
               />
-              <span className="text-[13px] text-vektrum-faint">%</span>
+              <span className="text-[13px] text-white/30">%</span>
             </div>
           </div>
 
           {milestone.notes && (
-            <div className="rounded-lg border border-vektrum-border/50 bg-vektrum-bg/50 px-3 py-2">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-vektrum-faint mb-1">
+            <div className="rounded-lg border border-white/[0.08]/50 bg-vektrum-bg/50 px-3 py-2">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-white/30 mb-1">
                 Contract note
               </p>
-              <p className="text-[12px] text-vektrum-muted leading-relaxed">{milestone.notes}</p>
+              <p className="text-[12px] text-white/55 leading-relaxed">{milestone.notes}</p>
             </div>
           )}
         </div>
@@ -268,13 +268,13 @@ export function MilestoneReviewScreen({
           <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-vektrum-blue mb-1">
             AI Contract Import
           </p>
-          <h1 className="text-[1.75rem] font-bold tracking-[-0.03em] text-vektrum-text">
+          <h1 className="text-[1.75rem] font-bold tracking-[-0.03em] text-white">
             Review proposed milestones
           </h1>
         </div>
         <button
           onClick={onStartOver}
-          className="flex items-center gap-1.5 text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors"
+          className="flex items-center gap-1.5 text-[13px] text-white/55 hover:text-white transition-colors"
         >
           <ArrowLeft size={14} />
           Start over
@@ -304,11 +304,11 @@ export function MilestoneReviewScreen({
 
       {/* Retainage summary */}
       {retainageSummary && (
-        <div className="rounded-xl border border-vektrum-border/60 bg-vektrum-surface px-4 py-3">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-vektrum-faint mb-1">
+        <div className="rounded-xl border border-white/[0.08]/60 bg-surface-2 px-4 py-3">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-white/30 mb-1">
             Retainage terms (from contract)
           </p>
-          <p className="text-[13px] text-vektrum-muted leading-relaxed">{retainageSummary}</p>
+          <p className="text-[13px] text-white/55 leading-relaxed">{retainageSummary}</p>
         </div>
       )}
 
@@ -328,16 +328,16 @@ export function MilestoneReviewScreen({
       {/* Add milestone */}
       <button
         onClick={addMilestone}
-        className="w-full rounded-2xl border border-dashed border-vektrum-border py-3.5 text-[13px] font-semibold text-vektrum-muted hover:border-vektrum-blue/50 hover:text-vektrum-blue transition-all flex items-center justify-center gap-2"
+        className="w-full rounded-xl border border-dashed border-white/[0.08] py-3.5 text-[13px] font-semibold text-white/55 hover:border-vektrum-blue/50 hover:text-vektrum-blue transition-all flex items-center justify-center gap-2"
       >
         <Plus size={15} />
         Add milestone
       </button>
 
       {/* Running total */}
-      <div className="rounded-xl border border-vektrum-border bg-vektrum-surface px-5 py-4 flex items-center justify-between">
+      <div className="rounded-xl border border-white/[0.08] bg-surface-2 px-5 py-4 flex items-center justify-between">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-faint">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/30">
             Total milestone value
           </p>
           {totalMismatch && (
@@ -347,7 +347,7 @@ export function MilestoneReviewScreen({
             </p>
           )}
         </div>
-        <p className={`text-[22px] font-bold tracking-[-0.03em] ${totalMismatch ? 'text-amber-400' : 'text-vektrum-text'}`}>
+        <p className={`text-[22px] font-bold tracking-[-0.03em] ${totalMismatch ? 'text-amber-400' : 'text-white'}`}>
           {formatCurrency(runningTotal)}
         </p>
       </div>
@@ -379,13 +379,13 @@ export function MilestoneReviewScreen({
         </button>
         <button
           onClick={onStartOver}
-          className="rounded-xl border border-vektrum-border px-5 py-3.5 text-[14px] font-semibold text-vektrum-muted hover:bg-vektrum-surface-alt transition-all"
+          className="rounded-xl border border-white/[0.08] px-5 py-3.5 text-[14px] font-semibold text-white/55 hover:bg-surface-3 transition-all"
         >
           Cancel
         </button>
       </div>
 
-      <p className="text-center text-[11px] text-vektrum-faint">
+      <p className="text-center text-[11px] text-white/30">
         AI-generated milestones. Review all amounts and conditions before confirming.
         The release gate runs independently server-side.
       </p>

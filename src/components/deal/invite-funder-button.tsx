@@ -173,7 +173,7 @@ export function InviteFunderButton({ dealId }: Props) {
     const isCopied = false
     return (
       <div className="space-y-2.5">
-        <div className="flex items-center gap-2 rounded-lg border border-vektrum-green-border bg-vektrum-green-bg px-3.5 py-3 text-sm text-vektrum-green">
+        <div className="flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/[0.08] px-3.5 py-3 text-sm text-emerald-400">
           <Check className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
           Invite sent to <strong className="ml-1">{state.email}</strong>
         </div>
@@ -188,7 +188,7 @@ export function InviteFunderButton({ dealId }: Props) {
     const isCopied = false
     return (
       <div className="space-y-2.5">
-        <div className="flex items-start gap-2 rounded-lg border border-vektrum-amber-border bg-vektrum-amber-bg px-3.5 py-3 text-sm text-vektrum-amber">
+        <div className="flex items-start gap-2 rounded-lg border border-amber-500/20 bg-amber-500/[0.08] px-3.5 py-3 text-sm text-amber-400">
           <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" aria-hidden="true" />
           <span>Invite created but email to <strong>{state.email}</strong> failed. Copy the link below and send it manually.</span>
         </div>
@@ -215,13 +215,13 @@ export function InviteFunderButton({ dealId }: Props) {
     return (
       <div className="space-y-2.5">
         {returnPhase === 'sent' && (
-          <div className="flex items-center gap-2 rounded-lg border border-vektrum-green-border bg-vektrum-green-bg px-3.5 py-3 text-sm text-vektrum-green">
+          <div className="flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/[0.08] px-3.5 py-3 text-sm text-emerald-400">
             <Check className="h-4 w-4 flex-shrink-0" />
             Invite sent
           </div>
         )}
         {returnPhase === 'email_failed' && (
-          <div className="flex items-start gap-2 rounded-lg border border-vektrum-amber-border bg-vektrum-amber-bg px-3.5 py-3 text-sm text-vektrum-amber">
+          <div className="flex items-start gap-2 rounded-lg border border-amber-500/20 bg-amber-500/[0.08] px-3.5 py-3 text-sm text-amber-400">
             <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" />
             Email failed — share the link manually
           </div>

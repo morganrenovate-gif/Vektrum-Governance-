@@ -35,12 +35,12 @@ const darkVariantClasses: Record<BadgeVariant, string> = {
 
 // ── Light-context badge variants (for marketing / light section use) ──────────
 const lightVariantClasses: Record<BadgeVariant, string> = {
-  default: "bg-vektrum-surface-alt text-vektrum-muted ring-vektrum-border",
-  neutral: "bg-vektrum-surface-alt text-vektrum-muted ring-vektrum-border",
-  success: "bg-vektrum-green-bg text-vektrum-green ring-vektrum-green-border",
-  warning: "bg-vektrum-amber-bg text-vektrum-amber ring-vektrum-amber-border",
-  error:   "bg-vektrum-red-bg text-vektrum-red ring-vektrum-red-border",
-  info:    "bg-vektrum-blue-subtle text-vektrum-blue ring-vektrum-blue-border",
+  default: "bg-surface-3 text-white/55 ring-white/[0.08]",
+  neutral: "bg-surface-3 text-white/55 ring-white/[0.08]",
+  success: "bg-emerald-500/[0.08] text-emerald-400 ring-emerald-500/20",
+  warning: "bg-amber-500/[0.08] text-amber-400 ring-amber-500/20",
+  error:   "bg-red-500/[0.08] text-red-400 ring-red-500/20",
+  info:    "bg-vektrum-blue/10 text-vektrum-blue ring-vektrum-blue/20",
 };
 
 export function Badge({

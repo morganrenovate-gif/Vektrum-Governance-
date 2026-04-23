@@ -3,7 +3,7 @@
 // Advisory Panel consensus:
 // - Advisor 9 (Skeptical Investor): All stats server-side only. Never trust client values.
 // - Advisor 10 (Adversarial): Admins CANNOT modify financial data or release funds.
-//   Every display is read-only. Money moves only through the 7-condition gate.
+//   Every display is read-only. Money moves only through the 8-condition gate.
 // - Advisor 6 (Attorney): Admin viewing a dispute is an auditable event (logged server-side).
 // - Advisor 4 (Security): Role gate is server-side. Client-side checks are supplementary only.
 // - Advisor 8 (Ops): Support needs platform health signals — added as coming-soon panel.
@@ -20,7 +20,8 @@ import {
 import { DisputeQueue } from '@/components/admin/dispute-queue'
 import { UserTable } from '@/components/admin/user-table'
 import { InviteAdminForm } from '@/components/admin/invite-admin-form'
-import { PageHeader, SectionHeader } from '@/components/layout'
+import { ReconciliationPanel } from '@/components/admin/ReconciliationPanel'
+import { PageHeader, SectionHeader, MetricStrip, StatBlock } from '@/components/layout'
 
 export const metadata = {
   title: 'Admin Dashboard — Vektrum',
@@ -29,6 +30,56 @@ export const metadata = {
 // ─── Server-side data fetching ────────────────────────────────────────────────
 // All queries use the admin client (service role) to bypass RLS.
 // Advisor 9: These numbers come exclusively from server-side queries.
+
+// ─── Reconciliation data ──────────────────────────────────────────────────────
+
+async function getReconciliationData() {
+  const adminClient = createSupabaseAdminClient()
+
+  const { data: issues } = await adminClient
+    .from('reconciliation_issues')
+    .select(
+      'id, run_id, issue_type, severity, status, deal_id, milestone_id, ' +
+      'release_id, stripe_transfer_id, expected_amount, actual_amount, ' +
+      'description, auto_fixable, resolution_note, resolution_action, ' +
+      'resolved_at, created_at, updated_at'
+    )
+    .eq('status', 'open')
+    .order('severity',   { ascending: true })
+    .order('created_at', { ascending: false })
+    .limit(50)
+
+  const { count: totalIssues } = await adminClient
+    .from('reconciliation_issues')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'open')
+
+  const { data: lastRun } = await adminClient
+    .from('reconciliation_runs')
+    .select(
+      'id, status, started_at, completed_at, releases_checked, ' +
+      'transfers_checked, deals_checked, issues_found, error_message, triggered_by'
+    )
+    .order('started_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const openIssues = (issues ?? []) as any[]
+  const openCritical = openIssues.filter((i: { severity: string }) => i.severity === 'critical').length
+  const openHigh     = openIssues.filter((i: { severity: string }) => i.severity === 'high').length
+
+  return {
+    issues:    openIssues,
+    total:     totalIssues ?? 0,
+    lastRun:   lastRun ?? null,
+    health: {
+      open_critical: openCritical,
+      open_high:     openHigh,
+      open_total:    totalIssues ?? 0,
+    },
+  }
+}
 
 async function getAdminData() {
   const adminClient = createSupabaseAdminClient()
@@ -63,11 +114,11 @@ async function getAdminData() {
     .eq('status', 'open')
     .order('opened_at', { ascending: true })
 
-  // Recent audit log entries
+  // Recent audit log entries — fetch compliance fields including actor_name
   const { data: recentAudit } = await adminClient
     .from('audit_log')
-    .select('id, entity_type, entity_id, action, actor_id, created_at, metadata')
-    .order('created_at', { ascending: false })
+    .select('id, event_sequence, entity_type, entity_id, action, actor_id, actor_name, actor_role, system_source, created_at, metadata')
+    .order('event_sequence', { ascending: false })
     .limit(10)
 
   // Fetch emails from auth.users (email lives in auth.users, not profiles)
@@ -149,15 +200,15 @@ function AdminStatTile({
 }) {
   return (
     <div
-      className={`rounded-2xl border bg-surface-2 shadow-card px-5 py-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-card-hover hover:border-white/[0.14] ${warning ? 'border-vektrum-amber/30' : 'border-white/[0.08]'}`}
+      className={`rounded-xl border bg-surface-2 shadow-card px-5 py-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-card-hover hover:border-white/[0.14] ${warning ? 'border-vektrum-amber/30' : 'border-white/[0.08]'}`}
     >
       <div className="flex items-start justify-between gap-3 mb-3">
         <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">{label}</p>
         <div className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08]`}>
-          <Icon size={13} className={warning ? 'text-vektrum-amber' : 'text-vektrum-blue'} aria-hidden="true" />
+          <Icon size={13} className={warning ? 'text-amber-400' : 'text-vektrum-blue'} aria-hidden="true" />
         </div>
       </div>
-      <p className={`font-display text-2xl font-bold tabular-nums leading-none break-all ${accent ? 'text-vektrum-blue' : warning ? 'text-vektrum-amber' : 'text-white'}`}>
+      <p className={`font-display text-2xl font-bold tabular-nums leading-none break-all ${accent ? 'text-vektrum-blue' : warning ? 'text-amber-400' : 'text-white'}`}>
         {value}
       </p>
       {sub && <p className="mt-1.5 text-[11px] text-white/30">{sub}</p>}
@@ -184,7 +235,13 @@ export default async function AdminDashboardPage() {
     redirect('/dashboard')
   }
 
-  const { profiles, deals, disputes, recentAudit, healthMetrics, emailMap } = await getAdminData()
+  const [
+    { profiles, deals, disputes, recentAudit, healthMetrics, emailMap },
+    reconciliationData,
+  ] = await Promise.all([
+    getAdminData(),
+    getReconciliationData(),
+  ])
 
   // ── Computed platform stats ────────────────────────────────────────────────
   const contractors    = profiles.filter(p => p.role === 'contractor')
@@ -203,85 +260,83 @@ export default async function AdminDashboardPage() {
       <PageHeader
         eyebrow="Admin Dashboard"
         title="Platform Overview"
-        description="Read-only. All financial actions require the 7-condition release gate."
+        description="Read-only. All financial actions require the 8-condition release gate."
         action={
-          <Link
-            href="/dashboard/audit"
-            className="inline-flex items-center gap-2 rounded-xl border border-white/[0.1] bg-white/[0.05] px-4 py-2.5 text-[13px] font-medium text-white/60 hover:bg-white/[0.08] hover:text-white transition-all self-start"
-          >
-            <FileText size={14} aria-hidden="true" />
-            Full Audit Log
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/dashboard/admin/ops"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/[0.1] bg-white/[0.05] px-4 py-2.5 text-[13px] font-medium text-white/60 hover:bg-white/[0.08] hover:text-white transition-all self-start"
+            >
+              <Activity size={14} aria-hidden="true" />
+              Ops Dashboard
+            </Link>
+            <Link
+              href="/dashboard/audit"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/[0.1] bg-white/[0.05] px-4 py-2.5 text-[13px] font-medium text-white/60 hover:bg-white/[0.08] hover:text-white transition-all self-start"
+            >
+              <FileText size={14} aria-hidden="true" />
+              Full Audit Log
+            </Link>
+          </div>
         }
       />
 
       {/* Admin access info */}
-      <div className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card p-5 text-sm text-white/55">
+      <div className="rounded-xl border border-white/[0.08] bg-surface-2 shadow-card p-5 text-sm text-white/55">
         <p className="font-semibold text-white mb-1.5">Admin Access</p>
         <p>You can manage users, invite new admins, review audit logs, and monitor platform health.
-        <strong className="text-white/80"> Financial actions (fund releases, payment processing) are governed by the 7-condition milestone gate</strong>
+        <strong className="text-white/80"> Financial actions (fund releases, payment processing) are governed by the 8-condition milestone gate</strong>
         {' '}and cannot be overridden from this dashboard. All admin actions are permanently logged.</p>
       </div>
 
       {/* ── Operator Health Metrics ─────────────────────────────────────── */}
-      <div className="flex flex-wrap gap-3">
-        <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${healthMetrics.onboardingBacklog > 0 ? 'bg-vektrum-amber-bg border-vektrum-amber-border text-vektrum-amber' : 'bg-vektrum-green-bg border-vektrum-green-border text-vektrum-green'}`}>
-          <Users size={14} />
+      <div className="flex flex-wrap gap-2">
+        <div className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[12px] font-semibold border ${healthMetrics.onboardingBacklog > 0 ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'}`}>
+          <Users size={12} />
           {healthMetrics.onboardingBacklog} pending onboarding
         </div>
-        <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${healthMetrics.blockedReleases > 0 ? 'bg-vektrum-blue-subtle border-vektrum-blue-border text-vektrum-blue' : 'bg-vektrum-green-bg border-vektrum-green-border text-vektrum-green'}`}>
-          <Clock size={14} />
+        <div className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[12px] font-semibold border ${healthMetrics.blockedReleases > 0 ? 'bg-vektrum-blue/10 border-vektrum-blue/20 text-vektrum-blue' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'}`}>
+          <Clock size={12} />
           {healthMetrics.blockedReleases} releases pending
         </div>
-        <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${healthMetrics.openDisputes > 0 ? 'bg-vektrum-red-bg border-vektrum-red-border text-vektrum-red' : 'bg-vektrum-green-bg border-vektrum-green-border text-vektrum-green'}`}>
-          <AlertTriangle size={14} />
+        <div className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[12px] font-semibold border ${healthMetrics.openDisputes > 0 ? 'bg-red-500/10 border-red-500/20 text-red-400' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'}`}>
+          <AlertTriangle size={12} />
           {healthMetrics.openDisputes} open disputes
         </div>
-        <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${healthMetrics.recentRoleChanges > 0 ? 'bg-vektrum-blue-subtle border-vektrum-blue-border text-vektrum-blue' : 'bg-vektrum-surface-alt border-vektrum-border text-vektrum-muted'}`}>
-          <Shield size={14} />
+        <div className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[12px] font-semibold border ${healthMetrics.recentRoleChanges > 0 ? 'bg-vektrum-blue/10 border-vektrum-blue/20 text-vektrum-blue' : 'bg-white/[0.05] border-white/[0.08] text-white/40'}`}>
+          <Shield size={12} />
           {healthMetrics.recentRoleChanges} role changes (7d)
         </div>
+        {/* Reconciliation health badge */}
+        {reconciliationData.health.open_critical > 0 ? (
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[12px] font-semibold border bg-red-500/10 border-red-500/20 text-red-400">
+            <AlertTriangle size={12} />
+            {reconciliationData.health.open_critical} critical reconciliation issue{reconciliationData.health.open_critical !== 1 ? 's' : ''}
+          </div>
+        ) : reconciliationData.health.open_total > 0 ? (
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[12px] font-semibold border bg-amber-500/10 border-amber-500/20 text-amber-400">
+            <AlertTriangle size={12} />
+            {reconciliationData.health.open_total} reconciliation issue{reconciliationData.health.open_total !== 1 ? 's' : ''}
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[12px] font-semibold border bg-emerald-500/10 border-emerald-500/20 text-emerald-400">
+            <Activity size={12} />
+            Stripe reconciled
+          </div>
+        )}
       </div>
 
       {/* ── Section 1: Platform Overview ──────────────────────────────────── */}
       <section>
         <SectionHeader label="Platform Overview" />
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          <AdminStatTile
-            label="Contractors"
-            value={contractors.length}
-            icon={Users}
-          />
-          <AdminStatTile
-            label="Funders"
-            value={funders.length}
-            icon={Users}
-            accent
-          />
-          <AdminStatTile
-            label="Active Deals"
-            value={activeDeals.length}
-            sub={`${completedDeals.length} completed`}
-            icon={Activity}
-          />
-          <AdminStatTile
-            label="Capital Governed"
-            value={formatMoney(totalCapital)}
-            icon={DollarSign}
-            accent
-          />
-          <AdminStatTile
-            label="Total Released"
-            value={formatMoney(totalReleased)}
-            icon={CheckCircle2}
-          />
-          <AdminStatTile
-            label="Open Disputes"
-            value={openDisputes.length}
-            icon={AlertTriangle}
-            warning={openDisputes.length > 0}
-          />
-        </div>
+        <MetricStrip>
+          <StatBlock inline label="Contractors" value={contractors.length} />
+          <StatBlock inline label="Funders" value={funders.length} />
+          <StatBlock inline label="Active Deals" value={activeDeals.length} subvalue={`${completedDeals.length} completed`} />
+          <StatBlock inline label="Capital Governed" value={formatMoney(totalCapital)} money />
+          <StatBlock inline label="Total Released" value={formatMoney(totalReleased)} money />
+          <StatBlock inline label="Open Disputes" value={openDisputes.length} alert={openDisputes.length > 0} />
+        </MetricStrip>
       </section>
 
       {/* ── Section: Invite New Admin ────────────────────────────────────── */}
@@ -313,7 +368,7 @@ export default async function AdminDashboardPage() {
           <AdminStatTile
             label="Release Gate Status"
             value="Operational"
-            sub="7 conditions enforced server-side on every release"
+            sub="8 conditions enforced server-side on every release"
             icon={Shield}
           />
           {(() => {
@@ -350,53 +405,71 @@ export default async function AdminDashboardPage() {
             sub="AI precondition required before any fund release — all draw reviews are logged"
             icon={Zap}
           />
-          <div className="mt-2 rounded-lg border border-vektrum-green-border bg-vektrum-green-bg px-4 py-3 text-[12px] text-vektrum-green">
+          <div className="mt-2 rounded-lg border border-emerald-500/20 bg-emerald-500/[0.07] px-4 py-3 text-[12px] text-emerald-400">
             <strong>AI draw review system is operational.</strong> All precondition checks are active.
           </div>
         </div>
       </section>
 
-      {/* ── Section 5: Recent Audit Activity ─────────────────────────────── */}
+      {/* ── Section 5: Stripe Reconciliation ─────────────────────────────── */}
+      <section>
+        <SectionHeader
+          label="Stripe Reconciliation"
+          count={reconciliationData.health.open_total > 0 ? reconciliationData.health.open_total : undefined}
+          variant={reconciliationData.health.open_critical > 0 ? 'warning' : 'default'}
+        />
+        <ReconciliationPanel
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          initialIssues={reconciliationData.issues as any}
+          initialTotal={reconciliationData.total}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          lastRun={reconciliationData.lastRun as any}
+          health={reconciliationData.health}
+        />
+      </section>
+
+      {/* ── Section 6: Recent Audit Activity ─────────────────────────────── */}
       <section>
         <SectionHeader label="Recent Audit Activity" />
         {recentAudit.length === 0 ? (
           <p className="text-sm text-white/35">No audit activity yet</p>
         ) : (
-          <div className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden">
+          <div className="rounded-xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden">
             <ul className="divide-y divide-white/[0.05]">
               {recentAudit.map((entry) => {
                 const actionColor = entry.action?.includes('release') || entry.action?.includes('released')
                   ? 'text-emerald-400'
-                  : entry.action?.includes('blocked') || entry.action?.includes('dispute')
-                  ? 'text-vektrum-amber'
+                  : entry.action?.includes('blocked') || entry.action?.includes('dispute') || entry.action?.includes('failed')
+                  ? 'text-amber-400'
                   : entry.action?.includes('ai_draw_review')
                   ? 'text-vektrum-blue'
                   : 'text-white/50'
 
-                const createdAt = new Date(entry.created_at)
-                const now = new Date()
-                const diffMs = now.getTime() - createdAt.getTime()
-                const diffMin = Math.floor(diffMs / 60000)
-                const diffHours = Math.floor(diffMin / 60)
-                const diffDays = Math.floor(diffHours / 24)
-                const relativeTime = diffDays > 0
-                  ? `${diffDays}d ago`
-                  : diffHours > 0
-                  ? `${diffHours}h ago`
-                  : diffMin > 0
-                  ? `${diffMin}m ago`
-                  : 'just now'
+                // Exact UTC timestamp — never relative time for audit records
+                const d = new Date(entry.created_at)
+                const pad = (n: number) => String(n).padStart(2, '0')
+                const utcTimestamp = `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())} UTC`
 
                 return (
                   <li key={entry.id} className="flex items-center gap-4 px-5 py-3 hover:bg-white/[0.03] transition-colors">
+                    {/* Sequence number */}
+                    {entry.event_sequence != null && (
+                      <span className="text-[10px] font-mono text-white/20 flex-shrink-0 w-10 text-right tabular-nums">
+                        #{entry.event_sequence}
+                      </span>
+                    )}
                     <span className={`font-mono text-[13px] font-medium ${actionColor} min-w-[160px]`}>
                       {entry.action}
                     </span>
                     <span className="text-[12px] text-white/35 truncate flex-1">
                       {entry.entity_type}/{entry.entity_id?.slice(0, 8)}
+                      {entry.actor_name && entry.actor_name !== 'system' && (
+                        <span className="text-white/25 ml-1.5">· {entry.actor_name}</span>
+                      )}
                     </span>
-                    <span className="text-[11px] text-white/25 tabular-nums flex-shrink-0">
-                      {relativeTime}
+                    {/* Exact UTC timestamp */}
+                    <span className="text-[11px] font-mono text-white/25 tabular-nums flex-shrink-0 whitespace-nowrap">
+                      {utcTimestamp}
                     </span>
                   </li>
                 )

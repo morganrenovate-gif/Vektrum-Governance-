@@ -185,11 +185,19 @@ serve(async (req) => {
     });
 
     // ── Perplexity API call ───────────────────────────────────────────────────
+    const perplexityApiKey = Deno.env.get("PERPLEXITY_API_KEY");
+    if (!perplexityApiKey) {
+      return new Response(JSON.stringify({ error: "AI dispute brief service is not configured." }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 503,
+      });
+    }
+
     const perplexityRes = await fetch("https://api.perplexity.ai/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${Deno.env.get("PERPLEXITY_API_KEY")}`,
+        Authorization: `Bearer ${perplexityApiKey}`,
       },
       body: JSON.stringify({
         model: "sonar-pro",

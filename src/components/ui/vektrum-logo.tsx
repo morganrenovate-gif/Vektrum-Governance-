@@ -132,7 +132,7 @@ export function VektrumWordmark({
         <span
           className={cn(
             "block font-display font-bold tracking-[-0.02em] leading-none",
-            dark ? "text-white" : "text-vektrum-text"
+            dark ? "text-white" : "text-white"
           )}
           style={{ fontSize: Math.round(markSize * 0.47) }}
         >
@@ -142,7 +142,7 @@ export function VektrumWordmark({
           <span
             className={cn(
               "block font-semibold uppercase tracking-[0.12em] leading-none mt-0.5",
-              dark ? "text-white/30" : "text-vektrum-faint"
+              dark ? "text-white/30" : "text-white/30"
             )}
             style={{ fontSize: Math.round(markSize * 0.28) }}
           >

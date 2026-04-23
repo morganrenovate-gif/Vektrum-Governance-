@@ -7,26 +7,26 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="bg-vektrum-bg">
+    <div className="bg-[#0D1B2A]">
       <div className="mx-auto max-w-3xl px-6 sm:px-8 py-16 sm:py-20">
-        <h1 className="font-display text-2xl sm:text-3xl font-bold text-vektrum-text tracking-[-0.025em]">
+        <h1 className="font-display text-2xl sm:text-3xl font-bold text-white tracking-[-0.025em]">
           Terms of Service
         </h1>
-        <p className="mt-2 text-[15px] text-vektrum-muted">Last updated: April 17, 2026</p>
+        <p className="mt-2 text-[15px] text-white/55">Last updated: April 17, 2026</p>
 
         <div className="mt-10 space-y-10">
           {/* Section 1 */}
           <section>
-            <h2 className="text-lg font-semibold text-vektrum-text">1. Acceptance</h2>
-            <p className="mt-3 text-[15px] leading-relaxed text-vektrum-muted">
+            <h2 className="text-lg font-semibold text-white">1. Acceptance</h2>
+            <p className="mt-3 text-[15px] leading-relaxed text-white/55">
               By accessing or using the Vektrum platform (&ldquo;Service&rdquo;), you agree to be bound by these Terms of Service (&ldquo;Terms&rdquo;). If you do not agree to these Terms, do not use the Service. Vektrum reserves the right to update these Terms at any time. Continued use of the Service after changes constitutes acceptance of the revised Terms.
             </p>
           </section>
 
           {/* Section 2 */}
           <section>
-            <h2 className="text-lg font-semibold text-vektrum-text">2. Description of Service</h2>
-            <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-vektrum-muted">
+            <h2 className="text-lg font-semibold text-white">2. Description of Service</h2>
+            <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-white/55">
               <p>
                 Vektrum is a milestone-gated construction project financing governance platform. The Service provides tools for contractors and funders to structure deals, define milestones, manage draw requests, and govern the release of funds based on verified conditions.
               </p>
@@ -38,8 +38,8 @@ export default function TermsPage() {
 
           {/* Section 3 */}
           <section>
-            <h2 className="text-lg font-semibold text-vektrum-text">3. User Accounts</h2>
-            <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-vektrum-muted">
+            <h2 className="text-lg font-semibold text-white">3. User Accounts</h2>
+            <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-white/55">
               <p>You must provide accurate, complete, and current information when creating an account. You are responsible for maintaining the confidentiality of your account credentials and for all activity that occurs under your account.</p>
               <p>You agree to immediately notify Vektrum of any unauthorized use of your account. Vektrum is not liable for any loss or damage arising from your failure to safeguard your account credentials.</p>
             </div>
@@ -47,8 +47,8 @@ export default function TermsPage() {
 
           {/* Section 4 */}
           <section>
-            <h2 className="text-lg font-semibold text-vektrum-text">4. Contractor Terms</h2>
-            <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-vektrum-muted">
+            <h2 className="text-lg font-semibold text-white">4. Contractor Terms</h2>
+            <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-white/55">
               <p>Contractors must connect a Stripe account via Stripe Connect before creating deals or receiving payments. Contractors are responsible for:</p>
               <ul className="space-y-2 list-disc pl-5">
                 <li>Providing accurate project descriptions, milestone definitions, and amounts.</li>
@@ -60,12 +60,12 @@ export default function TermsPage() {
 
           {/* Section 5 */}
           <section>
-            <h2 className="text-lg font-semibold text-vektrum-text">5. Funder Terms</h2>
-            <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-vektrum-muted">
+            <h2 className="text-lg font-semibold text-white">5. Funder Terms</h2>
+            <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-white/55">
               <p>Funders use the platform to fund deals into a Project Trust Account and approve milestone-gated releases. Funders acknowledge and agree that:</p>
               <ul className="space-y-2 list-disc pl-5">
                 <li>Funds are held in Stripe Connect managed accounts, not by Vektrum.</li>
-                <li>Release of funds is subject to the platform&rsquo;s 7-condition release gate, which includes AI-assisted draw review, documentation verification, and funder authorization.</li>
+                <li>Release of funds is subject to the platform&rsquo;s 8-condition release gate, which includes AI-assisted draw review, documentation verification, and funder authorization.</li>
                 <li>Vektrum does not guarantee the quality or completion of construction work performed by contractors.</li>
               </ul>
             </div>
@@ -73,8 +73,8 @@ export default function TermsPage() {
 
           {/* Section 6 */}
           <section>
-            <h2 className="text-lg font-semibold text-vektrum-text">6. Prohibited Conduct</h2>
-            <div className="mt-3 text-[15px] leading-relaxed text-vektrum-muted">
+            <h2 className="text-lg font-semibold text-white">6. Prohibited Conduct</h2>
+            <div className="mt-3 text-[15px] leading-relaxed text-white/55">
               <p>You agree not to:</p>
               <ul className="mt-3 space-y-2 list-disc pl-5">
                 <li>Use the Service for any unlawful purpose or in violation of any applicable laws.</li>
@@ -88,16 +88,16 @@ export default function TermsPage() {
 
           {/* Section 7 */}
           <section>
-            <h2 className="text-lg font-semibold text-vektrum-text">7. Intellectual Property</h2>
-            <p className="mt-3 text-[15px] leading-relaxed text-vektrum-muted">
+            <h2 className="text-lg font-semibold text-white">7. Intellectual Property</h2>
+            <p className="mt-3 text-[15px] leading-relaxed text-white/55">
               The Service, including its design, code, features, and documentation, is the property of Vektrum and is protected by intellectual property laws. You retain ownership of any content you submit to the platform. By using the Service, you grant Vektrum a limited license to use your content solely for the purpose of operating and improving the Service.
             </p>
           </section>
 
           {/* Section 8 */}
           <section>
-            <h2 className="text-lg font-semibold text-vektrum-text">8. Disclaimers and Limitation of Liability</h2>
-            <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-vektrum-muted">
+            <h2 className="text-lg font-semibold text-white">8. Disclaimers and Limitation of Liability</h2>
+            <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-white/55">
               <p>
                 THE SERVICE IS PROVIDED &ldquo;AS IS&rdquo; AND &ldquo;AS AVAILABLE&rdquo; WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT.
               </p>
@@ -112,24 +112,24 @@ export default function TermsPage() {
 
           {/* Section 9 */}
           <section>
-            <h2 className="text-lg font-semibold text-vektrum-text">9. Governing Law</h2>
-            <p className="mt-3 text-[15px] leading-relaxed text-vektrum-muted">
+            <h2 className="text-lg font-semibold text-white">9. Governing Law</h2>
+            <p className="mt-3 text-[15px] leading-relaxed text-white/55">
               These Terms shall be governed by and construed in accordance with the laws of the State of Delaware, without regard to conflict of law principles. Any disputes arising under these Terms shall be resolved in the state or federal courts located in the State of Delaware.
             </p>
           </section>
 
           {/* Section 10 */}
           <section>
-            <h2 className="text-lg font-semibold text-vektrum-text">10. Changes to Terms</h2>
-            <p className="mt-3 text-[15px] leading-relaxed text-vektrum-muted">
+            <h2 className="text-lg font-semibold text-white">10. Changes to Terms</h2>
+            <p className="mt-3 text-[15px] leading-relaxed text-white/55">
               Vektrum reserves the right to modify these Terms at any time. Material changes will be communicated via email or a prominent notice on the platform. Your continued use of the Service following the posting of changes constitutes your acceptance of those changes.
             </p>
           </section>
 
           {/* Section 11 */}
           <section>
-            <h2 className="text-lg font-semibold text-vektrum-text">11. Contact</h2>
-            <p className="mt-3 text-[15px] leading-relaxed text-vektrum-muted">
+            <h2 className="text-lg font-semibold text-white">11. Contact</h2>
+            <p className="mt-3 text-[15px] leading-relaxed text-white/55">
               For questions about these Terms, contact us at{' '}
               <a href="mailto:legal@vektrum.io" className="text-vektrum-blue hover:underline">
                 legal@vektrum.io

@@ -39,7 +39,7 @@ export function ContractImportFlow({ metadata, children, renderTrigger }: Props)
     <>
       {!renderTrigger && (
         <div className="flex items-center gap-3 mb-6">
-          <div className="flex-1 h-px bg-vektrum-border" />
+          <div className="flex-1 h-px bg-white/[0.08]" />
           <button
             type="button"
             onClick={openImport}
@@ -48,7 +48,7 @@ export function ContractImportFlow({ metadata, children, renderTrigger }: Props)
             <FileUp size={14} />
             Import from contract
           </button>
-          <div className="flex-1 h-px bg-vektrum-border" />
+          <div className="flex-1 h-px bg-white/[0.08]" />
         </div>
       )}
 

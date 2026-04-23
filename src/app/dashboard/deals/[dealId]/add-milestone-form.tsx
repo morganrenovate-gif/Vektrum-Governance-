@@ -118,7 +118,7 @@ export function AddMilestoneForm({ dealId, maxAmount }: AddMilestoneFormProps) {
       {serverError && (
         <div
           role="alert"
-          className="flex items-start gap-2 rounded-md bg-vektrum-red-bg border border-vektrum-red-border px-3 py-2 text-sm text-vektrum-red"
+          className="flex items-start gap-2 rounded-md bg-red-500/[0.08] border border-red-500/20 px-3 py-2 text-sm text-red-400"
         >
           <AlertCircle size={14} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
           {serverError}
@@ -128,7 +128,7 @@ export function AddMilestoneForm({ dealId, maxAmount }: AddMilestoneFormProps) {
       {success && (
         <div
           role="status"
-          className="flex items-center gap-2 rounded-md bg-vektrum-green-bg border border-vektrum-green-border px-3 py-2 text-sm text-vektrum-green"
+          className="flex items-center gap-2 rounded-md bg-emerald-500/[0.08] border border-emerald-500/20 px-3 py-2 text-sm text-emerald-400"
         >
           <CheckCircle2 size={14} aria-hidden="true" />
           Milestone added successfully.
@@ -146,7 +146,7 @@ export function AddMilestoneForm({ dealId, maxAmount }: AddMilestoneFormProps) {
       </Button>
 
       {maxAmount <= 0 && (
-        <p className="text-xs text-vektrum-faint">
+        <p className="text-xs text-white/30">
           All funds have been allocated across existing milestones.
         </p>
       )}

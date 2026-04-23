@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Profile } from '@/lib/types'
+import { calculateFee } from '@/lib/engine/billing'
 
 // ─── Result Shape ─────────────────────────────────────────────────────────────
 
@@ -16,7 +17,7 @@ export interface ReleaseValidationResult {
  * THE MOST CRITICAL FUNCTION IN THE SYSTEM.
  *
  * Validates all preconditions required before funds may be transferred to a
- * contractor. All 7 conditions plus the caller role check are evaluated in a
+ * contractor. All 8 conditions plus the caller role check are evaluated in a
  * single pass and ALL failures are returned simultaneously — so the caller
  * sees the complete picture without iterative round-trips.
  *
@@ -69,7 +70,7 @@ export async function validateRelease(
   // ── Fetch Deal ──────────────────────────────────────────────────────────────
   const { data: deal, error: dealError } = await supabase
     .from('deals')
-    .select('id, contractor_id, funded_amount, released_amount, total_amount')
+    .select('id, contractor_id, funded_amount, released_amount, fees_collected, billing_rate_bps, total_amount')
     .eq('id', milestone.deal_id)
     .single()
 
@@ -97,11 +98,15 @@ export async function validateRelease(
     // Cannot check Stripe conditions without the contractor — continue with other checks
   }
 
-  // ── Fetch Existing Release Record ───────────────────────────────────────────
-  const { data: existingRelease, error: releaseQueryError } = await supabase
+  // ── Fetch Existing Active Release Record ────────────────────────────────────
+  // Only block if there is a 'pending' or 'confirmed' release — failed/reversed
+  // releases leave audit trail rows but must not block a retry attempt.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: existingRelease, error: releaseQueryError } = await (supabase as any)
     .from('releases')
-    .select('id')
+    .select('id, transfer_status')
     .eq('milestone_id', milestoneId)
+    .in('transfer_status', ['pending', 'confirmed'])
     .maybeSingle()
 
   // ── Fetch Open Change Orders ────────────────────────────────────────────────
@@ -110,6 +115,15 @@ export async function validateRelease(
     .select('id')
     .eq('milestone_id', milestoneId)
     .eq('status', 'submitted')
+
+  // ── Fetch Contract (condition 8) ─────────────────────────────────────────────
+  // Belt-and-suspenders: funding already requires a signed contract, but we
+  // re-check at release time in case the contract was voided after funding.
+  const { data: contract, error: contractQueryError } = await supabase
+    .from('contracts')
+    .select('status')
+    .eq('deal_id', deal.id)
+    .maybeSingle()
 
   // ─────────────────────────────────────────────────────────────────────────────
   // CONDITION 1: Milestone must be in 'approved' status
@@ -135,16 +149,25 @@ export async function validateRelease(
 
   // ─────────────────────────────────────────────────────────────────────────────
   // CONDITION 3: Deal must have sufficient funded balance to cover this milestone
+  //              INCLUDING the platform fee.
+  //
+  // Available = funded_amount − released_amount − fees_collected
+  // Required  = milestone.amount + platform fee
+  //
+  // The fee is charged ON TOP of the milestone amount — the contractor always
+  // receives the full gross, and the fee is retained in the platform account.
   // ─────────────────────────────────────────────────────────────────────────────
-  const available = deal.funded_amount - deal.released_amount
-  const shortfall = milestone.amount - available
+  const available  = deal.funded_amount - deal.released_amount - deal.fees_collected
+  const fee        = calculateFee(milestone.amount, deal.billing_rate_bps)
+  const totalDebit = fee.totalDebit   // milestone.amount + fee.feeAmount
+  const shortfall  = totalDebit - available
 
-  if (available < milestone.amount) {
+  if (available < totalDebit) {
     errors.push(
       `Insufficient funded balance. ` +
         `Available: $${available.toFixed(2)}. ` +
-        `Required: $${milestone.amount.toFixed(2)}. ` +
-        `The funder needs to add $${shortfall.toFixed(2)} before this milestone can be released.`,
+        `Required: $${milestone.amount.toFixed(2)} (milestone) + $${fee.feeAmount.toFixed(2)} (${fee.rateLabel} platform fee) = $${totalDebit.toFixed(2)}. ` +
+        `The funder needs to deposit $${shortfall.toFixed(2)} more before this milestone can be released.`,
     )
   }
 
@@ -203,6 +226,35 @@ export async function validateRelease(
     )
   }
 
+  // ─────────────────────────────────────────────────────────────────────────────
+  // CONDITION 8: Deal must have a fully-executed (signed) contract on file
+  //
+  // Funding already enforces this, but contracts can be voided after a deal
+  // is funded. We re-check at release time to ensure the legal record is intact.
+  // If no contract exists or the contract was voided post-funding, all releases
+  // on the deal are blocked until a new signed contract is on file.
+  // ─────────────────────────────────────────────────────────────────────────────
+  if (contractQueryError) {
+    errors.push(
+      'Could not verify contract status for this deal. ' +
+        'Release aborted as a precaution. Please try again or contact support.',
+    )
+  } else if (!contract) {
+    errors.push(
+      'This deal does not have a contract on file. ' +
+        'A fully-executed contract is required before any milestone can be released. ' +
+        'The contractor must upload the contract PDF and both parties must sign.',
+    )
+  } else if (contract.status !== 'signed') {
+    const detail =
+      contract.status === 'voided'
+        ? 'The contract has been voided after funding. A new contract must be uploaded and signed ' +
+          'before milestone releases can resume.'
+        : `Contract is not fully executed (status: '${contract.status}'). ` +
+          'Both parties must sign the contract before funds can be released.'
+    errors.push(detail)
+  }
+
   return {
     allowed: errors.length === 0,
     errors,
@@ -213,7 +265,7 @@ export async function validateRelease(
 
 /**
  * Checks whether a recent, passing AI draw review exists for the milestone.
- * This is a SEPARATE precondition checked BEFORE the 7-condition release gate.
+ * This is a SEPARATE precondition checked BEFORE the 8-condition release gate.
  *
  * Rules:
  *   - Must have at least one ai_draw_review audit entry

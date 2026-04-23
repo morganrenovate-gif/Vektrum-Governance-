@@ -68,21 +68,21 @@ export function DisputeFlagModal({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
       onClick={(e) => { if (e.target === e.currentTarget && !isPending) onClose() }}
     >
-      <div className="w-full max-w-md rounded-2xl border border-vektrum-border bg-vektrum-surface shadow-2xl shadow-black/40 overflow-hidden">
+      <div className="w-full max-w-md rounded-xl border border-white/[0.08] bg-surface-2 shadow-2xl shadow-black/40 overflow-hidden">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-vektrum-border">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08]">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/10">
               <AlertTriangle size={15} className="text-red-400" />
             </div>
             <div>
-              <p className="text-[14px] font-semibold text-vektrum-text">Flag as disputed</p>
-              <p className="text-[11px] text-vektrum-faint">{milestoneName}</p>
+              <p className="text-[14px] font-semibold text-white">Flag as disputed</p>
+              <p className="text-[11px] text-white/30">{milestoneName}</p>
             </div>
           </div>
           {!isPending && (
-            <button onClick={onClose} className="text-vektrum-faint hover:text-vektrum-text transition-colors">
+            <button onClick={onClose} className="text-white/30 hover:text-white transition-colors">
               <X size={17} />
             </button>
           )}
@@ -103,7 +103,7 @@ export function DisputeFlagModal({
 
           {/* Reason dropdown */}
           <div>
-            <label className="block text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-faint mb-2">
+            <label className="block text-[11px] font-semibold uppercase tracking-[0.1em] text-white/30 mb-2">
               Dispute reason <span className="text-red-400">*</span>
             </label>
             <div className="relative">
@@ -111,20 +111,20 @@ export function DisputeFlagModal({
                 value={reason}
                 onChange={(e) => setReason(e.target.value as DisputeReason)}
                 disabled={isPending}
-                className="w-full appearance-none rounded-xl border border-vektrum-border bg-vektrum-bg px-4 py-2.5 pr-9 text-[13px] text-vektrum-text focus:border-vektrum-blue focus:outline-none disabled:opacity-50 cursor-pointer"
+                className="w-full appearance-none rounded-xl border border-white/[0.08] bg-vektrum-bg px-4 py-2.5 pr-9 text-[13px] text-white focus:border-vektrum-blue focus:outline-none disabled:opacity-50 cursor-pointer"
               >
                 <option value="" disabled>Select a reason...</option>
                 {(Object.entries(REASON_LABELS) as [DisputeReason, string][]).map(([val, label]) => (
                   <option key={val} value={val}>{label}</option>
                 ))}
               </select>
-              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-vektrum-faint pointer-events-none" />
+              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
             </div>
           </div>
 
           {/* Context field */}
           <div>
-            <label className="block text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-faint mb-2">
+            <label className="block text-[11px] font-semibold uppercase tracking-[0.1em] text-white/30 mb-2">
               Additional context
               {requiresContext
                 ? <span className="text-red-400"> *</span>
@@ -141,9 +141,9 @@ export function DisputeFlagModal({
                   ? 'Describe the specific issue...'
                   : 'Any additional context to help resolve quickly...'
               }
-              className="w-full rounded-xl border border-vektrum-border bg-vektrum-bg px-4 py-3 text-[13px] text-vektrum-text placeholder:text-vektrum-faint focus:border-vektrum-blue focus:outline-none resize-none disabled:opacity-50"
+              className="w-full rounded-xl border border-white/[0.08] bg-vektrum-bg px-4 py-3 text-[13px] text-white placeholder:text-white/30 focus:border-vektrum-blue focus:outline-none resize-none disabled:opacity-50"
             />
-            <p className="text-right text-[11px] text-vektrum-faint mt-1">{contextLength}/500</p>
+            <p className="text-right text-[11px] text-white/30 mt-1">{contextLength}/500</p>
           </div>
 
           {error && (
@@ -173,7 +173,7 @@ export function DisputeFlagModal({
             <button
               onClick={onClose}
               disabled={isPending}
-              className="rounded-xl border border-vektrum-border px-4 py-3 text-[14px] font-semibold text-vektrum-muted hover:bg-vektrum-surface-alt disabled:opacity-50 transition-all"
+              className="rounded-xl border border-white/[0.08] px-4 py-3 text-[14px] font-semibold text-white/55 hover:bg-surface-3 disabled:opacity-50 transition-all"
             >
               Cancel
             </button>

@@ -9,3 +9,5 @@ settings.json
 settings.json
 settings.json{
 tsconfig.tsbuildinfo
+.DS_Store
+.env.local

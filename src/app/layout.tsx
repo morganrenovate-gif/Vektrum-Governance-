@@ -78,7 +78,7 @@ export default async function RootLayout({
         "name": "Vektrum",
         "url": "https://vektrum.io",
         "logo": "https://vektrum.io/logo.png",
-        "description": "Vektrum is a construction payment governance platform providing controlled draw disbursements, AI compliance review, and immutable audit trails for lenders and contractors.",
+        "description": "Vektrum is a construction payment governance platform providing controlled draw disbursements, AI compliance review, and immutable audit trails for funders and contractors.",
         "contactPoint": {
           "@type": "ContactPoint",
           "email": "operations@vektrum.io",
@@ -114,38 +114,38 @@ export default async function RootLayout({
           gtag('config', 'G-SZ5V40216Y');
         `}} />
       </head>
-      <body className="flex min-h-screen flex-col bg-vektrum-bg font-sans text-vektrum-text antialiased">
+      <body className="flex min-h-screen flex-col bg-vektrum-bg font-sans text-white antialiased">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         {/* Navigation */}
-        <header className="sticky top-0 z-50 border-b border-vektrum-border/80 bg-vektrum-surface/90 backdrop-blur-xl">
-          <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
-            <nav className="flex h-16 items-center justify-between">
+        <header className="sticky top-0 z-50 border-b border-white/[0.07] bg-[#070D18]/95 backdrop-blur-xl">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+            <nav className="flex h-15 items-center justify-between" style={{ height: '60px' }}>
               <Link
                 href="/"
                 className="flex items-center group"
                 aria-label="Vektrum home"
               >
                 <VektrumWordmark
-                  markSize={28}
-                  className="group-hover:opacity-80 transition-opacity"
+                  markSize={26}
+                  className="group-hover:opacity-75 transition-opacity"
                 />
               </Link>
 
               {/* Desktop nav — hidden on mobile */}
-              <div className="hidden sm:flex items-center gap-1">
+              <div className="hidden sm:flex items-center gap-0.5">
                 {user ? (
                   // ── Logged-in nav ──────────────────────────────────────────
                   <>
                     <Link
                       href="/dashboard"
-                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-white/50 hover:text-white/90 hover:bg-white/[0.06] transition-all"
                     >
                       Dashboard
                     </Link>
-                    <div className="ml-2">
+                    <div className="ml-3 pl-3 border-l border-white/[0.08]">
                       <UserMenu name={userName} email={userEmail} role={userRole} />
                     </div>
                   </>
@@ -153,20 +153,20 @@ export default async function RootLayout({
                   // ── Logged-out nav ─────────────────────────────────────────
                   <>
                     <Link
-                      href="/lenders"
-                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                      href="/funders"
+                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-white/50 hover:text-white/90 hover:bg-white/[0.06] transition-all"
                     >
                       Funders
                     </Link>
                     <Link
                       href="/contractors"
-                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-white/50 hover:text-white/90 hover:bg-white/[0.06] transition-all"
                     >
-                      For Contractors
+                      Contractors
                     </Link>
                     <Link
                       href="/pricing"
-                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-white/50 hover:text-white/90 hover:bg-white/[0.06] transition-all"
                     >
                       Pricing
                     </Link>
@@ -174,27 +174,27 @@ export default async function RootLayout({
                       href="https://cal.com/vektrum"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-white/50 hover:text-white/90 hover:bg-white/[0.06] transition-all"
                     >
                       Book a call
                     </Link>
+                    <div className="mx-2 h-4 w-px bg-white/[0.1]" aria-hidden="true" />
                     <Link
                       href="/auth/login"
-                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-vektrum-muted hover:text-vektrum-text hover:bg-vektrum-surface-alt transition-all"
+                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-white/50 hover:text-white/90 hover:bg-white/[0.06] transition-all"
                     >
                       Sign in
                     </Link>
                     <Link
                       href="/auth/signup"
-                      className="group inline-flex items-center justify-center gap-2 rounded-lg bg-vektrum-blue px-4 py-2 text-[13px] font-medium text-white hover:bg-vektrum-blue-hover transition-all shadow-sm"
+                      className="group ml-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-vektrum-blue px-4 py-2 text-[13px] font-semibold text-white hover:bg-vektrum-blue-hover transition-all shadow-md shadow-vektrum-blue/20"
                     >
-                      Get Started 
+                      Get Started
                       <ArrowRight
-                        size={15}
+                        size={14}
                         className="transition-transform group-hover:translate-x-0.5"
                       />
                     </Link>
-                     
                   </>
                 )}
               </div>
@@ -210,13 +210,13 @@ export default async function RootLayout({
         <Analytics />
 
         {/* Footer */}
-        <footer className="border-t border-vektrum-border bg-vektrum-surface">
+        <footer className="border-t border-white/[0.08] bg-surface-2">
           <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-12">
             <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
               {/* Brand */}
               <div className="flex flex-col gap-3">
                 <VektrumWordmark markSize={24} showTagline />
-                <p className="text-[13px] leading-relaxed text-vektrum-muted max-w-xs">
+                <p className="text-[13px] leading-relaxed text-white/55 max-w-xs">
                   Construction payment governance. Funds release only when work is verified.
                 </p>
 
@@ -225,82 +225,85 @@ export default async function RootLayout({
               {/* Links */}
               <div className="flex gap-8 sm:gap-16">
                 <div className="flex flex-col gap-3">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-vektrum-faint">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/30">
                     Platform
                   </span>
-                  <Link href="/auth/signup" className="text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors">
+                  <Link href="/auth/signup" className="text-[13px] text-white/55 hover:text-white transition-colors">
                     Get started
                   </Link>
-                  <Link href="/auth/login" className="text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors">
+                  <Link href="/auth/login" className="text-[13px] text-white/55 hover:text-white transition-colors">
                     Sign in
                   </Link>
-                  <Link href="/dashboard" className="text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors">
+                  <Link href="/dashboard" className="text-[13px] text-white/55 hover:text-white transition-colors">
                     Dashboard
                   </Link>
-                  <Link href="/pricing" className="text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors">
+                  <Link href="/pricing" className="text-[13px] text-white/55 hover:text-white transition-colors">
                     Pricing
                   </Link>
                 </div>
                 <div className="flex flex-col gap-3">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-vektrum-faint">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/30">
                     For Funders &amp; Contractors
                   </span>
-                  <Link href="/lenders" className="text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors">
+                  <Link href="/funders" className="text-[13px] text-white/55 hover:text-white transition-colors">
                     Funders
                   </Link>
-                  <Link href="/contractors" className="text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors">
+                  <Link href="/contractors" className="text-[13px] text-white/55 hover:text-white transition-colors">
                     Contractors
                   </Link>
                   <Link
                     href="/founders"
-                    className="text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors"
+                    className="text-[13px] text-white/55 hover:text-white transition-colors"
                   >
                     Founders
                   </Link>
                 </div>
                 <div className="flex flex-col gap-3">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-vektrum-faint">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/30">
                     Company
                   </span>
-                  <Link href="/about" className="text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors">
+                  <Link href="/about" className="text-[13px] text-white/55 hover:text-white transition-colors">
                     About
                   </Link>
-                  <Link href="/careers" className="text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors">
+                  <Link href="/careers" className="text-[13px] text-white/55 hover:text-white transition-colors">
                     Careers
                   </Link>
-                  <Link href="/help" className="text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors">
+                  <Link href="/help" className="text-[13px] text-white/55 hover:text-white transition-colors">
                     Help
                   </Link>
                 </div>
                 <div className="flex flex-col gap-3">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-vektrum-faint">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/30">
                     Legal
                   </span>
-                  <Link href="/terms" className="text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors">
+                  <Link href="/terms" className="text-[13px] text-white/55 hover:text-white transition-colors">
                     Terms of Service
                   </Link>
-                  <Link href="/privacy" className="text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors">
+                  <Link href="/privacy" className="text-[13px] text-white/55 hover:text-white transition-colors">
                     Privacy Policy
                   </Link>
-                  <Link href="/security" className="text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors">
+                  <Link href="/security" className="text-[13px] text-white/55 hover:text-white transition-colors">
                     Security
                   </Link>
-                  <Link href="/contact" className="text-[13px] text-vektrum-muted hover:text-vektrum-text transition-colors">
+                  <Link href="/contact" className="text-[13px] text-white/55 hover:text-white transition-colors">
                     Contact
                   </Link>
                 </div>
               </div>
             </div>
 
-            <div className="mt-12 pt-6 border-t border-vektrum-border-subtle flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-[12px] text-vektrum-muted">
+            <div className="mt-12 pt-6 border-t border-white/[0.05] flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-[12px] text-white/55">
                 &copy; {new Date().getFullYear()} Vektrum. All rights reserved.
               </p>
-              <p className="text-[11px] text-vektrum-faint">
+              <p className="text-[11px] text-white/30">
                 Funds are held in Stripe Connect managed accounts, not by Vektrum.
               </p>
+              <p className="mt-1 text-[11px] text-white/25 leading-relaxed">
+                Vektrum is not a bank, lender, or money transmitter. Platform security reviewed annually. Data encrypted in transit and at rest.
+              </p>
               <div className="flex flex-col gap-1 sm:items-end">
-                <p className="text-[12px] text-vektrum-faint">
+                <p className="text-[12px] text-white/30">
                   Vektrum governs disbursement. Vektrum never holds funds.
                 </p>
                 {/* Removed footer attribution */}

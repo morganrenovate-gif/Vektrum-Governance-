@@ -15,12 +15,12 @@ import { UploadDocumentModal } from '@/components/demo/UploadDocumentModal'
 const deal = riverside
 
 const STATUS_CONFIG: Record<DemoMilestoneStatus, { label: string; badge: string; border: string }> = {
-  released: { label: 'Released', badge: 'bg-green-100 text-green-700 border border-green-200', border: 'border-l-4 border-green-500' },
-  approved: { label: 'Approved', badge: 'bg-blue-100 text-blue-700 border border-blue-200', border: 'border-l-4 border-blue-400' },
-  ready_for_review: { label: 'Ready for Review', badge: 'bg-yellow-100 text-yellow-700 border border-yellow-200', border: 'border-l-4 border-yellow-400' },
-  in_progress: { label: 'In Progress', badge: 'bg-slate-100 text-slate-600 border border-slate-200', border: 'border-l-4 border-slate-300' },
-  not_started: { label: 'Not Started', badge: 'bg-gray-100 text-gray-500 border border-gray-200', border: 'border-l-4 border-gray-200' },
-  disputed: { label: 'Disputed', badge: 'bg-red-100 text-red-700 border border-red-200', border: 'border-l-4 border-red-500' },
+  released:        { label: 'Released',         badge: 'bg-emerald-500/[0.12] text-emerald-400 border border-emerald-500/20',    border: 'border-l-4 border-emerald-500' },
+  approved:        { label: 'Approved',          badge: 'bg-vektrum-blue/10 text-vektrum-blue border border-vektrum-blue/20',      border: 'border-l-4 border-vektrum-blue' },
+  ready_for_review:{ label: 'Ready for Review',  badge: 'bg-amber-500/[0.12] text-amber-400 border border-amber-500/20',          border: 'border-l-4 border-amber-500' },
+  in_progress:     { label: 'In Progress',       badge: 'bg-white/[0.06] text-white/50 border border-white/[0.08]',               border: 'border-l-4 border-white/20' },
+  not_started:     { label: 'Not Started',       badge: 'bg-white/[0.04] text-white/30 border border-white/[0.06]',               border: 'border-l-4 border-white/[0.08]' },
+  disputed:        { label: 'Disputed',          badge: 'bg-red-500/[0.12] text-red-400 border border-red-500/20',                border: 'border-l-4 border-red-500' },
 }
 
 export default function RiversideDealPage() {
@@ -30,6 +30,7 @@ export default function RiversideDealPage() {
   const backLabel = from === 'contractor' ? '← Back to contractor dashboard' : from === 'admin' ? '← Back to admin dashboard' : '← Back to funder dashboard'
 
   const [overrides, setOverrides] = useState<Record<string, DemoMilestoneStatus>>({})
+  const [newlyReleased, setNewlyReleased] = useState<Set<string>>(new Set())
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
   const [drawModal, setDrawModal] = useState(false)
   const [releaseModal, setReleaseModal] = useState(false)
@@ -40,12 +41,19 @@ export default function RiversideDealPage() {
     return overrides[id] ?? defaultStatus
   }
 
-  const pct = deal.total > 0 ? Math.round((deal.released / deal.total) * 100) : 0
+  // Recompute released total whenever user releases a milestone in this session
+  const totalReleased =
+    deal.released +
+    deal.milestones
+      .filter((ms) => newlyReleased.has(ms.id))
+      .reduce((sum, ms) => sum + ms.amount, 0)
+
+  const pct = deal.total > 0 ? Math.round((totalReleased / deal.total) * 100) : 0
 
   return (
     <div className="page-container section space-y-8">
       {/* Back link */}
-      <Link href={backHref} className="inline-flex items-center gap-1 text-[13px] text-vektrum-muted hover:text-vektrum-blue transition-colors">
+      <Link href={backHref} className="inline-flex items-center gap-1 text-[13px] text-white/55 hover:text-vektrum-blue transition-colors">
         {backLabel}
       </Link>
 
@@ -53,12 +61,12 @@ export default function RiversideDealPage() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="flex items-center gap-2.5 mb-1">
-            <h1 className="font-display text-2xl font-bold text-vektrum-text">{deal.title}</h1>
-            <span className="inline-flex items-center rounded-full border border-green-200 bg-green-100 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-green-700">
+            <h1 className="font-display text-2xl font-bold text-white">{deal.title}</h1>
+            <span className="inline-flex items-center rounded-full border border-emerald-500/20 bg-emerald-500/[0.08] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">
               ACTIVE
             </span>
           </div>
-          <p className="text-sm text-vektrum-muted">
+          <p className="text-sm text-white/55">
             {deal.contractor} &middot; {deal.funder} &middot; Started {deal.startedAgo}
           </p>
         </div>
@@ -68,19 +76,19 @@ export default function RiversideDealPage() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatTile label="Total" value={formatCurrency(deal.total)} />
         <StatTile label="Funded" value={formatCurrency(deal.funded)} />
-        <StatTile label="Released" value={formatCurrency(deal.released)} green />
-        <div className="rounded-lg border border-vektrum-border bg-vektrum-surface px-5 py-5 shadow-sm">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">Progress</p>
-          <p className="mt-1.5 font-display text-xl font-bold tabular-nums text-vektrum-text">{pct}%</p>
-          <div className="mt-2 h-1.5 rounded-full bg-gray-100 overflow-hidden">
-            <div className="h-full rounded-full bg-green-500" style={{ width: `${pct}%` }} />
+        <StatTile label="Released" value={formatCurrency(totalReleased)} green />
+        <div className="rounded-lg border border-white/[0.08] bg-surface-2 px-5 py-5 shadow-sm">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Progress</p>
+          <p className="mt-1.5 font-display text-xl font-bold tabular-nums text-white">{pct}%</p>
+          <div className="mt-2 h-1.5 rounded-full bg-surface-3 overflow-hidden">
+            <div className="h-full rounded-full bg-emerald-500" style={{ width: `${pct}%` }} />
           </div>
         </div>
       </div>
 
       {/* Milestones */}
       <section>
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-vektrum-muted">Milestones</h2>
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white/55">Milestones</h2>
         <div className="space-y-4">
           {deal.milestones.map((ms) => {
             const status = getStatus(ms.id, ms.status)
@@ -88,21 +96,21 @@ export default function RiversideDealPage() {
             const isExpanded = expanded[ms.id] ?? false
 
             return (
-              <div key={ms.id} className={`rounded-xl border border-vektrum-border bg-white shadow-sm overflow-hidden ${cfg.border}`}>
+              <div key={ms.id} className={`rounded-xl border border-white/[0.08] bg-surface-2 shadow-sm overflow-hidden ${cfg.border}`}>
                 {/* Row */}
                 <div className="px-5 py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                    {status === 'released' && <CheckCircle2 size={16} className="text-green-500 flex-shrink-0" />}
+                    {status === 'released' && <CheckCircle2 size={16} className="text-emerald-400 flex-shrink-0" />}
                     <div className="min-w-0">
-                      <p className="text-[14px] font-semibold text-gray-900 truncate">{ms.name}</p>
-                      <p className="text-[12px] text-gray-500 mt-0.5">{formatCurrency(ms.amount)}</p>
+                      <p className="text-[14px] font-semibold text-white truncate">{ms.name}</p>
+                      <p className="text-[12px] text-white/40 mt-0.5">{formatCurrency(ms.amount)}</p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2 flex-wrap">
                     {/* AI score chip for approved milestones */}
                     {status === 'approved' && ms.aiScore && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 border border-blue-200 px-2 py-0.5 text-[11px] font-medium text-blue-700">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-vektrum-blue/[0.08] border border-vektrum-blue/20 px-2 py-0.5 text-[11px] font-medium text-vektrum-blue">
                         <Brain size={11} /> AI: {ms.aiScore}/100
                       </span>
                     )}
@@ -116,7 +124,7 @@ export default function RiversideDealPage() {
                       <button
                         type="button"
                         onClick={() => setReleaseModal(true)}
-                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                       >
                         Release Funds
                       </button>
@@ -126,21 +134,21 @@ export default function RiversideDealPage() {
                         <button
                           type="button"
                           onClick={() => setDrawModal(true)}
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                          className="bg-vektrum-blue hover:bg-vektrum-blue-hover text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                         >
                           Request Draw
                         </button>
                         <button
                           type="button"
                           onClick={() => setAiModal(true)}
-                          className="border border-blue-300 text-blue-700 bg-white hover:bg-blue-50 px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1.5 transition-colors"
+                          className="border border-vektrum-blue/30 text-vektrum-blue bg-surface-3 hover:bg-vektrum-blue/[0.08] px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1.5 transition-colors"
                         >
                           <Sparkles size={14} /> Request AI Review
                         </button>
                         <button
                           type="button"
                           onClick={() => setUploadModal(true)}
-                          className="text-gray-400 hover:text-blue-600 transition-colors"
+                          className="text-white/25 hover:text-vektrum-blue transition-colors"
                           title="Upload document"
                         >
                           <Paperclip size={16} />
@@ -148,7 +156,7 @@ export default function RiversideDealPage() {
                       </>
                     )}
                     {status === 'in_progress' && (
-                      <span className="bg-gray-100 text-gray-400 cursor-not-allowed px-4 py-2 rounded-lg text-sm">
+                      <span className="bg-white/[0.04] text-white/30 cursor-not-allowed px-4 py-2 rounded-lg text-sm">
                         Awaiting Review
                       </span>
                     )}
@@ -158,7 +166,7 @@ export default function RiversideDealPage() {
                       <button
                         type="button"
                         onClick={() => setExpanded((prev) => ({ ...prev, [ms.id]: !isExpanded }))}
-                        className="inline-flex items-center gap-1 text-[12px] text-blue-600 hover:text-blue-800 transition-colors"
+                        className="inline-flex items-center gap-1 text-[12px] text-white/40 hover:text-white/70 transition-colors"
                       >
                         {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                         {isExpanded ? 'Hide' : 'Details'}
@@ -169,27 +177,27 @@ export default function RiversideDealPage() {
 
                 {/* Expanded content */}
                 <div className={`overflow-hidden transition-all duration-300 ${isExpanded ? 'max-h-96' : 'max-h-0'}`}>
-                  <div className="border-t border-gray-100 px-5 py-4 space-y-3">
+                  <div className="border-t border-white/[0.06] px-5 py-4 space-y-3">
                     {status === 'released' && ms.releasedAt && (
-                      <p className="text-sm text-green-600 flex items-center gap-1.5">
+                      <p className="text-sm text-emerald-400 flex items-center gap-1.5">
                         <CheckCircle2 size={14} /> Released {ms.releasedAt}
                       </p>
                     )}
                     {ms.documents.length > 0 && (
                       <div>
-                        <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">Documents</p>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-white/30 mb-1.5">Documents</p>
                         <ul className="space-y-1">
                           {ms.documents.map((doc, i) => (
-                            <li key={i} className="text-sm text-gray-600 flex items-center gap-1.5">
-                              <FileText size={12} className="text-gray-400" /> {doc}
+                            <li key={i} className="text-sm text-white/40 flex items-center gap-1.5">
+                              <FileText size={12} className="text-white/25" /> {doc}
                             </li>
                           ))}
                         </ul>
                       </div>
                     )}
                     {status === 'approved' && ms.aiScore && (
-                      <div className="rounded-lg bg-blue-50 border border-blue-200 p-3">
-                        <p className="text-sm text-blue-700 font-medium">AI Score: {ms.aiScore}/100 &middot; Risk: {ms.aiRisk} &middot; Recommendation: {ms.aiRecommendation}</p>
+                      <div className="rounded-lg bg-vektrum-blue/[0.08] border border-vektrum-blue/20 p-3">
+                        <p className="text-sm text-vektrum-blue/80 font-medium">AI Score: {ms.aiScore}/100 &middot; Risk: {ms.aiRisk} &middot; Recommendation: {ms.aiRecommendation}</p>
                       </div>
                     )}
                   </div>
@@ -202,20 +210,20 @@ export default function RiversideDealPage() {
 
       {/* Documents */}
       <section>
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-vektrum-muted">Documents</h2>
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white/55">Documents</h2>
         <div className="space-y-2">
           {[
-            { name: 'Deal Agreement — Vektrum_Deal_Agreement.pdf', date: 'Signed April 2, 2025' },
-            { name: 'Insurance Certificate — Insurance_Cert_WebbConstruction.pdf', date: 'April 2, 2025' },
-            { name: 'Project Schedule — Master_Schedule_v2.pdf', date: 'April 5, 2025' },
+            { name: 'Deal Agreement — Vektrum_Deal_Agreement.pdf', date: 'Signed January 22, 2026' },
+            { name: 'Insurance Certificate — Insurance_Cert_WebbConstruction.pdf', date: 'January 22, 2026' },
+            { name: 'Project Schedule — Master_Schedule_v2.pdf', date: 'January 27, 2026' },
           ].map((doc, i) => (
-            <div key={i} className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3">
-              <FileText size={16} className="text-gray-400 flex-shrink-0" />
+            <div key={i} className="flex items-center gap-3 rounded-lg border border-white/[0.08] bg-surface-3 px-4 py-3">
+              <FileText size={16} className="text-white/30 flex-shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-gray-700 truncate">{doc.name}</p>
-                <p className="text-xs text-gray-400">{doc.date}</p>
+                <p className="text-sm text-white/55 truncate">{doc.name}</p>
+                <p className="text-xs text-white/30">{doc.date}</p>
               </div>
-              <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 bg-gray-100 rounded px-2 py-0.5">PDF</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-white/30 bg-white/[0.06] rounded px-2 py-0.5">PDF</span>
             </div>
           ))}
         </div>
@@ -223,20 +231,20 @@ export default function RiversideDealPage() {
 
       {/* Activity Timeline */}
       <section>
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-vektrum-muted">Activity</h2>
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white/55">Activity</h2>
         <div className="space-y-3">
           {[
-            { text: 'Deal created — Sarah Chen & Marcus Webb', date: 'April 2, 2025' },
-            { text: 'Foundation & Site Prep milestone released — $480,000', date: 'March 14, 2025' },
-            { text: 'AI Draw Review completed for Framing — score 87/100', date: 'April 1, 2025' },
-            { text: 'Milestone approved by Sarah Chen', date: 'April 3, 2025' },
-            { text: 'Draw requested for MEP Rough-In — $680,000', date: 'April 28, 2025' },
+            { text: 'Deal created — Sarah Chen & Marcus Webb', date: 'January 22, 2026' },
+            { text: 'Foundation & Site Prep milestone released — $480,000', date: 'February 21, 2026' },
+            { text: 'AI Draw Review completed for Framing — score 87/100', date: 'March 10, 2026' },
+            { text: 'Milestone approved by Sarah Chen', date: 'March 12, 2026' },
+            { text: 'Draw requested for MEP Rough-In — $680,000', date: 'April 15, 2026' },
           ].map((event, i) => (
             <div key={i} className="flex items-start gap-3 text-sm">
-              <div className="mt-1.5 h-2 w-2 rounded-full bg-blue-400 flex-shrink-0" />
+              <div className="mt-1.5 h-2 w-2 rounded-full bg-vektrum-blue flex-shrink-0" />
               <div>
-                <p className="text-gray-700">{event.text}</p>
-                <p className="text-xs text-gray-400">{event.date}</p>
+                <p className="text-white/55">{event.text}</p>
+                <p className="text-xs text-white/30">{event.date}</p>
               </div>
             </div>
           ))}
@@ -256,8 +264,10 @@ export default function RiversideDealPage() {
       <ReleaseFundsModal
         open={releaseModal}
         milestone={{ name: 'Framing & Structural Steel', amount: 720_000 }}
+        approvalDate="March 12, 2026"
         onConfirm={() => {
           setOverrides((prev) => ({ ...prev, 'ms-rv-2': 'released' }))
+          setNewlyReleased((prev) => new Set([...prev, 'ms-rv-2']))
         }}
         onClose={() => setReleaseModal(false)}
       />
@@ -273,9 +283,9 @@ export default function RiversideDealPage() {
 
 function StatTile({ label, value, green }: { label: string; value: string; green?: boolean }) {
   return (
-    <div className="rounded-lg border border-vektrum-border bg-vektrum-surface px-5 py-5 shadow-sm">
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-vektrum-faint">{label}</p>
-      <p className={`mt-1.5 font-display text-xl font-bold tabular-nums ${green ? 'text-green-600' : 'text-vektrum-text'}`}>{value}</p>
+    <div className="rounded-lg border border-white/[0.08] bg-surface-2 px-5 py-5 shadow-sm">
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">{label}</p>
+      <p className={`mt-1.5 font-display text-xl font-bold tabular-nums ${green ? 'text-emerald-400' : 'text-white'}`}>{value}</p>
     </div>
   )
 }

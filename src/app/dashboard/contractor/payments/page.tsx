@@ -1,12 +1,12 @@
 export const dynamic = 'force-dynamic'
 
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { DollarSign, ArrowRight } from 'lucide-react'
-import { formatMoney } from '@/lib/utils'
+import { DollarSign } from 'lucide-react'
+import { formatMoney, formatDateShort } from '@/lib/utils'
 import type { Profile } from '@/lib/types'
-import { PageHeader, StatBlock, EmptyState } from '@/components/layout'
+import { PageHeader, StatBlock, MetricStrip, EmptyState, SectionHeader } from '@/components/layout'
+import { ExportButton } from './export-button'
 
 export default async function ContractorPaymentsPage() {
   const supabase = await createClient()
@@ -88,19 +88,18 @@ export default async function ContractorPaymentsPage() {
         description="Track released milestone funds"
       />
 
-      {/* Stat tiles */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <StatBlock label="Total Earned" value={formatMoney(totalEarned)} money />
-        <StatBlock label="Pending Release" value={formatMoney(pendingRelease)} money alert={pendingRelease > 0} />
+      {/* Stat strip */}
+      <MetricStrip>
+        <StatBlock inline label="Total Earned" value={formatMoney(totalEarned)} money />
+        <StatBlock inline label="Pending Release" value={formatMoney(pendingRelease)} money alert={pendingRelease > 0} />
         <StatBlock
+          inline
           label="Last Payment"
           value={lastPayment ? formatMoney(lastPayment.amount) : '—'}
           money={!!lastPayment}
-          subvalue={lastPayment
-            ? new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(lastPayment.released_at))
-            : undefined}
+          subvalue={lastPayment ? formatDateShort(lastPayment.released_at) : undefined}
         />
-      </div>
+      </MetricStrip>
 
       {releases.length === 0 ? (
         <EmptyState
@@ -111,36 +110,49 @@ export default async function ContractorPaymentsPage() {
           variant="dashed"
         />
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/[0.06] bg-white/[0.02]">
-                <th className="text-left px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">Milestone</th>
-                <th className="text-left px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">Deal</th>
-                <th className="text-left px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">Amount</th>
-                <th className="text-left px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">Date Released</th>
-                <th className="text-left px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/[0.04]">
-              {releases.map((rel) => (
-                <tr key={rel.id} className="hover:bg-white/[0.025] transition-colors">
-                  <td className="px-4 py-3 font-medium text-white/80">{rel.milestone?.title ?? 'Unknown'}</td>
-                  <td className="px-4 py-3 text-white/45">{(dealMap.get(rel.deal_id) as string) ?? 'Unknown Deal'}</td>
-                  <td className="px-4 py-3 font-semibold tabular-nums text-emerald-400">{formatMoney(rel.amount)}</td>
-                  <td className="px-4 py-3 text-white/45">
-                    {new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(rel.released_at))}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="inline-flex items-center rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">
-                      Released
-                    </span>
-                  </td>
+        <section className="space-y-4">
+          <SectionHeader
+            label={`${releases.length} payment${releases.length !== 1 ? 's' : ''}`}
+            action={
+              <ExportButton
+                payments={releases.map((r) => ({
+                  milestoneTitle: r.milestone?.title ?? null,
+                  dealTitle: (dealMap.get(r.deal_id) as string) ?? null,
+                  amount: r.amount,
+                  releasedAt: r.released_at,
+                }))}
+              />
+            }
+          />
+          <div className="overflow-x-auto rounded-xl border border-white/[0.08] bg-surface-2 shadow-card">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Milestone</th>
+                  <th>Deal</th>
+                  <th>Amount</th>
+                  <th>Date Released</th>
+                  <th>Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {releases.map((rel) => (
+                  <tr key={rel.id}>
+                    <td className="font-medium text-white/80">{rel.milestone?.title ?? <span className="text-white/25 italic">Milestone removed</span>}</td>
+                    <td>{(dealMap.get(rel.deal_id) as string) ?? <span className="text-white/25 italic">Deal removed</span>}</td>
+                    <td className="font-semibold tabular-nums text-emerald-400">{formatMoney(rel.amount)}</td>
+                    <td>{formatDateShort(rel.released_at)}</td>
+                    <td>
+                      <span className="inline-flex items-center rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-2xs font-semibold uppercase tracking-wide text-emerald-400">
+                        Released
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
       )}
     </div>
     </div>

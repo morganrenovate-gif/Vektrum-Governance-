@@ -29,7 +29,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            // VISUAL: was text-vektrum-text (#141414) — black on dark bg
+            // VISUAL: was text-white (#141414) — black on dark bg
             // now text-white/70 — correct on navy
             className="text-[13px] font-medium text-white/70"
           >

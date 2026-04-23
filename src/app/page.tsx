@@ -33,7 +33,6 @@ export default async function HomePage() {
     <div className="flex flex-col">
 
       {/* ─── Hero ──────────────────────────────────────────────────────────── */}
-      {/* NO CHANGES — hero is the reference standard */}
       <section className="relative overflow-hidden bg-[#0D1B2A]">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-gradient-to-b from-vektrum-blue/15 to-transparent rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-1/2 right-0 w-[500px] h-[500px] bg-gradient-to-l from-vektrum-blue/8 to-transparent rounded-full blur-3xl pointer-events-none" />
@@ -66,7 +65,7 @@ export default async function HomePage() {
                   href="/auth/signup"
                   className="group inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-8 py-3.5 text-[15px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 transition-all hover:bg-vektrum-blue-hover hover:shadow-xl hover:shadow-vektrum-blue/40 hover:-translate-y-0.5"
                 >
-                  Start a deal — it&apos;s free
+                  Start your first deal
                   <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
                 </Link>
                 <a
@@ -98,8 +97,7 @@ export default async function HomePage() {
             {/* RIGHT — product card */}
             <div className="hidden lg:block lg:mt-2">
               <div
-                className="rounded-2xl border border-white/10 bg-[#111827] overflow-hidden transition-transform duration-500 hover:-translate-y-1"
-                style={{ boxShadow: '0 32px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04)' }}
+                className="rounded-2xl border border-white/10 bg-[#111827] overflow-hidden transition-transform duration-500 hover:-translate-y-1 shadow-deep"
               >
                 <div className="flex items-center gap-1.5 border-b border-white/[0.06] bg-white/[0.02] px-4 py-3">
                   <div className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
@@ -132,7 +130,7 @@ export default async function HomePage() {
                       </div>
                       <div className="flex flex-col items-end gap-1">
                         <span className="text-[12px] font-semibold tabular-nums text-white">$320,000</span>
-                        <span className="text-[9px] font-bold uppercase tracking-[0.06em] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400">Released</span>
+                        <span className="text-[10px] font-bold uppercase tracking-[0.06em] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400">Released</span>
                       </div>
                     </div>
 
@@ -146,7 +144,7 @@ export default async function HomePage() {
                       </div>
                       <div className="flex flex-col items-end gap-1">
                         <span className="text-[12px] font-semibold tabular-nums text-white">$15,000</span>
-                        <span className="text-[9px] font-bold uppercase tracking-[0.06em] px-1.5 py-0.5 rounded bg-red-500/15 text-red-400">Dispute</span>
+                        <span className="text-[10px] font-bold uppercase tracking-[0.06em] px-1.5 py-0.5 rounded bg-red-500/15 text-red-400">Dispute</span>
                       </div>
                     </div>
 
@@ -160,7 +158,7 @@ export default async function HomePage() {
                       </div>
                       <div className="flex flex-col items-end gap-1">
                         <span className="text-[12px] font-semibold tabular-nums text-white">$2,180,000</span>
-                        <span className="text-[9px] font-bold uppercase tracking-[0.06em] px-1.5 py-0.5 rounded bg-vektrum-blue/15 text-vektrum-blue">In Progress</span>
+                        <span className="text-[10px] font-bold uppercase tracking-[0.06em] px-1.5 py-0.5 rounded bg-vektrum-blue/15 text-vektrum-blue">In Progress</span>
                       </div>
                     </div>
 
@@ -174,7 +172,7 @@ export default async function HomePage() {
                       </div>
                       <div className="flex flex-col items-end gap-1">
                         <span className="text-[12px] font-semibold tabular-nums text-white">$1,640,000</span>
-                        <span className="text-[9px] font-bold uppercase tracking-[0.06em] px-1.5 py-0.5 rounded bg-white/[0.06] text-white/40">Upcoming</span>
+                        <span className="text-[10px] font-bold uppercase tracking-[0.06em] px-1.5 py-0.5 rounded bg-white/[0.06] text-white/40">Upcoming</span>
                       </div>
                     </div>
                   </div>
@@ -195,7 +193,6 @@ export default async function HomePage() {
       </section>
 
       {/* ─── The Defining Scenario ─────────────────────────────────────────── */}
-      {/* NO CHANGES — strong section, matches reference */}
       <section className="bg-[#031226] py-20 sm:py-28 border-t border-white/[0.06]">
         <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="grid gap-16 lg:grid-cols-2 lg:items-center">
@@ -230,8 +227,8 @@ export default async function HomePage() {
                   },
                   {
                     icon: CheckCircle2,
-                    title: '7-condition server-side gate',
-                    desc: 'Every release passes 7 checks simultaneously. No manual override. No spreadsheet.',
+                    title: '8-condition server-side gate',
+                    desc: 'Every release passes 8 checks simultaneously. No manual override. No spreadsheet.',
                     bg: 'bg-vektrum-blue/10',
                     color: 'text-vektrum-blue',
                   },
@@ -259,8 +256,7 @@ export default async function HomePage() {
 
             {/* Right: scenario card */}
             <div
-              className="rounded-2xl border border-white/[0.08] bg-[#111827] p-8"
-              style={{ boxShadow: '0 24px 60px rgba(0,0,0,0.4)' }}
+              className="rounded-2xl border border-white/[0.08] bg-[#111827] p-8 shadow-scene"
             >
               <div className="flex items-start justify-between pb-5 mb-5 border-b border-white/[0.07]">
                 <div>
@@ -285,7 +281,7 @@ export default async function HomePage() {
                     </div>
                     <div className="flex items-center gap-2.5">
                       <span className="text-[13px] font-semibold tabular-nums text-white">{m.amount}</span>
-                      <span className={`text-[9px] font-bold uppercase tracking-[0.06em] px-2 py-0.5 rounded ${m.badge}`}>{m.status}</span>
+                      <span className={`text-[10px] font-bold uppercase tracking-[0.06em] px-2 py-0.5 rounded ${m.badge}`}>{m.status}</span>
                     </div>
                   </div>
                 ))}
@@ -341,8 +337,7 @@ export default async function HomePage() {
 
             {/* LEFT — RELEASE GATE */}
             <div
-              className="rounded-2xl border border-black/[0.07] bg-white p-8"
-              style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04)' }}
+              className="rounded-2xl border border-black/[0.07] bg-white p-8 shadow-lift"
             >
               <span className="inline-block rounded-full bg-vektrum-blue/10 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-vektrum-blue">
                 Release Gate
@@ -359,13 +354,13 @@ export default async function HomePage() {
 
               <ul className="mt-7 flex flex-col gap-3.5">
                 {[
-                  '7 conditions checked simultaneously',
-                  'Milestone must be approved',
-                  'No active dispute on that milestone',
-                  'Contractor payout account verified',
-                  'No duplicate or conflicting release',
-                  'Funds available in custody',
-                  'Final approval remains human-controlled',
+                  'Milestone approved by funder',
+                  'AI draw review passed — no critical flags',
+                  'Milestone cleared for release (no active hold)',
+                  'Funded balance covers this disbursement',
+                  'Contractor payment account verified',
+                  'No prior release on this milestone',
+                  'No pending change orders',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3">
                     <div className="mt-[5px] flex-shrink-0 flex items-center justify-center w-4 h-4 rounded-full bg-vektrum-blue/10">
@@ -381,8 +376,7 @@ export default async function HomePage() {
 
             {/* RIGHT — VEKTRUM AI */}
             <div
-              className="rounded-2xl border border-black/[0.07] bg-white p-8"
-              style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04)' }}
+              className="rounded-2xl border border-black/[0.07] bg-white p-8 shadow-lift"
             >
               <span className="inline-block rounded-full bg-vektrum-blue/10 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-vektrum-blue">
                 Vektrum AI
@@ -393,7 +387,7 @@ export default async function HomePage() {
               </h3>
 
               <p className="mt-3 text-[14px] leading-relaxed text-vektrum-muted">
-                Vektrum Ai analyzes draw submissions for missing documents, conflicts, and readiness risks
+                Vektrum AI analyzes draw submissions for missing documents, conflicts, and readiness risks
                 before the release gate runs. It surfaces a structured summary for human approval.
               </p>
 
@@ -423,7 +417,6 @@ export default async function HomePage() {
       </section>
 
       {/* ─── Competitive Gap Table ─────────────────────────────────────────── */}
-      {/* NO CHANGES — strong dark section, matches reference */}
       <section className="bg-[#031226] py-20 sm:py-28">
         <div className="mx-auto max-w-6xl px-6 sm:px-8 lg:px-12">
           <div className="grid gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
@@ -583,14 +576,13 @@ export default async function HomePage() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[
               { icon: Shield, title: 'Milestone isolation', desc: 'Each milestone stands alone. One dispute never freezes a project.', bg: 'bg-vektrum-blue/10', color: 'text-vektrum-blue' },
-              { icon: Lock, title: '7-condition release gate', desc: 'Every release passes 7 enforced conditions before funds move.', bg: 'bg-vektrum-amber-bg', color: 'text-vektrum-amber' },
-              { icon: GitBranch, title: 'Immutable audit trail', desc: 'Every action is logged permanently. No edits. No deletion.', bg: 'bg-vektrum-green-bg', color: 'text-vektrum-green' },
+              { icon: Lock, title: '8-condition release gate', desc: 'Every release passes 8 enforced conditions before funds move.', bg: 'bg-amber-500/[0.08]', color: 'text-amber-400' },
+              { icon: GitBranch, title: 'Immutable audit trail', desc: 'Every action is logged permanently. No edits. No deletion.', bg: 'bg-emerald-500/[0.08]', color: 'text-emerald-400' },
               { icon: Zap, title: 'AI pre-clearance', desc: 'Draws are pre-cleared before funders ever review them.', bg: 'bg-vektrum-blue/10', color: 'text-vektrum-blue' },
             ].map((card) => (
               <div
                 key={card.title}
-                className="rounded-2xl border border-black/[0.07] bg-white p-7 hover:border-vektrum-blue/30 hover:-translate-y-0.5 transition-all duration-300"
-                style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.04)' }}
+                className="rounded-2xl border border-black/[0.07] bg-white p-7 hover:border-vektrum-blue/30 hover:-translate-y-0.5 transition-all duration-300 shadow-float"
               >
                 <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${card.bg} mb-5`}>
                   <card.icon size={20} className={card.color} />
@@ -627,8 +619,7 @@ export default async function HomePage() {
           <div className="grid gap-5 md:grid-cols-3">
             {/* Funders */}
             <div
-              className="rounded-2xl border border-black/[0.07] bg-[#F8F9FB] p-8 flex flex-col"
-              style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.04)' }}
+              className="rounded-2xl border border-black/[0.07] bg-[#F8F9FB] p-8 flex flex-col shadow-float"
             >
               <span className="inline-block text-[10px] font-bold uppercase tracking-[0.1em] px-3 py-1 rounded-full bg-vektrum-blue/10 text-vektrum-blue mb-6 self-start">
                 Funders
@@ -644,7 +635,7 @@ export default async function HomePage() {
                   'Approve each milestone before a dollar moves',
                   'Full audit trail for every disbursement',
                   'Change orders tracked and gated',
-                  '7-condition server-side release enforcement',
+                  '8-condition server-side release enforcement',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
                     <ArrowRight size={13} className="mt-0.5 flex-shrink-0 text-vektrum-blue" />
@@ -656,8 +647,7 @@ export default async function HomePage() {
 
             {/* Contractors */}
             <div
-              className="rounded-2xl border border-black/[0.07] bg-[#F8F9FB] p-8 flex flex-col"
-              style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.04)' }}
+              className="rounded-2xl border border-black/[0.07] bg-[#F8F9FB] p-8 flex flex-col shadow-float"
             >
               <span className="inline-block text-[10px] font-bold uppercase tracking-[0.1em] px-3 py-1 rounded-full bg-vektrum-blue/10 text-vektrum-blue mb-6 self-start">
                 Contractors
@@ -683,19 +673,18 @@ export default async function HomePage() {
               </ul>
             </div>
 
-            {/* Lenders */}
+            {/* Capital Partners */}
             <div
-              className="rounded-2xl border border-black/[0.07] bg-[#F8F9FB] p-8 flex flex-col"
-              style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.04)' }}
+              className="rounded-2xl border border-black/[0.07] bg-[#F8F9FB] p-8 flex flex-col shadow-float"
             >
               <span className="inline-block text-[10px] font-bold uppercase tracking-[0.1em] px-3 py-1 rounded-full bg-vektrum-blue/10 text-vektrum-blue mb-6 self-start">
-                Lenders
+                Capital Partners
               </span>
               <h3 className="font-display text-[22px] font-bold tracking-[-0.03em] text-vektrum-text leading-snug mb-3">
                 Your draw process, systematized.
               </h3>
               <p className="text-[14px] leading-relaxed text-vektrum-muted mb-6">
-                Portfolio-level visibility. No paper. No spreadsheets.
+                Portfolio-level visibility for banks and credit funds. No paper. No spreadsheets.
               </p>
               <ul className="flex flex-col gap-3.5 mt-auto">
                 {[
@@ -719,7 +708,7 @@ export default async function HomePage() {
       {/*
         VISUAL CHANGES:
         - bg-white → bg-[#F8F9FB] (consistent light section treatment)
-        - Step number: text-vektrum-faint → text-vektrum-text/[0.07] — same effect but
+        - Step number: text-white/30 → text-white/[0.07] — same effect but
           explicit so it renders correctly regardless of token value
         - Step cards: added individual boxShadow so they read as surfaces, not flat tiles
         - Grid container: removed bg-vektrum-border fill; now each card has its own border
@@ -745,19 +734,18 @@ export default async function HomePage() {
             {[
               { step: '01', title: 'Create the deal', desc: 'Contractor creates a deal with defined milestones, amounts, and conditions. Contract value is set upfront — no ambiguity.', icon: FileText, bg: 'bg-vektrum-blue/10', color: 'text-vektrum-blue' },
               { step: '02', title: 'Fund via Stripe', desc: 'Funder deposits via Stripe Connect or Licensed Escrow/Lender. Funds are held in managed accounts — Vektrum governs release but never touches the money.', icon: Shield, bg: 'bg-vektrum-blue/10', color: 'text-vektrum-blue' },
-              { step: '03', title: 'Complete & approve', desc: 'Contractor marks work done. AI pre-clears documents. Funder reviews and approves each milestone independently — no bundling.', icon: CheckCircle2, bg: 'bg-vektrum-green-bg', color: 'text-vektrum-green' },
-              { step: '04', title: 'Release payment', desc: 'All 7 conditions verified server-side. Immutably logged. No exceptions.', icon: Zap, bg: 'bg-vektrum-green-bg', color: 'text-vektrum-green' },
+              { step: '03', title: 'Complete & approve', desc: 'Contractor marks work done. AI pre-clears documents. Funder reviews and approves each milestone independently — no bundling.', icon: CheckCircle2, bg: 'bg-emerald-500/[0.08]', color: 'text-emerald-400' },
+              { step: '04', title: 'Release payment', desc: 'All 8 conditions verified server-side. Immutably logged. No exceptions.', icon: Zap, bg: 'bg-emerald-500/[0.08]', color: 'text-emerald-400' },
             ].map((item) => (
               <div
                 key={item.step}
-                className="rounded-2xl border border-black/[0.07] bg-white p-7 relative"
-                style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.04)' }}
+                className="rounded-2xl border border-black/[0.07] bg-white p-7 relative shadow-float"
               >
                 <div className="flex items-start justify-between mb-6">
                   <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${item.bg}`}>
                     <item.icon size={20} className={item.color} />
                   </div>
-                  <span className="font-display text-[3rem] font-bold text-vektrum-text/[0.07] leading-none tracking-[-0.05em] select-none">{item.step}</span>
+                  <span className="font-display text-[3rem] font-bold text-white/[0.07] leading-none tracking-[-0.05em] select-none">{item.step}</span>
                 </div>
                 <h3 className="text-[15px] font-semibold text-vektrum-text tracking-[-0.01em] mb-2.5">{item.title}</h3>
                 <p className="text-[13px] leading-relaxed text-vektrum-muted">{item.desc}</p>
@@ -807,14 +795,13 @@ export default async function HomePage() {
       </section>
 
       {/* ─── Final CTA ─────────────────────────────────────────────────────── */}
-      {/* NO CHANGES — solid section, consistent with hero */}
       <section className="bg-[#0D1B2A] py-16 sm:py-20">
         <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
           <h2 className="font-display text-2xl font-bold tracking-[-0.025em] text-white sm:text-3xl lg:text-[2.5rem] lg:leading-[1.1] text-balance">
-            Your first deal is free.
+            1% per release. No monthly fee.
           </h2>
           <p className="mt-4 mx-auto max-w-md text-[15px] text-white/50">
-            No credit card at signup. Contractors always join free. Funder pays when funding starts.
+            Contractors are always free. Funders pay 1% after each verified disbursement — never before.
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
             <Link

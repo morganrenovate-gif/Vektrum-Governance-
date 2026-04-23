@@ -18,22 +18,22 @@ export default function DashboardError({
   return (
     <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
-        <div className="rounded-xl border border-vektrum-red-border bg-vektrum-red-bg p-8 text-center space-y-5">
+        <div className="rounded-xl border border-red-500/20 bg-red-500/[0.08] p-8 text-center space-y-5">
           {/* Icon */}
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm">
-            <AlertTriangle size={20} className="text-vektrum-red" aria-hidden="true" />
+            <AlertTriangle size={20} className="text-red-400" aria-hidden="true" />
           </div>
 
           {/* Copy */}
           <div className="space-y-1.5">
-            <h2 className="font-display text-xl font-bold text-vektrum-text">
+            <h2 className="font-display text-xl font-bold text-white">
               Dashboard error
             </h2>
-            <p className="text-sm text-vektrum-muted">
+            <p className="text-sm text-white/55">
               The dashboard couldn&rsquo;t load. Your deals and funds are unaffected.
             </p>
             {error.digest && (
-              <p className="text-[11px] font-mono text-vektrum-faint mt-2">
+              <p className="text-[11px] font-mono text-white/30 mt-2">
                 Error: {error.digest}
               </p>
             )}
@@ -50,7 +50,7 @@ export default function DashboardError({
             </button>
             <Link
               href="/"
-              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-vektrum-border bg-white px-5 py-2.5 text-sm font-semibold text-vektrum-muted transition-all hover:bg-vektrum-surface-alt"
+              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-white/[0.08] bg-white px-5 py-2.5 text-sm font-semibold text-white/55 transition-all hover:bg-surface-3"
             >
               <LayoutDashboard size={14} aria-hidden="true" />
               Go home

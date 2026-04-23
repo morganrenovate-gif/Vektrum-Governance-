@@ -26,7 +26,7 @@ export function DrawReviewPanel({ deals, embedded = false }: DrawReviewPanelProp
 
   const emptyContent = (
     <div className="flex items-center gap-2 rounded-lg bg-surface-3 px-4 py-3">
-      <CheckCircle2 size={15} className="text-vektrum-green flex-shrink-0" />
+      <CheckCircle2 size={15} className="text-emerald-400 flex-shrink-0" />
       <p className="text-[13px] text-white/50">No milestones pending funder review.</p>
     </div>
   )
@@ -38,7 +38,7 @@ export function DrawReviewPanel({ deals, embedded = false }: DrawReviewPanelProp
         <p className="text-[11px] text-white/35">
           {reviewItems.length} milestone{reviewItems.length !== 1 ? 's' : ''} awaiting funder review
         </p>
-        <span className="inline-flex items-center gap-1 rounded-full border border-vektrum-amber-border bg-vektrum-amber-bg px-2.5 py-1 text-[10px] font-medium text-vektrum-amber">
+        <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/20 bg-amber-500/[0.08] px-2.5 py-1 text-[10px] font-medium text-amber-400">
           <Zap size={10} />
           AI-assisted review
         </span>
@@ -55,7 +55,7 @@ export function DrawReviewPanel({ deals, embedded = false }: DrawReviewPanelProp
               <div className="flex items-center justify-between gap-3 rounded-lg border border-white/[0.08] bg-surface-3 px-4 py-3 group-hover:border-vektrum-blue/40 transition-colors">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <AlertCircle size={12} className="flex-shrink-0 text-vektrum-amber" />
+                    <AlertCircle size={12} className="flex-shrink-0 text-amber-400" />
                     <span className="text-[13px] font-medium text-white truncate">
                       {milestone.title}
                     </span>
@@ -98,8 +98,8 @@ export function DrawReviewPanel({ deals, embedded = false }: DrawReviewPanelProp
     <div className="rounded-xl border border-white/[0.08] bg-surface-2 shadow-card p-6">
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-vektrum-amber-bg">
-            <Clock size={15} className="text-vektrum-amber" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/[0.08]">
+            <Clock size={15} className="text-amber-400" />
           </div>
           <h3 className="text-[14px] font-semibold text-white">Draw Review Status</h3>
         </div>

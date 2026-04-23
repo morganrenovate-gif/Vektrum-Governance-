@@ -20,19 +20,19 @@ export default function GlobalError({
     <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-12">
       <div className="w-full max-w-md text-center space-y-6">
         {/* Icon */}
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-vektrum-red-bg">
-          <AlertTriangle size={24} className="text-vektrum-red" aria-hidden="true" />
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-500/[0.08]">
+          <AlertTriangle size={24} className="text-red-400" aria-hidden="true" />
         </div>
 
         {/* Heading */}
         <div className="space-y-2">
-          <h1 className="font-display text-2xl font-bold text-vektrum-text">
+          <h1 className="font-display text-2xl font-bold text-white">
             Something went wrong
           </h1>
-          <p className="text-sm leading-relaxed text-vektrum-muted">
+          <p className="text-sm leading-relaxed text-white/55">
             An unexpected error occurred. Your data is safe — no funds have been moved.
             {error.digest && (
-              <span className="mt-1 block text-[11px] font-mono text-vektrum-faint">
+              <span className="mt-1 block text-[11px] font-mono text-white/30">
                 Error ID: {error.digest}
               </span>
             )}
@@ -50,7 +50,7 @@ export default function GlobalError({
           </button>
           <Link
             href="/dashboard"
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-vektrum-border bg-vektrum-surface px-5 py-2.5 text-sm font-semibold text-vektrum-muted shadow-xs transition-all hover:bg-vektrum-surface-alt hover:text-vektrum-text"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-white/[0.08] bg-surface-2 px-5 py-2.5 text-sm font-semibold text-white/55 shadow-xs transition-all hover:bg-surface-3 hover:text-white"
           >
             <Home size={14} aria-hidden="true" />
             Back to dashboard
@@ -58,7 +58,7 @@ export default function GlobalError({
         </div>
 
         {/* Trust signal */}
-        <p className="text-[11px] text-vektrum-faint">
+        <p className="text-[11px] text-white/30">
           Vektrum never moves funds without server-side verification. Your balance is unaffected.
         </p>
       </div>
