@@ -147,7 +147,7 @@ export function ReleaseFundsModal({
 
             {/* Amount & recipient */}
             <div className="rounded-lg border border-white/[0.08] bg-surface-3 px-4 py-3 mb-5">
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35 mb-1">
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-white/45 mb-1">
                 Transfer
               </p>
               <p className="text-2xl font-bold text-white tabular-nums">
@@ -157,7 +157,7 @@ export function ReleaseFundsModal({
                 {milestone.name} → Marcus Webb — Webb Construction Group
               </p>
               <div className="mt-2.5 pt-2.5 border-t border-white/[0.06] flex items-center justify-between">
-                <p className="text-xs text-white/35">
+                <p className="text-xs text-white/45">
                   + {fee.rateLabel} platform fee
                 </p>
                 <p className="text-xs font-medium text-white/50 tabular-nums">
@@ -222,13 +222,13 @@ export function ReleaseFundsModal({
             {/* Transfer detail block */}
             <div className="rounded-xl border border-white/[0.08] bg-surface-3 divide-y divide-white/[0.06] mb-5 overflow-hidden">
               <div className="px-4 py-3">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/45">
                   Milestone
                 </p>
                 <p className="text-sm font-medium text-white/80 mt-0.5">{milestone.name}</p>
               </div>
               <div className="px-4 py-3">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/45">
                   Recipient
                 </p>
                 <p className="text-sm font-medium text-white/80 mt-0.5">
@@ -236,7 +236,7 @@ export function ReleaseFundsModal({
                 </p>
               </div>
               <div className="px-4 py-3 flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/45">
                   Contractor payout
                 </p>
                 <p className="text-sm font-semibold text-white/80 tabular-nums">
@@ -244,7 +244,7 @@ export function ReleaseFundsModal({
                 </p>
               </div>
               <div className="px-4 py-3 flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/45">
                   Platform fee ({fee.rateLabel})
                 </p>
                 <p className="text-sm font-medium text-white/50 tabular-nums">
@@ -260,7 +260,7 @@ export function ReleaseFundsModal({
                 </p>
               </div>
               <div className="px-4 py-3">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/45">
                   Transfer method
                 </p>
                 <p className="text-sm font-medium text-white/80 mt-0.5">
@@ -290,7 +290,7 @@ export function ReleaseFundsModal({
             </div>
 
             {/* Fine print below buttons */}
-            <p className="text-center text-[11px] text-white/30 mt-3 leading-relaxed">
+            <p className="text-center text-[11px] text-white/40 mt-3 leading-relaxed">
               By confirming you authorize this transfer under the terms of the Vektrum Project Trust Agreement.
             </p>
           </div>
@@ -341,13 +341,13 @@ export function ReleaseFundsModal({
             {/* Receipt block */}
             <div className="rounded-xl border border-white/[0.08] bg-surface-3 divide-y divide-white/[0.06] mb-5 overflow-hidden">
               <div className="px-4 py-3 flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/45">
                   Milestone
                 </p>
                 <p className="text-sm font-medium text-white/80 text-right">{milestone.name}</p>
               </div>
               <div className="px-4 py-3 flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/45">
                   Recipient
                 </p>
                 <p className="text-sm font-medium text-white/80 text-right">
@@ -355,7 +355,7 @@ export function ReleaseFundsModal({
                 </p>
               </div>
               <div className="px-4 py-3 flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/45">
                   Contractor payout
                 </p>
                 <p className="text-sm font-semibold text-white/80 tabular-nums text-right">
@@ -363,7 +363,7 @@ export function ReleaseFundsModal({
                 </p>
               </div>
               <div className="px-4 py-3 flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/45">
                   Platform fee ({fee.rateLabel})
                 </p>
                 <p className="text-sm font-medium text-white/50 tabular-nums text-right">
@@ -371,7 +371,7 @@ export function ReleaseFundsModal({
                 </p>
               </div>
               <div className="px-4 py-3 flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/45">
                   Total charged
                 </p>
                 <p className="text-sm font-semibold text-white/80 tabular-nums text-right">
@@ -379,7 +379,7 @@ export function ReleaseFundsModal({
                 </p>
               </div>
               <div className="px-4 py-3 flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/45">
                   Timestamp
                 </p>
                 <p className="text-sm font-medium text-white/80 text-right tabular-nums">
@@ -387,7 +387,7 @@ export function ReleaseFundsModal({
                 </p>
               </div>
               <div className="px-4 py-3 flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/45">
                   Reference ID
                 </p>
                 <p className="text-sm font-mono font-medium text-white/80 tracking-wide">
@@ -395,7 +395,7 @@ export function ReleaseFundsModal({
                 </p>
               </div>
               <div className="px-4 py-3 flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/45">
                   Transfer via
                 </p>
                 <p className="text-sm font-medium text-white/80">Stripe Connect</p>

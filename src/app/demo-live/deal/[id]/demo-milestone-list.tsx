@@ -140,13 +140,13 @@ function DemoMilestoneCard({
         <div className="px-5 pb-4 flex flex-wrap gap-3">
           {ms.fundsReleased != null && (
             <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/[0.08] px-4 py-2">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Released</p>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">Released</p>
               <p className="text-[14px] font-bold tabular-nums text-emerald-400">{fmt(ms.fundsReleased)}</p>
             </div>
           )}
           {ms.fundsHeld != null && (
             <div className="rounded-lg border border-red-500/20 bg-red-500/[0.08] px-4 py-2">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Held &mdash; Under Dispute</p>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">Held &mdash; Under Dispute</p>
               <p className="text-[14px] font-bold tabular-nums text-red-400">{fmt(ms.fundsHeld)}</p>
             </div>
           )}
@@ -232,15 +232,15 @@ function DemoMilestoneCard({
               </div>
               <div className="grid grid-cols-3 gap-4 mb-3">
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Score</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">Score</p>
                   <p className="text-xl font-bold text-vektrum-blue tabular-nums">{ms.aiScore}/100</p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Risk</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">Risk</p>
                   <p className="text-[14px] font-semibold text-emerald-400">{ms.riskLevel}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Recommendation</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">Recommendation</p>
                   <p className="text-[14px] font-semibold text-emerald-400">Approve</p>
                 </div>
               </div>

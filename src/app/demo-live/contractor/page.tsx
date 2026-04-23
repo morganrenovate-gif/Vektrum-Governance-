@@ -154,7 +154,7 @@ function StatTile({ label, value, warning = false, href }: { label: string; valu
       className={`rounded-2xl border bg-surface-2 shadow-card px-5 py-5 transition-all duration-300 ${warning ? 'border-vektrum-amber/30' : 'border-white/[0.08]'} ${href ? 'hover:-translate-y-0.5 hover:border-white/[0.14] cursor-pointer' : ''}`}
       
     >
-      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">{label}</p>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/45">{label}</p>
       <p className={`mt-2 font-display text-4xl font-bold tabular-nums leading-none ${warning ? 'text-amber-400' : 'text-white'}`}>{value}</p>
     </div>
   )
@@ -167,7 +167,7 @@ function MoneyTile({ label, amount, href }: { label: string; amount: number; hre
       className={`rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card px-5 py-5 transition-all duration-300 ${href ? 'hover:-translate-y-0.5 hover:border-white/[0.14] cursor-pointer' : ''}`}
       
     >
-      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">{label}</p>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/45">{label}</p>
       <p className="mt-2 font-display text-xl font-bold tabular-nums leading-none text-white">{formatCurrency(amount)}</p>
     </div>
   )

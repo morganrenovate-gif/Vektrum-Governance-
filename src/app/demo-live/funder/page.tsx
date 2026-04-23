@@ -132,7 +132,7 @@ export default function DemoFunderPage() {
             
           >
             <div className="flex items-start justify-between gap-3 mb-2">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">Action Queue</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/45">Action Queue</p>
               <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08]">
                 <AlertCircle size={13} className="text-amber-400" aria-hidden="true" />
               </div>
@@ -244,7 +244,7 @@ export default function DemoFunderPage() {
               <p className="text-[14px] font-semibold text-white group-hover:text-vektrum-blue transition-colors">
                 Partial Dispute Scenario
               </p>
-              <p className="mt-1 text-[13px] text-white/50 leading-relaxed">
+              <p className="mt-1 text-[13px] text-white/65 leading-relaxed">
                 See how Vektrum handles a flagged line item while keeping 84% of project funds flowing.
               </p>
               <span className="mt-2 inline-flex items-center gap-1 text-[12px] font-semibold text-vektrum-blue">
@@ -269,7 +269,7 @@ function StatTile({ label, value, icon: Icon, href }: { label: string; value: st
       
     >
       <div className="flex items-start justify-between gap-3 mb-2">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">{label}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/45">{label}</p>
         <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08]">
           <Icon size={13} className="text-vektrum-blue" aria-hidden="true" />
         </div>
@@ -287,7 +287,7 @@ function MoneyTile({ label, amount, icon: Icon, href }: { label: string; amount:
       
     >
       <div className="flex items-start justify-between gap-3 mb-2">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">{label}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/45">{label}</p>
         <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08]">
           <Icon size={13} className="text-vektrum-blue" aria-hidden="true" />
         </div>

@@ -278,7 +278,7 @@ function AdminTile({
       <p className={`font-display text-2xl font-bold tabular-nums leading-none break-all ${accent ? 'text-vektrum-blue' : warning ? 'text-amber-400' : 'text-white'}`}>
         {value}
       </p>
-      {sub && <p className="mt-1.5 text-[11px] text-white/35">{sub}</p>}
+      {sub && <p className="mt-1.5 text-[11px] text-white/45">{sub}</p>}
     </div>
   )
   return href ? <Link href={href}>{inner}</Link> : inner

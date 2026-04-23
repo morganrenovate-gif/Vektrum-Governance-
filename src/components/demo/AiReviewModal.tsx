@@ -77,13 +77,13 @@ export function AiReviewModal({ open, onClose, milestoneContext }: AiReviewModal
             <p className="text-sm font-medium text-white/70 mb-4">Vektrum AI is reviewing draw request...</p>
             <div className="space-y-2 text-left max-w-xs mx-auto mb-6">
               {step1 && (
-                <p className="text-xs text-white/50 animate-fade-in">• Analyzing invoice documentation...</p>
+                <p className="text-xs text-white/60 animate-fade-in">• Analyzing invoice documentation...</p>
               )}
               {step2 && (
-                <p className="text-xs text-white/50 animate-fade-in">• Cross-referencing against approved scope...</p>
+                <p className="text-xs text-white/60 animate-fade-in">• Cross-referencing against approved scope...</p>
               )}
               {step3 && (
-                <p className="text-xs text-white/50 animate-fade-in">• Generating risk assessment...</p>
+                <p className="text-xs text-white/60 animate-fade-in">• Generating risk assessment...</p>
               )}
             </div>
             <div className="h-2 rounded-full bg-surface-3 overflow-hidden max-w-xs mx-auto">

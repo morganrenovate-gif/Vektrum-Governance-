@@ -92,7 +92,7 @@ export function FundDealModal({ open, onConfirm, onClose }: FundDealModalProps) 
 
             {/* Info box */}
             <div className="rounded-lg bg-vektrum-blue/[0.08] border border-vektrum-blue/20 px-4 py-3 mb-5">
-              <p className="text-xs text-vektrum-blue/80 leading-relaxed">
+              <p className="text-xs text-white/65 leading-relaxed">
                 Funds will be held in a Vektrum Project Trust Account and released only when milestone conditions are met and AI review passes.
               </p>
             </div>

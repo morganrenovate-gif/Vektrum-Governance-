@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import type { Profile } from '@/lib/types'
+export const runtime = "nodejs";
 
 /**
  * POST /api/assistant
@@ -81,9 +82,20 @@ export async function POST(req: NextRequest) {
 
     // ── Perplexity Sonar AI ────────────────────────────────────────────────────
     const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY
+
+    // Diagnostic: log key presence (never the value) and route context
+    console.info('[assistant] diagnostics:', {
+      route: 'POST /api/assistant',
+      perplexityKeyPresent: !!PERPLEXITY_API_KEY,
+      userId: user.id,
+      role: profile.role,
+    })
+
+    // Error type 1: missing env var
     if (!PERPLEXITY_API_KEY) {
+      console.error('[assistant] PERPLEXITY_API_KEY not set — add it to .env.local and Vercel env vars')
       return NextResponse.json(
-        { error: 'AI service unavailable' },
+        { error: 'AI assistant is temporarily unavailable.', code: 'AI_NOT_CONFIGURED' },
         { status: 503 },
       )
     }
@@ -93,31 +105,58 @@ export async function POST(req: NextRequest) {
       `The current user is a ${profile.role}${profile.full_name ? ` named ${profile.full_name}` : ''}. ` +
       'Keep responses concise and actionable. Use plain language.'
 
-    const perplexityResponse = await fetch('https://api.perplexity.ai/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'sonar',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: command },
-        ],
-        temperature: 0.5,
-        max_tokens: 512,
-      }),
-    })
+    let perplexityResponse: Response
+    try {
+      perplexityResponse = await fetch('https://api.perplexity.ai/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'sonar',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: command },
+          ],
+          temperature: 0.5,
+          max_tokens: 512,
+        }),
+      })
+    } catch (fetchErr) {
+      // Error type 6: network / provider unreachable
+      console.error('[assistant] Perplexity fetch failed (network error):', fetchErr)
+      return NextResponse.json(
+        { error: 'Could not reach the AI service. Please try again.', code: 'AI_NETWORK_ERROR' },
+        { status: 502 },
+      )
+    }
 
     if (!perplexityResponse.ok) {
-      console.error('[api/assistant] Perplexity API error:', await perplexityResponse.text())
-      return NextResponse.json({
-        reply:
-          'AI assistant encountered an error processing your request. Please try again.',
-        suggestions,
-        requiresConfirmation: false,
-      })
+      const errorText = await perplexityResponse.text()
+      console.error('[assistant] Perplexity API error:', perplexityResponse.status, errorText)
+
+      // Error type 2: invalid key / unauthorized
+      if (perplexityResponse.status === 401 || perplexityResponse.status === 403) {
+        return NextResponse.json(
+          { error: 'AI service authentication failed. Check the API key configuration.', code: 'AI_AUTH_FAILED' },
+          { status: 502 },
+        )
+      }
+
+      // 429 rate limit
+      if (perplexityResponse.status === 429) {
+        return NextResponse.json(
+          { error: 'AI service rate limit reached. Please try again in a moment.', code: 'AI_RATE_LIMITED' },
+          { status: 429 },
+        )
+      }
+
+      // Error type 6: other provider error
+      return NextResponse.json(
+        { error: 'AI assistant encountered an error. Please try again.', code: 'AI_PROVIDER_ERROR' },
+        { status: 502 },
+      )
     }
 
     const perplexityData = await perplexityResponse.json()
@@ -129,9 +168,10 @@ export async function POST(req: NextRequest) {
       requiresConfirmation: false,
     })
   } catch (err) {
-    console.error('[api/assistant] unexpected error:', err)
+    // Error type 7: unexpected internal error
+    console.error('[assistant] unexpected error:', err)
     return NextResponse.json(
-      { error: 'An unexpected error occurred.' },
+      { error: 'An unexpected error occurred.', code: 'INTERNAL_ERROR' },
       { status: 500 },
     )
   }

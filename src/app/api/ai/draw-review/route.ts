@@ -5,6 +5,7 @@ import { getAuthUser, requireRole, requireDealAccess } from '@/lib/auth/middlewa
 import { createClient } from '@/lib/supabase/server'
 import { logAudit } from '@/lib/engine/audit'
 import { notFoundError } from '@/lib/errors'
+export const runtime = "nodejs";
 
 // ─── GET /api/ai/draw-review?milestoneId=xxx ────────────────────────────────
 // Returns the most recent AI draw review assessment for a milestone.
@@ -198,33 +199,78 @@ Risk criteria:
 
 Respond ONLY with the JSON object. No markdown, no commentary.`
 
-  // Call Perplexity Sonar API
+  // ── Call Perplexity Sonar API ────────────────────────────────────────────────
   const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY
+
+  // Diagnostic: log key presence (never the value) and route context
+  console.info('[draw-review] diagnostics:', {
+    route: 'POST /api/ai/draw-review',
+    perplexityKeyPresent: !!PERPLEXITY_API_KEY,
+    milestoneId,
+    dealId: milestone.deal_id,
+  })
+
+  // Error type 1: missing env var
   if (!PERPLEXITY_API_KEY) {
-    return NextResponse.json({ error: 'Perplexity API not configured' }, { status: 503 })
+    console.error('[draw-review] PERPLEXITY_API_KEY not set — add it to .env.local and Vercel env vars')
+    return NextResponse.json(
+      { error: 'AI draw review is temporarily unavailable.', code: 'AI_NOT_CONFIGURED' },
+      { status: 503 },
+    )
   }
 
-  const perplexityResponse = await fetch('https://api.perplexity.ai/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'sonar-pro',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt }
-      ],
-      temperature: 0.1,
-      max_tokens: 1024,
+  let perplexityResponse: Response
+  try {
+    perplexityResponse = await fetch('https://api.perplexity.ai/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'sonar-pro',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+        temperature: 0.1,
+        max_tokens: 1024,
+      })
     })
-  })
+  } catch (fetchErr) {
+    // Error type 6: network / provider unreachable
+    console.error('[draw-review] Perplexity fetch failed (network error):', fetchErr)
+    return NextResponse.json(
+      { error: 'Could not reach the AI service. Please try again.', code: 'AI_NETWORK_ERROR' },
+      { status: 502 },
+    )
+  }
 
   if (!perplexityResponse.ok) {
     const errorText = await perplexityResponse.text()
-    console.error('Perplexity API error:', errorText)
-    return NextResponse.json({ error: 'AI assessment service unavailable' }, { status: 502 })
+    console.error('[draw-review] Perplexity API error:', perplexityResponse.status, errorText)
+
+    // Error type 2: invalid key / unauthorized
+    if (perplexityResponse.status === 401 || perplexityResponse.status === 403) {
+      return NextResponse.json(
+        { error: 'AI service authentication failed. Check the API key configuration.', code: 'AI_AUTH_FAILED' },
+        { status: 502 },
+      )
+    }
+
+    // 429 rate limit
+    if (perplexityResponse.status === 429) {
+      return NextResponse.json(
+        { error: 'AI service rate limit reached. Please try again in a moment.', code: 'AI_RATE_LIMITED' },
+        { status: 429 },
+      )
+    }
+
+    // Error type 6: other provider error
+    return NextResponse.json(
+      { error: 'AI assessment service unavailable.', code: 'AI_PROVIDER_ERROR' },
+      { status: 502 },
+    )
   }
 
   const perplexityData = await perplexityResponse.json()

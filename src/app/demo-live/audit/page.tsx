@@ -441,8 +441,8 @@ function roleBadgeClasses(role: string): string {
     case 'funder':     return 'bg-vektrum-blue/10 text-vektrum-blue'
     case 'contractor': return 'bg-amber-500/[0.12] text-amber-400'
     case 'admin':      return 'bg-purple-500/[0.12] text-purple-400'
-    case 'system':     return 'bg-white/[0.06] text-white/35'
-    default:           return 'bg-white/[0.06] text-white/35'
+    case 'system':     return 'bg-white/[0.06] text-white/45'
+    default:           return 'bg-white/[0.06] text-white/45'
   }
 }
 
@@ -456,6 +456,7 @@ export default function DemoAuditPage() {
     : auditEvents.filter(e => categoryFilters[activeTab].includes(e.action))
 
   return (
+    <div className="min-h-screen bg-surface-0">
     <div className="page-container section space-y-6">
       {/* Back link */}
       <Link
@@ -482,7 +483,7 @@ export default function DemoAuditPage() {
 
       {/* Compliance notice */}
       <div className="flex items-start gap-2.5 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-[12px] text-white/40">
-        <Shield size={13} className="text-white/30 flex-shrink-0 mt-0.5" />
+        <Shield size={13} className="text-white/40 flex-shrink-0 mt-0.5" />
         <span>
           All timestamps are exact UTC (YYYY-MM-DD HH:MM:SS UTC). Events are ordered by
           monotonic <code className="font-mono">event_sequence</code>. This log is append-only.
@@ -541,7 +542,7 @@ export default function DemoAuditPage() {
                     <div className="font-mono text-[12px] font-semibold text-white/60 tabular-nums">
                       #{entry.event_seq}
                     </div>
-                    <div className="font-mono text-[10px] text-white/20 mt-0.5" title={entry.id}>
+                    <div className="font-mono text-[10px] text-white/35 mt-0.5" title={entry.id}>
                       {entry.id.slice(0, 8)}…
                     </div>
                   </td>
@@ -552,7 +553,7 @@ export default function DemoAuditPage() {
                     <div className="font-mono tabular-nums text-[11px] text-white/55">
                       {entry.timestamp_utc.split(' ')[0]}
                     </div>
-                    <div className="font-mono tabular-nums text-[11px] text-white/35">
+                    <div className="font-mono tabular-nums text-[11px] text-white/45">
                       {entry.timestamp_utc.split(' ').slice(1).join(' ')}
                     </div>
                   </td>
@@ -566,7 +567,7 @@ export default function DemoAuditPage() {
                       </span>
                     </div>
                     {entry.actor_email && (
-                      <div className="text-[10px] font-mono text-white/25 mt-0.5 truncate max-w-[180px]">
+                      <div className="text-[10px] font-mono text-white/40 mt-0.5 truncate max-w-[180px]">
                         {entry.actor_email}
                       </div>
                     )}
@@ -586,7 +587,7 @@ export default function DemoAuditPage() {
 
                   {/* ── Source + Details ─────────────────────────────────── */}
                   <td className="px-4 py-3">
-                    <div className="text-[10px] font-mono text-white/25 mb-1">
+                    <div className="text-[10px] font-mono text-white/40 mb-1">
                       {entry.system_source}
                     </div>
                     <div className="text-[12px] text-white/40">
@@ -597,8 +598,9 @@ export default function DemoAuditPage() {
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-sm text-white/30">
+                  <td colSpan={6} className="px-4 py-8 text-center text-sm text-white/40">
                     No events match this filter.
+                  </td>
                   </td>
                 </tr>
               )}
@@ -606,6 +608,7 @@ export default function DemoAuditPage() {
           </table>
         </div>
       </div>
+    </div>
     </div>
   )
 }

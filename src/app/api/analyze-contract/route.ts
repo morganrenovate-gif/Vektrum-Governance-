@@ -27,6 +27,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser } from '@/lib/auth/middleware'
 import type { ContractAnalysisResult, ProposedMilestone } from '@/lib/actions/analyze-contract'
+export const runtime = "nodejs";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -133,10 +134,20 @@ export async function POST(req: NextRequest) {
 
   // ── 3. Check Perplexity key ────────────────────────────────────────────────
   const apiKey = process.env.PERPLEXITY_API_KEY
+
+  // Diagnostic: log key presence (never the value) and file context
+  console.info('[analyze-contract] diagnostics:', {
+    route: 'POST /api/analyze-contract',
+    perplexityKeyPresent: !!apiKey,
+    fileSize: contractFile.size,
+    textLength: contractText?.length ?? 0,
+  })
+
+  // Error type 1: missing env var
   if (!apiKey) {
-    console.error('[analyze-contract] PERPLEXITY_API_KEY not set')
+    console.error('[analyze-contract] PERPLEXITY_API_KEY not set — add it to .env.local and Vercel env vars')
     return NextResponse.json(
-      { success: false, error: 'AI analysis service is not configured.' },
+      { success: false, error: 'AI analysis service is not configured.', code: 'AI_NOT_CONFIGURED' },
       { status: 503 },
     )
   }
@@ -215,8 +226,26 @@ Rules:
     if (!response.ok) {
       const errorBody = await response.text()
       console.error('[analyze-contract] Perplexity error:', response.status, errorBody)
+
+      // Error type 2: invalid key / unauthorized
+      if (response.status === 401 || response.status === 403) {
+        return NextResponse.json(
+          { success: false, error: 'AI service authentication failed. Check the API key configuration.', code: 'AI_AUTH_FAILED' },
+          { status: 502 },
+        )
+      }
+
+      // 429 rate limit
+      if (response.status === 429) {
+        return NextResponse.json(
+          { success: false, error: 'AI service rate limit reached. Please try again in a moment.', code: 'AI_RATE_LIMITED' },
+          { status: 429 },
+        )
+      }
+
+      // Error type 6: other provider error
       return NextResponse.json(
-        { success: false, error: 'AI service returned an error. Please try again.' },
+        { success: false, error: 'AI service returned an error. Please try again.', code: 'AI_PROVIDER_ERROR' },
         { status: 502 },
       )
     }
@@ -224,9 +253,10 @@ Rules:
     const json = await response.json()
     rawContent = json.choices?.[0]?.message?.content ?? ''
   } catch (err) {
-    console.error('[analyze-contract] Perplexity fetch failed:', err)
+    // Error type 6: network / provider unreachable
+    console.error('[analyze-contract] Perplexity fetch failed (network error):', err)
     return NextResponse.json(
-      { success: false, error: 'Could not reach the AI service. Please try again.' },
+      { success: false, error: 'Could not reach the AI service. Please try again.', code: 'AI_NETWORK_ERROR' },
       { status: 502 },
     )
   }
