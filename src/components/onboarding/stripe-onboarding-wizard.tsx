@@ -78,7 +78,7 @@ export function StripeOnboardingWizard({
   }
 
   return (
-    <div className="min-h-screen bg-vektrum-bg flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#0D1B2A] flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
         {/* Card */}
         <div className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-lg overflow-hidden">

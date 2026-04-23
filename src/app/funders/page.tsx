@@ -32,7 +32,7 @@ export default function FundersPage() {
         <div className="relative max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-surface-2 px-4 py-1.5 shadow-sm mb-8">
             <div className="h-1.5 w-1.5 rounded-full bg-vektrum-green animate-pulse-slow" />
-            <span className="text-[12px] font-medium text-white/55 tracking-wide">
+            <span className="text-[12px] font-medium text-white/70 tracking-wide">
               For funders &amp; capital partners
             </span>
           </div>
@@ -40,7 +40,7 @@ export default function FundersPage() {
           <h1 className="font-display text-4xl font-bold tracking-[-0.035em] text-white sm:text-5xl text-balance">
             Your draw process, systematized.
           </h1>
-          <p className="mt-4 mx-auto max-w-2xl text-[17px] leading-relaxed text-white/55">
+          <p className="mt-4 mx-auto max-w-2xl text-[17px] leading-relaxed text-white/70">
             Stop managing draws in spreadsheets and email threads. Vektrum enforces
             your release conditions server-side, audits every disbursement, and gives
             you portfolio-level visibility.
@@ -65,7 +65,7 @@ export default function FundersPage() {
       </section>
 
       {/* ─── Benefits ──────────────────────────────────────────────────────── */}
-      <section className="bg-vektrum-bg py-16 sm:py-20">
+      <section className="bg-surface-0 py-16 sm:py-20">
         <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {[
@@ -123,7 +123,7 @@ export default function FundersPage() {
                 <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-vektrum-blue text-[12px] font-bold text-white">
                   {i + 1}
                 </span>
-                <p className="text-[14px] leading-relaxed text-white/55 pt-0.5">{step}</p>
+                <p className="text-[14px] leading-relaxed text-white/70 pt-0.5">{step}</p>
               </li>
             ))}
           </ol>

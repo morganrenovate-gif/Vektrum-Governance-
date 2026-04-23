@@ -68,7 +68,7 @@ export default function FoundersPage() {
         </div>
       </section>
 
-      <section className="py-20 sm:py-24 bg-vektrum-bg" aria-label="Founding team">
+      <section className="py-20 sm:py-24 bg-surface-0" aria-label="Founding team">
         <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="space-y-12">
             {founders.map((founder) => (
@@ -86,12 +86,12 @@ export default function FoundersPage() {
                     <h2 className="font-display text-[18px] font-bold text-white leading-tight">
                       {founder.name}
                     </h2>
-                    <p className="mt-0.5 text-[12px] font-semibold uppercase tracking-[0.1em] text-white/30">
+                    <p className="mt-0.5 text-[12px] font-semibold uppercase tracking-[0.1em] text-white/45">
                       {founder.title}
                     </p>
                   </div>
                 </div>
-                <div className="space-y-4 text-[14px] leading-relaxed text-white/55">
+                <div className="space-y-4 text-[14px] leading-relaxed text-white/65">
                   <p>{founder.bio1}</p>
                   <p>{founder.bio2}</p>
                   <p>{founder.bio3}</p>

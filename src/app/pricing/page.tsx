@@ -31,7 +31,7 @@ function ClarityCell({
 }) {
   return (
     <div className="flex flex-col gap-1 py-7 px-6 sm:px-8">
-      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/30">
+      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/40">
         {label}
       </p>
       <p className="text-[17px] font-bold tracking-[-0.02em] text-white">{value}</p>
@@ -94,7 +94,7 @@ function EngagementCard({
 
       {/* Rate — the number that dominates */}
       <div className="mb-6 pb-6 border-b border-white/[0.08]">
-        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/25 mb-4">
+        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/40 mb-4">
           {name}
         </p>
         <div className="flex items-baseline gap-2">
@@ -106,36 +106,36 @@ function EngagementCard({
           >
             {ratePercent}
           </span>
-          <span className="text-[14px] text-white/30 pb-1 font-medium">
+          <span className="text-[14px] text-white/40 pb-1 font-medium">
             per release
           </span>
         </div>
         <p className="mt-3 text-[12px] font-semibold text-emerald-400">
           {rateExample}
         </p>
-        <p className="mt-1.5 text-[11px] text-white/35 leading-snug">{descriptor}</p>
+        <p className="mt-1.5 text-[11px] text-white/50 leading-snug">{descriptor}</p>
       </div>
 
       {/* Structure — retainer + onboarding */}
       <div className="mb-6 space-y-3.5">
         <div className="flex items-start justify-between gap-4">
-          <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-white/25 shrink-0 mt-0.5">
+          <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-white/40 shrink-0 mt-0.5">
             Retainer
           </span>
           <div className="text-right">
-            <p className="text-[12px] font-semibold text-white/65">{retainer}</p>
+            <p className="text-[12px] font-semibold text-white/75">{retainer}</p>
             {retainerNote && (
-              <p className="text-[11px] text-white/35 mt-0.5 leading-snug">
+              <p className="text-[11px] text-white/45 mt-0.5 leading-snug">
                 {retainerNote}
               </p>
             )}
           </div>
         </div>
         <div className="flex items-start justify-between gap-4">
-          <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-white/25 shrink-0 mt-0.5">
+          <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-white/40 shrink-0 mt-0.5">
             Onboarding
           </span>
-          <p className="text-[12px] font-semibold text-white/65 text-right">
+          <p className="text-[12px] font-semibold text-white/75 text-right">
             {setup}
           </p>
         </div>
@@ -147,9 +147,9 @@ function EngagementCard({
           <li key={f} className="flex items-start gap-2.5">
             <CheckCircle2
               size={13}
-              className="mt-[1px] flex-shrink-0 text-emerald-400/60"
+              className="mt-[1px] flex-shrink-0 text-emerald-400/80"
             />
-            <span className="text-[12px] leading-relaxed text-white/50">{f}</span>
+            <span className="text-[12px] leading-relaxed text-white/65">{f}</span>
           </li>
         ))}
       </ul>
@@ -160,7 +160,7 @@ function EngagementCard({
           'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl text-[13px] font-semibold transition-all',
           highlight
             ? 'bg-vektrum-blue text-white shadow-lg shadow-vektrum-blue/25 hover:bg-vektrum-blue-hover'
-            : 'border border-white/[0.10] bg-transparent text-white/55 hover:bg-white/[0.04] hover:border-white/[0.18] hover:text-white',
+            : 'border border-white/[0.14] bg-transparent text-white/65 hover:bg-white/[0.05] hover:border-white/[0.22] hover:text-white',
         ].join(' ')}
       >
         {cta}
@@ -203,7 +203,7 @@ export default function PricingPage() {
 
         <div className="relative max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
           {/* Eyebrow */}
-          <p className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white/30 mb-8">
+          <p className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white/40 mb-8">
             <span className="inline-block h-px w-6 bg-vektrum-blue/60" />
             Governance Fee
             <span className="inline-block h-px w-6 bg-vektrum-blue/60" />
@@ -217,7 +217,7 @@ export default function PricingPage() {
           </h1>
 
           {/* What it actually is */}
-          <p className="mt-6 mx-auto max-w-xl text-[16px] leading-relaxed text-white/50">
+          <p className="mt-6 mx-auto max-w-xl text-[16px] leading-relaxed text-white/65">
             Vektrum charges a governance fee only when a milestone transfer
             completes — 8 conditions verified simultaneously, transfer
             confirmed to contractor's Stripe account. We earn when funds move.
@@ -267,15 +267,15 @@ export default function PricingPage() {
 
       {/* ─── 3. What You're Paying For ────────────────────────────────────────── */}
       {/* Reframes: this isn't software — it's controlled disbursement infrastructure. */}
-      <section className="bg-vektrum-bg py-16 sm:py-20">
+      <section className="bg-surface-0 py-16 sm:py-20">
         <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center mb-12">
-            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/30 mb-3">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/45 mb-3">
               What this fee covers
             </p>
             <h2 className="font-display text-2xl font-bold tracking-[-0.025em] text-white sm:text-3xl">
               Not software licensing.{' '}
-              <span className="text-white/45">
+              <span className="text-white/60">
                 Controlled disbursement infrastructure.
               </span>
             </h2>
@@ -326,7 +326,7 @@ export default function PricingPage() {
 
             {/* Left: risk cost table */}
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/30 mb-3">
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/40 mb-3">
                 The cost of getting it wrong
               </p>
               <h2 className="font-display text-2xl font-bold tracking-[-0.025em] text-white sm:text-3xl mb-8 text-balance">
@@ -445,17 +445,17 @@ export default function PricingPage() {
 
       {/* ─── 5. Fee Structure ─────────────────────────────────────────────────── */}
       {/* Three engagement models — not "plans", not "tiers". */}
-      <section className="bg-vektrum-bg py-16 sm:py-20">
+      <section className="bg-[#0B1625] py-16 sm:py-20">
         <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center mb-12">
-            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/30 mb-3">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/45 mb-3">
               Fee structure
             </p>
             <h2 className="font-display text-2xl font-bold tracking-[-0.025em] text-white sm:text-3xl">
               Three engagement models.
-              <span className="text-white/45"> One underlying structure.</span>
+              <span className="text-white/60"> One underlying structure.</span>
             </h2>
-            <p className="mt-4 mx-auto max-w-lg text-[14px] text-white/45 leading-relaxed">
+            <p className="mt-4 mx-auto max-w-lg text-[14px] text-white/55 leading-relaxed">
               Every model uses the same logic: a governance fee charged per verified
               disbursement. Institutional and Enterprise models add an annual retainer
               in exchange for a lower per-release rate.
@@ -528,7 +528,7 @@ export default function PricingPage() {
       <section className="bg-surface-2 py-16 sm:py-20">
         <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center mb-12">
-            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/30 mb-3">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/40 mb-3">
               The math
             </p>
             <h2 className="font-display text-2xl font-bold tracking-[-0.025em] text-white sm:text-3xl">
@@ -540,7 +540,7 @@ export default function PricingPage() {
             {/* Example 1 — Standalone */}
             <div className="rounded-2xl border border-white/[0.08] bg-surface-3 overflow-hidden">
               <div className="px-6 py-4 border-b border-white/[0.08]">
-                <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/30">
+                <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/40">
                   Standalone
                 </p>
                 <p className="text-[14px] font-semibold text-white mt-1">
@@ -586,7 +586,7 @@ export default function PricingPage() {
                   <div key={row.label} className="flex items-start justify-between px-6 py-3.5">
                     <div>
                       <p className="text-[12px] text-white/55">{row.label}</p>
-                      <p className="text-[11px] text-white/30 mt-0.5">{row.note}</p>
+                      <p className="text-[11px] text-white/40 mt-0.5">{row.note}</p>
                     </div>
                     <span className="text-[13px] font-semibold text-white tabular-nums shrink-0 ml-4">{row.value}</span>
                   </div>
@@ -604,7 +604,7 @@ export default function PricingPage() {
             {/* Example 3 — Enterprise */}
             <div className="rounded-2xl border border-white/[0.08] bg-surface-3 overflow-hidden">
               <div className="px-6 py-4 border-b border-white/[0.08]">
-                <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/30">
+                <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/40">
                   Enterprise
                 </p>
                 <p className="text-[14px] font-semibold text-white mt-1">
@@ -619,7 +619,7 @@ export default function PricingPage() {
                   <div key={row.label} className="flex items-start justify-between px-6 py-3.5">
                     <div>
                       <p className="text-[12px] text-white/55">{row.label}</p>
-                      <p className="text-[11px] text-white/30 mt-0.5">{row.note}</p>
+                      <p className="text-[11px] text-white/40 mt-0.5">{row.note}</p>
                     </div>
                     <span className="text-[13px] font-semibold text-white tabular-nums shrink-0 ml-4">{row.value}</span>
                   </div>
@@ -644,10 +644,10 @@ export default function PricingPage() {
 
       {/* ─── 7. Without vs. With ──────────────────────────────────────────────── */}
       {/* The decision matrix for institutional buyers justifying internally. */}
-      <section className="bg-vektrum-bg py-16 sm:py-20">
+      <section className="bg-surface-0 py-16 sm:py-20">
         <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center mb-12">
-            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/30 mb-3">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/45 mb-3">
               What changes
             </p>
             <h2 className="font-display text-2xl font-bold tracking-[-0.025em] text-white sm:text-3xl">
@@ -695,13 +695,13 @@ export default function PricingPage() {
                   <li key={item.label} className="flex items-start gap-3">
                     <X
                       size={14}
-                      className="mt-0.5 text-red-400/50 flex-shrink-0"
+                      className="mt-0.5 text-red-400/70 flex-shrink-0"
                     />
                     <div>
-                      <p className="text-[13px] font-semibold text-white/60">
+                      <p className="text-[13px] font-semibold text-white/75">
                         {item.label}
                       </p>
-                      <p className="text-[12px] text-white/30 mt-0.5 leading-snug">
+                      <p className="text-[12px] text-white/45 mt-0.5 leading-snug">
                         {item.desc}
                       </p>
                     </div>
@@ -813,7 +813,7 @@ export default function PricingPage() {
       <section className="bg-surface-2 py-14 sm:py-16">
         <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="rounded-2xl border border-white/[0.08] bg-surface-3 p-7 sm:p-10">
-            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/25 mb-1">
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/40 mb-1">
               Universal across all models
             </p>
             <h2 className="text-lg font-bold tracking-[-0.02em] text-white mb-8">
@@ -856,7 +856,7 @@ export default function PricingPage() {
       {/* ─── 10. CTA ──────────────────────────────────────────────────────────── */}
       <section className="border-t border-white/[0.08] bg-surface-2 py-20 sm:py-24">
         <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
-          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/30 mb-4">
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/40 mb-4">
             Get started
           </p>
           <h2 className="font-display text-2xl font-bold tracking-[-0.03em] text-white sm:text-[32px] text-balance">
@@ -895,9 +895,9 @@ export default function PricingPage() {
             ].map((item) => (
               <span
                 key={item}
-                className="flex items-center gap-1.5 text-[12px] text-white/30"
+                className="flex items-center gap-1.5 text-[12px] text-white/45"
               >
-                <span className="inline-block h-1 w-1 rounded-full bg-white/20" />
+                <span className="inline-block h-1 w-1 rounded-full bg-white/30" />
                 {item}
               </span>
             ))}

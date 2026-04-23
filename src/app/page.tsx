@@ -52,10 +52,10 @@ export default async function HomePage() {
               <h1 className="animate-fade-in font-display text-center lg:text-left text-[2.75rem] font-bold tracking-[-0.04em] text-white sm:text-6xl lg:text-[4rem] lg:leading-[1.05] leading-[1.08]">
                 Every dollar.<br />
                 Every draw.<br />
-                <em className="not-italic text-white/50">Governed.</em>
+                <em className="not-italic text-white/70">Governed.</em>
               </h1>
 
-              <p className="animate-fade-in-delay mx-auto lg:mx-0 mt-6 max-w-lg text-center lg:text-left text-[17px] leading-relaxed text-white/60">
+              <p className="animate-fade-in-delay mx-auto lg:mx-0 mt-6 max-w-lg text-center lg:text-left text-[17px] leading-relaxed text-white/70">
                 Vektrum enforces milestone-based releases, isolates disputes to individual draws,
                 and ensures funds move only when work is verified.
               </p>
@@ -70,7 +70,7 @@ export default async function HomePage() {
                 </Link>
                 <a
                   href="https://cal.com/vektrum"
-                  className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 px-7 py-3 text-[14px] font-semibold text-white/70 hover:bg-white/10 hover:text-white transition-all"
+                  className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/[0.07] px-7 py-3 text-[14px] font-semibold text-white/80 hover:bg-white/[0.12] hover:text-white transition-all"
                 >
                   Schedule a Call
                   <span className="text-white/40">↓</span>
@@ -81,15 +81,15 @@ export default async function HomePage() {
               <div className="mt-10 flex gap-8 justify-center lg:justify-start pt-8 border-t border-white/[0.08]">
                 <div className="flex flex-col gap-1">
                   <span className="font-display text-[28px] font-bold text-white leading-none tracking-[-0.03em]">7</span>
-                  <span className="text-[12px] text-white/40">Server-side release conditions</span>
+                  <span className="text-[12px] text-white/55">Server-side release conditions</span>
                 </div>
                 <div className="flex flex-col gap-1">
                   <span className="font-display text-[19px] font-bold text-white leading-none tracking-[-0.02em] pt-1">Non-custodial</span>
-                  <span className="text-[12px] text-white/40">Funds held by Stripe, not Vektrum</span>
+                  <span className="text-[12px] text-white/55">Funds held by Stripe, not Vektrum</span>
                 </div>
                 <div className="flex flex-col gap-1">
                   <span className="font-display text-[28px] font-bold text-white leading-none tracking-[-0.03em]">∞</span>
-                  <span className="text-[12px] text-white/40">Audit trail, forever</span>
+                  <span className="text-[12px] text-white/55">Audit trail, forever</span>
                 </div>
               </div>
             </div>
@@ -208,9 +208,9 @@ export default async function HomePage() {
               <h2 className="font-display text-[2.75rem] sm:text-5xl lg:text-[3.5rem] font-bold tracking-[-0.04em] text-white leading-[1.05]">
                 A $15K dispute.<br />
                 A $9M project<br />
-                <em className="not-italic text-white/40">unaffected.</em>
+                <em className="not-italic text-white/60">unaffected.</em>
               </h2>
-              <p className="mt-6 text-[16px] leading-relaxed text-white/55 max-w-md">
+              <p className="mt-6 text-[16px] leading-relaxed text-white/65 max-w-md">
                 In every other system, a disputed payment freezes the job. In Vektrum,
                 disputes are isolated to their milestone. The rest of the project keeps
                 moving. That&apos;s not a feature — it&apos;s the architecture.
@@ -246,7 +246,7 @@ export default async function HomePage() {
                     </div>
                     <div>
                       <p className="text-[14px] font-semibold text-white mb-1">{item.title}</p>
-                      <p className="text-[13px] leading-relaxed text-white/45">{item.desc}</p>
+                      <p className="text-[13px] leading-relaxed text-white/60">{item.desc}</p>
                     </div>
                   </div>
                 ))}
@@ -430,7 +430,7 @@ export default async function HomePage() {
                 The gap nobody else fills.
               </h2>
 
-              <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-white/60">
+              <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-white/70">
                 Procore is built for $50M+ jobs. Traditional lenders do everything manually.
                 The $500K–$25M segment — highest dispute rate, least protection — has no
                 automated solution. Until now.
@@ -449,7 +449,7 @@ export default async function HomePage() {
                   </div>
                   <div>
                     <div className="text-[15px] font-semibold text-white">Procore ignores this market</div>
-                    <div className="mt-1 text-[14px] leading-relaxed text-white/55">
+                    <div className="mt-1 text-[14px] leading-relaxed text-white/65">
                       Enterprise tooling for enterprise jobs. $500K–$25M projects don&apos;t fit
                       the deal size or complexity threshold.
                     </div>
@@ -465,7 +465,7 @@ export default async function HomePage() {
                   </div>
                   <div>
                     <div className="text-[15px] font-semibold text-white">Traditional lenders are manual</div>
-                    <div className="mt-1 text-[14px] leading-relaxed text-white/55">
+                    <div className="mt-1 text-[14px] leading-relaxed text-white/65">
                       Paper draw requests, manual inspection, spreadsheet tracking. No
                       enforcement layer. No dispute isolation.
                     </div>
@@ -480,7 +480,7 @@ export default async function HomePage() {
                   </div>
                   <div>
                     <div className="text-[15px] font-semibold text-white">Vektrum owns this segment</div>
-                    <div className="mt-1 text-[14px] leading-relaxed text-white/55">
+                    <div className="mt-1 text-[14px] leading-relaxed text-white/65">
                       Automated governance, Stripe-backed fund custody, milestone isolation —
                       purpose-built for mid-market construction.
                     </div>
@@ -800,7 +800,7 @@ export default async function HomePage() {
           <h2 className="font-display text-2xl font-bold tracking-[-0.025em] text-white sm:text-3xl lg:text-[2.5rem] lg:leading-[1.1] text-balance">
             1% per release. No monthly fee.
           </h2>
-          <p className="mt-4 mx-auto max-w-md text-[15px] text-white/50">
+          <p className="mt-4 mx-auto max-w-md text-[15px] text-white/65">
             Contractors are always free. Funders pay 1% after each verified disbursement — never before.
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">

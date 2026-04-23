@@ -86,7 +86,7 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
                 // ── Logged-in drawer ────────────────────────────────────────
                 <>
                   {/* User identity row */}
-                  <div className="flex items-center gap-3 px-4 py-3 mb-1 rounded-xl bg-vektrum-bg">
+                  <div className="flex items-center gap-3 px-4 py-3 mb-1 rounded-xl bg-white/[0.05] border border-white/[0.06]">
                     <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-vektrum-blue text-[13px] font-bold text-white select-none">
                       {getInitials()}
                     </div>

@@ -83,7 +83,7 @@ export function UserTable({ profiles, deals, emailMap = {} }: UserTableProps) {
   return (
     <div className="rounded-xl border border-white/[0.08] bg-surface-2 overflow-hidden shadow-sm">
       {/* Toolbar */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-5 py-4 border-b border-white/[0.05] bg-vektrum-bg">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-5 py-4 border-b border-white/[0.05] bg-white/[0.015]">
         {/* Search */}
         <div className="relative flex-1 max-w-xs">
           <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" aria-hidden="true" />
@@ -147,7 +147,7 @@ export function UserTable({ profiles, deals, emailMap = {} }: UserTableProps) {
             return (
               <div
                 key={profile.id}
-                className="flex flex-col gap-2 md:grid md:grid-cols-[2fr_1fr_1fr_1fr_auto_auto] md:items-center md:gap-4 px-5 py-3.5 hover:bg-vektrum-bg transition-colors"
+                className="flex flex-col gap-2 md:grid md:grid-cols-[2fr_1fr_1fr_1fr_auto_auto] md:items-center md:gap-4 px-5 py-3.5 hover:bg-white/[0.03] transition-colors"
               >
                 {/* User info */}
                 <div className="min-w-0">
