@@ -601,7 +601,6 @@ export default function DemoAuditPage() {
                   <td colSpan={6} className="px-4 py-8 text-center text-sm text-white/40">
                     No events match this filter.
                   </td>
-                  </td>
                 </tr>
               )}
             </tbody>
