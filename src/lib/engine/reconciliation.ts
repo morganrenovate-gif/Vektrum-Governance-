@@ -30,6 +30,11 @@ export type IssueType =
   | 'missing_billing_record'
   | 'fee_ledger_drift'
   | 'metadata_mismatch'
+  // ── Funding confirmation passes (Pass 5) ──
+  /** funded_amount in DB exceeds the sum of bank-confirmed Stripe PaymentIntents. Phantom balance. */
+  | 'funding_phantom_balance'
+  /** Stripe has confirmed a PaymentIntent but DB funded_amount is lower. Probable missed webhook. */
+  | 'funding_missing_webhook'
 
 export type IssueSeverity = 'critical' | 'high' | 'medium' | 'low'
 export type IssueStatus   = 'open' | 'acknowledged' | 'resolved' | 'false_positive' | 'auto_resolved'
@@ -73,25 +78,31 @@ export interface ReconciliationResult {
 // ─── Severity Map ─────────────────────────────────────────────────────────────
 
 const SEVERITY: Record<IssueType, IssueSeverity> = {
-  orphaned_transfer:        'critical',
-  missing_stripe_id:        'critical',
-  amount_mismatch:          'critical',
-  ledger_drift:             'critical',
-  stripe_transfer_not_found: 'high',
-  missing_billing_record:   'high',
-  fee_ledger_drift:         'high',
-  metadata_mismatch:        'medium',
+  orphaned_transfer:          'critical',
+  missing_stripe_id:          'critical',
+  amount_mismatch:            'critical',
+  ledger_drift:               'critical',
+  stripe_transfer_not_found:  'high',
+  missing_billing_record:     'high',
+  fee_ledger_drift:           'high',
+  metadata_mismatch:          'medium',
+  // Pass 5 — funding confirmation
+  funding_phantom_balance:    'critical',  // funded_amount > confirmed — real money risk
+  funding_missing_webhook:    'high',      // confirmed > funded_amount — likely missed webhook
 }
 
 const AUTO_FIXABLE: Record<IssueType, boolean> = {
-  orphaned_transfer:         false,
-  missing_stripe_id:         false,
-  amount_mismatch:           false,
-  ledger_drift:              true,   // recompute from releases table
-  stripe_transfer_not_found: false,
-  missing_billing_record:    true,   // insert from release + deal data
-  fee_ledger_drift:          true,   // recompute from billing_records table
-  metadata_mismatch:         false,
+  orphaned_transfer:          false,
+  missing_stripe_id:          false,
+  amount_mismatch:            false,
+  ledger_drift:               true,   // recompute from releases table
+  stripe_transfer_not_found:  false,
+  missing_billing_record:     true,   // insert from release + deal data
+  fee_ledger_drift:           true,   // recompute from billing_records table
+  metadata_mismatch:          false,
+  // Pass 5 — cannot auto-fix financial discrepancies without human approval
+  funding_phantom_balance:    false,
+  funding_missing_webhook:    false,
 }
 
 // ─── Main Entry Point ─────────────────────────────────────────────────────────
@@ -411,6 +422,171 @@ export async function runReconciliation(
           })
         }
       }
+    }
+
+    // ── Pass 5: Funding confirmation — funded_amount vs confirmed Stripe PIs ──
+    //
+    // Uses the Stripe PaymentIntent Search API to retrieve all Vektrum
+    // deal-funding PIs that have been bank-confirmed (status:'succeeded').
+    // Groups them by deal_id, then compares each deal's funded_amount against
+    // the sum of confirmed PI amounts.
+    //
+    // Flags two scenarios:
+    //   funding_phantom_balance  — funded_amount > sum(confirmed PIs)
+    //     Indicates funded_amount was incremented before bank confirmation
+    //     (the old optimistic bug) or a webhook was not processed correctly.
+    //   funding_missing_webhook  — sum(confirmed PIs) > funded_amount
+    //     Indicates a payment_intent.succeeded webhook was lost or failed;
+    //     funded_amount was never updated after bank confirmation.
+    //
+    // Stripe Search API docs:
+    //   https://stripe.com/docs/api/payment_intents/search
+    //   Supports: metadata['key']:'value' AND status:'succeeded'
+    try {
+      // Fetch all succeeded deal-funding PaymentIntents from Stripe
+      const confirmedByDeal = new Map<string, { totalUsd: number; piIds: string[] }>()
+
+      // Stripe Search: parameterized query for Vektrum deal-funding PIs
+      // The Stripe Search API does NOT support date-range filters on metadata queries,
+      // so we fetch all and let the dedup_key prevent re-reporting resolved issues.
+      let searchPage = await stripe.paymentIntents.search({
+        query:  `metadata['vektrum_action']:'deal_funding' AND status:'succeeded'`,
+        limit:  100,
+        expand: [],
+      })
+
+      const processPiPage = (pis: Stripe.PaymentIntent[]) => {
+        for (const pi of pis) {
+          const dId = pi.metadata?.deal_id
+          if (!dId) continue
+          const amtUsd = pi.amount / 100
+          const entry  = confirmedByDeal.get(dId) ?? { totalUsd: 0, piIds: [] }
+          entry.totalUsd += amtUsd
+          entry.piIds.push(pi.id)
+          confirmedByDeal.set(dId, entry)
+        }
+      }
+
+      processPiPage(searchPage.data)
+
+      while (searchPage.has_more && searchPage.next_page) {
+        searchPage = await stripe.paymentIntents.search({
+          query:     `metadata['vektrum_action']:'deal_funding' AND status:'succeeded'`,
+          limit:     100,
+          page:      searchPage.next_page,
+        })
+        processPiPage(searchPage.data)
+      }
+
+      if (confirmedByDeal.size > 0) {
+        const fundingDealIds = [...confirmedByDeal.keys()]
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: fundingDeals } = await (admin as any)
+          .from('deals')
+          .select('id, funded_amount, funds_captured')
+          .in('id', fundingDealIds)
+
+        for (const deal of fundingDeals ?? []) {
+          const stripeData = confirmedByDeal.get(deal.id)
+          if (!stripeData) continue
+
+          const dbFunded      = Number(deal.funded_amount)
+          const stripeConfirmed = stripeData.totalUsd
+          const delta          = dbFunded - stripeConfirmed
+
+          // Tolerance: 1 cent. Floating-point arithmetic at 2 decimal places.
+          if (Math.abs(delta) <= 0.01) continue
+
+          if (delta > 0.01) {
+            // funded_amount is higher than Stripe confirmed — phantom balance
+            issues.push({
+              issueType:      'funding_phantom_balance',
+              severity:       SEVERITY.funding_phantom_balance,
+              dealId:         deal.id,
+              expectedAmount: stripeConfirmed,
+              actualAmount:   dbFunded,
+              description:
+                `Deal ${deal.id}: funded_amount ($${dbFunded.toFixed(2)}) exceeds ` +
+                `sum of bank-confirmed Stripe PaymentIntents ($${stripeConfirmed.toFixed(2)}). ` +
+                `Phantom balance of $${delta.toFixed(2)}. ` +
+                `Confirmed PIs: ${stripeData.piIds.join(', ')}.`,
+              rawEvidence: {
+                deal_id:           deal.id,
+                db_funded_amount:  dbFunded,
+                stripe_confirmed:  stripeConfirmed,
+                delta,
+                payment_intent_ids: stripeData.piIds,
+              },
+              dedupKey:    `funding_phantom_balance:${deal.id}`,
+              autoFixable: false,
+            })
+          } else {
+            // Stripe confirmed more than DB — missed payment_intent.succeeded webhook
+            issues.push({
+              issueType:      'funding_missing_webhook',
+              severity:       SEVERITY.funding_missing_webhook,
+              dealId:         deal.id,
+              expectedAmount: stripeConfirmed,
+              actualAmount:   dbFunded,
+              description:
+                `Deal ${deal.id}: Stripe has confirmed $${stripeConfirmed.toFixed(2)} ` +
+                `across ${stripeData.piIds.length} PaymentIntent(s) but funded_amount ` +
+                `is only $${dbFunded.toFixed(2)}. A payment_intent.succeeded webhook ` +
+                `may have been lost. Missing: $${Math.abs(delta).toFixed(2)}. ` +
+                `PI IDs: ${stripeData.piIds.join(', ')}.`,
+              rawEvidence: {
+                deal_id:           deal.id,
+                db_funded_amount:  dbFunded,
+                stripe_confirmed:  stripeConfirmed,
+                delta:             Math.abs(delta),
+                payment_intent_ids: stripeData.piIds,
+              },
+              dedupKey:    `funding_missing_webhook:${deal.id}`,
+              autoFixable: false,
+            })
+          }
+        }
+
+        // Also flag deals with funds_captured=true that are not in Stripe's confirmed PI list
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: capturedNotInStripe } = await (admin as any)
+          .from('deals')
+          .select('id, funded_amount')
+          .eq('funds_captured', true)
+          .not('id', 'in', `(${fundingDealIds.map(id => `'${id}'`).join(',')})`)
+
+        for (const deal of capturedNotInStripe ?? []) {
+          issues.push({
+            issueType:      'funding_phantom_balance',
+            severity:       SEVERITY.funding_phantom_balance,
+            dealId:         deal.id,
+            expectedAmount: 0,
+            actualAmount:   Number(deal.funded_amount),
+            description:
+              `Deal ${deal.id}: funds_captured=true and funded_amount=$${Number(deal.funded_amount).toFixed(2)} ` +
+              `but no confirmed Stripe PaymentIntent found. ` +
+              `Possible data integrity issue — requires manual investigation.`,
+            rawEvidence: {
+              deal_id:          deal.id,
+              funds_captured:   true,
+              db_funded_amount: Number(deal.funded_amount),
+              stripe_pi_count:  0,
+            },
+            dedupKey:    `funding_phantom_balance:${deal.id}:no_stripe_pi`,
+            autoFixable: false,
+          })
+        }
+
+        dealsChecked += (fundingDeals?.length ?? 0)
+      }
+    } catch (pass5Error) {
+      // Pass 5 failure is non-fatal — the other passes still ran.
+      // Log the error but do not abort the entire run.
+      console.error(
+        '[reconciliation] Pass 5 (funding confirmation) failed — skipped:',
+        pass5Error instanceof Error ? pass5Error.message : String(pass5Error),
+      )
     }
 
     // ── Persist issues (upsert — dedup on dedup_key) ────────────────────────

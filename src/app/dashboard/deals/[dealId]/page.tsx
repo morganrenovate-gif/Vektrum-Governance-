@@ -232,6 +232,10 @@ export default async function DealDetailPage({
             totalAmount={typedDeal.total_amount}
             fundedAmount={typedDeal.funded_amount}
             releasedAmount={typedDeal.released_amount}
+            constructionBudget={typedDeal.construction_budget}
+            governanceFeeBps={typedDeal.governance_fee_bps}
+            governanceFeeTotal={typedDeal.governance_fee_total}
+            facilityTotal={typedDeal.facility_total}
           />
         </CardBody>
       </Card>

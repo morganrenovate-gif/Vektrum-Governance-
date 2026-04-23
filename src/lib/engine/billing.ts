@@ -108,6 +108,57 @@ export function calculateFee(grossAmount: number, billingRateBps: number): FeeBr
   }
 }
 
+// ─── Governance Facility ──────────────────────────────────────────────────────
+//
+// The governance fee model presents the platform fee as a funder-paid oversight
+// layer on top of the construction budget, rather than something deducted from
+// project disbursements. Contractors always receive the full gross milestone amount.
+//
+// facility_total = construction_budget + governance_fee_total
+//
+// This is a DISPLAY model — it does not change how Stripe transfers or billing
+// records work. It gives funders a clear picture of their total commitment.
+
+export interface GovernanceFacility {
+  /** The total contract value committed to contractor disbursements. */
+  constructionBudget:  number
+  /** Governance fee rate applied, in basis points. */
+  governanceFeeBps:    number
+  /** Total governance fee for the full deal: ROUND(budget × bps / 10000, 2). */
+  governanceFeeTotal:  number
+  /** Total funder commitment: constructionBudget + governanceFeeTotal. */
+  facilityTotal:       number
+  /** Human-readable governance fee rate, e.g. "1.00%". */
+  rateLabel:           string
+}
+
+/**
+ * Calculates the governance facility breakdown for a deal.
+ *
+ * Called at deal creation (using the default STANDALONE rate) and again at
+ * funding time (using the funder's actual subscription tier rate). The result
+ * is stored on the deal row so the funder always sees the correct facility size.
+ *
+ * @param constructionBudget - Total contract value (mirrors deal.total_amount).
+ * @param feeBps             - Governance fee rate in basis points (65 | 70 | 100).
+ */
+export function calculateGovernanceFacility(
+  constructionBudget: number,
+  feeBps: BillingRateBps,
+): GovernanceFacility {
+  if (constructionBudget <= 0) {
+    throw new Error(`calculateGovernanceFacility: constructionBudget must be > 0 (received ${constructionBudget})`)
+  }
+  const governanceFeeTotal = Math.round(constructionBudget * feeBps / 10000 * 100) / 100
+  return {
+    constructionBudget,
+    governanceFeeBps:  feeBps,
+    governanceFeeTotal,
+    facilityTotal:     constructionBudget + governanceFeeTotal,
+    rateLabel:         rateLabel(feeBps),
+  }
+}
+
 // ─── Stripe Helpers ───────────────────────────────────────────────────────────
 
 /**

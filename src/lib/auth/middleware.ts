@@ -11,6 +11,17 @@ import type { AuthContext, Profile, UserRole } from '@/lib/types'
  *
  * Throws a 401 NextResponse if no valid session exists.
  * Throws a 401 NextResponse if the profile record cannot be found.
+ *
+ * AUDIT LOG NOTE:
+ * This function does NOT log authentication events. It is called on every
+ * authenticated API request — logging here would produce one 'user_login'
+ * audit entry per request, creating massive noise (hundreds of entries per
+ * session) and adding a DB write to every API call.
+ *
+ * Authentication events are captured at the correct points:
+ *   - Sign-in via email link:  src/app/auth/callback/route.ts (action: 'user_login')
+ *   - Sign-in / password events: src/app/api/auth/webhook/route.ts
+ *     (configure a Supabase Database Webhook on auth.users → POST to /api/auth/webhook)
  */
 export async function getAuthUser(request: NextRequest): Promise<AuthContext> {
   const supabase = createServerClient(

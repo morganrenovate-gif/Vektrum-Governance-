@@ -11,3 +11,4 @@ settings.json{
 tsconfig.tsbuildinfo
 .DS_Store
 .env.local
+tsconfig.tsbuildinfo

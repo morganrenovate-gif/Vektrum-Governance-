@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { logAudit } from '@/lib/engine/audit'
-import { BILLING_RATES } from '@/lib/engine/billing'
+import { BILLING_RATES, calculateGovernanceFacility } from '@/lib/engine/billing'
 
 // ─── Shared types ─────────────────────────────────────────────────────────────
 // These types are the contract between the API route, the upload modal,
@@ -63,6 +63,10 @@ export async function confirmDealFromContract(
       return { success: false, error: 'You must be signed in to create a deal.' }
     }
 
+    // Governance facility at creation — conservative STANDALONE default.
+    // Updated to the funder's actual tier at funding.
+    const governance = calculateGovernanceFacility(input.totalValue, BILLING_RATES.STANDALONE)
+
     const { data: deal, error: dealError } = await supabase
       .from('deals')
       .insert({
@@ -73,7 +77,12 @@ export async function confirmDealFromContract(
         // billing_rate_bps is always set server-side — never from user input.
         // Default to STANDALONE (100 bps). Overwritten at funding time with the
         // funder's actual subscription tier rate.
-        billing_rate_bps: BILLING_RATES.STANDALONE,
+        billing_rate_bps:     BILLING_RATES.STANDALONE,
+        // Governance fee model — funder-facing facility breakdown.
+        construction_budget:  governance.constructionBudget,
+        governance_fee_bps:   governance.governanceFeeBps,
+        governance_fee_total: governance.governanceFeeTotal,
+        facility_total:       governance.facilityTotal,
       })
       .select('id')
       .single()

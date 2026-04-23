@@ -3,12 +3,17 @@ import { formatMoney } from '@/lib/utils'
 interface CapitalSummaryProps {
   totalFunded: number
   totalReleased: number
+  /** Sum of facility_total across all deals with governance fee model data. */
+  totalFacility?: number
+  /** Sum of governance_fee_total across all deals with governance fee model data. */
+  totalGovernanceFees?: number
 }
 
-export function CapitalSummary({ totalFunded, totalReleased }: CapitalSummaryProps) {
+export function CapitalSummary({ totalFunded, totalReleased, totalFacility, totalGovernanceFees }: CapitalSummaryProps) {
   const remaining = Math.max(0, totalFunded - totalReleased)
   const releasedPct = totalFunded > 0 ? (totalReleased / totalFunded) * 100 : 0
   const remainingPct = 100 - releasedPct
+  const hasGovernance = totalFacility != null && totalFacility > 0 && totalGovernanceFees != null
 
   return (
     <div className="rounded-xl border border-white/[0.08] bg-surface-2 shadow-card p-6">
@@ -76,6 +81,31 @@ export function CapitalSummary({ totalFunded, totalReleased }: CapitalSummaryPro
           <span className="text-[11px] text-white/30">Unfunded</span>
         </div>
       </div>
+
+      {/* ── Governance fee summary (shown only for governance-model deals) ────── */}
+      {hasGovernance && (
+        <div className="mt-5 pt-4 border-t border-white/[0.06]">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35 mb-3">
+            Facility Breakdown
+          </p>
+          <div className="flex items-center justify-between">
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <span className="text-[12px] text-white/55">Total Facility Size</span>
+                <span className="text-[13px] font-semibold tabular-nums text-white">
+                  {formatMoney(totalFacility!)}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[12px] text-white/55">Governance Layer</span>
+                <span className="text-[13px] font-medium tabular-nums text-vektrum-amber">
+                  +{formatMoney(totalGovernanceFees!)}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

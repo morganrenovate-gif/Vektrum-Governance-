@@ -30,7 +30,7 @@ export async function GET(
   // ── Verify deal exists and caller has access ──────────────────────────────
   const { data: deal, error: dealError } = await supabase
     .from('deals')
-    .select('id, billing_rate_bps, fees_collected')
+    .select('id, billing_rate_bps, fees_collected, construction_budget, governance_fee_bps, governance_fee_total, facility_total')
     .eq('id', dealId)
     .single()
 
@@ -69,6 +69,13 @@ export async function GET(
   return NextResponse.json({
     deal_id:          dealId,
     billing_rate_bps: deal.billing_rate_bps,
+    // Governance fee model — null for deals created before migration 004
+    governance: deal.construction_budget != null ? {
+      construction_budget:  deal.construction_budget,
+      governance_fee_bps:   deal.governance_fee_bps,
+      governance_fee_total: deal.governance_fee_total,
+      facility_total:       deal.facility_total,
+    } : null,
     records:          records ?? [],
     totals: {
       gross_amount: Math.round(totalGross * 100) / 100,

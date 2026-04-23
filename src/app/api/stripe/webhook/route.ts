@@ -86,6 +86,10 @@ export async function POST(request: NextRequest) {
         await handlePaymentIntentSucceeded(event.data.object as Stripe.PaymentIntent)
         break
 
+      case 'payment_intent.payment_failed':
+        await handlePaymentIntentFailed(event.data.object as Stripe.PaymentIntent)
+        break
+
       case 'transfer.succeeded':
         await handleTransferSucceeded(event.data.object as Stripe.Transfer)
         break
@@ -663,20 +667,33 @@ async function handleTransferFailed(
 }
 
 // ─── Handler: payment_intent.succeeded ───────────────────────────────────────
-// Fired when a funder's PaymentIntent (created by /api/deals/[dealId]/fund) succeeds.
-// Confirms the funded_amount is accurate and transitions deal status if needed.
+// Fired when the funder's bank confirms the payment.
 //
-// Note: The funded_amount is already optimistically updated when the PaymentIntent
-// is created. This handler verifies and reconciles the ledger on confirmed payment.
+// TWO-PHASE FUNDING MODEL — this is Phase 2:
+//   Phase 1 (POST /api/deals/[dealId]/fund): creates the Stripe PaymentIntent,
+//     increments funds_pending_amount, stores stripe_payment_intent_id. Does NOT
+//     touch funded_amount.
+//   Phase 2 (this handler): bank confirmation arrives. We increment funded_amount
+//     by the confirmed amount, decrement funds_pending_amount, set funds_captured,
+//     and transition the deal from 'draft' → 'active'.
+//
+// funded_amount is ONLY ever incremented here — never in the fund API route.
+// This eliminates the phantom-balance bug where funded_amount could reflect
+// a payment that was subsequently declined by the issuing bank.
+//
+// Stripe PaymentIntent shape:
+//   https://stripe.com/docs/api/payment_intents/object
+//   pi.amount   — integer, cents
+//   pi.metadata — set at PI creation: { deal_id, funder_id, vektrum_action }
 
 async function handlePaymentIntentSucceeded(
   paymentIntent: Stripe.PaymentIntent,
 ): Promise<void> {
-  const dealId = paymentIntent.metadata?.deal_id
+  const dealId   = paymentIntent.metadata?.deal_id
   const funderId = paymentIntent.metadata?.funder_id
 
   if (!dealId) {
-    // Not a Vektrum deal funding intent — skip
+    // Not a Vektrum deal-funding PI (could be a Connect payout PI) — skip
     console.log(
       `[webhook] payment_intent.succeeded: No deal_id in metadata for PI ${paymentIntent.id} — skipping`,
     )
@@ -685,9 +702,10 @@ async function handlePaymentIntentSucceeded(
 
   const adminClient = createSupabaseAdminClient()
 
-  const { data: deal, error: dealError } = await adminClient
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: deal, error: dealError } = await (adminClient as any)
     .from('deals')
-    .select('id, funded_amount, total_amount, status')
+    .select('id, funded_amount, funds_pending_amount, total_amount, status')
     .eq('id', dealId)
     .single()
 
@@ -695,58 +713,176 @@ async function handlePaymentIntentSucceeded(
     console.error(
       `[webhook] payment_intent.succeeded: Deal ${dealId} not found for PI ${paymentIntent.id}`,
     )
+    // Throw so Stripe retries — deal should always exist when a PI succeeds
     throw new Error(`Deal ${dealId} not found`)
   }
 
-  const amountInDollars = paymentIntent.amount / 100
+  const confirmedAmountUsd = paymentIntent.amount / 100
 
-  // Ensure deal status reflects funding — it should already be 'active' but confirm
-  const needsActivation = deal.status === 'draft'
+  const newFundedAmount  = deal.funded_amount + confirmedAmountUsd
+  const newPendingAmount = Math.max(0, (deal.funds_pending_amount ?? 0) - confirmedAmountUsd)
+  const newStatus        = deal.status === 'draft' ? 'active' : deal.status
 
-  const updatePayload: Record<string, unknown> = {
-    updated_at: new Date().toISOString(),
-  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error: updateError } = await (adminClient as any)
+    .from('deals')
+    .update({
+      funded_amount:        newFundedAmount,
+      funds_pending_amount: newPendingAmount,
+      funds_captured:       true,
+      status:               newStatus,
+      updated_at:           new Date().toISOString(),
+    })
+    .eq('id', dealId)
 
-  if (needsActivation) {
-    updatePayload.status = 'active'
-  }
-
-  if (Object.keys(updatePayload).length > 1 || needsActivation) {
-    const { error: updateError } = await adminClient
-      .from('deals')
-      .update(updatePayload)
-      .eq('id', dealId)
-
-    if (updateError) {
-      console.error(
-        `[webhook] payment_intent.succeeded: Failed to update deal ${dealId}:`,
-        updateError.message,
-      )
-      throw updateError
-    }
+  if (updateError) {
+    console.error(
+      `[webhook] payment_intent.succeeded: Failed to update deal ${dealId}:`,
+      updateError.message,
+    )
+    throw updateError
   }
 
   await logAudit({
-    entity_type: 'deal',
-    entity_id: dealId,
-    action: 'payment_confirmed',
-    actor_id: funderId ?? 'system',
-    old_values: { status: deal.status, funded_amount: deal.funded_amount },
+    entity_type:   'deal',
+    entity_id:     dealId,
+    action:        'deal_funded_confirmed',
+    actor_id:      funderId ?? null,
+    actor_role:    'system',
+    system_source: 'webhook/stripe',
+    old_values: {
+      funded_amount:        deal.funded_amount,
+      funds_pending_amount: deal.funds_pending_amount ?? 0,
+      status:               deal.status,
+      funds_captured:       false,
+    },
     new_values: {
-      status: needsActivation ? 'active' : deal.status,
-      payment_confirmed: true,
+      funded_amount:        newFundedAmount,
+      funds_pending_amount: newPendingAmount,
+      funds_captured:       true,
+      status:               newStatus,
     },
     metadata: {
       stripe_payment_intent_id: paymentIntent.id,
-      amount_confirmed: amountInDollars,
-      amount_in_cents: paymentIntent.amount,
-      currency: paymentIntent.currency,
+      stripe_event_type:        'payment_intent.succeeded',
+      confirmed_amount_usd:     confirmedAmountUsd,
+      amount_in_cents:          paymentIntent.amount,
+      currency:                 paymentIntent.currency,
     },
   })
 
   console.log(
-    `[webhook] payment_intent.succeeded: Deal ${dealId} — ` +
-      `confirmed $${amountInDollars.toFixed(2)} via PI ${paymentIntent.id}` +
-      (needsActivation ? ' — deal activated' : ''),
+    `[webhook] payment_intent.succeeded: Deal ${dealId} funded — ` +
+      `confirmed $${confirmedAmountUsd.toFixed(2)} via PI ${paymentIntent.id}` +
+      (newStatus !== deal.status ? ` — status: ${deal.status} → ${newStatus}` : ''),
   )
+}
+
+// ─── Handler: payment_intent.payment_failed ──────────────────────────────────
+// Fired when the funder's bank declines the payment.
+//
+// We:
+//   1. Decrement funds_pending_amount (reverting the increment from the fund route)
+//   2. Do NOT touch funded_amount — it was never incremented for this PI
+//   3. Log the failure reason from Stripe's last_payment_error for support/audit
+//
+// The deal remains in 'draft' status. The funder can retry by calling the fund
+// route again, which will detect the existing PI is now 'canceled' and create a new one.
+//
+// last_payment_error shape:
+//   https://stripe.com/docs/api/payment_intents/object#payment_intent_object-last_payment_error
+//   .code         — machine-readable: 'card_declined', 'insufficient_funds', etc.
+//   .decline_code — issuer reason: 'do_not_honor', 'insufficient_funds', etc.
+//   .message      — human-readable description
+
+async function handlePaymentIntentFailed(
+  paymentIntent: Stripe.PaymentIntent,
+): Promise<void> {
+  const dealId   = paymentIntent.metadata?.deal_id
+  const funderId = paymentIntent.metadata?.funder_id
+
+  if (!dealId) {
+    console.warn('[webhook] payment_intent.payment_failed: no deal_id in metadata', {
+      payment_intent_id: paymentIntent.id,
+    })
+    return
+  }
+
+  const adminClient = createSupabaseAdminClient()
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: deal, error: dealError } = await (adminClient as any)
+    .from('deals')
+    .select('id, funds_pending_amount')
+    .eq('id', dealId)
+    .single()
+
+  if (dealError || !deal) {
+    console.error('[webhook] payment_intent.payment_failed: deal not found', {
+      deal_id:           dealId,
+      payment_intent_id: paymentIntent.id,
+      error:             dealError?.message,
+    })
+    // Do not throw — a missing deal on payment failure is not recoverable via retry
+    return
+  }
+
+  const failedAmountUsd  = paymentIntent.amount / 100
+  const newPendingAmount = Math.max(0, (deal.funds_pending_amount ?? 0) - failedAmountUsd)
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error: updateError } = await (adminClient as any)
+    .from('deals')
+    .update({
+      funds_pending_amount: newPendingAmount,
+      updated_at:           new Date().toISOString(),
+    })
+    .eq('id', dealId)
+
+  if (updateError) {
+    console.error('[webhook] payment_intent.payment_failed: deal update failed', {
+      deal_id:           dealId,
+      payment_intent_id: paymentIntent.id,
+      error:             updateError.message,
+    })
+    throw updateError
+  }
+
+  // Extract Stripe failure details
+  // https://stripe.com/docs/api/payment_intents/object#payment_intent_object-last_payment_error
+  const lastError     = paymentIntent.last_payment_error
+  const failureCode   = lastError?.code         ?? 'unknown'
+  const failureReason = lastError?.message      ?? 'Payment declined by issuing bank'
+  const declineCode   = lastError?.decline_code ?? null
+
+  await logAudit({
+    entity_type:   'deal',
+    entity_id:     dealId,
+    action:        'deal_funding_failed',
+    actor_id:      funderId ?? null,
+    actor_role:    'system',
+    system_source: 'webhook/stripe',
+    old_values: {
+      funds_pending_amount: deal.funds_pending_amount ?? 0,
+    },
+    new_values: {
+      funds_pending_amount: newPendingAmount,
+    },
+    metadata: {
+      stripe_payment_intent_id: paymentIntent.id,
+      stripe_event_type:        'payment_intent.payment_failed',
+      failed_amount_usd:        failedAmountUsd,
+      failure_code:             failureCode,
+      failure_reason:           failureReason,
+      decline_code:             declineCode,
+      note: 'funded_amount was NOT decremented — it was never incremented for this payment intent',
+    },
+  })
+
+  console.warn('[webhook] payment_intent.payment_failed: payment declined', {
+    deal_id:        dealId,
+    failed_amount:  failedAmountUsd,
+    failure_code:   failureCode,
+    failure_reason: failureReason,
+  })
 }

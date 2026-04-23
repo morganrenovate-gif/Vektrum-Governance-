@@ -98,6 +98,9 @@ export default async function DashboardPage() {
 
   const totalFunded = deals.reduce((s, d) => s + d.funded_amount, 0)
   const totalReleased = deals.reduce((s, d) => s + d.released_amount, 0)
+  // Governance fee totals — only from deals that have governance model data
+  const totalFacility = deals.reduce((s, d) => s + (d.facility_total ?? 0), 0)
+  const totalGovernanceFees = deals.reduce((s, d) => s + (d.governance_fee_total ?? 0), 0)
   const pendingMilestones = deals
     .flatMap((d) => d.milestones ?? [])
     .filter((m) => m.status === 'ready_for_review').length
@@ -311,7 +314,12 @@ export default async function DashboardPage() {
             <IntelBriefing />
 
             {/* Capital Summary */}
-            <CapitalSummary totalFunded={totalFunded} totalReleased={totalReleased} />
+            <CapitalSummary
+              totalFunded={totalFunded}
+              totalReleased={totalReleased}
+              totalFacility={totalFacility > 0 ? totalFacility : undefined}
+              totalGovernanceFees={totalGovernanceFees > 0 ? totalGovernanceFees : undefined}
+            />
 
             {/* Portfolio Risk Chart */}
             <PortfolioRiskChart deals={deals} />

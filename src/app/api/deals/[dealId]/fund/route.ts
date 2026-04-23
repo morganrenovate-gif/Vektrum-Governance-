@@ -3,22 +3,36 @@ import { createClient } from '@/lib/supabase/server'
 import { getAuthUser, requireRole, requireDealAccess } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
 import { stripe } from '@/lib/stripe'
-import { billingRateFromTier, type SubscriptionTier } from '@/lib/engine/billing'
-import { errorResponse, internalError, notFoundError, validationError } from '@/lib/errors'
+import { billingRateFromTier, calculateGovernanceFacility, type SubscriptionTier } from '@/lib/engine/billing'
+import { errorResponse, internalError, notFoundError } from '@/lib/errors'
 
 export const dynamic = 'force-dynamic'
 
 
 
 // ─── POST /api/deals/[dealId]/fund ────────────────────────────────────────────
-// Fund a deal (funder only).
+// Initiate funding for a deal (funder only).
 //
-// Calculates the remaining amount to fund server-side
-// (total_amount - funded_amount) to prevent client-side manipulation.
-// Creates a Stripe PaymentIntent for the remaining amount, updates
-// funded_amount, and transitions the deal to 'active' if it was in 'draft'.
+// IMPORTANT — two-phase funding model:
+//   Phase 1 (this route):   Create a Stripe PaymentIntent. Increment
+//                           funds_pending_amount. Store stripe_payment_intent_id
+//                           on the deal. Do NOT touch funded_amount.
 //
-// Body: {} (no required fields — amount is always computed server-side)
+//   Phase 2 (webhook):      payment_intent.succeeded increments funded_amount,
+//                           decrements funds_pending_amount, and sets
+//                           funds_captured = true. Only then is the deal
+//                           considered funded.
+//
+// This separation ensures funded_amount only ever reflects bank-confirmed money,
+// eliminating the phantom-balance bug where PI creation preceded bank confirmation.
+//
+// IDEMPOTENCY:
+//   If stripe_payment_intent_id is already set on the deal and that PI is still
+//   in a pending Stripe state, the existing client_secret is returned rather than
+//   creating a duplicate charge. A new PI is only created when:
+//     - No existing PI is on the deal, OR
+//     - The existing PI has succeeded (funded_amount already updated by webhook), OR
+//     - The existing PI was cancelled or expired.
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ dealId: string }> }) {
   const { dealId } = await params
@@ -48,9 +62,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
 
   // ── Fetch Deal ──────────────────────────────────────────────────────────────
-  const { data: deal, error: dealError } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: deal, error: dealError } = await (supabase as any)
     .from('deals')
-    .select('id, total_amount, funded_amount, released_amount, status, funder_id')
+    .select('id, total_amount, funded_amount, released_amount, status, funder_id, stripe_payment_intent_id, funds_pending_amount')
     .eq('id', dealId)
     .single()
 
@@ -65,11 +80,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   // billing_rate_bps is always set server-side from the funder's subscription_tier.
   // It is locked in at first funding so that the rate is immutable for the life of
   // the deal — subsequent top-ups do not change it, and user input is never accepted.
-  //
-  // Funding is restricted to funders and admins (requireRole above), so user.id
-  // here is always the funder unless an admin is acting on their behalf — in the
-  // admin case, the admin's own tier is used, which is acceptable (admins are
-  // typically on an enterprise or institutional plan).
   const { data: funderProfile, error: profileError } = await supabase
     .from('profiles')
     .select('subscription_tier')
@@ -87,13 +97,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     (funderProfile.subscription_tier ?? 'standalone') as SubscriptionTier,
   )
 
+  // Compute the governance facility with the funder's actual tier rate.
+  // This supersedes the STANDALONE default set at deal creation.
+  const governance = calculateGovernanceFacility(deal.total_amount, billingRateBps)
+
   // ── Contract Gate: signed contract required before funding ─────────────────
-  //
-  // A deal cannot receive funding without a fully-executed contract.
-  // Both parties must have signed via DocuSign before escrow is opened.
-  //
-  // This query intentionally uses the user-scoped client (not admin) so that
-  // RLS confirms the caller is a deal participant.
   const { data: contract, error: contractLookupError } = await supabase
     .from('contracts')
     .select('status')
@@ -151,7 +159,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
 
   // ── Calculate Remaining Amount ──────────────────────────────────────────────
-  // Always computed server-side — never trust a client-provided amount
+  // Always computed server-side — never trust a client-provided amount.
+  // funded_amount reflects only confirmed payments (updated by webhook), so
+  // this correctly represents the true unfunded balance.
   const remainingToFund = deal.total_amount - deal.funded_amount
 
   if (remainingToFund <= 0) {
@@ -162,7 +172,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     )
   }
 
-  // Stripe amounts are in cents (integer)
   const amountInCents = Math.round(remainingToFund * 100)
 
   if (amountInCents < 50) {
@@ -173,9 +182,84 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     )
   }
 
+  // ── Idempotency Check: return existing pending PaymentIntent if present ─────
+  //
+  // If a PaymentIntent was already created for this deal and is still in a
+  // payment-pending state, return it rather than creating a duplicate charge.
+  // This handles the case where the funder's browser closed mid-checkout.
+  //
+  // Stripe PI lifecycle states that indicate payment is still in flight:
+  //   requires_payment_method — awaiting card/bank entry
+  //   requires_confirmation   — created but not yet confirmed
+  //   requires_action         — 3DS / bank redirect in progress
+  //   processing              — submitted to network, awaiting result
+  const PENDING_PI_STATUSES = new Set([
+    'requires_payment_method',
+    'requires_confirmation',
+    'requires_action',
+    'processing',
+  ])
+
+  if (deal.stripe_payment_intent_id) {
+    let existingIntent
+    try {
+      existingIntent = await stripe.paymentIntents.retrieve(deal.stripe_payment_intent_id)
+    } catch (err) {
+      // If Stripe can't find the PI (deleted/expired), proceed to create a new one
+      console.warn(
+        `[fund] Could not retrieve PI ${deal.stripe_payment_intent_id} from Stripe — will create new:`,
+        err instanceof Error ? err.message : String(err),
+      )
+    }
+
+    if (existingIntent) {
+      if (PENDING_PI_STATUSES.has(existingIntent.status)) {
+        // In-flight PI: return existing client_secret — do not create a duplicate
+        return NextResponse.json({
+          deal,
+          payment_intent: {
+            id:              existingIntent.id,
+            client_secret:   existingIntent.client_secret,
+            amount:          remainingToFund,
+            amount_in_cents: amountInCents,
+            status:          existingIntent.status,
+          },
+          reused: true,
+        })
+      }
+
+      if (existingIntent.status === 'succeeded') {
+        // PI succeeded but webhook hasn't fired yet (or there's a race).
+        // Return a conflict — the webhook will update funded_amount shortly.
+        return NextResponse.json(
+          {
+            error: 'Payment already confirmed.',
+            detail: 'Your Stripe payment was accepted. The deal balance will update within seconds ' +
+              'once the confirmation webhook is processed.',
+            stripe_payment_intent_id: existingIntent.id,
+          },
+          { status: 409 },
+        )
+      }
+
+      // PI is canceled or expired — clear it from the deal so we can create a new one
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase as any)
+        .from('deals')
+        .update({
+          stripe_payment_intent_id: null,
+          funds_pending_amount:     0,
+          updated_at:               new Date().toISOString(),
+        })
+        .eq('id', dealId)
+    }
+  }
+
   // ── Create Stripe PaymentIntent ─────────────────────────────────────────────
-  // Stable idempotency key prevents duplicate charges on retries
-  const idempotencyKey = `fund-${dealId}`
+  // Idempotency key scoped to deal + amount so that network-level retries for
+  // the same amount don't create duplicate PIs, while a new amount (partial
+  // top-up after confirmed payment) correctly creates a fresh intent.
+  const idempotencyKey = `fund-${dealId}-${amountInCents}`
   let paymentIntent
 
   try {
@@ -202,28 +286,36 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     )
   }
 
-  // ── Update Deal ─────────────────────────────────────────────────────────────
-  const newFundedAmount = deal.funded_amount + remainingToFund
-  const newStatus = deal.status === 'draft' ? 'active' : deal.status
-  const oldValues = {
-    funded_amount: deal.funded_amount,
-    status: deal.status,
-  }
+  // ── Update Deal (pending state only — funded_amount is NOT touched) ─────────
+  //
+  // Transition:
+  //   funds_pending_amount += remainingToFund   (in-flight uncommitted money)
+  //   stripe_payment_intent_id = paymentIntent.id
+  //   funded_amount            = UNCHANGED       ← only updated by webhook
+  //   status                   = UNCHANGED       ← only set to 'active' by webhook
+  //
+  // Governance fields and billing_rate_bps are locked in here so the funder's
+  // tier is captured at the moment they committed to funding, not at webhook time.
+  const newPendingAmount = (deal.funds_pending_amount ?? 0) + remainingToFund
 
-  const { data: updatedDeal, error: updateError } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: updatedDeal, error: updateError } = await (supabase as any)
     .from('deals')
     .update({
-      funded_amount:    newFundedAmount,
-      status:           newStatus,
-      funder_id:        deal.funder_id ?? user.id,
-      // Lock in the funder's billing rate — always derived from their subscription_tier,
-      // never from user input. Written on every funding call so that if the funder's
-      // tier was upgraded between deal creation and first funding, they receive the
-      // correct rate. After the first milestone release the rate is effectively immutable
-      // (changing it would invalidate the billing_records_fee_accurate constraint on
-      // any new release that used the old rate in its billing record).
-      billing_rate_bps: billingRateBps,
-      updated_at:       new Date().toISOString(),
+      // ── Pending funding state (two-phase model) ──────────────────────────
+      funds_pending_amount:     newPendingAmount,
+      stripe_payment_intent_id: paymentIntent.id,
+      // ── Funder assignment ────────────────────────────────────────────────
+      funder_id:                deal.funder_id ?? user.id,
+      // ── Billing rate — locked in at funding initiation ───────────────────
+      // Written here so that the rate reflects the funder's tier at the time
+      // they committed. The webhook uses whatever is already on the deal.
+      billing_rate_bps:         billingRateBps,
+      construction_budget:      governance.constructionBudget,
+      governance_fee_bps:       governance.governanceFeeBps,
+      governance_fee_total:     governance.governanceFeeTotal,
+      facility_total:           governance.facilityTotal,
+      updated_at:               new Date().toISOString(),
     })
     .eq('id', dealId)
     .select()
@@ -238,33 +330,44 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
 
   await logAudit({
-    entity_type: 'deal',
-    entity_id: dealId,
-    action: 'deal_funded',
-    actor_id: user.id,
-    old_values: oldValues,
+    entity_type:   'deal',
+    entity_id:     dealId,
+    action:        'deal_funding_initiated',
+    actor_id:      user.id,
+    system_source: 'api/deals/fund',
+    old_values: {
+      funded_amount:        deal.funded_amount,
+      funds_pending_amount: deal.funds_pending_amount ?? 0,
+      status:               deal.status,
+    },
     new_values: {
-      funded_amount:    newFundedAmount,
-      status:           newStatus,
-      billing_rate_bps: billingRateBps,
-      remaining_to_fund: remainingToFund,
+      funds_pending_amount:     newPendingAmount,
+      stripe_payment_intent_id: paymentIntent.id,
+      billing_rate_bps:         billingRateBps,
+      remaining_to_fund:        remainingToFund,
+      construction_budget:      governance.constructionBudget,
+      governance_fee_bps:       governance.governanceFeeBps,
+      governance_fee_total:     governance.governanceFeeTotal,
+      facility_total:           governance.facilityTotal,
     },
     metadata: {
-      stripe_payment_intent_id:  paymentIntent.id,
-      stripe_client_secret:      paymentIntent.client_secret,
-      amount_in_cents:           amountInCents,
-      funder_subscription_tier:  funderProfile.subscription_tier,
+      stripe_payment_intent_id: paymentIntent.id,
+      stripe_client_secret:     paymentIntent.client_secret,
+      amount_in_cents:          amountInCents,
+      funder_subscription_tier: funderProfile.subscription_tier,
+      note: 'funded_amount will be incremented by payment_intent.succeeded webhook, not here',
     },
   })
 
   return NextResponse.json({
-    deal: updatedDeal,
+    deal:    updatedDeal,
     payment_intent: {
-      id: paymentIntent.id,
-      client_secret: paymentIntent.client_secret,
-      amount: remainingToFund,
+      id:              paymentIntent.id,
+      client_secret:   paymentIntent.client_secret,
+      amount:          remainingToFund,
       amount_in_cents: amountInCents,
-      status: paymentIntent.status,
+      status:          paymentIntent.status,
     },
+    reused: false,
   })
 }

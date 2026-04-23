@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getAuthUser, requireRole } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
-import { BILLING_RATES } from '@/lib/engine/billing'
+import { BILLING_RATES, calculateGovernanceFacility } from '@/lib/engine/billing'
 import {
   errorResponse,
   forbiddenError,
@@ -144,6 +144,10 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
 
+    // Compute the governance facility at creation using the conservative
+    // STANDALONE default rate. Updated to the funder's actual tier at funding.
+    const governance = calculateGovernanceFacility(body.total_amount!, BILLING_RATES.STANDALONE)
+
     const insertPayload = {
       contractor_id:    user.id,
       title:            body.title!.trim(),
@@ -154,8 +158,14 @@ export async function POST(request: NextRequest) {
       // billing_rate_bps is always set server-side — never from user input.
       // Default to STANDALONE (100 bps). Overwritten at funding time with the
       // funder's actual subscription tier rate.
-      billing_rate_bps: BILLING_RATES.STANDALONE,
-      status:           'draft',
+      billing_rate_bps:  BILLING_RATES.STANDALONE,
+      status:            'draft',
+      // Governance fee model fields — provide the funder with a clear picture of
+      // their total facility commitment (construction budget + governance layer).
+      construction_budget:  governance.constructionBudget,
+      governance_fee_bps:   governance.governanceFeeBps,
+      governance_fee_total: governance.governanceFeeTotal,
+      facility_total:       governance.facilityTotal,
       ...(body.funder_id && { funder_id: body.funder_id }),
     }
 
@@ -180,10 +190,14 @@ export async function POST(request: NextRequest) {
       actor_role: profile.role,
       old_values: null,
       new_values: {
-        title: deal.title,
-        total_amount: deal.total_amount,
-        status: deal.status,
-        contractor_id: deal.contractor_id,
+        title:                deal.title,
+        total_amount:         deal.total_amount,
+        status:               deal.status,
+        contractor_id:        deal.contractor_id,
+        construction_budget:  governance.constructionBudget,
+        governance_fee_bps:   governance.governanceFeeBps,
+        governance_fee_total: governance.governanceFeeTotal,
+        facility_total:       governance.facilityTotal,
       },
     })
 

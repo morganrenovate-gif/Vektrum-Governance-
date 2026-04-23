@@ -152,6 +152,127 @@ export async function logAudit(params: AuditParams): Promise<void> {
   }
 }
 
+// ─── Audit Chain Verification ────────────────────────────────────────────────
+
+/**
+ * A single row's chain verification result.
+ */
+export interface AuditChainRow {
+  auditId:            string
+  eventSequence:      number
+  rowHashValid:       boolean
+  chainHashValid:     boolean
+  storedRowHash:      string
+  computedRowHash:    string
+  storedChainHash:    string
+  expectedChainHash:  string
+}
+
+/**
+ * Overall result of a chain verification pass.
+ */
+export interface AuditChainVerification {
+  /** True only when every checked row has both row_hash_valid and chain_hash_valid. */
+  valid:              boolean
+  checkedCount:       number
+  invalidCount:       number
+  /** All rows with row_hash_valid = false or chain_hash_valid = false. */
+  brokenRows:         AuditChainRow[]
+  /** All rows checked. Only populated when includeAll = true. */
+  allRows?:           AuditChainRow[]
+  error?:             string
+}
+
+/**
+ * Verifies the cryptographic hash chain for all hashed audit_log rows for a
+ * given entity (deal, milestone, etc.).
+ *
+ * Calls the Postgres verify_audit_chain() function (added in migration
+ * 20260424000004) which re-computes SHA-256 hashes server-side and compares
+ * against stored values. This avoids JavaScript/PostgreSQL JSONB serialization
+ * mismatches — the hashes are always verified in the same environment they were
+ * created.
+ *
+ * Only rows with row_hash IS NOT NULL are checked (pre-migration rows are
+ * excluded). A chain with zero hashed rows returns valid = true with
+ * checkedCount = 0.
+ *
+ * @param entityType   The entity_type to filter by (e.g., 'deal', 'milestone')
+ * @param entityId     The entity UUID
+ * @param includeAll   If true, all rows are included in the result (not just broken)
+ */
+export async function verifyAuditChain(
+  entityType: string,
+  entityId:   string,
+  includeAll  = false,
+): Promise<AuditChainVerification> {
+  try {
+    const adminClient = createSupabaseAdminClient()
+
+    const { data: rows, error } = await adminClient.rpc(
+      'verify_audit_chain',
+      { p_entity_type: entityType, p_entity_id: entityId },
+    )
+
+    if (error) {
+      console.error('[audit] verifyAuditChain RPC failed:', {
+        entityType,
+        entityId,
+        error: error.message,
+      })
+      return {
+        valid:         false,
+        checkedCount:  0,
+        invalidCount:  0,
+        brokenRows:    [],
+        error:         error.message,
+      }
+    }
+
+    const typedRows: AuditChainRow[] = (rows ?? []).map(
+      (r: {
+        audit_id: string
+        event_seq: number
+        row_hash_valid: boolean
+        chain_hash_valid: boolean
+        stored_row_hash: string
+        computed_row_hash: string
+        stored_chain_hash: string
+        expected_chain_hash: string
+      }) => ({
+        auditId:           r.audit_id,
+        eventSequence:     r.event_seq,
+        rowHashValid:      r.row_hash_valid,
+        chainHashValid:    r.chain_hash_valid,
+        storedRowHash:     r.stored_row_hash,
+        computedRowHash:   r.computed_row_hash,
+        storedChainHash:   r.stored_chain_hash,
+        expectedChainHash: r.expected_chain_hash,
+      }),
+    )
+
+    const brokenRows = typedRows.filter(r => !r.rowHashValid || !r.chainHashValid)
+
+    return {
+      valid:        brokenRows.length === 0,
+      checkedCount: typedRows.length,
+      invalidCount: brokenRows.length,
+      brokenRows,
+      allRows:      includeAll ? typedRows : undefined,
+    }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    console.error('[audit] verifyAuditChain unexpected error:', { entityType, entityId, error: message })
+    return {
+      valid:        false,
+      checkedCount: 0,
+      invalidCount: 0,
+      brokenRows:   [],
+      error:        message,
+    }
+  }
+}
+
 // ─── UTC Timestamp Formatter ──────────────────────────────────────────────────
 
 /**

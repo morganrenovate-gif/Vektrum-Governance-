@@ -80,10 +80,51 @@ export interface Deal {
   fees_collected: number;
   /** Vektrum platform fee rate in basis points. 100 = 1.00%, 70 = 0.70%, 65 = 0.65%. */
   billing_rate_bps: number;
+  /** In-flight reserved amount — funds committed to a release but not yet settled. */
+  reserved_amount?: number;
   status: DealStatus;
   contractor_id: string;
   funder_id: string | null;
   stripe_payment_intent_id: string | null;
+  /**
+   * Amount committed by an active Stripe PaymentIntent that has not yet been
+   * confirmed by the funder's bank. Incremented by POST /fund at PI creation;
+   * decremented on payment_intent.succeeded or payment_intent.payment_failed.
+   * Never negative. NOT a substitute for funded_amount.
+   */
+  funds_pending_amount: number;
+  /**
+   * True once a payment_intent.succeeded webhook has been processed for this
+   * deal. funded_amount is only incremented via the webhook — never in the
+   * fund API route. Used by the reconcile pass to identify deals that should
+   * have confirmed Stripe PaymentIntent records.
+   */
+  funds_captured: boolean;
+
+  // ── Governance fee model (null on deals created before migration 004) ────────
+  /**
+   * Total contract value committed to contractor disbursements.
+   * Mirrors total_amount. Null on legacy deals.
+   */
+  construction_budget?: number | null;
+  /**
+   * Governance fee rate in basis points applied to this deal.
+   * Mirrors billing_rate_bps under governance model terminology.
+   * Null on legacy deals.
+   */
+  governance_fee_bps?: number | null;
+  /**
+   * Total governance fee for the full deal life.
+   * ROUND(construction_budget × governance_fee_bps / 10000, 2).
+   * Null on legacy deals.
+   */
+  governance_fee_total?: number | null;
+  /**
+   * Total funder funding facility: construction_budget + governance_fee_total.
+   * Null on legacy deals.
+   */
+  facility_total?: number | null;
+
   created_at: string;
   updated_at: string;
   // Joined
@@ -154,6 +195,20 @@ export interface AuditLog {
   actor?: { full_name: string | null; role?: string | null } | null;
   /** Populated by join on entity_id for system-triggered events (e.g. signups) */
   entity_profile?: { full_name: string | null; role?: string | null } | null;
+
+  // ── Cryptographic integrity (migration 20260424000004) ─────────────────────
+  /**
+   * SHA-256 hex digest of the row's key fields, computed by the
+   * trg_audit_log_hash BEFORE INSERT trigger. NULL for pre-migration rows.
+   * Proves the row content has not changed since insertion.
+   */
+  row_hash: string | null;
+  /**
+   * SHA-256 of (row_hash || previous row's chain_hash), ordered by
+   * event_sequence. Detects retroactive insertion or deletion.
+   * NULL for pre-migration rows.
+   */
+  chain_hash: string | null;
 }
 
 // ─── Auth types ──────────────────────────────────────────────────────────────

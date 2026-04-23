@@ -1,10 +1,17 @@
 import { cn } from "@/lib/utils";
 import { Money } from "@/components/ui/money";
+import { formatMoney } from "@/lib/utils";
+import { rateLabel } from "@/lib/engine/billing";
 
 interface MoneySummaryProps {
   totalAmount: number;
   fundedAmount: number;
   releasedAmount: number;
+  // ── Governance fee model (null / undefined on legacy deals) ──────────────
+  constructionBudget?: number | null;
+  governanceFeeBps?: number | null;
+  governanceFeeTotal?: number | null;
+  facilityTotal?: number | null;
   className?: string;
 }
 
@@ -12,11 +19,23 @@ export function MoneySummary({
   totalAmount,
   fundedAmount,
   releasedAmount,
+  constructionBudget,
+  governanceFeeBps,
+  governanceFeeTotal,
+  facilityTotal,
   className,
 }: MoneySummaryProps) {
   const remaining = Math.max(0, totalAmount - releasedAmount);
   const fundedPct = totalAmount > 0 ? (fundedAmount / totalAmount) * 100 : 0;
   const releasedPct = totalAmount > 0 ? (releasedAmount / totalAmount) * 100 : 0;
+
+  // Governance breakdown is shown only when all four fields are present and positive
+  const hasGovernance =
+    constructionBudget != null &&
+    constructionBudget > 0 &&
+    governanceFeeBps != null &&
+    governanceFeeTotal != null &&
+    facilityTotal != null;
 
   return (
     <div className={cn("space-y-4", className)}>
@@ -57,6 +76,68 @@ export function MoneySummary({
           </span>
         </div>
       </div>
+
+      {/* ── Governance Fee Breakdown ──────────────────────────────────────────
+          Rendered only for deals created under the governance model (migration 004+).
+          Shows the funder the full facility structure:
+            Construction Budget   (project value / contractor disbursements)
+          + Governance Layer      (Vektrum oversight fee)
+          = Total Facility Size
+      */}
+      {hasGovernance && (
+        <div className="mt-1 rounded-lg border border-white/[0.08] bg-white/[0.02] divide-y divide-white/[0.06]">
+          {/* Header */}
+          <div className="px-4 py-2.5 flex items-center gap-2">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/40">
+              Facility Structure
+            </span>
+          </div>
+
+          {/* Construction Budget row */}
+          <div className="px-4 py-3 flex items-center justify-between">
+            <div>
+              <p className="text-[13px] font-medium text-white/80">Construction Budget</p>
+              <p className="text-[11px] text-white/40 mt-0.5">
+                Total contract value — disbursed to contractor
+              </p>
+            </div>
+            <span className="text-[14px] font-semibold tabular-nums text-white">
+              {formatMoney(constructionBudget!)}
+            </span>
+          </div>
+
+          {/* Governance Layer row */}
+          <div className="px-4 py-3 flex items-center justify-between">
+            <div>
+              <p className="text-[13px] font-medium text-white/80">
+                Governance Layer
+                <span className="ml-2 text-[11px] font-normal text-white/40">
+                  {rateLabel(governanceFeeBps!)}
+                </span>
+              </p>
+              <p className="text-[11px] text-white/40 mt-0.5">
+                Vektrum oversight & compliance fee
+              </p>
+            </div>
+            <span className="text-[14px] font-semibold tabular-nums text-vektrum-amber">
+              +{formatMoney(governanceFeeTotal!)}
+            </span>
+          </div>
+
+          {/* Total Facility row */}
+          <div className="px-4 py-3 flex items-center justify-between bg-white/[0.02] rounded-b-lg">
+            <div>
+              <p className="text-[13px] font-semibold text-white">Total Facility Size</p>
+              <p className="text-[11px] text-white/40 mt-0.5">
+                Full funder commitment including governance
+              </p>
+            </div>
+            <span className="text-[15px] font-bold tabular-nums text-vektrum-blue">
+              {formatMoney(facilityTotal!)}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

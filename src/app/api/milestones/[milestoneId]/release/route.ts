@@ -338,6 +338,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         fee_amount:         fee.feeAmount,
         net_amount:         fee.netAmount,
         stripe_transfer_id: stripeTransferId,
+        // Tag this record as governance-model so reporting can distinguish it
+        // from legacy records created before migration 004.
+        billing_source:     'governance_layer',
       })
 
     if (billingInsertError) {
