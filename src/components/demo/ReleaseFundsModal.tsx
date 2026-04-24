@@ -115,7 +115,7 @@ export function ReleaseFundsModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="text-white/35 hover:text-white/60 transition-colors rounded-lg p-1"
+                className="text-white/65 hover:text-white transition-colors rounded-lg p-1"
                 aria-label="Close"
               >
                 <X size={20} />
@@ -318,7 +318,7 @@ export function ReleaseFundsModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="text-white/35 hover:text-white/60 transition-colors rounded-lg p-1"
+                className="text-white/65 hover:text-white transition-colors rounded-lg p-1"
                 aria-label="Close"
               >
                 <X size={20} />

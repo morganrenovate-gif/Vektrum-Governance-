@@ -66,7 +66,7 @@ export function AiReviewModal({ open, onClose, milestoneContext }: AiReviewModal
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-lg font-semibold text-white">AI Draw Review</h2>
-          <button type="button" onClick={onClose} className="text-white/35 hover:text-white/60 transition-colors">
+          <button type="button" onClick={onClose} className="text-white/65 hover:text-white transition-colors">
             <X size={20} />
           </button>
         </div>
@@ -142,7 +142,7 @@ export function AiReviewModal({ open, onClose, milestoneContext }: AiReviewModal
             <button
               type="button"
               onClick={onClose}
-              className="w-full rounded-lg border border-white/[0.12] bg-surface-3 px-4 py-2 text-sm font-medium text-white/60 hover:bg-white/[0.06] transition-colors"
+              className="w-full rounded-lg border border-white/[0.14] bg-white/[0.06] px-4 py-2 text-sm font-medium text-white/80 hover:bg-white/[0.10] hover:text-white transition-colors"
             >
               Close
             </button>

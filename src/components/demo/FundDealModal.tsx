@@ -35,7 +35,7 @@ export function FundDealModal({ open, onConfirm, onClose }: FundDealModalProps) 
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-lg font-semibold text-white">Fund New Deal</h2>
-          <button type="button" onClick={onClose} className="text-white/35 hover:text-white/60 transition-colors">
+          <button type="button" onClick={onClose} className="text-white/65 hover:text-white transition-colors">
             <X size={20} />
           </button>
         </div>
