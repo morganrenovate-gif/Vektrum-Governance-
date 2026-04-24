@@ -17,12 +17,13 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import {
   Activity, AlertTriangle, ArrowLeft, Bell,
-  CheckCircle2, DollarSign, Search, ShieldAlert, Wifi, Zap,
+  CheckCircle2, DollarSign, Search, ShieldAlert, ShieldCheck, Wifi, Zap,
 } from 'lucide-react'
 import { ReleaseHealthPanel }  from '@/components/admin/ops/ReleaseHealthPanel'
 import { WebhookHealthPanel }  from '@/components/admin/ops/WebhookHealthPanel'
 import { AlertsFeed }          from '@/components/admin/ops/AlertsFeed'
 import { OpsSearch }           from '@/components/admin/ops/OpsSearch'
+import { AdminAuditLogPanel }  from '@/components/admin/ops/AdminAuditLogPanel'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
@@ -81,12 +82,37 @@ export default async function OpsPage() {
     { count: openDisputeCount },
     { count: payoutFailedCount },
     { count: stuckApprovedCount },
+    adminAuditResult,
+    unreviewedResult,
   ] = await Promise.all([
     adminClient.from('disputes').select('id', { count: 'exact', head: true }).eq('status', 'open'),
     adminClient.from('milestones').select('id', { count: 'exact', head: true }).eq('status', 'payout_failed'),
     adminClient.from('milestones').select('id', { count: 'exact', head: true }).eq('status', 'approved')
       .lt('approved_at', new Date(Date.now() - 4 * 3_600_000).toISOString()),
+    // Admin audit log: last 20 entries for initial render
+    adminClient
+      .from('admin_audit_log')
+      .select(
+        `id, event_sequence, entity_type, entity_id, action,
+         actor_id, actor_role, actor_name, actor_email,
+         system_source, ip_address, created_at,
+         admin_justification, authorization_reference,
+         reviewed_by, reviewed_at,
+         old_values, new_values, metadata`,
+        { count: 'exact' },
+      )
+      .order('created_at', { ascending: false })
+      .range(0, 19),
+    // Count of unreviewed entries for the badge
+    adminClient
+      .from('admin_audit_log')
+      .select('id', { count: 'exact', head: true })
+      .is('reviewed_by', null),
   ])
+
+  const adminAuditEntries = adminAuditResult.data ?? []
+  const adminAuditTotal   = adminAuditResult.count  ?? 0
+  const unreviewedTotal   = unreviewedResult.count  ?? 0
 
   const alertCount    = (alerts?.total as number | undefined) ?? 0
   const criticalCount = (alerts?.critical_count as number | undefined) ?? 0
@@ -222,6 +248,26 @@ export default async function OpsPage() {
           )}
         </section>
 
+        {/* ── Admin audit log ─────────────────────────────────────── */}
+        <section id="admin-audit-log">
+          <SectionHeader
+            icon={ShieldCheck}
+            title="Admin Audit Log"
+            description="All admin-privileged write actions — requires four-eyes review"
+            badge={unreviewedTotal > 0
+              ? { text: `${unreviewedTotal} unreviewed`, variant: 'warn' }
+              : { text: 'All reviewed', variant: 'ok' }
+            }
+          />
+          <AdminAuditLogPanel
+            initialData={{
+              entries:          adminAuditEntries,
+              total:            adminAuditTotal,
+              unreviewed_total: unreviewedTotal,
+            }}
+          />
+        </section>
+
         {/* ── Footer ──────────────────────────────────────────────── */}
         <footer className="text-center py-4">
           <p className="text-[11px] text-white/20">
@@ -280,19 +326,32 @@ function SummaryCard({
 }
 
 function SectionHeader({
-  icon: Icon, title, description,
+  icon: Icon, title, description, badge,
 }: {
   icon: React.ElementType
   title: string
   description: string
+  badge?: { text: string; variant: 'ok' | 'warn' | 'critical' }
 }) {
   return (
     <div className="flex items-center gap-3 mb-4">
       <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center">
         <Icon size={14} className="text-white/50" />
       </div>
-      <div>
-        <h2 className="text-[15px] font-semibold text-white/85">{title}</h2>
+      <div className="flex-1">
+        <div className="flex items-center gap-2">
+          <h2 className="text-[15px] font-semibold text-white/85">{title}</h2>
+          {badge && (
+            <span className={[
+              'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold',
+              badge.variant === 'ok'       ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : '',
+              badge.variant === 'warn'     ? 'bg-amber-500/10   text-amber-400   border border-amber-500/20'   : '',
+              badge.variant === 'critical' ? 'bg-red-500/10     text-red-400     border border-red-500/20'     : '',
+            ].join(' ')}>
+              {badge.text}
+            </span>
+          )}
+        </div>
         <p className="text-[12px] text-white/35">{description}</p>
       </div>
     </div>

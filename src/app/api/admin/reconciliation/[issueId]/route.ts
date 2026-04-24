@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createSupabaseAdminClient } from '@/lib/supabase/server'
-import { getAuthUser, requireRole, requireMFA } from '@/lib/auth/middleware'
+import { getAuthUser, requireRole, requireMFA, extractAdminJustification, requireAdminAudit } from '@/lib/auth/middleware'
 import { applyAutoFix } from '@/lib/engine/reconciliation'
-import { logAudit } from '@/lib/engine/audit'
 import { internalError, notFoundError } from '@/lib/errors'
 
 export const dynamic = 'force-dynamic'
@@ -47,15 +46,25 @@ export async function PATCH(
   const { user } = authContext
 
   // ── Parse body ──────────────────────────────────────────────────────────────
-  let body: { action: string; note?: string }
+  let body: { action: string; note?: string; admin_justification?: string; authorization_reference?: string }
   try {
     body = await request.json()
   } catch {
     return NextResponse.json(
-      { error: 'Request body must be JSON with an "action" field.' },
+      { error: 'Request body must be JSON with "action" and "admin_justification" fields.' },
       { status: 400 },
     )
   }
+
+  // ── Admin justification (required) ─────────────────────────────────────────
+  let justification: string
+  try {
+    justification = extractAdminJustification(request, body)
+  } catch (err) {
+    return err as NextResponse
+  }
+
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? null
 
   const { action, note } = body
 
@@ -154,20 +163,22 @@ export async function PATCH(
     }
 
     // applyAutoFix updates the issue itself — no further update needed
-    await logAudit({
-      entity_type: 'reconciliation_issue',
-      entity_id:   issueId,
-      action:      'reconciliation_auto_fix_applied',
-      actor_id:    user.id,
-      old_values:  { status: issue.status },
-      new_values:  { status: 'auto_resolved' },
+    await requireAdminAudit(authContext.profile, user, justification, {
+      action:                 'reconciliation_auto_fix_applied',
+      entityType:             'reconciliation_issue',
+      entityId:               issueId,
+      systemSource:           'api/admin/reconciliation/issueId',
+      authorizationReference: body.authorization_reference ?? null,
+      ipAddress:              ip,
+      oldValues:              { status: issue.status },
+      newValues:              { status: 'auto_resolved' },
       metadata: {
-        issue_type:       issue.issue_type,
-        severity:         issue.severity,
-        fix_description:  autoFixDescription,
-        deal_id:          issue.deal_id,
-        milestone_id:     issue.milestone_id,
-        release_id:       issue.release_id,
+        issue_type:      issue.issue_type,
+        severity:        issue.severity,
+        fix_description: autoFixDescription,
+        deal_id:         issue.deal_id,
+        milestone_id:    issue.milestone_id,
+        release_id:      issue.release_id,
       },
     })
 
@@ -190,14 +201,16 @@ export async function PATCH(
     return internalError(`Failed to update issue: ${updateError.message}`, updateError.message)
   }
 
-  // ── Audit log ───────────────────────────────────────────────────────────────
-  await logAudit({
-    entity_type: 'reconciliation_issue',
-    entity_id:   issueId,
-    action:      auditAction,
-    actor_id:    user.id,
-    old_values:  { status: issue.status },
-    new_values:  updatePayload,
+  // ── Dual-write to audit_log + admin_audit_log ─────────────────────────────
+  await requireAdminAudit(authContext.profile, user, justification, {
+    action:                 auditAction,
+    entityType:             'reconciliation_issue',
+    entityId:               issueId,
+    systemSource:           'api/admin/reconciliation/issueId',
+    authorizationReference: body.authorization_reference ?? null,
+    ipAddress:              ip,
+    oldValues:              { status: issue.status },
+    newValues:              updatePayload,
     metadata: {
       issue_type:   issue.issue_type,
       severity:     issue.severity,

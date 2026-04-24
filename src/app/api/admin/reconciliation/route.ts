@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createSupabaseAdminClient } from '@/lib/supabase/server'
-import { getAuthUser, requireRole, requireMFA } from '@/lib/auth/middleware'
+import { getAuthUser, requireRole, requireMFA, extractAdminJustification, requireAdminAudit } from '@/lib/auth/middleware'
 import { runReconciliation } from '@/lib/engine/reconciliation'
 import { internalError } from '@/lib/errors'
 
@@ -136,12 +136,35 @@ export async function POST(request: NextRequest) {
   const { user } = authContext
 
   let windowDays = 30
+  let justification = ''
+  let authorizationRef: string | null = null
+
   try {
-    const body = await request.json() as { window_days?: number }
+    const body = await request.json() as {
+      window_days?: number
+      admin_justification?: string
+      authorization_reference?: string
+    }
     if (body.window_days && typeof body.window_days === 'number') {
       windowDays = Math.min(Math.max(body.window_days, 1), 90)
     }
+    // Extract justification from parsed body (header fallback handled below)
+    if (typeof body.admin_justification === 'string') justification = body.admin_justification
+    if (typeof body.authorization_reference === 'string') authorizationRef = body.authorization_reference
   } catch { /* no body, use defaults */ }
+
+  // Header takes precedence over body
+  const headerJustification = request.headers.get('x-admin-justification')?.trim()
+  if (headerJustification) justification = headerJustification
+
+  // Validate justification
+  try {
+    extractAdminJustification(request, { admin_justification: justification })
+  } catch (err) {
+    return err as NextResponse
+  }
+
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? null
 
   // Create the run record first so we can return the run_id immediately
   const admin = createSupabaseAdminClient()
@@ -169,6 +192,28 @@ export async function POST(request: NextRequest) {
     windowDays,
     triggeredBy: `manual:${user.id}`,
     runId:       run.id,
+  })
+
+  // Dual-write audit — fire-and-forget
+  await requireAdminAudit(authContext.profile, user, justification, {
+    action:                 'reconciliation_run_triggered',
+    entityType:             'reconciliation_run',
+    entityId:               run.id,
+    systemSource:           'api/admin/reconciliation',
+    authorizationReference: authorizationRef,
+    ipAddress:              ip,
+    newValues: {
+      run_id:      result.runId,
+      status:      result.status,
+      window_days: windowDays,
+    },
+    metadata: {
+      releases_checked:  result.releasesChecked,
+      transfers_checked: result.transfersChecked,
+      deals_checked:     result.dealsChecked,
+      issues_found:      result.issuesFound,
+      duration_ms:       result.durationMs,
+    },
   })
 
   return NextResponse.json({

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createSupabaseAdminClient } from '@/lib/supabase/server'
-import { getAuthUser, requireRole, requireMFA } from '@/lib/auth/middleware'
-import { logAudit } from '@/lib/engine/audit'
+import { getAuthUser, requireRole, requireMFA, extractAdminJustification, requireAdminAudit } from '@/lib/auth/middleware'
 import { errorResponse, internalError, notFoundError } from '@/lib/errors'
 
 export const dynamic = 'force-dynamic'
@@ -34,15 +33,23 @@ export async function POST(request: NextRequest) {
     return err as NextResponse
   }
 
-  let body: { userId?: string }
+  let body: { userId?: string; admin_justification?: string; authorization_reference?: string }
 
   try {
     body = await request.json()
   } catch {
     return errorResponse(
       400,
-      'The request body could not be parsed as JSON. Ensure you are sending a valid JSON object with the required field: userId.',
+      'The request body could not be parsed as JSON. Ensure you are sending a valid JSON object with the required fields: userId, admin_justification.',
     )
+  }
+
+  // ── Admin justification (required) ─────────────────────────────────────────
+  let justification: string
+  try {
+    justification = extractAdminJustification(request, body)
+  } catch (err) {
+    return err as NextResponse
   }
 
   if (!body.userId || typeof body.userId !== 'string' || body.userId.trim() === '') {
@@ -54,8 +61,22 @@ export async function POST(request: NextRequest) {
     return errorResponse(400, 'You cannot promote yourself. Ask another admin to perform this action.')
   }
 
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? null
+
   try {
     const adminClient = createSupabaseAdminClient()
+
+    const { data: existingProfile } = await adminClient
+      .from('profiles')
+      .select('id, role')
+      .eq('id', body.userId)
+      .single()
+
+    if (!existingProfile) {
+      return notFoundError(
+        `No user found with ID ${body.userId}. Verify the user exists before attempting to promote them.`,
+      )
+    }
 
     const { data, error } = await adminClient
       .from('profiles')
@@ -70,15 +91,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    await logAudit({
-      entity_type: 'profile',
-      entity_id: body.userId,
-      action: 'admin_role_granted',
-      actor_id: user.id,
-      actor_role: 'admin',
-      old_values: null,
-      new_values: { role: 'admin' },
-      metadata: { promoted_by: user.id },
+    // Dual-write to audit_log + admin_audit_log
+    await requireAdminAudit(profile, user, justification, {
+      action:                 'admin_role_granted',
+      entityType:             'profile',
+      entityId:               body.userId,
+      systemSource:           'api/admin/promote',
+      authorizationReference: body.authorization_reference ?? null,
+      ipAddress:              ip,
+      oldValues:              { role: existingProfile.role },
+      newValues:              { role: 'admin' },
+      metadata:               { promoted_by: user.id },
     })
 
     return NextResponse.json({ success: true })

@@ -441,3 +441,108 @@ export function formatAuditTime(iso: string): string {
   const pad = (n: number): string => String(n).padStart(2, '0')
   return `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())} UTC`
 }
+
+// ─── Admin Audit Log ──────────────────────────────────────────────────────────
+
+/**
+ * Parameters for an admin audit log entry.
+ * Extends AuditParams with mandatory admin-specific compliance fields.
+ */
+export interface AdminAuditParams extends AuditParams {
+  /**
+   * Why the admin performed this action. Minimum 20 characters.
+   * Validated by requireAdminAudit() before this function is called;
+   * the DB also enforces the CHECK constraint as a backstop.
+   */
+  admin_justification: string
+
+  /**
+   * Optional external reference for the authorisation evidence:
+   * email thread ID, support ticket number, approval URL, etc.
+   */
+  authorization_reference?: string | null
+}
+
+/**
+ * Writes an admin action to BOTH audit_log and admin_audit_log.
+ *
+ * DUAL-WRITE CONTRACT:
+ *   Every admin-privileged write action must appear in the main audit_log
+ *   (for system-wide chronological history) AND in admin_audit_log (for the
+ *   compliance register with justification and four-eyes review workflow).
+ *
+ * SAFETY CONTRACT (same as logAudit):
+ *   MUST NEVER THROW. Failures are caught and printed to console.error.
+ *   Callers do not need a try/catch.
+ *
+ * ACTOR NAME RESOLUTION:
+ *   If actor_name is not supplied and actor_id is set, a single profiles
+ *   lookup resolves the display name (same behaviour as logAudit).
+ */
+export async function logAdminAudit(params: AdminAuditParams): Promise<void> {
+  // ── 1. Write to the regular audit_log first (never throws) ───────────────
+  await logAudit(params)
+
+  // ── 2. Write to admin_audit_log ──────────────────────────────────────────
+  try {
+    const adminClient = createSupabaseAdminClient()
+
+    // Resolve actor_name if not provided (mirrors logAudit resolution)
+    let resolvedActorName = params.actor_name ?? null
+
+    if (resolvedActorName === null && params.actor_id) {
+      try {
+        const { data: profile } = await adminClient
+          .from('profiles')
+          .select('full_name, company_name')
+          .eq('id', params.actor_id)
+          .single()
+
+        if (profile) {
+          resolvedActorName = profile.full_name ?? profile.company_name ?? params.actor_id
+        }
+      } catch {
+        resolvedActorName = params.actor_id
+      }
+    }
+
+    if (resolvedActorName === null && !params.actor_id) {
+      resolvedActorName = 'system'
+    }
+
+    const { error } = await adminClient.from('admin_audit_log').insert({
+      entity_type:             params.entity_type,
+      entity_id:               params.entity_id,
+      action:                  params.action,
+      actor_id:                params.actor_id ?? null,
+      actor_role:              params.actor_role ?? null,
+      actor_name:              resolvedActorName,
+      actor_email:             params.actor_email ?? null,
+      system_source:           params.system_source ?? null,
+      session_id:              params.session_id   ?? null,
+      ip_address:              params.ip_address   ?? null,
+      old_values:              params.old_values   ?? null,
+      new_values:              params.new_values   ?? null,
+      metadata:                params.metadata     ?? null,
+      admin_justification:     params.admin_justification,
+      authorization_reference: params.authorization_reference ?? null,
+      // reviewed_by / reviewed_at are always NULL at insert time
+      // created_at and event_sequence assigned by DB
+    })
+
+    if (error) {
+      console.error('[admin_audit] Failed to write admin_audit_log entry:', {
+        error,
+        action:  params.action,
+        entity:  `${params.entity_type}/${params.entity_id}`,
+        actor:   params.actor_id,
+        source:  params.system_source,
+      })
+    }
+  } catch (err) {
+    console.error('[admin_audit] Unexpected error in logAdminAudit:', err, {
+      action:  params.action,
+      entity:  `${params.entity_type}/${params.entity_id}`,
+    })
+  }
+}

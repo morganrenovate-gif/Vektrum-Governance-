@@ -41,13 +41,19 @@ export async function validateRelease(
   const errors: string[] = []
 
   // ── Caller Role Check ───────────────────────────────────────────────────────
-  if (callerProfile.role !== 'funder' && callerProfile.role !== 'admin') {
+  // SECURITY: Only the deal funder may release milestone payments.
+  // Admin accounts are explicitly excluded — this is a deliberate security
+  // boundary preventing admin compromise from bypassing funder authorisation.
+  // Admins may only modify protection_status after documented funder sign-off
+  // via the protection endpoint; they cannot trigger Stripe transfers directly.
+  if (callerProfile.role !== 'funder') {
     errors.push(
-      'Only funders and admins can release milestone payments. ' +
+      'Only the deal funder can release milestone payments. ' +
         `Your account is registered as a '${callerProfile.role}'. ` +
-        'If you believe this is incorrect, contact your account administrator.',
+        'Admin accounts cannot directly trigger releases — contact the deal ' +
+        'funder to authorise this payment.',
     )
-    // If the caller is not authorized, do not load any deal data — return immediately
+    // If the caller is not authorised, do not load any deal data — return immediately
     return { allowed: false, errors }
   }
 

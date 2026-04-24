@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createSupabaseAdminClient } from '@/lib/supabase/server'
-import { getAuthUser, requireRole, requireMFA } from '@/lib/auth/middleware'
-import { logAudit } from '@/lib/engine/audit'
+import { getAuthUser, requireRole, requireMFA, extractAdminJustification, requireAdminAudit } from '@/lib/auth/middleware'
+import { logAdminAudit } from '@/lib/engine/audit'
 import { errorResponse, internalError } from '@/lib/errors'
 
 export const dynamic = 'force-dynamic'
@@ -37,15 +37,23 @@ export async function POST(request: NextRequest) {
     return err as NextResponse
   }
 
-  let body: { email?: string }
+  let body: { email?: string; admin_justification?: string; authorization_reference?: string }
 
   try {
     body = await request.json()
   } catch {
     return errorResponse(
       400,
-      'The request body could not be parsed as JSON. Ensure you are sending a valid JSON object with the required field: email.',
+      'The request body could not be parsed as JSON. Ensure you are sending a valid JSON object with the required fields: email, admin_justification.',
     )
+  }
+
+  // ── Admin justification (required) ─────────────────────────────────────────
+  let justification: string
+  try {
+    justification = extractAdminJustification(request, body)
+  } catch (err) {
+    return err as NextResponse
   }
 
   if (!body.email || typeof body.email !== 'string' || body.email.trim() === '') {
@@ -57,6 +65,8 @@ export async function POST(request: NextRequest) {
   if (!EMAIL_REGEX.test(email)) {
     return errorResponse(400, 'The email address provided is not valid. Please provide a valid email.')
   }
+
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? null
 
   try {
     const adminClient = createSupabaseAdminClient()
@@ -74,15 +84,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const invitedUserId = data.user?.id ?? 'pending'
+    const invitedUserId = data.user?.id ?? '00000000-0000-0000-0000-000000000000'
 
-    await logAudit({
-      entity_type: 'profile',
-      entity_id: invitedUserId,
-      action: 'admin_invite_sent',
-      actor_id: user.id,
-      actor_role: 'admin',
-      metadata: { invited_email: email, invited_by: user.id },
+    // Dual-write to audit_log + admin_audit_log
+    await requireAdminAudit(profile, user, justification, {
+      action:                 'admin_invite_sent',
+      entityType:             'profile',
+      entityId:               invitedUserId,
+      systemSource:           'api/admin/invite',
+      authorizationReference: body.authorization_reference ?? null,
+      ipAddress:              ip,
+      metadata:               { invited_email: email, invited_by: user.id },
     })
 
     return NextResponse.json({ success: true, message: 'Invite sent' })
