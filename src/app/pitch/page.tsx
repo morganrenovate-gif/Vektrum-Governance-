@@ -1226,71 +1226,82 @@ function TractionSlide() {
 // ─────────────────────────────────────────────────────────────────────────────
 // SLIDE 14 — FOUNDERS & BOARD
 // ─────────────────────────────────────────────────────────────────────────────
-// TODO: Replace placeholder founder/board bios with verified details before publishing.
 
 function FoundersSlide() {
   const founders = [
     {
-      name:  'Adam Morgan',
-      role:  'Founder',
-      bio:   'Product + engineering lead. Built the Vektrum v1 release gate, rail abstraction, and audit layer end-to-end.',
       initials: 'AM',
+      name:     'Adam Morgan',
+      title:    'Co-Founder & Chief Product Officer',
+      bullets:  [
+        '10+ years construction project management — residential and commercial projects $100K–$1M+',
+        'Owner/Operator, Morgan Renovations: full-cycle estimating, budgeting, scheduling, crew, and client relations',
+        'Built Vektrum\'s technical architecture: Supabase backend, Stripe Connect, API webhooks, release gate, rail abstraction',
+        'Self-taught software engineer; product design driven by direct construction payment enforcement experience',
+      ],
     },
     {
-      name:  'Tanner Walstad',
-      role:  'Co-founder',
-      bio:   '— placeholder —', // TODO: verified bio
       initials: 'TW',
+      name:     'Tanner Walstad',
+      title:    'Co-Founder & Chief Commercial Officer',
+      bullets:  [
+        'Sales, marketing, and GTM across institutional software — Canary Speech AI, Altol Consulting, World Financial Group',
+        'Independently built the original Vektrum marketplace concept for construction payment dispute resolution',
+        'Accountable for commercial strategy, institutional lender partnerships, and market positioning',
+        'Brings compliance signaling, enterprise sales cycles, and governance requirements to lender conversations',
+      ],
     },
     {
-      name:  'Phillip Walstad',
-      role:  'Co-founder',
-      bio:   '— placeholder —', // TODO: verified bio
       initials: 'PW',
+      name:     'Phillip Walstad',
+      title:    'Board Member & Strategic Advisor',
+      bullets:  [
+        'Serial entrepreneur — Co-Founder of Canary Speech (healthcare AI, voice biomarker technology)',
+        'Founded / co-founded Compass Group (US + Latin America), Study&Work, Turnkey Social',
+        'Core expertise: startup formation, fundraising, go-to-market, product development, team building',
+        'Provides governance oversight, capital strategy, and operational guidance from multi-sector scaling experience',
+      ],
     },
   ]
 
   return (
-    <div className="relative flex flex-col justify-center h-full px-20 py-16 overflow-hidden">
+    <div className="relative flex flex-col justify-center h-full px-20 py-14 overflow-hidden">
       <DotGrid opacity={0.15} />
       <Glow className="w-[520px] h-[400px] -top-24 right-0 translate-x-1/4" />
 
-      <div className="relative z-10 max-w-[980px] mx-auto w-full">
+      <div className="relative z-10 max-w-[1000px] mx-auto w-full">
         <Eyebrow>Founders &amp; Board</Eyebrow>
 
-        <h2 className="text-[44px] font-black tracking-[-0.038em] text-white leading-[1.02] mb-5">
-          The team building
-          <br />
-          <span className="text-white/38">the release-control layer.</span>
+        <h2 className="text-[42px] font-black tracking-[-0.038em] text-white leading-[1.02] mb-3">
+          Built by operators who lived the problem.
         </h2>
-
-        <p className="text-[14px] text-white/50 leading-relaxed mb-10 max-w-[520px]">
-          A founding team of operators and builders with direct product + engineering
-          ownership of the Vektrum infrastructure.
+        <p className="text-[14px] text-white/50 leading-relaxed mb-8 max-w-[640px]">
+          Not fintech generalists. Operators from construction finance who watched the same
+          preventable failures repeat — and built the enforcement layer they needed.
         </p>
 
-        <div className="grid grid-cols-3 gap-5">
+        <div className="grid grid-cols-3 gap-4">
           {founders.map((f) => (
-            <div key={f.name} className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-7">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-vektrum-blue/30 to-blue-500/20 border border-vektrum-blue/30 flex items-center justify-center mb-5">
-                <span className="text-[14px] font-black text-blue-200 tracking-wider">{f.initials}</span>
+            <div key={f.name} className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-vektrum-blue/30 to-blue-500/20 border border-vektrum-blue/30 flex items-center justify-center flex-shrink-0">
+                  <span className="text-[12px] font-black text-blue-200 tracking-wider">{f.initials}</span>
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[14px] font-bold text-white leading-tight">{f.name}</p>
+                  <p className="text-[9.5px] font-bold uppercase tracking-[0.12em] text-blue-300/80 leading-snug mt-0.5">{f.title}</p>
+                </div>
               </div>
-              <p className="text-[16px] font-bold text-white leading-tight mb-1">{f.name}</p>
-              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-blue-300/80 mb-3.5">{f.role}</p>
-              <p className="text-[12.5px] text-white/55 leading-relaxed">{f.bio}</p>
+              <ul className="space-y-2">
+                {f.bullets.map((b) => (
+                  <li key={b} className="flex items-start gap-2">
+                    <span className="w-1 h-1 rounded-full bg-blue-400/60 flex-shrink-0 mt-[7px]" />
+                    <p className="text-[11px] text-white/58 leading-snug">{b}</p>
+                  </li>
+                ))}
+              </ul>
             </div>
           ))}
-        </div>
-
-        <div className="mt-8 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-          <div className="flex items-center gap-2 mb-1.5">
-            <Users size={12} className="text-white/45" />
-            <p className="text-[11px] font-black uppercase tracking-[0.16em] text-white/55">Board &amp; advisors</p>
-          </div>
-          <p className="text-[12px] text-white/45 leading-relaxed">
-            Board slate and operating advisors to be announced alongside the first
-            pilot partner and lead investor.
-          </p>
         </div>
       </div>
     </div>

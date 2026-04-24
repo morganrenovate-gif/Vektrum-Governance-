@@ -94,15 +94,21 @@ export async function POST(req: NextRequest) {
   }
 
   // ── 2. Extract text from PDF ───────────────────────────────────────────────
+  // pdf-parse v2.x replaced the old callable default export with a class-based
+  // API: `new PDFParse({ data: buffer }).getText()`. The constructor
+  // auto-converts Node Buffer to Uint8Array. Always call parser.destroy() to
+  // release the underlying pdfjs-dist document.
   let contractText: string
+  let parser: InstanceType<typeof import('pdf-parse').PDFParse> | null = null
   try {
     const buffer = Buffer.from(await contractFile.arrayBuffer())
 
-    // pdf-parse is CommonJS; use require() to avoid ESM interop issues in
-    // Next.js App Router. This is intentional and safe in the Node.js runtime.
+    // pdf-parse is shipped as a dual CJS/ESM package. Use require() to stay
+    // on the CJS path and avoid ESM interop issues in the Next.js Node runtime.
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const pdfParse = require('pdf-parse')
-    const parsed = await pdfParse(buffer)
+    const { PDFParse } = require('pdf-parse') as typeof import('pdf-parse')
+    parser = new PDFParse({ data: buffer })
+    const parsed = await parser.getText()
     contractText = parsed.text ?? ''
   } catch (err) {
     console.error('[analyze-contract] PDF parse error:', err)
@@ -114,6 +120,13 @@ export async function POST(req: NextRequest) {
       },
       { status: 422 },
     )
+  } finally {
+    // Always release pdfjs resources even if downstream steps throw.
+    try {
+      await parser?.destroy()
+    } catch {
+      // destroy() failures are non-fatal for the request
+    }
   }
 
   if (!contractText.trim()) {
