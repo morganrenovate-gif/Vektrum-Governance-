@@ -52,8 +52,6 @@ export default async function HomePage() {
               <p className="animate-fade-in-delay mx-auto lg:mx-0 mt-6 max-w-lg text-center lg:text-left text-[17px] leading-relaxed text-white/70">
                 Vektrum enforces 10 server-side conditions before any milestone funds can
                 move. Every approval is gated, every release is logged, every dispute is isolated.
-                Release authorization is separated from payment execution — funds can move
-                through Stripe Connect or existing financial infrastructure.
               </p>
 
               <div className="animate-fade-in-delay-3 mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-3">
@@ -697,7 +695,8 @@ export default async function HomePage() {
             </h2>
             <p className="mt-4 text-[16px] leading-relaxed text-vektrum-muted max-w-lg">
               From deal creation to final disbursement, every action is gated, logged,
-              and enforced.
+              and enforced. Release authorization is separate from payment execution —
+              funds can move through Stripe Connect or your existing payment infrastructure.
             </p>
           </div>
 

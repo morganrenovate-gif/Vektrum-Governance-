@@ -2,25 +2,30 @@
 
 // ─── Vektrum Pitch Deck ───────────────────────────────────────────────────────
 //
-// Slide-based pitch deck for Series A fundraise.
-// Navigation: arrow keys (←/→), spacebar, or click chevrons / dots.
+// Slide-based pitch deck. Navigation: arrow keys (←/→), spacebar, or click.
 // Designed for 1440×900+ presentation mode.
 //
-// Slides:
-//   1  Hero               — The Release Gate for Construction Capital
-//   2  Problem            — Trust, speed, accountability
-//   3  Solution           — Programmable escrow
-//   4  Release Gate       — 10 conditions, server-enforced
-//   5  Competitive        — Capability matrix
-//   6  Market             — TAM / SAM / SOM
-//   7  Business Model     — Take rate on capital at rest
+// Truth-aligned against:
+//   - src/lib/engine/release-gate.ts      (10 conditions, role check, rail opt)
+//   - src/lib/engine/billing.ts           (1% / 0.70% / 0.65%, $50 minimum)
+//   - src/lib/engine/reconciliation.ts    (hourly, SLA escalation, stuck-run)
+//   - src/lib/engine/audit.ts             (hash-chained append-only log)
+//   - docs/payment-rails.md               (Stripe Connect + external_manual)
+//   - src/app/api/milestones/[…]/release/route.ts
+//   - src/app/api/milestones/[…]/authorize-external/route.ts
+//   - src/app/api/releases/[…]/confirm-external/route.ts
+//   - src/app/api/releases/[…]/mark-external-failed/route.ts
+//
+// Positioning: release-control infrastructure for construction capital.
+// Not construction SaaS. Not a payment processor. Not an AI product.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState, useEffect, useCallback } from 'react'
 import {
   ChevronLeft, ChevronRight, Shield, CheckCircle2, XCircle,
-  DollarSign, AlertTriangle, FileCheck, CreditCard, Layers,
-  Eye, Lock, Users, Cpu,
+  DollarSign, AlertTriangle, FileCheck, CreditCard,
+  Eye, Lock, Users, Cpu, Building2, Landmark, HardHat,
+  GitBranch, Gauge, ScrollText, ArrowRight,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -89,57 +94,51 @@ function Half() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SLIDE 1 — HERO
+// SLIDE 1 — COVER
 // ─────────────────────────────────────────────────────────────────────────────
 
-function HeroSlide() {
+function CoverSlide() {
   return (
     <div className="relative flex flex-col items-center justify-center h-full px-16 py-20 text-center overflow-hidden">
       <DotGrid />
       <Glow className="w-[720px] h-[560px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
 
-      {/* Top accent line */}
       <div aria-hidden className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-vektrum-blue/45 to-transparent" />
 
       <div className="relative z-10 max-w-[880px] mx-auto">
 
-        {/* Series badge */}
         <div className="inline-flex items-center gap-2 rounded-full border border-vektrum-blue/30 bg-vektrum-blue/[0.07] px-3.5 py-1.5 mb-11">
           <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
           <span className="text-[10px] font-black text-vektrum-blue tracking-[0.18em] uppercase">
-            Series A · Construction Finance Infrastructure
+            Construction Finance Infrastructure
           </span>
         </div>
 
-        {/* Wordmark */}
         <p className="text-[12px] font-black tracking-[0.28em] text-white/30 uppercase mb-5">
           Vektrum
         </p>
 
-        {/* Headline */}
-        <h1 className="text-[66px] font-black tracking-[-0.045em] text-white leading-[0.91] mb-8">
-          The Release Gate
+        <h1 className="text-[60px] font-black tracking-[-0.045em] text-white leading-[0.95] mb-8">
+          Release-control infrastructure
           <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-br from-blue-300 via-blue-400 to-vektrum-blue">
-            for Construction Capital
+            for construction capital.
           </span>
         </h1>
 
-        <p className="text-[17px] text-white/58 leading-[1.7] max-w-[600px] mx-auto mb-14">
-          Programmable escrow with a 10-condition server-side release gate.
-          Vektrum is the trust infrastructure between funders and contractors —
-          automating draws without compromising compliance.
+        <p className="text-[18px] text-white/62 leading-[1.6] max-w-[620px] mx-auto mb-12">
+          Money does not move unless all release conditions pass.
+          Vektrum governs disbursement. Vektrum never holds funds.
         </p>
 
-        {/* Stat strip */}
         <div className="grid grid-cols-3 gap-4 max-w-[620px] mx-auto mb-14">
           {[
-            { value: '$1.8T',  sub: 'US construction lending' },
-            { value: '10',     sub: 'Server-side release conditions' },
-            { value: '45 → 2', sub: 'Days per draw cycle' },
+            { value: '10',        sub: 'Server-side release conditions' },
+            { value: '2 rails',   sub: 'Stripe Connect + external/manual' },
+            { value: 'Hash-chain',sub: 'Append-only audit log' },
           ].map((s) => (
             <div key={s.sub} className="rounded-2xl border border-white/[0.07] bg-white/[0.025] px-5 py-4">
-              <p className="text-[32px] font-black text-white tracking-tight tabular-nums leading-none mb-1.5">
+              <p className="text-[26px] font-black text-white tracking-tight tabular-nums leading-none mb-1.5">
                 {s.value}
               </p>
               <p className="text-[11px] text-white/42 leading-snug">{s.sub}</p>
@@ -165,27 +164,21 @@ function ProblemSlide() {
   const cards = [
     {
       icon:    AlertTriangle,
-      stat:    '$13B+',
-      meta:    'lost annually to draw fraud',
-      title:   'No enforcement layer',
-      body:    'Draw requests move through email threads, PDFs, and phone calls. Anyone can request a release — there is no programmatic gate, no condition engine, no server-side check.',
-      accent:  { border: 'border-red-500/15', iconBg: 'bg-red-500/[0.07]', icon: 'text-red-400', stat: 'text-red-400' },
+      title:   'Risk happens before money moves',
+      body:    'Draw approvals live in email threads, PDFs, and spreadsheets. Conditions are checked by memory. When a release is wrong, it is wrong before the wire leaves the bank.',
+      accent:  { border: 'border-red-500/15', iconBg: 'bg-red-500/[0.07]', icon: 'text-red-400' },
     },
     {
       icon:    FileCheck,
-      stat:    '45 days',
-      meta:    'average draw cycle time',
-      title:   'Broken process',
-      body:    'Funders, inspectors, title companies, and contractors pass documents in circles with no shared source of truth. Every stakeholder on a different timeline.',
-      accent:  { border: 'border-amber-500/15', iconBg: 'bg-amber-500/[0.07]', icon: 'text-amber-400', stat: 'text-amber-400' },
+      title:   'Fragmented documentation',
+      body:    'Funders, contractors, inspectors, title, and attorneys all hold pieces of the record. No single authoritative source for "was this release allowed?".',
+      accent:  { border: 'border-amber-500/15', iconBg: 'bg-amber-500/[0.07]', icon: 'text-amber-400' },
     },
     {
       icon:    Eye,
-      stat:    '0%',
-      meta:    'immutable audit trail in legacy tools',
-      title:   'Zero accountability',
-      body:    'When disputes arise — and they do — there is no on-chain record of approvals, conditions, or capital flows. Litigation is expensive and outcomes are uncertain.',
-      accent:  { border: 'border-red-500/15', iconBg: 'bg-red-500/[0.07]', icon: 'text-red-400', stat: 'text-red-400' },
+      title:   'Consequences compound',
+      body:    'Bad releases create disputes, over-advancing, lien exposure, and payment uncertainty. Recovery is manual, expensive, and slow.',
+      accent:  { border: 'border-red-500/15', iconBg: 'bg-red-500/[0.07]', icon: 'text-red-400' },
     },
   ]
 
@@ -198,14 +191,15 @@ function ProblemSlide() {
         <Eyebrow>The Problem</Eyebrow>
 
         <h2 className="text-[50px] font-black tracking-[-0.038em] text-white leading-[1.02] mb-4">
-          Construction finance has
+          Construction capital movement
           <br />
-          <span className="text-white/38">a trust problem.</span>
+          <span className="text-white/38">is governed by habit, not enforcement.</span>
         </h2>
 
-        <p className="text-[15px] text-white/50 mb-12 max-w-[500px] leading-relaxed">
-          The $1.8T construction lending market runs on manual processes,
-          misaligned incentives, and zero enforcement infrastructure.
+        <p className="text-[15px] text-white/50 mb-12 max-w-[620px] leading-relaxed">
+          Construction finance depends on approval chains, email, spreadsheets, and
+          scanned PDFs. The moment money moves is the moment risk crystallises — and
+          there is no systems layer between approval and disbursement.
         </p>
 
         <div className="grid grid-cols-3 gap-5">
@@ -216,12 +210,8 @@ function ProblemSlide() {
                 <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center mb-6', c.accent.iconBg)}>
                   <Icon size={16} className={c.accent.icon} />
                 </div>
-                <p className={cn('text-[38px] font-black tracking-tight tabular-nums leading-none mb-1', c.accent.stat)}>
-                  {c.stat}
-                </p>
-                <p className="text-[11px] text-white/38 mb-5 leading-snug">{c.meta}</p>
-                <h3 className="text-[14px] font-semibold text-white mb-2.5">{c.title}</h3>
-                <p className="text-[13px] text-white/52 leading-relaxed">{c.body}</p>
+                <h3 className="text-[15px] font-semibold text-white mb-3">{c.title}</h3>
+                <p className="text-[13px] text-white/55 leading-relaxed">{c.body}</p>
               </div>
             )
           })}
@@ -232,23 +222,72 @@ function ProblemSlide() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SLIDE 3 — SOLUTION
+// SLIDE 3 — CORE INSIGHT
+// ─────────────────────────────────────────────────────────────────────────────
+
+function InsightSlide() {
+  return (
+    <div className="relative flex flex-col justify-center h-full px-20 py-16 overflow-hidden">
+      <DotGrid opacity={0.15} />
+      <Glow className="w-[620px] h-[420px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+
+      <div className="relative z-10 max-w-[920px] mx-auto w-full">
+        <Eyebrow>The Insight</Eyebrow>
+
+        <h2 className="text-[54px] font-black tracking-[-0.04em] text-white leading-[1.0] mb-10">
+          The industry does not need
+          <br />
+          another workflow tool.
+        </h2>
+
+        <div className="grid grid-cols-2 gap-5 mb-10">
+          <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-7">
+            <p className="text-[11px] font-black tracking-[0.2em] uppercase text-white/35 mb-3">Already solved</p>
+            <p className="text-[16px] text-white/70 leading-relaxed">
+              Tracking drafts. Managing documents. Routing approvals.
+              Storing files. Dashboards.
+            </p>
+          </div>
+          <div className="rounded-2xl border border-vektrum-blue/30 bg-vektrum-blue/[0.06] p-7">
+            <p className="text-[11px] font-black tracking-[0.2em] uppercase text-vektrum-blue mb-3">Still unsolved</p>
+            <p className="text-[16px] text-white leading-relaxed">
+              Enforcement at the moment of release. A server-side answer
+              to a single question —
+            </p>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-white/[0.1] bg-gradient-to-br from-vektrum-blue/[0.10] to-transparent p-8 text-center">
+          <p className="text-[26px] font-black text-white tracking-[-0.02em] leading-tight">
+            “Is this release actually allowed right now?”
+          </p>
+          <p className="text-[13px] text-white/50 mt-3">
+            Most systems track construction payments. Vektrum controls whether they are allowed to move.
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SLIDE 4 — SOLUTION
 // ─────────────────────────────────────────────────────────────────────────────
 
 function SolutionSlide() {
   const flow = [
     {
-      label:    'Funder',
-      sub:      'Capital deposited into deal escrow',
-      icon:     DollarSign,
+      label:    'Funder authorisation',
+      sub:      'Funder triggers release. Admins cannot.',
+      icon:     Landmark,
       border:   'border-blue-500/20',
       bg:       'bg-blue-500/[0.05]',
       iconBg:   'bg-blue-500/[0.10]',
       iconText: 'text-blue-400',
     },
     {
-      label:    'AI Precondition',
-      sub:      'Multi-provider draw review — Perplexity → Anthropic → OpenAI',
+      label:    'AI precondition',
+      sub:      'Draw review — informs; never decides.',
       icon:     Cpu,
       border:   'border-purple-500/25',
       bg:       'bg-purple-500/[0.06]',
@@ -256,8 +295,8 @@ function SolutionSlide() {
       iconText: 'text-purple-400',
     },
     {
-      label:    'Release Gate',
-      sub:      '10 conditions, atomically enforced server-side',
+      label:    '10-condition gate',
+      sub:      'Server-side. Atomic. No UI bypass.',
       icon:     Shield,
       border:   'border-vektrum-blue/40',
       bg:       'bg-vektrum-blue/[0.10]',
@@ -266,8 +305,8 @@ function SolutionSlide() {
       core:     true,
     },
     {
-      label:    'Contractor',
-      sub:      'Stripe payout on gate pass — same day',
+      label:    'Execution rail',
+      sub:      'Stripe Connect or external/manual.',
       icon:     CreditCard,
       border:   'border-emerald-500/20',
       bg:       'bg-emerald-500/[0.05]',
@@ -286,30 +325,30 @@ function SolutionSlide() {
 
         <div className="grid grid-cols-[1fr_300px] gap-14 items-center">
 
-          {/* Left */}
           <div>
-            <h2 className="text-[48px] font-black tracking-[-0.038em] text-white leading-[1.02] mb-6">
-              Programmable escrow,
+            <h2 className="text-[46px] font-black tracking-[-0.038em] text-white leading-[1.02] mb-6">
+              A release-control layer
               <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-blue-500">
-                not another dashboard.
+                between approval and disbursement.
               </span>
             </h2>
 
-            <p className="text-[15px] text-white/54 leading-relaxed mb-9 max-w-[440px]">
-              Vektrum places a programmable release gate between funder capital
-              and contractor payouts. Every condition is enforced server-side —
-              not in the UI, not in a PDF, not in someone's inbox.
+            <p className="text-[15px] text-white/54 leading-relaxed mb-9 max-w-[460px]">
+              Vektrum determines whether construction funds are allowed to move.
+              Authorisation is separated from execution — funds flow through Stripe
+              Connect or a partner-controlled external process. Vektrum never holds,
+              escrows, transmits, or forwards money.
             </p>
 
             <div className="space-y-3.5">
               {[
-                'Conditions enforced in the database layer — cannot be bypassed via UI',
-                'AI draw review with multi-provider fallback chain',
-                'Hash-chained append-only audit log with tamper detection',
-                'Native Stripe Connect payouts — no ACH delays',
-                'DocuSign contract required before first milestone release',
-                'Admin override requires AAL2 MFA + justification + audit trail',
+                'Server-side 10-condition release gate — no UI path around it',
+                'AI-assisted draw review as a precondition, not the release authority',
+                'Stripe Connect automated rail + external/manual authorised rail',
+                'Append-only, hash-chained audit log with admin dual-logging',
+                'Hourly Stripe reconciliation with 1-hour SLA escalation',
+                'Funder-triggered release. Admin oversight. Admin cannot release.',
               ].map((item) => (
                 <div key={item} className="flex items-start gap-3">
                   <div className="flex-shrink-0 mt-[1px] w-5 h-5 rounded-full bg-vektrum-blue/10 flex items-center justify-center">
@@ -321,7 +360,6 @@ function SolutionSlide() {
             </div>
           </div>
 
-          {/* Right — flow diagram */}
           <div className="space-y-1.5">
             {flow.map((step, i) => {
               const Icon = step.icon
@@ -363,21 +401,21 @@ function SolutionSlide() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SLIDE 4 — RELEASE GATE
+// SLIDE 5 — RELEASE GATE (10 CONDITIONS)
 // ─────────────────────────────────────────────────────────────────────────────
 
 function ReleaseGateSlide() {
   const conditions = [
-    { n: '01', label: 'Milestone approved',       desc: 'Funder has explicitly approved the milestone'             },
-    { n: '02', label: 'Protection ready',          desc: 'protection_status = ready_for_release'                   },
-    { n: '03', label: 'Sufficient funded balance', desc: 'Escrow holds enough capital to cover the release'        },
-    { n: '04', label: 'Stripe payouts enabled',    desc: 'Contractor can receive Stripe Connect transfers'         },
-    { n: '05', label: 'Onboarding complete',       desc: 'Contractor KYC / AML checks have passed'                },
-    { n: '06', label: 'No existing release',       desc: 'Idempotency guard — prevents double-release'            },
-    { n: '07', label: 'No open change orders',     desc: 'All change orders resolved before release can proceed'  },
-    { n: '08', label: 'Signed contract',           desc: 'DocuSign envelope fully executed by all parties'        },
-    { n: '09', label: 'Sequential ordering',       desc: 'Prior milestones cleared — prerequisites enforced'      },
-    { n: '10', label: 'Approved lien waiver',      desc: 'Conditional lien waiver on file for this milestone'     },
+    { n: '01', label: 'Milestone approved',         desc: 'Funder has explicitly approved the work' },
+    { n: '02', label: 'Protection ready',           desc: 'Milestone protection cleared for release' },
+    { n: '03', label: 'Sufficient funded balance',  desc: 'Available capital covers milestone + fee' },
+    { n: '04', label: 'Payout readiness verified',  desc: 'Rail-aware: Stripe payouts enabled, or external rail authorised' },
+    { n: '05', label: 'Onboarding complete',        desc: 'Contractor platform onboarding finalised' },
+    { n: '06', label: 'No existing release',        desc: 'No pending or confirmed release for this milestone' },
+    { n: '07', label: 'No open change orders',      desc: 'All change orders resolved before release' },
+    { n: '08', label: 'Signed contract',            desc: 'Fully-executed, non-voided contract on file' },
+    { n: '09', label: 'Sequential ordering',        desc: 'Prior milestones released + explicit prerequisites met' },
+    { n: '10', label: 'Approved lien waiver',       desc: 'Conditional progress lien waiver on file (when required)' },
   ]
 
   return (
@@ -390,45 +428,34 @@ function ReleaseGateSlide() {
 
         <div className="grid grid-cols-[300px_1fr] gap-12 items-start">
 
-          {/* Left */}
           <div>
             <h2 className="text-[44px] font-black tracking-[-0.038em] text-white leading-[1.02] mb-5">
               10 conditions.
               <br />
-              <span className="text-white/38">Zero exceptions.</span>
+              <span className="text-white/38">Server-enforced.</span>
             </h2>
 
             <p className="text-[13.5px] text-white/52 leading-relaxed mb-7">
-              Every fund release passes all 10 checks atomically in a single
-              server-side transaction. There is no UI path around this gate —
-              it lives in the database layer, not the application layer.
+              Every release evaluates all 10 conditions in a single server-side pass.
+              All failures return together — no partial bypass, no UI shortcut.
+              Funder-triggered only; admin accounts are explicitly rejected.
             </p>
 
-            {/* AI precondition */}
-            <div className="rounded-xl border border-purple-500/22 bg-purple-500/[0.055] p-4.5 p-[18px]">
-              <div className="flex items-center gap-2 mb-2.5">
-                <Cpu size={12} className="text-purple-400" />
-                <p className="text-[10px] font-black text-purple-400 uppercase tracking-[0.16em]">AI Precondition</p>
-              </div>
-              <p className="text-[12px] text-white/50 leading-relaxed">
-                Runs <em className="text-white/70 not-italic font-semibold">before</em> the gate.
-                Multi-provider chain:
-                Perplexity sonar-pro → Anthropic claude-sonnet → OpenAI gpt-4o.
-                Malformed responses default to{' '}
-                <span className="text-red-400 font-bold">risk_level: critical</span> — gate blocked.
+            <div className="rounded-xl border border-white/[0.07] bg-white/[0.025] p-4">
+              <p className="text-[11px] text-white/45 leading-relaxed">
+                Funds cannot move unless all conditions pass. Reservation is atomic:
+                concurrent releases against the same balance cannot over-authorise.
               </p>
             </div>
 
-            {/* Integrity note */}
-            <div className="mt-3 rounded-xl border border-white/[0.07] bg-white/[0.025] p-4">
-              <p className="text-[11px] text-white/40 leading-relaxed">
-                All releases produce an append-only, hash-chained audit log entry.
-                Modification triggers SQLSTATE 23001 at the DB level.
+            <div className="mt-3 rounded-xl border border-vektrum-blue/25 bg-vektrum-blue/[0.05] p-4">
+              <p className="text-[11px] text-blue-200/75 leading-relaxed">
+                <span className="font-bold text-blue-300">Funder-triggered, system-enforced.</span>
+                {' '}Admins oversee operations but cannot release funds.
               </p>
             </div>
           </div>
 
-          {/* Right — conditions grid */}
           <div className="grid grid-cols-2 gap-2">
             {conditions.map((c) => (
               <div
@@ -457,30 +484,459 @@ function ReleaseGateSlide() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SLIDE 5 — COMPETITIVE ANALYSIS
+// SLIDE 6 — AI PRECONDITION
+// ─────────────────────────────────────────────────────────────────────────────
+
+function AiPreconditionSlide() {
+  const guards = [
+    { label: 'Risk below critical',   desc: 'Critical risk flags block the gate; admin review required.' },
+    { label: 'Assessment < 48h old',  desc: 'Stale reviews do not satisfy the precondition.' },
+    { label: 'Provider fallback',     desc: 'Perplexity → Anthropic → OpenAI. Malformed responses default to critical.' },
+    { label: 'Admin override (AAL2)', desc: 'Emergency bypass is time-boxed, audit-logged, and does not touch the gate.' },
+  ]
+
+  return (
+    <div className="relative flex flex-col justify-center h-full px-20 py-16 overflow-hidden">
+      <DotGrid opacity={0.15} />
+      <Glow className="w-[460px] h-[400px] -top-24 -left-20 bg-purple-500/[0.10]" />
+
+      <div className="relative z-10 max-w-[980px] mx-auto w-full">
+        <Eyebrow>AI Precondition</Eyebrow>
+
+        <div className="grid grid-cols-[1fr_340px] gap-14 items-start">
+          <div>
+            <h2 className="text-[44px] font-black tracking-[-0.038em] text-white leading-[1.02] mb-6">
+              AI informs.
+              <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-purple-500">
+                The gate decides.
+              </span>
+            </h2>
+
+            <p className="text-[14.5px] text-white/55 leading-relaxed mb-7 max-w-[460px]">
+              An AI-assisted draw review runs before the 10-condition gate. It reads
+              documentation, flags anomalies, and produces a risk level — but it
+              has no authority to release funds. If AI is unavailable, the gate
+              still runs; if AI is wrong, the gate still holds.
+            </p>
+
+            <div className="rounded-xl border border-purple-500/25 bg-purple-500/[0.05] p-5 max-w-[500px]">
+              <p className="text-[11px] font-black uppercase tracking-[0.16em] text-purple-300 mb-2">
+                Architectural boundary
+              </p>
+              <p className="text-[13px] text-white/60 leading-relaxed">
+                AI is a <span className="text-white font-semibold">precondition</span>, not an
+                <span className="text-white font-semibold"> approver</span>. The gate runs
+                independently in every case. A passing AI assessment does not bypass
+                any gate condition.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-2.5">
+            {guards.map((g) => (
+              <div key={g.label} className="rounded-xl border border-white/[0.07] bg-white/[0.022] p-4">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-purple-400 flex-shrink-0" />
+                  <p className="text-[12.5px] font-semibold text-white">{g.label}</p>
+                </div>
+                <p className="text-[11.5px] text-white/45 leading-snug pl-3.5">{g.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SLIDE 7 — EXECUTION RAILS
+// ─────────────────────────────────────────────────────────────────────────────
+
+function ExecutionRailsSlide() {
+  return (
+    <div className="relative flex flex-col justify-center h-full px-20 py-16 overflow-hidden">
+      <DotGrid opacity={0.15} />
+      <Glow className="w-[520px] h-[420px] bottom-0 left-0 -translate-x-1/3 translate-y-1/3" />
+      <Glow className="w-[520px] h-[420px] top-0 right-0 translate-x-1/3 -translate-y-1/3 bg-emerald-500/[0.08]" />
+
+      <div className="relative z-10 max-w-[980px] mx-auto w-full">
+        <Eyebrow>Execution Rails</Eyebrow>
+
+        <h2 className="text-[44px] font-black tracking-[-0.038em] text-white leading-[1.02] mb-4">
+          Authorisation is separated
+          <br />
+          <span className="text-white/38">from execution.</span>
+        </h2>
+
+        <p className="text-[14px] text-white/50 leading-relaxed mb-10 max-w-[640px]">
+          Vektrum authorises release. Execution happens on a payment rail. Funds
+          never touch Vektrum infrastructure — on either rail.
+        </p>
+
+        <div className="grid grid-cols-2 gap-5">
+
+          {/* Stripe Connect rail */}
+          <div className="rounded-2xl border border-vektrum-blue/25 bg-vektrum-blue/[0.05] p-7">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-vektrum-blue/15">
+                <CreditCard size={16} className="text-blue-300" />
+              </div>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-blue-300">Automated</p>
+                <p className="text-[17px] font-bold text-white leading-tight">Stripe Connect</p>
+              </div>
+            </div>
+            <p className="text-[13px] text-white/60 leading-relaxed mb-5">
+              Funds are held in Stripe-managed accounts. Vektrum runs the gate and
+              instructs Stripe to transfer. Stripe controls movement.
+            </p>
+            <div className="space-y-2">
+              {[
+                '10-condition gate, including Stripe payouts check',
+                'Atomic reservation + transfer + ledger increment',
+                'Billing record created on transfer confirmation',
+                'Reconciled hourly against Stripe API',
+              ].map((x) => (
+                <div key={x} className="flex items-start gap-2">
+                  <CheckCircle2 size={11} className="text-blue-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-[11.5px] text-white/55 leading-snug">{x}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* External / manual rail */}
+          <div className="rounded-2xl border border-emerald-500/25 bg-emerald-500/[0.04] p-7">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-emerald-500/15">
+                <Building2 size={16} className="text-emerald-300" />
+              </div>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-emerald-300">Partner-controlled</p>
+                <p className="text-[17px] font-bold text-white leading-tight">External / manual</p>
+              </div>
+            </div>
+            <p className="text-[13px] text-white/60 leading-relaxed mb-5">
+              Funds never touch Vektrum infrastructure at all. The funder (or their
+              treasury, escrow, or title partner) executes payment off-platform
+              after Vektrum authorises.
+            </p>
+            <div className="space-y-2">
+              {[
+                'Same 10-condition gate (Stripe payouts check skipped)',
+                'Authorisation recorded; funder executes externally',
+                'Confirmation records method, reference, proof, actor',
+                'SLA-tracked; unconfirmed releases escalate',
+              ].map((x) => (
+                <div key={x} className="flex items-start gap-2">
+                  <CheckCircle2 size={11} className="text-emerald-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-[11.5px] text-white/55 leading-snug">{x}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 text-center">
+          <p className="text-[13px] text-white/65">
+            <span className="text-white font-semibold">Vektrum governs disbursement.</span>{' '}
+            <span className="text-white/50">Vektrum never holds funds.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SLIDE 8 — TRUST / AUDIT / OPS
+// ─────────────────────────────────────────────────────────────────────────────
+
+function TrustOpsSlide() {
+  const items = [
+    {
+      icon:  ScrollText,
+      title: 'Hash-chained audit log',
+      desc:  'Append-only. Every action. Tamper-evident chain. Admin actions dual-log with justification ≥ 20 chars.',
+      tone:  'blue',
+    },
+    {
+      icon:  Lock,
+      title: 'AAL2 for privileged admin actions',
+      desc:  'Step-up MFA required for AI override, protection changes, and any admin write that could affect release eligibility.',
+      tone:  'purple',
+    },
+    {
+      icon:  Gauge,
+      title: 'Hourly Stripe reconciliation',
+      desc:  'Six-pass reconciliation compares DB ↔ Stripe ↔ ledger. Stuck-run detection. Rail-aware.',
+      tone:  'emerald',
+    },
+    {
+      icon:  AlertTriangle,
+      title: '1-hour SLA escalation',
+      desc:  'Unresolved critical findings escalate past a 1-hour threshold. External-rail pending releases tracked against SLA.',
+      tone:  'amber',
+    },
+    {
+      icon:  GitBranch,
+      title: 'Frozen-deal behaviour',
+      desc:  'If a contract is voided after releases have occurred, the deal freezes. No further release until admin review.',
+      tone:  'blue',
+    },
+    {
+      icon:  FileCheck,
+      title: 'Sequential milestones + lien waivers',
+      desc:  'Prior-milestone ordering and conditional progress lien waivers are enforced in the gate when configured.',
+      tone:  'purple',
+    },
+  ] as const
+
+  const toneMap: Record<string, { border: string; bg: string; iconBg: string; iconText: string }> = {
+    blue:    { border: 'border-blue-500/22',    bg: 'bg-blue-500/[0.04]',    iconBg: 'bg-blue-500/15',    iconText: 'text-blue-300' },
+    purple:  { border: 'border-purple-500/22',  bg: 'bg-purple-500/[0.04]',  iconBg: 'bg-purple-500/15',  iconText: 'text-purple-300' },
+    emerald: { border: 'border-emerald-500/22', bg: 'bg-emerald-500/[0.04]', iconBg: 'bg-emerald-500/15', iconText: 'text-emerald-300' },
+    amber:   { border: 'border-amber-500/22',   bg: 'bg-amber-500/[0.04]',   iconBg: 'bg-amber-500/15',   iconText: 'text-amber-300' },
+  }
+
+  return (
+    <div className="relative flex flex-col justify-center h-full px-20 py-16 overflow-hidden">
+      <DotGrid opacity={0.15} />
+
+      <div className="relative z-10 max-w-[1000px] mx-auto w-full">
+        <Eyebrow>Trust · Audit · Ops</Eyebrow>
+
+        <h2 className="text-[44px] font-black tracking-[-0.038em] text-white leading-[1.02] mb-4">
+          The trust layer lives
+          <br />
+          <span className="text-white/38">under every release.</span>
+        </h2>
+
+        <p className="text-[14px] text-white/50 leading-relaxed mb-10 max-w-[620px]">
+          A release is only as trustworthy as the record behind it. Vektrum writes
+          an immutable, operationally-monitored record of every authorisation,
+          confirmation, and override.
+        </p>
+
+        <div className="grid grid-cols-3 gap-4">
+          {items.map((it) => {
+            const tone = toneMap[it.tone]
+            const Icon = it.icon
+            return (
+              <div key={it.title} className={cn('rounded-xl border p-5', tone.border, tone.bg)}>
+                <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center mb-4', tone.iconBg)}>
+                  <Icon size={14} className={tone.iconText} />
+                </div>
+                <p className="text-[13px] font-semibold text-white mb-1.5 leading-tight">{it.title}</p>
+                <p className="text-[11.5px] text-white/50 leading-snug">{it.desc}</p>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SLIDE 9 — ROLE SEPARATION
+// ─────────────────────────────────────────────────────────────────────────────
+
+function RolesSlide() {
+  const roles = [
+    {
+      icon:  Landmark,
+      label: 'Funder',
+      can:   ['Fund the deal', 'Approve milestones', 'Trigger release', 'Confirm external execution'],
+      cant:  ['Release without conditions', 'Bypass the gate'],
+      tone:  'blue',
+    },
+    {
+      icon:  HardHat,
+      label: 'Contractor',
+      can:   ['Submit draws', 'Upload evidence / waivers', 'Receive payment after release'],
+      cant:  ['Release funds', 'Self-approve milestones'],
+      tone:  'emerald',
+    },
+    {
+      icon:  Shield,
+      label: 'Admin',
+      can:   ['Oversee disputes', 'Review audit log', 'Manage ops', 'Apply time-boxed overrides (AAL2)'],
+      cant:  ['Release funds', 'Modify financial records silently'],
+      tone:  'amber',
+    },
+  ] as const
+
+  const toneMap: Record<string, { border: string; bg: string; iconBg: string; iconText: string; label: string }> = {
+    blue:    { border: 'border-blue-500/25',    bg: 'bg-blue-500/[0.05]',    iconBg: 'bg-blue-500/15',    iconText: 'text-blue-300',    label: 'text-blue-300' },
+    emerald: { border: 'border-emerald-500/25', bg: 'bg-emerald-500/[0.04]', iconBg: 'bg-emerald-500/15', iconText: 'text-emerald-300', label: 'text-emerald-300' },
+    amber:   { border: 'border-amber-500/25',   bg: 'bg-amber-500/[0.04]',   iconBg: 'bg-amber-500/15',   iconText: 'text-amber-300',   label: 'text-amber-300' },
+  }
+
+  return (
+    <div className="relative flex flex-col justify-center h-full px-20 py-16 overflow-hidden">
+      <DotGrid opacity={0.15} />
+      <Glow className="w-[540px] h-[400px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+
+      <div className="relative z-10 max-w-[1000px] mx-auto w-full">
+        <Eyebrow>Role Separation</Eyebrow>
+
+        <h2 className="text-[44px] font-black tracking-[-0.038em] text-white leading-[1.02] mb-4">
+          Funder triggers.
+          <br />
+          <span className="text-white/38">Admin does not release.</span>
+        </h2>
+
+        <p className="text-[14px] text-white/50 leading-relaxed mb-10 max-w-[620px]">
+          The release gate rejects any caller whose role is not `funder`. This is a
+          deliberate security boundary — admin compromise cannot become unauthorised
+          disbursement.
+        </p>
+
+        <div className="grid grid-cols-3 gap-4">
+          {roles.map((r) => {
+            const tone = toneMap[r.tone]
+            const Icon = r.icon
+            return (
+              <div key={r.label} className={cn('rounded-2xl border p-6', tone.border, tone.bg)}>
+                <div className="flex items-center gap-3 mb-5">
+                  <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center', tone.iconBg)}>
+                    <Icon size={15} className={tone.iconText} />
+                  </div>
+                  <p className={cn('text-[11px] font-black uppercase tracking-[0.16em]', tone.label)}>{r.label}</p>
+                </div>
+
+                <p className="text-[10px] font-bold uppercase tracking-wider text-white/40 mb-2">Can</p>
+                <ul className="space-y-1.5 mb-4">
+                  {r.can.map((x) => (
+                    <li key={x} className="flex items-start gap-2">
+                      <CheckCircle2 size={11} className="text-emerald-400 mt-0.5 flex-shrink-0" />
+                      <span className="text-[11.5px] text-white/65 leading-snug">{x}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <p className="text-[10px] font-bold uppercase tracking-wider text-white/40 mb-2">Cannot</p>
+                <ul className="space-y-1.5">
+                  {r.cant.map((x) => (
+                    <li key={x} className="flex items-start gap-2">
+                      <XCircle size={11} className="text-red-400/70 mt-0.5 flex-shrink-0" />
+                      <span className="text-[11.5px] text-white/55 leading-snug">{x}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SLIDE 10 — MARKET / WHY NOW
+// ─────────────────────────────────────────────────────────────────────────────
+
+function MarketSlide() {
+  const reasons = [
+    {
+      title: 'Construction capital is still manual',
+      body:  'Draw decisions move through email, spreadsheets, and PDFs. Enforcement is memory, not systems.',
+    },
+    {
+      title: 'Private credit needs stronger release control',
+      body:  'Non-bank construction lenders are growing and they need institutional-grade release evidence.',
+    },
+    {
+      title: 'Payment rails are fragmented',
+      body:  'Lenders use Stripe, existing treasury, escrow, and title. A rail-agnostic authorisation layer is the high-leverage position.',
+    },
+  ]
+
+  return (
+    <div className="relative flex flex-col justify-center h-full px-20 py-16 overflow-hidden">
+      <DotGrid opacity={0.15} />
+      <Glow className="w-[540px] h-[360px] -top-28 left-1/2 -translate-x-1/2" />
+
+      <div className="relative z-10 max-w-[980px] mx-auto w-full">
+        <Eyebrow>Market · Why Now</Eyebrow>
+
+        <div className="grid grid-cols-[1fr_360px] gap-14 items-start">
+
+          <div>
+            <h2 className="text-[44px] font-black tracking-[-0.038em] text-white leading-[1.02] mb-5">
+              Construction finance
+              <br />
+              <span className="text-white/38">is due for an enforcement layer.</span>
+            </h2>
+            <p className="text-[14px] text-white/50 leading-relaxed mb-8 max-w-[460px]">
+              Construction starts represent one of the largest and least-digitised
+              credit flows in the US. The release-control layer has seen near-zero
+              investment — until now.
+            </p>
+
+            <div className="space-y-3">
+              {reasons.map((r) => (
+                <div key={r.title} className="rounded-xl border border-white/[0.07] bg-white/[0.022] p-5">
+                  <p className="text-[13.5px] font-semibold text-white mb-1">{r.title}</p>
+                  <p className="text-[12px] text-white/50 leading-relaxed">{r.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-vektrum-blue/25 bg-vektrum-blue/[0.06] p-6">
+            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-blue-300 mb-4">
+              Who needs this
+            </p>
+            <div className="space-y-4">
+              {[
+                { label: 'Private construction lenders', desc: 'Release evidence for LP reporting and diligence.' },
+                { label: 'Regional + community banks',    desc: 'Modernise draw operations without ripping out core.' },
+                { label: 'Fund managers / credit funds',  desc: 'Institutional-grade controls over portfolio draws.' },
+                { label: 'Vertical construction platforms', desc: 'Embed governance alongside existing workflow.' },
+              ].map((x) => (
+                <div key={x.label}>
+                  <p className="text-[13px] font-semibold text-white leading-tight">{x.label}</p>
+                  <p className="text-[11.5px] text-white/45 leading-snug mt-0.5">{x.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SLIDE 11 — COMPETITIVE LANDSCAPE
 // ─────────────────────────────────────────────────────────────────────────────
 
 function CompetitiveSlide() {
   type Mark = 'check' | 'cross' | 'half'
-  interface Row { feature: string; vektrum: Mark; built: Mark; procore: Mark; banks: Mark; manual: Mark }
+  interface Row { feature: string; vektrum: Mark; built: Mark; procore: Mark; banks: Mark; stripe: Mark }
 
   const rows: Row[] = [
-    { feature: 'Automated release gate',      vektrum: 'check', built: 'cross', procore: 'cross', banks: 'cross', manual: 'cross' },
-    { feature: 'Server-side enforcement',     vektrum: 'check', built: 'cross', procore: 'cross', banks: 'cross', manual: 'cross' },
-    { feature: 'AI-assisted draw review',     vektrum: 'check', built: 'cross', procore: 'cross', banks: 'cross', manual: 'cross' },
-    { feature: 'Native Stripe payouts',       vektrum: 'check', built: 'half',  procore: 'cross', banks: 'cross', manual: 'cross' },
-    { feature: 'Hash-chained audit log',      vektrum: 'check', built: 'cross', procore: 'half',  banks: 'cross', manual: 'cross' },
-    { feature: 'Dispute resolution engine',   vektrum: 'check', built: 'half',  procore: 'half',  banks: 'cross', manual: 'cross' },
-    { feature: 'DocuSign gate enforcement',   vektrum: 'check', built: 'cross', procore: 'half',  banks: 'cross', manual: 'cross' },
-    { feature: 'Real-time ops monitoring',    vektrum: 'check', built: 'half',  procore: 'cross', banks: 'cross', manual: 'cross' },
+    { feature: '10-condition release gate (server-side)', vektrum: 'check', built: 'cross', procore: 'cross', banks: 'cross', stripe: 'cross' },
+    { feature: 'Authorisation separated from execution',  vektrum: 'check', built: 'cross', procore: 'cross', banks: 'half',  stripe: 'cross' },
+    { feature: 'Rail-agnostic (Stripe + external)',       vektrum: 'check', built: 'cross', procore: 'cross', banks: 'half',  stripe: 'cross' },
+    { feature: 'AI draw review as precondition',          vektrum: 'check', built: 'cross', procore: 'cross', banks: 'cross', stripe: 'cross' },
+    { feature: 'Hash-chained audit log',                  vektrum: 'check', built: 'cross', procore: 'half',  banks: 'cross', stripe: 'cross' },
+    { feature: 'Hourly reconciliation + SLA escalation',  vektrum: 'check', built: 'half',  procore: 'cross', banks: 'cross', stripe: 'half'  },
+    { feature: 'Admin cannot release funds',              vektrum: 'check', built: 'half',  procore: 'half',  banks: 'cross', stripe: 'cross' },
+    { feature: 'Construction-native controls',            vektrum: 'check', built: 'check', procore: 'check', banks: 'cross', stripe: 'cross' },
   ]
 
   const cols: { key: keyof Row; label: string; highlight?: boolean }[] = [
-    { key: 'vektrum', label: 'Vektrum',       highlight: true },
+    { key: 'vektrum', label: 'Vektrum',     highlight: true },
     { key: 'built',   label: 'Built Tech' },
     { key: 'procore', label: 'Procore' },
-    { key: 'banks',   label: 'Banks' },
-    { key: 'manual',  label: 'Manual' },
+    { key: 'banks',   label: 'Lender internal' },
+    { key: 'stripe',  label: 'Stripe / MT' },
   ]
 
   function Cell({ type }: { type: Mark }) {
@@ -497,20 +953,18 @@ function CompetitiveSlide() {
         <Eyebrow>Competitive Landscape</Eyebrow>
 
         <div className="flex items-end justify-between mb-7">
-          <h2 className="text-[44px] font-black tracking-[-0.038em] text-white leading-[1.02]">
-            The infrastructure gap
+          <h2 className="text-[42px] font-black tracking-[-0.038em] text-white leading-[1.02]">
+            Others track, manage, or execute.
             <br />
-            <span className="text-white/38">no one else has closed.</span>
+            <span className="text-white/38">Vektrum controls authorisation.</span>
           </h2>
-          <p className="text-[12px] text-white/38 max-w-[260px] leading-relaxed text-right pb-1">
-            Competitors offer dashboards and workflows. Vektrum is the only platform
-            with server-side enforcement — the difference between a guardrail and a gate.
+          <p className="text-[12px] text-white/38 max-w-[280px] leading-relaxed text-right pb-1">
+            Construction platforms manage workflow. Payment processors move money.
+            Neither enforces whether a specific release is allowed.
           </p>
         </div>
 
-        {/* Table */}
         <div className="rounded-2xl border border-white/[0.07] overflow-hidden">
-          {/* Header */}
           <div
             className="grid border-b border-white/[0.06]"
             style={{ gridTemplateColumns: '1fr repeat(5, 112px)' }}
@@ -536,7 +990,6 @@ function CompetitiveSlide() {
             ))}
           </div>
 
-          {/* Rows */}
           {rows.map((row, i) => (
             <div
               key={row.feature}
@@ -547,7 +1000,7 @@ function CompetitiveSlide() {
               style={{ gridTemplateColumns: '1fr repeat(5, 112px)' }}
             >
               <div className="px-5 py-3.5 flex items-center">
-                <p className="text-[13px] text-white/70">{row.feature}</p>
+                <p className="text-[12.5px] text-white/70">{row.feature}</p>
               </div>
               {cols.map((col) => (
                 <div
@@ -564,7 +1017,6 @@ function CompetitiveSlide() {
           ))}
         </div>
 
-        {/* Legend */}
         <div className="flex items-center gap-6 mt-4">
           {[
             { node: <Tick />,  label: 'Full support' },
@@ -583,153 +1035,49 @@ function CompetitiveSlide() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SLIDE 6 — MARKET
-// ─────────────────────────────────────────────────────────────────────────────
-
-function MarketSlide() {
-  const tiers = [
-    {
-      tier:    'TAM',
-      value:   '$1.8T',
-      desc:    'Annual US construction starts — all financed via draw-based loans',
-      width:   'w-full',
-      border:  'border-vektrum-blue/28',
-      bg:      'bg-vektrum-blue/[0.12]',
-      text:    'text-blue-300',
-    },
-    {
-      tier:    'SAM',
-      value:   '$420B',
-      desc:    'Draw management in commercial + residential with digital tooling',
-      width:   'w-3/4',
-      border:  'border-blue-400/22',
-      bg:      'bg-blue-400/[0.08]',
-      text:    'text-blue-400',
-    },
-    {
-      tier:    'SOM',
-      value:   '$2.4B',
-      desc:    '3-year target — mid-market lenders + high-volume contractors',
-      width:   'w-[38%]',
-      border:  'border-emerald-500/22',
-      bg:      'bg-emerald-500/[0.08]',
-      text:    'text-emerald-400',
-    },
-  ]
-
-  const stats = [
-    { value: '8.2%',  label: 'CAGR',         sub: 'Construction lending growth through 2030' },
-    { value: '$13B',  label: 'Draw fraud',    sub: 'Estimated annual US loss in disbursement' },
-    { value: '180K+', label: 'GCs',           sub: 'US general contractors in the SAM segment' },
-    { value: '2,300+',label: 'Lenders',       sub: 'Community banks doing construction draws' },
-  ]
-
-  return (
-    <div className="relative flex flex-col justify-center h-full px-20 py-16 overflow-hidden">
-      <DotGrid opacity={0.15} />
-      <Glow className="w-[540px] h-[360px] -top-28 left-1/2 -translate-x-1/2" />
-
-      <div className="relative z-10 max-w-[980px] mx-auto w-full">
-        <Eyebrow>Market Opportunity</Eyebrow>
-
-        <div className="grid grid-cols-[1fr_270px] gap-14 items-center">
-
-          {/* Left */}
-          <div>
-            <h2 className="text-[46px] font-black tracking-[-0.038em] text-white leading-[1.02] mb-5">
-              $1.8T market.
-              <br />
-              <span className="text-white/38">Zero infrastructure.</span>
-            </h2>
-            <p className="text-[14px] text-white/50 leading-relaxed mb-11 max-w-[440px]">
-              Construction lending is one of the largest and least-digitised credit
-              markets in the US. The enforcement layer has seen zero investment —
-              until now.
-            </p>
-
-            {/* TAM/SAM/SOM bars */}
-            <div className="space-y-3.5">
-              {tiers.map((t) => (
-                <div key={t.tier} className="flex items-center gap-4">
-                  <div className="w-11 flex-shrink-0">
-                    <p className="text-[10px] font-black text-white/45 uppercase tracking-wider">{t.tier}</p>
-                  </div>
-                  <div className={cn('flex items-center h-11 rounded-xl border px-5 transition-all', t.bg, t.border, t.width)}>
-                    <p className={cn('text-[16px] font-black tabular-nums', t.text)}>{t.value}</p>
-                  </div>
-                  <p className="text-[11px] text-white/38 leading-snug max-w-[190px]">{t.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Right — stat cards */}
-          <div className="space-y-3">
-            {stats.map((s) => (
-              <div key={s.label} className="rounded-xl border border-white/[0.07] bg-white/[0.022] px-5 py-4">
-                <div className="flex items-baseline gap-2 mb-1">
-                  <p className="text-[26px] font-black text-white tracking-tight tabular-nums">{s.value}</p>
-                  <p className="text-[10px] font-bold text-white/38 uppercase tracking-wider">{s.label}</p>
-                </div>
-                <p className="text-[11px] text-white/38 leading-snug">{s.sub}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// SLIDE 7 — BUSINESS MODEL
+// SLIDE 12 — BUSINESS MODEL
 // ─────────────────────────────────────────────────────────────────────────────
 
 function BusinessModelSlide() {
-  const streams = [
+  const tiers = [
     {
-      name:    'Transaction fee',
-      model:   '15 – 25 bps per released draw',
-      example: '$850K draw → $1,275 – $2,125 per release event',
-      badge:   'Primary',
+      name:    'Standalone',
+      rate:    '1.00%',
+      desc:    'Self-service. No retainer. No setup.',
+      example: '$500,000 release → $5,000 governance fee',
+      badge:   'Entry',
       border:  'border-vektrum-blue/22',
       bg:      'bg-vektrum-blue/[0.05]',
       badgeBg: 'bg-vektrum-blue/10 border-vektrum-blue/25 text-blue-300',
     },
     {
-      name:    'Platform fee',
-      model:   '$500 – $2,000 / month per lender',
-      example: 'Seat-based ops dashboard + admin tooling + API access',
-      badge:   'Recurring',
-      border:  'border-blue-400/15',
-      bg:      'bg-blue-400/[0.03]',
+      name:    'Institutional',
+      rate:    '0.70%',
+      desc:    'Retainer-backed. Volume pricing.',
+      example: '$500,000 release → $3,500 governance fee',
+      badge:   'Retainer',
+      border:  'border-blue-400/18',
+      bg:      'bg-blue-400/[0.035]',
       badgeBg: 'bg-blue-400/10 border-blue-400/22 text-blue-300',
     },
     {
-      name:    'Enterprise API',
-      model:   'Custom contract, usage-based',
-      example: 'White-label release gate for lender origination systems',
-      badge:   'Expansion',
-      border:  'border-purple-500/15',
+      name:    'Enterprise',
+      rate:    '0.65%',
+      desc:    'Negotiated annually. Integration-led.',
+      example: '$500,000 release → $3,250 governance fee',
+      badge:   'Custom',
+      border:  'border-purple-500/18',
       bg:      'bg-purple-500/[0.04]',
       badgeBg: 'bg-purple-500/10 border-purple-500/22 text-purple-400',
     },
   ]
 
-  const unitEcon = [
-    { label: 'Avg deal size',       value: '$850K',  em: false },
-    { label: 'Avg draws / deal',    value: '10',     em: false },
-    { label: 'Revenue / draw',      value: '~$170',  em: false },
-    { label: 'Revenue / deal / yr', value: '~$1,700',em: true  },
-    { label: 'Gross margin',        value: '~88%',   em: true  },
-    { label: 'CAC (est.)',          value: '$2,800', em: false },
-    { label: 'Payback period',      value: '~19 mo', em: false },
-  ]
-
-  const arr = [
-    { yr: 'Y1', val: '$1.2M',  sub: '~700 deals' },
-    { yr: 'Y2', val: '$4.8M',  sub: '~2,800 deals' },
-    { yr: 'Y3', val: '$14M',   sub: '~8,200 deals' },
+  const principles = [
+    { label: 'Pricing model',       value: 'Per-release governance fee' },
+    { label: 'Minimum per release', value: '$50' },
+    { label: 'Contractor cost',     value: '$0 — always free' },
+    { label: 'Billed to',           value: 'Funder (on top of milestone)' },
+    { label: 'Rail-agnostic',       value: 'Stripe Connect + external/manual' },
   ]
 
   return (
@@ -740,74 +1088,53 @@ function BusinessModelSlide() {
       <div className="relative z-10 max-w-[980px] mx-auto w-full">
         <Eyebrow>Business Model</Eyebrow>
 
-        <div className="grid grid-cols-[1fr_268px] gap-12 items-start">
+        <div className="grid grid-cols-[1fr_300px] gap-12 items-start">
 
-          {/* Left */}
           <div>
-            <h2 className="text-[46px] font-black tracking-[-0.038em] text-white leading-[1.02] mb-5">
-              Take rate on
+            <h2 className="text-[44px] font-black tracking-[-0.038em] text-white leading-[1.02] mb-5">
+              Priced on what moves —
               <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-emerald-500">
-                capital at rest.
+                not on seats.
               </span>
             </h2>
 
-            <p className="text-[14px] text-white/50 leading-relaxed mb-9 max-w-[420px]">
-              Revenue compounds with deal volume. As lenders run more draws through
-              the gate, platform revenue scales with capital flow — not headcount.
+            <p className="text-[14px] text-white/50 leading-relaxed mb-9 max-w-[440px]">
+              A governance fee per verified disbursement. Contractors are always free.
+              Revenue scales with capital flow, not headcount.
             </p>
 
             <div className="space-y-3">
-              {streams.map((s) => (
-                <div key={s.name} className={cn('rounded-xl border p-5', s.border, s.bg)}>
+              {tiers.map((t) => (
+                <div key={t.name} className={cn('rounded-xl border p-5', t.border, t.bg)}>
                   <div className="flex items-start justify-between gap-4 mb-2">
-                    <p className="text-[14px] font-semibold text-white">{s.name}</p>
-                    <span className={cn('inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border flex-shrink-0', s.badgeBg)}>
-                      {s.badge}
+                    <div className="flex items-baseline gap-3">
+                      <p className="text-[22px] font-black text-white tabular-nums leading-none">{t.rate}</p>
+                      <p className="text-[14px] font-semibold text-white/75">{t.name}</p>
+                    </div>
+                    <span className={cn('inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border flex-shrink-0', t.badgeBg)}>
+                      {t.badge}
                     </span>
                   </div>
-                  <p className="text-[13px] text-white/68 mb-1">{s.model}</p>
-                  <p className="text-[11px] text-white/38">{s.example}</p>
+                  <p className="text-[12.5px] text-white/58 mb-1">{t.desc}</p>
+                  <p className="text-[11px] text-white/38 font-mono">{t.example}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Right */}
-          <div className="space-y-3">
-
-            {/* Unit economics */}
-            <div className="rounded-2xl border border-white/[0.07] bg-white/[0.022] overflow-hidden">
-              <div className="px-5 py-3.5 border-b border-white/[0.06]">
-                <p className="text-[10px] font-black text-white/38 uppercase tracking-wider">Unit Economics</p>
-                <p className="text-[11px] text-white/28 mt-0.5">Per deal, annualised</p>
-              </div>
-              <div className="px-5 py-4 space-y-3">
-                {unitEcon.map((row, i) => (
-                  <div key={row.label} className={cn('flex items-center justify-between', i > 0 ? 'pt-3 border-t border-white/[0.04]' : '')}>
-                    <p className="text-[12px] text-white/48">{row.label}</p>
-                    <p className={cn('text-[13px] font-bold tabular-nums', row.em ? 'text-emerald-400' : 'text-white/75')}>
-                      {row.value}
-                    </p>
-                  </div>
-                ))}
-              </div>
+          <div className="rounded-2xl border border-white/[0.07] bg-white/[0.022] overflow-hidden">
+            <div className="px-5 py-3.5 border-b border-white/[0.06]">
+              <p className="text-[10px] font-black text-white/45 uppercase tracking-wider">Model Principles</p>
+              <p className="text-[11px] text-white/32 mt-0.5">Mirrors billing.ts + /pricing</p>
             </div>
-
-            {/* ARR milestones */}
-            <div className="rounded-xl border border-emerald-500/18 bg-emerald-500/[0.045] px-5 py-4">
-              <p className="text-[10px] font-black text-emerald-400/65 uppercase tracking-wider mb-3.5">
-                ARR Milestones
-              </p>
-              <div className="space-y-2.5">
-                {arr.map((m) => (
-                  <div key={m.yr} className="flex items-center gap-3">
-                    <span className="text-[10px] font-mono text-white/28 w-5 flex-shrink-0">{m.yr}</span>
-                    <p className="text-[16px] font-black text-emerald-400 tabular-nums w-16">{m.val}</p>
-                    <p className="text-[11px] text-white/35">{m.sub}</p>
-                  </div>
-                ))}
-              </div>
+            <div className="px-5 py-4 space-y-3">
+              {principles.map((p, i) => (
+                <div key={p.label} className={cn('flex items-start justify-between gap-3', i > 0 ? 'pt-3 border-t border-white/[0.04]' : '')}>
+                  <p className="text-[11.5px] text-white/48 leading-snug">{p.label}</p>
+                  <p className="text-[12px] font-semibold text-white text-right leading-snug">{p.value}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -817,17 +1144,242 @@ function BusinessModelSlide() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// SLIDE 13 — TRACTION / CURRENT STATE
+// ─────────────────────────────────────────────────────────────────────────────
+
+function TractionSlide() {
+  const built = [
+    'Production-grade v1 infrastructure — gate, rails, reconciliation',
+    'Stripe Connect automated rail (end-to-end)',
+    'External / manual execution rail with confirmation + SLA tracking',
+    'Hash-chained audit log with admin dual-logging',
+    'AI draw review with provider fallback chain',
+    'Interactive public demo (funder · contractor · admin personas)',
+  ]
+
+  const now = [
+    'Seeking pilot funders + lending partners',
+    'Investor conversations for initial round',
+    'Design-partner program for construction lenders',
+  ]
+
+  return (
+    <div className="relative flex flex-col justify-center h-full px-20 py-16 overflow-hidden">
+      <DotGrid opacity={0.15} />
+      <Glow className="w-[500px] h-[380px] bottom-0 left-1/2 -translate-x-1/2 translate-y-1/4" />
+
+      <div className="relative z-10 max-w-[980px] mx-auto w-full">
+        <Eyebrow>Current State</Eyebrow>
+
+        <h2 className="text-[44px] font-black tracking-[-0.038em] text-white leading-[1.02] mb-10">
+          Shipped. Running.
+          <br />
+          <span className="text-white/38">Opening to pilot partners.</span>
+        </h2>
+
+        <div className="grid grid-cols-2 gap-5">
+          <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.04] p-7">
+            <div className="flex items-center gap-2 mb-5">
+              <CheckCircle2 size={15} className="text-emerald-400" />
+              <p className="text-[11px] font-black uppercase tracking-[0.16em] text-emerald-300">
+                Built today
+              </p>
+            </div>
+            <ul className="space-y-3">
+              {built.map((x) => (
+                <li key={x} className="flex items-start gap-2.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0 mt-[7px]" />
+                  <p className="text-[13px] text-white/65 leading-relaxed">{x}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="rounded-2xl border border-vektrum-blue/25 bg-vektrum-blue/[0.05] p-7">
+            <div className="flex items-center gap-2 mb-5">
+              <ArrowRight size={15} className="text-blue-300" />
+              <p className="text-[11px] font-black uppercase tracking-[0.16em] text-blue-300">
+                Now
+              </p>
+            </div>
+            <ul className="space-y-3 mb-6">
+              {now.map((x) => (
+                <li key={x} className="flex items-start gap-2.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0 mt-[7px]" />
+                  <p className="text-[13px] text-white/65 leading-relaxed">{x}</p>
+                </li>
+              ))}
+            </ul>
+            <div className="rounded-lg border border-white/[0.08] bg-white/[0.03] p-4">
+              <p className="text-[11px] text-white/45 leading-relaxed">
+                No paying-customer claims are represented in this deck.
+                Revenue begins when the first pilot funder moves a live release.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SLIDE 14 — FOUNDERS & BOARD
+// ─────────────────────────────────────────────────────────────────────────────
+// TODO: Replace placeholder founder/board bios with verified details before publishing.
+
+function FoundersSlide() {
+  const founders = [
+    {
+      name:  'Adam Morgan',
+      role:  'Founder',
+      bio:   'Product + engineering lead. Built the Vektrum v1 release gate, rail abstraction, and audit layer end-to-end.',
+      initials: 'AM',
+    },
+    {
+      name:  'Tanner Walstad',
+      role:  'Co-founder',
+      bio:   '— placeholder —', // TODO: verified bio
+      initials: 'TW',
+    },
+    {
+      name:  'Phillip Walstad',
+      role:  'Co-founder',
+      bio:   '— placeholder —', // TODO: verified bio
+      initials: 'PW',
+    },
+  ]
+
+  return (
+    <div className="relative flex flex-col justify-center h-full px-20 py-16 overflow-hidden">
+      <DotGrid opacity={0.15} />
+      <Glow className="w-[520px] h-[400px] -top-24 right-0 translate-x-1/4" />
+
+      <div className="relative z-10 max-w-[980px] mx-auto w-full">
+        <Eyebrow>Founders &amp; Board</Eyebrow>
+
+        <h2 className="text-[44px] font-black tracking-[-0.038em] text-white leading-[1.02] mb-5">
+          The team building
+          <br />
+          <span className="text-white/38">the release-control layer.</span>
+        </h2>
+
+        <p className="text-[14px] text-white/50 leading-relaxed mb-10 max-w-[520px]">
+          A founding team of operators and builders with direct product + engineering
+          ownership of the Vektrum infrastructure.
+        </p>
+
+        <div className="grid grid-cols-3 gap-5">
+          {founders.map((f) => (
+            <div key={f.name} className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-7">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-vektrum-blue/30 to-blue-500/20 border border-vektrum-blue/30 flex items-center justify-center mb-5">
+                <span className="text-[14px] font-black text-blue-200 tracking-wider">{f.initials}</span>
+              </div>
+              <p className="text-[16px] font-bold text-white leading-tight mb-1">{f.name}</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-blue-300/80 mb-3.5">{f.role}</p>
+              <p className="text-[12.5px] text-white/55 leading-relaxed">{f.bio}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-8 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+          <div className="flex items-center gap-2 mb-1.5">
+            <Users size={12} className="text-white/45" />
+            <p className="text-[11px] font-black uppercase tracking-[0.16em] text-white/55">Board &amp; advisors</p>
+          </div>
+          <p className="text-[12px] text-white/45 leading-relaxed">
+            Board slate and operating advisors to be announced alongside the first
+            pilot partner and lead investor.
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SLIDE 15 — CLOSING
+// ─────────────────────────────────────────────────────────────────────────────
+
+function ClosingSlide() {
+  return (
+    <div className="relative flex flex-col items-center justify-center h-full px-16 py-20 text-center overflow-hidden">
+      <DotGrid />
+      <Glow className="w-[720px] h-[560px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+
+      <div aria-hidden className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-vektrum-blue/45 to-transparent" />
+
+      <div className="relative z-10 max-w-[860px] mx-auto">
+
+        <p className="text-[11px] font-black tracking-[0.22em] text-vektrum-blue uppercase mb-6">
+          Closing
+        </p>
+
+        <h1 className="text-[58px] font-black tracking-[-0.045em] text-white leading-[0.96] mb-7">
+          The standard
+          <br />
+          <span className="text-transparent bg-clip-text bg-gradient-to-br from-blue-300 via-blue-400 to-vektrum-blue">
+            release-control layer
+          </span>
+          <br />
+          for construction capital.
+        </h1>
+
+        <p className="text-[17px] text-white/60 leading-[1.6] max-w-[560px] mx-auto mb-12">
+          Money does not move unless all release conditions pass. Vektrum governs
+          disbursement. Vektrum never holds funds.
+        </p>
+
+        <div className="grid grid-cols-3 gap-4 max-w-[680px] mx-auto mb-14">
+          {[
+            { label: 'Pilot partners',    desc: 'Funders + construction lenders' },
+            { label: 'Integration',       desc: 'Existing treasury / escrow / Stripe' },
+            { label: 'Investor conversations', desc: 'Seed / Series A discussions' },
+          ].map((c) => (
+            <div key={c.label} className="rounded-xl border border-white/[0.08] bg-white/[0.025] px-5 py-4 text-left">
+              <p className="text-[11px] font-black uppercase tracking-[0.14em] text-blue-300 mb-1.5">
+                {c.label}
+              </p>
+              <p className="text-[12px] text-white/55 leading-snug">{c.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="inline-flex flex-col items-center gap-2">
+          <p className="text-[13px] text-white/70 font-mono tracking-wider">
+            operations@vektrum.io
+          </p>
+          <p className="text-[10px] text-white/22 tracking-[0.15em] uppercase">
+            Confidential · {new Date().getFullYear()}
+          </p>
+        </div>
+      </div>
+
+      <div aria-hidden className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.05] to-transparent" />
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // DECK SHELL + NAVIGATION
 // ─────────────────────────────────────────────────────────────────────────────
 
 const SLIDES = [
-  { id: 'hero',        label: 'Vektrum',         component: HeroSlide },
-  { id: 'problem',     label: 'Problem',          component: ProblemSlide },
-  { id: 'solution',    label: 'Solution',         component: SolutionSlide },
-  { id: 'gate',        label: 'Release Gate',     component: ReleaseGateSlide },
-  { id: 'competitive', label: 'Competitive',      component: CompetitiveSlide },
-  { id: 'market',      label: 'Market',           component: MarketSlide },
-  { id: 'model',       label: 'Business Model',   component: BusinessModelSlide },
+  { id: 'cover',       label: 'Vektrum',           component: CoverSlide },
+  { id: 'problem',     label: 'Problem',            component: ProblemSlide },
+  { id: 'insight',     label: 'Insight',            component: InsightSlide },
+  { id: 'solution',    label: 'Solution',           component: SolutionSlide },
+  { id: 'gate',        label: 'Release Gate',       component: ReleaseGateSlide },
+  { id: 'ai',          label: 'AI Precondition',    component: AiPreconditionSlide },
+  { id: 'rails',       label: 'Execution Rails',    component: ExecutionRailsSlide },
+  { id: 'trust',       label: 'Trust · Audit',      component: TrustOpsSlide },
+  { id: 'roles',       label: 'Role Separation',    component: RolesSlide },
+  { id: 'market',      label: 'Market',             component: MarketSlide },
+  { id: 'competitive', label: 'Competitive',        component: CompetitiveSlide },
+  { id: 'model',       label: 'Business Model',     component: BusinessModelSlide },
+  { id: 'traction',    label: 'Traction',           component: TractionSlide },
+  { id: 'founders',    label: 'Founders',           component: FoundersSlide },
+  { id: 'closing',     label: 'Closing',            component: ClosingSlide },
 ] as const
 
 export default function PitchPage() {
@@ -836,7 +1388,6 @@ export default function PitchPage() {
   const prev = useCallback(() => setCurrent((c) => Math.max(0, c - 1)), [])
   const next = useCallback(() => setCurrent((c) => Math.min(SLIDES.length - 1, c + 1)), [])
 
-  // Keyboard navigation
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (['ArrowRight', 'ArrowDown', ' '].includes(e.key)) { e.preventDefault(); next() }
@@ -849,7 +1400,7 @@ export default function PitchPage() {
   return (
     <div className="relative bg-[#07091a] overflow-hidden" style={{ height: '100dvh' }}>
 
-      {/* ── Progress bar ─────────────────────────────────────── */}
+      {/* Progress bar */}
       <div className="fixed top-0 inset-x-0 z-50 h-[2px] bg-white/[0.04]" aria-hidden>
         <div
           className="h-full bg-gradient-to-r from-vektrum-blue to-blue-400 transition-all duration-500 ease-in-out"
@@ -857,21 +1408,21 @@ export default function PitchPage() {
         />
       </div>
 
-      {/* ── Wordmark ──────────────────────────────────────────── */}
+      {/* Wordmark */}
       <div className="fixed top-5 left-7 z-50">
         <p className="text-[10px] font-black tracking-[0.22em] text-white/28 uppercase select-none">
           Vektrum
         </p>
       </div>
 
-      {/* ── Slide label ───────────────────────────────────────── */}
+      {/* Slide label */}
       <div className="fixed top-5 right-7 z-50">
         <p className="text-[10px] text-white/22 uppercase tracking-[0.15em] font-medium select-none">
           {SLIDES[current].label}
         </p>
       </div>
 
-      {/* ── Slides ────────────────────────────────────────────── */}
+      {/* Slides */}
       <div className="relative h-full">
         {SLIDES.map(({ id, component: Slide }, i) => (
           <div
@@ -890,10 +1441,8 @@ export default function PitchPage() {
         ))}
       </div>
 
-      {/* ── Bottom navigation ─────────────────────────────────── */}
+      {/* Bottom nav */}
       <div className="fixed bottom-7 inset-x-0 z-50 flex items-center justify-center gap-4 select-none">
-
-        {/* Prev */}
         <button
           onClick={prev}
           disabled={current === 0}
@@ -903,7 +1452,6 @@ export default function PitchPage() {
           <ChevronLeft size={14} />
         </button>
 
-        {/* Dots */}
         <div className="flex items-center gap-1.5">
           {SLIDES.map(({ id, label }, i) => (
             <button
@@ -920,7 +1468,6 @@ export default function PitchPage() {
           ))}
         </div>
 
-        {/* Next */}
         <button
           onClick={next}
           disabled={current === SLIDES.length - 1}
@@ -931,7 +1478,7 @@ export default function PitchPage() {
         </button>
       </div>
 
-      {/* ── Slide counter ─────────────────────────────────────── */}
+      {/* Slide counter */}
       <div className="fixed bottom-7 right-7 z-50 select-none">
         <p className="text-[11px] font-mono text-white/25 tabular-nums">
           {String(current + 1).padStart(2, '0')} / {String(SLIDES.length).padStart(2, '0')}
