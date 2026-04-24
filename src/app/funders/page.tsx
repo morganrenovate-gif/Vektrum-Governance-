@@ -82,7 +82,7 @@ export default function FundersPage() {
               {
                 icon: FileText,
                 title: 'Immutable audit trail',
-                desc: 'Every approval, release, and status change logged with timestamp and actor. Forever.',
+                desc: 'Every approval, release, and status change recorded in an append-only, hash-chained log with timestamp and actor.',
               },
               {
                 icon: Lock,
@@ -117,7 +117,7 @@ export default function FundersPage() {
               'You fund the deal via Stripe Connect. Funds are held by Stripe — not Vektrum.',
               'As work completes, contractors submit draw requests with documentation.',
               'You review and approve each milestone. The 10-condition gate enforces your rules.',
-              'Approved funds release automatically via Stripe. Full audit trail recorded.',
+              'Approved releases execute via Stripe Connect or — on institutional deals — via your own treasury rail (wire / ACH / check) with Vektrum recording authorization and confirmation. Full audit trail either way.',
             ].map((step, i) => (
               <li key={i} className="flex items-start gap-4">
                 <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-vektrum-blue text-[12px] font-bold text-white">

@@ -34,8 +34,8 @@ export default function SecurityPage() {
             },
             {
               icon: Shield,
-              title: 'Non-Custodial Architecture',
-              desc: 'Funds flow through Stripe Connect. Vektrum never holds, transmits, or controls funds.',
+              title: 'Stripe Connect Custody Model',
+              desc: 'Funds are held in Stripe Connect managed accounts — not by Vektrum. Vektrum governs disbursement rules; Stripe controls movement.',
             },
             {
               icon: Server,

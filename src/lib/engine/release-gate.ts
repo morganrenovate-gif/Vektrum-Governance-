@@ -11,6 +11,21 @@ export interface ReleaseValidationResult {
   errors: string[]
 }
 
+export type ExecutionRail = 'stripe_connect' | 'external_manual'
+
+export interface ValidateReleaseOptions {
+  /**
+   * The payment rail on which this release will be executed. Default is
+   * 'stripe_connect' so existing callers get unchanged behaviour.
+   *
+   * When 'external_manual', Condition 4 (contractor Stripe payouts enabled)
+   * is skipped because payment is executed outside Vektrum by the funder or
+   * a partner treasury system — the contractor does not need a Stripe Connect
+   * account for this rail. All other 9 conditions still apply.
+   */
+  executionRail?: ExecutionRail
+}
+
 // ─── Release Gate ─────────────────────────────────────────────────────────────
 
 /**
@@ -28,10 +43,16 @@ export interface ReleaseValidationResult {
  * This function MUST be called at the start of every release operation,
  * before any Stripe API calls or database mutations are attempted.
  *
+ * Rail-awareness: when options.executionRail = 'external_manual', Condition 4
+ * (contractor Stripe payouts enabled) is skipped because the rail does not
+ * use Stripe Connect. All other 9 conditions still apply identically. This
+ * is the ONLY difference between the two rails at the gate layer.
+ *
  * @param supabase      - Supabase client (user-scoped or admin; must be able
  *                        to read deals, milestones, profiles, and releases).
  * @param milestoneId   - The UUID of the milestone to release.
  * @param callerProfile - The Profile of the user triggering the release.
+ * @param options       - Rail selection and other future options.
  *
  * @returns { allowed: true, errors: [] } if all conditions pass.
  * @returns { allowed: false, errors: [...] } if one or more conditions fail.
@@ -41,7 +62,9 @@ export async function validateRelease(
   supabase: ReturnType<typeof createServerClient>,
   milestoneId: string,
   callerProfile: Profile,
+  options: ValidateReleaseOptions = {},
 ): Promise<ReleaseValidationResult> {
+  const executionRail: ExecutionRail = options.executionRail ?? 'stripe_connect'
   const errors: string[] = []
 
   // ── Caller Role Check ───────────────────────────────────────────────────────
@@ -217,8 +240,16 @@ export async function validateRelease(
 
   // ─────────────────────────────────────────────────────────────────────────────
   // CONDITION 4: Contractor must have Stripe payouts enabled
+  //
+  // Rail-aware: skipped for external_manual. Payment is executed outside Vektrum
+  // (by the funder or a partner treasury system), so the contractor does not
+  // need a Stripe Connect account for this rail. The funder is responsible for
+  // knowing where to send payment to the contractor off-platform.
+  //
+  // This is the ONLY condition that differs between the two rails. All other
+  // 9 conditions apply identically regardless of execution_rail.
   // ─────────────────────────────────────────────────────────────────────────────
-  if (contractorProfile && !contractorProfile.stripe_payouts_enabled) {
+  if (executionRail === 'stripe_connect' && contractorProfile && !contractorProfile.stripe_payouts_enabled) {
     errors.push(
       'The contractor has not completed Stripe onboarding. ' +
         'Payouts must be enabled before funds can be released. ' +

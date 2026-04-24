@@ -266,7 +266,7 @@ export default function DemoPage() {
                   <span className="text-[8px] font-bold">+</span>
                 </div>
                 <span className="text-sm font-semibold text-vektrum-blue">
-                  AI Draw Review: score &ge; 40, risk &lt; critical, assessment &lt; 48h old
+                  AI Draw Review: risk below critical, assessment less than 48h old
                 </span>
               </li>
             </ul>

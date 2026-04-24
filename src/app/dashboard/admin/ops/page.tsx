@@ -20,11 +20,13 @@ import {
   Activity, AlertTriangle, ArrowLeft, Bell,
   CheckCircle2, DollarSign, Search, ShieldAlert, ShieldCheck, Wifi, Zap,
 } from 'lucide-react'
-import { ReleaseHealthPanel }  from '@/components/admin/ops/ReleaseHealthPanel'
-import { WebhookHealthPanel }  from '@/components/admin/ops/WebhookHealthPanel'
-import { AlertsFeed }          from '@/components/admin/ops/AlertsFeed'
-import { OpsSearch }           from '@/components/admin/ops/OpsSearch'
-import { AdminAuditLogPanel }  from '@/components/admin/ops/AdminAuditLogPanel'
+import { ReleaseHealthPanel }      from '@/components/admin/ops/ReleaseHealthPanel'
+import { WebhookHealthPanel }      from '@/components/admin/ops/WebhookHealthPanel'
+import { AlertsFeed }              from '@/components/admin/ops/AlertsFeed'
+import { OpsSearch }               from '@/components/admin/ops/OpsSearch'
+import { AdminAuditLogPanel }      from '@/components/admin/ops/AdminAuditLogPanel'
+import { ExternalReleasesPanel }   from '@/components/admin/ops/ExternalReleasesPanel'
+import type { ExternalReleasesData } from '@/components/admin/ops/ExternalReleasesPanel'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
@@ -43,8 +45,8 @@ export const metadata = {
 async function fetchOpsData(baseUrl: string, cookieHeader: string) {
   const headers = { cookie: cookieHeader }
 
-  // All three data sources fetched in parallel — the page render blocks on all.
-  const [releaseHealth, webhookHealth, alerts] = await Promise.all([
+  // All four data sources fetched in parallel — the page render blocks on all.
+  const [releaseHealth, webhookHealth, alerts, externalReleases] = await Promise.all([
     fetch(`${baseUrl}/api/admin/ops/release-health`, { cache: 'no-store', headers })
       .then((r) => (r.ok ? r.json() : null))
       .catch(() => null),
@@ -54,8 +56,11 @@ async function fetchOpsData(baseUrl: string, cookieHeader: string) {
     fetch(`${baseUrl}/api/admin/ops/alerts`, { cache: 'no-store', headers })
       .then((r) => (r.ok ? r.json() : null))
       .catch(() => null),
+    fetch(`${baseUrl}/api/admin/ops/external-releases`, { cache: 'no-store', headers })
+      .then((r) => (r.ok ? r.json() : null))
+      .catch(() => null),
   ])
-  return { releaseHealth, webhookHealth, alerts }
+  return { releaseHealth, webhookHealth, alerts, externalReleases }
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -88,7 +93,7 @@ export default async function OpsPage() {
     .map((c) => `${c.name}=${c.value}`)
     .join('; ')
 
-  const { releaseHealth, webhookHealth, alerts } = await fetchOpsData(appUrl, cookieHeader)
+  const { releaseHealth, webhookHealth, alerts, externalReleases } = await fetchOpsData(appUrl, cookieHeader)
 
   // ── Quick stats for the top strip ─────────────────────────────────────────
   const adminClient = createSupabaseAdminClient()
@@ -263,12 +268,33 @@ export default async function OpsPage() {
           )}
         </section>
 
+        {/* ── External-rail releases ──────────────────────────────── */}
+        <section id="external-releases">
+          <SectionHeader
+            icon={DollarSign}
+            title="External-Rail Releases"
+            description="Manually executed releases — pending confirmation, overdue, and evidence gaps"
+            badge={
+              externalReleases && (externalReleases as ExternalReleasesData).counts.overdue > 0
+                ? { text: `${(externalReleases as ExternalReleasesData).counts.overdue} overdue`, variant: 'critical' }
+                : externalReleases && (externalReleases as ExternalReleasesData).counts.awaiting_confirmation > 0
+                  ? { text: `${(externalReleases as ExternalReleasesData).counts.awaiting_confirmation} awaiting`, variant: 'warn' }
+                  : undefined
+            }
+          />
+          {externalReleases ? (
+            <ExternalReleasesPanel initialData={externalReleases as ExternalReleasesData} />
+          ) : (
+            <FetchError label="external releases" />
+          )}
+        </section>
+
         {/* ── Admin audit log ─────────────────────────────────────── */}
         <section id="admin-audit-log">
           <SectionHeader
             icon={ShieldCheck}
             title="Admin Audit Log"
-            description="All admin-privileged write actions — requires four-eyes review"
+            description="All admin-privileged write actions — requires peer review attestation (reviewer ≠ actor, enforced at DB layer)"
             badge={unreviewedTotal > 0
               ? { text: `${unreviewedTotal} unreviewed`, variant: 'warn' }
               : { text: 'All reviewed', variant: 'ok' }

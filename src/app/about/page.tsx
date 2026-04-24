@@ -82,7 +82,7 @@ export default function AboutPage() {
               {
                 icon: GitBranch,
                 title: 'Permanent record',
-                desc: 'No update. No delete. Every status change, approval, and payment is logged forever.',
+                desc: 'Append-only, hash-chained log. Every status change, approval, and payment is recorded — no updates, no deletes.',
               },
             ].map((item) => (
               <div

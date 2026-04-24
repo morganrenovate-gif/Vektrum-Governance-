@@ -80,16 +80,16 @@ export default async function HomePage() {
               {/* Proof stats */}
               <div className="mt-10 flex gap-8 justify-center lg:justify-start pt-8 border-t border-white/[0.08]">
                 <div className="flex flex-col gap-1">
-                  <span className="font-display text-[28px] font-bold text-white leading-none tracking-[-0.03em]">8</span>
+                  <span className="font-display text-[28px] font-bold text-white leading-none tracking-[-0.03em]">10</span>
                   <span className="text-[12px] text-white/55">Server-side release conditions</span>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <span className="font-display text-[19px] font-bold text-white leading-none tracking-[-0.02em] pt-1">Non-custodial</span>
-                  <span className="text-[12px] text-white/55">Funds held by Stripe, not Vektrum</span>
+                  <span className="font-display text-[19px] font-bold text-white leading-none tracking-[-0.02em] pt-1">Stripe Connect</span>
+                  <span className="text-[12px] text-white/55">Funds held in managed accounts, not by Vektrum</span>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <span className="font-display text-[28px] font-bold text-white leading-none tracking-[-0.03em]">∞</span>
-                  <span className="text-[12px] text-white/55">Audit trail, forever</span>
+                  <span className="font-display text-[19px] font-bold text-white leading-none tracking-[-0.02em] pt-1">Hash-chained</span>
+                  <span className="text-[12px] text-white/55">Append-only audit log</span>
                 </div>
               </div>
             </div>
@@ -235,7 +235,7 @@ export default async function HomePage() {
                   {
                     icon: GitBranch,
                     title: 'Immutable audit trail',
-                    desc: 'No update. No delete. Every status change timestamped and actor-logged, forever.',
+                    desc: 'Append-only, hash-chained log. Every status change is timestamped and actor-logged — no updates, no deletes.',
                     bg: 'bg-vektrum-blue/10',
                     color: 'text-vektrum-blue',
                   },

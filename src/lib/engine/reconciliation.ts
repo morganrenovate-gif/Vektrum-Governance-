@@ -35,6 +35,17 @@ export type IssueType =
   | 'funding_phantom_balance'
   /** Stripe has confirmed a PaymentIntent but DB funded_amount is lower. Probable missed webhook. */
   | 'funding_missing_webhook'
+  // ── External-rail hygiene (Pass 6) ──
+  /** External release has been in 'pending' longer than the configured SLA without confirmation. */
+  | 'external_confirmation_overdue'
+  /** External release is 'confirmed' but external_payment_reference is missing/blank. */
+  | 'external_reference_missing'
+  /** External release is 'confirmed' but no proof_of_payment_document_id has been attached. */
+  | 'external_proof_missing'
+  /** External release is 'confirmed' but external_executed_by is NULL (who confirmed?). */
+  | 'external_executed_without_actor'
+  /** Release row has execution_rail='external_manual' but also has a stripe_transfer_id — constraint violation. */
+  | 'external_rail_mismatch'
 
 export type IssueSeverity = 'critical' | 'high' | 'medium' | 'low'
 export type IssueStatus   = 'open' | 'acknowledged' | 'resolved' | 'false_positive' | 'auto_resolved'
@@ -96,6 +107,12 @@ const SEVERITY: Record<IssueType, IssueSeverity> = {
   // Pass 5 — funding confirmation
   funding_phantom_balance:    'critical',  // funded_amount > confirmed — real money risk
   funding_missing_webhook:    'high',      // confirmed > funded_amount — likely missed webhook
+  // Pass 6 — external-rail hygiene
+  external_confirmation_overdue:  'medium', // funder authorised but has not recorded execution — SLA breach
+  external_reference_missing:     'high',   // confirmed without a bank/check reference — incomplete evidence
+  external_proof_missing:         'low',    // missing proof-of-payment attachment — ops-coachable, not unsafe
+  external_executed_without_actor:'high',   // confirmed with no actor id — trail incomplete
+  external_rail_mismatch:         'critical', // execution_rail + stripe_transfer_id collision — constraint violation
 }
 
 const AUTO_FIXABLE: Record<IssueType, boolean> = {
@@ -110,6 +127,12 @@ const AUTO_FIXABLE: Record<IssueType, boolean> = {
   // Pass 5 — cannot auto-fix financial discrepancies without human approval
   funding_phantom_balance:    false,
   funding_missing_webhook:    false,
+  // Pass 6 — external-rail hygiene is always a human decision
+  external_confirmation_overdue:  false,
+  external_reference_missing:     false,
+  external_proof_missing:         false,
+  external_executed_without_actor:false,
+  external_rail_mismatch:         false,
 }
 
 // ─── Main Entry Point ─────────────────────────────────────────────────────────
@@ -178,16 +201,35 @@ export async function runReconciliation(
 
   try {
     // ── Fetch DB releases in window ─────────────────────────────────────────
-    const { data: dbReleases, error: relError } = await admin
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: dbReleases, error: relError } = await (admin as any)
       .from('releases')
-      .select('id, milestone_id, deal_id, amount, stripe_transfer_id, idempotency_key, released_at, released_by')
+      .select(
+        'id, milestone_id, deal_id, amount, stripe_transfer_id, idempotency_key, released_at, released_by, ' +
+        'execution_rail, execution_status, external_payment_reference, external_executed_at, ' +
+        'external_executed_by, proof_of_payment_document_id',
+      )
       .gte('created_at', windowStart.toISOString())
       .lte('created_at', windowEnd.toISOString())
 
     if (relError) throw new Error(`DB releases fetch failed: ${relError.message}`)
 
-    const releases = dbReleases ?? []
-    releasesChecked = releases.length
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const allReleases: any[] = dbReleases ?? []
+    releasesChecked = allReleases.length
+
+    // Pass 1 + Pass 2 (Stripe-focused) apply ONLY to stripe_connect rail.
+    // External-rail releases use confirmation metadata, not Stripe transfer
+    // ids — running them through Stripe reconciliation would produce false
+    // positives (missing_stripe_id, stripe_transfer_not_found, etc).
+    // Rows with execution_rail IS NULL are treated as stripe_connect for
+    // backwards compatibility with pre-migration rows.
+    const releases = allReleases.filter(
+      r => (r.execution_rail ?? 'stripe_connect') === 'stripe_connect',
+    )
+    const externalReleases = allReleases.filter(
+      r => r.execution_rail === 'external_manual',
+    )
 
     // ── Fetch DB billing_records in window ─────────────────────────────────
     const { data: dbBillingRecords, error: brError } = await admin
@@ -376,13 +418,30 @@ export async function runReconciliation(
     dealsChecked = (activeDeals ?? []).length
 
     if (dealsChecked > 0) {
-      // Aggregate actual releases per deal
-      const { data: releaseSums } = await admin
+      // Aggregate actual releases per deal.
+      //
+      // Rail-aware filter: released_amount on the deal ledger is incremented
+      // only when funds are settled on the rail:
+      //   - stripe_connect rows: always counted (pre-Phase-1 rows have no
+      //     execution_status; treat as settled for backwards compatibility)
+      //   - external_manual rows: counted ONLY when execution_status='confirmed'
+      //
+      // Including pending external releases here would make Pass 4 false-flag
+      // every deal that has an authorised-but-not-yet-confirmed external release.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: releaseSums } = await (admin as any)
         .from('releases')
-        .select('deal_id, amount')
+        .select('deal_id, amount, execution_rail, execution_status')
 
       const releaseByDeal = new Map<string, number>()
-      for (const r of releaseSums ?? []) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      for (const r of (releaseSums ?? []) as any[]) {
+        const rail = r.execution_rail ?? 'stripe_connect'
+        const counts =
+          rail === 'stripe_connect'
+            ? true                            // all stripe rows have been settled
+            : r.execution_status === 'confirmed'  // external: only confirmed counts
+        if (!counts) continue
         releaseByDeal.set(r.deal_id, (releaseByDeal.get(r.deal_id) ?? 0) + Number(r.amount))
       }
 
@@ -609,6 +668,230 @@ export async function runReconciliation(
       console.error(
         '[reconciliation] Pass 5 (funding confirmation) failed — skipped:',
         pass5Error instanceof Error ? pass5Error.message : String(pass5Error),
+      )
+    }
+
+    // ── Pass 6: External-rail hygiene ──────────────────────────────────────
+    //
+    // Applies to releases with execution_rail='external_manual'. Five checks:
+    //
+    //   external_rail_mismatch        — execution_rail='external_manual' AND
+    //                                   stripe_transfer_id IS NOT NULL. This
+    //                                   should be impossible given the CHECK
+    //                                   constraint releases_external_no_stripe_chk,
+    //                                   but we still detect it defensively so
+    //                                   a bypassed constraint (eg. direct SQL)
+    //                                   is immediately flagged.
+    //
+    //   external_confirmation_overdue — pending longer than the SLA without
+    //                                   confirmation. Default SLA: 72 hours,
+    //                                   overridable via env.
+    //
+    //   external_reference_missing    — confirmed without a non-empty
+    //                                   external_payment_reference.
+    //
+    //   external_executed_without_actor — confirmed without external_executed_by.
+    //
+    //   external_proof_missing        — confirmed without a proof document.
+    //                                   Low severity — ops-coachable, not unsafe.
+    try {
+      const overdueHoursEnv = process.env.EXTERNAL_CONFIRMATION_SLA_HOURS
+        ? parseInt(process.env.EXTERNAL_CONFIRMATION_SLA_HOURS, 10)
+        : null
+      const overdueHours = overdueHoursEnv && isFinite(overdueHoursEnv) && overdueHoursEnv > 0
+        ? overdueHoursEnv
+        : 72
+      const overdueCutoff = Date.now() - overdueHours * 3_600_000
+
+      // Full scan of external releases (not limited to window) so long-overdue
+      // pending releases from outside the window are still surfaced.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: externalAll } = await (admin as any)
+        .from('releases')
+        .select(
+          'id, milestone_id, deal_id, amount, stripe_transfer_id, created_at, ' +
+          'execution_rail, execution_status, external_payment_reference, ' +
+          'external_executed_at, external_executed_by, external_execution_notes, ' +
+          'proof_of_payment_document_id',
+        )
+        .eq('execution_rail', 'external_manual')
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      for (const release of (externalAll ?? []) as any[]) {
+        // ── external_rail_mismatch (defensive) ─────────────────────────────
+        if (release.stripe_transfer_id) {
+          issues.push({
+            issueType:        'external_rail_mismatch',
+            severity:         SEVERITY.external_rail_mismatch,
+            dealId:           release.deal_id,
+            milestoneId:      release.milestone_id,
+            releaseId:        release.id,
+            stripeTransferId: release.stripe_transfer_id,
+            actualAmount:     Number(release.amount),
+            description:
+              `Release ${release.id} has execution_rail='external_manual' but also a ` +
+              `stripe_transfer_id (${release.stripe_transfer_id}). This violates the ` +
+              `releases_external_no_stripe_chk constraint. Likely a direct-SQL bypass ` +
+              `or a data-integrity issue — investigate immediately.`,
+            rawEvidence:  {
+              db_release: {
+                id: release.id,
+                execution_rail: release.execution_rail,
+                execution_status: release.execution_status,
+                stripe_transfer_id: release.stripe_transfer_id,
+              },
+            },
+            dedupKey:     `external_rail_mismatch:${release.id}`,
+            autoFixable:  false,
+          })
+        }
+
+        // ── external_confirmation_overdue ──────────────────────────────────
+        if (release.execution_status === 'pending') {
+          const createdMs = release.created_at ? new Date(release.created_at).getTime() : NaN
+          if (isFinite(createdMs) && createdMs < overdueCutoff) {
+            const ageHours = Math.floor((Date.now() - createdMs) / 3_600_000)
+            issues.push({
+              issueType:    'external_confirmation_overdue',
+              severity:     SEVERITY.external_confirmation_overdue,
+              dealId:       release.deal_id,
+              milestoneId:  release.milestone_id,
+              releaseId:    release.id,
+              actualAmount: Number(release.amount),
+              description:
+                `Release ${release.id} has been pending external confirmation for ` +
+                `${ageHours} hours (SLA: ${overdueHours} h). The funder has authorised ` +
+                `payment but has not yet recorded execution. Follow up with the funder ` +
+                `to confirm whether payment was executed.`,
+              rawEvidence: {
+                db_release: {
+                  id: release.id,
+                  created_at: release.created_at,
+                  execution_status: release.execution_status,
+                  amount: release.amount,
+                },
+                sla_hours: overdueHours,
+                age_hours: ageHours,
+              },
+              dedupKey:    `external_confirmation_overdue:${release.id}`,
+              autoFixable: false,
+            })
+          }
+        }
+
+        // ── Checks that apply only when execution_status='confirmed' ───────
+        if (release.execution_status === 'confirmed') {
+          const hasReference = typeof release.external_payment_reference === 'string'
+            && release.external_payment_reference.trim().length > 0
+          if (!hasReference) {
+            issues.push({
+              issueType:    'external_reference_missing',
+              severity:     SEVERITY.external_reference_missing,
+              dealId:       release.deal_id,
+              milestoneId:  release.milestone_id,
+              releaseId:    release.id,
+              actualAmount: Number(release.amount),
+              description:
+                `Release ${release.id} is confirmed as external but has no ` +
+                `external_payment_reference. Confirmation evidence is incomplete.`,
+              rawEvidence:  {
+                db_release: {
+                  id: release.id,
+                  execution_status: release.execution_status,
+                  external_payment_reference: release.external_payment_reference,
+                },
+              },
+              dedupKey:     `external_reference_missing:${release.id}`,
+              autoFixable:  false,
+            })
+          }
+
+          if (!release.external_executed_by) {
+            issues.push({
+              issueType:    'external_executed_without_actor',
+              severity:     SEVERITY.external_executed_without_actor,
+              dealId:       release.deal_id,
+              milestoneId:  release.milestone_id,
+              releaseId:    release.id,
+              actualAmount: Number(release.amount),
+              description:
+                `Release ${release.id} is confirmed as external but external_executed_by ` +
+                `is NULL. The audit trail has no confirming actor on record.`,
+              rawEvidence:  {
+                db_release: {
+                  id: release.id,
+                  execution_status: release.execution_status,
+                  external_executed_by: release.external_executed_by,
+                },
+              },
+              dedupKey:     `external_executed_without_actor:${release.id}`,
+              autoFixable:  false,
+            })
+          }
+
+          if (!release.proof_of_payment_document_id) {
+            issues.push({
+              issueType:    'external_proof_missing',
+              severity:     SEVERITY.external_proof_missing,
+              dealId:       release.deal_id,
+              milestoneId:  release.milestone_id,
+              releaseId:    release.id,
+              actualAmount: Number(release.amount),
+              description:
+                `Release ${release.id} is confirmed as external but no proof-of-payment ` +
+                `document is attached. Ops-coachable — ask the funder to upload the wire ` +
+                `confirmation, check image, or bank-statement screenshot.`,
+              rawEvidence:  {
+                db_release: {
+                  id: release.id,
+                  execution_status: release.execution_status,
+                  proof_of_payment_document_id: release.proof_of_payment_document_id,
+                },
+              },
+              dedupKey:     `external_proof_missing:${release.id}`,
+              autoFixable:  false,
+            })
+          }
+        }
+
+        // ── Pass-2-equivalent for external-rail confirmed releases ─────────
+        // Every confirmed external release must have a billing_records row
+        // (inserted by /confirm-external). Cross-check here rather than in
+        // the Stripe-specific Pass 2 loop above.
+        if (release.execution_status === 'confirmed') {
+          const hasBilling =
+            billingRecordsByReleaseId.has(release.id) ||
+            billingRecordsByMilestoneId.has(release.milestone_id)
+          if (!hasBilling) {
+            issues.push({
+              issueType:        'missing_billing_record',
+              severity:         SEVERITY.missing_billing_record,
+              dealId:           release.deal_id,
+              milestoneId:      release.milestone_id,
+              releaseId:        release.id,
+              stripeTransferId: null,
+              expectedAmount:   null,
+              actualAmount:     Number(release.amount),
+              description:
+                `External release ${release.id} ($${Number(release.amount).toFixed(2)}) ` +
+                'is confirmed but has no corresponding billing_record. The platform fee ' +
+                'was not recorded — requires reconciliation.',
+              rawEvidence:  { db_release: release },
+              // Dedup key shares the missing_billing_record namespace with
+              // Pass 2 but prefixed so external-rail variants do not collide.
+              dedupKey:     `missing_billing_record:external:${release.id}`,
+              autoFixable:  false, // external-rail auto-fix is not safe — needs human sign-off
+            })
+          }
+        }
+      }
+
+      // Include the external-release scan in the counter for dashboard display
+      transfersChecked += externalReleases.length
+    } catch (pass6Error) {
+      console.error(
+        '[reconciliation] Pass 6 (external-rail hygiene) failed — skipped:',
+        pass6Error instanceof Error ? pass6Error.message : String(pass6Error),
       )
     }
 
