@@ -141,7 +141,7 @@ export default async function RootLayout({
                   <>
                     <Link
                       href="/dashboard"
-                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-white/50 hover:text-white/90 hover:bg-white/[0.06] transition-all"
+                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-white/75 hover:text-white hover:bg-white/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-all"
                     >
                       Dashboard
                     </Link>
@@ -154,19 +154,19 @@ export default async function RootLayout({
                   <>
                     <Link
                       href="/funders"
-                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-white/50 hover:text-white/90 hover:bg-white/[0.06] transition-all"
+                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-white/75 hover:text-white hover:bg-white/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-all"
                     >
                       Funders
                     </Link>
                     <Link
                       href="/contractors"
-                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-white/50 hover:text-white/90 hover:bg-white/[0.06] transition-all"
+                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-white/75 hover:text-white hover:bg-white/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-all"
                     >
                       Contractors
                     </Link>
                     <Link
                       href="/pricing"
-                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-white/50 hover:text-white/90 hover:bg-white/[0.06] transition-all"
+                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-white/75 hover:text-white hover:bg-white/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-all"
                     >
                       Pricing
                     </Link>
@@ -174,14 +174,14 @@ export default async function RootLayout({
                       href="https://cal.com/vektrum"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-white/50 hover:text-white/90 hover:bg-white/[0.06] transition-all"
+                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-white/75 hover:text-white hover:bg-white/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-all"
                     >
                       Book a call
                     </Link>
                     <div className="mx-2 h-4 w-px bg-white/[0.1]" aria-hidden="true" />
                     <Link
                       href="/auth/login"
-                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-white/50 hover:text-white/90 hover:bg-white/[0.06] transition-all"
+                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-white/75 hover:text-white hover:bg-white/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-all"
                     >
                       Sign in
                     </Link>
@@ -216,7 +216,7 @@ export default async function RootLayout({
               {/* Brand */}
               <div className="flex flex-col gap-3">
                 <VektrumWordmark markSize={24} showTagline />
-                <p className="text-[13px] leading-relaxed text-white/55 max-w-xs">
+                <p className="text-[13px] leading-relaxed text-white/75 max-w-xs">
                   Construction payment governance. Funds release only when work is verified.
                 </p>
 
@@ -225,67 +225,67 @@ export default async function RootLayout({
               {/* Links */}
               <div className="flex gap-8 sm:gap-16">
                 <div className="flex flex-col gap-3">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/30">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/65">
                     Platform
                   </span>
-                  <Link href="/auth/signup" className="text-[13px] text-white/55 hover:text-white transition-colors">
+                  <Link href="/auth/signup" className="text-[13px] text-white/75 hover:text-white focus-visible:text-white transition-colors rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue">
                     Get started
                   </Link>
-                  <Link href="/auth/login" className="text-[13px] text-white/55 hover:text-white transition-colors">
+                  <Link href="/auth/login" className="text-[13px] text-white/75 hover:text-white focus-visible:text-white transition-colors rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue">
                     Sign in
                   </Link>
-                  <Link href="/dashboard" className="text-[13px] text-white/55 hover:text-white transition-colors">
+                  <Link href="/dashboard" className="text-[13px] text-white/75 hover:text-white focus-visible:text-white transition-colors rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue">
                     Dashboard
                   </Link>
-                  <Link href="/pricing" className="text-[13px] text-white/55 hover:text-white transition-colors">
+                  <Link href="/pricing" className="text-[13px] text-white/75 hover:text-white focus-visible:text-white transition-colors rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue">
                     Pricing
                   </Link>
                 </div>
                 <div className="flex flex-col gap-3">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/30">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/65">
                     For Funders &amp; Contractors
                   </span>
-                  <Link href="/funders" className="text-[13px] text-white/55 hover:text-white transition-colors">
+                  <Link href="/funders" className="text-[13px] text-white/75 hover:text-white focus-visible:text-white transition-colors rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue">
                     Funders
                   </Link>
-                  <Link href="/contractors" className="text-[13px] text-white/55 hover:text-white transition-colors">
+                  <Link href="/contractors" className="text-[13px] text-white/75 hover:text-white focus-visible:text-white transition-colors rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue">
                     Contractors
                   </Link>
                   <Link
                     href="/founders"
-                    className="text-[13px] text-white/55 hover:text-white transition-colors"
+                    className="text-[13px] text-white/75 hover:text-white focus-visible:text-white transition-colors rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue"
                   >
                     Founders
                   </Link>
                 </div>
                 <div className="flex flex-col gap-3">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/30">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/65">
                     Company
                   </span>
-                  <Link href="/about" className="text-[13px] text-white/55 hover:text-white transition-colors">
+                  <Link href="/about" className="text-[13px] text-white/75 hover:text-white focus-visible:text-white transition-colors rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue">
                     About
                   </Link>
-                  <Link href="/careers" className="text-[13px] text-white/55 hover:text-white transition-colors">
+                  <Link href="/careers" className="text-[13px] text-white/75 hover:text-white focus-visible:text-white transition-colors rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue">
                     Careers
                   </Link>
-                  <Link href="/help" className="text-[13px] text-white/55 hover:text-white transition-colors">
+                  <Link href="/help" className="text-[13px] text-white/75 hover:text-white focus-visible:text-white transition-colors rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue">
                     Help
                   </Link>
                 </div>
                 <div className="flex flex-col gap-3">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/30">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/65">
                     Legal
                   </span>
-                  <Link href="/terms" className="text-[13px] text-white/55 hover:text-white transition-colors">
+                  <Link href="/terms" className="text-[13px] text-white/75 hover:text-white focus-visible:text-white transition-colors rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue">
                     Terms of Service
                   </Link>
-                  <Link href="/privacy" className="text-[13px] text-white/55 hover:text-white transition-colors">
+                  <Link href="/privacy" className="text-[13px] text-white/75 hover:text-white focus-visible:text-white transition-colors rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue">
                     Privacy Policy
                   </Link>
-                  <Link href="/security" className="text-[13px] text-white/55 hover:text-white transition-colors">
+                  <Link href="/security" className="text-[13px] text-white/75 hover:text-white focus-visible:text-white transition-colors rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue">
                     Security
                   </Link>
-                  <Link href="/contact" className="text-[13px] text-white/55 hover:text-white transition-colors">
+                  <Link href="/contact" className="text-[13px] text-white/75 hover:text-white focus-visible:text-white transition-colors rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue">
                     Contact
                   </Link>
                 </div>
@@ -293,17 +293,17 @@ export default async function RootLayout({
             </div>
 
             <div className="mt-12 pt-6 border-t border-white/[0.05] flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-[12px] text-white/55">
+              <p className="text-[12px] text-white/75">
                 &copy; {new Date().getFullYear()} Vektrum. All rights reserved.
               </p>
-              <p className="text-[11px] text-white/30">
+              <p className="text-[11px] text-white/65">
                 Funds are held in Stripe Connect managed accounts, not by Vektrum.
               </p>
-              <p className="mt-1 text-[11px] text-white/25 leading-relaxed">
+              <p className="mt-1 text-[11px] text-white/60 leading-relaxed">
                 Vektrum is not a bank, lender, or money transmitter. Platform security reviewed annually. Data encrypted in transit and at rest.
               </p>
               <div className="flex flex-col gap-1 sm:items-end">
-                <p className="text-[12px] text-white/30">
+                <p className="text-[12px] text-white/65">
                   Vektrum governs disbursement. Vektrum never holds funds.
                 </p>
                 {/* Removed footer attribution */}
