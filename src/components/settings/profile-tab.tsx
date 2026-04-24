@@ -139,7 +139,7 @@ export function ProfileTab({ profile, userEmail }: ProfileTabProps) {
             <div>
               <p className="text-[13px] font-semibold text-white">Email Address</p>
               <p className="text-[13px] text-white/55 mt-0.5">{userEmail}</p>
-              <p className="text-[11px] text-white/30 mt-1">
+              <p className="text-[11px] text-white/70 mt-1">
                 Used for sign-in and all platform notifications.
               </p>
             </div>

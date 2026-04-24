@@ -95,24 +95,24 @@ export function AiReviewModal({ open, onClose, milestoneContext }: AiReviewModal
           </div>
         ) : (
           <div>
-            <p className="text-xs text-white/45 mb-3">
+            <p className="text-xs text-white/75 mb-3">
               Milestone: {milestoneName} — {formattedAmount}
             </p>
 
             {/* Score / Risk / Result row */}
             <div className="grid grid-cols-3 gap-4 mb-5">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-white/40">Score</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-white/70">Score</p>
                 <p className="text-3xl font-bold text-vektrum-blue">82/100</p>
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-white/40">Risk</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-white/70">Risk</p>
                 <span className="inline-flex items-center rounded-full bg-emerald-500/[0.12] border border-emerald-500/20 text-emerald-400 px-3 py-1 text-sm font-medium mt-1">
                   Low
                 </span>
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-white/40">Result</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-white/70">Result</p>
                 <p className="text-lg font-semibold text-emerald-400 mt-1">✓ Pass</p>
               </div>
             </div>

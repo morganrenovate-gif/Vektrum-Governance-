@@ -159,7 +159,7 @@ export function StripeOnboardingWizard({
                 ) : (
                   <>
                     <div className="rounded-xl border border-white/[0.08] bg-surface-3 p-4">
-                      <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-white/30">
+                      <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-white/70">
                         Stripe-powered
                       </p>
                       <p className="mt-1 text-[13px] leading-relaxed text-white/55">
@@ -269,7 +269,7 @@ export function StripeOnboardingWizard({
         </div>
 
         {/* Skip link (below card) */}
-        <p className="mt-4 text-center text-[12px] text-white/30">
+        <p className="mt-4 text-center text-[12px] text-white/70">
           Having trouble?{' '}
           <a href="/dashboard/settings" className="text-vektrum-blue hover:underline">
             Go to Settings

@@ -56,7 +56,7 @@ export function InviteAdminForm() {
         </div>
         <h3 className="text-[13px] font-semibold text-white">Invite New Admin</h3>
       </div>
-      <p className="text-[12px] text-white/55 mb-4">
+      <p className="text-[12px] text-white/75 mb-4">
         Send an email invite to a new user with admin privileges. They will receive a sign-up link.
       </p>
 
@@ -71,9 +71,10 @@ export function InviteAdminForm() {
               setSuccess(null)
             }}
             placeholder="admin@company.com"
-            className="w-full rounded-lg border border-white/[0.08] bg-surface-3 px-3 py-2 text-[13px] text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-vektrum-blue/30 focus:border-vektrum-blue transition-all"
+            aria-label="Admin email address"
+            className="w-full rounded-lg border border-white/[0.14] bg-surface-3 px-3 py-2 text-[13px] text-white placeholder:text-white/55 focus:outline-none focus:ring-2 focus:ring-vektrum-blue/50 focus:border-vektrum-blue transition-all"
           />
-          <p className="text-xs text-white/55 mt-1">
+          <p className="text-xs text-white/70 mt-1">
             Invited users will receive admin access upon accepting. This action is logged in the audit trail.
           </p>
         </div>
@@ -81,9 +82,9 @@ export function InviteAdminForm() {
           type="submit"
           disabled={sending || !email.trim() || !EMAIL_REGEX.test(email.trim())}
           className={cn(
-            'inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-[13px] font-medium transition-all',
+            'inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-[13px] font-medium transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue',
             sending || !email.trim() || !EMAIL_REGEX.test(email.trim())
-              ? 'bg-surface-3 text-white/30 border border-white/[0.08] cursor-not-allowed'
+              ? 'bg-surface-3 text-white/55 border border-white/[0.08] cursor-not-allowed'
               : 'bg-vektrum-blue text-white hover:bg-vektrum-blue-hover'
           )}
         >

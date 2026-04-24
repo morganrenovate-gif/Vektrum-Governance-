@@ -136,7 +136,7 @@ export function CardDescription({
     <p
       className={cn(
         "mt-1 text-[13px] leading-relaxed",
-        variant === "dark" ? "text-white/45" : "text-white/55",
+        variant === "dark" ? "text-white/75" : "text-white/75",
         className
       )}
     >

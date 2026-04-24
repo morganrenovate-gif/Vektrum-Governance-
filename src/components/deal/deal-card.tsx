@@ -71,7 +71,7 @@ export function DealCard({ deal, className, viewerRole }: DealCardProps) {
               </h3>
 
               {/* Participants */}
-              <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[12px] text-white/35">
+              <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[12px] text-white/75">
                 {deal.contractor && (
                   <span className="flex items-center gap-1">
                     <Building2 size={10} aria-hidden="true" />
@@ -91,7 +91,7 @@ export function DealCard({ deal, className, viewerRole }: DealCardProps) {
               <DealStatusBadge status={deal.status} />
               <ChevronRight
                 size={14}
-                className="text-white/20 group-hover:text-vektrum-blue transition-colors"
+                className="text-white/60 group-hover:text-vektrum-blue transition-colors"
                 aria-hidden="true"
               />
             </div>
@@ -100,7 +100,7 @@ export function DealCard({ deal, className, viewerRole }: DealCardProps) {
           {/* Financial data row — 3 columns, tight */}
           <div className="mt-4 grid grid-cols-3 gap-0 divide-x divide-white/[0.06] -mx-1">
             <div className="px-1 text-center">
-              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/25 mb-1">
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/65 mb-1">
                 Total
               </p>
               <p className="text-[13px] font-semibold tabular-nums text-white/65 font-mono tracking-tight">
@@ -108,7 +108,7 @@ export function DealCard({ deal, className, viewerRole }: DealCardProps) {
               </p>
             </div>
             <div className="px-1 text-center">
-              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/25 mb-1">
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/65 mb-1">
                 Funded
               </p>
               <p className="text-[13px] font-semibold tabular-nums text-vektrum-blue font-mono tracking-tight">
@@ -116,7 +116,7 @@ export function DealCard({ deal, className, viewerRole }: DealCardProps) {
               </p>
             </div>
             <div className="px-1 text-center">
-              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/25 mb-1">
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/65 mb-1">
                 Released
               </p>
               <p className="text-[13px] font-semibold tabular-nums text-emerald-400 font-mono tracking-tight">
@@ -144,7 +144,7 @@ export function DealCard({ deal, className, viewerRole }: DealCardProps) {
 
         <CardFooter>
           <div className="flex items-center justify-between w-full gap-2">
-            <p className="text-[11px] text-white/30 tabular-nums">
+            <p className="text-[11px] text-white/70 tabular-nums">
               {milestones.length > 0 ? (
                 <>{milestones.length} milestone{milestones.length !== 1 ? "s" : ""} · {releasedCount} released</>
               ) : (

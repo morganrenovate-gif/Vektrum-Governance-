@@ -198,7 +198,7 @@ export default function InviteAcceptPage() {
           >
             <Loader2 className="mx-auto mb-4 h-8 w-8 animate-spin text-vektrum-blue" aria-hidden="true" />
             <p className="text-sm font-medium text-white">Loading your invite…</p>
-            <p className="mt-1 text-xs text-white/40">Verifying invite token</p>
+            <p className="mt-1 text-xs text-white/75">Verifying invite token</p>
           </div>
         )}
 
@@ -276,13 +276,13 @@ export default function InviteAcceptPage() {
 
             {/* Deal amount — the financial hero */}
             <div className="px-6 py-6 bg-white/[0.03] border-b border-white/[0.06]">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35 mb-2">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/65 mb-2">
                 Total deal value
               </p>
               <p className="font-display text-5xl font-bold tabular-nums tracking-[-0.03em] text-white">
                 {formatMoney(state.data.deal.total_amount)}
               </p>
-              <p className="mt-1.5 text-sm text-white/40">
+              <p className="mt-1.5 text-sm text-white/75">
                 Protected by Vektrum&rsquo;s 8-condition release gate
               </p>
             </div>
@@ -294,7 +294,7 @@ export default function InviteAcceptPage() {
                   <Building2 className="h-4 w-4 text-white/60" aria-hidden="true" />
                 </div>
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/30">Contractor</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/65">Contractor</p>
                   <p className="text-sm font-semibold text-white/80">{state.data.deal.contractor_name}</p>
                 </div>
               </div>
@@ -304,7 +304,7 @@ export default function InviteAcceptPage() {
                   <Clock className="h-4 w-4 text-amber-400" aria-hidden="true" />
                 </div>
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/30">Invite expires</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/65">Invite expires</p>
                   <p className="text-sm font-semibold text-white/80">
                     {new Date(state.data.invite.expires_at).toLocaleDateString('en-US', {
                       month: 'long', day: 'numeric', year: 'numeric',
@@ -316,7 +316,7 @@ export default function InviteAcceptPage() {
 
             {/* Trust signals grid */}
             <div className="px-6 py-5 border-b border-white/[0.06]">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30 mb-3">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/65 mb-3">
                 How your funds are protected
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -327,7 +327,7 @@ export default function InviteAcceptPage() {
                     </div>
                     <div>
                       <p className="text-xs font-semibold text-white/80">{label}</p>
-                      <p className="text-[11px] leading-snug text-white/40 mt-0.5">{desc}</p>
+                      <p className="text-[11px] leading-snug text-white/75 mt-0.5">{desc}</p>
                     </div>
                   </div>
                 ))}
@@ -344,7 +344,7 @@ export default function InviteAcceptPage() {
                 Accept &amp; Enter Deal Room
                 <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
               </button>
-              <p className="mt-3 text-center text-[12px] text-white/30">
+              <p className="mt-3 text-center text-[12px] text-white/65">
                 You must be signed in with a Funder account to accept.
                 {' '}
                 <Link href="/auth/signup" className="text-vektrum-blue hover:underline">
@@ -365,7 +365,7 @@ export default function InviteAcceptPage() {
               <Loader2 className="h-6 w-6 animate-spin text-vektrum-blue" aria-hidden="true" />
             </div>
             <p className="text-base font-semibold text-white">Setting up your deal room…</p>
-            <p className="mt-1.5 text-sm text-white/45">Assigning funder role and verifying access.</p>
+            <p className="mt-1.5 text-sm text-white/75">Assigning funder role and verifying access.</p>
           </div>
         )}
 
@@ -402,7 +402,7 @@ export default function InviteAcceptPage() {
         )}
 
         {/* Footer trust stamp */}
-        <div className="mt-8 flex items-center justify-center gap-2 text-[12px] text-white/25">
+        <div className="mt-8 flex items-center justify-center gap-2 text-[12px] text-white/65">
           <Shield size={12} className="text-vektrum-blue" aria-hidden="true" />
           <span>Protected by Vektrum · Payments powered by Stripe</span>
         </div>

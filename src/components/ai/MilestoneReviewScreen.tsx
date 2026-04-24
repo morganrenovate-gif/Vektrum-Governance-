@@ -63,12 +63,12 @@ function ConditionList({
               next[i] = e.target.value
               onChange(next)
             }}
-            className="flex-1 rounded-lg border border-white/[0.08] bg-surface-3 px-3 py-1.5 text-[13px] text-white placeholder:text-white/30 focus:border-vektrum-blue focus:outline-none"
+            className="flex-1 rounded-lg border border-white/[0.08] bg-surface-3 px-3 py-1.5 text-[13px] text-white placeholder:text-white/65 focus:border-vektrum-blue focus:outline-none"
             placeholder="Completion condition"
           />
           <button
             onClick={() => onChange(conditions.filter((_, j) => j !== i))}
-            className="text-white/30 hover:text-red-400 transition-colors"
+            className="text-white/65 hover:text-red-400 transition-colors"
           >
             <Trash2 size={13} />
           </button>
@@ -102,17 +102,17 @@ function MilestoneEditCard({
   return (
     <div className="rounded-xl border border-white/[0.08] bg-surface-2 overflow-hidden">
       <div className="flex items-center gap-3 px-5 py-3.5 border-b border-white/[0.08]/50">
-        <span className="font-mono text-[11px] font-semibold text-white/30 w-5 text-center">
+        <span className="font-mono text-[11px] font-semibold text-white/65 w-5 text-center">
           {String(index + 1).padStart(2, '0')}
         </span>
         <input
           value={milestone.name}
           onChange={(e) => onChange({ ...milestone, name: e.target.value })}
-          className="flex-1 bg-transparent text-[14px] font-semibold text-white focus:outline-none placeholder:text-white/30"
+          className="flex-1 bg-transparent text-[14px] font-semibold text-white focus:outline-none placeholder:text-white/65"
           placeholder="Milestone name"
         />
         <div className="flex items-center gap-1 mr-1">
-          <span className="text-[13px] text-white/30">$</span>
+          <span className="text-[13px] text-white/65">$</span>
           <input
             type="number"
             value={milestone.amount || ''}
@@ -126,13 +126,13 @@ function MilestoneEditCard({
         )}
         <button
           onClick={() => setExpanded((v) => !v)}
-          className="text-white/30 hover:text-white transition-colors"
+          className="text-white/65 hover:text-white transition-colors"
         >
           {expanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
         </button>
         <button
           onClick={onRemove}
-          className="text-white/30 hover:text-red-400 transition-colors ml-1"
+          className="text-white/65 hover:text-red-400 transition-colors ml-1"
         >
           <Trash2 size={14} />
         </button>
@@ -155,7 +155,7 @@ function MilestoneEditCard({
           )}
 
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/30 mb-2">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/65 mb-2">
               Release conditions
             </p>
             <ConditionList
@@ -165,7 +165,7 @@ function MilestoneEditCard({
           </div>
 
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/30 mb-1">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/65 mb-1">
               Retainage %
             </p>
             <div className="flex items-center gap-1">
@@ -179,13 +179,13 @@ function MilestoneEditCard({
                 }
                 className="w-16 rounded-lg border border-white/[0.08] bg-surface-3 px-2.5 py-1.5 text-[13px] text-white focus:border-vektrum-blue focus:outline-none"
               />
-              <span className="text-[13px] text-white/30">%</span>
+              <span className="text-[13px] text-white/65">%</span>
             </div>
           </div>
 
           {milestone.notes && (
             <div className="rounded-lg border border-white/[0.08]/50 bg-surface-3/50 px-3 py-2">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-white/30 mb-1">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-white/65 mb-1">
                 Contract note
               </p>
               <p className="text-[12px] text-white/55 leading-relaxed">{milestone.notes}</p>
@@ -305,7 +305,7 @@ export function MilestoneReviewScreen({
       {/* Retainage summary */}
       {retainageSummary && (
         <div className="rounded-xl border border-white/[0.08]/60 bg-surface-2 px-4 py-3">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-white/30 mb-1">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-white/65 mb-1">
             Retainage terms (from contract)
           </p>
           <p className="text-[13px] text-white/55 leading-relaxed">{retainageSummary}</p>
@@ -337,7 +337,7 @@ export function MilestoneReviewScreen({
       {/* Running total */}
       <div className="rounded-xl border border-white/[0.08] bg-surface-2 px-5 py-4 flex items-center justify-between">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/30">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/65">
             Total milestone value
           </p>
           {totalMismatch && (
@@ -385,7 +385,7 @@ export function MilestoneReviewScreen({
         </button>
       </div>
 
-      <p className="text-center text-[11px] text-white/30">
+      <p className="text-center text-[11px] text-white/65">
         AI-generated milestones. Review all amounts and conditions before confirming.
         The release gate runs independently server-side.
       </p>

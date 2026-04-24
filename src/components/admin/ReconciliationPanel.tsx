@@ -81,7 +81,7 @@ function severityBadge(severity: string) {
       </span>
     )
     default: return (
-      <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/10 border border-white/10 text-white/40">
+      <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/10 border border-white/[0.16] text-white/75">
         Low
       </span>
     )
@@ -224,7 +224,7 @@ export function ReconciliationPanel({
 
           {/* Last run metadata */}
           {lastRunObj && (
-            <p className="text-[11px] text-white/30">
+            <p className="text-[11px] text-white/65">
               Last run {relativeTime(lastRunObj.started_at)}
               {lastRunObj.status === 'completed' && (
                 <> · checked {lastRunObj.releases_checked} releases,&nbsp;
@@ -237,7 +237,7 @@ export function ReconciliationPanel({
             </p>
           )}
           {!lastRunObj && (
-            <p className="text-[11px] text-white/30">No reconciliation runs yet</p>
+            <p className="text-[11px] text-white/65">No reconciliation runs yet</p>
           )}
         </div>
 
@@ -245,7 +245,7 @@ export function ReconciliationPanel({
           type="button"
           onClick={handleRunNow}
           disabled={running}
-          className="flex items-center gap-2 rounded-xl border border-white/[0.1] bg-white/[0.05] px-3.5 py-2 text-[12px] font-medium text-white/60 hover:bg-white/[0.08] hover:text-white disabled:opacity-50 transition-all flex-shrink-0"
+          className="flex items-center gap-2 rounded-xl border border-white/[0.16] bg-white/[0.05] px-3.5 py-2 text-[12px] font-medium text-white/85 hover:bg-white/[0.1] hover:text-white hover:border-white/[0.24] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue disabled:opacity-50 transition-all flex-shrink-0"
         >
           {running
             ? <Loader2 size={12} className="animate-spin" />
@@ -265,18 +265,18 @@ export function ReconciliationPanel({
       {sortedIssues.length === 0 ? (
         <div className="rounded-xl border border-white/[0.06] bg-surface-2 px-5 py-8 text-center">
           <ShieldCheck size={20} className="text-emerald-400 mx-auto mb-2" />
-          <p className="text-sm font-medium text-white/60">All clear</p>
-          <p className="text-[12px] text-white/30 mt-1">
+          <p className="text-sm font-medium text-white/85">All clear</p>
+          <p className="text-[12px] text-white/70 mt-1">
             No open reconciliation issues. Stripe and database are consistent.
           </p>
         </div>
       ) : (
         <div className="rounded-xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden">
           <div className="px-5 py-3 border-b border-white/[0.06] flex items-center justify-between">
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-white/65">
               Open Issues ({total})
             </p>
-            <p className="text-[11px] text-white/25">Sorted by severity</p>
+            <p className="text-[11px] text-white/65">Sorted by severity</p>
           </div>
 
           <ul className="divide-y divide-white/[0.04]">
@@ -292,7 +292,7 @@ export function ReconciliationPanel({
           </ul>
 
           {total > sortedIssues.length && (
-            <div className="px-5 py-3 border-t border-white/[0.06] text-[12px] text-white/30">
+            <div className="px-5 py-3 border-t border-white/[0.06] text-[12px] text-white/70">
               Showing {sortedIssues.length} of {total} issues.
               {' '}<a href="/dashboard/audit" className="text-vektrum-blue hover:underline">View all in audit log →</a>
             </div>
@@ -341,17 +341,17 @@ function IssueRow({
         onClick={onToggle}
       >
         {expanded
-          ? <ChevronDown size={13} className="text-white/25 flex-shrink-0" />
-          : <ChevronRight size={13} className="text-white/25 flex-shrink-0" />
+          ? <ChevronDown size={13} className="text-white/65 flex-shrink-0" />
+          : <ChevronRight size={13} className="text-white/65 flex-shrink-0" />
         }
 
         <div className="flex-shrink-0">{severityBadge(issue.severity)}</div>
 
         <div className="flex-1 min-w-0">
-          <p className="text-[13px] font-semibold text-white/80 truncate">
+          <p className="text-[13px] font-semibold text-white truncate">
             {typeLabel}
           </p>
-          <p className="text-[11px] text-white/35 truncate mt-0.5">
+          <p className="text-[11px] text-white/70 truncate mt-0.5">
             {issue.description.slice(0, 120)}{issue.description.length > 120 ? '…' : ''}
           </p>
         </div>
@@ -365,7 +365,7 @@ function IssueRow({
           </div>
         )}
 
-        <p className="text-[11px] text-white/25 flex-shrink-0 tabular-nums">
+        <p className="text-[11px] text-white/65 flex-shrink-0 tabular-nums">
           {relativeTime(issue.created_at)}
         </p>
       </div>
@@ -391,7 +391,7 @@ function IssueRow({
           </div>
 
           {/* Full description */}
-          <p className="mt-3 text-[12px] text-white/45 leading-relaxed rounded-lg bg-white/[0.03] border border-white/[0.06] px-3 py-2.5">
+          <p className="mt-3 text-[12px] text-white/80 leading-relaxed rounded-lg bg-white/[0.03] border border-white/[0.1] px-3 py-2.5">
             {issue.description}
           </p>
 
@@ -407,14 +407,14 @@ function IssueRow({
                     : 'Why is this a false positive?'
                 }
                 rows={2}
-                className="w-full rounded-lg border border-white/[0.1] bg-white/[0.05] px-3 py-2 text-[12px] text-white/70 placeholder:text-white/25 focus:outline-none focus:border-vektrum-blue resize-none"
+                className="w-full rounded-lg border border-white/[0.14] bg-white/[0.05] px-3 py-2 text-[12px] text-white placeholder:text-white/55 focus:outline-none focus:ring-2 focus:ring-vektrum-blue/50 focus:border-vektrum-blue resize-none"
               />
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={() => act(noteMode, note)}
                   disabled={!note.trim() || !!loading}
-                  className="rounded-lg bg-white/[0.08] border border-white/[0.1] px-3 py-1.5 text-[12px] font-medium text-white/70 hover:bg-white/[0.12] disabled:opacity-40 transition-colors"
+                  className="rounded-lg bg-white/[0.08] border border-white/[0.16] px-3 py-1.5 text-[12px] font-medium text-white/90 hover:bg-white/[0.12] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue disabled:opacity-40 transition-colors"
                 >
                   {loading === noteMode ? <Loader2 size={11} className="animate-spin inline mr-1" /> : null}
                   Confirm
@@ -422,7 +422,7 @@ function IssueRow({
                 <button
                   type="button"
                   onClick={() => { setNoteMode(null); setNote('') }}
-                  className="rounded-lg border border-white/[0.12] bg-white/[0.04] px-3 py-1.5 text-[12px] text-white/70 hover:text-white transition-colors"
+                  className="rounded-lg border border-white/[0.16] bg-white/[0.04] px-3 py-1.5 text-[12px] text-white/85 hover:text-white hover:border-white/[0.24] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-colors"
                 >
                   Cancel
                 </button>
@@ -481,8 +481,8 @@ function IssueRow({
 function DetailRow({ label, value, mono, truncate }: { label: string; value: string; mono?: boolean; truncate?: boolean }) {
   return (
     <div className="flex items-start gap-3">
-      <p className="text-[11px] text-white/30 w-24 flex-shrink-0 pt-0.5">{label}</p>
-      <p className={`text-[12px] text-white/65 ${mono ? 'font-mono' : ''} ${truncate ? 'truncate max-w-xs' : ''}`}>
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-white/65 w-24 flex-shrink-0 pt-0.5">{label}</p>
+      <p className={`text-[12px] text-white/85 ${mono ? 'font-mono' : ''} ${truncate ? 'truncate max-w-xs' : ''}`}>
         {value}
       </p>
     </div>
@@ -499,10 +499,10 @@ function ActionButton({
   variant: 'muted' | 'green' | 'blue' | 'red'
 }) {
   const colors = {
-    muted:  'border-white/[0.08] bg-white/[0.04] text-white/50 hover:text-white/70 hover:bg-white/[0.07]',
-    green:  'border-emerald-500/25 bg-emerald-500/[0.08] text-emerald-400 hover:bg-emerald-500/[0.14]',
-    blue:   'border-vektrum-blue/25 bg-vektrum-blue/[0.08] text-vektrum-blue hover:bg-vektrum-blue/[0.14]',
-    red:    'border-red-500/25 bg-red-500/[0.08] text-red-400 hover:bg-red-500/[0.14]',
+    muted:  'border-white/[0.16] bg-white/[0.05] text-white/85 hover:text-white hover:bg-white/[0.1] hover:border-white/[0.24]',
+    green:  'border-emerald-500/30 bg-emerald-500/[0.1] text-emerald-400 hover:bg-emerald-500/[0.16]',
+    blue:   'border-vektrum-blue/30 bg-vektrum-blue/[0.1] text-vektrum-blue hover:bg-vektrum-blue/[0.16]',
+    red:    'border-red-500/30 bg-red-500/[0.1] text-red-400 hover:bg-red-500/[0.16]',
   }
 
   return (
@@ -510,7 +510,7 @@ function ActionButton({
       type="button"
       onClick={onClick}
       disabled={loading}
-      className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[12px] font-medium transition-colors disabled:opacity-50 ${colors[variant]}`}
+      className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[12px] font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue disabled:opacity-50 ${colors[variant]}`}
     >
       {loading
         ? <Loader2 size={11} className="animate-spin" />

@@ -64,18 +64,18 @@ function SectionToggle({
       className="flex items-center justify-between w-full text-left py-1"
     >
       <div className="flex items-center gap-2">
-        <p className={`text-[11px] font-bold uppercase tracking-[0.12em] ${accent ?? 'text-white/30'}`}>
+        <p className={`text-[11px] font-bold uppercase tracking-[0.12em] ${accent ?? 'text-white/65'}`}>
           {label}
         </p>
         {count !== undefined && (
-          <span className="text-[10px] font-semibold text-white/30 bg-surface-3 px-1.5 py-0.5 rounded">
+          <span className="text-[10px] font-semibold text-white/65 bg-surface-3 px-1.5 py-0.5 rounded">
             {count}
           </span>
         )}
       </div>
       {open
-        ? <ChevronUp size={13} className="text-white/30" />
-        : <ChevronDown size={13} className="text-white/30" />
+        ? <ChevronUp size={13} className="text-white/65" />
+        : <ChevronDown size={13} className="text-white/65" />
       }
     </button>
   )
@@ -85,7 +85,7 @@ function ResponsibleBadge({ party }: { party: 'CONTRACTOR' | 'FUNDER' | 'EITHER'
   const styles = {
     CONTRACTOR: 'bg-vektrum-blue/10 text-vektrum-blue border-vektrum-blue/20',
     FUNDER: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-    EITHER: 'bg-white/5 text-white/40 border-white/10',
+    EITHER: 'bg-white/5 text-white/75 border-white/10',
   }
   return (
     <span className={`inline-block rounded border px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] ${styles[party]}`}>
@@ -97,10 +97,10 @@ function ResponsibleBadge({ party }: { party: 'CONTRACTOR' | 'FUNDER' | 'EITHER'
 function BriefUnavailable() {
   return (
     <div className="rounded-xl border border-white/[0.06] bg-[#0d1520] px-5 py-4 flex items-start gap-3 mb-6">
-      <ShieldAlert size={15} className="text-white/30 flex-shrink-0 mt-0.5" />
+      <ShieldAlert size={15} className="text-white/65 flex-shrink-0 mt-0.5" />
       <div>
         <p className="text-[13px] font-semibold text-white/50">Dispute brief unavailable</p>
-        <p className="text-[12px] text-white/30 mt-0.5 leading-relaxed">
+        <p className="text-[12px] text-white/65 mt-0.5 leading-relaxed">
           The automated brief could not be generated. Please contact support or proceed with manual review. The dispute lock remains in effect.
         </p>
       </div>
@@ -148,7 +148,7 @@ export function DisputeBrief({ brief, role, milestoneId, milestoneName }: Props)
           </div>
           <div>
             <p className="text-[13px] font-semibold text-white">Dispute Brief</p>
-            <p className="text-[11px] text-white/35 capitalize">{reasonLabel}</p>
+            <p className="text-[11px] text-white/70 capitalize">{reasonLabel}</p>
           </div>
         </div>
         <div className="flex items-center gap-2.5">
@@ -163,7 +163,7 @@ export function DisputeBrief({ brief, role, milestoneId, milestoneName }: Props)
               Open
             </span>
           )}
-          <div className="flex items-center gap-1.5 text-[11px] text-white/25">
+          <div className="flex items-center gap-1.5 text-[11px] text-white/65">
             <Clock size={11} />
             {new Date(brief.created_at).toLocaleDateString()}
           </div>
@@ -174,9 +174,9 @@ export function DisputeBrief({ brief, role, milestoneId, milestoneName }: Props)
 
         {brief.dispute_context && (
           <div className="flex items-start gap-2.5 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
-            <User size={13} className="text-white/30 flex-shrink-0 mt-0.5" />
+            <User size={13} className="text-white/65 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-white/30 mb-0.5">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-white/65 mb-0.5">
                 Funder&apos;s context
               </p>
               <p className="text-[13px] text-white/60 leading-relaxed">{brief.dispute_context}</p>
@@ -186,13 +186,13 @@ export function DisputeBrief({ brief, role, milestoneId, milestoneName }: Props)
 
         {/* Project status */}
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3.5">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-white/30 mb-1.5">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-white/65 mb-1.5">
             Project status
           </p>
           <p className="text-[13px] text-white/65 leading-relaxed">{brief.project_status_summary}</p>
           <div className="mt-2.5 flex items-center gap-2">
-            <Clock size={11} className="text-white/30" />
-            <p className="text-[12px] text-white/40">
+            <Clock size={11} className="text-white/65" />
+            <p className="text-[12px] text-white/75">
               Estimated resolution:{' '}
               <span className="text-white/60 font-medium">{brief.estimated_resolution_time}</span>
             </p>
@@ -225,7 +225,7 @@ export function DisputeBrief({ brief, role, milestoneId, milestoneName }: Props)
                   <div>
                     <p className="text-[13px] font-medium text-white/80">{item.name}</p>
                     {item.detail && (
-                      <p className="mt-0.5 text-[12px] text-white/45 leading-relaxed">{item.detail}</p>
+                      <p className="mt-0.5 text-[12px] text-white/75 leading-relaxed">{item.detail}</p>
                     )}
                   </div>
                 </div>
@@ -265,7 +265,7 @@ export function DisputeBrief({ brief, role, milestoneId, milestoneName }: Props)
                         {item.severity}
                       </span>
                     </div>
-                    <p className="text-[11px] text-white/35">Required by: {item.requiredBy}</p>
+                    <p className="text-[11px] text-white/70">Required by: {item.requiredBy}</p>
                   </div>
                 ))}
               </div>
@@ -303,7 +303,7 @@ export function DisputeBrief({ brief, role, milestoneId, milestoneName }: Props)
                     }
                     <div>
                       <p className="text-[13px] font-medium text-white/80">{gap.condition}</p>
-                      <p className="mt-0.5 text-[12px] text-white/45 leading-relaxed">{gap.explanation}</p>
+                      <p className="mt-0.5 text-[12px] text-white/75 leading-relaxed">{gap.explanation}</p>
                     </div>
                   </div>
                 ))}
@@ -334,7 +334,7 @@ export function DisputeBrief({ brief, role, milestoneId, milestoneName }: Props)
                   <div className="flex-1">
                     <p className="text-[13px] font-medium text-white/80 leading-snug">{step.action}</p>
                     {step.detail && (
-                      <p className="mt-1 text-[12px] text-white/40 leading-relaxed">{step.detail}</p>
+                      <p className="mt-1 text-[12px] text-white/75 leading-relaxed">{step.detail}</p>
                     )}
                     <div className="mt-1.5">
                       <ResponsibleBadge party={step.responsibleParty} />
@@ -371,7 +371,7 @@ export function DisputeBrief({ brief, role, milestoneId, milestoneName }: Props)
                 </>
               )}
             </button>
-            <p className="text-center text-[11px] text-white/25">
+            <p className="text-center text-[11px] text-white/65">
               Milestone will return to &lsquo;approved&rsquo; status. You can then trigger the release gate.
             </p>
           </div>
@@ -389,8 +389,8 @@ export function DisputeBrief({ brief, role, milestoneId, milestoneName }: Props)
 
         {/* AI disclaimer */}
         <div className="flex items-start gap-2.5 rounded-xl border border-white/[0.04] bg-white/[0.02] px-3.5 py-3">
-          <ShieldAlert size={12} className="text-white/20 flex-shrink-0 mt-0.5" />
-          <p className="text-[11px] text-white/25 leading-relaxed">
+          <ShieldAlert size={12} className="text-white/60 flex-shrink-0 mt-0.5" />
+          <p className="text-[11px] text-white/65 leading-relaxed">
             Generated by Perplexity Computer
             {brief.model_version ? ` (${brief.model_version})` : ''}.
             Not legal advice. Human approval required to release funds.

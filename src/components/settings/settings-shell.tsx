@@ -53,7 +53,7 @@ export function SettingsShell({ profile, userEmail }: SettingsShellProps) {
           <h1 className="type-page-title">
             Account Settings
           </h1>
-          <p className="mt-2.5 text-[13px] text-white/45 leading-relaxed">
+          <p className="mt-2.5 text-[13px] text-white/75 leading-relaxed">
             Manage your profile, security, and platform preferences.
           </p>
         </div>
@@ -75,7 +75,7 @@ export function SettingsShell({ profile, userEmail }: SettingsShellProps) {
                     'flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-all whitespace-nowrap min-w-fit text-left',
                     isActive
                       ? 'bg-vektrum-blue/10 text-vektrum-blue border border-vektrum-blue/20'
-                      : 'text-white/45 hover:text-white/80 hover:bg-white/[0.05] border border-transparent'
+                      : 'text-white/80 hover:text-white hover:bg-white/[0.05] border border-transparent'
                   )}
                   aria-current={isActive ? 'page' : undefined}
                 >
@@ -120,7 +120,7 @@ function DangerTab() {
     <div className="space-y-5">
       <div>
         <h2 className="text-[16px] font-semibold tracking-[-0.01em] text-white">Danger Zone</h2>
-        <p className="mt-1.5 text-[13px] text-white/45 leading-relaxed">
+        <p className="mt-1.5 text-[13px] text-white/75 leading-relaxed">
           Irreversible account actions. Proceed with caution.
         </p>
       </div>
@@ -130,7 +130,7 @@ function DangerTab() {
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-sm font-semibold text-white">Delete Account</p>
-              <p className="mt-1.5 text-sm text-white/45 leading-relaxed max-w-md">
+              <p className="mt-1.5 text-sm text-white/75 leading-relaxed max-w-md">
                 Account deletion requires all active deals to be fully closed and all funds
                 released or returned. This action is irreversible and permanently removes
                 your deal history.

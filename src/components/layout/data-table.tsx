@@ -138,7 +138,7 @@ export function DataTableTd({
         align === "right" && "col-right",
         align === "center" && "text-center",
         numeric && "font-mono font-numeric tabular-nums !text-white",
-        muted && "!text-white/40",
+        muted && "!text-white/75",
         className
       )}
     >
@@ -204,7 +204,7 @@ export function TablePagination({
 
   return (
     <div className="flex items-center justify-between border-t border-white/[0.06] px-4 py-3">
-      <p className="text-[12px] text-white/35 font-numeric tabular-nums">
+      <p className="text-[12px] text-white/70 font-numeric tabular-nums">
         {total === 0 ? "No results" : `${start}–${end} of ${total}`}
       </p>
       <div className="flex items-center gap-2">
@@ -212,7 +212,7 @@ export function TablePagination({
           type="button"
           disabled={!hasPrev}
           onClick={onPrev}
-          className="min-h-[32px] rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 text-[12px] font-medium text-white/55 hover:bg-white/[0.06] hover:text-white/80 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="min-h-[32px] rounded-lg border border-white/[0.16] bg-white/[0.05] px-3 text-[12px] font-medium text-white/85 hover:bg-white/[0.1] hover:text-white hover:border-white/[0.24] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           Previous
         </button>
@@ -220,7 +220,7 @@ export function TablePagination({
           type="button"
           disabled={!hasNext}
           onClick={onNext}
-          className="min-h-[32px] rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 text-[12px] font-medium text-white/55 hover:bg-white/[0.06] hover:text-white/80 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="min-h-[32px] rounded-lg border border-white/[0.16] bg-white/[0.05] px-3 text-[12px] font-medium text-white/85 hover:bg-white/[0.1] hover:text-white hover:border-white/[0.24] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           Next
         </button>

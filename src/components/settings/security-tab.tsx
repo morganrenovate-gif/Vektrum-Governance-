@@ -73,7 +73,7 @@ export function SecurityTab() {
           </div>
           <div>
             <p className="text-[14px] font-semibold text-white">Change Password</p>
-            <p className="text-[11px] text-white/30">Minimum 8 characters required.</p>
+            <p className="text-[11px] text-white/70">Minimum 8 characters required.</p>
           </div>
         </div>
 

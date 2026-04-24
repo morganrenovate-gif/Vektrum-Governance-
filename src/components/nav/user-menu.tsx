@@ -159,7 +159,7 @@ export function UserMenu({ name, email, role }: UserMenuProps) {
               onClick={() => setOpen(false)}
               className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-white hover:bg-surface-3 transition-colors"
             >
-              <Settings size={14} className="text-white/55" aria-hidden="true" />
+              <Settings size={14} className="text-white/75" aria-hidden="true" />
               Account Settings
             </Link>
 
@@ -169,7 +169,7 @@ export function UserMenu({ name, email, role }: UserMenuProps) {
               onClick={() => setOpen(false)}
               className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-white hover:bg-surface-3 transition-colors"
             >
-              <HelpCircle size={14} className="text-white/55" aria-hidden="true" />
+              <HelpCircle size={14} className="text-white/75" aria-hidden="true" />
               Support
             </Link>
 

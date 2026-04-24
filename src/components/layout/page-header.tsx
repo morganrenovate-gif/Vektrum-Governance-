@@ -45,7 +45,7 @@ export function PageHeader({
             {title}
           </h1>
           {description && (
-            <p className="text-[13px] text-white/45 leading-relaxed max-w-2xl mt-0.5">
+            <p className="text-[13px] text-white/75 leading-relaxed max-w-2xl mt-0.5">
               {description}
             </p>
           )}
@@ -88,7 +88,7 @@ export function SectionHeader({
       ? "text-amber-400"
       : variant === "blue"
       ? "text-vektrum-blue"
-      : "text-white/35";
+      : "text-white/65";
 
   const barColor =
     variant === "warning"
@@ -106,7 +106,7 @@ export function SectionHeader({
         <p className={cn("text-[10px] font-bold uppercase tracking-[0.16em] whitespace-nowrap", labelColor)}>
           {label}
           {count !== undefined && (
-            <span className="ml-2.5 font-mono tabular-nums font-normal text-white/20">
+            <span className="ml-2.5 font-mono tabular-nums font-normal text-white/65">
               {count}
             </span>
           )}

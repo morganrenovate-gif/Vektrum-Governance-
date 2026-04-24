@@ -54,7 +54,7 @@ export function FundDealModal({ open, onConfirm, onClose }: FundDealModalProps) 
           <>
             {/* Funder */}
             <div className="mb-4">
-              <label className="block text-xs font-semibold uppercase tracking-wide text-white/40 mb-1">Funder</label>
+              <label className="block text-xs font-semibold uppercase tracking-wide text-white/70 mb-1">Funder</label>
               <div className="rounded-lg bg-surface-3 border border-white/[0.08] px-4 py-3 text-sm text-white/70">
                 Sarah Chen — Meridian Capital Partners
               </div>
@@ -62,7 +62,7 @@ export function FundDealModal({ open, onConfirm, onClose }: FundDealModalProps) 
 
             {/* Deal */}
             <div className="mb-4">
-              <label className="block text-xs font-semibold uppercase tracking-wide text-white/40 mb-1">Deal</label>
+              <label className="block text-xs font-semibold uppercase tracking-wide text-white/70 mb-1">Deal</label>
               <div className="rounded-lg bg-surface-3 border border-white/[0.08] px-4 py-3 text-sm text-white/70 cursor-not-allowed">
                 Westside Medical Office Campus — {formatCurrency(4_750_000)}
               </div>
@@ -70,7 +70,7 @@ export function FundDealModal({ open, onConfirm, onClose }: FundDealModalProps) 
 
             {/* Amount */}
             <div className="mb-5">
-              <label className="block text-xs font-semibold uppercase tracking-wide text-white/40 mb-1">Amount</label>
+              <label className="block text-xs font-semibold uppercase tracking-wide text-white/70 mb-1">Amount</label>
               <p className="text-2xl font-bold text-vektrum-blue">{formatCurrency(4_750_000)}</p>
             </div>
 

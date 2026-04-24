@@ -170,33 +170,33 @@ export function AdminAuditLogPanel({ initialData }: AdminAuditLogPanelProps) {
       {/* ── Filter bar ─────────────────────────────────────────────── */}
       <div className="flex flex-wrap gap-3 items-end p-3 rounded-xl border border-white/[0.08] bg-white/[0.02]">
         <label className="flex flex-col gap-1 min-w-[160px]">
-          <span className="text-[10px] uppercase tracking-widest text-white/30">Action</span>
+          <span className="text-[10px] uppercase tracking-widest text-white/65 font-semibold">Action</span>
           <input
             type="text"
             placeholder="e.g. admin_invite_sent"
             value={filters.action}
             onChange={e => setFilters(f => ({ ...f, action: e.target.value }))}
-            className="bg-transparent border border-white/[0.12] rounded-lg px-3 py-1.5 text-[13px] text-white/80 placeholder:text-white/20 focus:outline-none focus:border-vektrum-blue/50"
+            className="bg-white/[0.02] border border-white/[0.14] rounded-lg px-3 py-1.5 text-[13px] text-white placeholder:text-white/55 focus:outline-none focus:border-vektrum-blue focus:ring-2 focus:ring-vektrum-blue/30"
           />
         </label>
 
         <label className="flex flex-col gap-1 min-w-[120px]">
-          <span className="text-[10px] uppercase tracking-widest text-white/30">From</span>
+          <span className="text-[10px] uppercase tracking-widest text-white/65 font-semibold">From</span>
           <input
             type="date"
             value={filters.start_date}
             onChange={e => setFilters(f => ({ ...f, start_date: e.target.value }))}
-            className="bg-transparent border border-white/[0.12] rounded-lg px-3 py-1.5 text-[13px] text-white/80 focus:outline-none focus:border-vektrum-blue/50"
+            className="bg-white/[0.02] border border-white/[0.14] rounded-lg px-3 py-1.5 text-[13px] text-white focus:outline-none focus:border-vektrum-blue focus:ring-2 focus:ring-vektrum-blue/30"
           />
         </label>
 
         <label className="flex flex-col gap-1 min-w-[120px]">
-          <span className="text-[10px] uppercase tracking-widest text-white/30">To</span>
+          <span className="text-[10px] uppercase tracking-widest text-white/65 font-semibold">To</span>
           <input
             type="date"
             value={filters.end_date}
             onChange={e => setFilters(f => ({ ...f, end_date: e.target.value }))}
-            className="bg-transparent border border-white/[0.12] rounded-lg px-3 py-1.5 text-[13px] text-white/80 focus:outline-none focus:border-vektrum-blue/50"
+            className="bg-white/[0.02] border border-white/[0.14] rounded-lg px-3 py-1.5 text-[13px] text-white focus:outline-none focus:border-vektrum-blue focus:ring-2 focus:ring-vektrum-blue/30"
           />
         </label>
 
@@ -207,7 +207,7 @@ export function AdminAuditLogPanel({ initialData }: AdminAuditLogPanelProps) {
             onChange={e => setFilters(f => ({ ...f, unreviewed: e.target.checked }))}
             className="w-3.5 h-3.5 accent-vektrum-blue"
           />
-          <span className="text-[12px] text-white/70">Unreviewed only</span>
+          <span className="text-[12px] text-white/85">Unreviewed only</span>
         </label>
 
         <div className="flex gap-2 self-end">
@@ -220,7 +220,7 @@ export function AdminAuditLogPanel({ initialData }: AdminAuditLogPanelProps) {
           </button>
           <button
             onClick={() => { setFilters(DEFAULT_FILTERS); applyFilters(DEFAULT_FILTERS); }}
-            className="px-3 py-1.5 rounded-lg border border-white/[0.12] bg-white/[0.04] text-[12px] text-white/70 hover:text-white transition-colors"
+            className="px-3 py-1.5 rounded-lg border border-white/[0.16] bg-white/[0.04] text-[12px] text-white/85 hover:text-white hover:border-white/[0.24] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-colors"
           >
             Reset
           </button>
@@ -238,7 +238,7 @@ export function AdminAuditLogPanel({ initialData }: AdminAuditLogPanelProps) {
 
       {/* ── Table ──────────────────────────────────────────────────── */}
       {entries.length === 0 ? (
-        <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] px-5 py-8 text-center text-[13px] text-white/30">
+        <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] px-5 py-8 text-center text-[13px] text-white/70">
           No admin audit log entries match your filters.
         </div>
       ) : (
@@ -246,12 +246,12 @@ export function AdminAuditLogPanel({ initialData }: AdminAuditLogPanelProps) {
           <table className="w-full text-[12px]">
             <thead>
               <tr className="border-b border-white/[0.08] bg-white/[0.03]">
-                <th className="px-4 py-2.5 text-left text-[10px] uppercase tracking-widest text-white/30 font-medium">Timestamp</th>
-                <th className="px-4 py-2.5 text-left text-[10px] uppercase tracking-widest text-white/30 font-medium">Action</th>
-                <th className="px-4 py-2.5 text-left text-[10px] uppercase tracking-widest text-white/30 font-medium">Actor</th>
-                <th className="px-4 py-2.5 text-left text-[10px] uppercase tracking-widest text-white/30 font-medium">Justification</th>
-                <th className="px-4 py-2.5 text-left text-[10px] uppercase tracking-widest text-white/30 font-medium">Review</th>
-                <th className="px-4 py-2.5 text-left text-[10px] uppercase tracking-widest text-white/30 font-medium w-8" />
+                <th className="px-4 py-2.5 text-left text-[10px] uppercase tracking-widest text-white/65 font-semibold font-medium">Timestamp</th>
+                <th className="px-4 py-2.5 text-left text-[10px] uppercase tracking-widest text-white/65 font-semibold font-medium">Action</th>
+                <th className="px-4 py-2.5 text-left text-[10px] uppercase tracking-widest text-white/65 font-semibold font-medium">Actor</th>
+                <th className="px-4 py-2.5 text-left text-[10px] uppercase tracking-widest text-white/65 font-semibold font-medium">Justification</th>
+                <th className="px-4 py-2.5 text-left text-[10px] uppercase tracking-widest text-white/65 font-semibold font-medium">Review</th>
+                <th className="px-4 py-2.5 text-left text-[10px] uppercase tracking-widest text-white/65 font-semibold font-medium w-8" />
               </tr>
             </thead>
             <tbody>
@@ -272,36 +272,36 @@ export function AdminAuditLogPanel({ initialData }: AdminAuditLogPanelProps) {
                     >
                       {/* Timestamp */}
                       <td className="px-4 py-3 align-top whitespace-nowrap">
-                        <span className="font-mono text-white/50">
+                        <span className="font-mono text-white/75">
                           {formatAuditTimestamp(entry.created_at)}
                         </span>
                       </td>
 
                       {/* Action */}
                       <td className="px-4 py-3 align-top">
-                        <code className="text-vektrum-blue/80 bg-vektrum-blue/[0.08] px-1.5 py-0.5 rounded text-[11px]">
+                        <code className="text-vektrum-blue bg-vektrum-blue/[0.12] border border-vektrum-blue/20 px-1.5 py-0.5 rounded text-[11px] font-mono">
                           {entry.action}
                         </code>
                       </td>
 
                       {/* Actor */}
                       <td className="px-4 py-3 align-top">
-                        <div className="text-white/70">{entry.actor_name ?? entry.actor_id ?? "—"}</div>
+                        <div className="text-white/90 font-medium">{entry.actor_name ?? entry.actor_id ?? "—"}</div>
                         {entry.actor_email && (
-                          <div className="text-white/30 text-[11px]">{entry.actor_email}</div>
+                          <div className="text-white/65 text-[11px]">{entry.actor_email}</div>
                         )}
                         {entry.ip_address && (
-                          <div className="text-white/25 text-[11px] font-mono">{entry.ip_address}</div>
+                          <div className="text-white/60 text-[11px] font-mono">{entry.ip_address}</div>
                         )}
                       </td>
 
                       {/* Justification */}
                       <td className="px-4 py-3 align-top max-w-[260px]">
-                        <p className="text-white/60 leading-relaxed line-clamp-2">
+                        <p className="text-white/80 leading-relaxed line-clamp-2">
                           {entry.admin_justification}
                         </p>
                         {entry.authorization_reference && (
-                          <span className="inline-block mt-1 text-[10px] text-white/30 bg-white/[0.04] px-1.5 py-0.5 rounded">
+                          <span className="inline-block mt-1 text-[10px] text-white/70 bg-white/[0.06] border border-white/[0.1] px-1.5 py-0.5 rounded">
                             ref: {entry.authorization_reference}
                           </span>
                         )}
@@ -349,29 +349,29 @@ export function AdminAuditLogPanel({ initialData }: AdminAuditLogPanelProps) {
                         <td colSpan={6} className="px-4 py-3 bg-white/[0.02]">
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-[11px]">
                             <div>
-                              <p className="text-[10px] uppercase tracking-widest text-white/25 mb-1">Entity</p>
-                              <p className="text-white/50 font-mono">
+                              <p className="text-[10px] uppercase tracking-widest text-white/65 font-semibold mb-1">Entity</p>
+                              <p className="text-white/80 font-mono">
                                 {entry.entity_type} / {entry.entity_id}
                               </p>
                             </div>
                             {entry.system_source && (
                               <div>
-                                <p className="text-[10px] uppercase tracking-widest text-white/25 mb-1">Source</p>
-                                <p className="text-white/50 font-mono">{entry.system_source}</p>
+                                <p className="text-[10px] uppercase tracking-widest text-white/65 font-semibold mb-1">Source</p>
+                                <p className="text-white/80 font-mono">{entry.system_source}</p>
                               </div>
                             )}
                             {entry.new_values && (
                               <div className="sm:col-span-2">
-                                <p className="text-[10px] uppercase tracking-widest text-white/25 mb-1">New Values</p>
-                                <pre className="text-white/40 bg-black/20 rounded p-2 overflow-x-auto text-[10px] leading-relaxed">
+                                <p className="text-[10px] uppercase tracking-widest text-white/65 font-semibold mb-1">New Values</p>
+                                <pre className="text-white/85 bg-black/30 border border-white/[0.06] rounded p-2 overflow-x-auto text-[10px] leading-relaxed">
                                   {JSON.stringify(entry.new_values, null, 2)}
                                 </pre>
                               </div>
                             )}
                             {entry.reviewed_at && (
                               <div>
-                                <p className="text-[10px] uppercase tracking-widest text-white/25 mb-1">Reviewed At</p>
-                                <p className="text-white/50">{formatAuditTimestamp(entry.reviewed_at)}</p>
+                                <p className="text-[10px] uppercase tracking-widest text-white/65 font-semibold mb-1">Reviewed At</p>
+                                <p className="text-white/80">{formatAuditTimestamp(entry.reviewed_at)}</p>
                               </div>
                             )}
                           </div>
@@ -389,7 +389,7 @@ export function AdminAuditLogPanel({ initialData }: AdminAuditLogPanelProps) {
       {/* ── Pagination ─────────────────────────────────────────────── */}
       {total > LIMIT && (
         <div className="flex items-center justify-between pt-1">
-          <p className="text-[12px] text-white/30">
+          <p className="text-[12px] text-white/70">
             Showing {offset + 1}–{Math.min(offset + LIMIT, total)} of {total}
           </p>
           <div className="flex gap-2">

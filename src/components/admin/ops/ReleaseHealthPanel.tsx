@@ -111,17 +111,17 @@ function StuckRow({ item }: { item: StuckRelease }) {
         onClick={() => setExpanded((v) => !v)}
       >
         {expanded
-          ? <ChevronDown size={13} className="text-white/25 flex-shrink-0" />
-          : <ChevronRight size={13} className="text-white/25 flex-shrink-0" />
+          ? <ChevronDown size={13} className="text-white/65 flex-shrink-0" />
+          : <ChevronRight size={13} className="text-white/65 flex-shrink-0" />
         }
 
         <StuckBadge hours={item.hours_stuck} />
 
         <div className="flex-1 min-w-0">
-          <p className="text-[13px] font-semibold text-white/80 truncate">
+          <p className="text-[13px] font-semibold text-white truncate">
             {item.milestone_title}
           </p>
-          <p className="text-[11px] text-white/35 truncate mt-0.5">
+          <p className="text-[11px] text-white/70 truncate mt-0.5">
             {item.deal_title} · {item.contractor_name}
           </p>
         </div>
@@ -132,11 +132,11 @@ function StuckRow({ item }: { item: StuckRelease }) {
           </span>
         )}
 
-        <p className="text-[13px] font-mono text-white/60 flex-shrink-0">
+        <p className="text-[13px] font-mono text-white/85 flex-shrink-0">
           {formatMoney(item.amount)}
         </p>
 
-        <p className="text-[11px] text-white/25 flex-shrink-0 tabular-nums">
+        <p className="text-[11px] text-white/65 flex-shrink-0 tabular-nums">
           approved {relativeTime(item.approved_at)}
         </p>
       </div>
@@ -190,17 +190,17 @@ function FailedRow({
         onClick={() => setExpanded((v) => !v)}
       >
         {expanded
-          ? <ChevronDown size={13} className="text-white/25 flex-shrink-0" />
-          : <ChevronRight size={13} className="text-white/25 flex-shrink-0" />
+          ? <ChevronDown size={13} className="text-white/65 flex-shrink-0" />
+          : <ChevronRight size={13} className="text-white/65 flex-shrink-0" />
         }
 
         <FailureBadge count={item.payout_failure_count} />
 
         <div className="flex-1 min-w-0">
-          <p className="text-[13px] font-semibold text-white/80 truncate">
+          <p className="text-[13px] font-semibold text-white truncate">
             {item.milestone_title}
           </p>
-          <p className="text-[11px] text-white/35 truncate mt-0.5">
+          <p className="text-[11px] text-white/70 truncate mt-0.5">
             {item.deal_title} · Contractor: {item.contractor_name}
           </p>
           {item.failure_code && (
@@ -210,11 +210,11 @@ function FailedRow({
           )}
         </div>
 
-        <p className="text-[13px] font-mono text-white/60 flex-shrink-0">
+        <p className="text-[13px] font-mono text-white/85 flex-shrink-0">
           {formatMoney(item.amount)}
         </p>
 
-        <p className="text-[11px] text-white/25 flex-shrink-0 tabular-nums">
+        <p className="text-[11px] text-white/65 flex-shrink-0 tabular-nums">
           {relativeTime(item.last_payout_failure_at)}
         </p>
       </div>
@@ -326,7 +326,7 @@ export function ReleaseHealthPanel({ initialData }: ReleaseHealthPanelProps) {
               All releases healthy
             </div>
           )}
-          <p className="text-[11px] text-white/30">
+          <p className="text-[11px] text-white/65">
             Scanned {relativeTime(data.scanned_at)} · threshold: {data.stuck_threshold_hours}h
           </p>
         </div>
@@ -335,7 +335,7 @@ export function ReleaseHealthPanel({ initialData }: ReleaseHealthPanelProps) {
           type="button"
           onClick={refresh}
           disabled={refreshing}
-          className="flex items-center gap-2 rounded-xl border border-white/[0.1] bg-white/[0.05] px-3.5 py-2 text-[12px] font-medium text-white/60 hover:bg-white/[0.08] hover:text-white disabled:opacity-50 transition-all flex-shrink-0"
+          className="flex items-center gap-2 rounded-xl border border-white/[0.16] bg-white/[0.05] px-3.5 py-2 text-[12px] font-medium text-white/85 hover:bg-white/[0.1] hover:text-white hover:border-white/[0.24] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue disabled:opacity-50 transition-all flex-shrink-0"
         >
           {refreshing ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
           {refreshing ? 'Refreshing…' : 'Refresh'}
@@ -362,8 +362,8 @@ export function ReleaseHealthPanel({ initialData }: ReleaseHealthPanelProps) {
       {!hasIssues ? (
         <div className="rounded-xl border border-white/[0.06] bg-surface-2 px-5 py-8 text-center">
           <CheckCircle2 size={20} className="text-emerald-400 mx-auto mb-2" />
-          <p className="text-sm font-medium text-white/60">Release pipeline healthy</p>
-          <p className="text-[12px] text-white/30 mt-1">
+          <p className="text-sm font-medium text-white/90">Release pipeline healthy</p>
+          <p className="text-[12px] text-white/70 mt-1">
             No stuck approvals or failed payouts.
           </p>
         </div>
@@ -401,8 +401,8 @@ export function ReleaseHealthPanel({ initialData }: ReleaseHealthPanelProps) {
 function Detail({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div className="flex items-start gap-3">
-      <p className="text-[11px] text-white/30 w-28 flex-shrink-0 pt-0.5">{label}</p>
-      <p className={`text-[12px] text-white/65 break-all ${mono ? 'font-mono' : ''}`}>{value}</p>
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-white/65 w-28 flex-shrink-0 pt-0.5">{label}</p>
+      <p className={`text-[12px] text-white/85 break-all ${mono ? 'font-mono' : ''}`}>{value}</p>
     </div>
   )
 }
@@ -416,12 +416,12 @@ function TabBtn({
     <button
       type="button"
       onClick={onClick}
-      className={`px-3 py-1.5 rounded-md text-[12px] font-medium transition-colors ${
+      className={`px-3 py-1.5 rounded-md text-[12px] font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue ${
         active
           ? warning
             ? 'bg-red-500/15 text-red-400 border border-red-500/20'
-            : 'bg-white/[0.08] text-white/80'
-          : 'text-white/35 hover:text-white/60'
+            : 'bg-white/[0.1] text-white'
+          : 'text-white/75 hover:text-white hover:bg-white/[0.04]'
       }`}
     >
       {label}
@@ -432,8 +432,8 @@ function TabBtn({
 function ListHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <div className="px-5 py-3 border-b border-white/[0.06] flex items-center justify-between">
-      <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">{title}</p>
-      <p className="text-[11px] text-white/25">{subtitle}</p>
+      <p className="text-[11px] font-semibold uppercase tracking-widest text-white/65">{title}</p>
+      <p className="text-[11px] text-white/65">{subtitle}</p>
     </div>
   )
 }
@@ -442,7 +442,7 @@ function EmptyState({ label }: { label: string }) {
   return (
     <div className="rounded-xl border border-white/[0.06] bg-surface-2 px-5 py-6 text-center">
       <CheckCircle2 size={16} className="text-emerald-400 mx-auto mb-1.5" />
-      <p className="text-[13px] text-white/50">{label}</p>
+      <p className="text-[13px] text-white/80">{label}</p>
     </div>
   )
 }

@@ -275,7 +275,7 @@ export function MilestoneCard({
           </div>
           <div className="flex items-center gap-3 flex-shrink-0 ml-3">
             <span className="text-sm font-bold tabular-nums text-white">{formatMoney(milestone.amount)}</span>
-            <ChevronDown size={14} className="text-white/30" aria-hidden="true" />
+            <ChevronDown size={14} className="text-white/65" aria-hidden="true" />
           </div>
         </summary>
         <div className="border-t border-white/[0.06] px-5 py-4">
@@ -295,7 +295,7 @@ export function MilestoneCard({
             </div>
             <div className="flex flex-col items-start gap-3 sm:items-end">
               <div className="text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">Amount</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/65">Amount</p>
                 <p className="text-xl font-bold tabular-nums text-white">{formatMoney(milestone.amount)}</p>
               </div>
             </div>
@@ -340,7 +340,7 @@ export function MilestoneCard({
                     "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold tabular-nums",
                     isSequentiallyBlocked
                       ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                      : "bg-white/[0.06] text-white/40 border border-white/[0.08]",
+                      : "bg-white/[0.06] text-white/75 border border-white/[0.14]",
                   )}
                 >
                   <ListOrdered size={10} aria-hidden="true" />
@@ -371,7 +371,7 @@ export function MilestoneCard({
           {/* Right: amount + actions */}
           <div className="flex flex-col items-start gap-3 sm:items-end">
             <div className="text-right">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/65">
                 Amount
               </p>
               <p className="text-xl font-bold tabular-nums text-white">
@@ -486,10 +486,10 @@ export function MilestoneCard({
             {!lienWaiverState && (
               <div className="rounded-lg border border-white/[0.08] bg-white/[0.02] px-4 py-3 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2 min-w-0">
-                  <FileText size={13} className="text-white/40 flex-shrink-0" aria-hidden="true" />
+                  <FileText size={13} className="text-white/75 flex-shrink-0" aria-hidden="true" />
                   <div>
                     <p className="text-[12px] font-semibold text-white/70">Lien Waiver Required</p>
-                    <p className="text-[11px] text-white/40">
+                    <p className="text-[11px] text-white/75">
                       {role === "funder"
                         ? "Request a conditional progress waiver from the contractor."
                         : "The funder must request a lien waiver before this milestone can be released."}
@@ -569,7 +569,7 @@ export function MilestoneCard({
                       <p className="text-[12px] font-semibold text-white/80">
                         {role === "funder" ? "Waiver Uploaded — Review Required" : "Waiver Uploaded"}
                       </p>
-                      <p className="text-[11px] text-white/45 mt-0.5">
+                      <p className="text-[11px] text-white/75 mt-0.5">
                         {role === "funder"
                           ? "Review the signed waiver PDF and approve or reject it."
                           : "Your waiver is under review by the funder."}
@@ -606,7 +606,7 @@ export function MilestoneCard({
                       placeholder="Explain why the waiver is rejected (e.g. incorrect through-date, missing notarization)…"
                       value={rejectReason}
                       onChange={(e) => setRejectReason(e.target.value)}
-                      className="w-full rounded-lg border border-white/[0.10] bg-white/[0.04] px-3 py-2 text-[12px] text-white placeholder:text-white/25 focus:outline-none focus:ring-1 focus:ring-red-500/40 resize-none"
+                      className="w-full rounded-lg border border-white/[0.14] bg-white/[0.04] px-3 py-2 text-[12px] text-white placeholder:text-white/55 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500/60 resize-none"
                     />
                     <div className="flex items-center gap-2">
                       <Button

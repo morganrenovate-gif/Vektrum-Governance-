@@ -16,7 +16,7 @@ import {
 function Scene1() {
   return (
     <div className="space-y-4">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/30">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/65">
         Deal created
       </p>
       {/* Deal header */}
@@ -28,7 +28,7 @@ function Scene1() {
             </div>
             <div>
               <p className="text-[13px] font-semibold text-white">Riverside Mixed-Use</p>
-              <p className="text-[11px] text-white/30">4 milestones &middot; $2,400,000</p>
+              <p className="text-[11px] text-white/65">4 milestones &middot; $2,400,000</p>
             </div>
           </div>
           <span className="rounded-full bg-emerald-500/[0.08] px-2.5 py-0.5 text-[11px] font-medium text-emerald-400">
@@ -43,7 +43,7 @@ function Scene1() {
           { label: 'Foundation & Site Prep', amount: '$480,000', status: 'released', icon: CheckCircle2, color: 'text-emerald-400' },
           { label: 'Framing & Structural', amount: '$720,000', status: 'approved', icon: CheckCircle2, color: 'text-vektrum-blue' },
           { label: 'MEP Rough-In', amount: '$680,000', status: 'in progress', icon: Zap, color: 'text-amber-400' },
-          { label: 'Finishes & Certificate', amount: '$520,000', status: 'not started', icon: Lock, color: 'text-white/30' },
+          { label: 'Finishes & Certificate', amount: '$520,000', status: 'not started', icon: Lock, color: 'text-white/65' },
         ].map((m) => (
           <div
             key={m.label}
@@ -55,7 +55,7 @@ function Scene1() {
             </div>
             <div className="flex flex-col items-end flex-shrink-0">
               <span className="text-[11px] font-semibold tabular-nums text-white/55">{m.amount}</span>
-              <span className="text-[10px] capitalize text-white/30">{m.status}</span>
+              <span className="text-[10px] capitalize text-white/65">{m.status}</span>
             </div>
           </div>
         ))}
@@ -64,14 +64,14 @@ function Scene1() {
       {/* Funded progress */}
       <div className="rounded-xl border border-white/[0.08] bg-surface-2 p-4">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/30">Funded</span>
+          <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/65">Funded</span>
           <span className="text-[12px] font-bold tabular-nums text-vektrum-blue">$2,400,000</span>
         </div>
         <div className="relative h-2 w-full overflow-hidden rounded-full bg-surface-3">
           <div className="absolute left-0 top-0 h-full w-4/5 rounded-full bg-vektrum-blue" />
           <div className="absolute left-0 top-0 h-full w-[20%] rounded-full bg-vektrum-green" />
         </div>
-        <div className="mt-1.5 flex justify-between text-[10px] text-white/30">
+        <div className="mt-1.5 flex justify-between text-[10px] text-white/65">
           <span>$480K released</span>
           <span>$1,920K remaining</span>
         </div>
@@ -86,7 +86,7 @@ function Scene2() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/30">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/65">
           AI draw review
         </p>
         <span className="inline-flex items-center gap-1 rounded-full border border-vektrum-blue/20 bg-vektrum-blue/[0.08] px-2.5 py-0.5 text-[10px] font-medium text-vektrum-blue">
@@ -102,7 +102,7 @@ function Scene2() {
           </div>
           <div>
             <p className="text-[12px] font-semibold text-white">MEP Rough-In — $680,000</p>
-            <p className="text-[10px] text-white/30">Submitted for review &middot; 3 documents</p>
+            <p className="text-[10px] text-white/65">Submitted for review &middot; 3 documents</p>
           </div>
         </div>
 
@@ -144,7 +144,7 @@ function Scene2() {
 function Scene3() {
   return (
     <div className="space-y-4">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/30">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/65">
         $15K dispute &mdash; $9M project unaffected
       </p>
 
@@ -180,7 +180,7 @@ function Scene3() {
           </div>
           <div className="mt-2 flex items-center justify-between">
             <p className="text-[11px] text-red-400 font-semibold">$15,000 locked</p>
-            <p className="text-[10px] text-white/30">Isolated &mdash; does not block others</p>
+            <p className="text-[10px] text-white/65">Isolated &mdash; does not block others</p>
           </div>
         </div>
 
@@ -292,7 +292,7 @@ export function DemoScene() {
             >
               {s.label}
             </p>
-            <p className="text-[10px] text-white/30 leading-snug hidden sm:block">{s.sublabel}</p>
+            <p className="text-[10px] text-white/65 leading-snug hidden sm:block">{s.sublabel}</p>
           </button>
         ))}
       </div>
@@ -300,7 +300,7 @@ export function DemoScene() {
       {/* Scene label */}
       <div className="border-b border-white/[0.05] bg-surface-2 px-5 py-3">
         <p className="text-[13px] font-semibold text-white">{SCENES[active].label}</p>
-        <p className="text-[11px] text-white/30">{SCENES[active].sublabel}</p>
+        <p className="text-[11px] text-white/65">{SCENES[active].sublabel}</p>
       </div>
 
       {/* Active scene content */}

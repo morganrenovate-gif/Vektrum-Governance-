@@ -14,7 +14,7 @@ export function PortfolioRiskChart({ deals }: PortfolioRiskChartProps) {
 
   return (
     <div className="rounded-xl border border-white/[0.08] bg-surface-2 shadow-card p-6">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/35 mb-5">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/65 mb-5">
         Portfolio Capital Deployment
       </p>
 
@@ -33,7 +33,7 @@ export function PortfolioRiskChart({ deals }: PortfolioRiskChartProps) {
                 <span className="text-[12px] font-medium text-white truncate max-w-[60%]">
                   {deal.title}
                 </span>
-                <span className="text-[11px] font-semibold tabular-nums text-white/45 flex-shrink-0">
+                <span className="text-[11px] font-semibold tabular-nums text-white/80 flex-shrink-0">
                   {formatMoney(deal.funded_amount)}
                 </span>
               </div>
@@ -56,7 +56,7 @@ export function PortfolioRiskChart({ deals }: PortfolioRiskChartProps) {
               </div>
 
               {/* Sub-label */}
-              <div className="mt-1 flex justify-between text-[10px] text-white/30">
+              <div className="mt-1 flex justify-between text-[10px] text-white/70">
                 <span>{formatMoney(deal.released_amount)} released</span>
                 <span>
                   {formatMoney(Math.max(0, deal.funded_amount - deal.released_amount))} remaining
@@ -71,15 +71,15 @@ export function PortfolioRiskChart({ deals }: PortfolioRiskChartProps) {
       <div className="mt-4 flex items-center gap-4 pt-3 border-t border-white/[0.06]">
         <div className="flex items-center gap-1.5">
           <div className="h-2 w-3 rounded-sm bg-vektrum-green" />
-          <span className="text-[10px] text-white/30">Released</span>
+          <span className="text-[10px] text-white/70">Released</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="h-2 w-3 rounded-sm bg-vektrum-blue/30" />
-          <span className="text-[10px] text-white/30">Funded, not released</span>
+          <span className="text-[10px] text-white/70">Funded, not released</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="h-2 w-3 rounded-sm bg-white/[0.06] border border-white/[0.08]" />
-          <span className="text-[10px] text-white/30">Unfunded</span>
+          <span className="text-[10px] text-white/70">Unfunded</span>
         </div>
       </div>
     </div>

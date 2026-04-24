@@ -102,7 +102,7 @@ function Step2({ role }: { role: Profile['role'] }) {
         </p>
       </div>
       <div className="rounded-xl border border-white/[0.08] bg-surface-3 p-4">
-        <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-white/30">
+        <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-white/70">
           {isContractor ? 'Typical setup time' : 'Average portfolio view'}
         </p>
         <p className="mt-1 text-2xl font-bold tabular-nums text-white">

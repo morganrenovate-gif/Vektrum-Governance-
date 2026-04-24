@@ -35,7 +35,7 @@ export function DrawReviewPanel({ deals, embedded = false }: DrawReviewPanelProp
     <>
       {/* Sub-header with count + AI badge (only when has items) */}
       <div className="flex items-center justify-between mb-4">
-        <p className="text-[11px] text-white/35">
+        <p className="text-[11px] text-white/70">
           {reviewItems.length} milestone{reviewItems.length !== 1 ? 's' : ''} awaiting funder review
         </p>
         <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/20 bg-amber-500/[0.08] px-2.5 py-1 text-[10px] font-medium text-amber-400">
@@ -60,7 +60,7 @@ export function DrawReviewPanel({ deals, embedded = false }: DrawReviewPanelProp
                       {milestone.title}
                     </span>
                   </div>
-                  <p className="text-[11px] text-white/35 truncate">{deal.title}</p>
+                  <p className="text-[11px] text-white/70 truncate">{deal.title}</p>
                 </div>
                 <div className="flex flex-shrink-0 flex-col items-end gap-1.5">
                   <span className="text-[12px] font-semibold tabular-nums text-white">
@@ -68,7 +68,7 @@ export function DrawReviewPanel({ deals, embedded = false }: DrawReviewPanelProp
                   </span>
                   <RiskScoreBadge level={riskLevel} />
                 </div>
-                <ArrowRight size={14} className="flex-shrink-0 text-white/30 group-hover:text-vektrum-blue transition-colors" />
+                <ArrowRight size={14} className="flex-shrink-0 text-white/65 group-hover:text-vektrum-blue transition-colors" />
               </div>
             </Link>
           )

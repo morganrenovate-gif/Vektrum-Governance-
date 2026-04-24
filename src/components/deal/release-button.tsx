@@ -175,7 +175,7 @@ export function ReleaseButton({
               </p>
             </div>
             {milestoneTitle && (
-              <p className="mt-1 text-xs text-white/30">
+              <p className="mt-1 text-xs text-white/70">
                 Milestone: {milestoneTitle}
               </p>
             )}
@@ -250,7 +250,7 @@ export function ReleaseButton({
         className={cn(
           "inline-flex items-center justify-between gap-3 w-full sm:w-auto",
           "min-h-[52px] rounded-xl px-6 py-3",
-          "bg-surface-3/50 text-white/25 cursor-not-allowed",
+          "bg-surface-3/50 text-white/55 cursor-not-allowed",
           "border border-white/[0.08] shadow-sm"
         )}
       >
@@ -258,7 +258,7 @@ export function ReleaseButton({
           <Lock size={15} aria-hidden="true" />
           <span className="text-sm font-semibold">Release to {contractorName}</span>
         </div>
-        <span className="rounded-md bg-white/[0.06] px-2.5 py-1 text-sm font-bold tabular-nums text-white/30">
+        <span className="rounded-md bg-white/[0.06] px-2.5 py-1 text-sm font-bold tabular-nums text-white/65">
           {formatMoney(amount)}
         </span>
       </button>

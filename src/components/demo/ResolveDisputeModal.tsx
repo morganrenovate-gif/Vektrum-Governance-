@@ -86,7 +86,7 @@ export function ResolveDisputeModal({ open, onConfirm, onClose }: ResolveDispute
                   />
                   <div>
                     <p className="text-sm font-medium text-white">{opt.label}</p>
-                    <p className="text-xs text-white/45 mt-0.5">{opt.desc}</p>
+                    <p className="text-xs text-white/75 mt-0.5">{opt.desc}</p>
                   </div>
                 </label>
               ))}

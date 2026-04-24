@@ -102,7 +102,7 @@ export function InviteFunderButton({ dealId }: Props) {
   )
 
   const ExpiryRow = ({ expiresAt, onNew }: { expiresAt: string; onNew: () => void }) => (
-    <div className="flex items-center justify-between text-xs text-white/40">
+    <div className="flex items-center justify-between text-xs text-white/75">
       {expiresAt && (
         <span>Expires {new Date(expiresAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
       )}
@@ -120,14 +120,14 @@ export function InviteFunderButton({ dealId }: Props) {
     return (
       <div className="space-y-2">
         <div className="relative">
-          <Mail className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/30" aria-hidden="true" />
+          <Mail className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/65" aria-hidden="true" />
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && sendInvite()}
             placeholder="funder@company.com"
-            className="w-full rounded-lg border border-white/[0.1] bg-surface-3 py-2.5 pl-9 pr-3 text-sm text-white placeholder:text-white/25 focus:border-vektrum-blue focus:outline-none focus:ring-1 focus:ring-vektrum-blue"
+            className="w-full rounded-lg border border-white/[0.14] bg-surface-3 py-2.5 pl-9 pr-3 text-sm text-white placeholder:text-white/55 focus:border-vektrum-blue focus:outline-none focus:ring-2 focus:ring-vektrum-blue/50"
           />
         </div>
         <button
@@ -137,7 +137,7 @@ export function InviteFunderButton({ dealId }: Props) {
           <UserPlus className="h-4 w-4" aria-hidden="true" />
           {email.trim() ? 'Send Invite' : 'Generate Link'}
         </button>
-        <p className="text-xs text-white/35">
+        <p className="text-xs text-white/70">
           Enter an email to send the invite directly, or leave blank to get a copy-able link.
         </p>
       </div>

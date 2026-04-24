@@ -69,7 +69,7 @@ export function DrawRequestModal({ open, milestone, onConfirm, onClose }: DrawRe
         </div>
 
         {/* Info note */}
-        <p className="text-xs text-white/40 mb-5">
+        <p className="text-xs text-white/75 mb-5">
           Your funder will be notified and Vektrum AI will review this draw request before approval.
         </p>
 

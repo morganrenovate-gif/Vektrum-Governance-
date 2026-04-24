@@ -39,7 +39,7 @@ export function Money({
       <span
         className={cn(
           "text-[10px] font-semibold uppercase tracking-widest",
-          muted ? "text-white/30" : "text-white/55"
+          muted ? "text-white/65" : "text-white/75"
         )}
       >
         {label}
@@ -48,7 +48,7 @@ export function Money({
         className={cn(
           "font-numeric tabular-nums",
           sizeClasses[size as keyof typeof sizeClasses],
-          muted ? "text-white/30" : "text-white"
+          muted ? "text-white/75" : "text-white"
         )}
       >
         {formatted}

@@ -66,8 +66,8 @@ const STATUS_COLORS: Record<string, string> = {
   active:     'text-emerald-400',
   completed:  'text-blue-400',
   disputed:   'text-red-400',
-  draft:      'text-white/40',
-  cancelled:  'text-white/25',
+  draft:      'text-white/75',
+  cancelled:  'text-white/65',
   pending:    'text-amber-400',
   confirmed:  'text-emerald-400',
   failed:     'text-red-400',
@@ -87,8 +87,8 @@ function SectionLabel({ icon: Icon, label, count }: {
 }) {
   return (
     <div className="flex items-center gap-2 px-4 py-2 bg-white/[0.03] border-b border-white/[0.04]">
-      <Icon size={12} className="text-white/30" />
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">
+      <Icon size={12} className="text-white/65" />
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-white/65">
         {label} ({count})
       </p>
     </div>
@@ -101,26 +101,26 @@ function DealRow({ d }: { d: DealResult }) {
   return (
     <Link
       href={`/dashboard/admin?highlight=${d.id}`}
-      className="flex items-center gap-4 px-4 py-3 hover:bg-white/[0.04] transition-colors group"
+      className="flex items-center gap-4 px-4 py-3 hover:bg-white/[0.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-vektrum-blue transition-colors group"
     >
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-semibold text-white/80 truncate group-hover:text-white transition-colors">
+        <p className="text-[13px] font-semibold text-white truncate group-hover:text-white transition-colors">
           {d.title}
         </p>
-        <p className="text-[11px] text-white/35 truncate mt-0.5">
+        <p className="text-[11px] text-white/75 truncate mt-0.5">
           {d.contractor_name} → {d.funder_name}
         </p>
       </div>
 
-      <span className={`text-[11px] font-medium flex-shrink-0 capitalize ${STATUS_COLORS[d.status] ?? 'text-white/40'}`}>
+      <span className={`text-[11px] font-medium flex-shrink-0 capitalize ${STATUS_COLORS[d.status] ?? 'text-white/75'}`}>
         {d.status}
       </span>
 
-      <p className="text-[13px] font-mono text-white/50 flex-shrink-0">
+      <p className="text-[13px] font-mono text-white/85 flex-shrink-0">
         {formatMoney(d.total_amount)}
       </p>
 
-      <ArrowUpRight size={13} className="text-white/40 group-hover:text-white/75 flex-shrink-0 transition-colors" />
+      <ArrowUpRight size={13} className="text-white/65 group-hover:text-white flex-shrink-0 transition-colors" />
     </Link>
   )
 }
@@ -131,10 +131,10 @@ function ProfileRow({ p }: { p: ProfileResult }) {
   return (
     <div className="flex items-center gap-4 px-4 py-3 hover:bg-white/[0.04] transition-colors">
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-semibold text-white/80 truncate">
+        <p className="text-[13px] font-semibold text-white truncate">
           {p.display_name}
         </p>
-        <p className="text-[11px] text-white/35 truncate mt-0.5">
+        <p className="text-[11px] text-white/75 truncate mt-0.5">
           {p.email ?? 'No email'} · ID: {p.id.slice(0, 8)}…
         </p>
       </div>
@@ -145,12 +145,12 @@ function ProfileRow({ p }: { p: ProfileResult }) {
 
       <div className="flex gap-1.5 flex-shrink-0">
         {!p.stripe_payouts_enabled && p.role === 'contractor' && (
-          <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/15">
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
             No payouts
           </span>
         )}
         {!p.onboarding_complete && (
-          <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/[0.06] text-white/30 border border-white/[0.08]">
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/[0.06] text-white/75 border border-white/[0.16]">
             Incomplete
           </span>
         )}
@@ -166,20 +166,20 @@ function ReleaseRow({ r }: { r: ReleaseResult }) {
   return (
     <div className="flex items-center gap-4 px-4 py-3 hover:bg-white/[0.04] transition-colors">
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-mono text-white/60 truncate">
+        <p className="text-[13px] font-mono text-white/90 truncate">
           {r.stripe_transfer_id ?? r.id.slice(0, 16) + '…'}
         </p>
-        <p className="text-[11px] text-white/35 truncate mt-0.5">
+        <p className="text-[11px] text-white/75 truncate mt-0.5">
           {r.milestone_title ?? 'Milestone'} · {r.deal_title ?? 'Deal'}
           {isFailed && r.failure_code ? ` · ${r.failure_code}` : ''}
         </p>
       </div>
 
-      <span className={`text-[11px] font-medium flex-shrink-0 capitalize ${STATUS_COLORS[r.transfer_status] ?? 'text-white/40'}`}>
+      <span className={`text-[11px] font-medium flex-shrink-0 capitalize ${STATUS_COLORS[r.transfer_status] ?? 'text-white/75'}`}>
         {r.transfer_status}
       </span>
 
-      <p className="text-[13px] font-mono text-white/50 flex-shrink-0">
+      <p className="text-[13px] font-mono text-white/85 flex-shrink-0">
         {formatMoney(r.amount)}
       </p>
     </div>
@@ -233,8 +233,8 @@ export function OpsSearch() {
       <div className="relative">
         <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
           {loading
-            ? <Loader2 size={15} className="animate-spin text-white/30" />
-            : <Search size={15} className="text-white/30" />
+            ? <Loader2 size={15} className="animate-spin text-white/65" />
+            : <Search size={15} className="text-white/65" />
           }
         </div>
 
@@ -243,7 +243,8 @@ export function OpsSearch() {
           value={query}
           onChange={handleChange}
           placeholder="Search deals, users, emails, Stripe IDs…"
-          className="w-full rounded-xl border border-white/[0.1] bg-white/[0.05] pl-10 pr-10 py-3 text-[13px] text-white/80 placeholder:text-white/25 focus:outline-none focus:border-vektrum-blue/50 focus:bg-white/[0.07] transition-all"
+          aria-label="Search operations"
+          className="w-full rounded-xl border border-white/[0.14] bg-white/[0.05] pl-10 pr-10 py-3 text-[13px] text-white placeholder:text-white/55 focus:outline-none focus:ring-2 focus:ring-vektrum-blue/50 focus:border-vektrum-blue focus:bg-white/[0.07] transition-all"
           autoComplete="off"
           spellCheck={false}
         />
@@ -252,7 +253,8 @@ export function OpsSearch() {
           <button
             type="button"
             onClick={clear}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors"
+            aria-label="Clear search"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/75 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue rounded transition-colors"
           >
             <X size={14} />
           </button>
@@ -268,10 +270,10 @@ export function OpsSearch() {
       {/* ── Results ─────────────────────────────────────────────────── */}
       {isEmpty && (
         <div className="rounded-xl border border-white/[0.06] bg-surface-2 px-5 py-6 text-center">
-          <p className="text-[13px] text-white/40">
-            No results for <span className="text-white/60 font-mono">"{query}"</span>
+          <p className="text-[13px] text-white/80">
+            No results for <span className="text-white font-mono">"{query}"</span>
           </p>
-          <p className="text-[11px] text-white/25 mt-1">
+          <p className="text-[11px] text-white/65 mt-1">
             Try a different name, email, deal title, or Stripe transfer ID.
           </p>
         </div>
@@ -280,9 +282,9 @@ export function OpsSearch() {
       {hasResults && (
         <div className="rounded-xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden">
           <div className="px-4 py-2.5 border-b border-white/[0.06]">
-            <p className="text-[11px] text-white/30">
+            <p className="text-[11px] text-white/75">
               {results.total} result{results.total !== 1 ? 's' : ''} for{' '}
-              <span className="text-white/50 font-mono">"{results.query}"</span>
+              <span className="text-white font-mono">"{results.query}"</span>
             </p>
           </div>
 

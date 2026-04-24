@@ -180,7 +180,7 @@ export function DrawReviewAgent({
           <Loader2 size={14} className="animate-spin text-vektrum-blue" />
           Perplexity AI is analyzing this draw request...
         </div>
-        <p className="mt-1 text-xs text-white/30">This usually takes 10–15 seconds.</p>
+        <p className="mt-1 text-xs text-white/65">This usually takes 10–15 seconds.</p>
       </div>
     )
   }
@@ -194,11 +194,11 @@ export function DrawReviewAgent({
         </div>
         <div className="flex items-center gap-2 mb-3">
           <div className="h-5 w-5 rounded-md border border-white/[0.08] flex items-center justify-center">
-            <span className="text-xs text-white/30">–</span>
+            <span className="text-xs text-white/65">–</span>
           </div>
           <div>
             <p className="text-sm text-white/55">No AI assessment on file</p>
-            <p className="text-xs text-white/30">
+            <p className="text-xs text-white/65">
               Request a Perplexity AI review before this milestone can be released.
             </p>
           </div>
@@ -271,11 +271,11 @@ export function DrawReviewAgent({
       {/* Score row */}
       <div className="px-5 py-3 flex flex-wrap items-center gap-4 border-b border-white/[0.05]">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Score</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/65">Score</p>
           <p className="text-lg font-bold tabular-nums text-white">{assessment.score}/100</p>
         </div>
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Risk</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/65">Risk</p>
           <span className={cn(
             'inline-block rounded px-2 py-0.5 text-xs font-bold uppercase',
             colors.bg, colors.text,
@@ -284,7 +284,7 @@ export function DrawReviewAgent({
           </span>
         </div>
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Recommendation</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/65">Recommendation</p>
           <span className={cn(
             'inline-block rounded px-2 py-0.5 text-xs font-bold uppercase',
             assessment.recommendation === 'approve' ? 'bg-green-50 text-green-700' :
@@ -298,14 +298,14 @@ export function DrawReviewAgent({
 
       {/* Reasoning */}
       <div className="px-5 py-3 border-b border-white/[0.05]">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30 mb-1">Reasoning</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-white/65 mb-1">Reasoning</p>
         <p className="text-sm text-white/55">{assessment.reasoning}</p>
       </div>
 
       {/* Findings */}
       {assessment.findings.length > 0 && (
         <div className="px-5 py-3">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30 mb-2">Findings</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/65 mb-2">Findings</p>
           <ul className="space-y-1.5">
             {assessment.findings.map((finding, i) => (
               <li key={i} className="flex items-start gap-2 text-sm text-white/55">

@@ -78,7 +78,7 @@ export function DisputeFlagModal({
             </div>
             <div>
               <p className="text-[14px] font-semibold text-white">Flag as disputed</p>
-              <p className="text-[11px] text-white/30">{milestoneName}</p>
+              <p className="text-[11px] text-white/65">{milestoneName}</p>
             </div>
           </div>
           {!isPending && (
@@ -103,7 +103,7 @@ export function DisputeFlagModal({
 
           {/* Reason dropdown */}
           <div>
-            <label className="block text-[11px] font-semibold uppercase tracking-[0.1em] text-white/30 mb-2">
+            <label className="block text-[11px] font-semibold uppercase tracking-[0.1em] text-white/65 mb-2">
               Dispute reason <span className="text-red-400">*</span>
             </label>
             <div className="relative">
@@ -118,13 +118,13 @@ export function DisputeFlagModal({
                   <option key={val} value={val}>{label}</option>
                 ))}
               </select>
-              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
+              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/65 pointer-events-none" />
             </div>
           </div>
 
           {/* Context field */}
           <div>
-            <label className="block text-[11px] font-semibold uppercase tracking-[0.1em] text-white/30 mb-2">
+            <label className="block text-[11px] font-semibold uppercase tracking-[0.1em] text-white/65 mb-2">
               Additional context
               {requiresContext
                 ? <span className="text-red-400"> *</span>
@@ -141,9 +141,9 @@ export function DisputeFlagModal({
                   ? 'Describe the specific issue...'
                   : 'Any additional context to help resolve quickly...'
               }
-              className="w-full rounded-xl border border-white/[0.08] bg-surface-3 px-4 py-3 text-[13px] text-white placeholder:text-white/30 focus:border-vektrum-blue focus:outline-none resize-none disabled:opacity-50"
+              className="w-full rounded-xl border border-white/[0.08] bg-surface-3 px-4 py-3 text-[13px] text-white placeholder:text-white/65 focus:border-vektrum-blue focus:outline-none resize-none disabled:opacity-50"
             />
-            <p className="text-right text-[11px] text-white/30 mt-1">{contextLength}/500</p>
+            <p className="text-right text-[11px] text-white/65 mt-1">{contextLength}/500</p>
           </div>
 
           {error && (

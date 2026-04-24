@@ -68,7 +68,7 @@ function CircularGauge({ score }: { score: number }) {
         >
           {score}
         </span>
-        <span className="text-[10px] text-white/30 uppercase tracking-wider">/ 100</span>
+        <span className="text-[10px] text-white/70 uppercase tracking-wider">/ 100</span>
       </div>
     </div>
   )
@@ -108,7 +108,7 @@ export function ReadinessGauge({ dealId, preview = false }: ReadinessGaugeProps)
   if (error || !data) {
     return (
       <div className="flex items-center gap-3 rounded-lg bg-surface-3 px-4 py-3">
-        <span className="text-[12px] text-white/30">
+        <span className="text-[12px] text-white/75">
           Readiness score unavailable
         </span>
       </div>
@@ -122,7 +122,7 @@ export function ReadinessGauge({ dealId, preview = false }: ReadinessGaugeProps)
         <p className="text-[13px] font-semibold text-white">Release Readiness</p>
         {data.breakdown.map((b) => (
           <div key={b.label} className="flex items-center justify-between gap-2">
-            <span className="text-[11px] text-white/30 truncate">{b.label}</span>
+            <span className="text-[11px] text-white/75 truncate">{b.label}</span>
             <span className="text-[11px] font-medium tabular-nums text-white/50 flex-shrink-0">
               {b.points}/{b.max}
             </span>

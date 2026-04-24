@@ -36,7 +36,7 @@ export function DisputeQueue({ disputes }: DisputeQueueProps) {
           <CheckCircle2 size={18} className="text-emerald-400" aria-hidden="true" />
         </div>
         <p className="text-sm font-medium text-white">No open disputes</p>
-        <p className="mt-1 text-[12px] text-white/55">All milestone disputes have been resolved.</p>
+        <p className="mt-1 text-[12px] text-white/75">All milestone disputes have been resolved.</p>
       </div>
     )
   }
@@ -45,11 +45,11 @@ export function DisputeQueue({ disputes }: DisputeQueueProps) {
     <div className="rounded-xl border border-white/[0.08] bg-surface-2 overflow-hidden shadow-sm">
       {/* Table header */}
       <div className="hidden sm:grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-5 py-3 border-b border-white/[0.05] bg-white/[0.015]">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Deal / Milestone</p>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Amount</p>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Days Open</p>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Status</p>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Action</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-white/65">Deal / Milestone</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-white/65">Amount</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-white/65">Days Open</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-white/65">Status</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-white/65">Action</p>
       </div>
 
       {/* Rows */}
@@ -73,12 +73,12 @@ export function DisputeQueue({ disputes }: DisputeQueueProps) {
                       ? (dispute.deals[0]?.title ?? 'Unknown deal')
                       : (dispute.deals?.title ?? 'Unknown deal')}
                   </p>
-                  <p className="text-[11px] text-white/55 truncate mt-0.5">
+                  <p className="text-[11px] text-white/75 truncate mt-0.5">
                     Milestone: {Array.isArray(dispute.milestones)
                       ? (dispute.milestones[0]?.title ?? 'Unknown milestone')
                       : (dispute.milestones?.title ?? 'Unknown milestone')}
                   </p>
-                  <p className="text-[11px] text-white/30 truncate mt-0.5 sm:hidden">
+                  <p className="text-[11px] text-white/65 truncate mt-0.5 sm:hidden">
                     {dispute.reason.length > 80 ? dispute.reason.slice(0, 80) + '…' : dispute.reason}
                   </p>
                 </div>
@@ -86,7 +86,7 @@ export function DisputeQueue({ disputes }: DisputeQueueProps) {
 
               {/* Amount */}
               <div className="flex items-center gap-1.5">
-                <DollarSign size={12} className="text-white/30 flex-shrink-0" aria-hidden="true" />
+                <DollarSign size={12} className="text-white/60 flex-shrink-0" aria-hidden="true" />
                 <span className="text-[13px] font-semibold tabular-nums text-white">
                   {formatMoney(dispute.amount_in_dispute)}
                 </span>
@@ -94,7 +94,7 @@ export function DisputeQueue({ disputes }: DisputeQueueProps) {
 
               {/* Days open */}
               <div className="flex items-center gap-1.5">
-                <Clock size={12} className={isUrgent ? 'text-red-400' : 'text-white/55'} aria-hidden="true" />
+                <Clock size={12} className={isUrgent ? 'text-red-400' : 'text-white/75'} aria-hidden="true" />
                 <span className={`text-[13px] font-semibold ${isUrgent ? 'text-red-400' : 'text-white'}`}>
                   {days}d
                 </span>
@@ -113,7 +113,7 @@ export function DisputeQueue({ disputes }: DisputeQueueProps) {
               {/* View deal link */}
               <Link
                 href={`/dashboard/deals/${dispute.deal_id}`}
-                className="inline-flex items-center gap-1 rounded-lg border border-white/[0.12] bg-white/[0.05] px-3 py-1.5 text-[12px] font-medium text-white/80 hover:bg-white/[0.09] hover:text-white transition-all whitespace-nowrap"
+                className="inline-flex items-center gap-1 rounded-lg border border-white/[0.16] bg-white/[0.05] px-3 py-1.5 text-[12px] font-medium text-white/90 hover:bg-white/[0.1] hover:text-white hover:border-white/[0.24] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-all whitespace-nowrap"
               >
                 View deal
               </Link>

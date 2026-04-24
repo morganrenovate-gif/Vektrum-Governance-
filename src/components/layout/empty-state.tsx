@@ -48,13 +48,13 @@ export function EmptyState({
     >
       {/* Icon */}
       <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.03] mb-4">
-        <Icon size={20} className="text-white/20" aria-hidden="true" />
+        <Icon size={20} className="text-white/65" aria-hidden="true" />
       </div>
 
       {/* Text */}
-      <p className="text-[14px] font-semibold text-white/50">{title}</p>
+      <p className="text-[14px] font-semibold text-white/90">{title}</p>
       {description && (
-        <p className="mt-2 max-w-[280px] text-[13px] text-white/30 leading-relaxed">
+        <p className="mt-2 max-w-[280px] text-[13px] text-white/70 leading-relaxed">
           {description}
         </p>
       )}
@@ -65,7 +65,7 @@ export function EmptyState({
           {action.href ? (
             <Link
               href={action.href}
-              className="inline-flex min-h-[34px] items-center justify-center gap-1.5 rounded-lg border border-white/[0.1] bg-white/[0.04] px-4 py-1.5 text-[12px] font-medium text-white/55 hover:bg-white/[0.07] hover:text-white/80 transition-all"
+              className="inline-flex min-h-[34px] items-center justify-center gap-1.5 rounded-lg border border-white/[0.16] bg-white/[0.05] px-4 py-1.5 text-[12px] font-medium text-white/85 hover:bg-white/[0.1] hover:text-white hover:border-white/[0.24] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-all"
             >
               {action.label}
             </Link>
@@ -73,7 +73,7 @@ export function EmptyState({
             <button
               type="button"
               onClick={action.onClick}
-              className="inline-flex min-h-[34px] items-center justify-center gap-1.5 rounded-lg border border-white/[0.1] bg-white/[0.04] px-4 py-1.5 text-[12px] font-medium text-white/55 hover:bg-white/[0.07] hover:text-white/80 transition-all"
+              className="inline-flex min-h-[34px] items-center justify-center gap-1.5 rounded-lg border border-white/[0.16] bg-white/[0.05] px-4 py-1.5 text-[12px] font-medium text-white/85 hover:bg-white/[0.1] hover:text-white hover:border-white/[0.24] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-all"
             >
               {action.label}
             </button>

@@ -78,9 +78,9 @@ function severityStyles(severity: string): { badge: string; row: string; dot: st
       dot:   'bg-blue-400',
     }
     default: return {
-      badge: 'bg-white/10 border border-white/10 text-white/40',
-      row:   'border-l-2 border-l-white/10',
-      dot:   'bg-white/20',
+      badge: 'bg-white/10 border border-white/[0.16] text-white/75',
+      row:   'border-l-2 border-l-white/[0.16]',
+      dot:   'bg-white/60',
     }
   }
 }
@@ -104,22 +104,22 @@ function AlertRow({ alert }: { alert: OpsAlert }) {
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-semibold text-white/80 leading-snug">
+        <p className="text-[13px] font-semibold text-white leading-snug">
           {alert.title}
         </p>
-        <p className="text-[11px] text-white/40 mt-0.5 leading-relaxed line-clamp-2">
+        <p className="text-[11px] text-white/75 mt-0.5 leading-relaxed line-clamp-2">
           {alert.description}
         </p>
       </div>
 
       {/* Meta */}
       <div className="flex flex-col items-end gap-1 flex-shrink-0">
-        <p className="text-[11px] text-white/25 tabular-nums whitespace-nowrap">
+        <p className="text-[11px] text-white/65 tabular-nums whitespace-nowrap">
           {relativeTime(alert.detected_at)}
         </p>
         <Link
           href={alert.action_url}
-          className="flex items-center gap-1 text-[10px] text-vektrum-blue/80 hover:text-vektrum-blue transition-colors"
+          className="flex items-center gap-1 text-[10px] text-vektrum-blue hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue rounded transition-colors"
         >
           View <ExternalLink size={9} />
         </Link>
@@ -155,14 +155,14 @@ function FilterBar({
           key={f.key}
           type="button"
           onClick={() => onChange(f.key)}
-          className={`px-3 py-1.5 rounded-md text-[12px] font-medium transition-colors ${
+          className={`px-3 py-1.5 rounded-md text-[12px] font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue ${
             active === f.key
               ? f.key === 'critical'
                 ? 'bg-red-500/15 text-red-400'
                 : f.key === 'high'
                   ? 'bg-amber-500/15 text-amber-400'
-                  : 'bg-white/[0.08] text-white/80'
-              : 'text-white/60 hover:text-white/90'
+                  : 'bg-white/[0.1] text-white'
+              : 'text-white/80 hover:text-white hover:bg-white/[0.04]'
           }`}
         >
           {f.label}
@@ -246,7 +246,7 @@ export function AlertsFeed({ initialData, pollInterval = 30 }: AlertsFeedProps) 
               {data.total} alert{data.total !== 1 ? 's' : ''}
             </div>
           )}
-          <p className="text-[11px] text-white/30">
+          <p className="text-[11px] text-white/65">
             {pollInterval
               ? `Auto-refreshes every ${pollInterval}s · updated ${secsSinceRefresh}s ago`
               : `Scanned ${relativeTime(data.scanned_at)}`
@@ -258,7 +258,7 @@ export function AlertsFeed({ initialData, pollInterval = 30 }: AlertsFeedProps) 
           type="button"
           onClick={refresh}
           disabled={refreshing}
-          className="flex items-center gap-2 rounded-xl border border-white/[0.14] bg-white/[0.07] px-3.5 py-2 text-[12px] font-medium text-white/80 hover:bg-white/[0.10] hover:text-white disabled:opacity-40 transition-all flex-shrink-0"
+          className="flex items-center gap-2 rounded-xl border border-white/[0.16] bg-white/[0.07] px-3.5 py-2 text-[12px] font-medium text-white/90 hover:bg-white/[0.12] hover:text-white hover:border-white/[0.24] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue disabled:opacity-40 transition-all flex-shrink-0"
         >
           {refreshing ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
           {refreshing ? 'Refreshing…' : 'Refresh'}
@@ -280,10 +280,10 @@ export function AlertsFeed({ initialData, pollInterval = 30 }: AlertsFeedProps) 
       {filtered.length === 0 ? (
         <div className="rounded-xl border border-white/[0.06] bg-surface-2 px-5 py-8 text-center">
           <CheckCircle2 size={20} className="text-emerald-400 mx-auto mb-2" />
-          <p className="text-sm font-medium text-white/60">
+          <p className="text-sm font-medium text-white/90">
             {data.total === 0 ? 'No active alerts' : `No ${filter} alerts`}
           </p>
-          <p className="text-[12px] text-white/30 mt-1">
+          <p className="text-[12px] text-white/70 mt-1">
             {data.total === 0
               ? 'All systems operating normally.'
               : `${data.total} alert${data.total !== 1 ? 's' : ''} in other categories.`
@@ -293,10 +293,10 @@ export function AlertsFeed({ initialData, pollInterval = 30 }: AlertsFeedProps) 
       ) : (
         <div className="rounded-xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden">
           <div className="px-5 py-3 border-b border-white/[0.06] flex items-center justify-between">
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-white/65">
               Active Alerts ({filtered.length}{filter !== 'all' ? ` of ${data.total}` : ''})
             </p>
-            <p className="text-[11px] text-white/25">Sorted by severity</p>
+            <p className="text-[11px] text-white/65">Sorted by severity</p>
           </div>
           <ul className="divide-y divide-white/[0.04]">
             {filtered.map((alert) => <AlertRow key={alert.id} alert={alert} />)}

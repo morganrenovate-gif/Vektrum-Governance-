@@ -78,7 +78,7 @@ function actionColor(action: string): string {
   if (action.includes('failed') || action.includes('conflict')) return 'text-red-400'
   if (action.includes('confirmed') || action.includes('created')) return 'text-emerald-400'
   if (action.includes('generated') || action.includes('link')) return 'text-blue-400'
-  return 'text-white/40'
+  return 'text-white/75'
 }
 
 // ─── Panel ────────────────────────────────────────────────────────────────────
@@ -127,7 +127,7 @@ export function WebhookHealthPanel({ initialData }: WebhookHealthPanelProps) {
               Webhook feed healthy
             </div>
           )}
-          <p className="text-[11px] text-white/30">
+          <p className="text-[11px] text-white/65">
             Last event: {relativeTime(last_webhook_at)}
             {unconfirmed_total > 0 && (
               <> · <span className="text-amber-400">{unconfirmed_total} unconfirmed transfer{unconfirmed_total !== 1 ? 's' : ''}</span></>
@@ -139,7 +139,7 @@ export function WebhookHealthPanel({ initialData }: WebhookHealthPanelProps) {
           type="button"
           onClick={refresh}
           disabled={refreshing}
-          className="flex items-center gap-2 rounded-xl border border-white/[0.1] bg-white/[0.05] px-3.5 py-2 text-[12px] font-medium text-white/60 hover:bg-white/[0.08] hover:text-white disabled:opacity-50 transition-all flex-shrink-0"
+          className="flex items-center gap-2 rounded-xl border border-white/[0.16] bg-white/[0.05] px-3.5 py-2 text-[12px] font-medium text-white/85 hover:bg-white/[0.1] hover:text-white hover:border-white/[0.24] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue disabled:opacity-50 transition-all flex-shrink-0"
         >
           {refreshing ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
           {refreshing ? 'Refreshing…' : 'Refresh'}
@@ -189,11 +189,11 @@ export function WebhookHealthPanel({ initialData }: WebhookHealthPanelProps) {
           <div className="px-5 py-3 border-b border-white/[0.06] flex items-center justify-between">
             <div className="flex items-center gap-2">
               <ShieldAlert size={13} className="text-amber-400" />
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-white/65">
                 Stale Pending ({stale_count})
               </p>
             </div>
-            <p className="text-[11px] text-white/25">
+            <p className="text-[11px] text-white/65">
               Pending &gt;{data.stale_threshold_minutes}m — Stripe not confirming
             </p>
           </div>
@@ -211,21 +211,21 @@ export function WebhookHealthPanel({ initialData }: WebhookHealthPanelProps) {
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold text-white/80 truncate">
+                  <p className="text-[13px] font-semibold text-white truncate">
                     {t.milestone_title ?? t.release_id.slice(0, 12) + '…'}
                   </p>
-                  <p className="text-[11px] text-white/35 truncate mt-0.5">
+                  <p className="text-[11px] text-white/70 truncate mt-0.5">
                     {t.deal_title ?? 'Unknown deal'}
                     {t.contractor_name ? ` · ${t.contractor_name}` : ''}
                   </p>
                   {t.stripe_transfer_id && (
-                    <p className="text-[11px] font-mono text-white/25 mt-0.5 truncate">
+                    <p className="text-[11px] font-mono text-white/65 mt-0.5 truncate">
                       {t.stripe_transfer_id}
                     </p>
                   )}
                 </div>
 
-                <p className="text-[13px] font-mono text-white/60 flex-shrink-0">
+                <p className="text-[13px] font-mono text-white/85 flex-shrink-0">
                   {formatMoney(t.amount)}
                 </p>
               </li>
@@ -237,15 +237,15 @@ export function WebhookHealthPanel({ initialData }: WebhookHealthPanelProps) {
       {/* ── Recent event log ────────────────────────────────────────── */}
       <div className="rounded-xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden">
         <div className="px-5 py-3 border-b border-white/[0.06] flex items-center gap-2">
-          <Activity size={13} className="text-white/30" />
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35">
+          <Activity size={13} className="text-white/65" />
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-white/65">
             Recent Webhook Events
           </p>
         </div>
 
         {recent_events.length === 0 ? (
           <div className="px-5 py-6 text-center">
-            <p className="text-[12px] text-white/30">No recent webhook events recorded.</p>
+            <p className="text-[12px] text-white/70">No recent webhook events recorded.</p>
           </div>
         ) : (
           <ul className="divide-y divide-white/[0.04]">
@@ -263,11 +263,11 @@ export function WebhookHealthPanel({ initialData }: WebhookHealthPanelProps) {
                   {actionLabel(e.action)}
                 </p>
 
-                <p className="text-[11px] font-mono text-white/25 flex-shrink-0 truncate max-w-[180px]">
+                <p className="text-[11px] font-mono text-white/65 flex-shrink-0 truncate max-w-[180px]">
                   {e.entity_id.slice(0, 12)}…
                 </p>
 
-                <p className="text-[11px] text-white/25 flex-shrink-0 tabular-nums">
+                <p className="text-[11px] text-white/65 flex-shrink-0 tabular-nums">
                   {relativeTime(e.created_at)}
                 </p>
               </li>
@@ -283,7 +283,7 @@ export function WebhookHealthPanel({ initialData }: WebhookHealthPanelProps) {
             <ShieldAlert size={16} className="text-red-400 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-[13px] font-semibold text-red-300">Action required</p>
-              <p className="text-[12px] text-red-400/80 mt-1 leading-relaxed">
+              <p className="text-[12px] text-red-300 mt-1 leading-relaxed">
                 The Stripe webhook feed appears dead or severely delayed. Check the Stripe Dashboard
                 under Developers → Webhooks to confirm the endpoint is active and the signing secret
                 matches <code className="font-mono bg-red-500/10 px-1 rounded">STRIPE_WEBHOOK_SECRET</code>.
@@ -313,18 +313,18 @@ function MetricCard({
     ? 'text-red-400'
     : warn
       ? 'text-amber-400'
-      : 'text-white/70'
+      : 'text-white'
 
   const iconEl = critical
     ? <Icon size={14} className="text-red-400" />
     : warn
       ? <Icon size={14} className="text-amber-400" />
-      : <Icon size={14} className="text-white/25" />
+      : <Icon size={14} className="text-white/65" />
 
   return (
     <div className={`rounded-xl border ${color} px-4 py-3`}>
       <div className="flex items-center justify-between mb-1">
-        <p className="text-[10px] uppercase tracking-widest text-white/30">{label}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-white/65">{label}</p>
         {iconEl}
       </div>
       <p className={`text-[16px] font-semibold tabular-nums ${valueColor}`}>{value}</p>

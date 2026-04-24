@@ -185,7 +185,7 @@ export function AssistantPanel({ actionRequired = 0 }: AssistantPanelProps) {
             </div>
             <button
               onClick={() => setOpen(false)}
-              className="flex h-7 w-7 items-center justify-center rounded-lg text-white/40 hover:bg-white/10 hover:text-white/80 transition-colors"
+              className="flex h-7 w-7 items-center justify-center rounded-lg text-white/75 hover:bg-white/10 hover:text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue"
               aria-label="Close assistant"
             >
               <ChevronDown size={15} />
@@ -209,8 +209,8 @@ export function AssistantPanel({ actionRequired = 0 }: AssistantPanelProps) {
             ))}
             {loading && (
               <div className="self-start flex items-center gap-1.5 rounded-xl bg-surface-3 px-3.5 py-2.5">
-                <Loader2 size={13} className="animate-spin text-white/30" />
-                <span className="text-[12px] text-white/30">Thinking...</span>
+                <Loader2 size={13} className="animate-spin text-white/65" />
+                <span className="text-[12px] text-white/65">Thinking...</span>
               </div>
             )}
             <div ref={bottomRef} />
@@ -219,7 +219,7 @@ export function AssistantPanel({ actionRequired = 0 }: AssistantPanelProps) {
           {/* Suggested commands */}
           {!loading && (
             <div className="border-t border-white/[0.05] px-4 py-3">
-              <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-white/30">
+              <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-white/65">
                 Suggested
               </p>
               <div className="flex flex-wrap gap-1.5">
@@ -247,7 +247,7 @@ export function AssistantPanel({ actionRequired = 0 }: AssistantPanelProps) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask anything about your deals..."
-              className="flex-1 bg-transparent text-[13px] text-white placeholder:text-white/30 outline-none"
+              className="flex-1 bg-transparent text-[13px] text-white placeholder:text-white/65 outline-none"
               disabled={loading}
             />
             <button

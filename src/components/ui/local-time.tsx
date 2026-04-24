@@ -79,7 +79,7 @@ export function AuditTimestamp({ iso, split = false, className }: AuditTimestamp
     return (
       <span className={className}>
         <span className="block tabular-nums">{date}</span>
-        <span className="block tabular-nums text-white/40">{time}</span>
+        <span className="block tabular-nums text-white/70">{time}</span>
       </span>
     )
   }

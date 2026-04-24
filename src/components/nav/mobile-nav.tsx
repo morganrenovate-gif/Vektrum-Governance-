@@ -168,7 +168,7 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
 
                   <Link
                     href="/contact"
-                    className="flex items-center gap-3 min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-white/55 hover:text-white hover:bg-surface-3 transition-all"
+                    className="flex items-center gap-3 min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-white/80 hover:text-white hover:bg-surface-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-all"
                     onClick={() => setOpen(false)}
                   >
                     <HelpCircle size={16} aria-hidden="true" />

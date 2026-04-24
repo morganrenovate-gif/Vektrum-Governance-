@@ -81,7 +81,7 @@ export function MoneySummary({
             style={{ width: `${Math.min(100, releasedPct)}%` }}
           />
         </div>
-        <div className="flex justify-between text-xs text-white/40">
+        <div className="flex justify-between text-xs text-white/75">
           <span className="tabular-nums">
             {releasedPct.toFixed(0)}% released
           </span>
@@ -102,7 +102,7 @@ export function MoneySummary({
         <div className="mt-1 rounded-lg border border-white/[0.08] bg-white/[0.02] divide-y divide-white/[0.06]">
           {/* Header */}
           <div className="px-4 py-2.5 flex items-center gap-2">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/40">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/75">
               Facility Structure
             </span>
           </div>
@@ -111,7 +111,7 @@ export function MoneySummary({
           <div className="px-4 py-3 flex items-center justify-between">
             <div>
               <p className="text-[13px] font-medium text-white/80">Construction Budget</p>
-              <p className="text-[11px] text-white/40 mt-0.5">
+              <p className="text-[11px] text-white/75 mt-0.5">
                 Total contract value — disbursed to contractor
               </p>
             </div>
@@ -125,11 +125,11 @@ export function MoneySummary({
             <div>
               <p className="text-[13px] font-medium text-white/80">
                 Governance Layer
-                <span className="ml-2 text-[11px] font-normal text-white/40">
+                <span className="ml-2 text-[11px] font-normal text-white/75">
                   {rateLabel(governanceFeeBps!)}
                 </span>
               </p>
-              <p className="text-[11px] text-white/40 mt-0.5">
+              <p className="text-[11px] text-white/75 mt-0.5">
                 Vektrum oversight & compliance fee
               </p>
             </div>
@@ -142,7 +142,7 @@ export function MoneySummary({
           <div className="px-4 py-3 flex items-center justify-between bg-white/[0.02] rounded-b-lg">
             <div>
               <p className="text-[13px] font-semibold text-white">Total Facility Size</p>
-              <p className="text-[11px] text-white/40 mt-0.5">
+              <p className="text-[11px] text-white/75 mt-0.5">
                 Full funder commitment including governance
               </p>
             </div>
@@ -161,7 +161,7 @@ export function MoneySummary({
         <div className="mt-1 rounded-lg border border-white/[0.08] bg-white/[0.02] divide-y divide-white/[0.06]">
           {/* Header */}
           <div className="px-4 py-2.5 flex items-center justify-between">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/40">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/75">
               Retainage
             </span>
             <span className="text-[11px] font-semibold text-amber-400/80 tabular-nums">
@@ -173,13 +173,13 @@ export function MoneySummary({
           <div className="px-4 py-3 flex items-center justify-between">
             <div>
               <p className="text-[13px] font-medium text-white/80">Currently Held</p>
-              <p className="text-[11px] text-white/40 mt-0.5">
+              <p className="text-[11px] text-white/75 mt-0.5">
                 Withheld from milestone releases — pending project completion
               </p>
             </div>
             <span className={cn(
               "text-[14px] font-semibold tabular-nums",
-              heldBalance > 0 ? "text-amber-400" : "text-white/40"
+              heldBalance > 0 ? "text-amber-400" : "text-white/75"
             )}>
               {formatMoney(heldBalance)}
             </span>
@@ -190,7 +190,7 @@ export function MoneySummary({
             <div className="px-4 py-3 flex items-center justify-between">
               <div>
                 <p className="text-[13px] font-medium text-white/80">Released to Contractor</p>
-                <p className="text-[11px] text-white/40 mt-0.5">
+                <p className="text-[11px] text-white/75 mt-0.5">
                   Cumulative retainage disbursed
                 </p>
               </div>
@@ -204,7 +204,7 @@ export function MoneySummary({
           <div className="px-4 py-3 flex items-center justify-between bg-white/[0.02] rounded-b-lg">
             <div>
               <p className="text-[13px] font-semibold text-white">Total Retainage Pool</p>
-              <p className="text-[11px] text-white/40 mt-0.5">
+              <p className="text-[11px] text-white/75 mt-0.5">
                 Held + released (cumulative withheld)
               </p>
             </div>

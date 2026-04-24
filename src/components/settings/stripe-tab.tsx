@@ -65,7 +65,7 @@ export function StripeTab({ profile }: StripeTabProps) {
               {isConnected && payoutsEnabled ? (
                 <CheckCircle2 size={16} className="text-emerald-400" aria-hidden="true" />
               ) : (
-                <AlertCircle size={16} className={isConnected ? 'text-amber-400' : 'text-white/30'} aria-hidden="true" />
+                <AlertCircle size={16} className={isConnected ? 'text-amber-400' : 'text-white/70'} aria-hidden="true" />
               )}
             </div>
             <div>

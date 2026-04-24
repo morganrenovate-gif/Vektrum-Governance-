@@ -164,7 +164,7 @@ export function ReceiptCard({
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3
                       border-b border-white/10 bg-white/3 px-6 py-5">
         <div>
-          <p className="text-xs font-medium uppercase tracking-widest text-white/40 mb-1">
+          <p className="text-xs font-medium uppercase tracking-widest text-white/75 mb-1">
             Transaction Receipt
           </p>
           <h2 className="text-2xl font-bold text-white tracking-tight font-mono">
@@ -265,7 +265,7 @@ export function ReceiptCard({
       {/* ── Footer link (for email-like contexts) ──────────────────────── */}
       {showFooterLink && (
         <div className="border-t border-white/10 px-6 py-3 text-center">
-          <p className="text-xs text-white/30">
+          <p className="text-xs text-white/70">
             Vektrum · Construction payment governance ·{' '}
             <a
               href={`${process.env.NEXT_PUBLIC_APP_URL ?? ''}/dashboard/receipts/${receipt.id}`}

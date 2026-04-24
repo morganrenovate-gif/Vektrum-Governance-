@@ -103,7 +103,7 @@ export function ContractUploadModal({ metadata, onSuccess, onClose }: Props) {
               type="button"
               onClick={onClose}
               aria-label="Close"
-              className="rounded-lg p-1.5 text-white/30 transition-colors hover:bg-white/[0.06] hover:text-white/70"
+              className="rounded-lg p-1.5 text-white/65 transition-colors hover:bg-white/[0.06] hover:text-white/70"
             >
               <X size={16} />
             </button>
@@ -125,7 +125,7 @@ export function ContractUploadModal({ metadata, onSuccess, onClose }: Props) {
                 <p className="text-[14px] font-semibold text-white">
                   Analyzing your contract…
                 </p>
-                <p className="mt-1 text-[12px] text-white/45">
+                <p className="mt-1 text-[12px] text-white/75">
                   Extracting milestones, conditions, and retainage terms
                 </p>
               </div>
@@ -166,20 +166,20 @@ export function ContractUploadModal({ metadata, onSuccess, onClose }: Props) {
                       <FileText size={20} className="text-vektrum-blue" />
                     </div>
                     <p className="text-[14px] font-semibold text-white">{file.name}</p>
-                    <p className="mt-0.5 text-[12px] text-white/45">{fileSizeMB} MB · PDF</p>
-                    <p className="mt-2 text-[11px] text-white/30">
+                    <p className="mt-0.5 text-[12px] text-white/75">{fileSizeMB} MB · PDF</p>
+                    <p className="mt-2 text-[11px] text-white/65">
                       Click to choose a different file
                     </p>
                   </>
                 ) : (
                   <>
                     <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08]">
-                      <Upload size={20} className="text-white/35" />
+                      <Upload size={20} className="text-white/65" />
                     </div>
                     <p className="text-[14px] font-semibold text-white/80">
                       Drop contract PDF here
                     </p>
-                    <p className="mt-1 text-[12px] text-white/40">
+                    <p className="mt-1 text-[12px] text-white/75">
                       or click to browse · PDF only · max 20MB
                     </p>
                   </>
@@ -211,7 +211,7 @@ export function ContractUploadModal({ metadata, onSuccess, onClose }: Props) {
 
               {/* ── What gets extracted ────────────────────────────────────── */}
               <div className="space-y-1 rounded-xl border border-white/[0.06] bg-surface-3 px-4 py-3">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/65">
                   What gets extracted
                 </p>
                 {[
@@ -224,7 +224,7 @@ export function ContractUploadModal({ metadata, onSuccess, onClose }: Props) {
                     · {item}
                   </p>
                 ))}
-                <p className="pt-1 text-[11px] text-white/30">
+                <p className="pt-1 text-[11px] text-white/65">
                   Contract text is processed and discarded. Only the milestone structure is saved.
                 </p>
               </div>

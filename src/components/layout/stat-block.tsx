@@ -39,7 +39,7 @@ function TrendIndicator({ trend }: { trend: string }) {
     <span
       className={cn(
         "inline-flex items-center gap-0.5 text-[11px] font-semibold tabular-nums",
-        isPositive ? "text-emerald-400" : isNegative ? "text-red-400" : "text-white/40"
+        isPositive ? "text-emerald-400" : isNegative ? "text-red-400" : "text-white/75"
       )}
     >
       {trend}
@@ -75,7 +75,7 @@ export function StatBlock({
     >
       {/* Label row */}
       <div className="flex items-start justify-between gap-2 mb-2.5">
-        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/35 leading-none">
+        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/65 leading-none">
           {label}
         </p>
         {alert && (
@@ -100,7 +100,7 @@ export function StatBlock({
       {(subvalue || trend) && (
         <div className="mt-2 flex items-center gap-2">
           {subvalue && (
-            <p className="text-[11px] text-white/30 truncate">{subvalue}</p>
+            <p className="text-[11px] text-white/65 truncate">{subvalue}</p>
           )}
           {trend && <TrendIndicator trend={trend} />}
         </div>
