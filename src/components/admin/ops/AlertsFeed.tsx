@@ -119,7 +119,7 @@ function AlertRow({ alert }: { alert: OpsAlert }) {
         </p>
         <Link
           href={alert.action_url}
-          className="flex items-center gap-1 text-[10px] text-vektrum-blue/60 hover:text-vektrum-blue transition-colors"
+          className="flex items-center gap-1 text-[10px] text-vektrum-blue/80 hover:text-vektrum-blue transition-colors"
         >
           View <ExternalLink size={9} />
         </Link>
@@ -162,7 +162,7 @@ function FilterBar({
                 : f.key === 'high'
                   ? 'bg-amber-500/15 text-amber-400'
                   : 'bg-white/[0.08] text-white/80'
-              : 'text-white/35 hover:text-white/60'
+              : 'text-white/60 hover:text-white/90'
           }`}
         >
           {f.label}
@@ -258,7 +258,7 @@ export function AlertsFeed({ initialData, pollInterval = 30 }: AlertsFeedProps) 
           type="button"
           onClick={refresh}
           disabled={refreshing}
-          className="flex items-center gap-2 rounded-xl border border-white/[0.1] bg-white/[0.05] px-3.5 py-2 text-[12px] font-medium text-white/60 hover:bg-white/[0.08] hover:text-white disabled:opacity-50 transition-all flex-shrink-0"
+          className="flex items-center gap-2 rounded-xl border border-white/[0.14] bg-white/[0.07] px-3.5 py-2 text-[12px] font-medium text-white/80 hover:bg-white/[0.10] hover:text-white disabled:opacity-40 transition-all flex-shrink-0"
         >
           {refreshing ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
           {refreshing ? 'Refreshing…' : 'Refresh'}

@@ -106,7 +106,7 @@ export function UserTable({ profiles, deals, emailMap = {} }: UserTableProps) {
                 'rounded-lg px-3 py-1.5 text-[12px] font-medium transition-all capitalize',
                 roleFilter === role
                   ? 'bg-vektrum-blue text-white'
-                  : 'text-white/55 hover:text-white hover:bg-surface-3'
+                  : 'text-white/70 hover:text-white hover:bg-surface-3'
               )}
             >
               {role}

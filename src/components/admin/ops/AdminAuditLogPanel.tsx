@@ -160,7 +160,7 @@ export function AdminAuditLogPanel({ initialData }: AdminAuditLogPanelProps) {
         <button
           onClick={() => fetchEntries(filters, offset)}
           disabled={loading}
-          className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] text-[12px] text-white/40 hover:text-white/70 hover:border-white/20 transition-colors disabled:opacity-40"
+          className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/[0.14] bg-white/[0.06] text-[12px] text-white/75 hover:text-white hover:border-white/25 transition-colors disabled:opacity-40"
         >
           <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
           Refresh
@@ -207,7 +207,7 @@ export function AdminAuditLogPanel({ initialData }: AdminAuditLogPanelProps) {
             onChange={e => setFilters(f => ({ ...f, unreviewed: e.target.checked }))}
             className="w-3.5 h-3.5 accent-vektrum-blue"
           />
-          <span className="text-[12px] text-white/50">Unreviewed only</span>
+          <span className="text-[12px] text-white/70">Unreviewed only</span>
         </label>
 
         <div className="flex gap-2 self-end">
@@ -220,7 +220,7 @@ export function AdminAuditLogPanel({ initialData }: AdminAuditLogPanelProps) {
           </button>
           <button
             onClick={() => { setFilters(DEFAULT_FILTERS); applyFilters(DEFAULT_FILTERS); }}
-            className="px-3 py-1.5 rounded-lg border border-white/[0.08] text-[12px] text-white/40 hover:text-white/70 transition-colors"
+            className="px-3 py-1.5 rounded-lg border border-white/[0.12] bg-white/[0.04] text-[12px] text-white/70 hover:text-white transition-colors"
           >
             Reset
           </button>
@@ -335,7 +335,7 @@ export function AdminAuditLogPanel({ initialData }: AdminAuditLogPanelProps) {
                       <td className="px-3 py-3 align-top">
                         <button
                           onClick={() => setExpandedId(isExpanded ? null : entry.id)}
-                          className="text-white/25 hover:text-white/60 transition-colors"
+                          className="text-white/65 hover:text-white transition-colors"
                           title={isExpanded ? "Collapse" : "Expand details"}
                         >
                           {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
@@ -396,14 +396,14 @@ export function AdminAuditLogPanel({ initialData }: AdminAuditLogPanelProps) {
             <button
               onClick={() => { const o = Math.max(0, offset - LIMIT); setOffset(o); fetchEntries(filters, o); }}
               disabled={offset === 0 || loading}
-              className="px-3 py-1.5 rounded-lg border border-white/[0.08] text-[12px] text-white/40 hover:text-white/70 transition-colors disabled:opacity-30"
+              className="px-3 py-1.5 rounded-lg border border-white/[0.12] bg-white/[0.04] text-[12px] text-white/70 hover:text-white transition-colors disabled:opacity-40"
             >
               Previous
             </button>
             <button
               onClick={() => { const o = offset + LIMIT; setOffset(o); fetchEntries(filters, o); }}
               disabled={offset + LIMIT >= total || loading}
-              className="px-3 py-1.5 rounded-lg border border-white/[0.08] text-[12px] text-white/40 hover:text-white/70 transition-colors disabled:opacity-30"
+              className="px-3 py-1.5 rounded-lg border border-white/[0.12] bg-white/[0.04] text-[12px] text-white/70 hover:text-white transition-colors disabled:opacity-40"
             >
               Next
             </button>

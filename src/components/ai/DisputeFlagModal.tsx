@@ -82,7 +82,7 @@ export function DisputeFlagModal({
             </div>
           </div>
           {!isPending && (
-            <button onClick={onClose} className="text-white/30 hover:text-white transition-colors">
+            <button onClick={onClose} className="text-white/65 hover:text-white transition-colors">
               <X size={17} />
             </button>
           )}
@@ -173,7 +173,7 @@ export function DisputeFlagModal({
             <button
               onClick={onClose}
               disabled={isPending}
-              className="rounded-xl border border-white/[0.08] px-4 py-3 text-[14px] font-semibold text-white/55 hover:bg-surface-3 disabled:opacity-50 transition-all"
+              className="rounded-xl border border-white/[0.14] bg-white/[0.04] px-4 py-3 text-[14px] font-semibold text-white/80 hover:bg-surface-3 hover:text-white disabled:opacity-40 transition-all"
             >
               Cancel
             </button>

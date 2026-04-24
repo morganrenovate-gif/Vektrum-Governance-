@@ -17,7 +17,7 @@ export const runtime = "nodejs";
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const milestoneId = searchParams.get('milestoneId')
-  if (!milestoneId) return NextResponse.json({ error: 'milestoneId required' }, { status: 400 })
+  if (!milestoneId) return NextResponse.json({ error: 'milestoneId required', code: 'MISSING_MILESTONE_ID' }, { status: 400 })
 
   let authContext
   try {
@@ -115,7 +115,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { milestoneId }: { milestoneId: string } = await req.json()
-  if (!milestoneId) return NextResponse.json({ error: 'milestoneId required' }, { status: 400 })
+  if (!milestoneId) return NextResponse.json({ error: 'milestoneId required', code: 'MISSING_MILESTONE_ID' }, { status: 400 })
 
   const supabase = await createClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

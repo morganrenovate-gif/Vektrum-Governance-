@@ -113,7 +113,7 @@ export function DisputeQueue({ disputes }: DisputeQueueProps) {
               {/* View deal link */}
               <Link
                 href={`/dashboard/deals/${dispute.deal_id}`}
-                className="inline-flex items-center gap-1 rounded-lg border border-white/[0.08] bg-surface-2 px-3 py-1.5 text-[12px] font-medium text-white/55 hover:bg-surface-3 hover:text-white transition-all whitespace-nowrap"
+                className="inline-flex items-center gap-1 rounded-lg border border-white/[0.12] bg-white/[0.05] px-3 py-1.5 text-[12px] font-medium text-white/80 hover:bg-white/[0.09] hover:text-white transition-all whitespace-nowrap"
               >
                 View deal
               </Link>
