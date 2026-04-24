@@ -41,7 +41,7 @@ export default function DemoContractorPage() {
       {/* Back link */}
       <Link
         href="/demo-live"
-        className="inline-flex items-center gap-1.5 text-sm text-white/40 hover:text-white/70 transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm text-white/65 hover:text-white transition-colors"
       >
         <ArrowLeft size={14} aria-hidden="true" />
         Back to role selector

@@ -24,7 +24,7 @@ export default function DemoAdminPage() {
         {/* Back link */}
         <Link
           href="/demo-live"
-          className="inline-flex items-center gap-1.5 text-sm text-white/40 hover:text-white/70 transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm text-white/65 hover:text-white transition-colors"
         >
           ← Back to role selector
         </Link>
@@ -51,7 +51,7 @@ export default function DemoAdminPage() {
           </div>
           <Link
             href="/demo-live/audit"
-            className="inline-flex items-center gap-2 rounded-lg border border-white/[0.08] bg-surface-2 px-4 py-2 text-[13px] font-medium text-white/55 hover:border-white/[0.14] transition-all"
+            className="inline-flex items-center gap-2 rounded-lg border border-white/[0.14] bg-white/[0.06] px-4 py-2 text-[13px] font-medium text-white/80 hover:bg-white/[0.10] hover:text-white hover:border-white/[0.22] transition-all"
           >
             Full Audit Log
           </Link>

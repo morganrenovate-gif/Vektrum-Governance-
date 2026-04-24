@@ -49,7 +49,7 @@ export default function CapitalPage() {
       <div className="flex flex-col gap-1">
         <Link
           href="/demo-live/funder"
-          className="inline-flex items-center gap-1 text-[13px] text-white/55 hover:text-vektrum-blue transition-colors w-fit"
+          className="inline-flex items-center gap-1 text-[13px] text-white/70 hover:text-vektrum-blue transition-colors w-fit"
         >
           <ArrowLeft size={13} aria-hidden="true" />
           Back to Dashboard
