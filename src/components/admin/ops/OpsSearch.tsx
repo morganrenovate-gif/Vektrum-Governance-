@@ -120,7 +120,7 @@ function DealRow({ d }: { d: DealResult }) {
         {formatMoney(d.total_amount)}
       </p>
 
-      <ArrowUpRight size={13} className="text-white/20 group-hover:text-white/50 flex-shrink-0 transition-colors" />
+      <ArrowUpRight size={13} className="text-white/40 group-hover:text-white/75 flex-shrink-0 transition-colors" />
     </Link>
   )
 }
@@ -252,7 +252,7 @@ export function OpsSearch() {
           <button
             type="button"
             onClick={clear}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/60 transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors"
           >
             <X size={14} />
           </button>

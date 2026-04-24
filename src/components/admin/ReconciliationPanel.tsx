@@ -422,7 +422,7 @@ function IssueRow({
                 <button
                   type="button"
                   onClick={() => { setNoteMode(null); setNote('') }}
-                  className="rounded-lg border border-white/[0.08] px-3 py-1.5 text-[12px] text-white/40 hover:text-white/60 transition-colors"
+                  className="rounded-lg border border-white/[0.12] bg-white/[0.04] px-3 py-1.5 text-[12px] text-white/70 hover:text-white transition-colors"
                 >
                   Cancel
                 </button>

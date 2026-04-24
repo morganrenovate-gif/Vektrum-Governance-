@@ -127,7 +127,7 @@ export default async function OpsPage() {
         <div>
           <Link
             href="/dashboard/admin"
-            className="inline-flex items-center gap-1.5 text-[12px] text-white/35 hover:text-white/60 transition-colors mb-4"
+            className="inline-flex items-center gap-1.5 text-[12px] text-white/60 hover:text-white transition-colors mb-4"
           >
             <ArrowLeft size={12} />
             Admin Dashboard
