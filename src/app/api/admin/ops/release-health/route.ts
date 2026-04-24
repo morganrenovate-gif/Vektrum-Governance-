@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
-import { getAuthUser, requireRole } from '@/lib/auth/middleware'
+import { createClient } from '@/lib/supabase/server'
+import { getAuthUser, requireRole, requireMFA } from '@/lib/auth/middleware'
 import { internalError } from '@/lib/errors'
 
 export const dynamic = 'force-dynamic'
@@ -35,6 +36,13 @@ export async function GET(request: NextRequest) {
 
   try {
     requireRole(authContext.profile, 'admin')
+  } catch (err) {
+    return err as NextResponse
+  }
+
+  const supabase = await createClient()
+  try {
+    await requireMFA(supabase, authContext.profile)
   } catch (err) {
     return err as NextResponse
   }

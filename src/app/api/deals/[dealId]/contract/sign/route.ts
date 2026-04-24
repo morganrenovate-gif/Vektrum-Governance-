@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { getAuthUser, requireDealAccess } from '@/lib/auth/middleware'
+import { getAuthUser, requireDealAccess, requireMFA } from '@/lib/auth/middleware'
 import { getSigningUrl, DocuSignError, type DocuSignSigner } from '@/lib/engine/docusign'
 import { internalError, notFoundError } from '@/lib/errors'
 
@@ -47,6 +47,15 @@ export async function POST(
   }
 
   const supabase = await createClient()
+
+  // ── MFA Guard — funders must be at AAL2 to sign contracts ───────────────────
+  // (requireMFA automatically exempts contractors — they receive payments but
+  //  do not authorize fund movements, so AAL2 is not required for their signature.)
+  try {
+    await requireMFA(supabase, profile)
+  } catch (err) {
+    return err as NextResponse
+  }
 
   try {
     await requireDealAccess(supabase, dealId, user.id, profile.role)

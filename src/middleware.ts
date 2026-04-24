@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { createServerClient } from "@supabase/ssr";
 import { updateSession } from "@/lib/supabase/middleware";
 
 /**
@@ -54,6 +55,39 @@ export async function middleware(request: NextRequest) {
       const loginUrl = new URL("/auth/login", request.url);
       loginUrl.searchParams.set("next", pathname);
       return NextResponse.redirect(loginUrl);
+    }
+
+    // ── AAL2 enforcement for /dashboard/admin ───────────────────────────────
+    // Admin pages require MFA (AAL2). Check the JWT's aal claim — this is a
+    // local read of the token, not a network call, so it is safe in Edge Runtime.
+    //
+    // If the admin has MFA enrolled but hasn't verified this session → /auth/mfa/verify
+    // If the admin has no MFA enrolled at all                        → /auth/mfa/enroll
+    if (pathname.startsWith("/dashboard/admin")) {
+      const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          cookies: {
+            getAll() { return request.cookies.getAll() },
+            setAll() { /* read-only in middleware context */ },
+          },
+        },
+      );
+
+      const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+
+      if (aalData && aalData.currentLevel !== "aal2") {
+        // Determine whether to redirect to verify (enrolled) or enroll (not enrolled)
+        const mfaPath =
+          aalData.nextLevel === "aal2"
+            ? "/auth/mfa/verify"    // enrolled but not yet verified this session
+            : "/auth/mfa/enroll";  // not enrolled — must set up TOTP first
+
+        const mfaUrl = new URL(mfaPath, request.url);
+        mfaUrl.searchParams.set("next", pathname);
+        return NextResponse.redirect(mfaUrl);
+      }
     }
 
     return supabaseResponse;

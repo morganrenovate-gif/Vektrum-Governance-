@@ -74,7 +74,19 @@ export default function LoginPage() {
     }
 
     const next = new URLSearchParams(window.location.search).get("next");
-    window.location.href = next && next.startsWith("/") ? next : "/dashboard";
+    const destination = next && next.startsWith("/") ? next : "/dashboard";
+
+    // ── MFA step-up check ──────────────────────────────────────────────────
+    // If the user is enrolled in MFA but hasn't verified this session yet
+    // (currentLevel=aal1, nextLevel=aal2), redirect to the verify page.
+    // The verify page will redirect back to `destination` after a successful challenge.
+    const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (aalData?.currentLevel === "aal1" && aalData?.nextLevel === "aal2") {
+      window.location.href = `/auth/mfa/verify?next=${encodeURIComponent(destination)}`;
+      return;
+    }
+
+    window.location.href = destination;
   };
 
   return (

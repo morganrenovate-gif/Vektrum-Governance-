@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createSupabaseAdminClient } from '@/lib/supabase/server'
-import { getAuthUser, requireRole } from '@/lib/auth/middleware'
+import { getAuthUser, requireRole, requireMFA } from '@/lib/auth/middleware'
 import { runReconciliation } from '@/lib/engine/reconciliation'
 import { internalError } from '@/lib/errors'
 
@@ -27,6 +27,13 @@ export async function GET(request: NextRequest) {
 
   try {
     requireRole(authContext.profile, 'admin')
+  } catch (err) {
+    return err as NextResponse
+  }
+
+  const supabase = await createClient()
+  try {
+    await requireMFA(supabase, authContext.profile)
   } catch (err) {
     return err as NextResponse
   }
@@ -115,6 +122,13 @@ export async function POST(request: NextRequest) {
 
   try {
     requireRole(authContext.profile, 'admin')
+  } catch (err) {
+    return err as NextResponse
+  }
+
+  const supabase = await createClient()
+  try {
+    await requireMFA(supabase, authContext.profile)
   } catch (err) {
     return err as NextResponse
   }

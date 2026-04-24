@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseAdminClient } from '@/lib/supabase/server'
-import { getAuthUser, requireRole } from '@/lib/auth/middleware'
+import { createClient, createSupabaseAdminClient } from '@/lib/supabase/server'
+import { getAuthUser, requireRole, requireMFA } from '@/lib/auth/middleware'
 import { applyAutoFix } from '@/lib/engine/reconciliation'
 import { logAudit } from '@/lib/engine/audit'
 import { internalError, notFoundError } from '@/lib/errors'
@@ -33,6 +33,13 @@ export async function PATCH(
 
   try {
     requireRole(authContext.profile, 'admin')
+  } catch (err) {
+    return err as NextResponse
+  }
+
+  const supabase = await createClient()
+  try {
+    await requireMFA(supabase, authContext.profile)
   } catch (err) {
     return err as NextResponse
   }

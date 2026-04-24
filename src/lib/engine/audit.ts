@@ -152,6 +152,123 @@ export async function logAudit(params: AuditParams): Promise<void> {
   }
 }
 
+// ─── MFA Audit Helpers ───────────────────────────────────────────────────────
+//
+// Thin wrappers around logAudit() for MFA lifecycle events. Each wrapper
+// enforces a consistent action name, system_source, and metadata shape so
+// MFA events are reliably filterable in the audit log.
+//
+// All functions are fire-and-forget (never throw — logAudit already swallows).
+
+/**
+ * Logs a successful TOTP factor enrollment.
+ * Called by the MFA enrollment page after challengeAndVerify() succeeds.
+ */
+export async function logMfaEnrolled(params: {
+  actorId:    string
+  actorEmail: string | null
+  actorRole:  string | null
+  factorId:   string
+}): Promise<void> {
+  await logAudit({
+    entity_type:   'profile',
+    entity_id:     params.actorId,
+    action:        'mfa_enrolled',
+    actor_id:      params.actorId,
+    actor_email:   params.actorEmail,
+    actor_role:    params.actorRole,
+    system_source: 'auth/mfa/enroll',
+    new_values:    { factor_id: params.factorId, enrolled_at: new Date().toISOString() },
+    metadata:      { factor_type: 'totp' },
+  })
+}
+
+/**
+ * Logs a successful MFA challenge verification.
+ * Called after supabase.auth.mfa.challengeAndVerify() returns without error.
+ */
+export async function logMfaVerified(params: {
+  actorId:    string
+  actorEmail: string | null
+  actorRole:  string | null
+  factorId:   string
+  source:     string   // 'auth/mfa/verify' | 'auth/mfa/enroll' | route name
+}): Promise<void> {
+  await logAudit({
+    entity_type:   'profile',
+    entity_id:     params.actorId,
+    action:        'mfa_verified',
+    actor_id:      params.actorId,
+    actor_email:   params.actorEmail,
+    actor_role:    params.actorRole,
+    system_source: params.source,
+    new_values:    { verified_at: new Date().toISOString() },
+    metadata:      { factor_id: params.factorId, factor_type: 'totp' },
+  })
+}
+
+/**
+ * Logs a failed MFA verification attempt.
+ * Called when challengeAndVerify() returns an error.
+ */
+export async function logMfaFailed(params: {
+  actorId:      string
+  actorEmail:   string | null
+  actorRole:    string | null
+  factorId:     string | null
+  attemptCount: number
+  reason:       string
+  source:       string
+}): Promise<void> {
+  await logAudit({
+    entity_type:   'profile',
+    entity_id:     params.actorId,
+    action:        'mfa_failed',
+    actor_id:      params.actorId,
+    actor_email:   params.actorEmail,
+    actor_role:    params.actorRole,
+    system_source: params.source,
+    new_values:    null,
+    metadata: {
+      factor_id:     params.factorId,
+      attempt_count: params.attemptCount,
+      reason:        params.reason,
+      failed_at:     new Date().toISOString(),
+    },
+  })
+}
+
+/**
+ * Logs an admin-initiated MFA bypass (reserved for break-glass scenarios).
+ * Should NEVER be called in normal operation — requires a separate admin
+ * confirmation flow before invocation.
+ */
+export async function logMfaBypassedAdminOverride(params: {
+  targetUserId:  string
+  adminActorId:  string
+  adminEmail:    string | null
+  reason:        string
+  sessionId?:    string
+}): Promise<void> {
+  await logAudit({
+    entity_type:   'profile',
+    entity_id:     params.targetUserId,
+    action:        'mfa_bypassed_admin_override',
+    actor_id:      params.adminActorId,
+    actor_email:   params.adminEmail,
+    actor_role:    'admin',
+    system_source: 'admin/mfa-bypass',
+    session_id:    params.sessionId ?? null,
+    new_values:    null,
+    metadata: {
+      target_user_id: params.targetUserId,
+      reason:         params.reason,
+      bypassed_at:    new Date().toISOString(),
+      warning:        'SECURITY SENSITIVE — admin MFA bypass must be investigated if unexpected',
+    },
+  })
+}
+
 // ─── Audit Chain Verification ────────────────────────────────────────────────
 
 /**

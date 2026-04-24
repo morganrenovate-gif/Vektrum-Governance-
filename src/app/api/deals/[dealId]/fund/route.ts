@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { getAuthUser, requireRole, requireDealAccess } from '@/lib/auth/middleware'
+import { getAuthUser, requireRole, requireDealAccess, requireMFA } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
 import { stripe } from '@/lib/stripe'
 import { billingRateFromTier, calculateGovernanceFacility, type SubscriptionTier } from '@/lib/engine/billing'
@@ -54,6 +54,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
 
   const supabase = await createClient()
+
+  // ── MFA Guard — funders and admins must be at AAL2 to initiate funding ──────
+  try {
+    await requireMFA(supabase, profile)
+  } catch (err) {
+    return err as NextResponse
+  }
 
   try {
     await requireDealAccess(supabase, dealId, user.id, profile.role)

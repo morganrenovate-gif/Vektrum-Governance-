@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseAdminClient } from '@/lib/supabase/server'
-import { getAuthUser, requireRole } from '@/lib/auth/middleware'
+import { createClient, createSupabaseAdminClient } from '@/lib/supabase/server'
+import { getAuthUser, requireRole, requireMFA } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
 import { errorResponse, internalError, notFoundError } from '@/lib/errors'
 
@@ -23,6 +23,13 @@ export async function POST(request: NextRequest) {
 
   try {
     requireRole(profile, 'admin')
+  } catch (err) {
+    return err as NextResponse
+  }
+
+  const supabase = await createClient()
+  try {
+    await requireMFA(supabase, profile)
   } catch (err) {
     return err as NextResponse
   }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createSupabaseAdminClient } from '@/lib/supabase/server'
-import { getAuthUser, requireDealAccess } from '@/lib/auth/middleware'
+import { getAuthUser, requireDealAccess, requireMFA } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
 import { validateRelease, checkAiPrecondition } from '@/lib/engine/release-gate'
 import { calculateFee, toStripeCents } from '@/lib/engine/billing'
@@ -40,6 +40,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
   const { user, profile } = authContext
   const supabase = await createClient()
+
+  // ── MFA Guard — funders and admins must be at AAL2 to release funds ─────────
+  try {
+    await requireMFA(supabase, profile)
+  } catch (err) {
+    return err as NextResponse
+  }
 
   // ── Fetch Milestone (needed for deal access check) ──────────────────────────
   const { data: milestone, error: milestoneError } = await supabase

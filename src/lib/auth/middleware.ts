@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { forbiddenError, unauthorizedError } from '@/lib/errors'
 import type { AuthContext, Profile, UserRole } from '@/lib/types'
@@ -89,6 +89,85 @@ export function requireRole(profile: Profile, ...allowedRoles: UserRole[]): void
         `If you believe this is incorrect, contact your account administrator.`,
     )
   }
+}
+
+// ─── MFA Assurance Guard ──────────────────────────────────────────────────────
+
+/**
+ * Asserts that the session has reached Authentication Assurance Level 2 (AAL2)
+ * for roles that require MFA.
+ *
+ * REQUIRED ROLES: 'funder' and 'admin'. Contractors are exempt (they receive
+ * disbursements but do not authorize them).
+ *
+ * THROWS:
+ *   403 NextResponse — if the role requires MFA and the session is only AAL1.
+ *   The response body includes a machine-readable `mfa_required: true` field
+ *   so the frontend can redirect to /auth/mfa/verify automatically.
+ *
+ * AAL SEMANTICS (from Supabase docs):
+ *   aal1 + nextLevel aal2 → user has enrolled MFA but not verified this session
+ *   aal2               → user has verified MFA this session ✓
+ *   aal1 + nextLevel aal1 → user has no MFA enrolled
+ *
+ * For funders/admins with no MFA enrolled: this function throws 403 with
+ * `mfa_required: true` and `mfa_enrolled: false` so the caller can redirect
+ * to the enrollment page rather than the verify page.
+ *
+ * @param supabase  - Supabase server client from the request context
+ * @param profile   - The caller's profile (contains role)
+ */
+export async function requireMFA(
+  supabase: ReturnType<typeof createServerClient>,
+  profile: Profile,
+): Promise<void> {
+  const MFA_REQUIRED_ROLES: UserRole[] = ['funder', 'admin']
+
+  // Contractors are exempt — they receive payments but do not authorize them
+  if (!MFA_REQUIRED_ROLES.includes(profile.role)) return
+
+  const { data: aalData, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+
+  if (error || !aalData) {
+    // If we can't determine AAL, fail closed: deny access
+    throw NextResponse.json(
+      {
+        error:        'Could not verify multi-factor authentication status. Please sign in again.',
+        mfa_required: true,
+        mfa_error:    true,
+      },
+      { status: 403 },
+    )
+  }
+
+  const { currentLevel, nextLevel } = aalData
+
+  // AAL2 — fully verified: allow through
+  if (currentLevel === 'aal2') return
+
+  // AAL1 with next=AAL2 — enrolled but not yet verified this session
+  if (currentLevel === 'aal1' && nextLevel === 'aal2') {
+    throw NextResponse.json(
+      {
+        error:        'Multi-factor authentication is required for this action. Please verify your authenticator code.',
+        mfa_required: true,
+        mfa_enrolled: true,
+        redirect:     '/auth/mfa/verify',
+      },
+      { status: 403 },
+    )
+  }
+
+  // AAL1 with next=AAL1 — no MFA enrolled at all
+  throw NextResponse.json(
+    {
+      error:        'Your account requires multi-factor authentication. Please enroll an authenticator app before accessing this feature.',
+      mfa_required: true,
+      mfa_enrolled: false,
+      redirect:     '/auth/mfa/enroll',
+    },
+    { status: 403 },
+  )
 }
 
 // ─── Deal Access Guard ────────────────────────────────────────────────────────
