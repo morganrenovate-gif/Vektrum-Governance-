@@ -66,11 +66,13 @@ export function Badge({
 // ─── Status-aware badge helpers ───────────────────────────────────────────────
 export function DealStatusBadge({ status, context = "dark" }: { status: string; context?: "dark" | "light" }) {
   const map: Record<string, { variant: BadgeVariant; label: string }> = {
-    draft:     { variant: "neutral", label: "Draft" },
-    active:    { variant: "info",    label: "Active" },
-    completed: { variant: "success", label: "Completed" },
-    disputed:  { variant: "error",   label: "Disputed" },
-    cancelled: { variant: "neutral", label: "Cancelled" },
+    draft:       { variant: "neutral", label: "Draft" },
+    active:      { variant: "info",    label: "Active" },
+    in_progress: { variant: "info",    label: "In Progress" },
+    completed:   { variant: "success", label: "Completed" },
+    disputed:    { variant: "error",   label: "Disputed" },
+    cancelled:   { variant: "neutral", label: "Cancelled" },
+    frozen:      { variant: "error",   label: "Frozen" },
   };
   const entry = map[status] ?? { variant: "default", label: status };
   return <Badge variant={entry.variant} context={context}>{entry.label}</Badge>;

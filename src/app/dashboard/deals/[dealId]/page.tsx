@@ -11,9 +11,9 @@ import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { AddMilestoneForm } from "./add-milestone-form";
 import { FundDealButton } from "./fund-deal-button";
 import { ReleaseRetainageButton } from "./release-retainage-button";
-import type { Deal, Profile, Milestone, LienWaiver, ReleaseGateResult } from "@/lib/types";
+import type { Deal, Profile, Milestone, LienWaiver, ReleaseGateResult, ContractStatus } from "@/lib/types";
 import { formatMoney } from "@/lib/utils";
-import { ArrowLeft, Info, FolderOpen, FileText, CheckCircle2, Clock, XCircle, AlertCircle } from "lucide-react";
+import { ArrowLeft, Info, FolderOpen, FileText, CheckCircle2, Clock, XCircle, AlertCircle, ShieldAlert, ShieldCheck, PenLine } from "lucide-react";
 import { SectionHeader, EmptyState } from "@/components/layout";
 
 // ─── Release gate computation (server-side pre-check) ────────────────────────
@@ -50,6 +50,12 @@ function computeReleaseGate(
   }
   if (deal.status === "cancelled") {
     blockers.push("This deal has been cancelled.");
+  }
+  if (deal.status === "frozen") {
+    blockers.push(
+      "This deal is frozen. The contract was voided after milestone payments were released. " +
+      "An admin must unfreeze the deal before further releases are permitted."
+    );
   }
 
   // Sequential ordering: every predecessor must be released first
@@ -151,6 +157,40 @@ export default async function DealDetailPage({
   }
 
   const milestones = (typedDeal.milestones ?? []) as Milestone[];
+
+  // Contract — most recent non-voided contract for this deal (at most one,
+  // enforced by the contracts_deal_active_unique partial index).
+  // Falls back to most recent voided contract so the voided banner is visible.
+  const { data: activeContractRaw } = await supabase
+    .from("contracts")
+    .select("id, status, document_name, docusign_envelope_id, funder_signed_at, contractor_signed_at, voided_at, void_reason, created_at")
+    .eq("deal_id", dealId)
+    .not("status", "eq", "voided")
+    .maybeSingle();
+
+  const { data: voidedContractRaw } = !activeContractRaw
+    ? await supabase
+        .from("contracts")
+        .select("id, status, document_name, voided_at, void_reason, created_at")
+        .eq("deal_id", dealId)
+        .eq("status", "voided")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle()
+    : { data: null };
+
+  const contractRaw = activeContractRaw ?? voidedContractRaw;
+  const contract = contractRaw as {
+    id: string;
+    status: ContractStatus;
+    document_name: string;
+    docusign_envelope_id?: string | null;
+    funder_signed_at?: string | null;
+    contractor_signed_at?: string | null;
+    voided_at?: string | null;
+    void_reason?: string | null;
+    created_at: string;
+  } | null;
 
   const milestoneIds = milestones.map((m) => m.id);
   const { data: disputeBriefs } = milestoneIds.length
@@ -279,6 +319,108 @@ export default async function DealDetailPage({
           />
         )}
       </div>
+
+      {/* ── Frozen deal banner ── */}
+      {typedDeal.status === "frozen" && (
+        <div
+          role="alert"
+          className="flex items-start gap-3 rounded-xl border border-red-500/30 bg-red-500/[0.06] px-5 py-4"
+        >
+          <ShieldAlert size={18} className="flex-shrink-0 text-red-400 mt-0.5" aria-hidden="true" />
+          <div>
+            <p className="text-[14px] font-semibold text-red-400">Deal frozen — admin action required</p>
+            <p className="mt-0.5 text-[13px] leading-relaxed text-white/60">
+              The contract for this deal was voided after milestone payments had already been
+              released. To protect all parties, no further releases or funding can occur
+              until an admin reviews and unfreezes this deal.{" "}
+              {typedProfile.role !== "admin" && (
+                <span>Contact <a href="mailto:operations@vektrum.io" className="text-red-400 hover:underline">operations@vektrum.io</a> with the deal ID to request an unfreeze.</span>
+              )}
+              {typedProfile.role === "admin" && (
+                <span className="text-red-400 font-medium">
+                  Unfreeze via <code className="text-[12px] bg-white/[0.07] rounded px-1 py-0.5">
+                    POST /api/admin/deals/{typedDeal.id}/unfreeze
+                  </code> with admin justification.
+                </span>
+              )}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Contract status indicator ── */}
+      {(() => {
+        if (!contract) {
+          // No contract on file — warn funders who will need one before releases
+          return typedProfile.role === "funder" ? (
+            <div className="flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-5 py-3">
+              <AlertCircle size={16} className="flex-shrink-0 text-amber-400 mt-0.5" aria-hidden="true" />
+              <p className="text-[13px] leading-relaxed text-white/60">
+                <span className="font-semibold text-amber-400">No contract on file.</span>{" "}
+                A fully-signed contract is required before any milestone can be released.
+                The contractor must upload the contract PDF.
+              </p>
+            </div>
+          ) : null;
+        }
+
+        if (contract.status === "signed") {
+          return (
+            <div className="flex items-center gap-2.5 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.06] px-5 py-3">
+              <ShieldCheck size={15} className="flex-shrink-0 text-emerald-400" aria-hidden="true" />
+              <p className="text-[13px] text-emerald-400 font-medium">
+                Contract fully signed
+              </p>
+              <span className="text-[12px] text-white/40 ml-1 truncate max-w-[200px] sm:max-w-xs" title={contract.document_name}>
+                {contract.document_name}
+              </span>
+            </div>
+          );
+        }
+
+        if (contract.status === "voided") {
+          return (
+            <div className="flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/[0.06] px-5 py-3">
+              <XCircle size={16} className="flex-shrink-0 text-red-400 mt-0.5" aria-hidden="true" />
+              <p className="text-[13px] leading-relaxed text-white/60">
+                <span className="font-semibold text-red-400">Contract voided.</span>{" "}
+                {contract.void_reason && <span>{contract.void_reason}. </span>}
+                A new contract must be uploaded and signed before releases can resume.
+              </p>
+            </div>
+          );
+        }
+
+        // pending_signatures | funder_signed | contractor_signed
+        const funderDone      = !!contract.funder_signed_at;
+        const contractorDone  = !!contract.contractor_signed_at;
+        return (
+          <div className="flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-5 py-3">
+            <PenLine size={16} className="flex-shrink-0 text-amber-400 mt-0.5" aria-hidden="true" />
+            <div>
+              <p className="text-[13px] font-semibold text-amber-400">Awaiting signatures</p>
+              <p className="mt-0.5 text-[12px] text-white/55">
+                Funder:{" "}
+                {funderDone
+                  ? <span className="text-emerald-400">✓ signed</span>
+                  : <span className="text-amber-400">pending</span>}
+                {" · "}
+                Contractor:{" "}
+                {contractorDone
+                  ? <span className="text-emerald-400">✓ signed</span>
+                  : <span className="text-amber-400">pending</span>}
+                {" · "}
+                <span className="truncate" title={contract.document_name}>{contract.document_name}</span>
+              </p>
+              {typedProfile.role === "funder" && !funderDone && (
+                <p className="mt-1 text-[12px] text-amber-400/70">
+                  Milestone releases are blocked until the contract is fully executed.
+                </p>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ── Invite Funder Panel (contractor, draft, no funder) ── */}
       {showInviteFunder && (
