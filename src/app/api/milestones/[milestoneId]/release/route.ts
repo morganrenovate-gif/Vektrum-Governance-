@@ -3,7 +3,7 @@ import { createClient, createSupabaseAdminClient } from '@/lib/supabase/server'
 import { getAuthUser, requireDealAccess, requireMFA } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
 import { validateRelease, checkAiPrecondition } from '@/lib/engine/release-gate'
-import { calculateFee, toStripeCents } from '@/lib/engine/billing'
+import { calculateFee, calculateRetainage, toStripeCents } from '@/lib/engine/billing'
 import { createTransactionReceipt, markReceiptEmailSent } from '@/lib/engine/receipts'
 import { notifyTransactionReceipt } from '@/lib/engine/notifications'
 import { stripe } from '@/lib/stripe'
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   // ── Fetch Deal (needed for contractor_id, billing rate, and access check) ──
   const { data: deal, error: dealError } = await supabase
     .from('deals')
-    .select('id, title, contractor_id, funder_id, funded_amount, released_amount, fees_collected, reserved_amount, billing_rate_bps, total_amount')
+    .select('id, title, contractor_id, funder_id, funded_amount, released_amount, fees_collected, reserved_amount, billing_rate_bps, total_amount, retainage_percentage')
     .eq('id', milestone.deal_id)
     .single()
 
@@ -127,10 +127,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     funderProfile = data
   }
 
-  // ── STEP 1.5: Calculate Platform Fee ────────────────────────────────────────
-  // Fee is computed server-side, never passed from the client.
-  // billing_rate_bps comes from the deal row — set at deal creation from the funder's plan.
-  const fee = calculateFee(milestone.amount, deal.billing_rate_bps)
+  // ── STEP 1.5: Calculate Platform Fee + Retainage ────────────────────────────
+  // Both computed server-side — never accepted from the client.
+  // billing_rate_bps and retainage_percentage come from the deal row.
+  const fee       = calculateFee(milestone.amount, deal.billing_rate_bps)
+  const retainage = calculateRetainage(milestone.amount, deal.retainage_percentage ?? 0)
+  // Contractor receives net immediately; retainage is withheld until project completion.
+  const netToContractor = retainage.netToContractor
 
   // ── STEP 2: Generate Idempotency Key ────────────────────────────────────────
   // Stable idempotency key — milestone_id is a UUID so this is globally unique per milestone.
@@ -138,9 +141,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const idempotencyKey = `release_${milestoneId}`
 
   // ── Amount in Cents ─────────────────────────────────────────────────────────
-  // Stripe transfer = gross (contractor receives full milestone amount).
-  // Fee is retained naturally in the platform Stripe account.
-  const amountInCents = toStripeCents(milestone.amount)
+  // Stripe transfer = net_to_contractor (gross - retainage).
+  // Platform fee is retained in the Vektrum Stripe account.
+  // Retainage is held in the deal's retainage_held balance until project completion.
+  const amountInCents = toStripeCents(netToContractor)
 
   // ── STEP 2.5: Atomically Reserve Funded Balance ──────────────────────────────
   // This is the ACTUAL concurrency gate. validateRelease() above is a fast
@@ -238,6 +242,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
   try {
     // ── STEP 3: Stripe Transfer ─────────────────────────────────────────────
+    // Transfer = net_to_contractor (gross - retainage). Retainage is withheld
+    // in the deal's retainage_held balance — the contractor receives it later
+    // when the funder releases it via POST .../retainage/release.
     const transfer = await stripe.transfers.create(
       {
         amount: amountInCents,
@@ -245,11 +252,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         destination: contractorProfile.stripe_account_id,
         transfer_group: milestone.deal_id,
         metadata: {
-          milestone_id: milestoneId,
-          deal_id: milestone.deal_id,
-          contractor_id: deal.contractor_id,
-          vektrum_action: 'milestone_release',
-          idempotency_key: idempotencyKey,
+          milestone_id:        milestoneId,
+          deal_id:             milestone.deal_id,
+          contractor_id:       deal.contractor_id,
+          vektrum_action:      'milestone_release',
+          idempotency_key:     idempotencyKey,
+          gross_amount:        milestone.amount.toFixed(2),
+          retainage_amount:    retainage.retainageAmount.toFixed(2),
+          net_to_contractor:   netToContractor.toFixed(2),
         },
         description: `Vektrum milestone release — ${milestone.title}`,
       },
@@ -343,7 +353,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         gross_amount:       fee.grossAmount,
         billing_rate_bps:   fee.billingRateBps,
         fee_amount:         fee.feeAmount,
-        net_amount:         fee.netAmount,
+        // net_amount = net_to_contractor (gross - retainage). This is what
+        // the contractor actually received via Stripe in this release.
+        net_amount:         netToContractor,
+        retainage_amount:   retainage.retainageAmount,
         stripe_transfer_id: stripeTransferId,
         // Tag this record as governance-model so reporting can distinguish it
         // from legacy records created before migration 004.
@@ -379,12 +392,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     // ── STEP 5: Update Milestone Status (conditional write) ──────────────
     // Atomic: only transitions 'approved' → 'released'. If 0 rows returned,
     // a concurrent request already released this milestone.
+    // Also stores retainage_amount for the per-milestone audit trail.
     const { data: milestoneUpdateData, error: milestoneUpdateError } = await supabase
       .from('milestones')
       .update({
-        status: 'released',
+        status:            'released',
         protection_status: 'released',
-        updated_at: new Date().toISOString(),
+        retainage_amount:  retainage.retainageAmount,
+        updated_at:        new Date().toISOString(),
       })
       .eq('id', milestoneId)
       .eq('status', 'approved')
@@ -437,14 +452,23 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       )
     }
 
-    // ── STEP 6: Update deal.released_amount + fees_collected (atomic RPC) ─
-    // increment_deal_financials atomically increments both columns and guards
-    // against exceeding the funded balance in a single UPDATE … WHERE clause.
+    // ── STEP 6: Update deal financials (two atomic RPCs) ───────────────────
+    //
+    // 6a. increment_deal_financials(net_to_contractor, fee):
+    //   - released_amount += net_to_contractor
+    //   - fees_collected  += fee
+    //   - reserved_amount -= (net + fee)   [net + fee portion of reservation settled]
+    //   The retainage portion of the reservation stays in reserved_amount temporarily.
+    //
+    // 6b. increment_deal_retainage(retainage_amount):
+    //   - retainage_held  += retainage
+    //   - reserved_amount -= retainage     [completes full reservation conversion]
+    //   No-op when retainage_amount = 0 (deal has no retainage).
     const { error: dealUpdateError } = await supabase.rpc(
       'increment_deal_financials',
       {
         p_deal_id:         milestone.deal_id,
-        p_released_amount: fee.grossAmount,
+        p_released_amount: netToContractor,   // net, not gross
         p_fee_amount:      fee.feeAmount,
       },
     )
@@ -459,8 +483,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         actor_id:    user.id,
         old_values:  null,
         new_values: {
-          released_amount_increment: fee.grossAmount,
+          released_amount_increment: netToContractor,
           fee_amount_increment:      fee.feeAmount,
+          retainage_amount:          retainage.retainageAmount,
         },
         metadata: {
           stripe_transfer_id: stripeTransferId,
@@ -478,6 +503,44 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       )
     }
 
+    // 6b. Move retainage from reserved_amount → retainage_held (no-op if 0)
+    if (retainage.retainageAmount > 0) {
+      const { error: retainageUpdateError } = await supabase.rpc(
+        'increment_deal_retainage',
+        {
+          p_deal_id:   milestone.deal_id,
+          p_retainage: retainage.retainageAmount,
+        },
+      )
+
+      if (retainageUpdateError) {
+        // Non-fatal to the release but requires reconciliation.
+        // reserved_amount has an orphaned retainage portion; retainage_held is understated.
+        await logAudit({
+          entity_type: 'deal',
+          entity_id:   milestone.deal_id,
+          action:      'release_retainage_increment_failed',
+          actor_id:    user.id,
+          old_values:  null,
+          new_values:  { retainage_amount: retainage.retainageAmount },
+          metadata: {
+            stripe_transfer_id: stripeTransferId,
+            idempotency_key:    idempotencyKey,
+            error:              retainageUpdateError.message,
+            note:               'reserved_amount has orphaned retainage — requires reconciliation',
+          },
+        })
+
+        return internalError(
+          'Funds were transferred and the milestone released, but the retainage ledger ' +
+            '(retainage_held) could not be updated. This requires manual reconciliation. ' +
+            `Contact support with Stripe Transfer ID: ${stripeTransferId}, ` +
+            `Milestone ID: ${milestoneId}, retainage amount: $${retainage.retainageAmount.toFixed(2)}.`,
+          retainageUpdateError.message,
+        )
+      }
+    }
+
     // ── STEP 7: Audit Log (success path) ───────────────────────────────────
     await logAudit({
       entity_type: 'milestone',
@@ -491,19 +554,22 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       new_values: {
         status:            'released',
         protection_status: 'released',
+        retainage_amount:  retainage.retainageAmount,
       },
       metadata: {
-        deal_id:            milestone.deal_id,
-        contractor_id:      deal.contractor_id,
-        gross_amount:       fee.grossAmount,
-        fee_amount:         fee.feeAmount,
-        net_amount:         fee.netAmount,
-        billing_rate_bps:   fee.billingRateBps,
-        total_debit:        fee.totalDebit,
-        amount_in_cents:    amountInCents,
-        stripe_transfer_id: stripeTransferId,
-        idempotency_key:    idempotencyKey,
-        released_by_role:   profile.role,
+        deal_id:              milestone.deal_id,
+        contractor_id:        deal.contractor_id,
+        gross_amount:         fee.grossAmount,
+        fee_amount:           fee.feeAmount,
+        retainage_amount:     retainage.retainageAmount,
+        retainage_percentage: retainage.retainagePercentage,
+        net_to_contractor:    netToContractor,
+        billing_rate_bps:     fee.billingRateBps,
+        total_debit:          fee.totalDebit,
+        amount_in_cents:      amountInCents,
+        stripe_transfer_id:   stripeTransferId,
+        idempotency_key:      idempotencyKey,
+        released_by_role:     profile.role,
       },
     })
 
@@ -531,6 +597,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       dealTitle:        deal.title,
       milestoneTitle:   milestone.title,
       releasedAt,
+      // Receipt email will note the retainage withheld, if any
     })
 
     // ── STEP 8.5: Send Receipt Emails (fire-and-forget) ──────────────────
@@ -586,12 +653,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           receipt_number: receipt.receipt_number,
         } : null,
         billing: {
-          gross_amount:     fee.grossAmount,
-          fee_amount:       fee.feeAmount,
-          net_amount:       fee.netAmount,
-          billing_rate_bps: fee.billingRateBps,
-          rate_label:       fee.rateLabel,
-          total_debit:      fee.totalDebit,
+          gross_amount:         fee.grossAmount,
+          fee_amount:           fee.feeAmount,
+          retainage_amount:     retainage.retainageAmount,
+          retainage_percentage: retainage.retainagePercentage,
+          net_to_contractor:    netToContractor,
+          billing_rate_bps:     fee.billingRateBps,
+          rate_label:           fee.rateLabel,
+          total_debit:          fee.totalDebit,
         },
       },
     })
@@ -630,10 +699,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       old_values: null,
       new_values: null,
       metadata: {
-        error:              message,
-        stripe_transfer_id: stripeTransferId,
-        idempotency_key:    idempotencyKey,
-        reservation_made:   reservationMade,
+        error:                message,
+        stripe_transfer_id:   stripeTransferId,
+        idempotency_key:      idempotencyKey,
+        gross_amount:         fee.grossAmount,
+        retainage_amount:     retainage.retainageAmount,
+        net_to_contractor:    netToContractor,
+        reservation_made:     reservationMade,
         reservation_cancelled: !stripeTransferId && reservationMade,
       },
     })

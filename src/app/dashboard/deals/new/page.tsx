@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Input, Textarea } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle, ArrowLeft, FileUp } from "lucide-react";
+import { AlertCircle, ArrowLeft, FileUp, ListOrdered, Lock } from "lucide-react";
 import type { DealMetadata } from "@/lib/actions/analyze-contract";
 
 function formatCurrency(value: string): string {
@@ -22,6 +22,8 @@ export default function NewDealPage() {
     title: "",
     description: "",
     total_amount: "",
+    sequential_release_required: false,
+    retainage_percentage: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [serverError, setServerError] = useState<string | null>(null);
@@ -46,6 +48,12 @@ export default function NewDealPage() {
     } else if (amount > 100_000_000) {
       errs.total_amount = "Maximum deal amount is $100,000,000.";
     }
+    if (form.retainage_percentage !== "") {
+      const pct = parseFloat(form.retainage_percentage);
+      if (isNaN(pct) || pct < 0 || pct >= 100) {
+        errs.retainage_percentage = "Retainage must be between 0% and 100% (exclusive).";
+      }
+    }
     return errs;
   };
 
@@ -62,6 +70,11 @@ export default function NewDealPage() {
     setErrors({});
 
     try {
+      const retainagePct =
+        form.retainage_percentage !== ""
+          ? parseFloat(form.retainage_percentage)
+          : 0;
+
       const res = await fetch("/api/deals", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -69,6 +82,8 @@ export default function NewDealPage() {
           title: form.title.trim(),
           description: form.description.trim() || undefined,
           total_amount: parseFloat(form.total_amount),
+          sequential_release_required: form.sequential_release_required,
+          retainage_percentage: retainagePct > 0 ? retainagePct : undefined,
         }),
       });
 
@@ -172,6 +187,97 @@ export default function NewDealPage() {
                         }
                       }}
                     />
+
+                    {/* Sequential release toggle */}
+                    <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-4">
+                      <label className="flex items-start gap-3 cursor-pointer select-none">
+                        {/* Custom toggle */}
+                        <div className="relative flex-shrink-0 mt-0.5">
+                          <input
+                            type="checkbox"
+                            className="sr-only peer"
+                            checked={form.sequential_release_required}
+                            onChange={(e) =>
+                              setForm((prev) => ({
+                                ...prev,
+                                sequential_release_required: e.target.checked,
+                              }))
+                            }
+                          />
+                          <div className="w-9 h-5 rounded-full border border-white/[0.12] bg-white/[0.06] peer-checked:bg-vektrum-blue peer-checked:border-vektrum-blue transition-all" />
+                          <div className="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white/40 peer-checked:bg-white peer-checked:translate-x-4 transition-all" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5 mb-0.5">
+                            <ListOrdered size={13} className="text-white/50 flex-shrink-0" aria-hidden="true" />
+                            <span className="text-[13px] font-semibold text-white/85">
+                              Require milestones to be released in order
+                            </span>
+                          </div>
+                          <p className="text-[12px] text-white/45 leading-relaxed">
+                            Milestone N cannot be released until milestone N−1 is confirmed
+                            released. Recommended for institutional lenders who require sequential
+                            disbursement.
+                          </p>
+                          {form.sequential_release_required && (
+                            <p className="mt-1.5 text-[11px] font-medium text-vektrum-blue">
+                              Sequential enforcement enabled — cannot be changed after first funding.
+                            </p>
+                          )}
+                        </div>
+                      </label>
+                    </div>
+
+                    {/* Retainage percentage */}
+                    <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-4 space-y-3">
+                      <div className="flex items-center gap-1.5">
+                        <Lock size={13} className="text-white/50 flex-shrink-0" aria-hidden="true" />
+                        <span className="text-[13px] font-semibold text-white/85">
+                          Retainage Withholding
+                        </span>
+                        <span className="ml-auto text-[11px] text-white/35">
+                          Optional — default 0%
+                        </span>
+                      </div>
+                      <p className="text-[12px] text-white/45 leading-relaxed">
+                        Withhold a percentage of each milestone payment until project completion.
+                        Industry standard is 5–10% for institutional construction lending.
+                        Leave blank or 0 for no retainage.
+                      </p>
+                      <div className="flex items-center gap-3">
+                        <div className="relative flex-1 max-w-[140px]">
+                          <input
+                            type="number"
+                            min={0}
+                            max={99}
+                            step={0.5}
+                            placeholder="0"
+                            value={form.retainage_percentage}
+                            onChange={(e) =>
+                              setForm((prev) => ({
+                                ...prev,
+                                retainage_percentage: e.target.value,
+                              }))
+                            }
+                            className="w-full rounded-lg border border-white/[0.10] bg-white/[0.04] px-3 py-2 pr-8 text-[13px] text-white placeholder:text-white/25 focus:outline-none focus:ring-1 focus:ring-vektrum-blue/60"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] text-white/40 pointer-events-none">
+                            %
+                          </span>
+                        </div>
+                        {errors.retainage_percentage && (
+                          <p className="text-[12px] text-red-400">{errors.retainage_percentage}</p>
+                        )}
+                      </div>
+                      {form.retainage_percentage !== "" &&
+                        parseFloat(form.retainage_percentage) > 0 && (
+                          <p className="text-[11px] font-medium text-amber-400/80">
+                            {parseFloat(form.retainage_percentage).toFixed(
+                              parseFloat(form.retainage_percentage) % 1 === 0 ? 0 : 2
+                            )}% withheld per milestone — cannot be changed after first funding.
+                          </p>
+                        )}
+                    </div>
 
                     {serverError && (
                       <div

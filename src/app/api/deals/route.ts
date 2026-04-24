@@ -103,6 +103,14 @@ export async function POST(request: NextRequest) {
     description?: string
     total_amount?: number
     funder_id?: string
+    /** When true, milestones must be released in ascending order_index order. Default false. */
+    sequential_release_required?: boolean
+    /**
+     * Percentage of each milestone gross amount to withhold as retainage.
+     * Range: 0 to <100. Default 0 (no retainage).
+     * Industry standard: 5-10% for institutional construction lending.
+     */
+    retainage_percentage?: number
   }
 
   try {
@@ -166,6 +174,20 @@ export async function POST(request: NextRequest) {
       governance_fee_bps:   governance.governanceFeeBps,
       governance_fee_total: governance.governanceFeeTotal,
       facility_total:       governance.facilityTotal,
+      // Sequential release mode — false by default, opt-in per deal.
+      // Only accept explicit boolean true/false; ignore if not a boolean.
+      sequential_release_required:
+        typeof body.sequential_release_required === 'boolean'
+          ? body.sequential_release_required
+          : false,
+      // Retainage percentage — 0 by default (no retainage).
+      // Validated: must be a finite number in [0, 100). Clamped to 2 decimal places.
+      retainage_percentage: (() => {
+        const pct = body.retainage_percentage
+        if (typeof pct !== 'number' || !isFinite(pct)) return 0
+        if (pct < 0 || pct >= 100) return 0
+        return Math.round(pct * 100) / 100
+      })(),
       ...(body.funder_id && { funder_id: body.funder_id }),
     }
 
@@ -190,14 +212,16 @@ export async function POST(request: NextRequest) {
       actor_role: profile.role,
       old_values: null,
       new_values: {
-        title:                deal.title,
-        total_amount:         deal.total_amount,
-        status:               deal.status,
-        contractor_id:        deal.contractor_id,
-        construction_budget:  governance.constructionBudget,
-        governance_fee_bps:   governance.governanceFeeBps,
-        governance_fee_total: governance.governanceFeeTotal,
-        facility_total:       governance.facilityTotal,
+        title:                        deal.title,
+        total_amount:                 deal.total_amount,
+        status:                       deal.status,
+        contractor_id:                deal.contractor_id,
+        sequential_release_required:  deal.sequential_release_required,
+        retainage_percentage:         deal.retainage_percentage,
+        construction_budget:          governance.constructionBudget,
+        governance_fee_bps:           governance.governanceFeeBps,
+        governance_fee_total:         governance.governanceFeeTotal,
+        facility_total:               governance.facilityTotal,
       },
     })
 

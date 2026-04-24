@@ -5,8 +5,16 @@ import { cn, formatMoney } from "@/lib/utils";
 import { MilestoneStatusBadge, ProtectionStatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Milestone, UserRole } from "@/lib/types";
-import { CheckCircle2, AlertCircle, ChevronDown } from "lucide-react";
+import { CheckCircle2, AlertCircle, ChevronDown, ListOrdered, Lock } from "lucide-react";
 import { DrawReviewAgent } from "@/components/ai/draw-review-agent";
+
+/** A predecessor milestone that is blocking sequential release. */
+export interface SequentialBlocker {
+  id:         string;
+  title:      string;
+  /** 1-based display position derived from order_index */
+  position:   number;
+}
 
 // Left-border color coding by milestone status — dark-context tokens only.
 // Actionable milestones are visually differentiated from passive ones.
@@ -36,6 +44,15 @@ interface MilestoneCardProps {
   role: UserRole;
   dealId: string;
   onStatusChange?: (milestoneId: string, newStatus: Milestone["status"]) => void;
+  /**
+   * Milestones that must be released before this one can proceed.
+   * Populated by the deal page when deal.sequential_release_required = true
+   * or when explicit milestone_prerequisites exist.
+   * Empty array (or undefined) means no sequential block.
+   */
+  sequentialBlockers?: SequentialBlocker[];
+  /** True when this deal enforces sequential release order. */
+  sequentialDeal?: boolean;
 }
 
 export function MilestoneCard({
@@ -43,6 +60,8 @@ export function MilestoneCard({
   role,
   dealId,
   onStatusChange,
+  sequentialBlockers = [],
+  sequentialDeal = false,
 }: MilestoneCardProps) {
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -99,8 +118,12 @@ export function MilestoneCard({
     }
   };
 
-  const isReleased = milestone.status === "released";
-  const borderColor = statusBorderColor[milestone.status] ?? "border-l-white/[0.08]";
+  const isReleased          = milestone.status === "released";
+  const isSequentiallyBlocked = sequentialBlockers.length > 0;
+  const position            = milestone.order_index + 1;  // 1-based display number
+  const borderColor = isSequentiallyBlocked
+    ? "border-l-amber-500/60"
+    : (statusBorderColor[milestone.status] ?? "border-l-white/[0.08]");
   const shadowClass = statusShadow[milestone.status] ?? "shadow-xs";
   const isReadyForReview = milestone.status === 'ready_for_review'
   const showAiPanel =
@@ -174,9 +197,30 @@ export function MilestoneCard({
           {/* Left: info */}
           <div className="min-w-0 flex-1 space-y-1.5">
             <div className="flex flex-wrap items-center gap-2">
+              {/* Position badge — shown on sequential deals */}
+              {sequentialDeal && (
+                <span
+                  title={`Milestone ${position} of ${sequentialDeal ? 'sequential deal' : 'deal'}`}
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold tabular-nums",
+                    isSequentiallyBlocked
+                      ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                      : "bg-white/[0.06] text-white/40 border border-white/[0.08]",
+                  )}
+                >
+                  <ListOrdered size={10} aria-hidden="true" />
+                  #{position}
+                </span>
+              )}
               <h4 className="text-sm font-semibold text-white">
                 {milestone.title}
               </h4>
+              {isSequentiallyBlocked && (
+                <span className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                  <Lock size={9} aria-hidden="true" />
+                  Awaiting predecessor
+                </span>
+              )}
             </div>
 
             {milestone.description && (
@@ -253,6 +297,37 @@ export function MilestoneCard({
         {(milestone.status === 'ready_for_review' || milestone.status === 'approved') && (
           <div className="mt-4">
             <DrawReviewAgent milestoneId={milestone.id} milestoneStatus={milestone.status} />
+          </div>
+        )}
+
+        {/* Sequential release blocker notice */}
+        {isSequentiallyBlocked && (
+          <div className="mt-3 rounded-lg border border-amber-500/20 bg-amber-500/[0.06] px-4 py-3">
+            <div className="flex items-start gap-2.5">
+              <Lock size={14} className="text-amber-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
+              <div className="min-w-0">
+                <p className="text-[12px] font-semibold text-amber-400 mb-1.5">
+                  Release blocked — sequential order required
+                </p>
+                <p className="text-[11px] text-amber-400/70 mb-2">
+                  The following milestone{sequentialBlockers.length !== 1 ? 's' : ''} must be
+                  released before this one can proceed:
+                </p>
+                <ul className="space-y-1">
+                  {sequentialBlockers.map((blocker) => (
+                    <li
+                      key={blocker.id}
+                      className="flex items-center gap-1.5 text-[11px] text-amber-300/80"
+                    >
+                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-amber-500/15 text-amber-400 text-[9px] font-bold tabular-nums flex-shrink-0">
+                        {blocker.position}
+                      </span>
+                      <span className="truncate">{blocker.title}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
           </div>
         )}
 

@@ -2,7 +2,7 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { MoneySummary } from "@/components/deal/money-summary";
-import { MilestoneCard } from "@/components/deal/milestone-card";
+import { MilestoneCard, type SequentialBlocker } from "@/components/deal/milestone-card";
 import { MilestoneDisputeSection } from "@/components/ai/MilestoneDisputeSection";
 import { ReleaseButton } from "@/components/deal/release-button";
 import { InviteFunderButton } from "@/components/deal/invite-funder-button";
@@ -10,16 +10,23 @@ import { DealStatusBadge } from "@/components/ui/badge";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { AddMilestoneForm } from "./add-milestone-form";
 import { FundDealButton } from "./fund-deal-button";
+import { ReleaseRetainageButton } from "./release-retainage-button";
 import type { Deal, Profile, Milestone, ReleaseGateResult } from "@/lib/types";
 import { formatMoney } from "@/lib/utils";
 import { ArrowLeft, Info, FolderOpen } from "lucide-react";
 import { SectionHeader, EmptyState } from "@/components/layout";
 
-// ─── Release gate computation (server-side) ───────────────────────────────────
+// ─── Release gate computation (server-side pre-check) ────────────────────────
+//
+// A lightweight client-side pre-flight that surfaces blockers without a round-
+// trip to the release endpoint. The authoritative gate is validateRelease() in
+// src/lib/engine/release-gate.ts — this function only needs to be accurate
+// enough to give the funder meaningful UI feedback before they click.
 
 function computeReleaseGate(
   milestone: Milestone,
-  deal: Deal
+  deal: Deal,
+  allMilestones: Milestone[],
 ): ReleaseGateResult {
   const blockers: string[] = [];
 
@@ -45,7 +52,43 @@ function computeReleaseGate(
     blockers.push("This deal has been cancelled.");
   }
 
+  // Sequential ordering: every predecessor must be released first
+  if (deal.sequential_release_required) {
+    const unreleasedPredecessors = allMilestones.filter(
+      (m) => m.order_index < milestone.order_index && m.status !== "released"
+    );
+    for (const pred of unreleasedPredecessors) {
+      blockers.push(
+        `Sequential order required: "${pred.title}" (position ${pred.order_index + 1}) must be released first.`
+      );
+    }
+  }
+
   return { can_release: blockers.length === 0, blockers };
+}
+
+// ─── Sequential blocker computation ─────────────────────────────────────────
+//
+// Returns the list of predecessor milestones that are blocking the given
+// milestone under sequential enforcement. Empty array = not blocked.
+
+function computeSequentialBlockers(
+  milestone: Milestone,
+  deal: Deal,
+  allMilestones: Milestone[],
+): SequentialBlocker[] {
+  if (!deal.sequential_release_required) return [];
+  if (milestone.status === "released") return [];
+
+  return allMilestones
+    .filter(
+      (m) => m.order_index < milestone.order_index && m.status !== "released"
+    )
+    .map((m) => ({
+      id:       m.id,
+      title:    m.title,
+      position: m.order_index + 1,
+    }));
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -138,6 +181,12 @@ export default async function DealDetailPage({
     typedProfile.role === "contractor" &&
     typedDeal.status === "draft" &&
     !typedDeal.funder_id;
+
+  // Funder sees the retainage release button when deal is completed and retainage is held
+  const showReleaseRetainage =
+    typedProfile.role === "funder" &&
+    typedDeal.status === "completed" &&
+    (typedDeal.retainage_held ?? 0) > 0;
 
   return (
     <div className="min-h-screen bg-surface-0">
@@ -236,7 +285,19 @@ export default async function DealDetailPage({
             governanceFeeBps={typedDeal.governance_fee_bps}
             governanceFeeTotal={typedDeal.governance_fee_total}
             facilityTotal={typedDeal.facility_total}
+            retainagePercentage={typedDeal.retainage_percentage}
+            retainageHeld={typedDeal.retainage_held}
+            retainageReleased={typedDeal.retainage_released}
           />
+          {/* Release Retainage action — funder, completed deals with held retainage */}
+          {showReleaseRetainage && (
+            <div className="mt-4 flex justify-end border-t border-white/[0.06] pt-4">
+              <ReleaseRetainageButton
+                dealId={typedDeal.id}
+                retainageHeld={typedDeal.retainage_held!}
+              />
+            </div>
+          )}
         </CardBody>
       </Card>
 
@@ -256,7 +317,8 @@ export default async function DealDetailPage({
         ) : (
           <div className="space-y-3">
             {milestones.map((milestone) => {
-              const gate = computeReleaseGate(milestone, typedDeal);
+              const gate = computeReleaseGate(milestone, typedDeal, milestones);
+              const sequentialBlockers = computeSequentialBlockers(milestone, typedDeal, milestones);
               const latestBrief = briefMap.get(milestone.id) ?? null;
               const contractorName =
                 typedDeal.contractor?.full_name ?? "Contractor";
@@ -267,6 +329,8 @@ export default async function DealDetailPage({
                     milestone={milestone}
                     role={typedProfile.role}
                     dealId={typedDeal.id}
+                    sequentialBlockers={sequentialBlockers}
+                    sequentialDeal={typedDeal.sequential_release_required ?? false}
                   />
                   <MilestoneDisputeSection
                     milestone={{

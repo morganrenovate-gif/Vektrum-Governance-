@@ -12,6 +12,10 @@ interface MoneySummaryProps {
   governanceFeeBps?: number | null;
   governanceFeeTotal?: number | null;
   facilityTotal?: number | null;
+  // ── Retainage (null / undefined when retainage_percentage = 0) ───────────
+  retainagePercentage?: number | null;
+  retainageHeld?: number | null;
+  retainageReleased?: number | null;
   className?: string;
 }
 
@@ -23,6 +27,9 @@ export function MoneySummary({
   governanceFeeBps,
   governanceFeeTotal,
   facilityTotal,
+  retainagePercentage,
+  retainageHeld,
+  retainageReleased,
   className,
 }: MoneySummaryProps) {
   const remaining = Math.max(0, totalAmount - releasedAmount);
@@ -36,6 +43,13 @@ export function MoneySummary({
     governanceFeeBps != null &&
     governanceFeeTotal != null &&
     facilityTotal != null;
+
+  // Retainage section shown only when a retainage rate is configured
+  const hasRetainage =
+    retainagePercentage != null &&
+    retainagePercentage > 0;
+  const heldBalance     = retainageHeld    ?? 0;
+  const releasedBalance = retainageReleased ?? 0;
 
   return (
     <div className={cn("space-y-4", className)}>
@@ -134,6 +148,68 @@ export function MoneySummary({
             </div>
             <span className="text-[15px] font-bold tabular-nums text-vektrum-blue">
               {formatMoney(facilityTotal!)}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* ── Retainage Breakdown ───────────────────────────────────────────────────
+          Rendered only when a retainage rate > 0 is configured on the deal.
+          Shows the funder the current state of withheld and released retainage.
+      */}
+      {hasRetainage && (
+        <div className="mt-1 rounded-lg border border-white/[0.08] bg-white/[0.02] divide-y divide-white/[0.06]">
+          {/* Header */}
+          <div className="px-4 py-2.5 flex items-center justify-between">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/40">
+              Retainage
+            </span>
+            <span className="text-[11px] font-semibold text-amber-400/80 tabular-nums">
+              {retainagePercentage!.toFixed(retainagePercentage! % 1 === 0 ? 0 : 2)}% withheld per milestone
+            </span>
+          </div>
+
+          {/* Currently Held row */}
+          <div className="px-4 py-3 flex items-center justify-between">
+            <div>
+              <p className="text-[13px] font-medium text-white/80">Currently Held</p>
+              <p className="text-[11px] text-white/40 mt-0.5">
+                Withheld from milestone releases — pending project completion
+              </p>
+            </div>
+            <span className={cn(
+              "text-[14px] font-semibold tabular-nums",
+              heldBalance > 0 ? "text-amber-400" : "text-white/40"
+            )}>
+              {formatMoney(heldBalance)}
+            </span>
+          </div>
+
+          {/* Released row — only shown once any retainage has been released */}
+          {releasedBalance > 0 && (
+            <div className="px-4 py-3 flex items-center justify-between">
+              <div>
+                <p className="text-[13px] font-medium text-white/80">Released to Contractor</p>
+                <p className="text-[11px] text-white/40 mt-0.5">
+                  Cumulative retainage disbursed
+                </p>
+              </div>
+              <span className="text-[14px] font-semibold tabular-nums text-vektrum-green">
+                {formatMoney(releasedBalance)}
+              </span>
+            </div>
+          )}
+
+          {/* Total retainage balance row */}
+          <div className="px-4 py-3 flex items-center justify-between bg-white/[0.02] rounded-b-lg">
+            <div>
+              <p className="text-[13px] font-semibold text-white">Total Retainage Pool</p>
+              <p className="text-[11px] text-white/40 mt-0.5">
+                Held + released (cumulative withheld)
+              </p>
+            </div>
+            <span className="text-[14px] font-bold tabular-nums text-white/70">
+              {formatMoney(heldBalance + releasedBalance)}
             </span>
           </div>
         </div>

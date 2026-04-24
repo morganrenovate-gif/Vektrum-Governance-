@@ -60,7 +60,7 @@ export async function validateRelease(
   // ── Fetch Milestone ─────────────────────────────────────────────────────────
   const { data: milestone, error: milestoneError } = await supabase
     .from('milestones')
-    .select('id, deal_id, amount, status, protection_status')
+    .select('id, deal_id, amount, status, protection_status, order_index')
     .eq('id', milestoneId)
     .single()
 
@@ -78,7 +78,7 @@ export async function validateRelease(
   // that have been reserved but whose Stripe transfers haven't completed yet.
   const { data: deal, error: dealError } = await supabase
     .from('deals')
-    .select('id, contractor_id, funded_amount, released_amount, fees_collected, reserved_amount, billing_rate_bps, total_amount')
+    .select('id, contractor_id, funded_amount, released_amount, fees_collected, reserved_amount, billing_rate_bps, total_amount, sequential_release_required')
     .eq('id', milestone.deal_id)
     .single()
 
@@ -269,6 +269,89 @@ export async function validateRelease(
         : `Contract is not fully executed (status: '${contract.status}'). ` +
           'Both parties must sign the contract before funds can be released.'
     errors.push(detail)
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // CONDITION 9: Sequential release order + explicit prerequisites
+  //
+  // 9a. Deal-level sequential ordering (deal.sequential_release_required = true)
+  //     Every milestone with order_index < current must be 'released' before
+  //     this milestone can be released. Required for institutional lender
+  //     compliance. Enforced only when the flag is set on the deal.
+  //
+  // 9b. Explicit prerequisites (milestone_prerequisites table)
+  //     Any row in milestone_prerequisites where milestone_id = this milestone
+  //     represents a hard release dependency, enforced regardless of the
+  //     sequential_release_required flag.
+  //
+  // Both checks are run in parallel and all blocking milestones are reported
+  // simultaneously so the funder sees the complete picture in one response.
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  // Run both prerequisite queries in parallel
+  const [sequentialResult, explicitPrereqResult] = await Promise.all([
+    // 9a — sequential ordering: only relevant when the flag is set
+    deal.sequential_release_required
+      ? supabase
+          .from('milestones')
+          .select('id, title, order_index')
+          .eq('deal_id', deal.id)
+          .lt('order_index', milestone.order_index)
+          .neq('status', 'released')
+          .order('order_index', { ascending: true })
+      : Promise.resolve({ data: [] as { id: string; title: string; order_index: number }[] | null, error: null }),
+
+    // 9b — explicit prerequisites: always checked
+    supabase
+      .from('milestone_prerequisites')
+      .select('prerequisite_milestone_id')
+      .eq('milestone_id', milestoneId),
+  ])
+
+  // 9a errors — unreleased predecessors under sequential mode
+  if (sequentialResult.error) {
+    errors.push(
+      'Could not verify sequential release order for this milestone. ' +
+        'Release aborted as a precaution. Please try again or contact support.',
+    )
+  } else if (sequentialResult.data && sequentialResult.data.length > 0) {
+    for (const pred of sequentialResult.data) {
+      errors.push(
+        `Sequential order required: milestone "${pred.title}" ` +
+          `(position ${pred.order_index + 1}) must be released before this milestone ` +
+          `(position ${milestone.order_index + 1}) can be released.`,
+      )
+    }
+  }
+
+  // 9b errors — unmet explicit prerequisites
+  if (explicitPrereqResult.error) {
+    errors.push(
+      'Could not verify milestone prerequisites. ' +
+        'Release aborted as a precaution. Please try again or contact support.',
+    )
+  } else if (explicitPrereqResult.data && explicitPrereqResult.data.length > 0) {
+    // Fetch the actual milestone details for the unreleased prerequisite IDs
+    const prereqIds = explicitPrereqResult.data.map(r => r.prerequisite_milestone_id)
+    const { data: unreleasedPrereqs, error: prereqDetailError } = await supabase
+      .from('milestones')
+      .select('id, title, order_index')
+      .in('id', prereqIds)
+      .neq('status', 'released')
+
+    if (prereqDetailError) {
+      errors.push(
+        'Could not verify all prerequisite milestone statuses. ' +
+          'Release aborted as a precaution. Please try again or contact support.',
+      )
+    } else if (unreleasedPrereqs && unreleasedPrereqs.length > 0) {
+      for (const prereq of unreleasedPrereqs) {
+        errors.push(
+          `Prerequisite not met: milestone "${prereq.title}" ` +
+            `(position ${prereq.order_index + 1}) must be released before this milestone can proceed.`,
+        )
+      }
+    }
   }
 
   return {

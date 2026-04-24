@@ -177,10 +177,49 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
   }
 
+  // sequential_release_required — contractor or admin, draft only.
+  // Cannot be changed once the deal is funded — lender agreements lock this in.
+  if (body.sequential_release_required !== undefined) {
+    if (typeof body.sequential_release_required !== 'boolean') {
+      return errorResponse(400, 'sequential_release_required must be a boolean (true or false).')
+    }
+    if (!isDraft && !isAdmin) {
+      return errorResponse(
+        400,
+        `Sequential release mode can only be changed while the deal is in 'draft' status. ` +
+          `This deal is currently '${currentDeal.status}'. ` +
+          `Lender agreements lock in the disbursement order at funding — contact support if a change is required.`,
+      )
+    }
+    updates.sequential_release_required = body.sequential_release_required
+  }
+
+  // retainage_percentage — contractor or admin, draft only.
+  // Like sequential_release_required, lender agreements lock this in at funding.
+  if (body.retainage_percentage !== undefined) {
+    const pct = body.retainage_percentage
+    if (typeof pct !== 'number' || !isFinite(pct as number)) {
+      return errorResponse(400, 'retainage_percentage must be a finite number between 0 and 100 (exclusive).')
+    }
+    if ((pct as number) < 0 || (pct as number) >= 100) {
+      return errorResponse(400, 'retainage_percentage must be in the range [0, 100). Industry standard is 5-10%.')
+    }
+    if (!isDraft && !isAdmin) {
+      return errorResponse(
+        400,
+        `Retainage percentage can only be changed while the deal is in 'draft' status. ` +
+          `This deal is currently '${currentDeal.status}'. ` +
+          `Lender agreements lock in the retainage rate at funding — contact support if a change is required.`,
+      )
+    }
+    updates.retainage_percentage = Math.round((pct as number) * 100) / 100
+  }
+
   // Guard: reject any attempts to directly mutate protected financial or status fields.
   // billing_rate_bps is set server-side at funding time from the funder's subscription
   // tier — it must never be accepted from user input through this endpoint.
-  const protectedFields = ['total_amount', 'funded_amount', 'released_amount', 'status', 'billing_rate_bps']
+  // retainage_held and retainage_released are computed server-side via RPCs.
+  const protectedFields = ['total_amount', 'funded_amount', 'released_amount', 'status', 'billing_rate_bps', 'retainage_held', 'retainage_released']
   const attemptedProtectedFields = protectedFields.filter((f) => f in body)
 
   if (attemptedProtectedFields.length > 0) {
@@ -194,7 +233,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   if (Object.keys(updates).length === 0) {
     return errorResponse(
       400,
-      'No updatable fields were provided. Include at least one of: title, description, funder_id.',
+      'No updatable fields were provided. Include at least one of: title, description, funder_id, sequential_release_required, retainage_percentage.',
     )
   }
 
