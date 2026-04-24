@@ -132,7 +132,7 @@ export default function DemoFunderPage() {
             
           >
             <div className="flex items-start justify-between gap-3 mb-2">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/45">Action Queue</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/75">Action Queue</p>
               <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08]">
                 <AlertCircle size={13} className="text-amber-400" aria-hidden="true" />
               </div>
@@ -269,7 +269,7 @@ function StatTile({ label, value, icon: Icon, href }: { label: string; value: st
       
     >
       <div className="flex items-start justify-between gap-3 mb-2">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/45">{label}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/75">{label}</p>
         <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08]">
           <Icon size={13} className="text-vektrum-blue" aria-hidden="true" />
         </div>
@@ -287,7 +287,7 @@ function MoneyTile({ label, amount, icon: Icon, href }: { label: string; amount:
       
     >
       <div className="flex items-start justify-between gap-3 mb-2">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/45">{label}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/75">{label}</p>
         <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08]">
           <Icon size={13} className="text-vektrum-blue" aria-hidden="true" />
         </div>
@@ -310,7 +310,7 @@ function DealCard({ deal }: { deal: typeof MOCK_DEALS[number] }) {
         <span className="inline-flex items-center rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">
           {deal.status}
         </span>
-        <span className="text-[11px] text-white/45">{deal.milestoneCount} milestones</span>
+        <span className="text-[11px] text-white/75">{deal.milestoneCount} milestones</span>
       </div>
       <p className="text-[14px] font-semibold text-white/80 group-hover:text-white transition-colors leading-snug">{deal.title}</p>
       <p className="mt-1 text-[12px] text-white/50">{deal.contractor} &middot; {deal.contractorCompany}</p>

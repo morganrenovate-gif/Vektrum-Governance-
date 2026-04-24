@@ -184,17 +184,17 @@ export default function DemoPage() {
               {/* Score row */}
               <div className="px-5 py-3 flex flex-wrap items-center gap-4 border-b border-white/10">
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">Score</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/75">Score</p>
                   <p className="text-lg font-bold tabular-nums text-white">91/100</p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">Risk</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/75">Risk</p>
                   <span className="inline-block rounded px-2 py-0.5 text-xs font-bold uppercase bg-green-50 text-green-700">
                     low
                   </span>
                 </div>
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">Recommendation</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/75">Recommendation</p>
                   <span className="inline-block rounded px-2 py-0.5 text-xs font-bold uppercase bg-green-50 text-green-700">
                     approve
                   </span>
@@ -203,7 +203,7 @@ export default function DemoPage() {
 
               {/* Reasoning */}
               <div className="px-5 py-3 border-b border-white/10">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40 mb-1">Reasoning</p>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-white/75 mb-1">Reasoning</p>
                 <p className="text-sm text-white/70">
                   Foundation work is well-documented with 4 supporting documents including an
                   inspection report. Amount aligns with scope and no outstanding disputes.
@@ -212,7 +212,7 @@ export default function DemoPage() {
 
               {/* Findings */}
               <div className="px-5 py-3">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40 mb-2">Findings</p>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-white/75 mb-2">Findings</p>
                 <ul className="space-y-1.5">
                   {[
                     '4 supporting documents on file including inspection report',
@@ -304,13 +304,13 @@ export default function DemoPage() {
                 <span className="text-sm text-white/55">SAM</span>
                 <span className="font-display text-lg font-bold text-white">$500B</span>
               </div>
-              <p className="text-xs text-white/30">Commercial + residential new construction</p>
+              <p className="text-xs text-white/70">Commercial + residential new construction</p>
               <div className="h-px bg-vektrum-blue-border" />
               <div className="flex items-baseline justify-between">
                 <span className="text-sm text-white/55">SOM Year 1</span>
                 <span className="font-display text-lg font-bold text-white">$50M</span>
               </div>
-              <p className="text-xs text-white/30">Targeting 5,000 funder-managed projects</p>
+              <p className="text-xs text-white/70">Targeting 5,000 funder-managed projects</p>
             </div>
           </div>
         </div>
@@ -325,7 +325,7 @@ export default function DemoPage() {
           {/* Pricing snapshot */}
           <div className="mb-10 mx-auto max-w-lg rounded-xl border border-white/10 bg-white/5 overflow-hidden">
             <div className="px-5 py-3 border-b border-white/10">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/40">Pricing — v2.0</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/75">Pricing — v2.0</p>
             </div>
             <div className="divide-y divide-white/10">
               {[
@@ -360,7 +360,7 @@ export default function DemoPage() {
               Contact operations@vektrum.io
             </Link>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-white/40">
+          <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-white/75">
             <span>Built on Perplexity AI</span>
             <span className="hidden sm:inline">|</span>
             <span>Next.js 15</span>

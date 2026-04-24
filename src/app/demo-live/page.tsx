@@ -82,7 +82,7 @@ export default function DemoLivePage() {
 
               {/* Identity */}
               <p className="text-[15px] font-semibold text-white leading-snug">{r.name}</p>
-              <p className="text-[12px] text-white/45 mt-0.5">{r.company}</p>
+              <p className="text-[12px] text-white/75 mt-0.5">{r.company}</p>
 
               {/* Description */}
               <p className="mt-4 text-[13px] text-white/65 leading-relaxed flex-1">
@@ -104,7 +104,7 @@ export default function DemoLivePage() {
         </div>
 
         {/* ─── Footer note ─────────────────────────────────────────────── */}
-        <p className="mt-12 text-center text-[12px] text-white/40 tracking-wide">
+        <p className="mt-12 text-center text-[12px] text-white/75 tracking-wide">
           No account required &nbsp;·&nbsp; Simulated data only &nbsp;·&nbsp; No real funds
         </p>
 

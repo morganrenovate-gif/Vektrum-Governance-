@@ -201,19 +201,19 @@ export default async function DemoDealPage({
       {/* Money Summary */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <div className="rounded-lg border border-white/[0.08] bg-surface-2 px-5 py-5 shadow-sm">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">Total</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/70">Total</p>
           <p className="mt-1.5 font-display text-xl font-bold tabular-nums text-white">{fmt(deal.total)}</p>
         </div>
         <div className="rounded-lg border border-white/[0.08] bg-surface-2 px-5 py-5 shadow-sm">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">Funded</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/70">Funded</p>
           <p className="mt-1.5 font-display text-xl font-bold tabular-nums text-white">{fmt(deal.funded)}</p>
         </div>
         <div className="rounded-lg border border-white/[0.08] bg-surface-2 px-5 py-5 shadow-sm">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">Released</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/70">Released</p>
           <p className="mt-1.5 font-display text-xl font-bold tabular-nums text-emerald-400">{fmt(deal.released)}</p>
         </div>
         <div className="rounded-lg border border-white/[0.08] bg-surface-2 px-5 py-5 shadow-sm">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">Progress</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/70">Progress</p>
           <p className="mt-1.5 font-display text-xl font-bold tabular-nums text-white">{pct}%</p>
           <div className="mt-2 h-1.5 rounded-full bg-surface-3 overflow-hidden">
             <div className="h-full rounded-full bg-vektrum-green" style={{ width: `${pct}%` }} />

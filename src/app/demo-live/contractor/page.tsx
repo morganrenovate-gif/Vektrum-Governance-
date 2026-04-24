@@ -97,7 +97,7 @@ export default function DemoContractorPage() {
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-[13px] font-medium text-white/80">MEP Rough-In &mdash; Riverside Mixed-Use Development</p>
-              <p className="text-[12px] text-white/45 mt-0.5">Status: Awaiting AI Review &middot; Amount: {formatCurrency(680_000)}</p>
+              <p className="text-[12px] text-white/75 mt-0.5">Status: Awaiting AI Review &middot; Amount: {formatCurrency(680_000)}</p>
             </div>
             <Link
               href="/demo-live/deal/riverside?from=contractor"
@@ -126,7 +126,7 @@ export default function DemoContractorPage() {
                 <span className="inline-flex items-center rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">
                   Active
                 </span>
-                <span className="text-[11px] text-white/45">{deal.milestonesCompleted}/{deal.milestonesTotal} milestones</span>
+                <span className="text-[11px] text-white/75">{deal.milestonesCompleted}/{deal.milestonesTotal} milestones</span>
               </div>
               <p className="text-[14px] font-semibold text-white/80 group-hover:text-white transition-colors leading-snug">{deal.title}</p>
               <p className="mt-1 text-[12px] text-white/55">{deal.funder} &middot; {deal.funderCompany}</p>
@@ -135,7 +135,7 @@ export default function DemoContractorPage() {
                 <div className="flex-1 h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
                   <div className="h-full rounded-full bg-emerald-500" style={{ width: `${deal.pct}%` }} />
                 </div>
-                <span className="text-[11px] text-white/45 tabular-nums">{deal.pct}%</span>
+                <span className="text-[11px] text-white/75 tabular-nums">{deal.pct}%</span>
               </div>
             </Link>
           ))}
@@ -154,7 +154,7 @@ function StatTile({ label, value, warning = false, href }: { label: string; valu
       className={`rounded-2xl border bg-surface-2 shadow-card px-5 py-5 transition-all duration-300 ${warning ? 'border-vektrum-amber/30' : 'border-white/[0.08]'} ${href ? 'hover:-translate-y-0.5 hover:border-white/[0.14] cursor-pointer' : ''}`}
       
     >
-      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/45">{label}</p>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/75">{label}</p>
       <p className={`mt-2 font-display text-4xl font-bold tabular-nums leading-none ${warning ? 'text-amber-400' : 'text-white'}`}>{value}</p>
     </div>
   )
@@ -167,7 +167,7 @@ function MoneyTile({ label, amount, href }: { label: string; amount: number; hre
       className={`rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card px-5 py-5 transition-all duration-300 ${href ? 'hover:-translate-y-0.5 hover:border-white/[0.14] cursor-pointer' : ''}`}
       
     >
-      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/45">{label}</p>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/75">{label}</p>
       <p className="mt-2 font-display text-xl font-bold tabular-nums leading-none text-white">{formatCurrency(amount)}</p>
     </div>
   )

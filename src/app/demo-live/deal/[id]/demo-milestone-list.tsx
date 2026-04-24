@@ -72,7 +72,7 @@ function DemoMilestoneCard({
     approved: { label: 'Approved', color: 'text-vektrum-blue', bg: 'bg-vektrum-blue/10 border-vektrum-blue/20', border: '' },
     ready_for_review: { label: 'Ready for Review', color: 'text-amber-400', bg: 'bg-amber-500/[0.08] border-amber-500/20', border: '' },
     in_progress: { label: 'In Progress', color: 'text-white/55', bg: 'bg-surface-3 border-white/[0.08]', border: '' },
-    not_started: { label: 'Not Started', color: 'text-white/30', bg: 'bg-surface-3 border-white/[0.08]', border: '' },
+    not_started: { label: 'Not Started', color: 'text-white/65', bg: 'bg-surface-3 border-white/[0.08]', border: '' },
     disputed: { label: 'Disputed', color: 'text-red-400', bg: 'bg-red-500/[0.08] border-red-500/20', border: 'border-l-vektrum-red' },
   }
 
@@ -140,13 +140,13 @@ function DemoMilestoneCard({
         <div className="px-5 pb-4 flex flex-wrap gap-3">
           {ms.fundsReleased != null && (
             <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/[0.08] px-4 py-2">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">Released</p>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-white/70">Released</p>
               <p className="text-[14px] font-bold tabular-nums text-emerald-400">{fmt(ms.fundsReleased)}</p>
             </div>
           )}
           {ms.fundsHeld != null && (
             <div className="rounded-lg border border-red-500/20 bg-red-500/[0.08] px-4 py-2">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">Held &mdash; Under Dispute</p>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-white/70">Held &mdash; Under Dispute</p>
               <p className="text-[14px] font-bold tabular-nums text-red-400">{fmt(ms.fundsHeld)}</p>
             </div>
           )}
@@ -232,15 +232,15 @@ function DemoMilestoneCard({
               </div>
               <div className="grid grid-cols-3 gap-4 mb-3">
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">Score</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/70">Score</p>
                   <p className="text-xl font-bold text-vektrum-blue tabular-nums">{ms.aiScore}/100</p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">Risk</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/70">Risk</p>
                   <p className="text-[14px] font-semibold text-emerald-400">{ms.riskLevel}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">Recommendation</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/70">Recommendation</p>
                   <p className="text-[14px] font-semibold text-emerald-400">Approve</p>
                 </div>
               </div>

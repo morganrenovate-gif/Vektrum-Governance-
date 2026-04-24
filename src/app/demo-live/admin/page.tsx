@@ -69,7 +69,7 @@ export default function DemoAdminPage() {
 
         {/* Platform Overview */}
         <section>
-          <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
+          <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/75">
             Platform Overview
           </h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
@@ -84,7 +84,7 @@ export default function DemoAdminPage() {
 
         {/* Dispute Queue */}
         <section id="open-disputes">
-          <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
+          <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/75">
             Open Disputes
           </h2>
           <div className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card p-4 flex items-start justify-between gap-4" >
@@ -104,17 +104,17 @@ export default function DemoAdminPage() {
 
         {/* All Deals */}
         <section id="all-deals" className="mt-6">
-          <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40 mb-4">All Deals</h2>
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/75 mb-4">All Deals</h2>
           <div className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden" >
             <table className="w-full text-sm">
               <thead className="bg-white/[0.04]">
                 <tr>
-                  <th className="text-left px-4 py-3 text-white/40 font-medium">Deal</th>
-                  <th className="text-left px-4 py-3 text-white/40 font-medium">Contractor</th>
-                  <th className="text-left px-4 py-3 text-white/40 font-medium">Funder</th>
-                  <th className="text-right px-4 py-3 text-white/40 font-medium">Total</th>
-                  <th className="text-right px-4 py-3 text-white/40 font-medium">Released</th>
-                  <th className="text-left px-4 py-3 text-white/40 font-medium">Status</th>
+                  <th className="text-left px-4 py-3 text-white/75 font-medium">Deal</th>
+                  <th className="text-left px-4 py-3 text-white/75 font-medium">Contractor</th>
+                  <th className="text-left px-4 py-3 text-white/75 font-medium">Funder</th>
+                  <th className="text-right px-4 py-3 text-white/75 font-medium">Total</th>
+                  <th className="text-right px-4 py-3 text-white/75 font-medium">Released</th>
+                  <th className="text-left px-4 py-3 text-white/75 font-medium">Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -145,7 +145,7 @@ export default function DemoAdminPage() {
 
         {/* User Table */}
         <section id="user-management">
-          <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
+          <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/75">
             User Management
           </h2>
           <div className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden" >
@@ -153,11 +153,11 @@ export default function DemoAdminPage() {
               <table className="w-full min-w-[480px] text-sm">
                 <thead>
                   <tr className="border-b border-white/[0.08] bg-white/[0.04]">
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white/40">Name</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white/40">Role</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white/40">Company</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white/40">Status</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white/40">Stripe</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white/75">Name</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white/75">Role</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white/75">Company</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white/75">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white/75">Stripe</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/[0.06]">
@@ -192,7 +192,7 @@ export default function DemoAdminPage() {
 
         {/* Platform Health */}
         <section>
-          <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
+          <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/75">
             Platform Health
           </h2>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -228,7 +228,7 @@ export default function DemoAdminPage() {
         {/* Recent Audit Activity */}
         <section className="mt-6" id="audit-activity">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">Recent Audit Activity</h2>
+            <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/75">Recent Audit Activity</h2>
             <Link href="/demo-live/audit" className="text-sm text-vektrum-blue hover:underline">View full audit log →</Link>
           </div>
           <div className="rounded-2xl border border-white/[0.08] bg-surface-2 divide-y divide-white/[0.06] text-sm overflow-hidden" >
@@ -270,7 +270,7 @@ function AdminTile({
   const inner = (
     <div className={`rounded-2xl border bg-surface-2 shadow-card px-5 py-5 transition-all duration-300 hover:-translate-y-0.5 ${warning ? 'border-vektrum-amber/30' : 'border-white/[0.08] hover:border-white/[0.14]'} ${href ? 'cursor-pointer' : ''}`} >
       <div className="flex items-start justify-between gap-3 mb-3">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">{label}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-white/75">{label}</p>
         <div className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg ${warning ? 'bg-vektrum-amber/10' : 'bg-vektrum-blue/10'}`}>
           <Icon size={13} className={warning ? 'text-amber-400' : 'text-vektrum-blue'} aria-hidden="true" />
         </div>
@@ -278,7 +278,7 @@ function AdminTile({
       <p className={`font-display text-2xl font-bold tabular-nums leading-none break-all ${accent ? 'text-vektrum-blue' : warning ? 'text-amber-400' : 'text-white'}`}>
         {value}
       </p>
-      {sub && <p className="mt-1.5 text-[11px] text-white/45">{sub}</p>}
+      {sub && <p className="mt-1.5 text-[11px] text-white/75">{sub}</p>}
     </div>
   )
   return href ? <Link href={href}>{inner}</Link> : inner

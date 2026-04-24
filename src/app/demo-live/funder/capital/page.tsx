@@ -63,15 +63,15 @@ export default function CapitalPage() {
       {/* Summary tiles */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div className="rounded-lg border border-white/[0.08] bg-surface-2 px-5 py-5 shadow-sm">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">Total Capital Committed</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/70">Total Capital Committed</p>
           <p className="mt-1.5 font-display text-xl font-bold tabular-nums text-white">{fmt(totalCommitted)}</p>
         </div>
         <div id="released" className="rounded-lg border border-white/[0.08] bg-surface-2 px-5 py-5 shadow-sm">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">Total Released to Date</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/70">Total Released to Date</p>
           <p className="mt-1.5 font-display text-xl font-bold tabular-nums text-emerald-400">{fmt(totalReleased)}</p>
         </div>
         <div className="rounded-lg border border-white/[0.08] bg-surface-2 px-5 py-5 shadow-sm">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">Held Pending Release</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/70">Held Pending Release</p>
           <p className="mt-1.5 font-display text-xl font-bold tabular-nums text-amber-400">{fmt(heldPending)}</p>
         </div>
       </div>
@@ -135,7 +135,7 @@ export default function CapitalPage() {
                   <div className="h-2.5 w-full rounded-full bg-surface-3 overflow-hidden">
                     <div className={`h-full rounded-full ${p.color}`} style={{ width: `${releasedPct}%` }} />
                   </div>
-                  <p className="text-[11px] text-white/40">
+                  <p className="text-[11px] text-white/70">
                     Released: {fmtShort(p.released)} | Pending: {fmtShort(pending)}
                   </p>
                 </div>
@@ -171,10 +171,10 @@ export default function CapitalPage() {
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-white/[0.05]">
-                <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-white/40">Date</th>
-                <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-white/40">Project</th>
-                <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-white/40">Milestone</th>
-                <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-white/40 text-right">Amount</th>
+                <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-white/70">Date</th>
+                <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-white/70">Project</th>
+                <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-white/70">Milestone</th>
+                <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-white/70 text-right">Amount</th>
               </tr>
             </thead>
             <tbody>

@@ -56,7 +56,7 @@ export default function HarborDisputeDealPage() {
         <StatTile label="Funded" value={formatCurrency(DEAL_FUNDED)} />
         <StatTile label="Released" value={formatCurrency(DEAL_RELEASED)} green />
         <div className="rounded-lg border border-white/[0.08] bg-surface-2 px-5 py-5 shadow-sm">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">Progress</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/75">Progress</p>
           <p className="mt-1.5 font-display text-xl font-bold tabular-nums text-white">{pct}%</p>
           <div className="mt-2 h-1.5 rounded-full bg-surface-3 overflow-hidden">
             <div className="h-full rounded-full bg-emerald-500" style={{ width: `${pct}%` }} />
@@ -101,12 +101,12 @@ export default function HarborDisputeDealPage() {
             { name: 'Change Order CO-004 (unsigned) — CO-004_HVAC.pdf', date: 'April 10, 2026' },
           ].map((doc, i) => (
             <div key={i} className="flex items-center gap-3 rounded-lg border border-white/[0.08] bg-surface-3 px-4 py-3">
-              <FileText size={16} className="text-white/40 flex-shrink-0" />
+              <FileText size={16} className="text-white/75 flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-white/55 truncate">{doc.name}</p>
-                <p className="text-xs text-white/40">{doc.date}</p>
+                <p className="text-xs text-white/75">{doc.date}</p>
               </div>
-              <span className="text-[10px] font-semibold uppercase tracking-wide text-white/40 bg-white/[0.06] rounded px-2 py-0.5">PDF</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-white/75 bg-white/[0.06] rounded px-2 py-0.5">PDF</span>
             </div>
           ))}
         </div>
@@ -127,7 +127,7 @@ export default function HarborDisputeDealPage() {
               <div className="mt-1.5 h-2 w-2 rounded-full bg-vektrum-blue flex-shrink-0" />
               <div>
                 <p className="text-white/55">{event.text}</p>
-                <p className="text-xs text-white/40">{event.date}</p>
+                <p className="text-xs text-white/75">{event.date}</p>
               </div>
             </div>
           ))}
@@ -167,8 +167,8 @@ function ReleasedCard({ ms, expanded, onToggle }: { ms: DisputeMilestone; expand
           <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold bg-emerald-500/[0.12] text-emerald-400 border border-emerald-500/20">
             Released
           </span>
-          {ms.releasedAt && <span className="text-[12px] text-white/45 hidden sm:inline">Released {ms.releasedAt}</span>}
-          <button type="button" onClick={onToggle} className="inline-flex items-center gap-1 text-[12px] text-white/40 hover:text-white/70 transition-colors">
+          {ms.releasedAt && <span className="text-[12px] text-white/75 hidden sm:inline">Released {ms.releasedAt}</span>}
+          <button type="button" onClick={onToggle} className="inline-flex items-center gap-1 text-[12px] text-white/75 hover:text-white/70 transition-colors">
             {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
             {expanded ? 'Hide' : 'Details'}
           </button>
@@ -183,11 +183,11 @@ function ReleasedCard({ ms, expanded, onToggle }: { ms: DisputeMilestone; expand
           )}
           {ms.documents.length > 0 && (
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-white/40 mb-1.5">Documents</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-white/75 mb-1.5">Documents</p>
               <ul className="space-y-1">
                 {ms.documents.map((doc, i) => (
                   <li key={i} className="text-sm text-white/55 flex items-center gap-1.5">
-                    <FileText size={12} className="text-white/40" /> {doc}
+                    <FileText size={12} className="text-white/75" /> {doc}
                   </li>
                 ))}
               </ul>
@@ -306,11 +306,11 @@ function PartialReleaseCard({ ms }: { ms: DisputeMilestone }) {
         </div>
         <div className="flex flex-wrap gap-3">
           <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/[0.08] px-4 py-2">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">Released</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-white/75">Released</p>
             <p className="text-[14px] font-bold tabular-nums text-emerald-400">{formatCurrency(ms.fundsReleased ?? 0)}</p>
           </div>
           <div className="rounded-lg border border-red-500/20 bg-red-500/[0.08] px-4 py-2">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">Held — Under Dispute</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-white/75">Held — Under Dispute</p>
             <p className="text-[14px] font-bold tabular-nums text-red-400">{formatCurrency(ms.fundsHeld ?? 0)}</p>
           </div>
         </div>
@@ -322,7 +322,7 @@ function PartialReleaseCard({ ms }: { ms: DisputeMilestone }) {
 function StatTile({ label, value, green }: { label: string; value: string; green?: boolean }) {
   return (
     <div className="rounded-lg border border-white/[0.08] bg-surface-2 px-5 py-5 shadow-sm">
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">{label}</p>
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-white/75">{label}</p>
       <p className={`mt-1.5 font-display text-xl font-bold tabular-nums ${green ? 'text-emerald-400' : 'text-white'}`}>{value}</p>
     </div>
   )
