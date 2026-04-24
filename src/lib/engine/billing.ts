@@ -159,6 +159,63 @@ export function calculateGovernanceFacility(
   }
 }
 
+// ─── Retainage ────────────────────────────────────────────────────────────────
+//
+// Retainage is a percentage of each milestone gross amount withheld until the
+// project reaches substantial completion. Industry standard: 5-10%.
+//
+// Key accounting rule: platform fee is computed on the full gross amount, NOT
+// on the net-to-contractor. The contractor bears no fee; the retainage is simply
+// a deferred portion of the contractor's own proceeds.
+//
+// net_to_contractor = gross - retainage
+// Stripe transfer   = net_to_contractor (contractor receives net immediately)
+// retainage_held   += retainage per milestone (held until funder releases)
+
+export interface RetainageBreakdown {
+  /** The full milestone amount (gross). */
+  grossAmount:        number
+  /** Retainage percentage applied (0–<100). */
+  retainagePercentage: number
+  /** Dollar amount withheld: ROUND(gross × retainagePercentage / 100, 2). */
+  retainageAmount:    number
+  /** Amount actually transferred to the contractor: gross - retainageAmount. */
+  netToContractor:    number
+}
+
+/**
+ * Calculates the retainage withheld from a milestone release.
+ *
+ * When retainagePercentage is 0 (default), retainageAmount = 0 and
+ * netToContractor = grossAmount — identical to a no-retainage release.
+ *
+ * @param grossAmount          - The full milestone amount (must be > 0).
+ * @param retainagePercentage  - Deal-level retainage rate, 0 to <100.
+ */
+export function calculateRetainage(
+  grossAmount: number,
+  retainagePercentage: number,
+): RetainageBreakdown {
+  if (grossAmount <= 0) {
+    throw new Error(`calculateRetainage: grossAmount must be > 0 (received ${grossAmount})`)
+  }
+  if (retainagePercentage < 0 || retainagePercentage >= 100) {
+    throw new Error(
+      `calculateRetainage: retainagePercentage must be in [0, 100) (received ${retainagePercentage})`
+    )
+  }
+
+  // Round to 2 decimal places — matches DB ROUND(..., 2)
+  const retainageAmount = Math.round(grossAmount * retainagePercentage / 100 * 100) / 100
+  return {
+    grossAmount,
+    retainagePercentage,
+    retainageAmount,
+    netToContractor: grossAmount - retainageAmount,
+  }
+}
+
+
 // ─── Stripe Helpers ───────────────────────────────────────────────────────────
 
 /**

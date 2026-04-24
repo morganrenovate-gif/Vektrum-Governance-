@@ -125,6 +125,33 @@ export interface Deal {
    */
   facility_total?: number | null;
 
+  // ── Sequential release enforcement (migration 000005) ───────────────────────
+  /**
+   * When true, milestones must be released in ascending order_index order.
+   * A milestone with order_index N is blocked until every milestone with
+   * order_index < N is in 'released' status.
+   * Required by institutional lenders. Defaults to false.
+   */
+  sequential_release_required?: boolean;
+
+  // ── Retainage (migration 20260424000006) ─────────────────────────────────────
+  /**
+   * Percentage of each milestone gross amount withheld until project completion.
+   * Range: 0 to <100. Default 0 (no retainage). Locked after first funding event.
+   * Industry standard: 5-10% for institutional construction lending.
+   */
+  retainage_percentage?: number | null;
+  /**
+   * Cumulative retainage currently held (not yet released to contractor).
+   * Incremented on each milestone release; decremented on retainage release.
+   */
+  retainage_held?: number | null;
+  /**
+   * Cumulative retainage already released to the contractor (monotone increasing).
+   * Use retainage_held for the current outstanding balance.
+   */
+  retainage_released?: number | null;
+
   created_at: string;
   updated_at: string;
   // Joined
@@ -146,6 +173,12 @@ export interface Milestone {
   submitted_at: string | null;
   approved_at: string | null;
   released_at: string | null;
+  /**
+   * Dollar amount withheld from this milestone release as retainage.
+   * Zero when the deal has no retainage (retainage_percentage = 0).
+   * The contractor received (amount - retainage_amount) at release time.
+   */
+  retainage_amount?: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -315,14 +348,22 @@ export interface BillingRecord {
   milestone_id: string;
   release_id: string;
   funder_id: string;
-  /** Milestone amount — the full contract value released to the contractor. */
+  /** Milestone amount — the full contract value for this milestone. */
   gross_amount: number;
   /** Rate applied at the time of this release, in basis points. */
   billing_rate_bps: number;
   /** Vektrum platform fee charged to the funder on top of the gross amount. */
   fee_amount: number;
-  /** Contractor payout. Always equals gross_amount — contractors are never charged. */
+  /**
+   * Contractor payout via Stripe: gross_amount - retainage_amount.
+   * Equals gross_amount when retainage_percentage = 0.
+   */
   net_amount: number;
+  /**
+   * Retainage withheld from this milestone. Zero on pre-retainage records.
+   * net_amount = gross_amount - retainage_amount.
+   */
+  retainage_amount?: number | null;
   /** Stripe transfer ID for the contractor payout. */
   stripe_transfer_id: string;
   /** Mirrors releases.transfer_status. Failed/reversed records are excluded from fee totals. */
