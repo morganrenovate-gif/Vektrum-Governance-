@@ -78,7 +78,7 @@ export async function validateRelease(
   // that have been reserved but whose Stripe transfers haven't completed yet.
   const { data: deal, error: dealError } = await supabase
     .from('deals')
-    .select('id, contractor_id, funded_amount, released_amount, fees_collected, reserved_amount, billing_rate_bps, total_amount, sequential_release_required')
+    .select('id, contractor_id, funded_amount, released_amount, fees_collected, reserved_amount, billing_rate_bps, total_amount, sequential_release_required, lien_waiver_required')
     .eq('id', milestone.deal_id)
     .single()
 
@@ -351,6 +351,51 @@ export async function validateRelease(
             `(position ${prereq.order_index + 1}) must be released before this milestone can proceed.`,
         )
       }
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // CONDITION 10: Approved conditional lien waiver on file
+  //
+  // When deal.lien_waiver_required = true, an approved conditional_progress
+  // lien waiver must exist for this milestone before funds can be released.
+  //
+  // Legal basis: Most US states require lien waivers before construction
+  // disbursements (Cal. Civil Code §8132-8138; Texas Property Code §53.281;
+  // NY Lien Law §34). The conditional_progress form is the standard pre-payment
+  // waiver — it protects the funder's collateral from mechanics' lien claims.
+  //
+  // The waiver must be:
+  //   - Linked to this specific milestone (milestone_id = milestoneId)
+  //   - Type: conditional_progress (the pre-disbursement AIA form)
+  //   - Status: approved (reviewed and accepted by the funder)
+  //
+  // If missing, the release is blocked and the funder is prompted to request
+  // a waiver and have the contractor upload the signed PDF.
+  // ─────────────────────────────────────────────────────────────────────────────
+  if (deal.lien_waiver_required) {
+    const { data: approvedWaiver, error: waiverQueryError } = await supabase
+      .from('lien_waivers')
+      .select('id, approved_at')
+      .eq('milestone_id', milestoneId)
+      .eq('waiver_type', 'conditional_progress')
+      .eq('status', 'approved')
+      .order('approved_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (waiverQueryError) {
+      errors.push(
+        'Could not verify lien waiver status for this milestone. ' +
+          'Release aborted as a precaution. Please try again or contact support.',
+      )
+    } else if (!approvedWaiver) {
+      errors.push(
+        'An approved conditional lien waiver is required before this milestone can be released. ' +
+          'The funder must request a waiver and the contractor must upload a signed ' +
+          'conditional progress payment lien waiver (AIA G702/G703 equivalent). ' +
+          'Contact the deal funder to initiate the waiver process.',
+      )
     }
   }
 

@@ -134,6 +134,14 @@ export interface Deal {
    */
   sequential_release_required?: boolean;
 
+  // ── Lien waiver (migration 20260424000008) ───────────────────────────────────
+  /**
+   * When true, an approved conditional_progress lien waiver is required for
+   * every milestone release (Condition 10 of validateRelease()).
+   * Required by institutional lenders in most US states.
+   */
+  lien_waiver_required?: boolean;
+
   // ── Retainage (migration 20260424000006) ─────────────────────────────────────
   /**
    * Percentage of each milestone gross amount withheld until project completion.
@@ -179,6 +187,12 @@ export interface Milestone {
    * The contractor received (amount - retainage_amount) at release time.
    */
   retainage_amount?: number | null;
+  /**
+   * Soft reference to the active/approved lien waiver for this milestone.
+   * Not a FK (lien_waivers already references milestones — circular FK avoided).
+   * Updated when a conditional_progress waiver is approved.
+   */
+  lien_waiver_id?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -287,6 +301,40 @@ export interface ReleaseGateResult {
   can_release: boolean;
   blockers: string[];
 }
+
+// ─── Lien Waivers ────────────────────────────────────────────────────────────
+
+export type LienWaiverType =
+  | 'conditional_progress'
+  | 'unconditional_progress'
+  | 'conditional_final'
+  | 'unconditional_final'
+
+export type LienWaiverStatus = 'requested' | 'uploaded' | 'approved' | 'rejected'
+
+export interface LienWaiver {
+  id:               string
+  deal_id:          string
+  milestone_id:     string | null
+  waiver_type:      LienWaiverType
+  status:           LienWaiverStatus
+  uploaded_by:      string | null
+  approved_by:      string | null
+  /** Supabase Storage path in the 'lien-waivers' bucket. */
+  file_path:        string | null
+  /** Dollar amount covered by this waiver (typically = milestone.amount). */
+  waiver_amount:    number | null
+  /** Through-date for the waiver (ISO date string). */
+  through_date:     string | null
+  rejection_reason: string | null
+  requested_at:     string
+  uploaded_at:      string | null
+  approved_at:      string | null
+  rejected_at:      string | null
+  created_at:       string
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 export type ChangeOrderStatus = 'pending' | 'approved' | 'rejected'
 export type DisputeStatus = 'open' | 'resolved' | 'escalated'

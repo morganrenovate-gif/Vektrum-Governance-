@@ -11,9 +11,9 @@ import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { AddMilestoneForm } from "./add-milestone-form";
 import { FundDealButton } from "./fund-deal-button";
 import { ReleaseRetainageButton } from "./release-retainage-button";
-import type { Deal, Profile, Milestone, ReleaseGateResult } from "@/lib/types";
+import type { Deal, Profile, Milestone, LienWaiver, ReleaseGateResult } from "@/lib/types";
 import { formatMoney } from "@/lib/utils";
-import { ArrowLeft, Info, FolderOpen } from "lucide-react";
+import { ArrowLeft, Info, FolderOpen, FileText, CheckCircle2, Clock, XCircle, AlertCircle } from "lucide-react";
 import { SectionHeader, EmptyState } from "@/components/layout";
 
 // ─── Release gate computation (server-side pre-check) ────────────────────────
@@ -167,6 +167,29 @@ export default async function DealDetailPage({
       briefMap.set(brief.milestone_id, brief);
     }
   }
+
+  // Fetch lien waivers for all milestones (most recent per milestone, any status)
+  const { data: lienWaiversRaw } = milestoneIds.length
+    ? await supabase
+        .from("lien_waivers")
+        .select("*")
+        .eq("deal_id", dealId)
+        .order("created_at", { ascending: false })
+    : { data: [] };
+
+  // Build a map: milestone_id → most recent waiver (any status)
+  // The most recent non-superseded waiver is the one the UI cares about.
+  const lienWaiverMap = new Map<string, LienWaiver>();
+  for (const w of (lienWaiversRaw ?? []) as LienWaiver[]) {
+    if (w.milestone_id && !lienWaiverMap.has(w.milestone_id)) {
+      lienWaiverMap.set(w.milestone_id, w);
+    }
+  }
+
+  // Outstanding waivers = any waiver not in 'approved' state (for the summary section)
+  const outstandingWaivers = (lienWaiversRaw ?? []).filter(
+    (w: any) => w.status !== "approved" && w.milestone_id
+  ) as LienWaiver[];
 
   const milestonesTotal = milestones.reduce((s, m) => s + m.amount, 0);
   const remaining = Math.max(0, typedDeal.total_amount - milestonesTotal);
@@ -331,6 +354,8 @@ export default async function DealDetailPage({
                     dealId={typedDeal.id}
                     sequentialBlockers={sequentialBlockers}
                     sequentialDeal={typedDeal.sequential_release_required ?? false}
+                    lienWaiver={lienWaiverMap.get(milestone.id) ?? null}
+                    lienWaiverRequired={typedDeal.lien_waiver_required ?? false}
                   />
                   <MilestoneDisputeSection
                     milestone={{
@@ -366,6 +391,78 @@ export default async function DealDetailPage({
           </div>
         )}
       </section>
+
+      {/* ── Lien Waiver Summary (shown when deal has lien_waiver_required) ── */}
+      {typedDeal.lien_waiver_required && milestones.length > 0 && (
+        <section>
+          <SectionHeader
+            label="Lien Waivers"
+            count={outstandingWaivers.length > 0 ? outstandingWaivers.length : undefined}
+          />
+          <Card>
+            <CardBody>
+              {outstandingWaivers.length === 0 ? (
+                <div className="flex items-center gap-2.5 py-1">
+                  <CheckCircle2 size={15} className="text-emerald-400 flex-shrink-0" aria-hidden="true" />
+                  <p className="text-[13px] text-emerald-400 font-medium">
+                    All lien waivers approved — no outstanding items.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-0 divide-y divide-white/[0.06]">
+                  {milestones.filter(m => m.status !== "released").map((milestone) => {
+                    const waiver = lienWaiverMap.get(milestone.id);
+                    return (
+                      <div key={milestone.id} className="flex items-center justify-between gap-3 py-3">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[13px] font-medium text-white/80 truncate">
+                            {milestone.title}
+                          </p>
+                          <p className="text-[11px] text-white/40 tabular-nums">
+                            {formatMoney(milestone.amount)}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {!waiver && (
+                            <span className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium bg-white/[0.05] text-white/50 border border-white/[0.08]">
+                              <FileText size={10} aria-hidden="true" />
+                              Not requested
+                            </span>
+                          )}
+                          {waiver?.status === "requested" && (
+                            <span className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                              <Clock size={10} aria-hidden="true" />
+                              Awaiting upload
+                            </span>
+                          )}
+                          {waiver?.status === "uploaded" && (
+                            <span className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium bg-vektrum-blue/10 text-vektrum-blue border border-vektrum-blue/20">
+                              <FileText size={10} aria-hidden="true" />
+                              Awaiting review
+                            </span>
+                          )}
+                          {waiver?.status === "approved" && (
+                            <span className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                              <CheckCircle2 size={10} aria-hidden="true" />
+                              Approved
+                            </span>
+                          )}
+                          {waiver?.status === "rejected" && (
+                            <span className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium bg-red-500/10 text-red-400 border border-red-500/20">
+                              <XCircle size={10} aria-hidden="true" />
+                              Rejected
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardBody>
+          </Card>
+        </section>
+      )}
 
       {/* ── Add milestone (contractor, draft deals) ── */}
       {isDraftContractor && (

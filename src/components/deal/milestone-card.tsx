@@ -1,11 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { cn, formatMoney } from "@/lib/utils";
 import { MilestoneStatusBadge, ProtectionStatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { Milestone, UserRole } from "@/lib/types";
-import { CheckCircle2, AlertCircle, ChevronDown, ListOrdered, Lock } from "lucide-react";
+import type { Milestone, UserRole, LienWaiver } from "@/lib/types";
+import {
+  CheckCircle2, AlertCircle, ChevronDown, ListOrdered, Lock,
+  FileText, Upload, Clock, XCircle, Copy, Check,
+} from "lucide-react";
 import { DrawReviewAgent } from "@/components/ai/draw-review-agent";
 
 /** A predecessor milestone that is blocking sequential release. */
@@ -53,6 +57,13 @@ interface MilestoneCardProps {
   sequentialBlockers?: SequentialBlocker[];
   /** True when this deal enforces sequential release order. */
   sequentialDeal?: boolean;
+  /**
+   * Most recent lien waiver for this milestone (any status).
+   * Null/undefined = no waiver has been requested yet.
+   */
+  lienWaiver?: LienWaiver | null;
+  /** True when deal.lien_waiver_required = true. */
+  lienWaiverRequired?: boolean;
 }
 
 export function MilestoneCard({
@@ -62,7 +73,10 @@ export function MilestoneCard({
   onStatusChange,
   sequentialBlockers = [],
   sequentialDeal = false,
+  lienWaiver,
+  lienWaiverRequired = false,
 }: MilestoneCardProps) {
+  const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -76,6 +90,127 @@ export function MilestoneCard({
     reviewed_at?: string
   } | null>(null)
   const [aiLoading, setAiLoading] = useState(false)
+
+  // ── Lien waiver state ───────────────────────────────────────────────────
+  const [lienWaiverState, setLienWaiverState] = useState<LienWaiver | null>(lienWaiver ?? null)
+  const [lienLoading, setLienLoading] = useState<string | null>(null)
+  const [lienError, setLienError]   = useState<string | null>(null)
+  const [copied, setCopied]         = useState(false)
+  const [rejectReason, setRejectReason] = useState("")
+  const [showRejectInput, setShowRejectInput] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleRequestWaiver = async () => {
+    setLienLoading("request")
+    setLienError(null)
+    try {
+      const res = await fetch(
+        `/api/deals/${dealId}/milestones/${milestone.id}/lien-waiver`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            waiver_type:   "conditional_progress",
+            waiver_amount: milestone.amount,
+          }),
+        }
+      )
+      const data = await res.json()
+      if (!res.ok) {
+        setLienError(data.error ?? "Failed to request lien waiver.")
+      } else {
+        setLienWaiverState(data.lien_waiver)
+        router.refresh()
+      }
+    } catch {
+      setLienError("Network error. Please try again.")
+    } finally {
+      setLienLoading(null)
+    }
+  }
+
+  const handleUpload = async (file: File) => {
+    if (!lienWaiverState) return
+    setLienLoading("upload")
+    setLienError(null)
+    const fd = new FormData()
+    fd.append("file", file)
+    try {
+      const res = await fetch(`/api/lien-waivers/${lienWaiverState.id}/upload`, {
+        method: "POST",
+        body: fd,
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setLienError(data.error ?? "Failed to upload waiver.")
+      } else {
+        setLienWaiverState(data.lien_waiver)
+        router.refresh()
+      }
+    } catch {
+      setLienError("Network error. Please try again.")
+    } finally {
+      setLienLoading(null)
+    }
+  }
+
+  const handleApproveWaiver = async () => {
+    if (!lienWaiverState) return
+    setLienLoading("approve")
+    setLienError(null)
+    try {
+      const res = await fetch(`/api/lien-waivers/${lienWaiverState.id}/approve`, {
+        method: "POST",
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setLienError(data.error ?? "Failed to approve waiver.")
+      } else {
+        setLienWaiverState(data.lien_waiver)
+        router.refresh()
+      }
+    } catch {
+      setLienError("Network error. Please try again.")
+    } finally {
+      setLienLoading(null)
+    }
+  }
+
+  const handleRejectWaiver = async () => {
+    if (!lienWaiverState || rejectReason.trim().length < 10) return
+    setLienLoading("reject")
+    setLienError(null)
+    try {
+      const res = await fetch(`/api/lien-waivers/${lienWaiverState.id}/reject`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rejection_reason: rejectReason.trim() }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setLienError(data.error ?? "Failed to reject waiver.")
+      } else {
+        setLienWaiverState(data.lien_waiver)
+        setShowRejectInput(false)
+        setRejectReason("")
+        router.refresh()
+      }
+    } catch {
+      setLienError("Network error. Please try again.")
+    } finally {
+      setLienLoading(null)
+    }
+  }
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Clipboard API unavailable
+    }
+  }
 
   const handleAction = async (action: string) => {
     console.log('handleAction fired', action)
@@ -328,6 +463,233 @@ export function MilestoneCard({
                 </ul>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* ── Lien Waiver Panel ── */}
+        {lienWaiverRequired && (
+          <div className="mt-3">
+            {/* Hidden file input for contractor upload */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.png,.jpg,.jpeg"
+              className="sr-only"
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) handleUpload(file)
+                e.target.value = ""  // reset so same file can be re-selected
+              }}
+            />
+
+            {/* ── No waiver requested yet ── */}
+            {!lienWaiverState && (
+              <div className="rounded-lg border border-white/[0.08] bg-white/[0.02] px-4 py-3 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 min-w-0">
+                  <FileText size={13} className="text-white/40 flex-shrink-0" aria-hidden="true" />
+                  <div>
+                    <p className="text-[12px] font-semibold text-white/70">Lien Waiver Required</p>
+                    <p className="text-[11px] text-white/40">
+                      {role === "funder"
+                        ? "Request a conditional progress waiver from the contractor."
+                        : "The funder must request a lien waiver before this milestone can be released."}
+                    </p>
+                  </div>
+                </div>
+                {role === "funder" && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    loading={lienLoading === "request"}
+                    onClick={handleRequestWaiver}
+                    className="flex-shrink-0"
+                  >
+                    Request Waiver
+                  </Button>
+                )}
+              </div>
+            )}
+
+            {/* ── Requested — awaiting contractor upload ── */}
+            {lienWaiverState?.status === "requested" && (
+              <div className="rounded-lg border border-amber-500/20 bg-amber-500/[0.04] px-4 py-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-2.5 min-w-0">
+                    <Clock size={13} className="text-amber-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
+                    <div className="min-w-0">
+                      <p className="text-[12px] font-semibold text-amber-400">
+                        {role === "contractor"
+                          ? "Lien Waiver Requested — Upload Required"
+                          : "Awaiting Contractor Upload"}
+                      </p>
+                      <p className="text-[11px] text-amber-400/60 mt-0.5">
+                        {role === "contractor"
+                          ? "Please upload your signed conditional progress lien waiver (PDF)."
+                          : "The contractor must upload the signed waiver before you can approve it."}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {role === "contractor" && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        loading={lienLoading === "upload"}
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <Upload size={12} className="mr-1" aria-hidden="true" />
+                        Upload Waiver
+                      </Button>
+                    )}
+                    {role === "funder" && (
+                      <button
+                        type="button"
+                        onClick={handleCopyLink}
+                        title="Copy page link to share with contractor"
+                        className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] font-medium text-amber-400/80 border border-amber-500/20 hover:bg-amber-500/10 transition-colors"
+                      >
+                        {copied
+                          ? <><Check size={11} aria-hidden="true" /> Copied!</>
+                          : <><Copy size={11} aria-hidden="true" /> Copy Link</>
+                        }
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ── Uploaded — awaiting funder review ── */}
+            {lienWaiverState?.status === "uploaded" && (
+              <div className="rounded-lg border border-vektrum-blue/20 bg-vektrum-blue/[0.04] px-4 py-3 space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-2.5 min-w-0">
+                    <FileText size={13} className="text-vektrum-blue flex-shrink-0 mt-0.5" aria-hidden="true" />
+                    <div className="min-w-0">
+                      <p className="text-[12px] font-semibold text-white/80">
+                        {role === "funder" ? "Waiver Uploaded — Review Required" : "Waiver Uploaded"}
+                      </p>
+                      <p className="text-[11px] text-white/45 mt-0.5">
+                        {role === "funder"
+                          ? "Review the signed waiver PDF and approve or reject it."
+                          : "Your waiver is under review by the funder."}
+                      </p>
+                    </div>
+                  </div>
+                  {role === "funder" && !showRejectInput && (
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <Button
+                        variant="success"
+                        size="sm"
+                        loading={lienLoading === "approve"}
+                        onClick={handleApproveWaiver}
+                      >
+                        Approve
+                      </Button>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => setShowRejectInput(true)}
+                        disabled={lienLoading !== null}
+                      >
+                        Reject
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Reject inline form */}
+                {role === "funder" && showRejectInput && (
+                  <div className="space-y-2">
+                    <textarea
+                      rows={2}
+                      placeholder="Explain why the waiver is rejected (e.g. incorrect through-date, missing notarization)…"
+                      value={rejectReason}
+                      onChange={(e) => setRejectReason(e.target.value)}
+                      className="w-full rounded-lg border border-white/[0.10] bg-white/[0.04] px-3 py-2 text-[12px] text-white placeholder:text-white/25 focus:outline-none focus:ring-1 focus:ring-red-500/40 resize-none"
+                    />
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        loading={lienLoading === "reject"}
+                        disabled={rejectReason.trim().length < 10}
+                        onClick={handleRejectWaiver}
+                      >
+                        Confirm Rejection
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => { setShowRejectInput(false); setRejectReason("") }}
+                        disabled={lienLoading !== null}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── Approved ── */}
+            {lienWaiverState?.status === "approved" && (
+              <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/[0.04] px-4 py-2.5 flex items-center gap-2.5">
+                <CheckCircle2 size={13} className="text-emerald-400 flex-shrink-0" aria-hidden="true" />
+                <div>
+                  <p className="text-[12px] font-semibold text-emerald-400">
+                    Lien Waiver Approved
+                  </p>
+                  {lienWaiverState.approved_at && (
+                    <p className="text-[11px] text-emerald-400/60">
+                      Approved{" "}
+                      {new Date(lienWaiverState.approved_at).toLocaleDateString("en-US", {
+                        month: "short", day: "numeric", year: "numeric",
+                      })}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* ── Rejected — contractor re-upload ── */}
+            {lienWaiverState?.status === "rejected" && (
+              <div className="rounded-lg border border-red-500/20 bg-red-500/[0.05] px-4 py-3 space-y-2">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-2.5 min-w-0">
+                    <XCircle size={13} className="text-red-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
+                    <div className="min-w-0">
+                      <p className="text-[12px] font-semibold text-red-400">Waiver Rejected</p>
+                      {lienWaiverState.rejection_reason && (
+                        <p className="text-[11px] text-red-400/70 mt-0.5 break-words">
+                          {lienWaiverState.rejection_reason}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  {role === "contractor" && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      loading={lienLoading === "upload"}
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex-shrink-0"
+                    >
+                      <Upload size={12} className="mr-1" aria-hidden="true" />
+                      Re-upload
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Lien waiver error feedback */}
+            {lienError && (
+              <div className="mt-2 flex items-start gap-1.5 rounded-md bg-red-500/[0.08] border border-red-500/20 px-3 py-2 text-[12px] text-red-400">
+                <AlertCircle size={13} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
+                {lienError}
+              </div>
+            )}
           </div>
         )}
 

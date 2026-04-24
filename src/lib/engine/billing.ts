@@ -11,6 +11,17 @@
 
 // ─── Rate Constants ───────────────────────────────────────────────────────────
 
+/**
+ * Minimum platform fee per milestone release, in USD.
+ *
+ * Applied as a floor so that small milestones still cover operational overhead.
+ * The DB constraint billing_records_fee_accurate uses GREATEST(..., 2.50) to
+ * accept records where the calculated rate-based fee would fall below this floor.
+ *
+ * $2.50 was chosen as a break-even threshold for Stripe transfer fees + overhead.
+ */
+export const MINIMUM_FEE = 2.50
+
 export const BILLING_RATES = {
   /** 1.00% — Standalone tier (self-service, no retainer) */
   STANDALONE:    100,
@@ -40,6 +51,24 @@ export function billingRateFromTier(tier: SubscriptionTier): BillingRateBps {
     case 'enterprise':    return BILLING_RATES.ENTERPRISE
     case 'standalone':
     default:              return BILLING_RATES.STANDALONE
+  }
+}
+
+/**
+ * Returns a human-readable description of the governance fee for a subscription tier.
+ *
+ * Used in billing portal, admin subscription management, and deal creation UI
+ * to give funders a clear summary of what fee applies to their account.
+ *
+ * @param tier - The funder's subscription tier.
+ * @returns A display string, e.g. "1.00% governance fee (Standalone)".
+ */
+export function getFeeDescription(tier: SubscriptionTier): string {
+  switch (tier) {
+    case 'institutional': return '0.70% governance fee (Institutional)'
+    case 'enterprise':    return '0.65% governance fee (Enterprise)'
+    case 'standalone':
+    default:              return '1.00% governance fee (Standalone)'
   }
 }
 
@@ -78,9 +107,12 @@ export interface FeeBreakdown {
  * Fee is rounded to two decimal places (banker's rounding is not used —
  * standard Math.round is fine for USD amounts at this precision).
  *
+ * The MINIMUM_FEE floor ($2.50) is applied after rounding, so the returned
+ * feeAmount is always ≥ $2.50 regardless of milestone size.
+ *
  * The DB constraint billing_records_fee_accurate enforces that the stored
- * fee_amount is within ±$0.01 of this calculation, providing a second layer
- * of validation.
+ * fee_amount is within ±$0.01 of GREATEST(calculated, 2.50), providing a
+ * second layer of validation.
  *
  * @param grossAmount    - The milestone amount (must be > 0).
  * @param billingRateBps - The deal's plan rate in basis points (100 | 70 | 65).
@@ -93,8 +125,11 @@ export function calculateFee(grossAmount: number, billingRateBps: number): FeeBr
     throw new Error(`calculateFee: billingRateBps must be > 0 (received ${billingRateBps})`)
   }
 
-  // Round to 2 decimal places — matches ROUND(..., 2) in the DB constraint
-  const feeAmount  = Math.round(grossAmount * billingRateBps / 10000 * 100) / 100
+  // Round to 2 decimal places — matches ROUND(..., 2) in the DB constraint.
+  // Apply the MINIMUM_FEE floor so small milestones still cover operational overhead.
+  // The DB constraint billing_records_fee_accurate uses GREATEST(..., 2.50) to match.
+  const calculated = Math.round(grossAmount * billingRateBps / 10000 * 100) / 100
+  const feeAmount  = Math.max(calculated, MINIMUM_FEE)
   const netAmount  = grossAmount          // contractor always receives full gross
   const totalDebit = grossAmount + feeAmount
 
