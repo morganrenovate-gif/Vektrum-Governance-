@@ -1,0 +1,163 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { createSupabaseAdminClient } from '@/lib/supabase/server'
+import { getAuthUser } from '@/lib/auth/middleware'
+import { billingRateFromTier, getFeeDescription } from '@/lib/engine/billing'
+import { errorResponse, internalError, notFoundError } from '@/lib/errors'
+import type { SubscriptionTier } from '@/lib/engine/billing'
+
+export const dynamic = 'force-dynamic'
+
+
+// ─── POST /api/admin/subscriptions/[profileId]/tier ───────────────────────────
+//
+// Admin-only endpoint to change a funder's subscription tier.
+//
+// On success:
+//   1. profiles: subscription_tier updated, billing_rate_bps derived from new tier
+//   2. admin_audit_log: subscription_tier_changed with old/new tier + justification
+//
+// Note: This does NOT retroactively change existing deal billing_rate_bps values.
+// Deals lock in the funder's rate at the time of funding — the new rate applies
+// only to deals created after this change.
+//
+// Body: { tier: SubscriptionTier, admin_justification: string }
+// Access: Admin only.
+
+const VALID_TIERS: SubscriptionTier[] = ['standalone', 'institutional', 'enterprise']
+
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ profileId: string }> },
+) {
+  const { profileId } = await params
+
+  let authContext
+  try {
+    authContext = await getAuthUser(request)
+  } catch (err) {
+    return err as NextResponse
+  }
+
+  const { user, profile: adminProfile } = authContext
+
+  if (adminProfile.role !== 'admin') {
+    return errorResponse(403, 'Only admins can change subscription tiers.')
+  }
+
+  // ── Parse Body ─────────────────────────────────────────────────────────────
+  let body: { tier?: unknown; admin_justification?: unknown }
+  try {
+    body = await request.json()
+  } catch {
+    return errorResponse(400, 'The request body could not be parsed as JSON.')
+  }
+
+  if (!body.tier || !VALID_TIERS.includes(body.tier as SubscriptionTier)) {
+    return errorResponse(
+      400,
+      `Invalid tier. Must be one of: ${VALID_TIERS.join(', ')}.`,
+    )
+  }
+
+  if (
+    typeof body.admin_justification !== 'string' ||
+    body.admin_justification.trim().length < 10
+  ) {
+    return errorResponse(
+      400,
+      'admin_justification is required and must be at least 10 characters. ' +
+        'Document the business reason for this tier change.',
+    )
+  }
+
+  const newTier          = body.tier as SubscriptionTier
+  const adminJustification = body.admin_justification.trim()
+  const newBillingRateBps  = billingRateFromTier(newTier)
+
+  const adminClient = createSupabaseAdminClient()
+
+  // ── Fetch Target Profile ──────────────────────────────────────────────────
+  const { data: targetProfile, error: profileError } = await adminClient
+    .from('profiles')
+    .select('id, role, subscription_tier, billing_rate_bps, full_name, company_name')
+    .eq('id', profileId)
+    .single()
+
+  if (profileError || !targetProfile) {
+    return notFoundError(`Profile ${profileId} was not found.`)
+  }
+
+  if (targetProfile.role !== 'funder') {
+    return errorResponse(
+      422,
+      `Subscription tiers only apply to funders. This profile has role '${targetProfile.role}'.`,
+    )
+  }
+
+  const oldTier           = targetProfile.subscription_tier as SubscriptionTier | null
+  const oldBillingRateBps = targetProfile.billing_rate_bps  as number | null
+
+  if (oldTier === newTier) {
+    return errorResponse(
+      422,
+      `This funder is already on the '${newTier}' tier. No change made.`,
+    )
+  }
+
+  // ── Update Profile ────────────────────────────────────────────────────────
+  const { data: updatedProfile, error: updateError } = await adminClient
+    .from('profiles')
+    .update({
+      subscription_tier:  newTier,
+      billing_rate_bps:   newBillingRateBps,
+    })
+    .eq('id', profileId)
+    .select('id, subscription_tier, billing_rate_bps')
+    .single()
+
+  if (updateError || !updatedProfile) {
+    return internalError(
+      'Failed to update the subscription tier. Please try again.',
+      updateError?.message,
+    )
+  }
+
+  // ── Admin Audit Log ───────────────────────────────────────────────────────
+  const { error: auditError } = await adminClient
+    .from('admin_audit_log')
+    .insert({
+      actor_id:            user.id,
+      actor_role:          'admin',
+      action:              'subscription_tier_changed',
+      entity_type:         'profile',
+      entity_id:           profileId,
+      admin_justification: adminJustification,
+      old_values: {
+        subscription_tier:  oldTier,
+        billing_rate_bps:   oldBillingRateBps,
+        fee_description:    oldTier ? getFeeDescription(oldTier) : null,
+      },
+      new_values: {
+        subscription_tier:  newTier,
+        billing_rate_bps:   newBillingRateBps,
+        fee_description:    getFeeDescription(newTier),
+      },
+    })
+
+  if (auditError) {
+    // Non-fatal: tier was updated; audit failure should be investigated but
+    // must not roll back a legitimate tier change.
+    console.error(
+      `[admin/subscriptions/tier] Audit log insert failed for profile ${profileId}: ${auditError.message}`,
+    )
+  }
+
+  return NextResponse.json(
+    {
+      profile: updatedProfile,
+      message: `Subscription tier updated to '${newTier}'. ${getFeeDescription(newTier)} will apply to new deals.`,
+      note:    'Existing deal billing_rate_bps values are unchanged — deals lock in the rate at funding time.',
+    },
+    { status: 200 },
+  )
+}
