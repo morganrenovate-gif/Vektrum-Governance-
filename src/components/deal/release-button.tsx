@@ -153,7 +153,7 @@ export function ReleaseButton({
             <button
               type="button"
               onClick={() => setUiState("idle")}
-              className="rounded-md p-1 text-white/30 hover:text-white/50 hover:bg-surface-4 transition-colors"
+              className="rounded-md p-1 text-white/65 hover:text-white hover:bg-surface-4 transition-colors"
               aria-label="Cancel release"
             >
               <X size={16} aria-hidden="true" />

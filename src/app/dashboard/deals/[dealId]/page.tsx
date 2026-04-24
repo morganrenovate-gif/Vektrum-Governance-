@@ -148,7 +148,7 @@ export default async function DealDetailPage({
           <li>
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-1 hover:text-white/60 transition-colors"
+              className="inline-flex items-center gap-1 text-white/65 hover:text-white transition-colors"
             >
               <ArrowLeft size={13} aria-hidden="true" />
               Dashboard

@@ -211,7 +211,7 @@ export function OnboardingWizard({ profile }: OnboardingWizardProps) {
         {/* Skip button */}
         <button
           onClick={handleSkip}
-          className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg text-white/30 hover:bg-surface-3 hover:text-white/55 transition-colors"
+          className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg text-white/60 hover:bg-surface-3 hover:text-white transition-colors"
           aria-label="Skip onboarding"
           disabled={completing}
         >

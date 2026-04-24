@@ -269,7 +269,7 @@ export function ReceiptCard({
             Vektrum · Construction payment governance ·{' '}
             <a
               href={`${process.env.NEXT_PUBLIC_APP_URL ?? ''}/dashboard/receipts/${receipt.id}`}
-              className="underline underline-offset-2 hover:text-white/60"
+              className="text-white/65 underline underline-offset-2 hover:text-white transition-colors"
             >
               View on Vektrum
             </a>
