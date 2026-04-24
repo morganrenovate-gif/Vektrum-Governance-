@@ -265,14 +265,14 @@ export default async function AdminDashboardPage() {
           <div className="flex items-center gap-2">
             <Link
               href="/dashboard/admin/ops"
-              className="inline-flex items-center gap-2 rounded-xl border border-white/[0.14] bg-white/[0.05] px-4 py-2.5 text-[13px] font-medium text-white/80 hover:bg-white/[0.1] hover:text-white hover:border-white/[0.22] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-all self-start"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/[0.22] bg-white/[0.09] px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/[0.14] hover:border-white/[0.32] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-all self-start"
             >
               <Activity size={14} aria-hidden="true" />
               Ops Dashboard
             </Link>
             <Link
               href="/dashboard/audit"
-              className="inline-flex items-center gap-2 rounded-xl border border-white/[0.14] bg-white/[0.05] px-4 py-2.5 text-[13px] font-medium text-white/80 hover:bg-white/[0.1] hover:text-white hover:border-white/[0.22] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-all self-start"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/[0.22] bg-white/[0.09] px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/[0.14] hover:border-white/[0.32] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-all self-start"
             >
               <FileText size={14} aria-hidden="true" />
               Full Audit Log

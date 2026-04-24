@@ -138,7 +138,7 @@ function DangerTab() {
             </div>
             <a
               href="mailto:support@vektrum.io?subject=Account%20Deletion%20Request"
-              className="flex-shrink-0 inline-flex items-center min-h-[34px] rounded-lg border border-red-500/20 bg-red-500/[0.05] px-3 py-1.5 text-xs font-semibold text-red-400 hover:bg-red-500/10 hover:border-red-500/30 transition-colors"
+              className="flex-shrink-0 inline-flex items-center min-h-[34px] rounded-lg border border-red-500/35 bg-red-500/[0.12] px-3 py-1.5 text-xs font-semibold text-red-300 hover:bg-red-500/20 hover:border-red-500/50 transition-colors"
             >
               Contact Support
             </a>
