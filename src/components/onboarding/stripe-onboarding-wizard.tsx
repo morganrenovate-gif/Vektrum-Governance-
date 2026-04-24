@@ -108,7 +108,7 @@ export function StripeOnboardingWizard({
                         'Direct deposit to your bank via Stripe Connect',
                       ]
                     : [
-                        '8-condition release gate — every check runs server-side',
+                        '10-condition release gate — every check runs server-side',
                         'Full audit trail — immutable, timestamped, actor-logged',
                         'Stripe holds funds in your Project Trust Account until every condition is met',
                       ]

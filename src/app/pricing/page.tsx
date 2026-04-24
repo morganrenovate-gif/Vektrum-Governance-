@@ -219,7 +219,7 @@ export default function PricingPage() {
           {/* What it actually is */}
           <p className="mt-6 mx-auto max-w-xl text-[16px] leading-relaxed text-white/65">
             Vektrum charges a governance fee only when a milestone transfer
-            completes — 8 conditions verified simultaneously, transfer
+            completes — 10 conditions verified simultaneously, transfer
             confirmed to contractor's Stripe account. We earn when funds move.
           </p>
 
@@ -286,7 +286,7 @@ export default function PricingPage() {
               {
                 icon: Lock,
                 title: 'Controlled disbursement',
-                body: 'Funds only transfer after 8 server-side conditions are satisfied simultaneously. No manual override. Every release is a uniquely identified, server-verified event.',
+                body: 'Funds only transfer after 10 server-side conditions are satisfied simultaneously. No manual override. Every release is a uniquely identified, server-verified event.',
               },
               {
                 icon: FileText,
@@ -472,7 +472,7 @@ export default function PricingPage() {
               retainerNote="Pay only when a milestone closes"
               setup="Self-service — no setup fee"
               features={[
-                '8-condition server-side release gate',
+                '10-condition server-side release gate',
                 'Milestone-level dispute isolation',
                 'Append-only, timestamped audit trail',
                 'Stripe Connect payouts to contractor',
@@ -722,7 +722,7 @@ export default function PricingPage() {
               <ul className="space-y-5">
                 {[
                   {
-                    label: '8-condition server-side gate',
+                    label: '10-condition server-side gate',
                     desc: 'Every condition verified simultaneously. Timestamped audit entry on every decision.',
                   },
                   {

@@ -3,7 +3,7 @@
 // Advisory Panel consensus:
 // - Advisor 9 (Skeptical Investor): All stats server-side only. Never trust client values.
 // - Advisor 10 (Adversarial): Admins CANNOT modify financial data or release funds.
-//   Every display is read-only. Money moves only through the 8-condition gate.
+//   Every display is read-only. Money moves only through the 10-condition gate.
 // - Advisor 6 (Attorney): Admin viewing a dispute is an auditable event (logged server-side).
 // - Advisor 4 (Security): Role gate is server-side. Client-side checks are supplementary only.
 // - Advisor 8 (Ops): Support needs platform health signals — added as coming-soon panel.
@@ -260,7 +260,7 @@ export default async function AdminDashboardPage() {
       <PageHeader
         eyebrow="Admin Dashboard"
         title="Platform Overview"
-        description="Read-only. All financial actions require the 8-condition release gate."
+        description="Read-only. All financial actions require the 10-condition release gate."
         action={
           <div className="flex items-center gap-2">
             <Link
@@ -285,7 +285,7 @@ export default async function AdminDashboardPage() {
       <div className="rounded-xl border border-white/[0.08] bg-surface-2 shadow-card p-5 text-sm text-white/80">
         <p className="font-semibold text-white mb-1.5">Admin Access</p>
         <p>You can manage users, invite new admins, review audit logs, and monitor platform health.
-        <strong className="text-white font-semibold"> Financial actions (fund releases, payment processing) are governed by the 8-condition milestone gate</strong>
+        <strong className="text-white font-semibold"> Financial actions (fund releases, payment processing) are governed by the 10-condition milestone gate</strong>
         {' '}and cannot be overridden from this dashboard. All admin actions are permanently logged.</p>
       </div>
 
@@ -368,7 +368,7 @@ export default async function AdminDashboardPage() {
           <AdminStatTile
             label="Release Gate Status"
             value="Operational"
-            sub="8 conditions enforced server-side on every release"
+            sub="10 conditions enforced server-side on every release"
             icon={Shield}
           />
           {(() => {

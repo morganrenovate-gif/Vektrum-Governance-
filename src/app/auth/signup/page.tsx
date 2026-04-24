@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import type { UserRole } from "@/lib/types";
 
 const AUTH_TRUST = [
-  { icon: Lock, title: "8-condition release gate", desc: "Payments move only with your explicit approval." },
+  { icon: Lock, title: "10-condition release gate", desc: "Payments move only with your explicit approval." },
   { icon: Shield, title: "Funds held by Stripe", desc: "Vektrum governs — never holds your capital." },
   { icon: FileCheck, title: "Immutable audit trail", desc: "Every action logged. No edits. No deletes." },
   { icon: CheckCircle2, title: "Contractors join free", desc: "Funders pay. Contractors are always free." },

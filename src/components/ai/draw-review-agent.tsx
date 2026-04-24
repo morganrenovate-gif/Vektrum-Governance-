@@ -178,7 +178,7 @@ export function DrawReviewAgent({
         </div>
         <div className="flex items-center gap-2 text-sm text-white/55">
           <Loader2 size={14} className="animate-spin text-vektrum-blue" />
-          Perplexity AI is analyzing this draw request...
+          AI review in progress — analyzing this draw request...
         </div>
         <p className="mt-1 text-xs text-white/65">This usually takes 10–15 seconds.</p>
       </div>
@@ -199,7 +199,7 @@ export function DrawReviewAgent({
           <div>
             <p className="text-sm text-white/55">No AI assessment on file</p>
             <p className="text-xs text-white/65">
-              Request a Perplexity AI review before this milestone can be released.
+              Request an AI-assisted draw review before this milestone can be released.
             </p>
           </div>
         </div>

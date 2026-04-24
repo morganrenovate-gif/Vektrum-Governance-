@@ -40,7 +40,7 @@ export default function SecurityPage() {
             {
               icon: Server,
               title: 'Server-Side Enforcement',
-              desc: 'The 8-condition release gate runs server-side, atomically. Client state is display only.',
+              desc: 'The 10-condition release gate runs server-side, atomically. Client state is display only.',
             },
             {
               icon: Users,

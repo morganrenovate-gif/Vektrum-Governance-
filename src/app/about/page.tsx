@@ -54,7 +54,7 @@ export default function AboutPage() {
             </p>
             <p>
               Vektrum fills that gap. We built a platform where every milestone is an
-              independent financial unit, every release passes 8 server-side conditions,
+              independent financial unit, every release passes 10 server-side conditions,
               and every action is recorded in an immutable audit trail.
             </p>
           </div>

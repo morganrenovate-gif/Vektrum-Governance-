@@ -271,7 +271,7 @@ export default async function OpsPage() {
         {/* ── Footer ──────────────────────────────────────────────── */}
         <footer className="text-center py-4">
           <p className="text-[11px] text-white/65">
-            Ops Dashboard · Read-only · All financial actions require the 8-condition release gate
+            Ops Dashboard · Read-only · All financial actions require the 10-condition release gate
           </p>
         </footer>
       </div>

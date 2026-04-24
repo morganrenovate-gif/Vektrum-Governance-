@@ -46,7 +46,7 @@ export default function DemoAdminPage() {
               <h1 className="font-display text-[2.25rem] font-bold tracking-[-0.04em] text-white leading-[1.05]">Admin Dashboard</h1>
             </div>
             <p className="text-sm text-white/55">
-              Platform-wide oversight. Read-only. All financial actions require the 8-condition release gate.
+              Platform-wide oversight. Read-only. All financial actions require the 10-condition release gate.
             </p>
           </div>
           <Link
@@ -62,7 +62,7 @@ export default function DemoAdminPage() {
           <Shield size={15} className="text-vektrum-blue flex-shrink-0 mt-0.5" aria-hidden="true" />
           <p className="text-[13px] text-vektrum-blue leading-relaxed">
             <strong>Admin access is read-only for financial data.</strong> You cannot release funds, modify milestone amounts,
-            or alter deal terms from this panel. All payment actions require the full 8-condition release gate
+            or alter deal terms from this panel. All payment actions require the full 10-condition release gate
             to be satisfied by the deal participants.
           </p>
         </div>
@@ -199,7 +199,7 @@ export default function DemoAdminPage() {
             <AdminTile
               label="Release Gate Status"
               value="Operational"
-              sub="8 conditions enforced server-side"
+              sub="10 conditions enforced server-side"
               icon={Shield}
             />
             <AdminTile
@@ -217,9 +217,9 @@ export default function DemoAdminPage() {
           </div>
           <div className="mt-3">
             <AdminTile
-              label="Perplexity AI Integration"
-              value="Active — Sonar Pro draw review enabled"
-              sub="All draw requests route through /api/ai/draw-review"
+              label="AI Draw Review"
+              value="Active — Perplexity Sonar Pro (primary)"
+              sub="Anthropic + OpenAI configured as fallback providers for draw review"
               icon={Zap}
             />
           </div>

@@ -11,7 +11,7 @@ import {
 export const metadata = {
   title: 'For Funders & Capital Partners — Vektrum',
   description:
-    'Automated draw management, 8-condition release gates, and immutable audit trails. Vektrum systematizes your construction lending disbursement process.',
+    'Automated draw management, 10-condition release gates, and immutable audit trails. Vektrum systematizes your construction lending disbursement process.',
 }
 
 export default function FundersPage() {
@@ -71,8 +71,8 @@ export default function FundersPage() {
             {[
               {
                 icon: Shield,
-                title: '8-condition release gate',
-                desc: 'Every disbursement passes 8 server-side checks simultaneously before funds move.',
+                title: '10-condition release gate',
+                desc: 'Every disbursement passes 10 server-side checks simultaneously before funds move.',
               },
               {
                 icon: BarChart3,
@@ -116,7 +116,7 @@ export default function FundersPage() {
               'Contractor creates a deal with milestones and amounts.',
               'You fund the deal via Stripe Connect. Funds are held by Stripe — not Vektrum.',
               'As work completes, contractors submit draw requests with documentation.',
-              'You review and approve each milestone. The 8-condition gate enforces your rules.',
+              'You review and approve each milestone. The 10-condition gate enforces your rules.',
               'Approved funds release automatically via Stripe. Full audit trail recorded.',
             ].map((step, i) => (
               <li key={i} className="flex items-start gap-4">

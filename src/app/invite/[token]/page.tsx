@@ -55,7 +55,7 @@ const TRUST_SIGNALS = [
   },
   {
     icon: Shield,
-    label: '8-condition release gate',
+    label: '10-condition release gate',
     desc: 'Payments move only with your explicit approval',
   },
   {
@@ -283,7 +283,7 @@ export default function InviteAcceptPage() {
                 {formatMoney(state.data.deal.total_amount)}
               </p>
               <p className="mt-1.5 text-sm text-white/75">
-                Protected by Vektrum&rsquo;s 8-condition release gate
+                Protected by Vektrum&rsquo;s 10-condition release gate
               </p>
             </div>
 

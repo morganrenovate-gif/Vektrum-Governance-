@@ -91,6 +91,8 @@ export function ReleaseFundsModal({
     'No prior release on this milestone',
     'No pending change orders',
     'Signed contract on file for this deal',
+    'Sequential-release ordering and prerequisites satisfied (where required)',
+    'Approved conditional lien waiver on file (where required)',
   ]
 
   return (
@@ -110,7 +112,7 @@ export function ReleaseFundsModal({
             {/* Header */}
             <div className="flex items-center justify-between mb-5">
               <h2 id="release-modal-title" className="text-lg font-semibold text-white">
-                Release Funds — 8-Condition Gate
+                Release Funds — 10-Condition Gate
               </h2>
               <button
                 type="button"
@@ -122,7 +124,7 @@ export function ReleaseFundsModal({
               </button>
             </div>
 
-            {/* 8 conditions */}
+            {/* 10 conditions */}
             <div className="space-y-2.5 mb-5">
               {conditions.map((c, i) => (
                 <div key={i} className="flex items-start gap-2.5 text-sm">
@@ -140,7 +142,7 @@ export function ReleaseFundsModal({
               <div className="flex items-center gap-2">
                 <ShieldCheck size={15} className="text-emerald-400 flex-shrink-0" />
                 <p className="text-sm font-medium text-emerald-400">
-                  All 8 conditions satisfied. Ready to release.
+                  All 10 conditions satisfied. Ready to release.
                 </p>
               </div>
             </div>

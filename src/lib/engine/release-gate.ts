@@ -17,9 +17,13 @@ export interface ReleaseValidationResult {
  * THE MOST CRITICAL FUNCTION IN THE SYSTEM.
  *
  * Validates all preconditions required before funds may be transferred to a
- * contractor. All 8 conditions plus the caller role check are evaluated in a
- * single pass and ALL failures are returned simultaneously — so the caller
- * sees the complete picture without iterative round-trips.
+ * contractor. All 10 numbered conditions plus the caller role check are
+ * evaluated in a single pass and ALL failures are returned simultaneously —
+ * so the caller sees the complete picture without iterative round-trips.
+ *
+ * This is the "10-condition server-side release gate." An AI precondition
+ * (checkAiPrecondition) is a SEPARATE check run BEFORE validateRelease by
+ * the release route; it is not part of the 10 conditions.
  *
  * This function MUST be called at the start of every release operation,
  * before any Stripe API calls or database mutations are attempted.
@@ -410,7 +414,7 @@ export async function validateRelease(
 /**
  * Checks whether a passing AI draw review (or active admin override) exists
  * for the milestone. This is a SEPARATE precondition checked BEFORE the
- * 8-condition release gate.
+ * 10-condition release gate.
  *
  * Pass logic (checked in order):
  *   1. Standard ai_draw_review — must be < 48 h old and NOT critical risk.

@@ -113,7 +113,7 @@ export default function ContractorsPage() {
               'You receive an invite from your funder to join a deal on Vektrum.',
               'Set up your Stripe Connect account for direct deposit — takes minutes.',
               'Complete milestones and submit draw requests with supporting documentation.',
-              'The funder reviews and approves. The 8-condition gate verifies everything server-side.',
+              'The funder reviews and approves. The 10-condition gate verifies everything server-side.',
               'Funds deposit directly to your bank. Immutable audit trail confirms every release.',
             ].map((step, i) => (
               <li key={i} className="flex items-start gap-4">

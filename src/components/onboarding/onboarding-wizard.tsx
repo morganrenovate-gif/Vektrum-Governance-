@@ -53,7 +53,7 @@ function Step1({ role }: { role: Profile['role'] }) {
         <p className="mt-2 text-[14px] leading-relaxed text-white/55">
           {isContractor
             ? 'Vektrum tracks every milestone, every approval, and every dollar. No 90-day net terms. No disputes freezing your whole project.'
-            : 'Every disbursement passes 8 server-side checks before a dollar moves. Milestones approved, funds available, no disputes, contractor verified.'}
+            : 'Every disbursement passes 10 server-side checks before a dollar moves. Milestones approved, funds available, no disputes, contractor verified.'}
         </p>
       </div>
       <ul className="space-y-2.5">
@@ -64,7 +64,7 @@ function Step1({ role }: { role: Profile['role'] }) {
               'Direct deposit to your bank via Stripe Connect',
             ]
           : [
-              '8-condition release gate — every check runs server-side',
+              '10-condition release gate — every check runs server-side',
               'Full audit trail — immutable, timestamped, actor-logged',
               "Dispute isolation \u2014 a $15K disagreement won\u2019t freeze a $9M job",
             ]

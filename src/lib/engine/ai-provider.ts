@@ -120,17 +120,27 @@ function parseAssessment(
     const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
     return JSON.parse(cleaned)
   } catch {
+    // SECURITY: A malformed AI response is an UNTRUSTED result. It must BLOCK
+    // the release gate, not advise "hold" while still satisfying the precondition.
+    //
+    // checkAiPrecondition() in release-gate.ts treats risk_level === 'critical'
+    // as an automatic block. We return 'critical' here (not 'high') so a parse
+    // failure cannot be silently accepted as a valid review.
+    //
+    // To unblock, an admin must either (a) request a fresh review once the
+    // provider is healthy, or (b) apply a time-limited MFA-gated admin override
+    // via POST /api/admin/milestones/[milestoneId]/override-ai-review.
     return {
-      risk_level:     'high',
-      score:          40,
+      risk_level:     'critical',
+      score:          0,
       findings:       [
-        'AI response could not be parsed — manual review required',
+        'AI provider returned malformed or untrusted output — release is blocked until a valid review is obtained or an admin override is applied.',
         raw.slice(0, 500),
       ],
       recommendation: 'hold',
       reasoning:
-        'Automated assessment encountered a parsing error. ' +
-        'A human reviewer should evaluate this draw request.',
+        'Automated assessment could not be parsed from the provider response. ' +
+        'Release is blocked pending a fresh review or an admin override.',
     }
   }
 }

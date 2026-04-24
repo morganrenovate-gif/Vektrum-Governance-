@@ -148,6 +148,8 @@ const RELEASE_GATE_CONDITIONS = [
   'No prior release on this milestone',
   'No pending change orders',
   'Signed contract on file',
+  'Sequential-release ordering and prerequisites satisfied (where required)',
+  'Approved conditional lien waiver on file (where required)',
 ]
 
 // ── Page ─────────────────────────────────────────────────────────────────────

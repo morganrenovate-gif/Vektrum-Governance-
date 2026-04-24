@@ -275,11 +275,11 @@ function DemoMilestoneCard({
               Release Funds (Demo)
             </button>
 
-            {/* 8-condition gate checklist */}
+            {/* 10-condition gate checklist */}
             <div className="rounded-lg border border-white/[0.08] bg-surface-2 p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Shield size={14} className="text-vektrum-blue" aria-hidden="true" />
-                <span className="text-[12px] font-semibold text-white">8-Condition Release Gate</span>
+                <span className="text-[12px] font-semibold text-white">10-Condition Release Gate</span>
               </div>
               <ul className="space-y-2">
                 {releaseGateConditions.map((c, i) => (

@@ -92,7 +92,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     )
   }
 
-  // ── STEP 1: Run Release Gate (all 8 conditions + role check) ────────────────
+  // ── STEP 1: Run Release Gate (all 10 conditions + role check) ──────────────
+  // AI precondition (STEP 0 above) has already been checked. This is the
+  // 10-condition server-side release gate defined in src/lib/engine/release-gate.ts.
   const releaseValidation = await validateRelease(supabase, milestoneId, profile)
 
   if (!releaseValidation.allowed) {

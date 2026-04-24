@@ -28,8 +28,8 @@ function humanizeError(message: string): string {
 const AUTH_TRUST = [
   {
     icon: Lock,
-    title: "8-condition release gate",
-    desc: "Every payment passes 8 server-side checks before a single dollar moves.",
+    title: "10-condition release gate",
+    desc: "Every payment passes 10 server-side checks before a single dollar moves.",
   },
   {
     icon: Shield,

@@ -65,7 +65,7 @@ export default function TermsPage() {
               <p>Funders use the platform to fund deals into a Project Trust Account and approve milestone-gated releases. Funders acknowledge and agree that:</p>
               <ul className="space-y-2 list-disc pl-5">
                 <li>Funds are held in Stripe Connect managed accounts, not by Vektrum.</li>
-                <li>Release of funds is subject to the platform&rsquo;s 8-condition release gate, which includes AI-assisted draw review, documentation verification, and funder authorization.</li>
+                <li>Release of funds is subject to the platform&rsquo;s 10-condition server-side release gate, preceded by an AI-assisted draw review precondition. Together these verify milestone approval, contract status, funded balance, contractor payout eligibility, documentation, change-order status, lien-waiver status (where required), and sequential-release ordering (where required) before any transfer is authorized.</li>
                 <li>Vektrum does not guarantee the quality or completion of construction work performed by contractors.</li>
               </ul>
             </div>

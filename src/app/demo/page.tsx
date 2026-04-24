@@ -3,8 +3,8 @@ import { VektrumWordmark } from '@/components/ui/vektrum-logo'
 import { Shield, CheckCircle2, FileText, Brain, Banknote, Users, AlertTriangle, ArrowDown } from 'lucide-react'
 
 export const metadata = {
-  title: 'Vektrum — Every Construction Dollar, Governed by AI',
-  description: 'AI-verified milestone disbursements and immutable audit trails for construction payment governance.',
+  title: 'Vektrum — AI-assisted draw review, human-approved releases',
+  description: 'AI-assisted milestone draw review (multi-provider fallback), a 10-condition server-side release gate, and immutable audit trails for construction payment governance.',
 }
 
 export default function DemoPage() {
@@ -17,17 +17,18 @@ export default function DemoPage() {
             <VektrumWordmark markSize={40} dark showTagline />
           </div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-vektrum-blue mb-6">
-            Powered by Perplexity AI
+            AI-assisted draw review with multi-provider fallback
           </p>
           <div className="mx-auto h-px w-16 bg-vektrum-blue mb-8" />
           <h1 className="font-display text-3xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
             Every Construction Dollar,{' '}
             <br className="hidden sm:block" />
-            Governed by AI.
+            Verified Before Release.
           </h1>
           <p className="mt-6 mx-auto max-w-2xl text-base sm:text-lg text-vektrum-canvas-text/70">
-            Vektrum protects $2.19T in annual U.S. construction spend with AI-verified
-            milestone disbursements and immutable audit trails.
+            Vektrum governs the $2.19T U.S. construction spend with AI-assisted
+            draw review, a 10-condition server-side release gate, and immutable
+            audit trails.
           </p>
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
@@ -121,13 +122,13 @@ export default function DemoPage() {
               {
                 step: 4,
                 title: 'AI Reviews Draw',
-                desc: 'Perplexity AI analyzes documentation against milestone criteria, flags risks',
+                desc: 'AI-assisted draw review analyzes documentation against milestone criteria and flags risks (Perplexity primary, Anthropic/OpenAI fallback).',
                 icon: Brain,
               },
               {
                 step: 5,
                 title: 'Funds Released',
-                desc: '8-condition gate verifies ALL requirements. Funds disbursed instantly.',
+                desc: '10-condition gate verifies ALL requirements. Funds disbursed.',
                 icon: Shield,
               },
             ].map((item) => (
@@ -143,22 +144,22 @@ export default function DemoPage() {
         </div>
       </section>
 
-      {/* ── Section 4: Perplexity AI Integration ──────────────────────────── */}
+      {/* ── Section 4: AI Draw Review Integration ─────────────────────────── */}
       <section id="ai-integration" className="bg-vektrum-canvas py-16 sm:py-20">
         <div className="mx-auto max-w-5xl px-6">
           <h2 className="text-center font-display text-2xl sm:text-3xl font-bold text-white mb-4">
-            Perplexity AI is the Governor of Every Dollar
+            AI-assisted draw review, with human final approval
           </h2>
           <p className="text-center text-sm text-vektrum-canvas-text/60 mb-12 max-w-2xl mx-auto">
-            Before any milestone payment releases, Perplexity Sonar AI evaluates the evidence and issues a formal assessment.
+            Before any milestone payment releases, an AI-assisted draw review evaluates the evidence and issues a formal assessment. Perplexity Sonar is the primary provider, with Anthropic and OpenAI configured as fallbacks for draw review. The funder still gives final approval.
           </p>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
             {/* Left: Explanation */}
             <div className="space-y-6">
               {[
-                'Before any milestone payment releases, Perplexity Sonar AI reviews the submitted evidence against the deal context.',
-                'The AI scores the draw request 0\u2013100, flags risk factors, and issues a formal recommendation: Approve, Hold, or Reject.',
-                'This assessment is cryptographically logged to an immutable audit trail \u2014 permanent, tamper-proof, legally defensible.',
+                'Before any milestone payment releases, the AI draw review reads the submitted evidence against the deal context.',
+                'The review scores the draw request 0\u2013100, flags risk factors, and issues a formal recommendation: Approve, Hold, or Reject. A funder must still approve before funds move.',
+                'Every assessment is cryptographically logged to an immutable audit trail \u2014 permanent, tamper-proof, legally defensible.',
               ].map((text, i) => (
                 <div key={i} className="flex items-start gap-3">
                   <div className="mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-vektrum-blue/20">
@@ -231,14 +232,14 @@ export default function DemoPage() {
         </div>
       </section>
 
-      {/* ── Section 5: The 8-Condition Release Gate ────────────────────────── */}
+      {/* ── Section 5: The 10-Condition Release Gate ───────────────────────── */}
       <section className="bg-vektrum-bg py-16 sm:py-20">
         <div className="mx-auto max-w-5xl px-6">
           <h2 className="text-center font-display text-2xl sm:text-3xl font-bold text-white mb-4">
             The Release Gate
           </h2>
           <p className="text-center text-sm text-white/55 mb-10 max-w-xl mx-auto">
-            ALL 8 conditions must be true simultaneously before any payment is released.
+            ALL 10 conditions must be true simultaneously before any payment is released.
           </p>
           <div className="mx-auto max-w-xl rounded-xl border border-white/[0.08] bg-surface-2 p-6 shadow-md">
             <ul className="space-y-3">
@@ -251,6 +252,8 @@ export default function DemoPage() {
                 'No existing active release for this milestone',
                 'No open change orders on this milestone',
                 'Signed contract on file for this deal',
+                'Sequential-release ordering and prerequisites satisfied (where required)',
+                'Approved conditional lien waiver on file (where required)',
               ].map((condition, i) => (
                 <li key={i} className="flex items-center gap-3">
                   <CheckCircle2 size={16} className="text-emerald-400 flex-shrink-0" />
@@ -361,7 +364,7 @@ export default function DemoPage() {
             </Link>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-white/75">
-            <span>Built on Perplexity AI</span>
+            <span>AI draw review: Perplexity + Anthropic/OpenAI fallback</span>
             <span className="hidden sm:inline">|</span>
             <span>Next.js 15</span>
             <span className="hidden sm:inline">|</span>

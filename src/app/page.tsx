@@ -227,8 +227,8 @@ export default async function HomePage() {
                   },
                   {
                     icon: CheckCircle2,
-                    title: '8-condition server-side gate',
-                    desc: 'Every release passes 8 checks simultaneously. No manual override. No spreadsheet.',
+                    title: '10-condition server-side gate',
+                    desc: 'Every release passes 10 checks simultaneously. No manual override. No spreadsheet.',
                     bg: 'bg-vektrum-blue/10',
                     color: 'text-vektrum-blue',
                   },
@@ -576,7 +576,7 @@ export default async function HomePage() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[
               { icon: Shield, title: 'Milestone isolation', desc: 'Each milestone stands alone. One dispute never freezes a project.', bg: 'bg-vektrum-blue/10', color: 'text-vektrum-blue' },
-              { icon: Lock, title: '8-condition release gate', desc: 'Every release passes 8 enforced conditions before funds move.', bg: 'bg-amber-500/[0.08]', color: 'text-amber-400' },
+              { icon: Lock, title: '10-condition release gate', desc: 'Every release passes 10 enforced conditions before funds move.', bg: 'bg-amber-500/[0.08]', color: 'text-amber-400' },
               { icon: GitBranch, title: 'Immutable audit trail', desc: 'Every action is logged permanently. No edits. No deletion.', bg: 'bg-emerald-500/[0.08]', color: 'text-emerald-400' },
               { icon: Zap, title: 'AI pre-clearance', desc: 'Draws are pre-cleared before funders ever review them.', bg: 'bg-vektrum-blue/10', color: 'text-vektrum-blue' },
             ].map((card) => (
@@ -635,7 +635,7 @@ export default async function HomePage() {
                   'Approve each milestone before a dollar moves',
                   'Full audit trail for every disbursement',
                   'Change orders tracked and gated',
-                  '8-condition server-side release enforcement',
+                  '10-condition server-side release enforcement',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
                     <ArrowRight size={13} className="mt-0.5 flex-shrink-0 text-vektrum-blue" />
@@ -735,7 +735,7 @@ export default async function HomePage() {
               { step: '01', title: 'Create the deal', desc: 'Contractor creates a deal with defined milestones, amounts, and conditions. Contract value is set upfront — no ambiguity.', icon: FileText, bg: 'bg-vektrum-blue/10', color: 'text-vektrum-blue' },
               { step: '02', title: 'Fund via Stripe', desc: 'Funder deposits via Stripe Connect or Licensed Escrow/Lender. Funds are held in managed accounts — Vektrum governs release but never touches the money.', icon: Shield, bg: 'bg-vektrum-blue/10', color: 'text-vektrum-blue' },
               { step: '03', title: 'Complete & approve', desc: 'Contractor marks work done. AI pre-clears documents. Funder reviews and approves each milestone independently — no bundling.', icon: CheckCircle2, bg: 'bg-emerald-500/[0.08]', color: 'text-emerald-400' },
-              { step: '04', title: 'Release payment', desc: 'All 8 conditions verified server-side. Immutably logged. No exceptions.', icon: Zap, bg: 'bg-emerald-500/[0.08]', color: 'text-emerald-400' },
+              { step: '04', title: 'Release payment', desc: 'All 10 conditions verified server-side. Immutably logged. No exceptions.', icon: Zap, bg: 'bg-emerald-500/[0.08]', color: 'text-emerald-400' },
             ].map((item) => (
               <div
                 key={item.step}
