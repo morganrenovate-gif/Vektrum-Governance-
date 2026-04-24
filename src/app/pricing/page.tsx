@@ -31,11 +31,11 @@ function ClarityCell({
 }) {
   return (
     <div className="flex flex-col gap-1 py-7 px-6 sm:px-8">
-      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/40">
+      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/75">
         {label}
       </p>
       <p className="text-[17px] font-bold tracking-[-0.02em] text-white">{value}</p>
-      <p className="text-[11px] text-white/40 leading-snug">{sub}</p>
+      <p className="text-[11px] text-white/75 leading-snug">{sub}</p>
     </div>
   )
 }
@@ -94,7 +94,7 @@ function EngagementCard({
 
       {/* Rate — the number that dominates */}
       <div className="mb-6 pb-6 border-b border-white/[0.08]">
-        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/40 mb-4">
+        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/75 mb-4">
           {name}
         </p>
         <div className="flex items-baseline gap-2">
@@ -106,7 +106,7 @@ function EngagementCard({
           >
             {ratePercent}
           </span>
-          <span className="text-[14px] text-white/40 pb-1 font-medium">
+          <span className="text-[14px] text-white/75 pb-1 font-medium">
             per release
           </span>
         </div>
@@ -119,20 +119,20 @@ function EngagementCard({
       {/* Structure — retainer + onboarding */}
       <div className="mb-6 space-y-3.5">
         <div className="flex items-start justify-between gap-4">
-          <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-white/40 shrink-0 mt-0.5">
+          <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-white/75 shrink-0 mt-0.5">
             Retainer
           </span>
           <div className="text-right">
             <p className="text-[12px] font-semibold text-white/75">{retainer}</p>
             {retainerNote && (
-              <p className="text-[11px] text-white/45 mt-0.5 leading-snug">
+              <p className="text-[11px] text-white/75 mt-0.5 leading-snug">
                 {retainerNote}
               </p>
             )}
           </div>
         </div>
         <div className="flex items-start justify-between gap-4">
-          <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-white/40 shrink-0 mt-0.5">
+          <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-white/75 shrink-0 mt-0.5">
             Onboarding
           </span>
           <p className="text-[12px] font-semibold text-white/75 text-right">
@@ -175,7 +175,7 @@ function EngagementCard({
 function ConstantRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between border-b border-white/[0.06] py-3.5 last:border-0">
-      <span className="text-[13px] text-white/45">{label}</span>
+      <span className="text-[13px] text-white/75">{label}</span>
       <span className="text-[13px] font-semibold text-white tabular-nums">
         {value}
       </span>
@@ -203,7 +203,7 @@ export default function PricingPage() {
 
         <div className="relative max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
           {/* Eyebrow */}
-          <p className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white/40 mb-8">
+          <p className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white/75 mb-8">
             <span className="inline-block h-px w-6 bg-vektrum-blue/60" />
             Governance Fee
             <span className="inline-block h-px w-6 bg-vektrum-blue/60" />
@@ -213,7 +213,7 @@ export default function PricingPage() {
           <h1 className="font-display text-4xl font-bold tracking-[-0.04em] text-white sm:text-[52px] sm:leading-[1.06] text-balance">
             Priced on disbursement.
             <br />
-            <span className="text-white/45">Earned on verified release.</span>
+            <span className="text-white/75">Earned on verified release.</span>
           </h1>
 
           {/* What it actually is */}
@@ -228,8 +228,8 @@ export default function PricingPage() {
             <span className="text-[15px] font-semibold tracking-[-0.01em] text-emerald-300">
               $500,000 release → $5,000 governance fee
             </span>
-            <span className="hidden sm:block text-white/20">·</span>
-            <span className="text-[13px] text-white/45">
+            <span className="hidden sm:block text-white/60">·</span>
+            <span className="text-[13px] text-white/75">
               Charged after transfer. Never before.
             </span>
           </div>
@@ -270,7 +270,7 @@ export default function PricingPage() {
       <section className="bg-surface-0 py-16 sm:py-20">
         <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center mb-12">
-            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/45 mb-3">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/75 mb-3">
               What this fee covers
             </p>
             <h2 className="font-display text-2xl font-bold tracking-[-0.025em] text-white sm:text-3xl">
@@ -326,7 +326,7 @@ export default function PricingPage() {
 
             {/* Left: risk cost table */}
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/40 mb-3">
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/75 mb-3">
                 The cost of getting it wrong
               </p>
               <h2 className="font-display text-2xl font-bold tracking-[-0.025em] text-white sm:text-3xl mb-8 text-balance">
@@ -338,10 +338,10 @@ export default function PricingPage() {
               <div className="rounded-2xl border border-white/[0.08] bg-surface-2 overflow-hidden">
                 {/* Table header */}
                 <div className="grid grid-cols-2 border-b border-white/[0.08] px-5 py-3">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/25">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/65">
                     Risk scenario
                   </span>
-                  <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/25 text-right">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/65 text-right">
                     Typical resolution cost
                   </span>
                 </div>
@@ -377,7 +377,7 @@ export default function PricingPage() {
                   </div>
                 ))}
               </div>
-              <p className="mt-3 text-[11px] text-white/25 leading-relaxed">
+              <p className="mt-3 text-[11px] text-white/65 leading-relaxed">
                 Estimates based on published construction litigation data and industry
                 loss reporting. Actual costs vary by jurisdiction, deal size, and
                 complexity.
@@ -392,16 +392,16 @@ export default function PricingPage() {
 
               <div className="space-y-6">
                 <div>
-                  <p className="text-[13px] text-white/45 mb-1">
+                  <p className="text-[13px] text-white/75 mb-1">
                     $5,000,000 construction deal · 5 milestones
                   </p>
                   <div className="flex items-baseline gap-2">
                     <span className="font-display text-[38px] font-bold tracking-[-0.04em] text-white leading-none">
                       $50,000
                     </span>
-                    <span className="text-[14px] text-white/35">total fee</span>
+                    <span className="text-[14px] text-white/70">total fee</span>
                   </div>
-                  <p className="mt-1.5 text-[12px] text-white/35">
+                  <p className="mt-1.5 text-[12px] text-white/70">
                     1% × $5,000,000 disbursed across all milestones
                   </p>
                 </div>
@@ -448,7 +448,7 @@ export default function PricingPage() {
       <section className="bg-[#0B1625] py-16 sm:py-20">
         <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center mb-12">
-            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/45 mb-3">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/75 mb-3">
               Fee structure
             </p>
             <h2 className="font-display text-2xl font-bold tracking-[-0.025em] text-white sm:text-3xl">
@@ -528,7 +528,7 @@ export default function PricingPage() {
       <section className="bg-surface-2 py-16 sm:py-20">
         <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center mb-12">
-            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/40 mb-3">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/75 mb-3">
               The math
             </p>
             <h2 className="font-display text-2xl font-bold tracking-[-0.025em] text-white sm:text-3xl">
@@ -540,7 +540,7 @@ export default function PricingPage() {
             {/* Example 1 — Standalone */}
             <div className="rounded-2xl border border-white/[0.08] bg-surface-3 overflow-hidden">
               <div className="px-6 py-4 border-b border-white/[0.08]">
-                <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/40">
+                <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/75">
                   Standalone
                 </p>
                 <p className="text-[14px] font-semibold text-white mt-1">
@@ -554,7 +554,7 @@ export default function PricingPage() {
                   { label: 'Certificate of Occupancy', value: '$300,000 → $3,000' },
                 ].map((row) => (
                   <div key={row.label} className="flex items-center justify-between px-6 py-3">
-                    <span className="text-[12px] text-white/45">{row.label}</span>
+                    <span className="text-[12px] text-white/75">{row.label}</span>
                     <span className="text-[12px] font-semibold text-white tabular-nums">{row.value}</span>
                   </div>
                 ))}
@@ -564,7 +564,7 @@ export default function PricingPage() {
                 </div>
               </div>
               <div className="px-6 py-3 border-t border-white/[0.06]">
-                <p className="text-[11px] text-white/25">No setup fee. No monthly charge. $250 deposit refunded at close.</p>
+                <p className="text-[11px] text-white/65">No setup fee. No monthly charge. $250 deposit refunded at close.</p>
               </div>
             </div>
 
@@ -586,7 +586,7 @@ export default function PricingPage() {
                   <div key={row.label} className="flex items-start justify-between px-6 py-3.5">
                     <div>
                       <p className="text-[12px] text-white/55">{row.label}</p>
-                      <p className="text-[11px] text-white/40 mt-0.5">{row.note}</p>
+                      <p className="text-[11px] text-white/75 mt-0.5">{row.note}</p>
                     </div>
                     <span className="text-[13px] font-semibold text-white tabular-nums shrink-0 ml-4">{row.value}</span>
                   </div>
@@ -597,14 +597,14 @@ export default function PricingPage() {
                 </div>
               </div>
               <div className="px-6 py-3 border-t border-white/[0.06]">
-                <p className="text-[11px] text-white/25">Annual retainer credited against per-release fees throughout the year.</p>
+                <p className="text-[11px] text-white/65">Annual retainer credited against per-release fees throughout the year.</p>
               </div>
             </div>
 
             {/* Example 3 — Enterprise */}
             <div className="rounded-2xl border border-white/[0.08] bg-surface-3 overflow-hidden">
               <div className="px-6 py-4 border-b border-white/[0.08]">
-                <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/40">
+                <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/75">
                   Enterprise
                 </p>
                 <p className="text-[14px] font-semibold text-white mt-1">
@@ -619,7 +619,7 @@ export default function PricingPage() {
                   <div key={row.label} className="flex items-start justify-between px-6 py-3.5">
                     <div>
                       <p className="text-[12px] text-white/55">{row.label}</p>
-                      <p className="text-[11px] text-white/40 mt-0.5">{row.note}</p>
+                      <p className="text-[11px] text-white/75 mt-0.5">{row.note}</p>
                     </div>
                     <span className="text-[13px] font-semibold text-white tabular-nums shrink-0 ml-4">{row.value}</span>
                   </div>
@@ -630,12 +630,12 @@ export default function PricingPage() {
                 </div>
               </div>
               <div className="px-6 py-3 border-t border-white/[0.06]">
-                <p className="text-[11px] text-white/25">Includes API integration, dedicated CSM, and custom MSA. Rate negotiated annually.</p>
+                <p className="text-[11px] text-white/65">Includes API integration, dedicated CSM, and custom MSA. Rate negotiated annually.</p>
               </div>
             </div>
           </div>
 
-          <p className="mt-6 text-center text-[12px] text-white/25">
+          <p className="mt-6 text-center text-[12px] text-white/65">
             Traditional construction platform licensing at comparable institutional scale
             typically runs $100,000–$300,000 / yr. Vektrum charges only when funds move.
           </p>
@@ -647,7 +647,7 @@ export default function PricingPage() {
       <section className="bg-surface-0 py-16 sm:py-20">
         <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center mb-12">
-            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/45 mb-3">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/75 mb-3">
               What changes
             </p>
             <h2 className="font-display text-2xl font-bold tracking-[-0.025em] text-white sm:text-3xl">
@@ -701,7 +701,7 @@ export default function PricingPage() {
                       <p className="text-[13px] font-semibold text-white/75">
                         {item.label}
                       </p>
-                      <p className="text-[12px] text-white/45 mt-0.5 leading-snug">
+                      <p className="text-[12px] text-white/75 mt-0.5 leading-snug">
                         {item.desc}
                       </p>
                     </div>
@@ -755,7 +755,7 @@ export default function PricingPage() {
                       <p className="text-[13px] font-semibold text-white/75">
                         {item.label}
                       </p>
-                      <p className="text-[12px] text-white/40 mt-0.5 leading-snug">
+                      <p className="text-[12px] text-white/75 mt-0.5 leading-snug">
                         {item.desc}
                       </p>
                     </div>
@@ -799,7 +799,7 @@ export default function PricingPage() {
                 <p className="text-[13px] font-bold text-white mb-2">
                   {pillar.headline}
                 </p>
-                <p className="text-[12px] leading-relaxed text-white/45">
+                <p className="text-[12px] leading-relaxed text-white/75">
                   {pillar.body}
                 </p>
               </div>
@@ -813,7 +813,7 @@ export default function PricingPage() {
       <section className="bg-surface-2 py-14 sm:py-16">
         <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="rounded-2xl border border-white/[0.08] bg-surface-3 p-7 sm:p-10">
-            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/40 mb-1">
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/75 mb-1">
               Universal across all models
             </p>
             <h2 className="text-lg font-bold tracking-[-0.02em] text-white mb-8">
@@ -856,13 +856,13 @@ export default function PricingPage() {
       {/* ─── 10. CTA ──────────────────────────────────────────────────────────── */}
       <section className="border-t border-white/[0.08] bg-surface-2 py-20 sm:py-24">
         <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
-          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/40 mb-4">
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/75 mb-4">
             Get started
           </p>
           <h2 className="font-display text-2xl font-bold tracking-[-0.03em] text-white sm:text-[32px] text-balance">
             Standalone: self-service, no setup, 1% per release.
             <br />
-            <span className="text-white/40">
+            <span className="text-white/75">
               Institutional: contact us to configure your portfolio.
             </span>
           </h2>
@@ -895,7 +895,7 @@ export default function PricingPage() {
             ].map((item) => (
               <span
                 key={item}
-                className="flex items-center gap-1.5 text-[12px] text-white/45"
+                className="flex items-center gap-1.5 text-[12px] text-white/75"
               >
                 <span className="inline-block h-1 w-1 rounded-full bg-white/30" />
                 {item}

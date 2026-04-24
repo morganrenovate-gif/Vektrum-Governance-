@@ -32,7 +32,7 @@ export default function GlobalError({
           <p className="text-sm leading-relaxed text-white/55">
             An unexpected error occurred. Your data is safe — no funds have been moved.
             {error.digest && (
-              <span className="mt-1 block text-[11px] font-mono text-white/30">
+              <span className="mt-1 block text-[11px] font-mono text-white/70">
                 Error ID: {error.digest}
               </span>
             )}
@@ -58,7 +58,7 @@ export default function GlobalError({
         </div>
 
         {/* Trust signal */}
-        <p className="text-[11px] text-white/30">
+        <p className="text-[11px] text-white/70">
           Vektrum never moves funds without server-side verification. Your balance is unaffected.
         </p>
       </div>

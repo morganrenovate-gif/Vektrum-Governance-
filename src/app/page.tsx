@@ -73,7 +73,7 @@ export default async function HomePage() {
                   className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/[0.07] px-7 py-3 text-[14px] font-semibold text-white/80 hover:bg-white/[0.12] hover:text-white transition-all"
                 >
                   Schedule a Call
-                  <span className="text-white/40">↓</span>
+                  <span className="text-white/75">↓</span>
                 </a>
               </div>
 
@@ -105,14 +105,14 @@ export default async function HomePage() {
                   <div className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
                   <div className="mx-auto flex items-center gap-2 rounded-md border border-white/[0.06] bg-white/[0.03] px-3 py-1">
                     <div className="h-1.5 w-1.5 rounded-full bg-vektrum-blue" />
-                    <span className="text-[11px] text-white/30">app.vektrum.io — Deal Dashboard</span>
+                    <span className="text-[11px] text-white/65">app.vektrum.io — Deal Dashboard</span>
                   </div>
                 </div>
 
                 <div className="p-5 space-y-3">
                   <div className="flex items-start justify-between mb-1">
                     <div>
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-white/30 mb-1">Active Deal</p>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-white/65 mb-1">Active Deal</p>
                       <p className="text-[15px] font-semibold text-white">Harbor Logistics Center</p>
                       <p className="font-display text-[26px] font-bold text-white tracking-[-0.03em] leading-none mt-1">$9,000,000</p>
                     </div>
@@ -125,7 +125,7 @@ export default async function HomePage() {
                         <div className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
                         <div>
                           <p className="text-[12px] font-medium text-white/80">Site Preparation</p>
-                          <p className="text-[10px] text-white/35">Completed &amp; verified</p>
+                          <p className="text-[10px] text-white/70">Completed &amp; verified</p>
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-1">
@@ -139,7 +139,7 @@ export default async function HomePage() {
                         <div className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />
                         <div>
                           <p className="text-[12px] font-medium text-white/80">Concrete Sub-grade</p>
-                          <p className="text-[10px] text-white/35">Review hold — isolated</p>
+                          <p className="text-[10px] text-white/70">Review hold — isolated</p>
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-1">
@@ -153,7 +153,7 @@ export default async function HomePage() {
                         <div className="w-2 h-2 rounded-full bg-vektrum-blue flex-shrink-0" />
                         <div>
                           <p className="text-[12px] font-medium text-white/80">Structural Steel</p>
-                          <p className="text-[10px] text-white/35">Processing normally</p>
+                          <p className="text-[10px] text-white/70">Processing normally</p>
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-1">
@@ -167,12 +167,12 @@ export default async function HomePage() {
                         <div className="w-2 h-2 rounded-full bg-white/20 flex-shrink-0" />
                         <div>
                           <p className="text-[12px] font-medium text-white/80">MEP Systems</p>
-                          <p className="text-[10px] text-white/35">Queued</p>
+                          <p className="text-[10px] text-white/70">Queued</p>
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-1">
                         <span className="text-[12px] font-semibold tabular-nums text-white">$1,640,000</span>
-                        <span className="text-[10px] font-bold uppercase tracking-[0.06em] px-1.5 py-0.5 rounded bg-white/[0.06] text-white/40">Upcoming</span>
+                        <span className="text-[10px] font-bold uppercase tracking-[0.06em] px-1.5 py-0.5 rounded bg-white/[0.06] text-white/75">Upcoming</span>
                       </div>
                     </div>
                   </div>
@@ -181,7 +181,7 @@ export default async function HomePage() {
                     <Zap size={13} className="text-vektrum-blue mt-0.5 flex-shrink-0" />
                     <div>
                       <p className="text-[12px] font-semibold text-vektrum-blue">$15K locked · $8,985,000 flowing</p>
-                      <p className="text-[11px] text-white/40 mt-0.5 leading-relaxed">The dispute is isolated to its milestone. Every other payment proceeds on schedule.</p>
+                      <p className="text-[11px] text-white/75 mt-0.5 leading-relaxed">The dispute is isolated to its milestone. Every other payment proceeds on schedule.</p>
                     </div>
                   </div>
                 </div>
@@ -271,8 +271,8 @@ export default async function HomePage() {
                   { name: 'Site Preparation', amount: '$320,000', status: 'Released', dot: 'bg-emerald-500', badge: 'bg-emerald-500/15 text-emerald-400', row: 'border-emerald-500/15 bg-emerald-500/5' },
                   { name: 'Concrete Sub-grade', amount: '$15,000', status: 'Locked', dot: 'bg-red-500', badge: 'bg-red-500/15 text-red-400', row: 'border-red-500/20 bg-red-500/5' },
                   { name: 'Structural Steel', amount: '$2,180,000', status: 'Active', dot: 'bg-vektrum-blue', badge: 'bg-vektrum-blue/15 text-vektrum-blue', row: 'border-white/[0.06] bg-white/[0.02]' },
-                  { name: 'MEP Systems', amount: '$1,640,000', status: 'Queued', dot: 'bg-white/20', badge: 'bg-white/[0.06] text-white/40', row: 'border-white/[0.06] bg-white/[0.02]' },
-                  { name: 'Finishes & Cert', amount: '$4,845,000', status: 'Queued', dot: 'bg-white/20', badge: 'bg-white/[0.06] text-white/40', row: 'border-white/[0.06] bg-white/[0.02]' },
+                  { name: 'MEP Systems', amount: '$1,640,000', status: 'Queued', dot: 'bg-white/20', badge: 'bg-white/[0.06] text-white/75', row: 'border-white/[0.06] bg-white/[0.02]' },
+                  { name: 'Finishes & Cert', amount: '$4,845,000', status: 'Queued', dot: 'bg-white/20', badge: 'bg-white/[0.06] text-white/75', row: 'border-white/[0.06] bg-white/[0.02]' },
                 ].map((m) => (
                   <div key={m.name} className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl border ${m.row}`}>
                     <div className="flex items-center gap-2.5">
@@ -289,11 +289,11 @@ export default async function HomePage() {
 
               <div className="mt-5 pt-5 border-t border-white/[0.07] space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-[13px] text-white/40">Locked in dispute</span>
+                  <span className="text-[13px] text-white/75">Locked in dispute</span>
                   <span className="text-[13px] font-semibold text-red-400">$15,000</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[13px] text-white/40">Continuing to flow</span>
+                  <span className="text-[13px] text-white/75">Continuing to flow</span>
                   <span className="text-[13px] font-semibold text-emerald-400">$8,985,000</span>
                 </div>
                 <div className="mt-3 p-3.5 rounded-xl bg-emerald-500/[0.06] border border-emerald-500/15">
@@ -491,10 +491,10 @@ export default async function HomePage() {
 
             <div className="space-y-6">
               <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-7 shadow-[0_8px_30px_rgba(0,0,0,0.18)]">
-                <div className="mb-5 text-[11px] font-bold uppercase tracking-[0.1em] text-white/35">
+                <div className="mb-5 text-[11px] font-bold uppercase tracking-[0.1em] text-white/70">
                   Deal size coverage
                 </div>
-                <div className="mb-6 flex justify-between text-[11px] text-white/25">
+                <div className="mb-6 flex justify-between text-[11px] text-white/65">
                   <span>$100K</span>
                   <span>$1M</span>
                   <span>$10M</span>
@@ -528,19 +528,19 @@ export default async function HomePage() {
               <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 shadow-[0_8px_30px_rgba(0,0,0,0.18)]">
                 <div className="grid gap-5 text-center sm:grid-cols-3">
                   <div>
-                    <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-white/35">Milestone isolation</div>
+                    <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-white/70">Milestone isolation</div>
                     <div className="text-[22px] text-white/80">✗ · ✗ · <span className="text-vektrum-blue">✓</span></div>
-                    <div className="mt-1 text-[10px] text-white/25">Procore · Trad. · Vektrum</div>
+                    <div className="mt-1 text-[10px] text-white/65">Procore · Trad. · Vektrum</div>
                   </div>
                   <div>
-                    <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-white/35">Auto release gate</div>
+                    <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-white/70">Auto release gate</div>
                     <div className="text-[22px] text-white/80">✗ · ✗ · <span className="text-vektrum-blue">✓</span></div>
-                    <div className="mt-1 text-[10px] text-white/25">Procore · Trad. · Vektrum</div>
+                    <div className="mt-1 text-[10px] text-white/65">Procore · Trad. · Vektrum</div>
                   </div>
                   <div>
-                    <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-white/35">Contractor free</div>
+                    <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-white/70">Contractor free</div>
                     <div className="text-[22px] text-white/80">✗ · ✗ · <span className="text-vektrum-blue">✓</span></div>
-                    <div className="mt-1 text-[10px] text-white/25">Procore · Trad. · Vektrum</div>
+                    <div className="mt-1 text-[10px] text-white/65">Procore · Trad. · Vektrum</div>
                   </div>
                 </div>
               </div>
@@ -708,7 +708,7 @@ export default async function HomePage() {
       {/*
         VISUAL CHANGES:
         - bg-white → bg-[#F8F9FB] (consistent light section treatment)
-        - Step number: text-white/30 → text-white/[0.07] — same effect but
+        - Step number: text-white/65 → text-white/[0.07] — same effect but
           explicit so it renders correctly regardless of token value
         - Step cards: added individual boxShadow so they read as surfaces, not flat tiles
         - Grid container: removed bg-vektrum-border fill; now each card has its own border
