@@ -82,7 +82,7 @@ export async function validateRelease(
   // that have been reserved but whose Stripe transfers haven't completed yet.
   const { data: deal, error: dealError } = await supabase
     .from('deals')
-    .select('id, contractor_id, funded_amount, released_amount, fees_collected, reserved_amount, billing_rate_bps, total_amount, sequential_release_required, lien_waiver_required')
+    .select('id, status, contractor_id, funded_amount, released_amount, fees_collected, reserved_amount, billing_rate_bps, total_amount, sequential_release_required, lien_waiver_required, deal_freeze_on_void')
     .eq('id', milestone.deal_id)
     .single()
 
@@ -128,13 +128,37 @@ export async function validateRelease(
     .eq('milestone_id', milestoneId)
     .eq('status', 'submitted')
 
+  // ── Frozen deal fast-path ────────────────────────────────────────────────────
+  // A deal is frozen when a DocuSign contract was voided after milestone
+  // releases had already occurred. No release may proceed until an admin
+  // unfreezes the deal with documented justification.
+  // This check is a gate BEFORE the 10 numbered conditions, not a numbered
+  // condition itself — a frozen deal can never satisfy all 10 conditions
+  // anyway (Condition 8 will also block on the voided contract), but the
+  // frozen check provides a clearer, purpose-specific error message.
+  if (deal.status === 'frozen') {
+    return {
+      allowed: false,
+      errors: [
+        'This deal has been frozen because the contract was voided after milestone ' +
+        'payments had already been released. No further releases are permitted until ' +
+        'an admin reviews the situation and unfreezes the deal. ' +
+        'Contact operations@vektrum.io with the deal ID to request an unfreeze.',
+      ],
+    }
+  }
+
   // ── Fetch Contract (condition 8) ─────────────────────────────────────────────
   // Belt-and-suspenders: funding already requires a signed contract, but we
   // re-check at release time in case the contract was voided after funding.
+  // After migration 20260424000010, the contracts_deal_active_unique partial
+  // index guarantees at most one non-voided contract per deal_id, so
+  // .maybeSingle() is safe (returns 0 or 1 rows, never 2+).
   const { data: contract, error: contractQueryError } = await supabase
     .from('contracts')
     .select('status')
     .eq('deal_id', deal.id)
+    .not('status', 'eq', 'voided')
     .maybeSingle()
 
   // ─────────────────────────────────────────────────────────────────────────────

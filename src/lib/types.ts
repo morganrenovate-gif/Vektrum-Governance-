@@ -5,9 +5,11 @@ export type UserRole = "contractor" | "funder" | "admin";
 export type DealStatus =
   | "draft"
   | "active"
+  | "in_progress"
   | "completed"
   | "disputed"
-  | "cancelled";
+  | "cancelled"
+  | "frozen";   // deal locked by a contract void that occurred after milestone releases
 
 export type MilestoneStatus =
   | "not_started"
@@ -29,11 +31,13 @@ export type ProtectionStatus =
 // If the DB enum changes, update here and TypeScript will surface every callsite.
 
 export const DEAL_STATUSES: Record<DealStatus, DealStatus> = {
-  draft:     "draft",
-  active:    "active",
-  completed: "completed",
-  disputed:  "disputed",
-  cancelled: "cancelled",
+  draft:       "draft",
+  active:      "active",
+  in_progress: "in_progress",
+  completed:   "completed",
+  disputed:    "disputed",
+  cancelled:   "cancelled",
+  frozen:      "frozen",
 };
 
 export const MILESTONE_STATUSES: Record<MilestoneStatus, MilestoneStatus> = {
@@ -159,6 +163,19 @@ export interface Deal {
    * Use retainage_held for the current outstanding balance.
    */
   retainage_released?: number | null;
+
+  // ── Contract void freeze (migration 20260424000010) ──────────────────────────
+  /**
+   * True when a DocuSign envelope-voided event fired AFTER milestone releases
+   * had already occurred on this deal. The deal status is simultaneously set to
+   * 'frozen'. Releases and new funding are blocked until an admin unfreezes.
+   */
+  deal_freeze_on_void?: boolean;
+  /**
+   * The deal status captured immediately before the freeze. The admin unfreeze
+   * endpoint restores the deal to this status. NULL on non-frozen deals.
+   */
+  frozen_from_status?: string | null;
 
   created_at: string;
   updated_at: string;
