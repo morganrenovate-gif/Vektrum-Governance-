@@ -655,3 +655,115 @@ function emailFooter(): string {
     </p>
   `
 }
+
+// ─── Admin Alert (reconciliation + ops) ──────────────────────────────────────
+//
+// Sends a plain-text ops alert email to all ADMIN_EMAIL recipients.
+//
+// Warning batching:
+//   Warning-severity alerts are de-duplicated in-process with a module-level Map
+//   keyed by alert type. At most one warning email of each type is sent per hour.
+//   Critical alerts bypass batching and are always sent immediately.
+//
+// This function never throws.
+
+const WARNING_LAST_SENT = new Map<string, number>()
+const WARNING_BATCH_MS  = 60 * 60 * 1_000 // 1 hour
+
+export type AdminAlertSeverity = 'critical' | 'warning'
+
+export interface AdminAlertOptions {
+  severity:    AdminAlertSeverity
+  /** Short subject line (appended to "[Vektrum Ops] "). */
+  title:       string
+  description: string
+  /** Arbitrary key-value pairs shown in the email body. */
+  metadata?:   Record<string, string | number | boolean | null | undefined>
+  /**
+   * De-duplication key for warning batching.
+   * Defaults to the `title` value. Set this explicitly when the title contains
+   * per-entity data so that batching is keyed by issue type, not entity.
+   * e.g. batchKey: 'funding_phantom_balance'
+   */
+  batchKey?:   string
+}
+
+/**
+ * Sends an ops-alert email to all ADMIN_EMAIL recipients.
+ *
+ * - Critical:  always sent immediately.
+ * - Warning:   sent at most once per hour per batchKey (in-process dedup).
+ *
+ * Never throws.
+ */
+export async function sendAdminAlert(opts: AdminAlertOptions): Promise<void> {
+  const resend = getResend()
+  if (!resend) return
+
+  const recipients = getAdminEmails()
+  if (recipients.length === 0) {
+    console.warn('[notifications] sendAdminAlert: ADMIN_EMAIL not set — skipping alert email')
+    return
+  }
+
+  // ── Warning batching ───────────────────────────────────────────────────────
+  if (opts.severity === 'warning') {
+    const key     = opts.batchKey ?? opts.title
+    const lastMs  = WARNING_LAST_SENT.get(key) ?? 0
+    const nowMs   = Date.now()
+
+    if (nowMs - lastMs < WARNING_BATCH_MS) {
+      console.log(
+        `[notifications] sendAdminAlert: suppressing duplicate warning '${key}' ` +
+        `(last sent ${Math.round((nowMs - lastMs) / 60_000)} min ago)`,
+      )
+      return
+    }
+
+    WARNING_LAST_SENT.set(key, nowMs)
+  }
+
+  // ── Build email body ───────────────────────────────────────────────────────
+  const severityLabel = opts.severity === 'critical' ? '🚨 CRITICAL' : '⚠️ WARNING'
+  const opsUrl        = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.vektrum.io'}/dashboard/admin/ops`
+
+  let metaHtml = ''
+  if (opts.metadata) {
+    const rows = Object.entries(opts.metadata)
+      .filter(([, v]) => v !== undefined)
+      .map(([k, v]) => `<tr><td style="padding:4px 8px 4px 0;font-weight:600;color:#374151;white-space:nowrap">${k}</td><td style="padding:4px 0;color:#6B7280">${String(v ?? '—')}</td></tr>`)
+      .join('')
+
+    if (rows) {
+      metaHtml = `
+        <table style="border-collapse:collapse;margin-top:12px;font-size:13px">
+          ${rows}
+        </table>`
+    }
+  }
+
+  const html = `
+    <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
+      <p style="font-size:16px;font-weight:600;color:#111827">${severityLabel}: ${opts.title}</p>
+      <p style="font-size:14px;color:#6B7280;margin-top:8px">${opts.description}</p>
+      ${metaHtml}
+      <p style="margin-top:20px">
+        <a href="${opsUrl}" style="background:#1D4ED8;color:#fff;padding:10px 18px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600">
+          View Ops Dashboard →
+        </a>
+      </p>
+      ${emailFooter()}
+    </div>
+  `
+
+  try {
+    await resend.emails.send({
+      from:    getSender(),
+      to:      recipients,
+      subject: `[Vektrum Ops] ${opts.title}`,
+      html,
+    })
+  } catch (err) {
+    console.error('[notifications] sendAdminAlert failed:', err instanceof Error ? err.message : err)
+  }
+}

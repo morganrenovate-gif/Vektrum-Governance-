@@ -1,19 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { runReconciliation } from '@/lib/engine/reconciliation'
+import { runReconciliation }          from '@/lib/engine/reconciliation'
+import { sendSlackAlert }             from '@/lib/engine/alerts'
+import { sendAdminAlert }             from '@/lib/engine/notifications'
+import { createSupabaseAdminClient }  from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 
 // ─── POST /api/cron/reconcile ─────────────────────────────────────────────────
 //
-// Vercel Cron endpoint. Runs the Stripe ↔ DB reconciliation job.
-// Schedule: daily at 02:00 UTC (configured in vercel.json).
-// Note: Vercel Hobby plan permits at most one execution per day per cron job.
+// Vercel Cron endpoint — Stripe ↔ DB reconciliation job.
+// Schedule: every hour (configured in vercel.json).
+// Requires Vercel Pro plan for sub-daily cron frequency.
 //
-// Security: Vercel automatically adds "Authorization: Bearer {CRON_SECRET}"
+// Security: Vercel automatically sets "Authorization: Bearer {CRON_SECRET}"
 // when invoking cron routes. Any other caller must present the same token.
 //
-// Also accepts POST for manual testing. The /api/admin/reconciliation route
-// is the human-facing trigger — this route is infrastructure-only.
+// Behaviour per run:
+//   1. Detect and fix stuck runs from the previous invocation.
+//   2. Run all reconciliation passes with RECONCILIATION_LOOKBACK_HOURS window.
+//   3. Alert on NEW findings (first detected this run — created_at >= runStart).
+//   4. Escalate unresolved critical issues older than 1 hour (SLA enforcement).
 
 export async function GET(request: NextRequest) {
   return handler(request)
@@ -23,8 +29,18 @@ export async function POST(request: NextRequest) {
   return handler(request)
 }
 
+// ─── Thresholds ───────────────────────────────────────────────────────────────
+
+/** A run is considered "stuck" if it has been in status='running' for more than this many ms. */
+const STUCK_RUN_THRESHOLD_MS = 2 * 60 * 60 * 1_000 // 2 hours
+
+/** A critical issue is "overdue" (SLA breach) if it has been open for more than this many ms. */
+const SLA_CRITICAL_THRESHOLD_MS = 1 * 60 * 60 * 1_000 // 1 hour
+
+// ─── Handler ──────────────────────────────────────────────────────────────────
+
 async function handler(request: NextRequest): Promise<NextResponse> {
-  // ── Authenticate ──────────────────────────────────────────────────────────
+  // ── Authenticate ────────────────────────────────────────────────────────────
   const cronSecret = process.env.CRON_SECRET
   if (cronSecret) {
     const authHeader = request.headers.get('authorization')
@@ -35,7 +51,6 @@ async function handler(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
   } else if (process.env.NODE_ENV === 'production') {
-    // CRON_SECRET must be set in production
     console.error('[cron/reconcile] CRON_SECRET is not set — refusing to run in production')
     return NextResponse.json(
       { error: 'CRON_SECRET environment variable is not configured.' },
@@ -43,21 +58,49 @@ async function handler(request: NextRequest): Promise<NextResponse> {
     )
   }
 
-  const startTime = Date.now()
-  console.log('[cron/reconcile] Starting reconciliation run')
+  const runStart = new Date()
+  console.log('[cron/reconcile] Starting reconciliation run at', runStart.toISOString())
+
+  const admin = createSupabaseAdminClient()
+
+  // ── 1. Detect and fix stuck runs ───────────────────────────────────────────
+  await detectAndFixStuckRuns(admin, runStart)
+
+  // ── 2. Run reconciliation passes ───────────────────────────────────────────
+  const lookbackHours = process.env.RECONCILIATION_LOOKBACK_HOURS
+    ? parseInt(process.env.RECONCILIATION_LOOKBACK_HOURS, 10)
+    : 72
 
   const result = await runReconciliation({
-    windowDays:  7,
+    windowHours:  isFinite(lookbackHours) ? lookbackHours : 72,
     triggeredBy: 'cron',
   })
 
-  const durationSeconds = (Date.now() - startTime) / 1000
+  const durationSeconds = (Date.now() - runStart.getTime()) / 1000
 
   if (result.status === 'failed') {
     console.error(
       `[cron/reconcile] Run ${result.runId} FAILED after ${durationSeconds.toFixed(1)}s:`,
       result.error,
     )
+
+    // Alert on run failure
+    await Promise.allSettled([
+      sendSlackAlert({
+        severity:    'critical',
+        title:       'Reconciliation run failed',
+        description: result.error ?? 'Unknown error — check server logs.',
+        metadata:    { run_id: result.runId, duration_s: durationSeconds.toFixed(1) },
+      }),
+      sendAdminAlert({
+        severity:    'critical',
+        title:       'Reconciliation run failed',
+        description: result.error ?? 'Unknown error — check server logs.',
+        metadata:    { run_id: result.runId, duration_s: durationSeconds.toFixed(1) },
+        batchKey:    'reconciliation_run_failed',
+      }),
+    ])
+
     return NextResponse.json(
       {
         success:  false,
@@ -75,12 +118,17 @@ async function handler(request: NextRequest): Promise<NextResponse> {
     `${result.dealsChecked} deals. Issues found: ${result.issuesFound}.`,
   )
 
+  // ── 3. Alert on NEW findings ───────────────────────────────────────────────
+  //
+  // A finding is "new" if it was first detected in this run:
+  //   created_at >= runStart (upserts preserve the original created_at, so only
+  //   first-detection rows satisfy this condition).
   if (result.issuesFound > 0) {
-    console.warn(
-      `[cron/reconcile] ⚠️ ${result.issuesFound} reconciliation issue(s) detected. ` +
-      'Review at /dashboard/admin.',
-    )
+    await alertNewFindings(admin, result.runId, runStart)
   }
+
+  // ── 4. SLA escalation — unresolved critical issues ─────────────────────────
+  await escalateOverdueCriticals(admin)
 
   return NextResponse.json({
     success:           true,
@@ -91,4 +139,199 @@ async function handler(request: NextRequest): Promise<NextResponse> {
     issues_found:      result.issuesFound,
     duration_seconds:  durationSeconds,
   })
+}
+
+// ─── Stuck-run detection ──────────────────────────────────────────────────────
+
+async function detectAndFixStuckRuns(
+  admin:    ReturnType<typeof createSupabaseAdminClient>,
+  now:      Date,
+): Promise<void> {
+  const twoHoursAgo = new Date(now.getTime() - STUCK_RUN_THRESHOLD_MS).toISOString()
+
+  const { data: stuckRuns, error } = await admin
+    .from('reconciliation_runs')
+    .select('id, created_at, triggered_by')
+    .eq('status', 'running')
+    .lt('created_at', twoHoursAgo)
+
+  if (error) {
+    console.error('[cron/reconcile] Failed to query for stuck runs:', error.message)
+    return
+  }
+
+  if (!stuckRuns || stuckRuns.length === 0) return
+
+  for (const run of stuckRuns) {
+    console.warn(
+      `[cron/reconcile] Marking stuck run ${run.id} as failed ` +
+      `(started ${run.created_at}, triggered_by: ${run.triggered_by})`,
+    )
+
+    await admin
+      .from('reconciliation_runs')
+      .update({
+        status:          'failed',
+        completed_at:    now.toISOString(),
+        error_message:   'Run exceeded 2-hour timeout — forcibly marked failed by subsequent cron invocation.',
+      })
+      .eq('id', run.id)
+      .eq('status', 'running') // guard: don't overwrite if another process already resolved it
+
+    await Promise.allSettled([
+      sendSlackAlert({
+        severity:    'critical',
+        title:       `Stuck reconciliation run detected`,
+        description: `Run ${run.id} was still in status 'running' after 2+ hours. It has been marked failed.`,
+        metadata:    {
+          run_id:       run.id,
+          started_at:   run.created_at,
+          triggered_by: run.triggered_by,
+        },
+      }),
+      sendAdminAlert({
+        severity:    'critical',
+        title:       `Stuck reconciliation run: ${run.id}`,
+        description: `Run ${run.id} was still in status 'running' after 2+ hours and has been marked failed.`,
+        metadata:    {
+          run_id:       run.id,
+          started_at:   run.created_at,
+          triggered_by: run.triggered_by,
+        },
+        batchKey:    'stuck_reconciliation_run',
+      }),
+    ])
+  }
+}
+
+// ─── New-finding alerting ─────────────────────────────────────────────────────
+
+async function alertNewFindings(
+  admin:    ReturnType<typeof createSupabaseAdminClient>,
+  runId:    string,
+  runStart: Date,
+): Promise<void> {
+  // Fetch issues that were first detected in this run.
+  // Upsert logic preserves the original `created_at` on re-detection, so
+  // `created_at >= runStart` reliably identifies new (not re-detected) issues.
+  const { data: newIssues, error } = await admin
+    .from('reconciliation_issues')
+    .select('id, issue_type, severity, deal_id, milestone_id, description, created_at')
+    .eq('run_id', runId)
+    .gte('created_at', runStart.toISOString())
+    .in('severity', ['critical', 'high'])  // only actionable severities
+    .in('status', ['open', 'acknowledged'])
+    .order('severity', { ascending: true }) // critical first
+
+  if (error) {
+    console.error('[cron/reconcile] Failed to fetch new findings:', error.message)
+    return
+  }
+
+  if (!newIssues || newIssues.length === 0) {
+    console.log('[cron/reconcile] No new high/critical findings this run.')
+    return
+  }
+
+  console.warn(`[cron/reconcile] ${newIssues.length} new finding(s) detected.`)
+
+  for (const issue of newIssues) {
+    const isCritical = issue.severity === 'critical'
+    const title      = `${isCritical ? 'Critical' : 'Warning'}: ${issue.issue_type} detected`
+    const entityId   = issue.deal_id ?? undefined
+
+    await Promise.allSettled([
+      sendSlackAlert({
+        severity:    isCritical ? 'critical' : 'warning',
+        title,
+        description: issue.description,
+        entityId,
+        metadata: {
+          issue_type:   issue.issue_type,
+          severity:     issue.severity,
+          deal_id:      issue.deal_id ?? '—',
+          milestone_id: issue.milestone_id ?? '—',
+          detected_at:  issue.created_at,
+          run_id:       runId,
+        },
+      }),
+      sendAdminAlert({
+        severity:    isCritical ? 'critical' : 'warning',
+        title,
+        description: issue.description,
+        metadata: {
+          issue_type:   issue.issue_type,
+          deal_id:      issue.deal_id ?? '—',
+          milestone_id: issue.milestone_id ?? '—',
+          detected_at:  issue.created_at,
+        },
+        // Warning batching key is keyed by issue_type so one warning per type per hour
+        batchKey:    issue.issue_type,
+      }),
+    ])
+  }
+}
+
+// ─── SLA escalation ───────────────────────────────────────────────────────────
+
+async function escalateOverdueCriticals(
+  admin: ReturnType<typeof createSupabaseAdminClient>,
+): Promise<void> {
+  const oneHourAgo = new Date(Date.now() - SLA_CRITICAL_THRESHOLD_MS).toISOString()
+
+  const { data: overdueIssues, error } = await admin
+    .from('reconciliation_issues')
+    .select('id, issue_type, deal_id, milestone_id, description, created_at')
+    .eq('severity', 'critical')
+    .in('status', ['open', 'acknowledged'])
+    .lt('created_at', oneHourAgo)
+
+  if (error) {
+    console.error('[cron/reconcile] Failed to query for overdue critical issues:', error.message)
+    return
+  }
+
+  if (!overdueIssues || overdueIssues.length === 0) return
+
+  console.warn(`[cron/reconcile] ${overdueIssues.length} overdue critical issue(s) — escalating.`)
+
+  for (const issue of overdueIssues) {
+    const ageMinutes = Math.round(
+      (Date.now() - new Date(issue.created_at).getTime()) / 60_000,
+    )
+    const entityLabel = issue.deal_id ?? issue.milestone_id ?? issue.id
+    const title       = `UNRESOLVED CRITICAL: ${issue.issue_type} for ${entityLabel}`
+
+    await Promise.allSettled([
+      sendSlackAlert({
+        severity:    'critical',
+        title,
+        description:
+          `This critical reconciliation issue has been open for ${ageMinutes} minutes without resolution. ` +
+          issue.description,
+        entityId:    issue.deal_id ?? undefined,
+        metadata: {
+          issue_type:  issue.issue_type,
+          open_for:    `${ageMinutes} minutes`,
+          deal_id:     issue.deal_id ?? '—',
+          created_at:  issue.created_at,
+        },
+      }),
+      sendAdminAlert({
+        severity:    'critical',
+        title,
+        description:
+          `Critical issue open for ${ageMinutes} minutes. Immediate attention required. ` +
+          issue.description,
+        metadata: {
+          issue_type:  issue.issue_type,
+          open_for:    `${ageMinutes} minutes`,
+          deal_id:     issue.deal_id ?? '—',
+          created_at:  issue.created_at,
+        },
+        // Each overdue issue gets its own escalation email (no batching for SLA escalations)
+        batchKey:    `sla_escalation:${issue.id}`,
+      }),
+    ])
+  }
 }

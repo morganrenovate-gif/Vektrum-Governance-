@@ -55,7 +55,14 @@ export interface ReconciliationIssueInput {
 }
 
 export interface ReconciliationRunOptions {
-  /** Days back to check DB releases and Stripe transfers. Default 7. */
+  /**
+   * Hours back to check DB releases, Stripe transfers, and PaymentIntents.
+   * Takes precedence over `windowDays` when set.
+   * Reads RECONCILIATION_LOOKBACK_HOURS env var when neither is provided.
+   * Fallback default: 72 hours.
+   */
+  windowHours?:  number
+  /** Days back to check (overridden by windowHours). Default 7 days / 168 h. */
   windowDays?:   number
   /** Who triggered this run. 'cron' or 'manual:{user_id}'. Default 'cron'. */
   triggeredBy?:  string
@@ -111,14 +118,22 @@ export async function runReconciliation(
   options: ReconciliationRunOptions = {},
 ): Promise<ReconciliationResult> {
   const {
-    windowDays  = 7,
-    triggeredBy = 'cron',
+    windowHours:  optWindowHours,
+    windowDays    = 7,
+    triggeredBy   = 'cron',
     runId: presetRunId,
   } = options
 
+  // Resolve effective lookback window in hours.
+  // Priority: explicit windowHours option → RECONCILIATION_LOOKBACK_HOURS env var → windowDays fallback.
+  const envHours = process.env.RECONCILIATION_LOOKBACK_HOURS
+    ? parseInt(process.env.RECONCILIATION_LOOKBACK_HOURS, 10)
+    : null
+  const effectiveHours = optWindowHours ?? (envHours && isFinite(envHours) ? envHours : windowDays * 24)
+
   const startedAt   = Date.now()
   const windowEnd   = new Date()
-  const windowStart = new Date(windowEnd.getTime() - windowDays * 86_400_000)
+  const windowStart = new Date(windowEnd.getTime() - effectiveHours * 3_600_000)
 
   const admin = createSupabaseAdminClient()
 
@@ -455,8 +470,16 @@ export async function runReconciliation(
         expand: [],
       })
 
+      // Apply lookback window: filter PIs outside the reconciliation window.
+      // Stripe Search doesn't support date filters on metadata queries, so we
+      // page through all results and discard PIs created before windowStart.
+      const windowStartUnixSec = Math.floor(windowStart.getTime() / 1000)
+
       const processPiPage = (pis: Stripe.PaymentIntent[]) => {
         for (const pi of pis) {
+          // Skip PIs outside the lookback window
+          if (pi.created < windowStartUnixSec) continue
+
           const dId = pi.metadata?.deal_id
           if (!dId) continue
           const amtUsd = pi.amount / 100
