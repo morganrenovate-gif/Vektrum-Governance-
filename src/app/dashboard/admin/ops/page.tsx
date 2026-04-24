@@ -14,6 +14,7 @@
 
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import {
   Activity, AlertTriangle, ArrowLeft, Bell,
@@ -33,18 +34,25 @@ export const metadata = {
 }
 
 // ─── Server-side data fetch ───────────────────────────────────────────────────
+//
+// The three ops API routes require admin auth + MFA (via getAuthUser / requireMFA
+// which read cookies from the incoming NextRequest).  When calling them from a
+// server component we must forward the session cookies explicitly — server-side
+// fetch() does NOT carry browser cookies automatically.
 
-async function fetchOpsData(baseUrl: string) {
+async function fetchOpsData(baseUrl: string, cookieHeader: string) {
+  const headers = { cookie: cookieHeader }
+
   // All three data sources fetched in parallel — the page render blocks on all.
   const [releaseHealth, webhookHealth, alerts] = await Promise.all([
-    fetch(`${baseUrl}/api/admin/ops/release-health`, { cache: 'no-store' })
-      .then((r) => r.json())
+    fetch(`${baseUrl}/api/admin/ops/release-health`, { cache: 'no-store', headers })
+      .then((r) => (r.ok ? r.json() : null))
       .catch(() => null),
-    fetch(`${baseUrl}/api/admin/ops/webhook-health`, { cache: 'no-store' })
-      .then((r) => r.json())
+    fetch(`${baseUrl}/api/admin/ops/webhook-health`, { cache: 'no-store', headers })
+      .then((r) => (r.ok ? r.json() : null))
       .catch(() => null),
-    fetch(`${baseUrl}/api/admin/ops/alerts`, { cache: 'no-store' })
-      .then((r) => r.json())
+    fetch(`${baseUrl}/api/admin/ops/alerts`, { cache: 'no-store', headers })
+      .then((r) => (r.ok ? r.json() : null))
       .catch(() => null),
   ])
   return { releaseHealth, webhookHealth, alerts }
@@ -73,7 +81,14 @@ export default async function OpsPage() {
   //
   // Determine the base URL: prefer NEXT_PUBLIC_APP_URL, fall back to localhost.
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
-  const { releaseHealth, webhookHealth, alerts } = await fetchOpsData(appUrl)
+
+  // Forward the current session cookies so the API routes can authenticate.
+  const cookieStore = await cookies()
+  const cookieHeader = cookieStore.getAll()
+    .map((c) => `${c.name}=${c.value}`)
+    .join('; ')
+
+  const { releaseHealth, webhookHealth, alerts } = await fetchOpsData(appUrl, cookieHeader)
 
   // ── Quick stats for the top strip ─────────────────────────────────────────
   const adminClient = createSupabaseAdminClient()
@@ -120,7 +135,7 @@ export default async function OpsPage() {
 
   // ── Page ──────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-surface-0">
       <div className="max-w-5xl mx-auto px-6 py-8 space-y-10">
 
         {/* ── Page header ─────────────────────────────────────────── */}
