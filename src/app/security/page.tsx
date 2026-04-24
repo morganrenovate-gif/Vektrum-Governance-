@@ -35,7 +35,7 @@ export default function SecurityPage() {
             {
               icon: Shield,
               title: 'Stripe Connect Custody Model',
-              desc: 'Funds are held in Stripe Connect managed accounts — not by Vektrum. Vektrum governs disbursement rules; Stripe controls movement.',
+              desc: 'Vektrum never holds funds. On Stripe-rail deals, funds are held in Stripe Connect managed accounts; on external-rail deals, funds move entirely outside Vektrum infrastructure. Vektrum governs disbursement — not custody.',
             },
             {
               icon: Server,

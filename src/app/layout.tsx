@@ -34,7 +34,7 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Vektrum — Construction Payment Governance",
   description:
-    "Protected milestone payments for construction. Funds release only when work is verified.",
+    "Construction disbursement governance — 10-condition release gate, immutable audit trail, and dispute isolation. Funds release only when all conditions are verified.",
 };
 
 export const viewport: Viewport = {
@@ -78,7 +78,7 @@ export default async function RootLayout({
         "name": "Vektrum",
         "url": "https://vektrum.io",
         "logo": "https://vektrum.io/logo.png",
-        "description": "Vektrum is a construction payment governance platform providing controlled draw disbursements, AI compliance review, and immutable audit trails for funders and contractors.",
+        "description": "Vektrum is a construction disbursement governance platform providing controlled draw disbursements with a 10-condition release gate, AI-assisted draw review preconditions, and immutable audit trails for funders and contractors.",
         "contactPoint": {
           "@type": "ContactPoint",
           "email": "operations@vektrum.io",

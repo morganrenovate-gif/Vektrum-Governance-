@@ -214,7 +214,7 @@ export function ReleaseFundsModal({
                     This action is permanent and cannot be undone
                   </p>
                   <p className="text-sm text-amber-400/80 mt-0.5 leading-relaxed">
-                    Once confirmed, funds will be transferred immediately via Stripe Connect and
+                    Once confirmed, the transfer is initiated via Stripe Connect and
                     cannot be recalled.
                   </p>
                 </div>

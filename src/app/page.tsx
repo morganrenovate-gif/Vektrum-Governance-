@@ -9,15 +9,9 @@ import {
   Lock,
   CheckCircle2,
   Zap,
-  Building2,
-  TrendingUp,
   X,
-  BadgeCheck,
-  Star,
   AlertCircle,
-  Banknote,
 } from 'lucide-react'
-import { DemoScene } from '@/components/homepage/demo-scene'
 
 export default async function HomePage() {
   const supabase = await createClient()
@@ -32,13 +26,13 @@ export default async function HomePage() {
   return (
     <div className="flex flex-col">
 
-      {/* ─── Hero ──────────────────────────────────────────────────────────── */}
+      {/* ─── 1. Hero ──────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-[#0D1B2A]">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-gradient-to-b from-vektrum-blue/15 to-transparent rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-1/2 right-0 w-[500px] h-[500px] bg-gradient-to-l from-vektrum-blue/8 to-transparent rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 pt-24 pb-16 sm:pt-32 sm:pb-20">
-          <div className="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center lg:pt-8">
+          <div className="lg:grid lg:grid-cols-2 lg:gap-14 lg:items-start lg:pt-6">
 
             {/* LEFT */}
             <div>
@@ -49,15 +43,17 @@ export default async function HomePage() {
                 </p>
               </div>
 
-              <h1 className="animate-fade-in font-display text-center lg:text-left text-[2.75rem] font-bold tracking-[-0.04em] text-white sm:text-6xl lg:text-[4rem] lg:leading-[1.05] leading-[1.08]">
-                Every dollar.<br />
-                Every draw.<br />
-                <em className="not-italic text-white/70">Governed.</em>
+              <h1 className="animate-fade-in font-display text-center lg:text-left text-[2.5rem] font-bold tracking-[-0.04em] text-white sm:text-5xl lg:text-[3.5rem] lg:leading-[1.1] leading-[1.08]">
+                Construction funds don&apos;t move<br />
+                unless all release<br />
+                <em className="not-italic text-white/70">conditions pass.</em>
               </h1>
 
               <p className="animate-fade-in-delay mx-auto lg:mx-0 mt-6 max-w-lg text-center lg:text-left text-[17px] leading-relaxed text-white/70">
-                Vektrum enforces milestone-based releases, isolates disputes to individual draws,
-                and ensures funds move only when work is verified.
+                Vektrum enforces 10 server-side conditions before any milestone funds can
+                move. Every approval is gated, every release is logged, every dispute is isolated.
+                Release authorization is separated from payment execution — funds can move
+                through Stripe Connect or existing financial infrastructure.
               </p>
 
               <div className="animate-fade-in-delay-3 mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-3">
@@ -72,8 +68,7 @@ export default async function HomePage() {
                   href="https://cal.com/vektrum"
                   className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/[0.07] px-7 py-3 text-[14px] font-semibold text-white/80 hover:bg-white/[0.12] hover:text-white transition-all"
                 >
-                  Schedule a Call
-                  <span className="text-white/75">↓</span>
+                  Schedule a call
                 </a>
               </div>
 
@@ -85,7 +80,7 @@ export default async function HomePage() {
                 </div>
                 <div className="flex flex-col gap-1">
                   <span className="font-display text-[19px] font-bold text-white leading-none tracking-[-0.02em] pt-1">Stripe Connect</span>
-                  <span className="text-[12px] text-white/55">Funds held in managed accounts, not by Vektrum</span>
+                  <span className="text-[12px] text-white/55">Funds held by Stripe, not Vektrum</span>
                 </div>
                 <div className="flex flex-col gap-1">
                   <span className="font-display text-[19px] font-bold text-white leading-none tracking-[-0.02em] pt-1">Hash-chained</span>
@@ -94,94 +89,86 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* RIGHT — product card */}
+            {/* RIGHT — release gate evaluation card */}
             <div className="hidden lg:block lg:mt-2">
-              <div
-                className="rounded-2xl border border-white/10 bg-[#111827] overflow-hidden transition-transform duration-500 hover:-translate-y-1 shadow-deep"
-              >
+              <div className="rounded-2xl border border-white/10 bg-[#111827] overflow-hidden shadow-deep">
+                {/* Browser chrome */}
                 <div className="flex items-center gap-1.5 border-b border-white/[0.06] bg-white/[0.02] px-4 py-3">
                   <div className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
                   <div className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
                   <div className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
                   <div className="mx-auto flex items-center gap-2 rounded-md border border-white/[0.06] bg-white/[0.03] px-3 py-1">
                     <div className="h-1.5 w-1.5 rounded-full bg-vektrum-blue" />
-                    <span className="text-[11px] text-white/65">app.vektrum.io — Deal Dashboard</span>
+                    <span className="text-[11px] text-white/65">app.vektrum.io — Release Gate</span>
                   </div>
                 </div>
 
-                <div className="p-5 space-y-3">
-                  <div className="flex items-start justify-between mb-1">
+                <div className="p-5">
+                  {/* Card header */}
+                  <div className="flex items-start justify-between mb-4">
                     <div>
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-white/65 mb-1">Active Deal</p>
-                      <p className="text-[15px] font-semibold text-white">Harbor Logistics Center</p>
-                      <p className="font-display text-[26px] font-bold text-white tracking-[-0.03em] leading-none mt-1">$9,000,000</p>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-white/55 mb-0.5">Gate Evaluation</p>
+                      <p className="text-[13px] font-semibold text-white">Harbor Logistics — Structural Steel</p>
+                      <p className="font-display text-[20px] font-bold text-white/90 tracking-[-0.03em] leading-none mt-1">$2,180,000</p>
                     </div>
-                    <span className="text-[10px] font-bold uppercase tracking-[0.08em] px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Active</span>
+                    <span className="text-[10px] font-bold uppercase tracking-[0.08em] px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 flex-shrink-0">Checking</span>
                   </div>
 
-                  <div className="space-y-1.5 mt-3">
-                    <div className="flex items-center justify-between px-3 py-2.5 rounded-xl border border-emerald-500/15 bg-emerald-500/5">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
-                        <div>
-                          <p className="text-[12px] font-medium text-white/80">Site Preparation</p>
-                          <p className="text-[10px] text-white/70">Completed &amp; verified</p>
+                  {/* 10 gate conditions */}
+                  <div className="space-y-1">
+                    {[
+                      { label: 'Funder approval',            pass: true  },
+                      { label: 'No active dispute',           pass: true  },
+                      { label: 'No active hold',              pass: true  },
+                      { label: 'Contractor account verified', pass: true  },
+                      { label: 'Funded balance sufficient',   pass: true  },
+                      { label: 'Sequential order',            pass: false, reason: 'Prior milestone unreleased' },
+                      { label: 'No duplicate release',        pass: true  },
+                      { label: 'Change order CO-004',         pass: false, reason: 'Approval pending' },
+                      { label: 'Contract active',             pass: true  },
+                      { label: 'Deal not frozen',             pass: true  },
+                    ].map((cond, i) => (
+                      <div
+                        key={i}
+                        className={`flex items-start gap-2.5 px-2.5 py-1.5 rounded-lg ${
+                          cond.pass
+                            ? 'bg-white/[0.02] border border-white/[0.04]'
+                            : 'bg-red-500/[0.08] border border-red-500/20'
+                        }`}
+                      >
+                        <div className={`mt-[3px] flex-shrink-0 w-3.5 h-3.5 rounded-full flex items-center justify-center ${
+                          cond.pass ? 'bg-emerald-500/20' : 'bg-red-500/20'
+                        }`}>
+                          {cond.pass
+                            ? <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                            : <X size={8} className="text-red-400" />
+                          }
                         </div>
-                      </div>
-                      <div className="flex flex-col items-end gap-1">
-                        <span className="text-[12px] font-semibold tabular-nums text-white">$320,000</span>
-                        <span className="text-[10px] font-bold uppercase tracking-[0.06em] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400">Released</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between px-3 py-2.5 rounded-xl border border-red-500/20 bg-red-500/5">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />
-                        <div>
-                          <p className="text-[12px] font-medium text-white/80">Concrete Sub-grade</p>
-                          <p className="text-[10px] text-white/70">Review hold — isolated</p>
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-[11px] font-medium leading-tight ${
+                            cond.pass ? 'text-white/65' : 'text-white/85'
+                          }`}>
+                            {cond.label}
+                          </p>
+                          {cond.reason && (
+                            <p className="text-[10px] text-red-400/80 mt-0.5 leading-tight">{cond.reason}</p>
+                          )}
                         </div>
+                        <span className={`text-[9px] font-bold uppercase tracking-wider flex-shrink-0 mt-[3px] ${
+                          cond.pass ? 'text-emerald-500/50' : 'text-red-400'
+                        }`}>
+                          {cond.pass ? 'Pass' : 'Fail'}
+                        </span>
                       </div>
-                      <div className="flex flex-col items-end gap-1">
-                        <span className="text-[12px] font-semibold tabular-nums text-white">$15,000</span>
-                        <span className="text-[10px] font-bold uppercase tracking-[0.06em] px-1.5 py-0.5 rounded bg-red-500/15 text-red-400">Dispute</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between px-3 py-2.5 rounded-xl border border-white/[0.06] bg-white/[0.02]">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-2 h-2 rounded-full bg-vektrum-blue flex-shrink-0" />
-                        <div>
-                          <p className="text-[12px] font-medium text-white/80">Structural Steel</p>
-                          <p className="text-[10px] text-white/70">Processing normally</p>
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end gap-1">
-                        <span className="text-[12px] font-semibold tabular-nums text-white">$2,180,000</span>
-                        <span className="text-[10px] font-bold uppercase tracking-[0.06em] px-1.5 py-0.5 rounded bg-vektrum-blue/15 text-vektrum-blue">In Progress</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between px-3 py-2.5 rounded-xl border border-white/[0.06] bg-white/[0.02]">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-2 h-2 rounded-full bg-white/20 flex-shrink-0" />
-                        <div>
-                          <p className="text-[12px] font-medium text-white/80">MEP Systems</p>
-                          <p className="text-[10px] text-white/70">Queued</p>
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end gap-1">
-                        <span className="text-[12px] font-semibold tabular-nums text-white">$1,640,000</span>
-                        <span className="text-[10px] font-bold uppercase tracking-[0.06em] px-1.5 py-0.5 rounded bg-white/[0.06] text-white/75">Upcoming</span>
-                      </div>
-                    </div>
+                    ))}
                   </div>
 
-                  <div className="flex items-start gap-3 px-3.5 py-3 rounded-xl border border-vektrum-blue/20 bg-vektrum-blue/[0.07] mt-1">
-                    <Zap size={13} className="text-vektrum-blue mt-0.5 flex-shrink-0" />
+                  {/* Blocked banner */}
+                  <div className="mt-3 flex items-center gap-2.5 px-3.5 py-3 rounded-xl border border-red-500/25 bg-red-500/[0.08]">
+                    <X size={13} className="text-red-400 flex-shrink-0" />
                     <div>
-                      <p className="text-[12px] font-semibold text-vektrum-blue">$15K locked · $8,985,000 flowing</p>
-                      <p className="text-[11px] text-white/75 mt-0.5 leading-relaxed">The dispute is isolated to its milestone. Every other payment proceeds on schedule.</p>
+                      <p className="text-[12px] font-semibold text-red-400">Release blocked — 2 conditions unmet</p>
+                      <p className="text-[10px] text-white/50 mt-0.5">All 10 conditions must pass before funds move.</p>
                     </div>
                   </div>
                 </div>
@@ -192,12 +179,12 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ─── The Defining Scenario ─────────────────────────────────────────── */}
+      {/* ─── 2. The $15K / $9M Scenario ───────────────────────────────────────── */}
       <section className="bg-[#031226] py-20 sm:py-28 border-t border-white/[0.06]">
         <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="grid gap-16 lg:grid-cols-2 lg:items-center">
 
-            {/* Left: copy */}
+            {/* Left */}
             <div>
               <div className="mb-6 flex items-center gap-3">
                 <div className="h-px w-5 bg-vektrum-blue" />
@@ -205,15 +192,15 @@ export default async function HomePage() {
                   The defining scenario
                 </p>
               </div>
-              <h2 className="font-display text-[2.75rem] sm:text-5xl lg:text-[3.5rem] font-bold tracking-[-0.04em] text-white leading-[1.05]">
+              <h2 className="font-display text-[2.75rem] sm:text-5xl font-bold tracking-[-0.04em] text-white leading-[1.05]">
                 A $15K dispute.<br />
                 A $9M project<br />
                 <em className="not-italic text-white/60">unaffected.</em>
               </h2>
               <p className="mt-6 text-[16px] leading-relaxed text-white/65 max-w-md">
-                In every other system, a disputed payment freezes the job. In Vektrum,
-                disputes are isolated to their milestone. The rest of the project keeps
-                moving. That&apos;s not a feature — it&apos;s the architecture.
+                In most systems, a disputed payment can freeze the job. In Vektrum, disputes
+                are isolated to their milestone. The rest of the project keeps moving —
+                because each milestone is an independent financial unit enforced at the gate.
               </p>
 
               <div className="mt-8 flex flex-col gap-5">
@@ -221,28 +208,22 @@ export default async function HomePage() {
                   {
                     icon: Lock,
                     title: 'Milestone isolation by design',
-                    desc: 'Each milestone is an independent financial unit. One dispute cannot freeze another.',
-                    bg: 'bg-vektrum-blue/10',
-                    color: 'text-vektrum-blue',
+                    desc: 'Each milestone is an independent financial unit. One dispute cannot touch another.',
                   },
                   {
                     icon: CheckCircle2,
                     title: '10-condition server-side gate',
-                    desc: 'Every release passes 10 checks simultaneously. No manual override. No spreadsheet.',
-                    bg: 'bg-vektrum-blue/10',
-                    color: 'text-vektrum-blue',
+                    desc: 'Every release passes 10 checks simultaneously. No manual override.',
                   },
                   {
                     icon: GitBranch,
-                    title: 'Immutable audit trail',
-                    desc: 'Append-only, hash-chained log. Every status change is timestamped and actor-logged — no updates, no deletes.',
-                    bg: 'bg-vektrum-blue/10',
-                    color: 'text-vektrum-blue',
+                    title: 'Append-only, hash-chained audit log',
+                    desc: 'Every status change timestamped and actor-logged — no updates, no deletes.',
                   },
                 ].map((item) => (
                   <div key={item.title} className="flex items-start gap-4">
-                    <div className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl ${item.bg}`}>
-                      <item.icon size={16} className={item.color} />
+                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-vektrum-blue/10">
+                      <item.icon size={16} className="text-vektrum-blue" />
                     </div>
                     <div>
                       <p className="text-[14px] font-semibold text-white mb-1">{item.title}</p>
@@ -251,13 +232,10 @@ export default async function HomePage() {
                   </div>
                 ))}
               </div>
-
             </div>
 
             {/* Right: scenario card */}
-            <div
-              className="rounded-2xl border border-white/[0.08] bg-[#111827] p-8 shadow-scene"
-            >
+            <div className="rounded-2xl border border-white/[0.08] bg-[#111827] p-8 shadow-scene">
               <div className="flex items-start justify-between pb-5 mb-5 border-b border-white/[0.07]">
                 <div>
                   <p className="text-[16px] font-semibold text-white">Harbor Logistics Center</p>
@@ -268,11 +246,11 @@ export default async function HomePage() {
 
               <div className="space-y-2">
                 {[
-                  { name: 'Site Preparation', amount: '$320,000', status: 'Released', dot: 'bg-emerald-500', badge: 'bg-emerald-500/15 text-emerald-400', row: 'border-emerald-500/15 bg-emerald-500/5' },
-                  { name: 'Concrete Sub-grade', amount: '$15,000', status: 'Locked', dot: 'bg-red-500', badge: 'bg-red-500/15 text-red-400', row: 'border-red-500/20 bg-red-500/5' },
-                  { name: 'Structural Steel', amount: '$2,180,000', status: 'Active', dot: 'bg-vektrum-blue', badge: 'bg-vektrum-blue/15 text-vektrum-blue', row: 'border-white/[0.06] bg-white/[0.02]' },
-                  { name: 'MEP Systems', amount: '$1,640,000', status: 'Queued', dot: 'bg-white/20', badge: 'bg-white/[0.06] text-white/75', row: 'border-white/[0.06] bg-white/[0.02]' },
-                  { name: 'Finishes & Cert', amount: '$4,845,000', status: 'Queued', dot: 'bg-white/20', badge: 'bg-white/[0.06] text-white/75', row: 'border-white/[0.06] bg-white/[0.02]' },
+                  { name: 'Site Preparation',   amount: '$320,000',    status: 'Released', dot: 'bg-emerald-500', badge: 'bg-emerald-500/15 text-emerald-400', row: 'border-emerald-500/15 bg-emerald-500/5' },
+                  { name: 'Concrete Sub-grade', amount: '$15,000',     status: 'Locked',   dot: 'bg-red-500',     badge: 'bg-red-500/15 text-red-400',           row: 'border-red-500/20 bg-red-500/5'        },
+                  { name: 'Structural Steel',   amount: '$2,180,000',  status: 'Active',   dot: 'bg-vektrum-blue', badge: 'bg-vektrum-blue/15 text-vektrum-blue', row: 'border-white/[0.06] bg-white/[0.02]'  },
+                  { name: 'MEP Systems',        amount: '$1,640,000',  status: 'Queued',   dot: 'bg-white/20',    badge: 'bg-white/[0.06] text-white/75',        row: 'border-white/[0.06] bg-white/[0.02]'  },
+                  { name: 'Finishes & Cert',    amount: '$4,845,000',  status: 'Queued',   dot: 'bg-white/20',    badge: 'bg-white/[0.06] text-white/75',        row: 'border-white/[0.06] bg-white/[0.02]'  },
                 ].map((m) => (
                   <div key={m.name} className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl border ${m.row}`}>
                     <div className="flex items-center gap-2.5">
@@ -298,7 +276,8 @@ export default async function HomePage() {
                 </div>
                 <div className="mt-3 p-3.5 rounded-xl bg-emerald-500/[0.06] border border-emerald-500/15">
                   <p className="text-[13px] leading-relaxed text-white/55">
-                    <strong className="text-emerald-400">99.83% of project value unaffected.</strong> The $15K dispute resolves in its own lane. No stoppage. No negotiation over the whole job.
+                    <strong className="text-emerald-400">99.83% of project value unaffected.</strong>{' '}
+                    The $15K dispute resolves in its own lane — no stoppage, no negotiation over the whole job.
                   </p>
                 </div>
               </div>
@@ -308,337 +287,336 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ─── Proof Layer ───────────────────────────────────────────────────── */}
-      {/*
-        VISUAL CHANGES:
-        - bg-vektrum-bg → bg-[#F8F9FB] (slightly cooler, avoids pure white clash)
-        - Cards: added explicit boxShadow for depth; upgraded border to be slightly more visible
-        - List items: replaced plain `→` text marker with a styled inline dot+line, more consistent
-          with the icon-block language used in dark sections
-        - Section header h2: bumped to match the page's typographic scale (was undersized)
-        - Card inner padding tightened slightly for better content density
-      */}
-      <section className="bg-[#F8F9FB] py-20 sm:py-28 border-t border-black/[0.06]">
-        <div className="mx-auto max-w-6xl px-6 sm:px-8 lg:px-12">
-
-          {/* Section Header */}
-          <div>
-            <div className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-vektrum-blue">
-              <span className="block h-px w-8 bg-vektrum-blue" />
-              System architecture
-            </div>
-            <h2 className="mt-5 font-display text-[2.75rem] sm:text-5xl font-bold tracking-[-0.04em] text-vektrum-text leading-[1.05]">
-              Releases, enforced.
-            </h2>
+      {/* ─── 3. Shift ──────────────────────────────────────────────────────────── */}
+      <section className="bg-[#0A1628] border-t border-white/[0.06] py-16">
+        <div className="max-w-3xl mx-auto px-6 sm:px-8 text-center">
+          <div className="inline-flex items-center gap-3 mb-5">
+            <div className="h-px w-5 bg-vektrum-blue" />
+            <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">The shift</p>
+            <div className="h-px w-5 bg-vektrum-blue" />
           </div>
-
-          {/* 2 Column Grid */}
-          <div className="mt-12 grid gap-6 lg:grid-cols-2">
-
-            {/* LEFT — RELEASE GATE */}
-            <div
-              className="rounded-2xl border border-black/[0.07] bg-white p-8 shadow-lift"
-            >
-              <span className="inline-block rounded-full bg-vektrum-blue/10 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-vektrum-blue">
-                Release Gate
-              </span>
-
-              <h3 className="mt-6 font-display text-[22px] font-bold tracking-[-0.03em] text-vektrum-text leading-snug">
-                Money moves only when conditions pass.
-              </h3>
-
-              <p className="mt-3 text-[14px] leading-relaxed text-vektrum-muted">
-                Every payout is enforced server-side. If one condition fails, the release does not run.
-                Disputes stay isolated to their milestone, not the entire project.
-              </p>
-
-              <ul className="mt-7 flex flex-col gap-3.5">
-                {[
-                  'Milestone approved by funder',
-                  'AI draw review passed — no critical flags',
-                  'Milestone cleared for release (no active hold)',
-                  'Funded balance covers this disbursement',
-                  'Contractor payment account verified',
-                  'No prior release on this milestone',
-                  'No pending change orders',
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-3">
-                    <div className="mt-[5px] flex-shrink-0 flex items-center justify-center w-4 h-4 rounded-full bg-vektrum-blue/10">
-                      <div className="w-1.5 h-1.5 rounded-full bg-vektrum-blue" />
-                    </div>
-                    <span className="text-[13.5px] leading-relaxed text-vektrum-muted">
-                      {item}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* RIGHT — VEKTRUM AI */}
-            <div
-              className="rounded-2xl border border-black/[0.07] bg-white p-8 shadow-lift"
-            >
-              <span className="inline-block rounded-full bg-vektrum-blue/10 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-vektrum-blue">
-                Vektrum AI
-              </span>
-
-              <h3 className="mt-6 font-display text-[22px] font-bold tracking-[-0.03em] text-vektrum-text leading-snug">
-                AI reviews every draw before approval.
-              </h3>
-
-              <p className="mt-3 text-[14px] leading-relaxed text-vektrum-muted">
-                Vektrum AI analyzes draw submissions for missing documents, conflicts, and readiness risks
-                before the release gate runs. It surfaces a structured summary for human approval.
-              </p>
-
-              <ul className="mt-7 flex flex-col gap-3.5">
-                {[
-                  'Draw package submitted by contractor',
-                  'Missing documents automatically flagged',
-                  'Conflicting change orders detected',
-                  'Milestone readiness evaluated',
-                  'Summary surfaced to approver',
-                  'Supports decision — does not control release',
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-3">
-                    <div className="mt-[5px] flex-shrink-0 flex items-center justify-center w-4 h-4 rounded-full bg-vektrum-blue/10">
-                      <div className="w-1.5 h-1.5 rounded-full bg-vektrum-blue" />
-                    </div>
-                    <span className="text-[13.5px] leading-relaxed text-vektrum-muted">
-                      {item}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-          </div>
+          <h2 className="font-display text-[2rem] sm:text-[2.5rem] font-bold tracking-[-0.04em] text-white leading-[1.1]">
+            Not a tool. An enforcement layer.
+          </h2>
+          <p className="mt-4 text-[16px] leading-relaxed text-white/60 max-w-xl mx-auto">
+            Project management software tracks what happens. Vektrum determines what
+            can happen. Every release requires all conditions to pass, server-side,
+            before any funds move.
+          </p>
         </div>
       </section>
 
-      {/* ─── Competitive Gap Table ─────────────────────────────────────────── */}
-      <section className="bg-[#031226] py-20 sm:py-28">
-        <div className="mx-auto max-w-6xl px-6 sm:px-8 lg:px-12">
-          <div className="grid gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
-            <div>
-              <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-vektrum-blue">
-                <span className="block h-px w-4 bg-vektrum-blue" />
-                Market position
-              </div>
-
-              <h2 className="mt-4 font-display text-4xl font-bold tracking-[-0.04em] text-white sm:text-5xl lg:text-[4rem] lg:leading-[0.95]">
-                The gap nobody else fills.
-              </h2>
-
-              <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-white/70">
-                Procore is built for $50M+ jobs. Traditional lenders do everything manually.
-                The $500K–$25M segment — highest dispute rate, least protection — has no
-                automated solution. Until now.
-              </p>
-
-              <div className="mt-10 flex flex-col gap-6">
-                <div className="flex items-start gap-4">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-vektrum-blue/10 text-vektrum-blue">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <rect x="2" y="13" width="16" height="2.5" rx="1" fill="currentColor" opacity=".2" />
-                      <rect x="4" y="8" width="3" height="5" rx="0.75" fill="currentColor" opacity=".35" />
-                      <rect x="8.5" y="5" width="3" height="8" rx="0.75" fill="currentColor" opacity=".6" />
-                      <rect x="13" y="9" width="3" height="4" rx="0.75" fill="currentColor" opacity=".35" />
-                      <path d="M1 15.5h18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="text-[15px] font-semibold text-white">Procore ignores this market</div>
-                    <div className="mt-1 text-[14px] leading-relaxed text-white/65">
-                      Enterprise tooling for enterprise jobs. $500K–$25M projects don&apos;t fit
-                      the deal size or complexity threshold.
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-vektrum-blue/10 text-vektrum-blue">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <rect x="4" y="2" width="12" height="16" rx="2" stroke="currentColor" strokeWidth="1.5" fill="currentColor" fillOpacity=".08" />
-                      <path d="M7 7h6M7 10h6M7 13h4" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="text-[15px] font-semibold text-white">Traditional lenders are manual</div>
-                    <div className="mt-1 text-[14px] leading-relaxed text-white/65">
-                      Paper draw requests, manual inspection, spreadsheet tracking. No
-                      enforcement layer. No dispute isolation.
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-vektrum-blue/10 text-vektrum-blue">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M11.5 2L4 11h6.5L8.5 18 16 9h-6.5L11.5 2Z" fill="currentColor" fillOpacity=".15" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="text-[15px] font-semibold text-white">Vektrum owns this segment</div>
-                    <div className="mt-1 text-[14px] leading-relaxed text-white/65">
-                      Automated governance, Stripe-backed fund custody, milestone isolation —
-                      purpose-built for mid-market construction.
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-7 shadow-[0_8px_30px_rgba(0,0,0,0.18)]">
-                <div className="mb-5 text-[11px] font-bold uppercase tracking-[0.1em] text-white/70">
-                  Deal size coverage
-                </div>
-                <div className="mb-6 flex justify-between text-[11px] text-white/65">
-                  <span>$100K</span>
-                  <span>$1M</span>
-                  <span>$10M</span>
-                  <span>$100M+</span>
-                </div>
-                <div className="space-y-5">
-                  <div className="grid grid-cols-[100px_1fr_80px] items-center gap-3">
-                    <div className="text-[15px] font-semibold text-white/85">Procore</div>
-                    <div className="h-2 rounded-full bg-white/8">
-                      <div className="ml-auto h-2 w-[40%] rounded-full bg-white/20" />
-                    </div>
-                    <div className="text-right text-[13px] text-white/55">$50M+</div>
-                  </div>
-                  <div className="grid grid-cols-[100px_1fr_80px] items-center gap-3">
-                    <div className="text-[15px] font-semibold text-white/85">Trad. lender</div>
-                    <div className="h-2 rounded-full bg-white/8">
-                      <div className="h-2 w-full rounded-full bg-white/20" />
-                    </div>
-                    <div className="text-right text-[13px] text-white/55">Any (manual)</div>
-                  </div>
-                  <div className="grid grid-cols-[100px_1fr_80px] items-center gap-3">
-                    <div className="text-[15px] font-bold text-vektrum-blue">Vektrum</div>
-                    <div className="h-2 rounded-full bg-white/8">
-                      <div className="h-2 w-[55%] rounded-full bg-vektrum-blue" />
-                    </div>
-                    <div className="text-right text-[13px] font-semibold text-vektrum-blue">$500K–$25M</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 shadow-[0_8px_30px_rgba(0,0,0,0.18)]">
-                <div className="grid gap-5 text-center sm:grid-cols-3">
-                  <div>
-                    <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-white/70">Milestone isolation</div>
-                    <div className="text-[22px] text-white/80">✗ · ✗ · <span className="text-vektrum-blue">✓</span></div>
-                    <div className="mt-1 text-[10px] text-white/65">Procore · Trad. · Vektrum</div>
-                  </div>
-                  <div>
-                    <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-white/70">Auto release gate</div>
-                    <div className="text-[22px] text-white/80">✗ · ✗ · <span className="text-vektrum-blue">✓</span></div>
-                    <div className="mt-1 text-[10px] text-white/65">Procore · Trad. · Vektrum</div>
-                  </div>
-                  <div>
-                    <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-white/70">Contractor free</div>
-                    <div className="text-[22px] text-white/80">✗ · ✗ · <span className="text-vektrum-blue">✓</span></div>
-                    <div className="mt-1 text-[10px] text-white/65">Procore · Trad. · Vektrum</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── Core Protections ──────────────────────────────────────────────── */}
-      {/*
-        VISUAL CHANGES:
-        - bg-white → bg-[#F8F9FB] for consistency with the Proof Layer light sections
-        - Section header h2: restored to full scale (was text-2xl, now matches rest of page)
-        - Centered header subtext: increased size from text-[11px] to consistent label treatment
-        - Cards: added explicit boxShadow; border upgraded for definition on light bg
-        - Icon containers: h-10 w-10 → h-11 w-11, slightly more presence
-        - Card padding: p-8 maintained; hover shadow improved
-      */}
+      {/* ─── 4. Release Gate + AI Precondition ────────────────────────────────── */}
       <section className="bg-[#F8F9FB] py-20 sm:py-28 border-t border-black/[0.06]">
         <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
 
-          <div className="text-center mb-14">
+          <div className="mb-12">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-px w-5 bg-vektrum-blue" />
+              <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">Release gate</p>
+            </div>
+            <h2 className="font-display text-[2.75rem] sm:text-5xl font-bold tracking-[-0.04em] text-vektrum-text leading-[1.05]">
+              10 conditions. No exceptions.
+            </h2>
+            <p className="mt-4 text-[16px] leading-relaxed text-vektrum-muted max-w-xl">
+              Every milestone release is evaluated server-side against 10 independent
+              conditions simultaneously. If any condition fails, the release is blocked.
+            </p>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
+
+            {/* LEFT: the 10 conditions */}
+            <div className="rounded-2xl border border-black/[0.07] bg-white p-8 shadow-lift">
+              <div className="mb-6 flex items-center justify-between">
+                <span className="inline-block rounded-full bg-vektrum-blue/10 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-vektrum-blue">
+                  The 10-condition gate
+                </span>
+                <span className="text-[12px] text-vektrum-muted font-medium">All 10 must pass</span>
+              </div>
+
+              <ol className="space-y-2">
+                {[
+                  'Milestone approved by funder',
+                  'No active dispute on this milestone',
+                  'No active hold on this milestone',
+                  'Contractor payment account verified',
+                  'Funded balance covers this disbursement',
+                  'Sequential milestone order satisfied',
+                  'No duplicate release on this milestone',
+                  'No unresolved change orders',
+                  'Contract not voided',
+                  'Deal not frozen or under admin suspension',
+                ].map((cond, i) => (
+                  <li key={i} className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-[#F8F9FB] border border-black/[0.04]">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-vektrum-blue/10 flex items-center justify-center text-[11px] font-bold text-vektrum-blue tabular-nums">
+                      {i + 1}
+                    </span>
+                    <span className="text-[13.5px] text-vektrum-muted">{cond}</span>
+                  </li>
+                ))}
+              </ol>
+
+              <div className="mt-5 flex items-start gap-3 px-4 py-3.5 rounded-xl bg-red-50 border border-red-100">
+                <AlertCircle size={14} className="text-red-500 flex-shrink-0 mt-0.5" />
+                <p className="text-[13px] text-red-700 font-medium leading-relaxed">
+                  If any condition fails, the release is blocked until the underlying issue is resolved.
+                </p>
+              </div>
+            </div>
+
+            {/* RIGHT: AI precondition (visually subordinate) */}
+            <div className="flex flex-col gap-4">
+              <div className="rounded-2xl border border-black/[0.07] bg-white p-7 shadow-lift">
+                <span className="inline-block rounded-full bg-vektrum-blue/10 px-3.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-vektrum-blue mb-4">
+                  AI Precondition
+                </span>
+                <h3 className="font-display text-[18px] font-bold tracking-[-0.02em] text-vektrum-text leading-snug mb-3">
+                  Runs before the gate.
+                </h3>
+
+                <p className="text-[13px] leading-relaxed text-vektrum-muted mb-4">
+                  Before the 10-condition gate runs, Vektrum AI reviews the draw package:
+                  document completeness, conflict detection, milestone readiness. If the risk
+                  level is critical or the assessment is older than 48 hours, the release
+                  is blocked before the gate evaluates.
+                </p>
+
+                <div className="space-y-2 mb-4">
+                  {[
+                    'Draw package completeness',
+                    'Conflict detection',
+                    'Milestone readiness score',
+                    'Risk level evaluation',
+                  ].map((item) => (
+                    <div key={item} className="flex items-center gap-2.5">
+                      <div className="w-1.5 h-1.5 rounded-full bg-vektrum-blue/60 flex-shrink-0" />
+                      <span className="text-[12.5px] text-vektrum-muted">{item}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <p className="text-[11px] text-vektrum-muted/60 leading-relaxed mb-4">
+                  Provider fallback: Perplexity sonar-pro → Anthropic Claude → OpenAI GPT-4o
+                </p>
+
+                <div className="pt-3 border-t border-black/[0.06]">
+                  <p className="text-[12px] font-semibold text-vektrum-text text-center tracking-[0.02em]">
+                    AI informs · gate decides
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-black/[0.07] bg-white px-5 py-4 shadow-lift">
+                <p className="text-[12.5px] text-vektrum-muted leading-relaxed">
+                  <strong className="text-vektrum-text">The gate is not AI-driven.</strong>{' '}
+                  AI is an independent precondition. Once the draw clears the AI check, the
+                  10-condition gate makes the final enforcement decision.
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ─── 5. Category Difference ────────────────────────────────────────────── */}
+      <section className="bg-white py-20 sm:py-28 border-t border-black/[0.06]">
+        <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
+
+          <div className="mb-12 text-center">
             <div className="inline-flex items-center gap-3 mb-4">
               <div className="h-px w-5 bg-vektrum-blue" />
-              <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-vektrum-blue">Core protections</span>
+              <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">Category difference</p>
               <div className="h-px w-5 bg-vektrum-blue" />
             </div>
             <h2 className="font-display text-[2.75rem] sm:text-5xl font-bold tracking-[-0.04em] text-vektrum-text leading-[1.05]">
-              Every dollar governed
+              Workflow tools track.<br />Vektrum enforces.
             </h2>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-6 lg:grid-cols-2">
+
+            {/* Without enforcement */}
+            <div className="rounded-2xl border border-black/[0.07] bg-[#F8F9FB] p-8 shadow-float">
+              <div className="mb-6">
+                <span className="inline-block rounded-full bg-black/[0.06] px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-vektrum-muted">
+                  Without enforcement
+                </span>
+                <h3 className="mt-4 font-display text-[20px] font-bold tracking-[-0.03em] text-vektrum-text leading-snug">
+                  Approvals tracked. Releases manual.
+                </h3>
+              </div>
+              <ul className="space-y-3">
+                {[
+                  'Draw requests submitted via email',
+                  'Approvals tracked in spreadsheets',
+                  'Releases triggered manually — no condition check',
+                  'Dispute spreads across the entire project',
+                  'Audit trail means inbox export',
+                  'Nothing automatically blocks a bad release',
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <X size={13} className="mt-[3px] flex-shrink-0 text-red-400/70" />
+                    <span className="text-[13.5px] text-vektrum-muted">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* With Vektrum */}
+            <div className="rounded-2xl border border-vektrum-blue/20 bg-white p-8 shadow-lift">
+              <div className="mb-6">
+                <span className="inline-block rounded-full bg-vektrum-blue/10 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-vektrum-blue">
+                  With Vektrum
+                </span>
+                <h3 className="mt-4 font-display text-[20px] font-bold tracking-[-0.03em] text-vektrum-text leading-snug">
+                  Releases blocked unless conditions pass.
+                </h3>
+              </div>
+              <ul className="space-y-3">
+                {[
+                  'Draw packages submitted in-platform with documentation',
+                  'AI precondition evaluates completeness and risk first',
+                  '10 conditions verified server-side before any funds move',
+                  'Dispute isolated to its milestone — rest of project continues',
+                  'Append-only, hash-chained audit log — no edits, no deletes',
+                  'Release blocked at condition failure — automatically, always',
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <CheckCircle2 size={13} className="mt-[3px] flex-shrink-0 text-vektrum-blue" />
+                    <span className="text-[13.5px] text-vektrum-muted">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ─── 6. Prevention ──────────────────────────────────────────────────────── */}
+      <section className="bg-[#031226] py-20 sm:py-28 border-t border-white/[0.06]">
+        <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
+
+          <div className="mb-12">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-px w-5 bg-vektrum-blue" />
+              <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">Prevention</p>
+            </div>
+            <h2 className="font-display text-[2.75rem] sm:text-5xl font-bold tracking-[-0.04em] text-white leading-[1.05]">
+              The gate stops this.
+            </h2>
+            <p className="mt-4 text-[16px] leading-relaxed text-white/60 max-w-xl">
+              Seven common construction payment failures — each blocked by the release
+              gate before funds move.
+            </p>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {[
-              { icon: Shield, title: 'Milestone isolation', desc: 'Each milestone stands alone. One dispute never freezes a project.', bg: 'bg-vektrum-blue/10', color: 'text-vektrum-blue' },
-              { icon: Lock, title: '10-condition release gate', desc: 'Every release passes 10 enforced conditions before funds move.', bg: 'bg-amber-500/[0.08]', color: 'text-amber-400' },
-              { icon: GitBranch, title: 'Immutable audit trail', desc: 'Every action is logged permanently. No edits. No deletion.', bg: 'bg-emerald-500/[0.08]', color: 'text-emerald-400' },
-              { icon: Zap, title: 'AI pre-clearance', desc: 'Draws are pre-cleared before funders ever review them.', bg: 'bg-vektrum-blue/10', color: 'text-vektrum-blue' },
-            ].map((card) => (
+              {
+                title: 'Inspection report not submitted',
+                without: 'Release proceeds on assumption; disputed post-payment',
+                condition: 'Condition 3 — active hold until documentation clears',
+              },
+              {
+                title: 'Active dispute on this milestone',
+                without: 'Payment contested after the fact; project stalls',
+                condition: 'Condition 2 — milestone with dispute cannot release',
+              },
+              {
+                title: 'Funded balance insufficient',
+                without: 'Overdraw risk; funder scrambles to cover the shortfall',
+                condition: 'Condition 5 — balance must cover full disbursement amount',
+              },
+              {
+                title: 'Prior milestone unreleased',
+                without: 'Out-of-sequence payments; accounting disputes follow',
+                condition: 'Condition 6 — sequential order must be satisfied',
+              },
+              {
+                title: 'Contractor account not connected',
+                without: 'Payment fails at the bank level after funds leave escrow',
+                condition: 'Condition 4 — contractor payment account must be verified',
+              },
+              {
+                title: 'Unresolved change order',
+                without: 'Scope and payment amount in conflict; post-release disputes',
+                condition: 'Condition 8 — all change orders must be resolved first',
+              },
+              {
+                title: 'Contract voided mid-project',
+                without: 'Continued releases on a terminated agreement',
+                condition: 'Condition 9 — contract must be in active status',
+              },
+            ].map((scenario) => (
               <div
-                key={card.title}
-                className="rounded-2xl border border-black/[0.07] bg-white p-7 hover:border-vektrum-blue/30 hover:-translate-y-0.5 transition-all duration-300 shadow-float"
+                key={scenario.title}
+                className="rounded-2xl border border-white/[0.08] bg-[#111827] p-6"
               >
-                <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${card.bg} mb-5`}>
-                  <card.icon size={20} className={card.color} />
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <h3 className="text-[14px] font-semibold text-white leading-snug">{scenario.title}</h3>
+                  <span className="flex-shrink-0 text-[9px] font-bold uppercase tracking-[0.1em] px-2 py-0.5 rounded bg-red-500/15 text-red-400 border border-red-500/20">
+                    Blocked
+                  </span>
                 </div>
-                <h3 className="text-[15px] font-semibold text-vektrum-text tracking-[-0.01em] mb-2.5">{card.title}</h3>
-                <p className="text-[13px] leading-relaxed text-vektrum-muted">{card.desc}</p>
+                <p className="text-[12px] text-white/55 leading-relaxed mb-3">
+                  <span className="text-white/35 font-medium">Without enforcement: </span>
+                  {scenario.without}
+                </p>
+                <div className="flex items-start gap-2 pt-3 border-t border-white/[0.06]">
+                  <Shield size={11} className="text-vektrum-blue mt-0.5 flex-shrink-0" />
+                  <p className="text-[11px] text-vektrum-blue/80 leading-relaxed">{scenario.condition}</p>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ─── Every party, protected ────────────────────────────────────────── */}
-      {/*
-        VISUAL CHANGES:
-        - bg-vektrum-bg stays (correct alternation)
-        - Cards: added boxShadow for elevation off the bg-vektrum-bg surface
-        - Border: slightly more visible border-black/[0.07]
-        - List gap: gap-3 → gap-3.5 for better breathing room
-        - Section header h2: already correct scale, no change
-      */}
-      <section className="bg-white py-20 sm:py-28 border-t border-black/[0.06]">
+      {/* ─── 7. Role Clarity ────────────────────────────────────────────────────── */}
+      <section className="bg-[#F8F9FB] py-20 sm:py-28 border-t border-black/[0.06]">
         <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="mb-14">
+
+          <div className="mb-12">
             <div className="flex items-center gap-3 mb-4">
               <div className="h-px w-5 bg-vektrum-blue" />
-              <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">Who it&apos;s built for</p>
+              <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">Role clarity</p>
             </div>
             <h2 className="font-display text-[2.75rem] sm:text-5xl font-bold tracking-[-0.04em] text-vektrum-text leading-[1.05]">
               Every party, protected.
             </h2>
+            <p className="mt-4 text-[16px] leading-relaxed text-vektrum-muted max-w-xl">
+              Vektrum is built for three roles. Each has clearly defined permissions —
+              and hard limits enforced at the gate layer.
+            </p>
           </div>
 
           <div className="grid gap-5 md:grid-cols-3">
+
             {/* Funders */}
-            <div
-              className="rounded-2xl border border-black/[0.07] bg-[#F8F9FB] p-8 flex flex-col shadow-float"
-            >
+            <div className="rounded-2xl border border-black/[0.07] bg-white p-8 flex flex-col shadow-float">
               <span className="inline-block text-[10px] font-bold uppercase tracking-[0.1em] px-3 py-1 rounded-full bg-vektrum-blue/10 text-vektrum-blue mb-6 self-start">
                 Funders
               </span>
-              <h3 className="font-display text-[22px] font-bold tracking-[-0.03em] text-vektrum-text leading-snug mb-3">
+              <h3 className="font-display text-[21px] font-bold tracking-[-0.03em] text-vektrum-text leading-snug mb-3">
                 Release only what&apos;s earned.
               </h3>
               <p className="text-[14px] leading-relaxed text-vektrum-muted mb-6">
-                Full control over every disbursement. No surprises. No manual chasing.
+                Full control over every disbursement. Fund via Stripe Connect — funds
+                held in Stripe-managed accounts, not by Vektrum.
               </p>
-              <ul className="flex flex-col gap-3.5 mt-auto">
+              <ul className="flex flex-col gap-3 mt-auto">
                 {[
-                  'Approve each milestone before a dollar moves',
+                  'Approve each milestone before funds move',
+                  'Only the funder can trigger a release',
                   'Full audit trail for every disbursement',
-                  'Change orders tracked and gated',
-                  '10-condition server-side release enforcement',
+                  '10-condition gate enforced on every release',
+                  'Institutional portfolios: external rail available',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
-                    <ArrowRight size={13} className="mt-0.5 flex-shrink-0 text-vektrum-blue" />
+                    <ArrowRight size={12} className="mt-0.5 flex-shrink-0 text-vektrum-blue" />
                     <span className="text-[13px] leading-relaxed text-vektrum-muted">{item}</span>
                   </li>
                 ))}
@@ -646,106 +624,129 @@ export default async function HomePage() {
             </div>
 
             {/* Contractors */}
-            <div
-              className="rounded-2xl border border-black/[0.07] bg-[#F8F9FB] p-8 flex flex-col shadow-float"
-            >
+            <div className="rounded-2xl border border-black/[0.07] bg-white p-8 flex flex-col shadow-float">
               <span className="inline-block text-[10px] font-bold uppercase tracking-[0.1em] px-3 py-1 rounded-full bg-vektrum-blue/10 text-vektrum-blue mb-6 self-start">
                 Contractors
               </span>
-              <h3 className="font-display text-[22px] font-bold tracking-[-0.03em] text-vektrum-text leading-snug mb-3">
+              <h3 className="font-display text-[21px] font-bold tracking-[-0.03em] text-vektrum-text leading-snug mb-3">
                 Get paid when you deliver.
               </h3>
               <p className="text-[14px] leading-relaxed text-vektrum-muted mb-6">
-                Milestone-based payouts. No net-90 terms. Immutable proof of approval.
+                Milestone-based payouts. Immutable proof of approval. Disputes affect
+                only the disputed milestone — not the whole job.
               </p>
-              <ul className="flex flex-col gap-3.5 mt-auto">
+              <ul className="flex flex-col gap-3 mt-auto">
                 {[
-                  'Milestone payouts — no 90-day net terms',
-                  'Immutable proof that work was approved',
-                  'Disputes isolate one milestone, not the job',
-                  'Direct deposit via Stripe Connect. Always free to join.',
+                  'Receive full gross milestone amount — no fee deducted',
+                  'Always free to join and participate',
+                  'Disputes isolate one milestone, not the project',
+                  'Immutable record that work was approved',
+                  'Submit draw packages with documentation in-platform',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
-                    <ArrowRight size={13} className="mt-0.5 flex-shrink-0 text-vektrum-blue" />
+                    <ArrowRight size={12} className="mt-0.5 flex-shrink-0 text-vektrum-blue" />
                     <span className="text-[13px] leading-relaxed text-vektrum-muted">{item}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
-            {/* Capital Partners */}
-            <div
-              className="rounded-2xl border border-black/[0.07] bg-[#F8F9FB] p-8 flex flex-col shadow-float"
-            >
+            {/* Admins */}
+            <div className="rounded-2xl border border-black/[0.07] bg-white p-8 flex flex-col shadow-float">
               <span className="inline-block text-[10px] font-bold uppercase tracking-[0.1em] px-3 py-1 rounded-full bg-vektrum-blue/10 text-vektrum-blue mb-6 self-start">
-                Capital Partners
+                Platform Admin
               </span>
-              <h3 className="font-display text-[22px] font-bold tracking-[-0.03em] text-vektrum-text leading-snug mb-3">
-                Your draw process, systematized.
+              <h3 className="font-display text-[21px] font-bold tracking-[-0.03em] text-vektrum-text leading-snug mb-3">
+                Oversight with hard limits.
               </h3>
               <p className="text-[14px] leading-relaxed text-vektrum-muted mb-6">
-                Portfolio-level visibility for banks and credit funds. No paper. No spreadsheets.
+                Ops monitoring, dispute management, and audit review — with every
+                privileged action requiring AAL2 MFA and written justification.
               </p>
-              <ul className="flex flex-col gap-3.5 mt-auto">
+              <ul className="flex flex-col gap-3 mt-auto">
                 {[
-                  'Milestone approvals without touching paper',
-                  'Release gates run server-side, not in Excel',
-                  'Audit trails for compliance and due diligence',
-                  'Portfolio risk scores and readiness dashboards',
+                  'Monitor platform health via ops dashboard',
+                  'Manage disputes and release-health alerts',
+                  'Review admin audit log — peer attestation required',
+                  'Cannot trigger milestone releases — gate enforces this',
+                  'All privileged actions dual-logged with justification',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
-                    <ArrowRight size={13} className="mt-0.5 flex-shrink-0 text-vektrum-blue" />
+                    <ArrowRight size={12} className="mt-0.5 flex-shrink-0 text-vektrum-blue" />
                     <span className="text-[13px] leading-relaxed text-vektrum-muted">{item}</span>
                   </li>
                 ))}
               </ul>
             </div>
+
           </div>
         </div>
       </section>
 
-      {/* ─── Four steps. Zero ambiguity. ───────────────────────────────────── */}
-      {/*
-        VISUAL CHANGES:
-        - bg-white → bg-[#F8F9FB] (consistent light section treatment)
-        - Step number: text-white/65 → text-white/[0.07] — same effect but
-          explicit so it renders correctly regardless of token value
-        - Step cards: added individual boxShadow so they read as surfaces, not flat tiles
-        - Grid container: removed bg-vektrum-border fill; now each card has its own border
-          and shadow — more premium, less "table"
-        - Border-radius on outer grid: tightened
-      */}
-      <section className="bg-[#F8F9FB] py-20 sm:py-28 border-t border-black/[0.06]">
+      {/* ─── 8. How Capital Moves ─────────────────────────────────────────────── */}
+      <section className="bg-white py-20 sm:py-28 border-t border-black/[0.06]">
         <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
+
           <div className="mb-14">
             <div className="flex items-center gap-3 mb-4">
               <div className="h-px w-5 bg-vektrum-blue" />
               <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">The process</p>
             </div>
             <h2 className="font-display text-[2.75rem] sm:text-5xl font-bold tracking-[-0.04em] text-vektrum-text leading-[1.05]">
-              Four steps. Zero ambiguity.
+              How capital moves.
             </h2>
             <p className="mt-4 text-[16px] leading-relaxed text-vektrum-muted max-w-lg">
-              From deal creation to final disbursement, every action is gated, logged, and enforced.
+              From deal creation to final disbursement, every action is gated, logged,
+              and enforced.
             </p>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { step: '01', title: 'Create the deal', desc: 'Contractor creates a deal with defined milestones, amounts, and conditions. Contract value is set upfront — no ambiguity.', icon: FileText, bg: 'bg-vektrum-blue/10', color: 'text-vektrum-blue' },
-              { step: '02', title: 'Fund via Stripe', desc: 'Funder deposits via Stripe Connect or Licensed Escrow/Lender. Funds are held in managed accounts — Vektrum governs release but never touches the money.', icon: Shield, bg: 'bg-vektrum-blue/10', color: 'text-vektrum-blue' },
-              { step: '03', title: 'Complete & approve', desc: 'Contractor marks work done. AI pre-clears documents. Funder reviews and approves each milestone independently — no bundling.', icon: CheckCircle2, bg: 'bg-emerald-500/[0.08]', color: 'text-emerald-400' },
-              { step: '04', title: 'Release payment', desc: 'All 10 conditions verified server-side. Immutably logged. No exceptions.', icon: Zap, bg: 'bg-emerald-500/[0.08]', color: 'text-emerald-400' },
+              {
+                step: '01',
+                icon: FileText,
+                title: 'Deal created',
+                desc: 'Contractor defines milestones, amounts, and conditions. Contract value is fixed upfront — no ambiguity on scope or payment.',
+                bg: 'bg-vektrum-blue/10',
+                color: 'text-vektrum-blue',
+              },
+              {
+                step: '02',
+                icon: Shield,
+                title: 'Funder deposits',
+                desc: 'Funder deposits via Stripe Connect. Funds held in Stripe-managed accounts. Vektrum governs disbursement but never holds funds.',
+                bg: 'bg-vektrum-blue/10',
+                color: 'text-vektrum-blue',
+              },
+              {
+                step: '03',
+                icon: CheckCircle2,
+                title: 'Work submitted',
+                desc: 'Contractor marks milestone complete and submits draw package. AI precondition runs. Funder reviews and approves independently.',
+                bg: 'bg-emerald-500/[0.08]',
+                color: 'text-emerald-400',
+              },
+              {
+                step: '04',
+                icon: Zap,
+                title: 'Gate evaluates',
+                desc: 'All 10 conditions verified server-side. If any fail, release is blocked with explanation. If all pass, funds move — immutably logged.',
+                bg: 'bg-emerald-500/[0.08]',
+                color: 'text-emerald-400',
+              },
             ].map((item) => (
               <div
                 key={item.step}
-                className="rounded-2xl border border-black/[0.07] bg-white p-7 relative shadow-float"
+                className="rounded-2xl border border-black/[0.07] bg-[#F8F9FB] p-7 relative shadow-float"
               >
                 <div className="flex items-start justify-between mb-6">
                   <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${item.bg}`}>
                     <item.icon size={20} className={item.color} />
                   </div>
-                  <span className="font-display text-[3rem] font-bold text-white/[0.07] leading-none tracking-[-0.05em] select-none">{item.step}</span>
+                  <span className="font-display text-[3rem] font-bold text-black/[0.05] leading-none tracking-[-0.05em] select-none">
+                    {item.step}
+                  </span>
                 </div>
                 <h3 className="text-[15px] font-semibold text-vektrum-text tracking-[-0.01em] mb-2.5">{item.title}</h3>
                 <p className="text-[13px] leading-relaxed text-vektrum-muted">{item.desc}</p>
@@ -755,55 +756,180 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ─── Demo CTA ──────────────────────────────────────────────────────── */}
-      {/*
-        VISUAL CHANGES (most significant fix on this section):
-        - bg-vektrum-canvas → bg-[#031226] — brings into the established dark navy palette
-          and removes the jarring mid-page color inconsistency
-        - Section padding: py-16 sm:py-20 → py-20 sm:py-28 — matches all other major sections
-        - Added the vektrum-blue accent line + eyebrow label treatment from the rest of the page
-        - h2: bumped to match typographic scale (text-[2.75rem])
-        - Body text: adjusted opacity to match the white/60 treatment in other dark sections
-        - Button: changed from bg-white/text-dark to the established vektrum-blue primary CTA
-          pattern — consistent with hero and final CTA
-        - Added subtle radial gradient glow behind the button to give section visual weight
-      */}
-      <section className="relative overflow-hidden bg-[#031226] py-20 sm:py-28 border-t border-white/[0.06]">
+      {/* ─── 9. Trust / Audit / Ops ───────────────────────────────────────────── */}
+      <section className="bg-[#031226] py-20 sm:py-28 border-t border-white/[0.06]">
+        <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
+
+          <div className="mb-12">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-px w-5 bg-vektrum-blue" />
+              <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">Trust infrastructure</p>
+            </div>
+            <h2 className="font-display text-[2.75rem] sm:text-5xl font-bold tracking-[-0.04em] text-white leading-[1.05]">
+              Built to be audited.
+            </h2>
+            <p className="mt-4 text-[16px] leading-relaxed text-white/60 max-w-xl">
+              Every layer of Vektrum is designed for institutional scrutiny — append-only
+              records, peer-reviewed admin actions, scheduled reconciliation.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              {
+                icon: GitBranch,
+                title: 'Append-only, hash-chained audit log',
+                desc: 'Every approval, release, and status change is recorded permanently. No UPDATE path. No DELETE path. Every entry chained to the previous.',
+              },
+              {
+                icon: Shield,
+                title: 'Admin peer review attestation',
+                desc: 'All admin privileged actions are dual-logged. Peer review is enforced at the database layer — reviewer cannot be the actor.',
+              },
+              {
+                icon: Lock,
+                title: 'Dispute isolation architecture',
+                desc: 'A disputed milestone is locked at the milestone level. The deal continues. Other milestones flow on schedule — by design, not configuration.',
+              },
+              {
+                icon: Zap,
+                title: 'Scheduled reconciliation engine',
+                desc: 'Multi-pass reconciliation runs on a schedule: Stripe transfer consistency, billing record completeness, deal ledger arithmetic, external-rail hygiene.',
+              },
+              {
+                icon: FileText,
+                title: 'Vektrum governs. Stripe holds.',
+                desc: 'Funds held in Stripe Connect managed accounts — not by Vektrum. Vektrum governs disbursement. Vektrum never holds, collects, forwards, or transmits funds.',
+              },
+              {
+                icon: AlertCircle,
+                title: 'Gate supremacy — no bypass path',
+                desc: 'No admin can override the release gate. No API endpoint bypasses the 10-condition check. The gate is the only path to fund movement.',
+              },
+            ].map((card) => (
+              <div
+                key={card.title}
+                className="rounded-2xl border border-white/[0.08] bg-[#111827] p-7"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-vektrum-blue/10 mb-5">
+                  <card.icon size={18} className="text-vektrum-blue" />
+                </div>
+                <h3 className="text-[14px] font-semibold text-white leading-snug mb-2.5">{card.title}</h3>
+                <p className="text-[13px] leading-relaxed text-white/55">{card.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Legal boundary strip */}
+          <div className="mt-10 rounded-2xl border border-white/[0.06] bg-white/[0.02] px-6 py-5">
+            <div className="grid gap-4 sm:grid-cols-3 text-center sm:text-left sm:divide-x sm:divide-white/[0.06]">
+              <div className="sm:pr-6">
+                <p className="text-[12px] text-white/85 leading-relaxed font-medium">
+                  Funds held in Stripe Connect managed accounts — not by Vektrum.
+                </p>
+              </div>
+              <div className="sm:px-6">
+                <p className="text-[12px] text-white/85 leading-relaxed font-medium">
+                  Vektrum governs disbursement. Vektrum never holds, collects, forwards, or transmits funds.
+                </p>
+              </div>
+              <div className="sm:pl-6">
+                <p className="text-[12px] text-white/85 leading-relaxed font-medium">
+                  Vektrum is not a bank, payment processor, or money transmitter.
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ─── 10. Demo CTA ────────────────────────────────────────────────────────── */}
+      <section className="relative overflow-hidden bg-[#0D1B2A] py-20 sm:py-28 border-t border-white/[0.06]">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-gradient-to-b from-vektrum-blue/10 to-transparent rounded-full blur-3xl pointer-events-none" />
-        <div className="relative max-w-3xl mx-auto px-6 text-center">
+        <div className="relative max-w-4xl mx-auto px-6 sm:px-8 text-center">
           <div className="mb-6 inline-flex items-center gap-3">
             <div className="h-px w-5 bg-vektrum-blue" />
-            <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">Live demo</p>
+            <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">Interactive demo</p>
             <div className="h-px w-5 bg-vektrum-blue" />
           </div>
           <h2 className="font-display text-[2.75rem] sm:text-5xl font-bold tracking-[-0.04em] text-white leading-[1.05]">
-            See Vektrum in Action
+            See exactly what blocks a release in real time.
           </h2>
           <p className="mt-5 text-[16px] leading-relaxed text-white/55 max-w-md mx-auto">
-            Watch a live walkthrough of milestone-gated payments, AI draw review, and dispute resolution.
+            Explore a fully simulated deal with real enforcement logic. Choose your role —
+            all data is simulated.
           </p>
-          <div className="mt-8">
-            <Link
-              href="/demo-live"
-              className="group inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-8 py-3.5 text-[15px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 transition-all hover:bg-vektrum-blue-hover hover:shadow-xl hover:shadow-vektrum-blue/40 hover:-translate-y-0.5"
-            >
-              View Interactive Demo
-              <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
-            </Link>
+
+          <div className="mt-10 grid gap-4 sm:grid-cols-3 max-w-xl mx-auto">
+            {[
+              { role: 'Funder', href: '/demo-live?role=funder', desc: 'Approve draws, trigger releases, watch the gate evaluate' },
+              { role: 'Contractor', href: '/demo-live?role=contractor', desc: 'Submit draw packages, track milestone status' },
+              { role: 'Admin', href: '/demo-live?role=admin', desc: 'Ops dashboard, audit log, dispute management' },
+            ].map((r) => (
+              <Link
+                key={r.role}
+                href={r.href}
+                className="group rounded-xl border border-white/[0.08] bg-white/[0.04] px-5 py-5 text-left hover:bg-white/[0.08] hover:border-vektrum-blue/30 transition-all"
+              >
+                <p className="text-[13px] font-semibold text-white mb-1.5 group-hover:text-vektrum-blue transition-colors">
+                  {r.role} view
+                  <ArrowRight size={12} className="inline-block ml-1.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </p>
+                <p className="text-[12px] text-white/50 leading-relaxed">{r.desc}</p>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ─── Final CTA ─────────────────────────────────────────────────────── */}
-      <section className="bg-[#0D1B2A] py-16 sm:py-20">
-        <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
-          <h2 className="font-display text-2xl font-bold tracking-[-0.025em] text-white sm:text-3xl lg:text-[2.5rem] lg:leading-[1.1] text-balance">
-            1% per release. No monthly fee.
-          </h2>
-          <p className="mt-4 mx-auto max-w-md text-[15px] text-white/65">
-            Contractors are always free. Funders pay 1% after each verified disbursement — never before.
-          </p>
-          <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
+      {/* ─── 11. Pricing / Final CTA ─────────────────────────────────────────────── */}
+      <section className="bg-[#031226] py-16 sm:py-20 border-t border-white/[0.06]">
+        <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
+
+          <div className="text-center mb-10">
+            <h2 className="font-display text-[2rem] sm:text-[2.5rem] font-bold tracking-[-0.03em] text-white leading-[1.1]">
+              1% per release. $50 minimum.
+            </h2>
+            <p className="mt-3 text-[15px] text-white/55">
+              Contractors are always free. Funders pay after each verified disbursement — never before.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-3 mb-10">
+            {[
+              {
+                tier: 'Standalone',
+                rate: '1.00%',
+                detail: 'No annual retainer required',
+                note: 'Self-service, full platform access',
+              },
+              {
+                tier: 'Institutional',
+                rate: '0.70%',
+                detail: 'Annual retainer applies',
+                note: 'Dedicated onboarding, portfolio dashboard',
+              },
+              {
+                tier: 'Enterprise',
+                rate: '0.65%',
+                detail: 'Negotiated annually',
+                note: 'Custom terms, treasury rail integration',
+              },
+            ].map((t) => (
+              <div
+                key={t.tier}
+                className="rounded-2xl border border-white/[0.08] bg-white/[0.03] px-6 py-6 text-center"
+              >
+                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/55 mb-2">{t.tier}</p>
+                <p className="font-display text-[2rem] font-bold text-white tracking-[-0.03em] leading-none mb-1">{t.rate}</p>
+                <p className="text-[12px] text-vektrum-blue font-medium mb-1">{t.detail}</p>
+                <p className="text-[11px] text-white/40">{t.note}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
             <Link
               href="/auth/signup"
               className="group inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-7 py-3 text-[14px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 hover:bg-vektrum-blue-hover transition-all"
@@ -815,9 +941,10 @@ export default async function HomePage() {
               href="/pricing"
               className="inline-flex min-h-[48px] items-center justify-center rounded-xl border border-white/15 bg-white/5 px-7 py-3 text-[14px] font-semibold text-white/70 hover:bg-white/10 transition-all"
             >
-              View pricing
+              View full pricing
             </Link>
           </div>
+
         </div>
       </section>
 

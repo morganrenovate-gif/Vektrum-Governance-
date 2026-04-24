@@ -41,8 +41,8 @@ export default function ContractorsPage() {
             Get paid when you deliver.
           </h1>
           <p className="mt-4 mx-auto max-w-2xl text-[17px] leading-relaxed text-white/70">
-            No more 90-day net terms. No more chasing invoices. Vektrum releases
-            milestone payments directly to your bank the moment work is approved.
+            No more 90-day net terms. No more chasing invoices. Once the funder
+            approves and all release conditions pass, funds deposit directly to your account.
           </p>
 
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
@@ -84,7 +84,7 @@ export default function ContractorsPage() {
               {
                 icon: Clock,
                 title: 'No more waiting',
-                desc: 'When work is verified and the funder approves, funds transfer immediately. No 90-day hold.',
+                desc: 'When work is verified, the funder approves, and the release gate clears, your payment is initiated. No 90-day hold.',
               },
             ].map((item) => (
               <div

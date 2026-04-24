@@ -77,7 +77,7 @@ export default function CareersPage() {
               },
               {
                 title: 'Technical depth',
-                desc: 'Server-enforced release gates, AI draw review, immutable audit trails. Hard problems with real consequences.',
+                desc: 'Server-enforced release gates, AI-assisted draw review preconditions, immutable audit trails. Hard problems with real consequences.',
               },
             ].map((item) => (
               <div

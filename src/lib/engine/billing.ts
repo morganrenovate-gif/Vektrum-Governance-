@@ -15,12 +15,12 @@
  * Minimum platform fee per milestone release, in USD.
  *
  * Applied as a floor so that small milestones still cover operational overhead.
- * The DB constraint billing_records_fee_accurate uses GREATEST(..., 2.50) to
+ * The DB constraint billing_records_fee_accurate uses GREATEST(..., 50.00) to
  * accept records where the calculated rate-based fee would fall below this floor.
  *
- * $2.50 was chosen as a break-even threshold for Stripe transfer fees + overhead.
+ * $50 is the public minimum per release as stated on the Pricing page.
  */
-export const MINIMUM_FEE = 2.50
+export const MINIMUM_FEE = 50
 
 export const BILLING_RATES = {
   /** 1.00% — Standalone tier (self-service, no retainer) */
@@ -107,11 +107,11 @@ export interface FeeBreakdown {
  * Fee is rounded to two decimal places (banker's rounding is not used —
  * standard Math.round is fine for USD amounts at this precision).
  *
- * The MINIMUM_FEE floor ($2.50) is applied after rounding, so the returned
- * feeAmount is always ≥ $2.50 regardless of milestone size.
+ * The MINIMUM_FEE floor ($50) is applied after rounding, so the returned
+ * feeAmount is always ≥ $50 regardless of milestone size.
  *
  * The DB constraint billing_records_fee_accurate enforces that the stored
- * fee_amount is within ±$0.01 of GREATEST(calculated, 2.50), providing a
+ * fee_amount is within ±$0.01 of GREATEST(calculated, 50.00), providing a
  * second layer of validation.
  *
  * @param grossAmount    - The milestone amount (must be > 0).
@@ -127,7 +127,7 @@ export function calculateFee(grossAmount: number, billingRateBps: number): FeeBr
 
   // Round to 2 decimal places — matches ROUND(..., 2) in the DB constraint.
   // Apply the MINIMUM_FEE floor so small milestones still cover operational overhead.
-  // The DB constraint billing_records_fee_accurate uses GREATEST(..., 2.50) to match.
+  // The DB constraint billing_records_fee_accurate uses GREATEST(..., 50.00) to match.
   const calculated = Math.round(grossAmount * billingRateBps / 10000 * 100) / 100
   const feeAmount  = Math.max(calculated, MINIMUM_FEE)
   const netAmount  = grossAmount          // contractor always receives full gross

@@ -6,7 +6,7 @@ const roles = [
     role: 'Funder',
     name: 'Sarah Chen',
     company: 'Meridian Capital Partners',
-    description: 'See portfolio overview, capital deployed, deal action queue, and AI draw review approvals.',
+    description: 'See portfolio overview, capital deployed, deal action queue, and draw request reviews.',
     href: '/demo-live/funder',
     icon: Landmark,
     badge: 'bg-vektrum-blue/10 text-vektrum-blue border-vektrum-blue/20',

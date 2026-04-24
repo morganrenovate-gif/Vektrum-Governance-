@@ -49,7 +49,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-lg font-semibold text-white">4. Contractor Terms</h2>
             <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-white/55">
-              <p>Contractors must connect a Stripe account via Stripe Connect before creating deals or receiving payments. Contractors are responsible for:</p>
+              <p>For deals using Stripe Connect payment rails, contractors must connect a Stripe account via Stripe Connect before receiving payments. Contractors are responsible for:</p>
               <ul className="space-y-2 list-disc pl-5">
                 <li>Providing accurate project descriptions, milestone definitions, and amounts.</li>
                 <li>Submitting truthful documentation for milestone completion and draw requests.</li>

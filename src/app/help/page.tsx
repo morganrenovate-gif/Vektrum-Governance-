@@ -32,7 +32,7 @@ const FAQ: FaqItem[] = [
   },
   {
     q: 'What is the 10-condition release gate?',
-    a: 'Before any milestone payment releases, 10 server-side conditions must all be true simultaneously: (1) milestone approved, (2) protection status ready_for_release, (3) sufficient funded balance including platform fee, (4) contractor Stripe payouts enabled, (5) contractor onboarding complete, (6) no duplicate release, (7) no open change orders, (8) a fully-signed contract on file, (9) sequential-release ordering and explicit prerequisites satisfied (where required), and (10) an approved conditional lien waiver on file (where required). A separate AI-assisted draw review precondition runs before the gate.',
+    a: 'Before any milestone payment releases, 10 server-side conditions must all be true simultaneously: (1) milestone approved by the funder, (2) milestone cleared and eligible for release, (3) sufficient funded balance including the platform fee, (4) contractor payment account verified and active, (5) contractor onboarding complete, (6) no duplicate release on this milestone, (7) no pending change orders, (8) a fully-signed contract on file, (9) sequential-release ordering and explicit prerequisites satisfied (where required), and (10) an approved conditional lien waiver on file (where required). A separate AI-assisted draw review precondition runs independently before the gate.',
   },
   {
     q: 'How does dispute isolation work?',

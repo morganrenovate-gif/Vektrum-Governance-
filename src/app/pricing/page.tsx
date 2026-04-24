@@ -219,8 +219,8 @@ export default function PricingPage() {
           {/* What it actually is */}
           <p className="mt-6 mx-auto max-w-xl text-[16px] leading-relaxed text-white/65">
             Vektrum charges a governance fee only when a milestone transfer
-            completes — 10 conditions verified simultaneously, transfer
-            confirmed to contractor's Stripe account. We earn when funds move.
+            completes — 10 conditions verified simultaneously, release
+            authorized and funds disbursed to the contractor. We earn when funds move.
           </p>
 
           {/* The anchor sentence */}
