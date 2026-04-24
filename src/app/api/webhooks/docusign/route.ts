@@ -17,36 +17,53 @@ export const dynamic = 'force-dynamic'
 //   recipient-completed — one signer has signed; updates the appropriate
 //                         *_signed_at timestamp and advances contract status.
 //   envelope-completed  — all signers have signed; downloads the final
-//                         composite PDF, stores it, and marks status = 'signed'.
+//                         composite PDF, stores it, marks status = 'signed'.
+//   envelope-voided     — envelope voided in DocuSign (admin or system action);
+//                         marks contract voided; if milestone releases have
+//                         already occurred on the deal, freezes the deal and
+//                         logs contract_voided_with_releases.
+//   envelope-declined   — at least one signer explicitly declined; marks
+//                         contract voided with reason 'declined'; same freeze
+//                         check as voided; logs contract_declined.
 //
-// Security: HMAC-SHA256 signature verified against DOCUSIGN_WEBHOOK_SECRET.
+// Security: HMAC-SHA256 signature verified against DOCUSIGN_WEBHOOK_SECRET
+//           before any payload is processed.
 //
 // DocuSign Connect setup:
 //   Admin Console → Connect → Add Configuration
 //   URL:             {APP_URL}/api/webhooks/docusign
-//   Trigger events:  envelope-sent, envelope-completed, recipient-completed
+//   Trigger events:  envelope-sent, envelope-completed, recipient-completed,
+//                    envelope-voided, envelope-declined
 //   HMAC key:        set to DOCUSIGN_WEBHOOK_SECRET value
 //   Include data:    Recipients, Documents (for envelope-completed)
 //   Format:          JSON
+//
+// Error response strategy:
+//   HMAC/parse failures: 401/400 — DocuSign should NOT retry these.
+//   Processing failures: 200 — prevents spurious DocuSign retries on
+//   transient DB or Stripe errors; errors are console.error'd for alerting.
+//   Idempotency: each handler checks current state before mutating.
 
 export async function POST(request: NextRequest) {
   // ── Read raw body for HMAC verification ─────────────────────────────────────
-  // We must read the raw bytes before any parsing — HMAC is over the exact payload.
+  // Must read the raw bytes before any parsing — HMAC is over the exact bytes.
   const rawBody = Buffer.from(await request.arrayBuffer())
 
   // ── Verify webhook signature ─────────────────────────────────────────────────
   const webhookSecret = process.env.DOCUSIGN_WEBHOOK_SECRET
   if (!webhookSecret) {
-    // If secret is not configured, accept the webhook in development mode only
     if (process.env.NODE_ENV === 'production') {
+      console.error('[docusign-webhook] DOCUSIGN_WEBHOOK_SECRET is not set in production')
       return NextResponse.json(
         { error: 'Webhook secret not configured.' },
         { status: 500 },
       )
     }
+    // Development: accept without signature (log a warning)
+    console.warn('[docusign-webhook] DOCUSIGN_WEBHOOK_SECRET not set — skipping HMAC check (dev mode only)')
   } else {
-    // DocuSign sends up to 5 HMAC signatures (X-DocuSign-Signature-1 through -5)
-    // Verify against the first one.
+    // DocuSign sends up to 5 HMAC signatures (X-DocuSign-Signature-1 through -5).
+    // We verify against the first one.
     const signature = request.headers.get('x-docusign-signature-1')
     if (!signature) {
       return NextResponse.json(
@@ -77,6 +94,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Missing envelopeId in payload.' }, { status: 400 })
   }
 
+  const eventType = event.event
+  const summary   = event.data?.envelopeSummary
+
   const admin = createSupabaseAdminClient()
 
   // ── Look up contract by envelope ID ──────────────────────────────────────────
@@ -88,7 +108,8 @@ export async function POST(request: NextRequest) {
 
   if (contractError) {
     console.error('[docusign-webhook] DB lookup error:', contractError.message)
-    return NextResponse.json({ error: 'DB error.' }, { status: 500 })
+    // Return 200 to prevent retries — this is an internal error, not a DocuSign problem
+    return NextResponse.json({ received: true }, { status: 200 })
   }
 
   if (!contract) {
@@ -97,18 +118,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true }, { status: 200 })
   }
 
-  // Already fully signed — nothing to update
-  if (contract.status === 'signed') {
-    return NextResponse.json({ received: true }, { status: 200 })
-  }
-
   // ── Handle events ─────────────────────────────────────────────────────────────
-
-  const eventType = event.event   // "recipient-completed" | "envelope-completed"
-  const summary   = event.data?.envelopeSummary
 
   // ── recipient-completed ───────────────────────────────────────────────────────
   if (eventType === 'recipient-completed') {
+    // If the contract is already fully signed, nothing to update for individual
+    // recipient events. (Voided/declined events are processed even on signed contracts.)
+    if (contract.status === 'signed') {
+      return NextResponse.json({ received: true }, { status: 200 })
+    }
+
     const signer = summary?.recipients?.signers?.find(s => s.status === 'completed')
     if (!signer) {
       return NextResponse.json({ received: true }, { status: 200 })
@@ -121,22 +140,21 @@ export async function POST(request: NextRequest) {
     // Identify signer role by routingOrder:
     //   routingOrder "1" = funder
     //   routingOrder "2" = contractor
-    const routingOrder = Number(signer.routingOrder)
-    const isFunderSigner     = routingOrder === 1
-    const isContractorSigner = routingOrder === 2
+    const routingOrder        = Number(signer.routingOrder)
+    const isFunderSigner      = routingOrder === 1
+    const isContractorSigner  = routingOrder === 2
 
-    let updates: Record<string, unknown> = {}
+    const updates: Record<string, unknown> = {}
     let newStatus = contract.status
 
     if (isFunderSigner && !contract.funder_signed_at) {
       updates.funder_signed_at = signedAt
-      // If contractor already signed (shouldn't happen given routing order, but guard it)
       newStatus = contract.contractor_signed_at ? 'signed' : 'funder_signed'
     } else if (isContractorSigner && !contract.contractor_signed_at) {
       updates.contractor_signed_at = signedAt
       newStatus = contract.funder_signed_at ? 'signed' : 'contractor_signed'
     } else {
-      // Already recorded
+      // Already recorded — idempotent no-op
       return NextResponse.json({ received: true }, { status: 200 })
     }
 
@@ -148,8 +166,8 @@ export async function POST(request: NextRequest) {
       .eq('id', contract.id)
 
     if (updateError) {
-      console.error('[docusign-webhook] Failed to update contract:', updateError.message)
-      return NextResponse.json({ error: 'DB update failed.' }, { status: 500 })
+      console.error('[docusign-webhook] Failed to update contract (recipient-completed):', updateError.message)
+      return NextResponse.json({ received: true }, { status: 200 })
     }
 
     await logAudit({
@@ -160,11 +178,11 @@ export async function POST(request: NextRequest) {
       old_values:  { status: contract.status },
       new_values:  { status: newStatus, ...updates },
       metadata: {
-        deal_id:      contract.deal_id,
-        envelope_id:  envelopeId,
-        signer_email: signer.email,
+        deal_id:       contract.deal_id,
+        envelope_id:   envelopeId,
+        signer_email:  signer.email,
         routing_order: signer.routingOrder,
-        signed_at:    signedAt,
+        signed_at:     signedAt,
       },
     })
 
@@ -173,11 +191,18 @@ export async function POST(request: NextRequest) {
 
   // ── envelope-completed ────────────────────────────────────────────────────────
   if (eventType === 'envelope-completed') {
+    // Idempotent: if already marked signed, skip
+    if (contract.status === 'signed') {
+      return NextResponse.json({ received: true }, { status: 200 })
+    }
+
     const completedAt = summary?.completedDateTime
       ? new Date(summary.completedDateTime).toISOString()
       : new Date().toISOString()
 
-    // Download the final signed composite PDF
+    // Download the final signed composite PDF.
+    // Non-critical: if the download fails, we still mark the contract as signed
+    // (the signing event is the authoritative fact; storage is supplementary).
     let signedStoragePath: string | null = null
 
     try {
@@ -201,10 +226,9 @@ export async function POST(request: NextRequest) {
       console.error('[docusign-webhook] Failed to download signed PDF:', String(err))
     }
 
-    // Collect signing timestamps from the recipient list
-    const signers   = summary?.recipients?.signers ?? []
-    const funder    = signers.find(s => Number(s.routingOrder) === 1)
-    const contractor = signers.find(s => Number(s.routingOrder) === 2)
+    const signers     = summary?.recipients?.signers ?? []
+    const funder      = signers.find(s => Number(s.routingOrder) === 1)
+    const contractor  = signers.find(s => Number(s.routingOrder) === 2)
 
     const { error: finalizeError } = await admin
       .from('contracts')
@@ -221,8 +245,8 @@ export async function POST(request: NextRequest) {
       .eq('id', contract.id)
 
     if (finalizeError) {
-      console.error('[docusign-webhook] Failed to finalize contract:', finalizeError.message)
-      return NextResponse.json({ error: 'DB finalize failed.' }, { status: 500 })
+      console.error('[docusign-webhook] Failed to finalize contract (envelope-completed):', finalizeError.message)
+      return NextResponse.json({ received: true }, { status: 200 })
     }
 
     await logAudit({
@@ -245,34 +269,215 @@ export async function POST(request: NextRequest) {
 
   // ── envelope-voided ───────────────────────────────────────────────────────────
   if (eventType === 'envelope-voided' || summary?.status === 'voided') {
+    // Idempotent: if already voided, skip
+    if (contract.status === 'voided') {
+      return NextResponse.json({ received: true }, { status: 200 })
+    }
+
+    const voidedAt    = summary?.voidedDateTime
+      ? new Date(summary.voidedDateTime).toISOString()
+      : new Date().toISOString()
+    const voidReason  = summary?.voidedReason ?? 'Voided via DocuSign'
+
     const { error: voidError } = await admin
       .from('contracts')
       .update({
         status:      'voided',
-        voided_at:   new Date().toISOString(),
-        void_reason: summary?.voidedReason ?? 'Voided via DocuSign',
+        voided_at:   voidedAt,
+        void_reason: voidReason,
       })
       .eq('id', contract.id)
 
-    if (!voidError) {
-      await logAudit({
-        entity_type: 'contract',
-        entity_id:   contract.id,
-        action:      'contract_voided',
-        actor_id:    'system',
-        old_values:  { status: contract.status },
-        new_values:  { status: 'voided' },
-        metadata: {
-          deal_id:     contract.deal_id,
-          envelope_id: envelopeId,
-          reason:      summary?.voidedReason,
-        },
-      })
+    if (voidError) {
+      console.error('[docusign-webhook] Failed to void contract:', voidError.message)
+      return NextResponse.json({ received: true }, { status: 200 })
     }
+
+    await logAudit({
+      entity_type: 'contract',
+      entity_id:   contract.id,
+      action:      'contract_voided',
+      actor_id:    'system',
+      old_values:  { status: contract.status },
+      new_values:  { status: 'voided' },
+      metadata: {
+        deal_id:     contract.deal_id,
+        envelope_id: envelopeId,
+        voided_at:   voidedAt,
+        reason:      voidReason,
+      },
+    })
+
+    // ── Deal freeze check ──────────────────────────────────────────────────────
+    // If any milestones on this deal have already been released, a void-after-
+    // funding is a governance incident. Freeze the deal so no further releases
+    // occur until an admin reviews and unfreezes with documented justification.
+    await freezeDealIfReleasesExist(admin, contract.deal_id, contract.id, envelopeId, voidReason)
+
+    return NextResponse.json({ received: true }, { status: 200 })
+  }
+
+  // ── envelope-declined ─────────────────────────────────────────────────────────
+  //
+  // At least one signer explicitly declined the envelope. Treat similarly to
+  // voided — mark the contract voided, run the freeze check, log contract_declined.
+  //
+  // TODO: wire up a transactional email service here to notify both the funder
+  // and contractor that a signer declined (declinerEmail from summary.recipients).
+  if (eventType === 'envelope-declined' || summary?.status === 'declined') {
+    // Idempotent: already voided/declined
+    if (contract.status === 'voided') {
+      return NextResponse.json({ received: true }, { status: 200 })
+    }
+
+    const declinedAt  = new Date().toISOString()
+    const decliner    = summary?.recipients?.signers?.find(s => s.status === 'declined')
+    const declineReason = decliner
+      ? `Signer (${decliner.email}, routing order ${decliner.routingOrder}) declined the envelope`
+      : 'Envelope declined via DocuSign'
+
+    const { error: declineError } = await admin
+      .from('contracts')
+      .update({
+        status:      'voided',
+        voided_at:   declinedAt,
+        void_reason: declineReason,
+      })
+      .eq('id', contract.id)
+
+    if (declineError) {
+      console.error('[docusign-webhook] Failed to mark contract declined:', declineError.message)
+      return NextResponse.json({ received: true }, { status: 200 })
+    }
+
+    await logAudit({
+      entity_type: 'contract',
+      entity_id:   contract.id,
+      action:      'contract_declined',
+      actor_id:    'system',
+      old_values:  { status: contract.status },
+      new_values:  { status: 'voided' },
+      metadata: {
+        deal_id:        contract.deal_id,
+        envelope_id:    envelopeId,
+        declined_at:    declinedAt,
+        decliner_email: decliner?.email ?? null,
+        routing_order:  decliner?.routingOrder ?? null,
+        reason:         declineReason,
+      },
+    })
+
+    // Notify both parties — TODO: implement when transactional email is wired up.
+    // Required: notify funder (deal funder) and contractor (deal contractor_id)
+    // that the contract was declined and must be re-sent.
+    console.warn(
+      `[docusign-webhook] contract_declined for deal ${contract.deal_id} — ` +
+      `notify both parties. Decliner: ${decliner?.email ?? 'unknown'}`,
+    )
+
+    // Run freeze check (unlikely to be needed for a pre-signing decline,
+    // but run defensively in case a re-signing decline occurs post-release).
+    await freezeDealIfReleasesExist(admin, contract.deal_id, contract.id, envelopeId, declineReason)
 
     return NextResponse.json({ received: true }, { status: 200 })
   }
 
   // All other events (envelope-sent, envelope-delivered, etc.) — acknowledge
   return NextResponse.json({ received: true }, { status: 200 })
+}
+
+// ─── Helper: freeze deal when a contract void follows milestone releases ───────
+//
+// Called by both the envelope-voided and envelope-declined handlers.
+// Checks if any milestone on this deal has been released. If so, sets deal
+// status to 'frozen', records deal_freeze_on_void = true and
+// frozen_from_status = <prior status>, then logs contract_voided_with_releases.
+//
+// Idempotent: skips if deal is already frozen.
+
+async function freezeDealIfReleasesExist(
+  admin: ReturnType<typeof createSupabaseAdminClient>,
+  dealId:     string,
+  contractId: string,
+  envelopeId: string,
+  reason:     string,
+): Promise<void> {
+  try {
+    // ── 1. Check for any released milestones on this deal ──────────────────────
+    const { data: releasedMilestones, error: mErr } = await admin
+      .from('milestones')
+      .select('id')
+      .eq('deal_id', dealId)
+      .eq('status', 'released')
+      .limit(1)
+
+    if (mErr) {
+      console.error('[docusign-webhook] freeze check — milestone query error:', mErr.message)
+      return
+    }
+
+    if (!releasedMilestones || releasedMilestones.length === 0) {
+      // No releases have occurred — no freeze needed
+      return
+    }
+
+    // ── 2. Fetch current deal status ───────────────────────────────────────────
+    const { data: deal, error: dErr } = await admin
+      .from('deals')
+      .select('id, status')
+      .eq('id', dealId)
+      .single()
+
+    if (dErr || !deal) {
+      console.error('[docusign-webhook] freeze check — deal fetch error:', dErr?.message)
+      return
+    }
+
+    // Idempotent: already frozen
+    if (deal.status === 'frozen') return
+
+    // ── 3. Freeze the deal ─────────────────────────────────────────────────────
+    const { error: freezeError } = await admin
+      .from('deals')
+      .update({
+        status:             'frozen',
+        deal_freeze_on_void: true,
+        frozen_from_status: deal.status,
+      })
+      .eq('id', dealId)
+
+    if (freezeError) {
+      console.error('[docusign-webhook] Failed to freeze deal:', freezeError.message)
+      return
+    }
+
+    // ── 4. Audit log ───────────────────────────────────────────────────────────
+    await logAudit({
+      entity_type: 'deal',
+      entity_id:   dealId,
+      action:      'contract_voided_with_releases',
+      actor_id:    'system',
+      old_values:  { status: deal.status },
+      new_values:  {
+        status:             'frozen',
+        deal_freeze_on_void: true,
+        frozen_from_status: deal.status,
+      },
+      metadata: {
+        contract_id:      contractId,
+        envelope_id:      envelopeId,
+        void_reason:      reason,
+        released_count:   releasedMilestones.length,
+      },
+      system_source: 'api/webhooks/docusign',
+    })
+
+    console.warn(
+      `[docusign-webhook] Deal ${dealId} frozen — contract voided after milestone releases. ` +
+      `Prior status: ${deal.status}. Admin unfreeze required at ` +
+      `POST /api/admin/deals/${dealId}/unfreeze`,
+    )
+  } catch (err) {
+    console.error('[docusign-webhook] Unexpected error in freezeDealIfReleasesExist:', String(err))
+  }
 }
