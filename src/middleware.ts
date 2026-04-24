@@ -111,6 +111,7 @@ export async function middleware(request: NextRequest) {
     pathname === "/" ||
     pathname === "/pricing" ||
     pathname.startsWith("/invite/") ||
+    pathname.startsWith("/api/invites/") ||   // public: GET preview (no auth) + POST accept (route handles its own auth)
     pathname.startsWith("/favicon") ||
     pathname === "/demo" ||
     pathname === "/demo-live" ||

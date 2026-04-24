@@ -91,15 +91,41 @@ export default function InviteAcceptPage() {
         return
       }
       if (!res.ok) {
-        setState({ phase: 'error', message: 'Something went wrong loading this invite. Try refreshing.' })
+        // Try to extract a server-provided message, fall back to a generic one
+        let serverMsg: string | undefined
+        try {
+          const body = await res.json()
+          serverMsg = body?.error
+        } catch { /* non-JSON body — ignore */ }
+        setState({
+          phase: 'error',
+          message: serverMsg ?? `Could not load this invite (HTTP ${res.status}). Try refreshing.`,
+        })
+        return
+      }
+
+      // Guard against non-JSON body (e.g. a middleware redirect followed to an HTML page)
+      const contentType = res.headers.get('content-type') ?? ''
+      if (!contentType.includes('application/json')) {
+        setState({
+          phase: 'error',
+          message: 'Unexpected server response. Please sign in and try again.',
+        })
         return
       }
 
       const parsed: InvitePreview = await res.json()
       setPreviewData(parsed)
       setState({ phase: 'preview', data: parsed })
-    } catch {
-      setState({ phase: 'error', message: 'Network error. Check your connection and try again.' })
+    } catch (err) {
+      // SyntaxError = malformed JSON; TypeError = network failure
+      const isJsonError = err instanceof SyntaxError
+      setState({
+        phase: 'error',
+        message: isJsonError
+          ? 'Unexpected server response. Please sign in and try again.'
+          : 'Network error. Check your connection and try again.',
+      })
     }
   }, [token])
 

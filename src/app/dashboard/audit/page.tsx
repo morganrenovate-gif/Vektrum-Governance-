@@ -202,8 +202,30 @@ export default async function AuditLogPage({
     .eq("id", user.id)
     .single()) as { data: { role: string } | null };
 
-  if (!profile || profile.role !== "admin") {
-    redirect("/dashboard");
+  if (!profile) redirect("/dashboard");
+
+  const isAdmin     = profile.role === "admin";
+  const isFunder    = profile.role === "funder";
+  // Contractors + funders get a deal-scoped activity view; admins see everything.
+
+  // ── Scope non-admin users to their own deals/milestones ──────────────────
+  // For a contractor: deals where contractor_id = me.
+  // For a funder:     deals where funder_id = me.
+  // We collect their deal IDs + milestone IDs and use them as an entity_id filter.
+  let scopedEntityIds: string[] = []
+
+  if (!isAdmin) {
+    const dealField = isFunder ? "funder_id" : "contractor_id";
+    const { data: userDeals } = await supabase
+      .from("deals")
+      .select("id, milestones(id)")
+      .eq(dealField, user.id);
+
+    const dealIds      = userDeals?.map((d) => d.id) ?? [];
+    const milestoneIds = userDeals?.flatMap(
+      (d) => (d.milestones as { id: string }[] | null)?.map((m) => m.id) ?? []
+    ) ?? [];
+    scopedEntityIds = [...dealIds, ...milestoneIds];
   }
 
   // ── Build query ──────────────────────────────────────────────────────────
@@ -229,13 +251,23 @@ export default async function AuditLogPage({
   if (category && category !== "all" && CATEGORY_ACTIONS[category]) {
     query = query.in("action", CATEGORY_ACTIONS[category]);
   }
-  if (role)   query = query.eq("actor_role", role);
+  if (role && isAdmin) query = query.eq("actor_role", role);  // role filter only for admins
   if (action) query = query.eq("action", action);
   if (search && search.trim()) {
     const term = search.trim();
     query = UUID_RE.test(term)
       ? query.or(`action.ilike.%${term}%,entity_id.eq.${term},actor_id.eq.${term}`)
       : query.or(`action.ilike.%${term}%,actor_name.ilike.%${term}%,actor_email.ilike.%${term}%,system_source.ilike.%${term}%`);
+  }
+
+  // Non-admins: restrict to events they were the actor of, OR events on their deals/milestones
+  if (!isAdmin) {
+    if (scopedEntityIds.length > 0) {
+      query = query.or(`actor_id.eq.${user.id},entity_id.in.(${scopedEntityIds.join(",")})`);
+    } else {
+      // User has no deals yet — show only events where they are the actor
+      query = query.eq("actor_id", user.id);
+    }
   }
 
   query = query.range(from, to);
@@ -248,6 +280,11 @@ export default async function AuditLogPage({
   const currentParams: Record<string, string | undefined> = { category, role, action, search };
   const hasFilters = !!((category && category !== "all") || role || action || search);
 
+  // Non-admins cannot filter by role (their results are already scoped)
+  const visibleTabs = isAdmin
+    ? CATEGORY_TABS
+    : CATEGORY_TABS.filter((t) => t.key !== "admin");
+
   return (
     <div className="min-h-screen bg-surface-0">
     <div className="dash-page">
@@ -255,11 +292,15 @@ export default async function AuditLogPage({
       {/* Header */}
       <PageHeader
         eyebrow="Audit Log"
-        title="Platform Events"
+        title={isAdmin ? "Platform Events" : "Activity Log"}
         description={
-          count !== null
-            ? `${count.toLocaleString()} immutable event${count !== 1 ? 's' : ''} · ordered by event_sequence · all timestamps UTC`
-            : 'Append-only event log · all timestamps UTC'
+          isAdmin
+            ? (count !== null
+                ? `${count.toLocaleString()} immutable event${count !== 1 ? 's' : ''} · ordered by event_sequence · all timestamps UTC`
+                : 'Append-only event log · all timestamps UTC')
+            : (count !== null
+                ? `${count.toLocaleString()} event${count !== 1 ? 's' : ''} on your deals · ordered by sequence · all timestamps UTC`
+                : 'Events on your deals and milestones · all timestamps UTC')
         }
       />
 
@@ -267,16 +308,20 @@ export default async function AuditLogPage({
       <div className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-[12px] text-white/40">
         <Shield size={14} className="text-white/30 flex-shrink-0 mt-0.5" />
         <span>
-          All timestamps are exact UTC (YYYY-MM-DD HH:MM:SS UTC). Events are ordered by
-          monotonic <code className="font-mono text-white/50">event_sequence</code>, not
-          wall-clock time, to resolve sub-millisecond ordering ambiguity. This log is
-          append-only — no record can be modified or deleted.
+          {isAdmin
+            ? <>All timestamps are exact UTC (YYYY-MM-DD HH:MM:SS UTC). Events are ordered by
+               monotonic <code className="font-mono text-white/50">event_sequence</code>, not
+               wall-clock time, to resolve sub-millisecond ordering ambiguity. This log is
+               append-only — no record can be modified or deleted.</>
+            : <>Shows actions on your deals and milestones, plus your own account activity.
+               Timestamps are exact UTC. This log is append-only — no record can be modified or deleted.</>
+          }
         </span>
       </div>
 
       {/* Category tabs */}
       <div className="flex flex-wrap gap-1.5">
-        {CATEGORY_TABS.map((tab) => {
+        {visibleTabs.map((tab) => {
           const isActive = tab.key === "all"
             ? !category || category === "all"
             : category === tab.key;
@@ -306,18 +351,20 @@ export default async function AuditLogPage({
         )}
         {action && <input type="hidden" name="action" value={action} />}
 
-        {/* Role */}
-        <select
-          name="role"
-          defaultValue={role ?? ""}
-          className="h-9 rounded-lg border border-white/[0.1] bg-white/[0.05] px-3 pr-8 text-xs text-white/70 focus:border-vektrum-blue focus:outline-none focus:ring-1 focus:ring-vektrum-blue"
-        >
-          <option value="">All Roles</option>
-          <option value="contractor">Contractor</option>
-          <option value="funder">Funder</option>
-          <option value="admin">Admin</option>
-          <option value="system">System</option>
-        </select>
+        {/* Role filter — admin only (non-admins are already scoped to their own data) */}
+        {isAdmin && (
+          <select
+            name="role"
+            defaultValue={role ?? ""}
+            className="h-9 rounded-lg border border-white/[0.1] bg-white/[0.05] px-3 pr-8 text-xs text-white/70 focus:border-vektrum-blue focus:outline-none focus:ring-1 focus:ring-vektrum-blue"
+          >
+            <option value="">All Roles</option>
+            <option value="contractor">Contractor</option>
+            <option value="funder">Funder</option>
+            <option value="admin">Admin</option>
+            <option value="system">System</option>
+          </select>
+        )}
 
         {/* Search — now also matches actor_name, actor_email, system_source */}
         <div className="relative">
@@ -394,7 +441,7 @@ export default async function AuditLogPage({
                   </td>
                 </tr>
               ) : (
-                entries.map((log) => <AuditRow key={log.id} log={log} />)
+                entries.map((log) => <AuditRow key={log.id} log={log} isAdmin={isAdmin} />)
               )}
             </tbody>
           </table>
@@ -413,7 +460,7 @@ export default async function AuditLogPage({
 
 // ─── Audit row ────────────────────────────────────────────────────────────────
 
-function AuditRow({ log }: { log: AuditLog }) {
+function AuditRow({ log, isAdmin }: { log: AuditLog; isAdmin: boolean }) {
   // Resolve actor display: prefer denormalized actor_name (migration 016),
   // fall back to joined profile, then to system/unknown labels.
   const displayRole = log.actor_role ?? log.actor?.role ?? null;
@@ -469,8 +516,8 @@ function AuditRow({ log }: { log: AuditLog }) {
                 </span>
               )}
             </div>
-            {/* Email — compliance field, not shown to contractors/funders */}
-            {log.actor_email && (
+            {/* Email — compliance field, admin-only */}
+            {isAdmin && log.actor_email && (
               <p className="text-[11px] text-white/30 mt-0.5 font-mono truncate max-w-[180px]">
                 {log.actor_email}
               </p>
@@ -512,11 +559,11 @@ function AuditRow({ log }: { log: AuditLog }) {
             </summary>
             <div className="mt-2 max-w-xs overflow-auto rounded-xl bg-white/[0.05] border border-white/[0.08] p-2.5">
               <dl className="space-y-1">
-                {/* Session ID and IP address first if present */}
-                {log.session_id && (
+                {/* Session ID and IP address — admin-only operational fields */}
+                {isAdmin && log.session_id && (
                   <DetailRow k="session_id" v={log.session_id} mono />
                 )}
-                {log.ip_address && (
+                {isAdmin && log.ip_address && (
                   <DetailRow k="ip_address" v={log.ip_address} mono />
                 )}
                 {Object.entries(log.metadata).map(([key, value]) => (
@@ -531,7 +578,7 @@ function AuditRow({ log }: { log: AuditLog }) {
               </dl>
             </div>
           </details>
-        ) : log.session_id || log.ip_address ? (
+        ) : isAdmin && (log.session_id || log.ip_address) ? (
           <details className="group cursor-pointer">
             <summary className="select-none list-none text-xs text-vektrum-blue hover:underline">
               View details
