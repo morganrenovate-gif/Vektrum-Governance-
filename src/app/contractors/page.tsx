@@ -55,7 +55,7 @@ export default function ContractorsPage() {
             </Link>
           </div>
 
-          <p className="mt-4 text-[12px] text-white/45">
+          <p className="mt-4 text-[12px] text-white/75">
             No subscription. No per-milestone charge. No onboarding fee.
           </p>
         </div>

@@ -216,7 +216,7 @@ export default async function DealDetailPage({
     <div className="dash-page">
       {/* Breadcrumb */}
       <nav aria-label="Breadcrumb">
-        <ol className="flex items-center gap-1.5 text-sm text-white/50">
+        <ol className="flex items-center gap-1.5 text-sm text-white/75">
           <li>
             <Link
               href="/dashboard"
@@ -227,7 +227,7 @@ export default async function DealDetailPage({
             </Link>
           </li>
           <li aria-hidden="true" className="text-white/15">/</li>
-          <li className="text-white/50 font-medium truncate max-w-[200px] sm:max-w-xs">
+          <li className="text-white/85 font-medium truncate max-w-[200px] sm:max-w-xs">
             {typedDeal.title}
           </li>
         </ol>
@@ -241,15 +241,15 @@ export default async function DealDetailPage({
             <DealStatusBadge status={typedDeal.status} />
           </div>
           {typedDeal.description && (
-            <p className="max-w-2xl text-sm text-white/55">
+            <p className="max-w-2xl text-sm text-white/80">
               {typedDeal.description}
             </p>
           )}
-          <div className="flex flex-wrap gap-x-4 gap-y-0.5 pt-1 text-xs text-white/35">
+          <div className="flex flex-wrap gap-x-4 gap-y-0.5 pt-1 text-xs text-white/75">
             {typedDeal.contractor && (
               <span>
                 Contractor:{" "}
-                <strong className="text-white/55">
+                <strong className="text-white">
                   {typedDeal.contractor.company_name ??
                     typedDeal.contractor.full_name}
                 </strong>
@@ -258,7 +258,7 @@ export default async function DealDetailPage({
             {typedDeal.funder ? (
               <span>
                 Funder:{" "}
-                <strong className="text-white/55">
+                <strong className="text-white">
                   {typedDeal.funder.full_name}
                 </strong>
               </span>
@@ -287,7 +287,7 @@ export default async function DealDetailPage({
             <CardTitle>Invite a Funder</CardTitle>
           </CardHeader>
           <CardBody>
-            <p className="mb-4 text-[13px] text-white/50 leading-relaxed">
+            <p className="mb-4 text-[13px] text-white/80 leading-relaxed">
               Share a secure invite link with your funder. When they accept, they will be
               assigned to this deal room and can begin reviewing milestones and funding the
               project. The link is valid for 7 days and is single-use.
@@ -418,13 +418,13 @@ export default async function DealDetailPage({
                           <p className="text-[13px] font-medium text-white/80 truncate">
                             {milestone.title}
                           </p>
-                          <p className="text-[11px] text-white/40 tabular-nums">
+                          <p className="text-[11px] text-white/75 tabular-nums">
                             {formatMoney(milestone.amount)}
                           </p>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
                           {!waiver && (
-                            <span className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium bg-white/[0.05] text-white/50 border border-white/[0.08]">
+                            <span className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium bg-white/[0.05] text-white/80 border border-white/[0.14]">
                               <FileText size={10} aria-hidden="true" />
                               Not requested
                             </span>

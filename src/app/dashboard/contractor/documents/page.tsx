@@ -80,11 +80,11 @@ export default async function ContractorDocumentsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-white/[0.06] bg-white/[0.02]">
-                <th className="text-left px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">Document Name</th>
-                <th className="text-left px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">Deal</th>
-                <th className="text-left px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">Type</th>
-                <th className="text-left px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">Uploaded</th>
-                <th className="text-left px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">Actions</th>
+                <th className="text-left px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/65">Document Name</th>
+                <th className="text-left px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/65">Deal</th>
+                <th className="text-left px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/65">Type</th>
+                <th className="text-left px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/65">Uploaded</th>
+                <th className="text-left px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/65">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.04]">
@@ -94,10 +94,10 @@ export default async function ContractorDocumentsPage() {
                   : 'Unknown Deal'
                 return (
                   <tr key={doc.id} className="hover:bg-white/[0.025] transition-colors">
-                    <td className="px-4 py-3 font-medium text-white/80">{doc.file_name}</td>
-                    <td className="px-4 py-3 text-white/45">{dealTitle as string}</td>
-                    <td className="px-4 py-3 text-white/40 font-mono text-[11px]">{doc.mime_type}</td>
-                    <td className="px-4 py-3 text-white/45">
+                    <td className="px-4 py-3 font-medium text-white">{doc.file_name}</td>
+                    <td className="px-4 py-3 text-white/80">{dealTitle as string}</td>
+                    <td className="px-4 py-3 text-white/75 font-mono text-[11px]">{doc.mime_type}</td>
+                    <td className="px-4 py-3 text-white/80">
                       {new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(doc.created_at))}
                     </td>
                     <td className="px-4 py-3">

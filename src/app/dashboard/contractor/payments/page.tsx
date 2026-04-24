@@ -138,8 +138,8 @@ export default async function ContractorPaymentsPage() {
               <tbody>
                 {releases.map((rel) => (
                   <tr key={rel.id}>
-                    <td className="font-medium text-white/80">{rel.milestone?.title ?? <span className="text-white/25 italic">Milestone removed</span>}</td>
-                    <td>{(dealMap.get(rel.deal_id) as string) ?? <span className="text-white/25 italic">Deal removed</span>}</td>
+                    <td className="font-medium text-white/90">{rel.milestone?.title ?? <span className="text-white/65 italic">Milestone removed</span>}</td>
+                    <td>{(dealMap.get(rel.deal_id) as string) ?? <span className="text-white/65 italic">Deal removed</span>}</td>
                     <td className="font-semibold tabular-nums text-emerald-400">{formatMoney(rel.amount)}</td>
                     <td>{formatDateShort(rel.released_at)}</td>
                     <td>

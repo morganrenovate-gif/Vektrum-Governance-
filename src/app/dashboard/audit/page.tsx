@@ -150,9 +150,9 @@ function roleBadgeClasses(role: string | null | undefined): string {
     case "funder":
       return "bg-vektrum-blue/15 text-vektrum-blue border border-vektrum-blue/20";
     case "admin":
-      return "bg-white/[0.08] text-white/60 border border-white/[0.1]";
+      return "bg-white/[0.08] text-white/90 border border-white/[0.16]";
     default:
-      return "bg-white/[0.04] text-white/30 border border-white/[0.06]";
+      return "bg-white/[0.04] text-white/75 border border-white/[0.12]";
   }
 }
 
@@ -305,12 +305,12 @@ export default async function AuditLogPage({
       />
 
       {/* Compliance notice */}
-      <div className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-[12px] text-white/40">
-        <Shield size={14} className="text-white/30 flex-shrink-0 mt-0.5" />
+      <div className="flex items-start gap-3 rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3 text-[12px] text-white/75">
+        <Shield size={14} className="text-white/65 flex-shrink-0 mt-0.5" />
         <span>
           {isAdmin
             ? <>All timestamps are exact UTC (YYYY-MM-DD HH:MM:SS UTC). Events are ordered by
-               monotonic <code className="font-mono text-white/50">event_sequence</code>, not
+               monotonic <code className="font-mono text-white bg-white/[0.06] px-1 py-0.5 rounded">event_sequence</code>, not
                wall-clock time, to resolve sub-millisecond ordering ambiguity. This log is
                append-only — no record can be modified or deleted.</>
             : <>Shows actions on your deals and milestones, plus your own account activity.
@@ -332,10 +332,10 @@ export default async function AuditLogPage({
                 category: tab.key === "all" ? undefined : tab.key,
                 page: undefined,
               })}
-              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue ${
                 isActive
                   ? "bg-vektrum-blue text-white shadow-sm shadow-vektrum-blue/30"
-                  : "bg-white/[0.05] border border-white/[0.08] text-white/50 hover:bg-white/[0.08] hover:text-white"
+                  : "bg-white/[0.05] border border-white/[0.14] text-white/80 hover:bg-white/[0.1] hover:text-white hover:border-white/[0.24]"
               }`}
             >
               {tab.label}
@@ -355,8 +355,9 @@ export default async function AuditLogPage({
         {isAdmin && (
           <select
             name="role"
+            aria-label="Filter by role"
             defaultValue={role ?? ""}
-            className="h-9 rounded-lg border border-white/[0.1] bg-white/[0.05] px-3 pr-8 text-xs text-white/70 focus:border-vektrum-blue focus:outline-none focus:ring-1 focus:ring-vektrum-blue"
+            className="h-9 rounded-lg border border-white/[0.14] bg-white/[0.05] px-3 pr-8 text-xs text-white focus:border-vektrum-blue focus:outline-none focus:ring-2 focus:ring-vektrum-blue/50"
           >
             <option value="">All Roles</option>
             <option value="contractor">Contractor</option>
@@ -368,13 +369,14 @@ export default async function AuditLogPage({
 
         {/* Search — now also matches actor_name, actor_email, system_source */}
         <div className="relative">
-          <Search size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-white/30" />
+          <Search size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-white/65" />
           <input
             type="text"
             name="search"
+            aria-label="Search audit log"
             defaultValue={search ?? ""}
             placeholder="Action, actor name, email, or entity UUID…"
-            className="h-9 w-72 rounded-lg border border-white/[0.1] bg-white/[0.05] pl-8 pr-3 text-xs text-white/70 placeholder:text-white/25 focus:border-vektrum-blue focus:outline-none focus:ring-1 focus:ring-vektrum-blue"
+            className="h-9 w-72 rounded-lg border border-white/[0.14] bg-white/[0.05] pl-8 pr-3 text-xs text-white placeholder:text-white/55 focus:border-vektrum-blue focus:outline-none focus:ring-2 focus:ring-vektrum-blue/50"
           />
         </div>
 
@@ -388,7 +390,7 @@ export default async function AuditLogPage({
         {hasFilters && (
           <Link
             href="?"
-            className="inline-flex items-center gap-1 text-xs text-white/40 hover:text-vektrum-blue transition-colors"
+            className="inline-flex items-center gap-1 text-xs text-white/75 hover:text-vektrum-blue focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue rounded transition-colors"
           >
             <X size={12} />
             Clear
@@ -399,11 +401,11 @@ export default async function AuditLogPage({
       {/* Table */}
       <div className="rounded-xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden">
         <div className="border-b border-white/[0.06] px-5 py-3.5 bg-white/[0.015] flex items-center justify-between">
-          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/30">
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/65">
             Events · ordered by sequence desc
           </p>
           {count !== null && (
-            <p className="text-[11px] text-white/25 tabular-nums">
+            <p className="text-[11px] text-white/65 tabular-nums">
               {count.toLocaleString()} total
             </p>
           )}
@@ -413,22 +415,22 @@ export default async function AuditLogPage({
           <table className="w-full min-w-[900px] text-sm">
             <thead>
               <tr className="border-b border-white/[0.06] bg-white/[0.02]">
-                <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35 whitespace-nowrap">
+                <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-white/65 whitespace-nowrap">
                   Seq / Event ID
                 </th>
-                <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35 whitespace-nowrap">
+                <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-white/65 whitespace-nowrap">
                   Timestamp (UTC)
                 </th>
-                <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">
+                <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-white/65">
                   Actor
                 </th>
-                <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">
+                <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-white/65">
                   Action
                 </th>
-                <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">
+                <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-white/65">
                   Entity
                 </th>
-                <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">
+                <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-white/65">
                   Source / Details
                 </th>
               </tr>
@@ -436,7 +438,7 @@ export default async function AuditLogPage({
             <tbody className="divide-y divide-white/[0.04]">
               {entries.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-sm text-white/30">
+                  <td colSpan={6} className="px-4 py-12 text-center text-sm text-white/70">
                     No audit events match your filters.
                   </td>
                 </tr>
@@ -478,27 +480,27 @@ function AuditRow({ log, isAdmin }: { log: AuditLog; isAdmin: boolean }) {
       {/* ── Seq / Event ID ─────────────────────────────────────────────── */}
       <td className="px-4 py-3 whitespace-nowrap">
         {log.event_sequence != null && (
-          <p className="text-[12px] font-mono font-semibold text-white/60 tabular-nums">
+          <p className="text-[12px] font-mono font-semibold text-white/85 tabular-nums">
             #{log.event_sequence.toLocaleString()}
           </p>
         )}
-        <p className="text-[10px] font-mono text-white/20 mt-0.5" title={log.id}>
+        <p className="text-[10px] font-mono text-white/60 mt-0.5" title={log.id}>
           {log.id.slice(0, 8)}…{log.id.slice(-4)}
         </p>
       </td>
 
       {/* ── Timestamp — exact UTC, never relative ──────────────────────── */}
       <td className="px-4 py-3 whitespace-nowrap">
-        <AuditTimestamp iso={log.created_at} split className="text-[11px] text-white/50" />
+        <AuditTimestamp iso={log.created_at} split className="text-[11px] text-white/75" />
       </td>
 
       {/* ── Actor ──────────────────────────────────────────────────────── */}
       <td className="px-4 py-3 text-xs">
         {isSystem ? (
           <div className="flex items-center gap-1.5">
-            <span className="italic text-white/25">System</span>
+            <span className="italic text-white/75">System</span>
             {log.system_source && (
-              <span className="text-[10px] font-mono text-white/20 truncate max-w-[100px]"
+              <span className="text-[10px] font-mono text-white/65 truncate max-w-[100px]"
                     title={log.system_source}>
                 {log.system_source.split('/').pop()}
               </span>
@@ -507,7 +509,7 @@ function AuditRow({ log, isAdmin }: { log: AuditLog; isAdmin: boolean }) {
         ) : (
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="text-white/70 font-medium">
+              <span className="text-white font-medium">
                 {actorName ?? "Unknown"}
               </span>
               {displayRole && (
@@ -518,7 +520,7 @@ function AuditRow({ log, isAdmin }: { log: AuditLog; isAdmin: boolean }) {
             </div>
             {/* Email — compliance field, admin-only */}
             {isAdmin && log.actor_email && (
-              <p className="text-[11px] text-white/30 mt-0.5 font-mono truncate max-w-[180px]">
+              <p className="text-[11px] text-white/65 mt-0.5 font-mono truncate max-w-[180px]">
                 {log.actor_email}
               </p>
             )}
@@ -535,8 +537,8 @@ function AuditRow({ log, isAdmin }: { log: AuditLog; isAdmin: boolean }) {
 
       {/* ── Entity ─────────────────────────────────────────────────────── */}
       <td className="px-4 py-3">
-        <p className="text-xs font-medium text-white/60">{log.entity_type}</p>
-        <p className="text-[10px] font-mono text-white/25 mt-0.5" title={log.entity_id}>
+        <p className="text-xs font-medium text-white/85">{log.entity_type}</p>
+        <p className="text-[10px] font-mono text-white/65 mt-0.5" title={log.entity_id}>
           {log.entity_id.slice(0, 8)}…
         </p>
       </td>
@@ -545,7 +547,7 @@ function AuditRow({ log, isAdmin }: { log: AuditLog; isAdmin: boolean }) {
       <td className="px-4 py-3">
         {/* system_source tag */}
         {log.system_source && (
-          <p className="text-[10px] font-mono text-white/25 mb-1 truncate max-w-[200px]"
+          <p className="text-[10px] font-mono text-white/65 mb-1 truncate max-w-[200px]"
              title={log.system_source}>
             {log.system_source}
           </p>
@@ -591,7 +593,7 @@ function AuditRow({ log, isAdmin }: { log: AuditLog; isAdmin: boolean }) {
             </div>
           </details>
         ) : (
-          <span className="text-xs text-white/20">&mdash;</span>
+          <span className="text-xs text-white/60" aria-label="None">&mdash;</span>
         )}
       </td>
     </tr>
@@ -603,10 +605,10 @@ function AuditRow({ log, isAdmin }: { log: AuditLog; isAdmin: boolean }) {
 function DetailRow({ k, v, mono }: { k: string; v: string; mono?: boolean }) {
   return (
     <div className="flex items-baseline gap-1.5 text-[11px]">
-      <dt className="font-medium text-white/40 capitalize whitespace-nowrap">
+      <dt className="font-medium text-white/70 capitalize whitespace-nowrap">
         {k.replace(/_/g, ' ')}:
       </dt>
-      <dd className={`text-white/70 truncate ${mono ? 'font-mono text-[10px]' : ''}`}>
+      <dd className={`text-white/90 truncate ${mono ? 'font-mono text-[10px]' : ''}`}>
         {v}
       </dd>
     </div>
@@ -624,14 +626,14 @@ function Pagination({
 }) {
   return (
     <nav className="flex items-center justify-between" aria-label="Audit log pagination">
-      <p className="text-xs text-white/35">
+      <p className="text-xs text-white/70">
         Page {page} of {totalPages}
       </p>
       <div className="flex gap-2">
         {page > 1 && (
           <Link
             href={buildUrl(currentParams, { page: String(page - 1) })}
-            className="rounded-lg border border-white/[0.1] bg-white/[0.05] px-3 py-1.5 text-xs font-medium text-white/50 hover:bg-white/[0.08] hover:text-white transition-all"
+            className="rounded-lg border border-white/[0.16] bg-white/[0.05] px-3 py-1.5 text-xs font-medium text-white/85 hover:bg-white/[0.1] hover:text-white hover:border-white/[0.24] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-all"
           >
             Previous
           </Link>
@@ -639,7 +641,7 @@ function Pagination({
         {page < totalPages && (
           <Link
             href={buildUrl(currentParams, { page: String(page + 1) })}
-            className="rounded-lg border border-white/[0.1] bg-white/[0.05] px-3 py-1.5 text-xs font-medium text-white/50 hover:bg-white/[0.08] hover:text-white transition-all"
+            className="rounded-lg border border-white/[0.16] bg-white/[0.05] px-3 py-1.5 text-xs font-medium text-white/85 hover:bg-white/[0.1] hover:text-white hover:border-white/[0.24] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-all"
           >
             Next
           </Link>

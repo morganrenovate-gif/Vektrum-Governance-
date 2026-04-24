@@ -21,7 +21,7 @@ export default function DealError({
         {/* Breadcrumb */}
         <Link
           href="/dashboard"
-          className="inline-flex items-center gap-1.5 text-sm text-white/55 hover:text-white transition-colors mb-8"
+          className="inline-flex items-center gap-1.5 text-sm text-white/80 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue rounded transition-colors mb-8"
         >
           <ArrowLeft size={14} aria-hidden="true" />
           Back to dashboard
@@ -38,12 +38,12 @@ export default function DealError({
             <h2 className="font-display text-xl font-bold text-white">
               Deal couldn&rsquo;t load
             </h2>
-            <p className="text-sm text-white/55">
+            <p className="text-sm text-white/85">
               There was a problem loading this deal. No funds have been moved or
               affected.
             </p>
             {error.digest && (
-              <p className="text-[11px] font-mono text-white/30 mt-2">
+              <p className="text-[11px] font-mono text-white/70 mt-2">
                 Error: {error.digest}
               </p>
             )}
@@ -60,7 +60,7 @@ export default function DealError({
             </button>
             <Link
               href="/dashboard"
-              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-white/[0.08] bg-white px-5 py-2.5 text-sm font-semibold text-white/55 transition-all hover:bg-surface-3"
+              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-white/[0.16] bg-white/[0.05] px-5 py-2.5 text-sm font-semibold text-white/90 hover:bg-white/[0.1] hover:text-white hover:border-white/[0.24] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-all"
             >
               <ArrowLeft size={14} aria-hidden="true" />
               Dashboard
@@ -68,7 +68,7 @@ export default function DealError({
           </div>
         </div>
 
-        <p className="mt-6 text-center text-[12px] text-white/30">
+        <p className="mt-6 text-center text-[12px] text-white/65">
           Vektrum&rsquo;s release gate requires server-side verification. Any pending
           approvals are still in their last known state.
         </p>

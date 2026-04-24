@@ -188,7 +188,7 @@ export default async function DashboardPage() {
                     <div className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${dotColor}`} />
                     <div>
                       <p className="text-[14px] font-semibold text-white">{actionTitle}</p>
-                      <p className="text-[13px] text-white/55 mt-0.5">{actionDescription}</p>
+                      <p className="text-[13px] text-white/75 mt-0.5">{actionDescription}</p>
                     </div>
                   </div>
                   <Link href={actionHref} className="ml-4 flex-shrink-0">
@@ -209,7 +209,7 @@ export default async function DashboardPage() {
                   <p className="text-[13px] font-semibold text-amber-400">
                     Connect your Stripe account to create deals
                   </p>
-                  <p className="text-[12px] text-white/45 mt-0.5">
+                  <p className="text-[12px] text-white/80 mt-0.5">
                     You must connect a Stripe account before you can create deals and receive milestone payments.
                   </p>
                   <Link href="/dashboard/contractor/onboarding" className="mt-3 inline-block">

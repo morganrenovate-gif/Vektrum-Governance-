@@ -214,7 +214,7 @@ export default function NewDealPage() {
                               Require milestones to be released in order
                             </span>
                           </div>
-                          <p className="text-[12px] text-white/45 leading-relaxed">
+                          <p className="text-[12px] text-white/75 leading-relaxed">
                             Milestone N cannot be released until milestone N−1 is confirmed
                             released. Recommended for institutional lenders who require sequential
                             disbursement.
@@ -235,11 +235,11 @@ export default function NewDealPage() {
                         <span className="text-[13px] font-semibold text-white/85">
                           Retainage Withholding
                         </span>
-                        <span className="ml-auto text-[11px] text-white/35">
+                        <span className="ml-auto text-[11px] text-white/65">
                           Optional — default 0%
                         </span>
                       </div>
-                      <p className="text-[12px] text-white/45 leading-relaxed">
+                      <p className="text-[12px] text-white/75 leading-relaxed">
                         Withhold a percentage of each milestone payment until project completion.
                         Industry standard is 5–10% for institutional construction lending.
                         Leave blank or 0 for no retainage.
@@ -259,9 +259,9 @@ export default function NewDealPage() {
                                 retainage_percentage: e.target.value,
                               }))
                             }
-                            className="w-full rounded-lg border border-white/[0.10] bg-white/[0.04] px-3 py-2 pr-8 text-[13px] text-white placeholder:text-white/25 focus:outline-none focus:ring-1 focus:ring-vektrum-blue/60"
+                            className="w-full rounded-lg border border-white/[0.14] bg-white/[0.04] px-3 py-2 pr-8 text-[13px] text-white placeholder:text-white/55 focus:outline-none focus:ring-2 focus:ring-vektrum-blue/50 focus:border-vektrum-blue"
                           />
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] text-white/40 pointer-events-none">
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] text-white/75 pointer-events-none">
                             %
                           </span>
                         </div>
@@ -317,7 +317,7 @@ export default function NewDealPage() {
                                 </Link>
                               </div>
 
-                              <p className="text-xs text-white/30">
+                              <p className="text-xs text-white/70">
                                 After creating the deal, you&rsquo;ll be able to add milestones and
                                 invite a funder.
                               </p>

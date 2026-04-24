@@ -203,7 +203,7 @@ function AdminStatTile({
       className={`rounded-xl border bg-surface-2 shadow-card px-5 py-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-card-hover hover:border-white/[0.14] ${warning ? 'border-vektrum-amber/30' : 'border-white/[0.08]'}`}
     >
       <div className="flex items-start justify-between gap-3 mb-3">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">{label}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/65">{label}</p>
         <div className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08]`}>
           <Icon size={13} className={warning ? 'text-amber-400' : 'text-vektrum-blue'} aria-hidden="true" />
         </div>
@@ -211,7 +211,7 @@ function AdminStatTile({
       <p className={`font-display text-2xl font-bold tabular-nums leading-none break-all ${accent ? 'text-vektrum-blue' : warning ? 'text-amber-400' : 'text-white'}`}>
         {value}
       </p>
-      {sub && <p className="mt-1.5 text-[11px] text-white/30">{sub}</p>}
+      {sub && <p className="mt-1.5 text-[11px] text-white/60">{sub}</p>}
     </div>
   )
 }
@@ -265,14 +265,14 @@ export default async function AdminDashboardPage() {
           <div className="flex items-center gap-2">
             <Link
               href="/dashboard/admin/ops"
-              className="inline-flex items-center gap-2 rounded-xl border border-white/[0.1] bg-white/[0.05] px-4 py-2.5 text-[13px] font-medium text-white/60 hover:bg-white/[0.08] hover:text-white transition-all self-start"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/[0.14] bg-white/[0.05] px-4 py-2.5 text-[13px] font-medium text-white/80 hover:bg-white/[0.1] hover:text-white hover:border-white/[0.22] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-all self-start"
             >
               <Activity size={14} aria-hidden="true" />
               Ops Dashboard
             </Link>
             <Link
               href="/dashboard/audit"
-              className="inline-flex items-center gap-2 rounded-xl border border-white/[0.1] bg-white/[0.05] px-4 py-2.5 text-[13px] font-medium text-white/60 hover:bg-white/[0.08] hover:text-white transition-all self-start"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/[0.14] bg-white/[0.05] px-4 py-2.5 text-[13px] font-medium text-white/80 hover:bg-white/[0.1] hover:text-white hover:border-white/[0.22] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-all self-start"
             >
               <FileText size={14} aria-hidden="true" />
               Full Audit Log
@@ -282,10 +282,10 @@ export default async function AdminDashboardPage() {
       />
 
       {/* Admin access info */}
-      <div className="rounded-xl border border-white/[0.08] bg-surface-2 shadow-card p-5 text-sm text-white/55">
+      <div className="rounded-xl border border-white/[0.08] bg-surface-2 shadow-card p-5 text-sm text-white/80">
         <p className="font-semibold text-white mb-1.5">Admin Access</p>
         <p>You can manage users, invite new admins, review audit logs, and monitor platform health.
-        <strong className="text-white/80"> Financial actions (fund releases, payment processing) are governed by the 8-condition milestone gate</strong>
+        <strong className="text-white font-semibold"> Financial actions (fund releases, payment processing) are governed by the 8-condition milestone gate</strong>
         {' '}and cannot be overridden from this dashboard. All admin actions are permanently logged.</p>
       </div>
 
@@ -303,7 +303,7 @@ export default async function AdminDashboardPage() {
           <AlertTriangle size={12} />
           {healthMetrics.openDisputes} open disputes
         </div>
-        <div className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[12px] font-semibold border ${healthMetrics.recentRoleChanges > 0 ? 'bg-vektrum-blue/10 border-vektrum-blue/20 text-vektrum-blue' : 'bg-white/[0.05] border-white/[0.08] text-white/40'}`}>
+        <div className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[12px] font-semibold border ${healthMetrics.recentRoleChanges > 0 ? 'bg-vektrum-blue/10 border-vektrum-blue/20 text-vektrum-blue' : 'bg-white/[0.05] border-white/[0.12] text-white/75'}`}>
           <Shield size={12} />
           {healthMetrics.recentRoleChanges} role changes (7d)
         </div>
@@ -432,7 +432,7 @@ export default async function AdminDashboardPage() {
       <section>
         <SectionHeader label="Recent Audit Activity" />
         {recentAudit.length === 0 ? (
-          <p className="text-sm text-white/35">No audit activity yet</p>
+          <p className="text-sm text-white/70">No audit activity yet</p>
         ) : (
           <div className="rounded-xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden">
             <ul className="divide-y divide-white/[0.05]">
@@ -443,7 +443,7 @@ export default async function AdminDashboardPage() {
                   ? 'text-amber-400'
                   : entry.action?.includes('ai_draw_review')
                   ? 'text-vektrum-blue'
-                  : 'text-white/50'
+                  : 'text-white/75'
 
                 // Exact UTC timestamp — never relative time for audit records
                 const d = new Date(entry.created_at)
@@ -454,21 +454,21 @@ export default async function AdminDashboardPage() {
                   <li key={entry.id} className="flex items-center gap-4 px-5 py-3 hover:bg-white/[0.03] transition-colors">
                     {/* Sequence number */}
                     {entry.event_sequence != null && (
-                      <span className="text-[10px] font-mono text-white/20 flex-shrink-0 w-10 text-right tabular-nums">
+                      <span className="text-[10px] font-mono text-white/55 flex-shrink-0 w-10 text-right tabular-nums">
                         #{entry.event_sequence}
                       </span>
                     )}
                     <span className={`font-mono text-[13px] font-medium ${actionColor} min-w-[160px]`}>
                       {entry.action}
                     </span>
-                    <span className="text-[12px] text-white/35 truncate flex-1">
+                    <span className="text-[12px] text-white/70 truncate flex-1">
                       {entry.entity_type}/{entry.entity_id?.slice(0, 8)}
                       {entry.actor_name && entry.actor_name !== 'system' && (
-                        <span className="text-white/25 ml-1.5">· {entry.actor_name}</span>
+                        <span className="text-white/60 ml-1.5">· {entry.actor_name}</span>
                       )}
                     </span>
                     {/* Exact UTC timestamp */}
-                    <span className="text-[11px] font-mono text-white/25 tabular-nums flex-shrink-0 whitespace-nowrap">
+                    <span className="text-[11px] font-mono text-white/65 tabular-nums flex-shrink-0 whitespace-nowrap">
                       {utcTimestamp}
                     </span>
                   </li>

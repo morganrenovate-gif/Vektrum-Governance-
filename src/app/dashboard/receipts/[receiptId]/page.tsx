@@ -55,23 +55,23 @@ export default async function ReceiptPage({
       <div className="mx-auto max-w-2xl">
 
         {/* ── Breadcrumb ─────────────────────────────────────────────── */}
-        <div className="mb-6 flex items-center gap-2 text-sm text-white/40">
+        <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-2 text-sm text-white/75">
           <Link
             href="/dashboard"
-            className="hover:text-white/70 transition-colors"
+            className="hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue rounded transition-colors"
           >
             Dashboard
           </Link>
-          <span>/</span>
+          <span aria-hidden="true">/</span>
           <Link
             href={dealUrl}
-            className="hover:text-white/70 transition-colors"
+            className="hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue rounded transition-colors"
           >
             {receipt.deal_title}
           </Link>
-          <span>/</span>
-          <span className="text-white/60">Receipt</span>
-        </div>
+          <span aria-hidden="true">/</span>
+          <span className="text-white" aria-current="page">Receipt</span>
+        </nav>
 
         {/* ── Page header ────────────────────────────────────────────── */}
         <div className="mb-6 flex items-start gap-3">
@@ -83,7 +83,7 @@ export default async function ReceiptPage({
             <h1 className="text-xl font-semibold text-white">
               Transaction Receipt
             </h1>
-            <p className="text-sm text-white/40">
+            <p className="text-sm text-white/75">
               {receipt.deal_title} · {receipt.milestone_title}
             </p>
           </div>
@@ -98,7 +98,7 @@ export default async function ReceiptPage({
         />
 
         {/* ── Compliance note ────────────────────────────────────────── */}
-        <p className="mt-4 text-center text-xs text-white/25">
+        <p className="mt-4 text-center text-xs text-white/65">
           This receipt is a legally defensible record. All timestamps are in UTC.
           Use &ldquo;Export / Print PDF&rdquo; to generate a PDF for your records.
         </p>
@@ -107,8 +107,8 @@ export default async function ReceiptPage({
         <div className="mt-6 flex justify-center">
           <Link
             href={dealUrl}
-            className="inline-flex items-center gap-1.5 text-sm text-white/40
-                       hover:text-white/70 transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm text-white/80
+                       hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue rounded transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to deal

@@ -121,8 +121,8 @@ export default async function BillingPortalPage() {
       case 'active':    return 'bg-vektrum-blue/10 text-vektrum-blue border-vektrum-blue/20'
       case 'completed': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
       case 'disputed':  return 'bg-red-500/10 text-red-400 border-red-500/20'
-      case 'draft':     return 'bg-white/[0.05] text-white/40 border-white/[0.08]'
-      default:          return 'bg-white/[0.05] text-white/40 border-white/[0.08]'
+      case 'draft':     return 'bg-white/[0.05] text-white/75 border-white/[0.14]'
+      default:          return 'bg-white/[0.05] text-white/75 border-white/[0.14]'
     }
   }
 
@@ -188,7 +188,7 @@ export default async function BillingPortalPage() {
             className="rounded-xl border border-white/[0.08] bg-surface-2 px-4 py-4 shadow-card"
           >
             <div className="flex items-start justify-between gap-3 mb-2">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/65">
                 {label}
               </p>
               <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-white/[0.05] border border-white/[0.08]">
@@ -196,7 +196,7 @@ export default async function BillingPortalPage() {
               </div>
             </div>
             <p className="font-display text-xl font-bold tabular-nums text-white">{value}</p>
-            {sub && <p className="mt-1 text-[11px] text-white/30">{sub}</p>}
+            {sub && <p className="mt-1 text-[11px] text-white/65">{sub}</p>}
           </div>
         ))}
       </div>
@@ -210,8 +210,8 @@ export default async function BillingPortalPage() {
 
         {dealRows.length === 0 ? (
           <div className="rounded-xl border border-white/[0.08] bg-surface-2 p-10 text-center">
-            <DollarSign size={32} className="text-white/20 mx-auto mb-3" />
-            <p className="text-[13px] text-white/40">No deals found. Create and fund a deal to see billing data.</p>
+            <DollarSign size={32} className="text-white/65 mx-auto mb-3" aria-hidden="true" />
+            <p className="text-[13px] text-white/80">No deals found. Create and fund a deal to see billing data.</p>
           </div>
         ) : (
           <div className="rounded-xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden">
@@ -248,7 +248,7 @@ export default async function BillingPortalPage() {
                             >
                               {deal.title}
                             </Link>
-                            <p className="text-[11px] text-white/35 mt-0.5">
+                            <p className="text-[11px] text-white/65 mt-0.5">
                               {formatDateShort(deal.created_at)}
                             </p>
                           </div>
@@ -297,7 +297,7 @@ export default async function BillingPortalPage() {
                             ? 'text-emerald-400'
                             : variance < -0.01
                             ? 'text-amber-400'
-                            : 'text-white/30'
+                            : 'text-white/65'
                         }`}>
                           {variance === 0 || feeBudget === 0
                             ? '—'
@@ -345,8 +345,8 @@ export default async function BillingPortalPage() {
       </div>
 
       {/* Note on fee model */}
-      <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 text-[12px] text-white/35">
-        <p className="font-medium text-white/50 mb-1">About governance fees</p>
+      <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 text-[12px] text-white/75">
+        <p className="font-medium text-white/90 mb-1">About governance fees</p>
         <p>
           The governance fee is charged on top of each milestone release —
           contractors always receive the full gross milestone amount.

@@ -123,7 +123,7 @@ async function getSubscriptionData() {
 function TierBadge({ tier }: { tier: SubscriptionTier | null }) {
   if (!tier) {
     return (
-      <span className="inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium bg-white/[0.05] text-white/30 border border-white/[0.08]">
+      <span className="inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium bg-white/[0.05] text-white/70 border border-white/[0.12]">
         Unset
       </span>
     )
@@ -183,7 +183,7 @@ export default async function SubscriptionsPage() {
         action={
           <Link
             href="/dashboard/admin"
-            className="inline-flex items-center gap-2 rounded-xl border border-white/[0.1] bg-white/[0.05] px-4 py-2.5 text-[13px] font-medium text-white/60 hover:bg-white/[0.08] hover:text-white transition-all"
+            className="inline-flex items-center gap-2 rounded-xl border border-white/[0.14] bg-white/[0.05] px-4 py-2.5 text-[13px] font-medium text-white/80 hover:bg-white/[0.1] hover:text-white hover:border-white/[0.22] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-all"
           >
             <ArrowLeft size={14} />
             Admin Dashboard
@@ -194,12 +194,12 @@ export default async function SubscriptionsPage() {
       {/* Compliance notice */}
       <div className="flex items-start gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] p-4">
         <ShieldCheck size={15} className="text-vektrum-blue flex-shrink-0 mt-0.5" />
-        <div className="text-[13px] text-white/50 space-y-0.5">
+        <div className="text-[13px] text-white/75 space-y-0.5">
           <p className="font-medium text-white/70">Tier changes are audit-logged</p>
           <p>
             Every change requires a written justification and is permanently recorded in the
             admin audit log with your user ID. Changes affect only future deal fundings —
-            existing <code className="text-white/60">billing_rate_bps</code> values are never retroactively modified.
+            existing <code className="text-white/90 font-mono text-[12px] rounded bg-white/[0.06] px-1 py-0.5">billing_rate_bps</code> values are never retroactively modified.
           </p>
         </div>
       </div>
@@ -210,15 +210,15 @@ export default async function SubscriptionsPage() {
           { label: 'Standalone',    count: tierBreakdown.standalone,    color: 'text-white/60' },
           { label: 'Institutional', count: tierBreakdown.institutional, color: 'text-vektrum-blue' },
           { label: 'Enterprise',    count: tierBreakdown.enterprise,    color: 'text-amber-400' },
-          { label: 'Unset',         count: tierBreakdown.unset,         color: 'text-white/30' },
+          { label: 'Unset',         count: tierBreakdown.unset,         color: 'text-white/70' },
         ].map(({ label, count, color }) => (
           <div
             key={label}
             className="rounded-xl border border-white/[0.08] bg-surface-2 px-4 py-3"
           >
-            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35 mb-1">{label}</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/65 mb-1">{label}</p>
             <p className={`font-display text-2xl font-bold ${color}`}>{count}</p>
-            <p className="text-[11px] text-white/30 mt-0.5">funders</p>
+            <p className="text-[11px] text-white/60 mt-0.5">funders</p>
           </div>
         ))}
       </div>
@@ -228,7 +228,7 @@ export default async function SubscriptionsPage() {
         <SectionHeader label="Funder Accounts" count={funderRows.length} />
 
         {funderRows.length === 0 ? (
-          <div className="rounded-xl border border-white/[0.08] bg-surface-2 p-10 text-center text-[13px] text-white/30">
+          <div className="rounded-xl border border-white/[0.08] bg-surface-2 p-10 text-center text-[13px] text-white/70">
             No funder accounts found.
           </div>
         ) : (
@@ -256,17 +256,17 @@ export default async function SubscriptionsPage() {
                             {funder.full_name ?? funder.company_name ?? '—'}
                           </p>
                           {funder.email && (
-                            <p className="text-[11px] text-white/40 mt-0.5">{funder.email}</p>
+                            <p className="text-[11px] text-white/65 mt-0.5">{funder.email}</p>
                           )}
                           {funder.company_name && funder.full_name && (
-                            <p className="text-[11px] text-white/35 mt-0.5">{funder.company_name}</p>
+                            <p className="text-[11px] text-white/60 mt-0.5">{funder.company_name}</p>
                           )}
                         </div>
                       </td>
                       <td>
                         <TierBadge tier={funder.subscription_tier} />
                       </td>
-                      <td className="tabular-nums text-white/60">
+                      <td className="tabular-nums text-white/80">
                         {funder.subscription_tier
                           ? `${billingRateFromTier(funder.subscription_tier) / 100}%`
                           : '—'}
@@ -287,7 +287,7 @@ export default async function SubscriptionsPage() {
                       <td className="tabular-nums text-white/70">
                         {formatMoney(funder.totalFunded)}
                       </td>
-                      <td className="text-white/40">
+                      <td className="text-white/70">
                         {formatDateShort(funder.lastTierChange)}
                       </td>
                       <td>
@@ -320,7 +320,7 @@ export default async function SubscriptionsPage() {
             >
               <TierBadge tier={tier} />
               <p className="mt-2 text-[13px] text-white/70">{getFeeDescription(tier)}</p>
-              <p className="mt-1 text-[11px] text-white/35">
+              <p className="mt-1 text-[11px] text-white/65">
                 {tier === 'standalone'    && 'Self-service. No retainer required.'}
                 {tier === 'institutional' && 'Retainer applies. Volume commitments.'}
                 {tier === 'enterprise'    && 'Negotiated annually. Custom terms.'}

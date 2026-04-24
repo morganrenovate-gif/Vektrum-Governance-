@@ -29,11 +29,11 @@ export default function DashboardError({
             <h2 className="font-display text-xl font-bold text-white">
               Dashboard error
             </h2>
-            <p className="text-sm text-white/55">
+            <p className="text-sm text-white/85">
               The dashboard couldn&rsquo;t load. Your deals and funds are unaffected.
             </p>
             {error.digest && (
-              <p className="text-[11px] font-mono text-white/30 mt-2">
+              <p className="text-[11px] font-mono text-white/70 mt-2">
                 Error: {error.digest}
               </p>
             )}
@@ -50,7 +50,7 @@ export default function DashboardError({
             </button>
             <Link
               href="/"
-              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-white/[0.08] bg-white px-5 py-2.5 text-sm font-semibold text-white/55 transition-all hover:bg-surface-3"
+              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-white/[0.16] bg-white/[0.05] px-5 py-2.5 text-sm font-semibold text-white/90 hover:bg-white/[0.1] hover:text-white hover:border-white/[0.24] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-all"
             >
               <LayoutDashboard size={14} aria-hidden="true" />
               Go home

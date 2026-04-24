@@ -83,7 +83,7 @@ export function ReleaseRetainageButton({
             <button
               onClick={() => { setOpen(false); setError(null); }}
               disabled={loading}
-              className="absolute right-4 top-4 text-white/40 hover:text-white/80 transition-colors disabled:opacity-50"
+              className="absolute right-4 top-4 text-white/75 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue rounded transition-colors disabled:opacity-50"
               aria-label="Close"
             >
               <X size={18} />
@@ -96,7 +96,7 @@ export function ReleaseRetainageButton({
               >
                 Release Retainage
               </h2>
-              <p className="text-[13px] text-white/50 leading-relaxed">
+              <p className="text-[13px] text-white/80 leading-relaxed">
                 Transfer withheld retainage to the contractor&rsquo;s Stripe account.
                 Currently held:{" "}
                 <span className="font-semibold text-amber-400">
@@ -119,12 +119,12 @@ export function ReleaseRetainageButton({
               />
 
               <div>
-                <label className="block text-[12px] font-medium text-white/60 mb-1.5">
-                  Notes <span className="text-white/30 font-normal">(optional)</span>
+                <label className="block text-[12px] font-medium text-white/85 mb-1.5">
+                  Notes <span className="text-white/65 font-normal">(optional)</span>
                 </label>
                 <textarea
                   rows={2}
-                  className="w-full rounded-lg border border-white/[0.10] bg-white/[0.04] px-3 py-2 text-[13px] text-white placeholder:text-white/25 focus:outline-none focus:ring-1 focus:ring-vektrum-blue/60 resize-none disabled:opacity-50"
+                  className="w-full rounded-lg border border-white/[0.14] bg-white/[0.04] px-3 py-2 text-[13px] text-white placeholder:text-white/55 focus:outline-none focus:ring-2 focus:ring-vektrum-blue/50 focus:border-vektrum-blue resize-none disabled:opacity-50"
                   placeholder="e.g. Substantial completion — punch list closed"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}

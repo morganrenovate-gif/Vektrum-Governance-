@@ -146,7 +146,7 @@ export function AddMilestoneForm({ dealId, maxAmount }: AddMilestoneFormProps) {
       </Button>
 
       {maxAmount <= 0 && (
-        <p className="text-xs text-white/30">
+        <p className="text-xs text-white/70">
           All funds have been allocated across existing milestones.
         </p>
       )}

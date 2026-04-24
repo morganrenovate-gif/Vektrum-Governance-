@@ -53,7 +53,7 @@ export default function FoundersPage() {
         <div className="relative max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-surface-2 px-4 py-1.5 shadow-sm mb-8">
             <span className="h-1.5 w-1.5 rounded-full bg-vektrum-green animate-pulse" aria-hidden="true" />
-            <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/30">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/65">
               The Team
             </span>
           </div>
@@ -86,7 +86,7 @@ export default function FoundersPage() {
                     <h2 className="font-display text-[18px] font-bold text-white leading-tight">
                       {founder.name}
                     </h2>
-                    <p className="mt-0.5 text-[12px] font-semibold uppercase tracking-[0.1em] text-white/45">
+                    <p className="mt-0.5 text-[12px] font-semibold uppercase tracking-[0.1em] text-white/75">
                       {founder.title}
                     </p>
                   </div>
@@ -104,7 +104,7 @@ export default function FoundersPage() {
 
       <section className="border-t border-white/[0.08] bg-surface-2 py-20 sm:py-24" aria-label="Get started with Vektrum">
         <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/30 mb-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/65 mb-4">
             Work with us
           </p>
           <h2 className="font-display text-2xl font-bold tracking-[-0.025em] text-white sm:text-3xl mb-4">

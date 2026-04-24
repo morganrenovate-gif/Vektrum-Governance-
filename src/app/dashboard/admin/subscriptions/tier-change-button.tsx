@@ -15,7 +15,7 @@ const TIER_LABELS: Record<SubscriptionTier, string> = {
 }
 
 const TIER_COLORS: Record<SubscriptionTier, string> = {
-  standalone:    'text-white/60',
+  standalone:    'text-white/85',
   institutional: 'text-vektrum-blue',
   enterprise:    'text-amber-400',
 }
@@ -101,7 +101,7 @@ export function TierChangeButton({
             onClick={() => {}}
           >
             <span className={TIER_COLORS[appliedTier]}>{TIER_LABELS[appliedTier]}</span>
-            <ChevronDown size={11} className="text-white/30" />
+            <ChevronDown size={11} className="text-white/65" />
           </button>
 
           {/* Dropdown */}
@@ -117,7 +117,7 @@ export function TierChangeButton({
                 {tier === appliedTier && <Check size={11} className="text-emerald-400" />}
                 {tier !== appliedTier && <span className="w-[11px]" />}
                 <span className={TIER_COLORS[tier]}>{TIER_LABELS[tier]}</span>
-                <span className="ml-auto text-white/30 text-[10px]">
+                <span className="ml-auto text-white/65 text-[10px] tabular-nums">
                   {tier === 'standalone' ? '1.00%' : tier === 'institutional' ? '0.70%' : '0.65%'}
                 </span>
               </button>
@@ -139,7 +139,7 @@ export function TierChangeButton({
             <h3 className="text-[15px] font-semibold text-white mb-1">
               Change Subscription Tier
             </h3>
-            <p className="text-[13px] text-white/50 mb-5">
+            <p className="text-[13px] text-white/75 mb-5">
               Updating <span className="text-white/80">{funderName}</span> from{' '}
               <span className={TIER_COLORS[appliedTier]}>{TIER_LABELS[appliedTier]}</span> to{' '}
               <span className={TIER_COLORS[selectedTier]}>{TIER_LABELS[selectedTier]}</span>
@@ -156,20 +156,21 @@ export function TierChangeButton({
             )}
 
             <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-3 mb-4">
-              <p className="text-[11px] text-white/40 uppercase tracking-wider mb-1">New fee</p>
-              <p className="text-[13px] text-white/80">{getFeeDescription(selectedTier)}</p>
+              <p className="text-[11px] text-white/65 uppercase tracking-wider mb-1 font-semibold">New fee</p>
+              <p className="text-[13px] text-white">{getFeeDescription(selectedTier)}</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-[12px] font-medium text-white/60 mb-1.5">
-                  Admin justification <span className="text-red-400">*</span>
+                <label className="block text-[12px] font-medium text-white/85 mb-1.5">
+                  Admin justification <span className="text-red-400" aria-hidden="true">*</span>
+                  <span className="sr-only">(required)</span>
                 </label>
                 <textarea
                   value={justification}
                   onChange={(e) => setJustification(e.target.value)}
                   placeholder="Document the business reason for this tier change (e.g. 'Agreed enterprise rate per contract signed 2026-04-23')"
-                  className="w-full rounded-xl border border-white/[0.1] bg-white/[0.05] px-3 py-2 text-[13px] text-white placeholder:text-white/30 resize-none focus:outline-none focus:ring-2 focus:ring-vektrum-blue/50 focus:border-vektrum-blue/40"
+                  className="w-full rounded-xl border border-white/[0.14] bg-white/[0.05] px-3 py-2 text-[13px] text-white placeholder:text-white/55 resize-none focus:outline-none focus:ring-2 focus:ring-vektrum-blue/50 focus:border-vektrum-blue/40"
                   rows={3}
                   minLength={10}
                   required

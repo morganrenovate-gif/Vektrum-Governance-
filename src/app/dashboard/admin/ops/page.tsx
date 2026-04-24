@@ -127,7 +127,7 @@ export default async function OpsPage() {
         <div>
           <Link
             href="/dashboard/admin"
-            className="inline-flex items-center gap-1.5 text-[12px] text-white/60 hover:text-white transition-colors mb-4"
+            className="inline-flex items-center gap-1.5 text-[12px] text-white/75 hover:text-white focus-visible:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue rounded-sm transition-colors mb-4"
           >
             <ArrowLeft size={12} />
             Admin Dashboard
@@ -138,7 +138,7 @@ export default async function OpsPage() {
               <h1 className="text-[22px] font-bold text-white tracking-tight">
                 Ops Dashboard
               </h1>
-              <p className="text-[13px] text-white/40 mt-1">
+              <p className="text-[13px] text-white/70 mt-1">
                 Release health · Payout failures · Webhook monitoring · Search
               </p>
             </div>
@@ -270,7 +270,7 @@ export default async function OpsPage() {
 
         {/* ── Footer ──────────────────────────────────────────────── */}
         <footer className="text-center py-4">
-          <p className="text-[11px] text-white/20">
+          <p className="text-[11px] text-white/65">
             Ops Dashboard · Read-only · All financial actions require the 8-condition release gate
           </p>
         </footer>
@@ -307,12 +307,12 @@ function SummaryCard({
     ? <Icon size={14} className="text-red-400" />
     : warn
       ? <Icon size={14} className="text-amber-400" />
-      : <Icon size={14} className="text-white/25" />
+      : <Icon size={14} className="text-white/60" />
 
   const inner = (
     <div className={`rounded-xl border ${color} px-4 py-3 transition-all ${href ? 'hover:brightness-110 cursor-pointer' : ''}`}>
       <div className="flex items-center justify-between mb-1.5">
-        <p className="text-[10px] uppercase tracking-widest text-white/30">{label}</p>
+        <p className="text-[10px] uppercase tracking-widest text-white/65">{label}</p>
         {iconEl}
       </div>
       <p className={`text-[20px] font-bold tabular-nums ${valueColor}`}>{value}</p>
@@ -336,11 +336,11 @@ function SectionHeader({
   return (
     <div className="flex items-center gap-3 mb-4">
       <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center">
-        <Icon size={14} className="text-white/50" />
+        <Icon size={14} className="text-white/75" />
       </div>
       <div className="flex-1">
         <div className="flex items-center gap-2">
-          <h2 className="text-[15px] font-semibold text-white/85">{title}</h2>
+          <h2 className="text-[15px] font-semibold text-white">{title}</h2>
           {badge && (
             <span className={[
               'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold',
@@ -352,7 +352,7 @@ function SectionHeader({
             </span>
           )}
         </div>
-        <p className="text-[12px] text-white/35">{description}</p>
+        <p className="text-[12px] text-white/65">{description}</p>
       </div>
     </div>
   )
