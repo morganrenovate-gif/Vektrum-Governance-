@@ -280,18 +280,28 @@ export async function validateRelease(
 // ─── AI Draw Review Precondition ─────────────────────────────────────────────
 
 /**
- * Checks whether a recent, passing AI draw review exists for the milestone.
- * This is a SEPARATE precondition checked BEFORE the 8-condition release gate.
+ * Checks whether a passing AI draw review (or active admin override) exists
+ * for the milestone. This is a SEPARATE precondition checked BEFORE the
+ * 8-condition release gate.
  *
- * Rules:
- *   - Must have at least one ai_draw_review audit entry
- *   - Assessment must be < 48 hours old
- *   - Assessment must NOT be critical risk level
+ * Pass logic (checked in order):
+ *   1. Standard ai_draw_review — must be < 48 h old and NOT critical risk.
+ *   2. Admin override (ai_review_admin_override) — TTL controlled by
+ *      AI_ADMIN_OVERRIDE_TTL_HOURS env var (default 4 h). Gate passes but a
+ *      console.warn and a 'warning' field in the result signal the override.
+ *
+ * Override guards (enforced by the override endpoint, not re-validated here):
+ *   - Only admins with AAL2 MFA may create overrides.
+ *   - Overrides cannot be created while a critical-risk review is in effect.
  */
 export async function checkAiPrecondition(
   milestoneId: string,
-  supabase: SupabaseClient
-): Promise<{ passed: boolean; reason?: string }> {
+  supabase: SupabaseClient,
+): Promise<{ passed: boolean; reason?: string; warning?: string }> {
+
+  const FORTY_EIGHT_HOURS_MS = 48 * 60 * 60 * 1000
+
+  // ── 1. Standard AI draw review ────────────────────────────────────────────
   const { data: reviews } = await supabase
     .from('audit_log')
     .select('created_at, metadata')
@@ -301,22 +311,78 @@ export async function checkAiPrecondition(
     .order('created_at', { ascending: false })
     .limit(1)
 
+  if (reviews && reviews.length > 0) {
+    const review    = reviews[0]
+    const reviewAge = Date.now() - new Date(review.created_at).getTime()
+
+    if (reviewAge <= FORTY_EIGHT_HOURS_MS) {
+      const riskLevel = (review.metadata as Record<string, unknown> | null)?.risk_level
+      if (riskLevel === 'critical') {
+        return {
+          passed: false,
+          reason: 'AI flagged critical risk — admin review required before release',
+        }
+      }
+      // Valid, non-critical, non-expired review → pass
+      return { passed: true }
+    }
+    // Expired review — fall through to check admin override before failing
+  }
+
+  // ── 2. Admin override (for AI service unavailability) ─────────────────────
+  // Check for an active ai_review_admin_override entry. These expire after
+  // AI_ADMIN_OVERRIDE_TTL_HOURS (default 4 h) — much shorter than the normal
+  // 48 h TTL to limit the blast radius of an emergency bypass.
+  const ttlHours = Math.max(
+    1,
+    parseInt(process.env.AI_ADMIN_OVERRIDE_TTL_HOURS ?? '4', 10),
+  )
+  const ttlMs = ttlHours * 60 * 60 * 1000
+
+  const { data: overrides } = await supabase
+    .from('audit_log')
+    .select('created_at, metadata')
+    .eq('entity_type', 'milestone')
+    .eq('entity_id', milestoneId)
+    .eq('action', 'ai_review_admin_override')
+    .order('created_at', { ascending: false })
+    .limit(1)
+
+  if (overrides && overrides.length > 0) {
+    const override    = overrides[0]
+    const overrideAge = Date.now() - new Date(override.created_at).getTime()
+
+    if (overrideAge <= ttlMs) {
+      const meta            = override.metadata as Record<string, unknown> | null
+      const overrideRiskLevel = meta?.override_risk_level ?? 'unknown'
+      const expiresAt         = meta?.expires_at ?? 'unknown'
+
+      console.warn(
+        `[release-gate] Admin AI-review override ACTIVE for milestone ${milestoneId}. ` +
+        `Asserted risk: ${overrideRiskLevel}. Expires: ${expiresAt}. ` +
+        'Standard AI precondition bypassed by admin override.',
+      )
+
+      return {
+        passed:  true,
+        warning:
+          `Admin override in effect — AI draw review bypassed by admin ` +
+          `(asserted risk: ${overrideRiskLevel}, expires: ${expiresAt}).`,
+      }
+    }
+    // Override exists but has expired — fall through to failure
+  }
+
+  // ── 3. No valid review or active override ─────────────────────────────────
   if (!reviews || reviews.length === 0) {
     return { passed: false, reason: 'AI draw review is required before release' }
   }
 
-  const review = reviews[0]
-  const reviewAge = Date.now() - new Date(review.created_at).getTime()
-  const fortyEightHours = 48 * 60 * 60 * 1000
-
-  if (reviewAge > fortyEightHours) {
-    return { passed: false, reason: 'AI assessment expired — please request a fresh review' }
+  // Reviews exist but all are expired
+  return {
+    passed: false,
+    reason:
+      'AI assessment expired — please request a fresh review. ' +
+      'If the AI service is unavailable, an admin can apply a temporary override.',
   }
-
-  const riskLevel = (review.metadata as Record<string, unknown> | null)?.risk_level
-  if (riskLevel === 'critical') {
-    return { passed: false, reason: 'AI flagged critical risk — admin review required before release' }
-  }
-
-  return { passed: true }
 }
