@@ -137,7 +137,7 @@ export default function SignupPage() {
           </ul>
         </div>
 
-        <p className="text-xs text-white/30">
+        <p className="text-xs text-white/70">
           Payments powered by Stripe Connect · Vektrum never holds funds
         </p>
       </div>
@@ -195,7 +195,7 @@ export default function SignupPage() {
                           )}>
                             {label}
                           </p>
-                          <p className="text-[11px] text-white/30">{sub}</p>
+                          <p className="text-[11px] text-white/70">{sub}</p>
                         </div>
                       </button>
                     );

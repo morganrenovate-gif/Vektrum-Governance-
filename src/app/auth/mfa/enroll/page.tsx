@@ -169,7 +169,7 @@ export default function MfaEnrollPage() {
 
           {/* ── Loading ──────────────────────────────────────────────────── */}
           {step === "loading" && (
-            <div className="flex flex-col items-center gap-3 py-8 text-white/40">
+            <div className="flex flex-col items-center gap-3 py-8 text-white/75">
               <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-vektrum-blue" />
               <p className="text-sm">Preparing authenticator setup&hellip;</p>
             </div>
@@ -229,14 +229,14 @@ export default function MfaEnrollPage() {
                 <button
                   type="button"
                   onClick={() => setShowSecret(s => !s)}
-                  className="flex items-center gap-1.5 text-xs text-white/40 hover:text-white/70 transition-colors"
+                  className="flex items-center gap-1.5 text-xs text-white/80 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue rounded transition-colors"
                 >
                   <Key size={12} aria-hidden="true" />
                   {showSecret ? "Hide" : "Can't scan? Show"} setup key
                 </button>
                 {showSecret && (
                   <div className="mt-2 rounded-lg border border-white/[0.08] bg-[#0D1B2A] px-3 py-2">
-                    <p className="text-xs text-white/40 mb-1">Manual entry key</p>
+                    <p className="text-xs text-white/75 mb-1">Manual entry key</p>
                     <code className="text-sm font-mono tracking-wider text-white break-all select-all">
                       {secret}
                     </code>

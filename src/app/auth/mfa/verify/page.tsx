@@ -177,7 +177,7 @@ export default function MfaVerifyPage() {
 
           {/* Loading */}
           {!pageReady && (
-            <div className="flex flex-col items-center gap-3 py-8 text-white/40">
+            <div className="flex flex-col items-center gap-3 py-8 text-white/75">
               <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-vektrum-blue" />
               <p className="text-sm">Loading&hellip;</p>
             </div>
@@ -228,7 +228,7 @@ export default function MfaVerifyPage() {
           <button
             type="button"
             onClick={handleSignOut}
-            className="inline-flex items-center gap-1.5 text-sm text-white/40 hover:text-white/70 transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm text-white/80 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue rounded transition-colors"
           >
             <LogOut size={13} aria-hidden="true" />
             Sign out and use a different account

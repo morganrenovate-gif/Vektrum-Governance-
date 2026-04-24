@@ -126,7 +126,7 @@ export default function LoginPage() {
         </div>
 
         {/* Bottom note */}
-        <p className="text-xs text-white/30">
+        <p className="text-xs text-white/70">
           Payments powered by Stripe Connect · Vektrum never holds funds
         </p>
       </div>
