@@ -71,27 +71,80 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  // ── Atomic idempotency guard ─────────────────────────────────────────────────
-  // Insert into stripe_processed_events BEFORE processing. A unique violation
-  // (SQLSTATE 23505) means this event was already handled — return 200 immediately
-  // so Stripe stops retrying. This is DB-atomic: two concurrent deliveries cannot
-  // both succeed the insert, eliminating the race window in application-level checks.
+  // ── Idempotency guard with processing lifecycle ──────────────────────────────
+  //
+  // INSERT with processing_status='processing' before running any handler.
+  // A unique violation (SQLSTATE 23505) means Stripe has delivered this event
+  // before. We inspect the existing row's processing_status to decide what to do:
+  //
+  //   'processed'  — already handled successfully; return 200 (idempotent).
+  //   'processing' — concurrent delivery in-flight; return 200 and let it finish.
+  //   'failed'     — previous attempt threw; Stripe is retrying. Atomically claim
+  //                  the row (UPDATE WHERE processing_status='failed' RETURNING) and
+  //                  re-run the handler. If another concurrent retry already claimed
+  //                  it, return 200 without re-processing.
+  //
+  // On success: UPDATE processing_status='processed', processed_at=now().
+  // On error:   UPDATE processing_status='failed', error_message=<msg>; return 500
+  //             so Stripe will retry (and the retry can claim the 'failed' row).
   const adminClient = createSupabaseAdminClient()
   const processingStart = Date.now()
 
-  const { error: dedupError } = await adminClient
+  const { error: dedupInsertError } = await adminClient
     .from('stripe_processed_events')
-    .insert({ stripe_event_id: event.id, event_type: event.type, result: 'ok' })
+    .insert({ stripe_event_id: event.id, event_type: event.type })
 
-  if (dedupError) {
-    if (dedupError.code === '23505') {
-      // Duplicate delivery — already processed. Acknowledge without re-processing.
-      console.log(`[webhook] Duplicate event ${event.id} (${event.type}) — already processed, skipping.`)
-      return NextResponse.json({ received: true, event_id: event.id, duplicate: true })
+  if (dedupInsertError) {
+    if (dedupInsertError.code === '23505') {
+      // ── Fetch the existing row to inspect lifecycle state ──────────────────
+      const { data: existingRow } = await adminClient
+        .from('stripe_processed_events')
+        .select('processing_status')
+        .eq('stripe_event_id', event.id)
+        .single()
+
+      const existingStatus = existingRow?.processing_status
+
+      if (existingStatus === 'processed') {
+        // Already handled successfully — idempotent acknowledgement.
+        console.log(`[webhook] Duplicate event ${event.id} (${event.type}) — already processed, skipping.`)
+        return NextResponse.json({ received: true, event_id: event.id, duplicate: true })
+      }
+
+      if (existingStatus === 'processing') {
+        // Concurrent delivery — the first request is actively handling this event.
+        console.log(`[webhook] Concurrent delivery of event ${event.id} (${event.type}) — in-flight, skipping.`)
+        return NextResponse.json({ received: true, event_id: event.id, duplicate: true })
+      }
+
+      if (existingStatus === 'failed') {
+        // Previous attempt failed. Atomically claim the row for retry.
+        // If another concurrent Stripe retry already claimed it, back off.
+        const { data: claimRows } = await adminClient
+          .from('stripe_processed_events')
+          .update({ processing_status: 'processing' })
+          .eq('stripe_event_id', event.id)
+          .eq('processing_status', 'failed')
+          .select('id')
+
+        if (!claimRows || claimRows.length === 0) {
+          // Another concurrent retry claimed this event first — back off.
+          console.log(`[webhook] Event ${event.id} retry already claimed by concurrent request — skipping.`)
+          return NextResponse.json({ received: true, event_id: event.id, duplicate: true })
+        }
+
+        // Successfully claimed — fall through to re-run the handler below.
+        console.log(`[webhook] Retrying previously-failed event ${event.id} (${event.type}).`)
+      } else {
+        // Unexpected state (e.g. NULL from a schema transition). Acknowledge safely.
+        console.warn(`[webhook] Unexpected dedup state '${existingStatus}' for event ${event.id} — skipping.`)
+        return NextResponse.json({ received: true, event_id: event.id, duplicate: true })
+      }
+    } else {
+      // Non-uniqueness DB error — log but continue. Downstream conditional writes
+      // guard against duplicate side-effects.
+      console.error(`[webhook] stripe_processed_events insert failed for ${event.id}:`, dedupInsertError.message)
     }
-    // Non-uniqueness DB error — log but continue processing. Worst case: duplicate
-    // side-effects, which the downstream conditional writes already guard against.
-    console.error(`[webhook] stripe_processed_events insert failed for ${event.id}:`, dedupError.message)
   }
 
   // ── Route Event ─────────────────────────────────────────────────────────────
@@ -140,24 +193,32 @@ export async function POST(request: NextRequest) {
       }
 
       default:
-        // Acknowledge but do not process unhandled event types
-        console.log(`[webhook] Received unhandled event type: ${event.type}`)
+        // Acknowledge but do not process unhandled event types.
+        // console.warn so these surface in error monitoring — unknown events
+        // often mean a new Stripe event type was enabled on the dashboard.
+        console.warn(`[webhook] Received unhandled event type: ${event.type}`)
         break
     }
   } catch (handlerError) {
     const message = handlerError instanceof Error ? handlerError.message : String(handlerError)
     console.error(`[webhook] Handler error for event ${event.type} (${event.id}):`, message)
 
-    // Mark the event as errored so it can be retried (update, not insert — row exists).
+    // Mark the event as 'failed' so the next Stripe retry can claim and re-run it.
+    // (The dedup INSERT at the top uses WHERE processing_status='failed' to atomically
+    // claim failed rows for re-processing rather than short-circuiting with 200.)
     adminClient
       .from('stripe_processed_events')
-      .update({ result: 'error', processing_ms: Date.now() - processingStart })
+      .update({
+        processing_status: 'failed',
+        error_message:     message,
+        processing_ms:     Date.now() - processingStart,
+      })
       .eq('stripe_event_id', event.id)
       .then(({ error }) => {
-        if (error) console.error(`[webhook] Failed to mark event ${event.id} as error:`, error.message)
+        if (error) console.error(`[webhook] Failed to mark event ${event.id} as failed:`, error.message)
       })
 
-    // Return 500 so Stripe will retry the event
+    // Return 500 so Stripe will retry the event.
     return NextResponse.json(
       {
         error: `Webhook handler failed for event type '${event.type}'. Stripe will retry.`,
@@ -166,13 +227,17 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  // Record processing duration for monitoring.
+  // Mark event as successfully processed and record wall-clock duration.
   adminClient
     .from('stripe_processed_events')
-    .update({ processing_ms: Date.now() - processingStart })
+    .update({
+      processing_status: 'processed',
+      processed_at:      new Date().toISOString(),
+      processing_ms:     Date.now() - processingStart,
+    })
     .eq('stripe_event_id', event.id)
     .then(({ error }) => {
-      if (error) console.error(`[webhook] Failed to record processing_ms for ${event.id}:`, error.message)
+      if (error) console.error(`[webhook] Failed to mark event ${event.id} as processed:`, error.message)
     })
 
   return NextResponse.json({ received: true, event_id: event.id })
@@ -250,23 +315,29 @@ async function handleAccountUpdated(account: Stripe.Account): Promise<void> {
 // Fired by Stripe when a Connect transfer is confirmed — i.e. funds have been
 // applied to the destination (contractor's) Connect account.
 //
-// Updates:
+// Updates (via confirm_stripe_transfer RPC — single ACID transaction):
 //   releases.transfer_status         pending → confirmed
-//   transaction_receipts.status      pending → confirmed
 //   billing_records.transfer_status  pending → confirmed
 //
-// Idempotency:
-//   All three writes are conditional on the current status being 'pending'.
-//   A second delivery of the same event is a safe no-op:
-//     - 'confirmed' rows are skipped by the .eq('transfer_status', 'pending') guard.
-//     - 'failed'/'reversed' rows are intentionally left alone — a failure event
-//       has higher authority than a late-arriving success. Stripe can deliver events
-//       out of order in rare network-partition scenarios; the failure state wins.
+// Then (outside the transaction, non-fatal):
+//   transaction_receipts.status      pending → confirmed
 //
-// Non-fatal handling:
-//   billing_records update failure is logged but does not cause a retry (no throw).
-//   The release and receipt are the authoritative records; billing_records is
-//   informational for fee tracking and reconciliation.
+// Atomicity:
+//   The release and billing_records updates are wrapped in confirm_stripe_transfer(),
+//   a Postgres function that uses SELECT FOR UPDATE NOWAIT to serialize concurrent
+//   deliveries. Both updates commit or neither does. If billing fails, the entire
+//   transaction rolls back, leaving the release in 'pending' so Stripe can retry.
+//
+// Idempotency:
+//   Pre-query checks release state before calling the RPC:
+//     - 'confirmed': return 200 (already done — duplicate delivery).
+//     - 'failed'/'reversed': return 200 with audit log (failure state wins;
+//       late-arriving success must not overwrite — Stripe should not retry).
+//   The RPC also checks inside the lock for race-condition safety.
+//
+// NOTE: increment_deal_financials() is NOT called here. The release route calls
+// it synchronously before returning (reserved_amount → released_amount + fees).
+// Calling it again in the webhook would double-increment the deal ledger.
 
 async function handleTransferSucceeded(transfer: Stripe.Transfer): Promise<void> {
   const transferId = transfer.id
@@ -294,7 +365,10 @@ async function handleTransferSucceeded(transfer: Stripe.Transfer): Promise<void>
 
   const adminClient = createSupabaseAdminClient()
 
-  // ── 1. Locate the release record ──────────────────────────────────────────
+  // ── 1. Pre-check release state for idempotency and failure-wins logging ───
+  // We query without a lock first to handle already-confirmed and failure-wins
+  // cases with detailed audit logging, avoiding an unnecessary RPC call.
+  // The RPC re-checks state inside the lock for race-condition correctness.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: release, error: releaseQueryError } = await (adminClient as any)
     .from('releases')
@@ -312,19 +386,18 @@ async function handleTransferSucceeded(transfer: Stripe.Transfer): Promise<void>
 
   if (!release) {
     // No matching release. Two legitimate causes:
-    //   a) Webhook arrived before the release route finished its DB insert
-    //      (narrow race window — Stripe retries will resolve this).
+    //   a) Webhook arrived before the release route finished its DB insert —
+    //      Stripe retries will resolve this (handler throws → 500).
     //   b) Transfer was not created by this platform.
-    // Either way: log, return 200, let Stripe retry if needed.
+    // Throw so Stripe retries; if it's case (b) the event will eventually
+    // age out of Stripe's retry window.
     console.warn(
-      `[webhook] transfer.succeeded: No release found for transfer ${transferId} — no-op`,
+      `[webhook] transfer.succeeded: No release found for transfer ${transferId} — throwing for Stripe retry`,
     )
-    return
+    throw new Error(`No release found for transfer ${transferId}`)
   }
 
-  // ── Idempotency guards ─────────────────────────────────────────────────────
-
-  // Already confirmed — this is a duplicate webhook delivery. No-op.
+  // Already confirmed — duplicate webhook delivery. No-op.
   if (release.transfer_status === 'confirmed') {
     console.log(
       `[webhook] transfer.succeeded: Release ${release.id} already confirmed — skipping`,
@@ -332,8 +405,9 @@ async function handleTransferSucceeded(transfer: Stripe.Transfer): Promise<void>
     return
   }
 
-  // Already failed or reversed — a failure event arrived first.
-  // Do NOT overwrite with confirmed: the failure state has higher authority.
+  // Already failed or reversed — a failure event arrived (and committed) first.
+  // Do NOT overwrite: the failure state has higher authority.
+  // Return 200 — Stripe should not retry a late success after a confirmed failure.
   if (release.transfer_status === 'failed' || release.transfer_status === 'reversed') {
     console.warn(
       `[webhook] transfer.succeeded: Release ${release.id} is already '${release.transfer_status}'. ` +
@@ -356,65 +430,80 @@ async function handleTransferSucceeded(transfer: Stripe.Transfer): Promise<void>
     return
   }
 
-  // ── 2. Confirm the release record ──────────────────────────────────────────
-  // Conditional write: only from 'pending'. Guards against the race where a
-  // failure event processes concurrently and wins the status update.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error: releaseUpdateError } = await (adminClient as any)
-    .from('releases')
-    .update({ transfer_status: 'confirmed' })
-    .eq('id', release.id)
-    .eq('transfer_status', 'pending')
+  // ── 2. Atomically confirm release + billing via RPC ───────────────────────
+  // confirm_stripe_transfer() wraps both status updates in a single Postgres
+  // transaction with a SELECT FOR UPDATE NOWAIT on the release row:
+  //   - If the transfer is already confirmed (race): returns already_confirmed=true
+  //   - If the release entered failure state between pre-query and RPC (race):
+  //     raises SQLSTATE 55000 — failure wins, we return 200 without retry
+  //   - If another delivery holds the lock (NOWAIT): raises SQLSTATE 55P03 —
+  //     we throw so Stripe retries after the concurrent delivery commits
+  //   - If any UPDATE fails: entire transaction rolls back → release stays
+  //     'pending' → we throw so Stripe retries
+  const { data: rpcData, error: rpcError } = await adminClient.rpc('confirm_stripe_transfer', {
+    p_stripe_transfer_id: transferId,
+  })
 
-  if (releaseUpdateError) {
+  if (rpcError) {
+    if (rpcError.code === '55000') {
+      // Release entered failure state between pre-query and RPC (concurrent failure
+      // event). Failure state wins — return 200, do not retry.
+      console.warn(
+        `[webhook] transfer.succeeded: Release ${release.id} entered failure state during ` +
+          `confirmation race. Late success ignored — failure state takes precedence.`,
+      )
+      return
+    }
+    // All other errors (P0002 not found, 55P03 lock conflict, transaction failure):
+    // throw so Stripe retries.
     console.error(
-      `[webhook] transfer.succeeded: Failed to confirm release ${release.id}:`,
-      releaseUpdateError.message,
+      `[webhook] transfer.succeeded: confirm_stripe_transfer RPC failed for ${transferId}:`,
+      rpcError.message, `(code: ${rpcError.code})`,
     )
-    throw releaseUpdateError
+    throw rpcError
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rpcResult = (rpcData as any[])[0] as {
+    already_confirmed: boolean
+    release_id:        string
+    billing_updated:   boolean
+  }
+
+  if (rpcResult.already_confirmed) {
+    // Concurrent delivery confirmed this release between pre-query and RPC.
+    console.log(
+      `[webhook] transfer.succeeded: Transfer ${transferId} confirmed by concurrent request ` +
+        `(release ${rpcResult.release_id}) — skipping`,
+    )
+    return
   }
 
   // ── 3. Confirm the transaction receipt ────────────────────────────────────
-  // confirmTransactionReceipt() is internally guarded: only transitions from
-  // 'pending', never overwrites 'failed'/'reversed'. Never throws.
-  await confirmTransactionReceipt(release.id)
+  // Outside the RPC transaction — non-fatal. confirmTransactionReceipt() is
+  // internally guarded: only transitions from 'pending', never overwrites
+  // 'failed'/'reversed'. If this fails, the release is already confirmed; the
+  // receipt discrepancy is caught by reconciliation.
+  await confirmTransactionReceipt(rpcResult.release_id)
 
-  // ── 4. Confirm the billing record (non-fatal) ─────────────────────────────
-  // Keeps billing_records.transfer_status consistent with the release.
-  // Non-fatal: a failure here does not cause Stripe to retry and does not
-  // affect the release or receipt, which are the authoritative records.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error: billingUpdateError } = await (adminClient as any)
-    .from('billing_records')
-    .update({ transfer_status: 'confirmed' })
-    .eq('release_id', release.id)
-    .eq('transfer_status', 'pending')
-
-  if (billingUpdateError) {
-    console.warn(
-      `[webhook] transfer.succeeded: billing_records update failed for release ${release.id} — non-fatal:`,
-      billingUpdateError.message,
-    )
-  }
-
-  // ── 5. Audit log ───────────────────────────────────────────────────────────
+  // ── 4. Audit log ───────────────────────────────────────────────────────────
   await logAudit({
     entity_type: 'release',
-    entity_id:   release.id,
+    entity_id:   rpcResult.release_id,
     action:      'transfer_confirmed',
     actor_id:    'system',
     old_values:  { transfer_status: 'pending' },
     new_values:  { transfer_status: 'confirmed' },
     metadata: {
-      stripe_transfer_id:      transferId,
-      milestone_id:            milestoneId,
-      deal_id:                 dealId,
-      billing_record_updated:  !billingUpdateError,
+      stripe_transfer_id:     transferId,
+      milestone_id:           milestoneId,
+      deal_id:                dealId,
+      billing_record_updated: rpcResult.billing_updated,
     },
   })
 
   console.log(
-    `[webhook] transfer.succeeded: Release ${release.id} confirmed — Transfer ${transferId}`,
+    `[webhook] transfer.succeeded: Release ${rpcResult.release_id} confirmed — Transfer ${transferId}`,
   )
 }
 
