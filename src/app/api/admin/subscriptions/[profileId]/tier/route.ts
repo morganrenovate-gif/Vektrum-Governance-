@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseAdminClient } from '@/lib/supabase/server'
-import { getAuthUser } from '@/lib/auth/middleware'
+import { createClient, createSupabaseAdminClient } from '@/lib/supabase/server'
+import { getAuthUser, requireMFA } from '@/lib/auth/middleware'
 import { billingRateFromTier, getFeeDescription } from '@/lib/engine/billing'
 import { errorResponse, internalError, notFoundError } from '@/lib/errors'
 import type { SubscriptionTier } from '@/lib/engine/billing'
@@ -44,6 +44,14 @@ export async function POST(
     return errorResponse(403, 'Only admins can change subscription tiers.')
   }
 
+  // ── AAL2 MFA required — billing_rate_bps change has direct financial impact ─
+  const supabase = await createClient()
+  try {
+    await requireMFA(supabase, adminProfile)
+  } catch (err) {
+    return err as NextResponse
+  }
+
   // ── Parse Body ─────────────────────────────────────────────────────────────
   let body: { tier?: unknown; admin_justification?: unknown }
   try {
@@ -61,11 +69,11 @@ export async function POST(
 
   if (
     typeof body.admin_justification !== 'string' ||
-    body.admin_justification.trim().length < 10
+    body.admin_justification.trim().length < 20
   ) {
     return errorResponse(
       400,
-      'admin_justification is required and must be at least 10 characters. ' +
+      'admin_justification is required and must be at least 20 characters. ' +
         'Document the business reason for this tier change.',
     )
   }

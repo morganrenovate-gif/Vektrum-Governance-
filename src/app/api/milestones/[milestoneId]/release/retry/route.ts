@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createSupabaseAdminClient } from '@/lib/supabase/server'
-import { getAuthUser, requireDealAccess } from '@/lib/auth/middleware'
+import { getAuthUser, requireDealAccess, requireMFA } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
 import { notifyRetryInitiated } from '@/lib/engine/notifications'
 import { notFoundError, validationError, internalError } from '@/lib/errors'
@@ -56,6 +56,13 @@ export async function POST(
 
   const supabase      = await createClient()
   const adminClient   = createSupabaseAdminClient()
+
+  // ── AAL2 MFA required — resets milestone state, unlocking a subsequent release
+  try {
+    await requireMFA(supabase, profile)
+  } catch (err) {
+    return err as NextResponse
+  }
 
   // ── Fetch Milestone ─────────────────────────────────────────────────────────
   const { data: milestone, error: milestoneError } = await supabase
