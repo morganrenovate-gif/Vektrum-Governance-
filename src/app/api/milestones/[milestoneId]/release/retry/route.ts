@@ -130,8 +130,13 @@ export async function POST(
   const nowIso = new Date().toISOString()
 
   // ── Reset Milestone to Approved ─────────────────────────────────────────────
-  // Conditional write: only transition from 'payout_failed' → prevents double-retry race
-  const { data: milestoneUpdateData, error: milestoneUpdateError } = await supabase
+  // Conditional write: only transition from 'payout_failed' → prevents double-retry race.
+  // Uses adminClient (service role, auth.uid() IS NULL) so that the protection_status
+  // reset ('released' → 'ready_for_release') is permitted by
+  // trg_enforce_protection_status. Session-client funders are only permitted to
+  // set protection_status = 'released'; resetting it for a retry requires the
+  // admin client path.
+  const { data: milestoneUpdateData, error: milestoneUpdateError } = await adminClient
     .from('milestones')
     .update({
       status:             'approved',

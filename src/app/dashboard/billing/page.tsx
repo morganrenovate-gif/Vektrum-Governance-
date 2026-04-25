@@ -353,7 +353,7 @@ export default async function BillingPortalPage() {
           The Fee Budget is the projected total fee for a deal at the time of funding,
           calculated as <code className="text-white/50">total_amount × billing_rate_bps / 10000</code>.
           Fees Collected reflects actual fees on released milestones.
-          A minimum fee of $2.50 per milestone applies.
+          A minimum fee of $50.00 per milestone applies.
         </p>
       </div>
 

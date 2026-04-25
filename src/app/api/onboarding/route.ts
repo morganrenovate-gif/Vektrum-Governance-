@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createSupabaseAdminClient } from '@/lib/supabase/server'
 import type { Profile } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
@@ -26,9 +26,14 @@ export async function PATCH() {
       )
     }
 
-    // Cast to any to bypass broken database.ts type conflict (pre-existing in repo)
+    // Use the admin client for this write so it runs as service role (auth.uid() IS NULL).
+    // onboarding_complete is a platform-managed field protected by
+    // trg_enforce_profile_platform_fields — session-client writes are blocked.
+    // The admin client bypasses that trigger while still scoping the update to
+    // the authenticated user's own profile row via .eq('id', user.id).
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: updateError } = await (supabase as any)
+    const adminClient = createSupabaseAdminClient()
+    const { error: updateError } = await (adminClient as any)
       .from('profiles')
       .update({ onboarding_complete: true, updated_at: new Date().toISOString() })
       .eq('id', user.id)
