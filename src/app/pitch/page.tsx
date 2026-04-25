@@ -25,7 +25,7 @@ import {
   ChevronLeft, ChevronRight, Shield, CheckCircle2, XCircle,
   DollarSign, AlertTriangle, FileCheck, CreditCard,
   Eye, Lock, Users, Cpu, Building2, Landmark, HardHat,
-  GitBranch, Gauge, ScrollText, ArrowRight,
+  GitBranch, Gauge, ScrollText, ArrowRight, Printer, Zap,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -1372,6 +1372,177 @@ function ClosingSlide() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// API ARCHITECTURE SLIDE
+// ─────────────────────────────────────────────────────────────────────────────
+
+function ApiArchitectureSlide() {
+  const stages = [
+    {
+      num: '01',
+      label: 'Auth Guards',
+      color: 'blue',
+      borderColor: 'border-blue-500/30',
+      bgColor: 'bg-blue-500/[0.06]',
+      iconColor: 'text-blue-300',
+      labelColor: 'text-blue-300',
+      items: ['JWT session verification', 'Role enforcement (funder-only)', 'MFA / AAL2 for funders & admins', 'Deal participant access check'],
+    },
+    {
+      num: '02',
+      label: 'AI Precondition',
+      color: 'violet',
+      borderColor: 'border-violet-500/30',
+      bgColor: 'bg-violet-500/[0.06]',
+      iconColor: 'text-violet-300',
+      labelColor: 'text-violet-300',
+      items: ['48 h result TTL cache', 'Photo + doc risk filter', 'Admin override with TTL', 'Blocks if inconclusive'],
+    },
+    {
+      num: '03',
+      label: '10-Condition Gate',
+      color: 'vektrum',
+      borderColor: 'border-vektrum-blue/50',
+      bgColor: 'bg-vektrum-blue/[0.10]',
+      iconColor: 'text-blue-300',
+      labelColor: 'text-blue-400',
+      items: ['Milestone + deal state checks', 'Active contract required', 'Duplicate release guard', 'Rail-specific validation'],
+      highlight: true,
+    },
+    {
+      num: '04',
+      label: 'Execution',
+      color: 'emerald',
+      borderColor: 'border-emerald-500/30',
+      bgColor: 'bg-emerald-500/[0.06]',
+      iconColor: 'text-emerald-300',
+      labelColor: 'text-emerald-300',
+      items: ['Stripe / external dispatch', 'Release + billing record', 'Ledger increment (atomic)', 'Immutable audit entry'],
+    },
+  ]
+
+  const endpoints = [
+    { method: 'POST', path: '/api/milestones/[id]/release',             desc: 'Stripe rail — triggers all 4 layers' },
+    { method: 'POST', path: '/api/milestones/[id]/authorize-external',  desc: 'External rail — auth + gate only' },
+    { method: 'POST', path: '/api/releases/[id]/confirm-external',      desc: 'Funder confirms off-platform payment' },
+    { method: 'POST', path: '/api/releases/[id]/mark-external-failed',  desc: 'Admin marks failed with justification' },
+  ]
+
+  return (
+    <div className="relative flex flex-col justify-center h-full px-20 py-14 overflow-hidden">
+      <DotGrid opacity={0.14} />
+      <Glow className="w-[600px] h-[500px] top-0 right-0 translate-x-1/4 -translate-y-1/4 bg-blue-500/[0.07]" />
+      <Glow className="w-[440px] h-[380px] bottom-0 left-0 -translate-x-1/3 translate-y-1/3 bg-violet-500/[0.06]" />
+
+      <div className="relative z-10 max-w-[1060px] mx-auto w-full">
+        <Eyebrow>API Architecture</Eyebrow>
+
+        <div className="flex gap-12 mt-2">
+
+          {/* Left: description + async channels */}
+          <div className="w-[240px] flex-shrink-0 flex flex-col justify-center">
+            <h2 className="text-[32px] font-black tracking-[-0.034em] text-white leading-[1.05] mb-3">
+              Four layers.
+              <br />
+              <span className="text-white/38">No bypass path.</span>
+            </h2>
+            <p className="text-[12.5px] text-white/52 leading-relaxed mb-7">
+              Every release request passes through all four validation layers in sequence.
+              A block at any layer terminates the request — no layer can be skipped by
+              role, flag, or calling convention.
+            </p>
+
+            <div className="space-y-3">
+              <p className="text-[9.5px] font-black uppercase tracking-[0.18em] text-white/28 mb-1">Async channels</p>
+              <div className="flex items-start gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-white/[0.05] border border-white/[0.08] flex items-center justify-center flex-shrink-0">
+                  <Gauge size={12} className="text-white/45" />
+                </div>
+                <div>
+                  <p className="text-[11px] font-semibold text-white/65 leading-tight">Reconciliation engine</p>
+                  <p className="text-[10.5px] text-white/38 leading-snug">Hourly · 6 pass · SLA escalation</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-white/[0.05] border border-white/[0.08] flex items-center justify-center flex-shrink-0">
+                  <Zap size={12} className="text-white/45" />
+                </div>
+                <div>
+                  <p className="text-[11px] font-semibold text-white/65 leading-tight">Stripe webhooks</p>
+                  <p className="text-[10.5px] text-white/38 leading-snug">HMAC-verified · idempotent · failure-wins</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right: pipeline + endpoints */}
+          <div className="flex-1 min-w-0">
+
+            {/* Pipeline stages */}
+            <div className="flex items-stretch gap-2 mb-4">
+              {stages.map((stage, i) => (
+                <div key={stage.num} className="flex items-center gap-2 flex-1 min-w-0">
+                  <div className={cn(
+                    'flex-1 rounded-xl border p-3.5 flex flex-col min-w-0',
+                    stage.borderColor,
+                    stage.bgColor,
+                    stage.highlight && 'ring-1 ring-vektrum-blue/30',
+                  )}>
+                    <div className="flex items-center gap-1.5 mb-2.5">
+                      <span className={cn('text-[9px] font-black font-mono tracking-wider', stage.labelColor)}>
+                        {stage.num}
+                      </span>
+                      <span className={cn('text-[11px] font-bold leading-tight', stage.highlight ? 'text-white' : 'text-white/80')}>
+                        {stage.label}
+                      </span>
+                    </div>
+                    <div className="space-y-1.5">
+                      {stage.items.map((item) => (
+                        <div key={item} className="flex items-start gap-1.5">
+                          <div className={cn('w-1 h-1 rounded-full mt-1.5 flex-shrink-0', `bg-${stage.color}-400`)} />
+                          <p className="text-[10px] text-white/48 leading-snug">{item}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  {i < stages.length - 1 && (
+                    <ArrowRight size={12} className="text-white/20 flex-shrink-0" />
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Block on any failure */}
+            <div className="rounded-xl border border-white/[0.07] bg-white/[0.025] px-4 py-2.5 mb-4 text-center">
+              <p className="text-[11.5px] text-white/50">
+                <span className="text-white/75 font-semibold">Blocks on any failure.</span>
+                {' '}No layer may be short-circuited by caller identity, feature flag, or environment override.
+              </p>
+            </div>
+
+            {/* Endpoint badges */}
+            <div className="grid grid-cols-2 gap-2">
+              {endpoints.map((ep) => (
+                <div key={ep.path} className="rounded-lg border border-white/[0.07] bg-white/[0.025] px-3 py-2.5 flex items-start gap-2.5">
+                  <span className="text-[9px] font-black font-mono tracking-wider text-vektrum-blue bg-vektrum-blue/15 rounded px-1.5 py-0.5 flex-shrink-0 mt-0.5">
+                    {ep.method}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[9.5px] font-mono text-white/60 truncate leading-tight">{ep.path}</p>
+                    <p className="text-[10px] text-white/38 leading-snug mt-0.5">{ep.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div aria-hidden className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.05] to-transparent" />
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // DECK SHELL + NAVIGATION
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -1383,6 +1554,7 @@ const SLIDES = [
   { id: 'gate',        label: 'Release Gate',       component: ReleaseGateSlide },
   { id: 'ai',          label: 'AI Precondition',    component: AiPreconditionSlide },
   { id: 'rails',       label: 'Execution Rails',    component: ExecutionRailsSlide },
+  { id: 'api-arch',    label: 'API Architecture',   component: ApiArchitectureSlide },
   { id: 'trust',       label: 'Trust · Audit',      component: TrustOpsSlide },
   { id: 'roles',       label: 'Role Separation',    component: RolesSlide },
   { id: 'market',      label: 'Market',             component: MarketSlide },
@@ -1409,10 +1581,23 @@ export default function PitchPage() {
   }, [next, prev])
 
   return (
-    <div className="relative bg-[#07091a] overflow-hidden" style={{ height: '100dvh' }}>
+    <div data-pitch-container className="relative bg-[#07091a] overflow-hidden" style={{ height: '100dvh' }}>
+
+      {/* Print CSS — all slides visible, full-page per slide */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          @page { size: landscape; margin: 0; }
+          body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          [data-pitch-nav] { display: none !important; }
+          [data-pitch-container] { position: relative !important; height: auto !important; overflow: visible !important; background: #07091a !important; }
+          [data-pitch-slides-wrapper] { position: relative !important; height: auto !important; }
+          [data-pitch-slide] { position: relative !important; height: 100vh !important; opacity: 1 !important; transform: none !important; break-after: page !important; page-break-after: always !important; display: block !important; pointer-events: none !important; }
+          [data-pitch-slide]:last-child { break-after: avoid !important; page-break-after: avoid !important; }
+        }
+      ` }} />
 
       {/* Progress bar */}
-      <div className="fixed top-0 inset-x-0 z-50 h-[2px] bg-white/[0.04]" aria-hidden>
+      <div data-pitch-nav className="fixed top-0 inset-x-0 z-50 h-[2px] bg-white/[0.04]" aria-hidden>
         <div
           className="h-full bg-gradient-to-r from-vektrum-blue to-blue-400 transition-all duration-500 ease-in-out"
           style={{ width: `${((current + 1) / SLIDES.length) * 100}%` }}
@@ -1420,24 +1605,25 @@ export default function PitchPage() {
       </div>
 
       {/* Wordmark */}
-      <div className="fixed top-5 left-7 z-50">
+      <div data-pitch-nav className="fixed top-5 left-7 z-50">
         <p className="text-[10px] font-black tracking-[0.22em] text-white/28 uppercase select-none">
           Vektrum
         </p>
       </div>
 
       {/* Slide label */}
-      <div className="fixed top-5 right-7 z-50">
+      <div data-pitch-nav className="fixed top-5 right-7 z-50">
         <p className="text-[10px] text-white/22 uppercase tracking-[0.15em] font-medium select-none">
           {SLIDES[current].label}
         </p>
       </div>
 
       {/* Slides */}
-      <div className="relative h-full">
+      <div data-pitch-slides-wrapper className="relative h-full">
         {SLIDES.map(({ id, component: Slide }, i) => (
           <div
             key={id}
+            data-pitch-slide
             className={cn(
               'absolute inset-0 transition-all duration-500 ease-in-out',
               i === current
@@ -1453,7 +1639,7 @@ export default function PitchPage() {
       </div>
 
       {/* Bottom nav */}
-      <div className="fixed bottom-7 inset-x-0 z-50 flex items-center justify-center gap-4 select-none">
+      <div data-pitch-nav className="fixed bottom-7 inset-x-0 z-50 flex items-center justify-center gap-4 select-none">
         <button
           onClick={prev}
           disabled={current === 0}
@@ -1490,11 +1676,23 @@ export default function PitchPage() {
       </div>
 
       {/* Slide counter */}
-      <div className="fixed bottom-7 right-7 z-50 select-none">
+      <div data-pitch-nav className="fixed bottom-7 right-7 z-50 select-none">
         <p className="text-[11px] font-mono text-white/25 tabular-nums">
           {String(current + 1).padStart(2, '0')} / {String(SLIDES.length).padStart(2, '0')}
         </p>
       </div>
+
+      {/* Export PDF button */}
+      <button
+        data-pitch-nav
+        onClick={() => window.print()}
+        aria-label="Export as PDF"
+        title="Export all slides as PDF"
+        className="fixed bottom-7 left-7 z-50 flex items-center gap-1.5 px-3 h-8 rounded-full border border-white/[0.10] bg-white/[0.04] text-white/40 hover:text-white/75 hover:bg-white/[0.08] hover:border-white/[0.18] transition-all select-none"
+      >
+        <Printer size={12} />
+        <span className="text-[10px] font-medium tracking-wide">PDF</span>
+      </button>
     </div>
   )
 }
