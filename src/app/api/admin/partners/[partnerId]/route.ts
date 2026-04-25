@@ -34,7 +34,8 @@ async function adminAuth(request: NextRequest) {
 
 // ─── GET /api/admin/partners/[partnerId] ─────────────────────────────────────
 //
-// Returns a single partner's details (no credentials).
+// Returns a single partner's details, assigned deals, and operational stats.
+// Never returns credentials (api_key_hash, webhook_signing_secret).
 
 export async function GET(
   request: NextRequest,
@@ -48,7 +49,10 @@ export async function GET(
 
   const { data: partner, error: fetchError } = await admin
     .from('partners')
-    .select('id, name, webhook_url, api_key_prefix, is_active, notes, created_at, updated_at')
+    .select(
+      'id, name, webhook_url, api_key_prefix, is_active, notes, ' +
+      'key_environment, last_used_at, created_at, updated_at',
+    )
     .eq('id', partnerId)
     .single()
 
@@ -56,14 +60,14 @@ export async function GET(
     return notFoundError(`Partner ${partnerId} was not found.`)
   }
 
-  // Deal summary for this partner
+  // Assigned deals
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: deals } = await (admin as any)
     .from('deals')
-    .select('id, title, status, funded_amount, released_amount')
+    .select('id, title, status, execution_rail, funded_amount, released_amount')
     .eq('partner_id', partnerId)
     .order('created_at', { ascending: false })
-    .limit(20)
+    .limit(50)
 
   return NextResponse.json({ partner, deals: deals ?? [] })
 }
@@ -71,22 +75,33 @@ export async function GET(
 // ─── PATCH /api/admin/partners/[partnerId] ────────────────────────────────────
 //
 // Updates partner name, webhook_url, notes, or is_active status.
-// Rotation of credentials is handled by separate sub-actions in the body
-// (action: 'rotate_key' | 'rotate_secret').
+// Credential rotation and revocation are sub-actions in the body.
 //
 // Request body fields (all optional):
-//   name?:          string
-//   webhook_url?:   string | null   (null removes the webhook)
-//   notes?:         string | null
-//   is_active?:     boolean
-//   action?:        'rotate_key' | 'rotate_secret'
+//   name?:              string
+//   webhook_url?:       string | null   (null removes the webhook)
+//   notes?:             string | null
+//   is_active?:         boolean
+//   action?:            'rotate_key' | 'rotate_secret' | 'revoke'
+//   key_environment?:   'test' | 'live'  (for rotate_key, defaults to existing)
+//
+// Actions:
+//   rotate_key    — generates a new API key; old key immediately invalid.
+//                   Returns credentials in response (show once).
+//   rotate_secret — generates a new webhook signing secret.
+//                   Returns credentials in response (show once).
+//   revoke        — deactivates the partner (is_active = false) with a
+//                   distinct audit action 'partner_key_revoked'. Differs from
+//                   is_active=false toggle: signals intentional revocation vs
+//                   temporary deactivation in the audit trail.
 
 interface PatchPartnerBody {
-  name?:         string
-  webhook_url?:  string | null
-  notes?:        string | null
-  is_active?:    boolean
-  action?:       'rotate_key' | 'rotate_secret'
+  name?:            string
+  webhook_url?:     string | null
+  notes?:           string | null
+  is_active?:       boolean
+  action?:          'rotate_key' | 'rotate_secret' | 'revoke'
+  key_environment?: string
 }
 
 export async function PATCH(
@@ -121,7 +136,7 @@ export async function PATCH(
   // Verify partner exists
   const { data: existing, error: fetchError } = await admin
     .from('partners')
-    .select('id, name, webhook_url, api_key_prefix, is_active, notes')
+    .select('id, name, webhook_url, api_key_prefix, is_active, notes, key_environment')
     .eq('id', partnerId)
     .single()
 
@@ -129,11 +144,52 @@ export async function PATCH(
     return notFoundError(`Partner ${partnerId} was not found.`)
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const ex = existing as any
+
+  // ── Revoke: hard deactivation with distinct audit action ──────────────────
+  if (body.action === 'revoke') {
+    if (!ex.is_active) {
+      return NextResponse.json(
+        { error: 'This partner is already inactive/revoked.' },
+        { status: 409 },
+      )
+    }
+
+    const { data: revoked, error: revokeError } = await admin
+      .from('partners')
+      .update({ is_active: false })
+      .eq('id', partnerId)
+      .select('id, name, webhook_url, api_key_prefix, key_environment, is_active, notes, last_used_at, updated_at')
+      .single()
+
+    if (revokeError || !revoked) {
+      return internalError('Failed to revoke partner.', revokeError?.message)
+    }
+
+    await logAudit({
+      entity_type:   'partner',
+      entity_id:     partnerId,
+      action:        'partner_key_revoked',
+      actor_id:      authContext.user.id,
+      actor_role:    authContext.profile.role,
+      system_source: 'api/admin/partners/[partnerId]',
+      old_values:    { is_active: true },
+      new_values:    { is_active: false },
+      metadata: {
+        partner_name:    ex.name,
+        api_key_prefix:  ex.api_key_prefix,
+        key_environment: ex.key_environment,
+        revoked_by:      authContext.user.id,
+      },
+    })
+
+    return NextResponse.json({ partner: revoked })
+  }
+
   const errors: string[] = []
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updates: Record<string, any> = {}
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const newCredentials: Record<string, any> | null = null
 
   // ── Field updates ──────────────────────────────────────────────────────────
   if (body.name !== undefined) {
@@ -168,14 +224,23 @@ export async function PATCH(
   if (errors.length > 0) return validationError(errors)
 
   // ── Credential rotation ────────────────────────────────────────────────────
-  let rotatedKey: string | null    = null
-  let rotatedSecret: string | null = null
+  let rotatedKey:        string | null = null
+  let rotatedKeyEnv:     'test' | 'live' | null = null
+  let rotatedSecret:     string | null = null
 
   if (body.action === 'rotate_key') {
-    const { fullKey, prefix, hash } = generatePartnerApiKey()
-    updates.api_key_hash   = hash
-    updates.api_key_prefix = prefix
-    rotatedKey = fullKey
+    // Use explicitly requested environment or preserve the existing one
+    const targetEnv: 'test' | 'live' =
+      body.key_environment === 'test' ? 'test'
+      : body.key_environment === 'live' ? 'live'
+      : (ex.key_environment as 'test' | 'live' ?? 'live')
+
+    const { fullKey, prefix, hash, keyEnvironment } = generatePartnerApiKey(targetEnv)
+    updates.api_key_hash    = hash
+    updates.api_key_prefix  = prefix
+    updates.key_environment = keyEnvironment
+    rotatedKey    = fullKey
+    rotatedKeyEnv = keyEnvironment
   }
 
   if (body.action === 'rotate_secret') {
@@ -193,7 +258,7 @@ export async function PATCH(
     .from('partners')
     .update(updates)
     .eq('id', partnerId)
-    .select('id, name, webhook_url, api_key_prefix, is_active, notes, updated_at')
+    .select('id, name, webhook_url, api_key_prefix, key_environment, is_active, notes, last_used_at, updated_at')
     .single()
 
   if (updateError || !updated) {
@@ -210,30 +275,38 @@ export async function PATCH(
     actor_role:    authContext.profile.role,
     system_source: 'api/admin/partners/[partnerId]',
     old_values: {
-      name:       existing.name,
-      is_active:  existing.is_active,
-      webhook_url: existing.webhook_url,
+      name:            ex.name,
+      is_active:       ex.is_active,
+      webhook_url:     ex.webhook_url,
+      key_environment: ex.key_environment,
     },
     new_values: updates,
+    metadata: {
+      ...(rotatedKey ? { new_key_prefix: (updated as any).api_key_prefix, key_environment: rotatedKeyEnv } : {}),
+    },
   })
 
   const response: Record<string, unknown> = { partner: updated }
 
   if (rotatedKey) {
     response.credentials = {
-      api_key: rotatedKey,
-      warning: 'New API key shown once — store immediately. The previous key is now invalid.',
+      api_key:         rotatedKey,
+      key_environment: rotatedKeyEnv,
+      warning:
+        'New API key shown once — store immediately. ' +
+        'The previous key is now invalid.',
     }
   }
   if (rotatedSecret) {
     response.credentials = {
-      ...(response.credentials as object ?? {}),
+      ...(typeof response.credentials === 'object' && response.credentials !== null
+        ? response.credentials
+        : {}),
       webhook_signing_secret: rotatedSecret,
-      warning: 'New webhook signing secret shown once — store immediately and update your verification logic.',
+      warning:
+        'New webhook signing secret shown once — store immediately and ' +
+        'update your verification logic before the next webhook delivery.',
     }
-  }
-  if (newCredentials) {
-    response.credentials = newCredentials
   }
 
   return NextResponse.json(response)

@@ -1,4 +1,4 @@
-import { createHash } from 'crypto'
+import { createHash, randomBytes } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 
@@ -8,22 +8,25 @@ import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 // (escrow companies, construction loan servicers, title companies).
 //
 // Authentication scheme: Bearer token in Authorization header.
-//   Authorization: Bearer vkp_<hex>
+//   Authorization: Bearer vkp_live_<hex>  (live key)
+//   Authorization: Bearer vkp_test_<hex>  (test key)
 //
 // Lookup strategy:
 //   1. Parse Bearer token from Authorization header.
 //   2. SHA-256 hash the token.
 //   3. Look up in partners table by api_key_hash.
 //   4. Confirm partner.is_active = true.
-//   5. Return partner row, or throw a 401 NextResponse.
+//   5. Fire-and-forget update of last_used_at.
+//   6. Return partner context, or throw a 401 NextResponse.
 //
-// The plaintext API key is never stored — only the hash. This means a
-// compromised DB does not expose partner keys.
+// The plaintext API key is never stored — only the SHA-256 hash. A compromised
+// DB does not expose partner keys.
 
 export interface PartnerAuthContext {
-  partnerId:   string
-  partnerName: string
-  webhookUrl:  string | null
+  partnerId:      string
+  partnerName:    string
+  webhookUrl:     string | null
+  keyEnvironment: 'test' | 'live'
 }
 
 /**
@@ -36,6 +39,8 @@ export interface PartnerAuthContext {
  *
  * Never leaks whether a key exists vs. is inactive — both return the same
  * "Invalid or inactive partner API key" message.
+ *
+ * Side effect (non-blocking): updates last_used_at on successful auth.
  */
 export async function requirePartnerAuth(
   request: NextRequest,
@@ -67,7 +72,7 @@ export async function requirePartnerAuth(
 
   const { data: partner, error } = await admin
     .from('partners')
-    .select('id, name, webhook_url, is_active')
+    .select('id, name, webhook_url, is_active, key_environment')
     .eq('api_key_hash', keyHash)
     .maybeSingle()
 
@@ -88,43 +93,63 @@ export async function requirePartnerAuth(
     )
   }
 
+  // ── Fire-and-forget: record last_used_at ───────────────────────────────────
+  // Non-blocking — must not add latency to the partner API hot path.
+  // Failure is logged but does not fail the request.
+  admin
+    .from('partners')
+    .update({ last_used_at: new Date().toISOString() })
+    .eq('id', partner.id)
+    .then(({ error: updateErr }) => {
+      if (updateErr) {
+        console.error('[partner-auth] last_used_at update failed:', updateErr.message)
+      }
+    })
+
   return {
-    partnerId:   partner.id,
-    partnerName: partner.name,
-    webhookUrl:  partner.webhook_url ?? null,
+    partnerId:      partner.id,
+    partnerName:    partner.name,
+    webhookUrl:     partner.webhook_url ?? null,
+    keyEnvironment: (partner.key_environment as 'test' | 'live') ?? 'live',
   }
 }
 
 // ─── API Key Generation ───────────────────────────────────────────────────────
 
-import { randomBytes } from 'crypto'
-
 /**
  * Generates a new partner API key and its derived values.
  *
+ * Key format: vkp_<env>_<64 hex chars>
+ *   vkp_live_<hex>  — production integration
+ *   vkp_test_<hex>  — test/sandbox integration
+ *
  * Returns:
- *   fullKey    — the plaintext key to show once and discard (vkp_<64 hex>)
- *   prefix     — first 12 chars for UI display (vkp_ABCD1234)
- *   hash       — SHA-256 of fullKey, stored in DB for lookup
+ *   fullKey        — the plaintext key to show once and discard
+ *   prefix         — first 17 chars for UI display (vkp_live_ABCDEF12)
+ *   hash           — SHA-256 of fullKey, stored in DB for lookup
+ *   keyEnvironment — 'test' | 'live'
  */
-export function generatePartnerApiKey(): {
-  fullKey: string
-  prefix:  string
-  hash:    string
+export function generatePartnerApiKey(env: 'test' | 'live' = 'live'): {
+  fullKey:        string
+  prefix:         string
+  hash:           string
+  keyEnvironment: 'test' | 'live'
 } {
-  const hex     = randomBytes(32).toString('hex')   // 64 hex chars
-  const fullKey = `vkp_${hex}`
-  const prefix  = fullKey.slice(0, 12)              // "vkp_" + 8 hex chars
+  const hex     = randomBytes(32).toString('hex')     // 64 hex chars = 256 bits
+  const fullKey = `vkp_${env}_${hex}`
+  // Prefix: "vkp_live_" (9) + 8 hex chars = 17 chars, e.g. "vkp_live_A1B2C3D4"
+  //         "vkp_test_" (9) + 8 hex chars = 17 chars, e.g. "vkp_test_E5F6A7B8"
+  const prefix  = fullKey.slice(0, 17)
   const hash    = createHash('sha256').update(fullKey).digest('hex')
 
-  return { fullKey, prefix, hash }
+  return { fullKey, prefix, hash, keyEnvironment: env }
 }
 
 /**
  * Generates a webhook signing secret for HMAC verification.
  *
- * The secret is stored plaintext in the DB (Vektrum signs with it).
- * Partners receive it once at setup to verify incoming webhooks.
+ * The secret is stored plaintext in the DB (Vektrum signs outbound webhooks
+ * with it). Partners receive it once at setup to verify incoming webhooks.
  *
  * Format: whsec_<64 hex chars>
  */
