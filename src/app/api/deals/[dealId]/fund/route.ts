@@ -5,6 +5,7 @@ import { logAudit } from '@/lib/engine/audit'
 import { stripe } from '@/lib/stripe'
 import { billingRateFromTier, calculateGovernanceFacility, type SubscriptionTier } from '@/lib/engine/billing'
 import { errorResponse, internalError, notFoundError } from '@/lib/errors'
+import { POLICIES, checkRateLimit, rateLimitResponse, logRateLimitViolation } from '@/lib/engine/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -60,6 +61,18 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     await requireMFA(supabase, profile)
   } catch (err) {
     return err as NextResponse
+  }
+
+  // ── Rate limit — deal funding ──────────────────────────────────────────────
+  {
+    const rl = await checkRateLimit(`user:${user.id}:deal_fund`, POLICIES.deal_fund)
+    if (!rl.allowed) {
+      logRateLimitViolation(`user:${user.id}:deal_fund`, rl, {
+        actorId: user.id, policyName: 'deal_fund',
+        entityType: 'deal', entityId: dealId,
+      })
+      return rateLimitResponse(rl, POLICIES.deal_fund.description)
+    }
   }
 
   try {

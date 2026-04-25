@@ -27,6 +27,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser } from '@/lib/auth/middleware'
 import type { ContractAnalysisResult, ProposedMilestone } from '@/lib/actions/analyze-contract'
+import { POLICIES, checkRateLimit, rateLimitResponse, logRateLimitViolation, getRequestIp } from '@/lib/engine/rate-limit'
 export const runtime = "nodejs";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -43,10 +44,26 @@ export async function POST(req: NextRequest) {
   // Any authenticated user may analyse a contract. We do NOT require a specific
   // role because this endpoint is used during deal creation, before a deal (and
   // therefore a role context) exists. The gate solely prevents anonymous abuse.
+  let authContext
   try {
-    await getAuthUser(req)
+    authContext = await getAuthUser(req)
   } catch (err) {
     return err as NextResponse
+  }
+
+  // ── Rate limit — AI contract analysis (IP-keyed + user-keyed) ─────────────
+  // Keyed by user ID when available; falls back to IP for any edge cases.
+  // Each call parses a PDF and sends ~15k tokens to Perplexity — strict cap.
+  {
+    const limitKey = `user:${authContext.user.id}:ai_analysis`
+    const rl = await checkRateLimit(limitKey, POLICIES.ai_analysis)
+    if (!rl.allowed) {
+      logRateLimitViolation(limitKey, rl, {
+        actorId: authContext.user.id, policyName: 'ai_analysis',
+        entityType: 'contract', entityId: 'upload',
+      })
+      return rateLimitResponse(rl, POLICIES.ai_analysis.description)
+    }
   }
 
   // ── 1. Parse multipart form ────────────────────────────────────────────────

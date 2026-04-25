@@ -3,6 +3,7 @@ import { runReconciliation }          from '@/lib/engine/reconciliation'
 import { sendSlackAlert }             from '@/lib/engine/alerts'
 import { sendAdminAlert }             from '@/lib/engine/notifications'
 import { createSupabaseAdminClient }  from '@/lib/supabase/admin'
+import { POLICIES, checkRateLimit, rateLimitResponse, logRateLimitViolation, getRequestIp } from '@/lib/engine/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -56,6 +57,21 @@ async function handler(request: NextRequest): Promise<NextResponse> {
       { error: 'CRON_SECRET environment variable is not configured.' },
       { status: 500 },
     )
+  }
+
+  // ── Rate limit — cron endpoint (secondary defence) ────────────────────────
+  // CRON_SECRET is the primary protection. This cap prevents repeated manual
+  // runs from saturating the reconciliation engine (which issues many DB queries).
+  {
+    const ip = getRequestIp(request)
+    const rl = await checkRateLimit(`ip:${ip}:cron`, POLICIES.cron)
+    if (!rl.allowed) {
+      logRateLimitViolation(`ip:${ip}:cron`, rl, {
+        actorId: null, policyName: 'cron',
+        entityType: 'cron', entityId: 'reconcile',
+      })
+      return rateLimitResponse(rl, POLICIES.cron.description)
+    }
   }
 
   const runStart = new Date()

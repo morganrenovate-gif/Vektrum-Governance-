@@ -3,6 +3,7 @@ import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { requirePartnerAuth } from '@/lib/auth/partner'
 import { calculateFee, calculateRetainage } from '@/lib/engine/billing'
 import { notFoundError } from '@/lib/errors'
+import { POLICIES, checkRateLimit, rateLimitResponse, logRateLimitViolation } from '@/lib/engine/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -41,6 +42,18 @@ export async function GET(
     partnerCtx = await requirePartnerAuth(request)
   } catch (err) {
     return err as NextResponse
+  }
+
+  // ── Rate limit — partner API ───────────────────────────────────────────────
+  {
+    const rl = await checkRateLimit(`partner:${partnerCtx.partnerId}:partner_api`, POLICIES.partner_api)
+    if (!rl.allowed) {
+      logRateLimitViolation(`partner:${partnerCtx.partnerId}:partner_api`, rl, {
+        actorId: partnerCtx.partnerId, policyName: 'partner_api',
+        entityType: 'release', entityId: releaseId,
+      })
+      return rateLimitResponse(rl, POLICIES.partner_api.description)
+    }
   }
 
   const admin = createSupabaseAdminClient()

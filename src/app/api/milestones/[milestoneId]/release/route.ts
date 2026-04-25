@@ -8,6 +8,7 @@ import { createTransactionReceipt, markReceiptEmailSent } from '@/lib/engine/rec
 import { notifyTransactionReceipt } from '@/lib/engine/notifications'
 import { stripe } from '@/lib/stripe'
 import { internalError, notFoundError, validationError } from '@/lib/errors'
+import { POLICIES, checkRateLimit, rateLimitResponse, logRateLimitViolation } from '@/lib/engine/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -46,6 +47,21 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     await requireMFA(supabase, profile)
   } catch (err) {
     return err as NextResponse
+  }
+
+  // ── Rate limit — financial writes ──────────────────────────────────────────
+  // 5 release attempts per 60 s per user (configurable via RATE_LIMIT_FINANCIAL_WRITE_MAX).
+  // Blocks burst-submission and amplified gate-query load. Enforced AFTER auth
+  // so the key is the authenticated user ID, not a forgeable IP.
+  {
+    const rl = await checkRateLimit(`user:${user.id}:financial_write`, POLICIES.financial_write)
+    if (!rl.allowed) {
+      logRateLimitViolation(`user:${user.id}:financial_write`, rl, {
+        actorId: user.id, policyName: 'financial_write',
+        entityType: 'milestone', entityId: milestoneId,
+      })
+      return rateLimitResponse(rl, POLICIES.financial_write.description)
+    }
   }
 
   // ── Fetch Milestone (needed for deal access check) ──────────────────────────
@@ -98,7 +114,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       .eq('entity_type', 'milestone')
       .eq('entity_id', milestoneId)
       .eq('actor_id', user.id)
-      .in('action', ['milestone_released', 'release_validation_failed', 'ai_precondition_override_applied'])
+      .in('action', ['milestone_released', 'release_validation_failed', 'ai_precondition_override_applied', 'release_gate_blocked'])
       .gte('created_at', windowStart)
       .limit(1)
 
@@ -119,6 +135,23 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   // ── STEP 0: AI Draw Review Precondition ─────────────────────────────────────
   const aiCheck = await checkAiPrecondition(milestoneId, supabase)
   if (!aiCheck.passed) {
+    // Fire-and-forget: the block is already decided. Audit failure must not
+    // accidentally allow the release or obscure the 422 response to the caller.
+    logAudit({
+      entity_type: 'milestone',
+      entity_id:   milestoneId,
+      action:      'release_gate_blocked',
+      actor_id:    user.id,
+      old_values:  null,
+      new_values:  null,
+      metadata: {
+        deal_id:        milestone.deal_id,
+        execution_rail: 'stripe_connect',
+        blocked_by:     'ai_precondition',
+        reason:         aiCheck.reason,
+      },
+    }).catch(err => console.error('[release] release_gate_blocked (ai_precondition) audit failed:', err))
+
     return NextResponse.json(
       { error: aiCheck.reason },
       { status: 422 },
@@ -151,6 +184,25 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const releaseValidation = await validateRelease(supabase, milestoneId, profile)
 
   if (!releaseValidation.allowed) {
+    // Fire-and-forget: the block is already decided. Audit failure must not
+    // accidentally allow the release or obscure the 400 response to the caller.
+    // failed_conditions contains structured gate error messages (not raw AI output
+    // or secrets) — safe to persist for forensic review.
+    logAudit({
+      entity_type: 'milestone',
+      entity_id:   milestoneId,
+      action:      'release_gate_blocked',
+      actor_id:    user.id,
+      old_values:  null,
+      new_values:  null,
+      metadata: {
+        deal_id:           milestone.deal_id,
+        execution_rail:    'stripe_connect',
+        blocked_by:        'release_gate',
+        failed_conditions: releaseValidation.errors,
+      },
+    }).catch(err => console.error('[release] release_gate_blocked (release_gate) audit failed:', err))
+
     return validationError(releaseValidation.errors)
   }
 
@@ -225,9 +277,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   )
 
   if (reservationError) {
-    // Postgres lock_not_available (55P03) = another release is already in progress
-    // for this deal. Return 409 so the client can retry after a short delay.
-    const isLockConflict = reservationError.code === '55P03'
+    // Postgres error code classification:
+    //   55P03 — lock_not_available: another release holds the deal row lock (NOWAIT)
+    //   55000 — object_not_in_prerequisite_state: deal is frozen/void/cancelled
+    //           (race window between validateRelease() check and lock acquisition;
+    //            caught inside reserve_release_funds() after it acquires the lock)
+    const isLockConflict    = reservationError.code === '55P03'
+    const isStatusRejection = reservationError.code === '55000'
     await logAudit({
       entity_type: 'milestone',
       entity_id:   milestoneId,
@@ -237,9 +293,15 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       new_values:  null,
       metadata: {
         deal_id:          milestone.deal_id,
+        execution_rail:   'stripe_connect',
         gross_amount:     fee.grossAmount,
         fee_amount:       fee.feeAmount,
         is_lock_conflict: isLockConflict,
+        // blocked_by surfaces the frozen-deal race window in forensic queries
+        // without duplicating the full reserve_release_funds error message.
+        blocked_by:       isStatusRejection ? 'frozen_deal_status'
+                        : isLockConflict    ? 'lock_conflict'
+                        : 'reservation_error',
         error:            reservationError.message,
         error_code:       reservationError.code,
       },

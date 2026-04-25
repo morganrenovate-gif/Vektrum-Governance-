@@ -11,6 +11,7 @@ import {
   ProviderChainError,
   type DrawReviewContext,
 } from '@/lib/engine/ai-provider'
+import { POLICIES, checkRateLimit, rateLimitResponse, logRateLimitViolation } from '@/lib/engine/rate-limit'
 
 // ─── GET /api/ai/draw-review?milestoneId=xxx ────────────────────────────────
 // Returns the most recent AI draw review assessment for a milestone.
@@ -117,6 +118,18 @@ export async function POST(req: NextRequest) {
     requireRole(profile, 'contractor', 'funder', 'admin')
   } catch (err) {
     return err as NextResponse
+  }
+
+  // ── Rate limit — AI draw review ────────────────────────────────────────────
+  {
+    const rl = await checkRateLimit(`user:${user.id}:ai_draw_review`, POLICIES.ai_draw_review)
+    if (!rl.allowed) {
+      logRateLimitViolation(`user:${user.id}:ai_draw_review`, rl, {
+        actorId: user.id, policyName: 'ai_draw_review',
+        entityType: 'milestone', entityId: 'unknown',
+      })
+      return rateLimitResponse(rl, POLICIES.ai_draw_review.description)
+    }
   }
 
   const { milestoneId }: { milestoneId: string } = await req.json()

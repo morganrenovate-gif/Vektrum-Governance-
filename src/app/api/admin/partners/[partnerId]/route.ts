@@ -5,6 +5,7 @@ import { getAuthUser, requireRole, requireMFA } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
 import { generatePartnerApiKey, generateWebhookSigningSecret } from '@/lib/auth/partner'
 import { internalError, notFoundError, validationError } from '@/lib/errors'
+import { POLICIES, checkRateLimit, rateLimitResponse, logRateLimitViolation } from '@/lib/engine/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -95,6 +96,18 @@ export async function PATCH(
   const { partnerId } = await params
   const { error, authContext } = await adminAuth(request)
   if (error || !authContext) return error!
+
+  // ── Rate limit — admin write ───────────────────────────────────────────────
+  {
+    const rl = await checkRateLimit(`user:${authContext.user.id}:admin_write`, POLICIES.admin_write)
+    if (!rl.allowed) {
+      logRateLimitViolation(`user:${authContext.user.id}:admin_write`, rl, {
+        actorId: authContext.user.id, policyName: 'admin_write',
+        entityType: 'partner', entityId: partnerId,
+      })
+      return rateLimitResponse(rl, POLICIES.admin_write.description)
+    }
+  }
 
   let body: PatchPartnerBody
   try {

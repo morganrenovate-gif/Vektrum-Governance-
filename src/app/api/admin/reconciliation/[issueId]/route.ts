@@ -3,6 +3,7 @@ import { createClient, createSupabaseAdminClient } from '@/lib/supabase/server'
 import { getAuthUser, requireRole, requireMFA, extractAdminJustification, requireAdminAudit } from '@/lib/auth/middleware'
 import { applyAutoFix } from '@/lib/engine/reconciliation'
 import { internalError, notFoundError } from '@/lib/errors'
+import { POLICIES, checkRateLimit, rateLimitResponse, logRateLimitViolation } from '@/lib/engine/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -44,6 +45,18 @@ export async function PATCH(
   }
 
   const { user } = authContext
+
+  // ── Rate limit — admin write ───────────────────────────────────────────────
+  {
+    const rl = await checkRateLimit(`user:${user.id}:admin_write`, POLICIES.admin_write)
+    if (!rl.allowed) {
+      logRateLimitViolation(`user:${user.id}:admin_write`, rl, {
+        actorId: user.id, policyName: 'admin_write',
+        entityType: 'reconciliation_issue', entityId: issueId,
+      })
+      return rateLimitResponse(rl, POLICIES.admin_write.description)
+    }
+  }
 
   // ── Parse body ──────────────────────────────────────────────────────────────
   let body: { action: string; note?: string; admin_justification?: string; authorization_reference?: string }

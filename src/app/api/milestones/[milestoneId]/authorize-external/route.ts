@@ -6,6 +6,7 @@ import { validateRelease, checkAiPrecondition } from '@/lib/engine/release-gate'
 import { calculateFee, calculateRetainage } from '@/lib/engine/billing'
 import { deliverPartnerWebhook } from '@/lib/engine/partner-webhook'
 import { internalError, notFoundError, validationError } from '@/lib/errors'
+import { POLICIES, checkRateLimit, rateLimitResponse, logRateLimitViolation } from '@/lib/engine/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -73,6 +74,18 @@ export async function POST(
     return err as NextResponse
   }
 
+  // ── Rate limit — financial writes ──────────────────────────────────────────
+  {
+    const rl = await checkRateLimit(`user:${user.id}:financial_write`, POLICIES.financial_write)
+    if (!rl.allowed) {
+      logRateLimitViolation(`user:${user.id}:financial_write`, rl, {
+        actorId: user.id, policyName: 'financial_write',
+        entityType: 'milestone', entityId: milestoneId,
+      })
+      return rateLimitResponse(rl, POLICIES.financial_write.description)
+    }
+  }
+
   // ── Fetch milestone ────────────────────────────────────────────────────────
   const { data: milestone, error: milestoneError } = await supabase
     .from('milestones')
@@ -112,6 +125,23 @@ export async function POST(
   // Identical bar to the Stripe rail — rail choice does not relax AI review.
   const aiCheck = await checkAiPrecondition(milestoneId, supabase)
   if (!aiCheck.passed) {
+    // Fire-and-forget: the block is already decided. Audit failure must not
+    // accidentally allow the authorization or obscure the 422 to the caller.
+    logAudit({
+      entity_type: 'milestone',
+      entity_id:   milestoneId,
+      action:      'release_gate_blocked',
+      actor_id:    user.id,
+      old_values:  null,
+      new_values:  null,
+      metadata: {
+        deal_id:        milestone.deal_id,
+        execution_rail: 'external_manual',
+        blocked_by:     'ai_precondition',
+        reason:         aiCheck.reason,
+      },
+    }).catch(err => console.error('[authorize-external] release_gate_blocked (ai_precondition) audit failed:', err))
+
     return NextResponse.json({ error: aiCheck.reason }, { status: 422 })
   }
 
@@ -142,6 +172,25 @@ export async function POST(
   })
 
   if (!releaseValidation.allowed) {
+    // Fire-and-forget: the block is already decided. Audit failure must not
+    // accidentally allow the authorization or obscure the 400 to the caller.
+    // failed_conditions contains structured gate error messages — not raw AI
+    // output or secrets — safe to persist for forensic review.
+    logAudit({
+      entity_type: 'milestone',
+      entity_id:   milestoneId,
+      action:      'release_gate_blocked',
+      actor_id:    user.id,
+      old_values:  null,
+      new_values:  null,
+      metadata: {
+        deal_id:           milestone.deal_id,
+        execution_rail:    'external_manual',
+        blocked_by:        'release_gate',
+        failed_conditions: releaseValidation.errors,
+      },
+    }).catch(err => console.error('[authorize-external] release_gate_blocked (release_gate) audit failed:', err))
+
     return validationError(releaseValidation.errors)
   }
 
@@ -180,7 +229,11 @@ export async function POST(
   )
 
   if (reservationError) {
-    const isLockConflict = reservationError.code === '55P03'
+    // 55P03 — lock_not_available: deal row already locked by concurrent release
+    // 55000 — object_not_in_prerequisite_state: deal frozen/void/cancelled
+    //         (race window between validateRelease() and lock acquisition)
+    const isLockConflict    = reservationError.code === '55P03'
+    const isStatusRejection = reservationError.code === '55000'
     await logAudit({
       entity_type: 'milestone',
       entity_id:   milestoneId,
@@ -190,12 +243,15 @@ export async function POST(
       new_values:  null,
       metadata: {
         deal_id:          milestone.deal_id,
+        execution_rail:   'external_manual',
         gross_amount:     fee.grossAmount,
         fee_amount:       fee.feeAmount,
         is_lock_conflict: isLockConflict,
+        blocked_by:       isStatusRejection ? 'frozen_deal_status'
+                        : isLockConflict    ? 'lock_conflict'
+                        : 'reservation_error',
         error:            reservationError.message,
         error_code:       reservationError.code,
-        execution_rail:   'external_manual',
       },
     })
 

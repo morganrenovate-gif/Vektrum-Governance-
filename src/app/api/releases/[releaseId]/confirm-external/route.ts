@@ -10,6 +10,7 @@ import {
 import { logAudit } from '@/lib/engine/audit'
 import { calculateFee, calculateRetainage } from '@/lib/engine/billing'
 import { internalError, notFoundError, validationError } from '@/lib/errors'
+import { POLICIES, checkRateLimit, rateLimitResponse, logRateLimitViolation } from '@/lib/engine/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -81,6 +82,18 @@ export async function POST(
     await requireMFA(supabase, profile)
   } catch (err) {
     return err as NextResponse
+  }
+
+  // ── Rate limit — financial writes ──────────────────────────────────────────
+  {
+    const rl = await checkRateLimit(`user:${user.id}:financial_write`, POLICIES.financial_write)
+    if (!rl.allowed) {
+      logRateLimitViolation(`user:${user.id}:financial_write`, rl, {
+        actorId: user.id, policyName: 'financial_write',
+        entityType: 'release', entityId: releaseId,
+      })
+      return rateLimitResponse(rl, POLICIES.financial_write.description)
+    }
   }
 
   // ── Parse body ─────────────────────────────────────────────────────────────

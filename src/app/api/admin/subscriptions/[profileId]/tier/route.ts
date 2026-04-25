@@ -3,6 +3,7 @@ import { createClient, createSupabaseAdminClient } from '@/lib/supabase/server'
 import { getAuthUser, requireMFA } from '@/lib/auth/middleware'
 import { billingRateFromTier, getFeeDescription } from '@/lib/engine/billing'
 import { errorResponse, internalError, notFoundError } from '@/lib/errors'
+import { POLICIES, checkRateLimit, rateLimitResponse, logRateLimitViolation } from '@/lib/engine/rate-limit'
 import type { SubscriptionTier } from '@/lib/engine/billing'
 
 export const dynamic = 'force-dynamic'
@@ -50,6 +51,18 @@ export async function POST(
     await requireMFA(supabase, adminProfile)
   } catch (err) {
     return err as NextResponse
+  }
+
+  // ── Rate limit — admin write ───────────────────────────────────────────────
+  {
+    const rl = await checkRateLimit(`user:${user.id}:admin_write`, POLICIES.admin_write)
+    if (!rl.allowed) {
+      logRateLimitViolation(`user:${user.id}:admin_write`, rl, {
+        actorId: user.id, policyName: 'admin_write',
+        entityType: 'profile', entityId: profileId,
+      })
+      return rateLimitResponse(rl, POLICIES.admin_write.description)
+    }
   }
 
   // ── Parse Body ─────────────────────────────────────────────────────────────

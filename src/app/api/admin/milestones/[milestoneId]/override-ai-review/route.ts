@@ -10,6 +10,7 @@ import {
 } from '@/lib/auth/middleware'
 import { logAdminAudit } from '@/lib/engine/audit'
 import { errorResponse, notFoundError } from '@/lib/errors'
+import { POLICIES, checkRateLimit, rateLimitResponse, logRateLimitViolation } from '@/lib/engine/rate-limit'
 
 // ─── POST /api/admin/milestones/[milestoneId]/override-ai-review ─────────────
 //
@@ -66,6 +67,18 @@ export async function POST(
     await requireMFA(supabase, profile)
   } catch (err) {
     return err as NextResponse
+  }
+
+  // ── Rate limit — admin write ───────────────────────────────────────────────
+  {
+    const rl = await checkRateLimit(`user:${user.id}:admin_write`, POLICIES.admin_write)
+    if (!rl.allowed) {
+      logRateLimitViolation(`user:${user.id}:admin_write`, rl, {
+        actorId: user.id, policyName: 'admin_write',
+        entityType: 'milestone', entityId: milestoneId,
+      })
+      return rateLimitResponse(rl, POLICIES.admin_write.description)
+    }
   }
 
   // ── Parse body ────────────────────────────────────────────────────────────

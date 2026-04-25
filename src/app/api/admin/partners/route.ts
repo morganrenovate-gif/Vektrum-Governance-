@@ -5,6 +5,7 @@ import { getAuthUser, requireRole, requireMFA } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
 import { generatePartnerApiKey, generateWebhookSigningSecret } from '@/lib/auth/partner'
 import { internalError, validationError } from '@/lib/errors'
+import { POLICIES, checkRateLimit, rateLimitResponse, logRateLimitViolation } from '@/lib/engine/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -123,6 +124,18 @@ export async function POST(request: NextRequest) {
     await requireMFA(supabase, authContext.profile)
   } catch (err) {
     return err as NextResponse
+  }
+
+  // ── Rate limit — admin write ───────────────────────────────────────────────
+  {
+    const rl = await checkRateLimit(`user:${authContext.user.id}:admin_write`, POLICIES.admin_write)
+    if (!rl.allowed) {
+      logRateLimitViolation(`user:${authContext.user.id}:admin_write`, rl, {
+        actorId: authContext.user.id, policyName: 'admin_write',
+        entityType: 'partner', entityId: 'new',
+      })
+      return rateLimitResponse(rl, POLICIES.admin_write.description)
+    }
   }
 
   let body: CreatePartnerBody
