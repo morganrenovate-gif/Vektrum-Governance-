@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createSupabaseAdminClient } from '@/lib/supabase/server'
-import { getAuthUser, requireDealAccess, requireMFA } from '@/lib/auth/middleware'
+import { getAuthUser, requireDealAccess, requireMFA, requireRole } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
 import { validateRelease, checkAiPrecondition } from '@/lib/engine/release-gate'
 import { calculateFee, calculateRetainage, toStripeCents } from '@/lib/engine/billing'
@@ -40,9 +40,27 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
 
   const { user, profile } = authContext
+
+  // ── Role Guard — funder only ────────────────────────────────────────────────
+  // Only the deal funder may release milestone payments. This mirrors the
+  // security boundary enforced by validateRelease() Condition 0, but fails fast
+  // here — before MFA verification, rate-limit consumption, or any DB query.
+  //
+  // Admin rationale: admins are intentionally excluded. The release gate documents
+  // this as "a deliberate security boundary preventing admin compromise from
+  // bypassing funder authorisation." An admin 403 here is the correct outcome;
+  // there is no legitimate admin path to release funds on behalf of a funder.
+  //
+  // Consistency: authorize-external/route.ts uses the same funder-only gate.
+  try {
+    requireRole(profile, 'funder')
+  } catch (err) {
+    return err as NextResponse
+  }
+
   const supabase = await createClient()
 
-  // ── MFA Guard — funders and admins must be at AAL2 to release funds ─────────
+  // ── MFA Guard — funder must be at AAL2 to release funds ──────────────────────
   try {
     await requireMFA(supabase, profile)
   } catch (err) {
