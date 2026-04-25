@@ -793,7 +793,7 @@ export default async function HomePage() {
                 step: '02',
                 icon: Shield,
                 title: 'Funder deposits',
-                desc: 'Funder deposits via Stripe Connect. Funds held in Stripe-managed accounts. Vektrum governs authorization but never holds funds.',
+                desc: 'Funder deposits via Stripe Connect. Funds held in Stripe-managed accounts. Vektrum governs authorization but does not hold funds directly.',
                 bg: 'bg-vektrum-blue/10',
                 color: 'text-vektrum-blue',
               },
@@ -877,7 +877,7 @@ export default async function HomePage() {
               {
                 icon: FileText,
                 title: 'Vektrum governs. Stripe holds.',
-                desc: 'Funds held in Stripe Connect managed accounts — not by Vektrum. Vektrum governs authorization. Vektrum never holds, collects, forwards, or transmits funds.',
+                desc: 'Funds held in Stripe Connect managed accounts — not by Vektrum. Vektrum governs authorization. Vektrum does not hold, collect, forward, or transmit funds directly.',
               },
               {
                 icon: AlertCircle,
@@ -908,7 +908,7 @@ export default async function HomePage() {
               </div>
               <div className="sm:px-6">
                 <p className="text-[12px] text-white/85 leading-relaxed font-medium">
-                  Vektrum governs authorization. Vektrum never holds, collects, forwards, or transmits funds.
+                  Vektrum governs authorization. Vektrum does not hold, collect, forward, or transmit funds directly.
                 </p>
               </div>
               <div className="sm:pl-6">

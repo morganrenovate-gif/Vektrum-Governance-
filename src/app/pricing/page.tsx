@@ -776,7 +776,7 @@ export default function PricingPage() {
               {
                 icon: Building2,
                 headline: 'Stripe holds the money.',
-                body: 'Funds never pass through Vektrum. All capital is held in Stripe Connect managed accounts. Vektrum never holds, transmits, or controls funds directly.',
+                body: 'Funds do not pass through Vektrum. All capital is held in Stripe Connect managed accounts or processed through licensed payment partners. Vektrum does not hold, transmit, or control funds directly.',
               },
               {
                 icon: FileText,
