@@ -25,7 +25,7 @@ All pre-existing releases are backfilled with `execution_rail='stripe_connect'`.
 
 ## The invariant Vektrum preserves across both rails
 
-> **Vektrum governs disbursement. Vektrum never holds funds.**
+> **Vektrum governs authorization. Vektrum never holds funds.**
 
 For `stripe_connect`: funds are held in Stripe-managed accounts. Vektrum
 instructs Stripe when to transfer; Stripe controls movement.
@@ -216,7 +216,7 @@ by `GET /api/admin/ops/external-releases`:
 
 Claims that remain safe:
 
-- "Vektrum governs disbursement. Vektrum never holds funds."
+- "Vektrum governs authorization. Vektrum never holds funds."
 - "Funds are held in Stripe Connect managed accounts — not by Vektrum." (for
   Stripe-rail deals)
 - "Append-only, hash-chained audit log."
