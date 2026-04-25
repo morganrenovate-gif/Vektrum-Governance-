@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createSupabaseAdminClient } from '@/lib/supabase/server'
-import { getAuthUser, requireDealAccess, requireMFA } from '@/lib/auth/middleware'
+import { getAuthUser, requireDealAccess, requireMFA, requireRole } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
 import { validateRelease, checkAiPrecondition } from '@/lib/engine/release-gate'
 import { calculateFee, calculateRetainage } from '@/lib/engine/billing'
@@ -56,6 +56,16 @@ export async function POST(
   const { user, profile } = authContext
   const supabase = await createClient()
 
+  // ── Role Guard — funder only ────────────────────────────────────────────────
+  // validateRelease() also enforces this, but an explicit check here provides
+  // defense-in-depth: the route is rejected before any DB reads or Stripe calls
+  // if the caller is not a funder.
+  try {
+    requireRole(profile, 'funder')
+  } catch (err) {
+    return err as NextResponse
+  }
+
   // ── MFA Guard ───────────────────────────────────────────────────────────────
   try {
     await requireMFA(supabase, profile)
@@ -103,6 +113,25 @@ export async function POST(
   const aiCheck = await checkAiPrecondition(milestoneId, supabase)
   if (!aiCheck.passed) {
     return NextResponse.json({ error: aiCheck.reason }, { status: 422 })
+  }
+
+  // Dedicated override audit — same as the Stripe rail, ensures the decision to
+  // bypass AI review is traceable independently of the authorization record.
+  if (aiCheck.warning) {
+    logAudit({
+      entity_type: 'milestone',
+      entity_id:   milestoneId,
+      action:      'ai_precondition_override_applied',
+      actor_id:    user.id,
+      old_values:  null,
+      new_values:  null,
+      metadata: {
+        deal_id:          milestone.deal_id,
+        execution_rail:   'external_manual',
+        override_warning: aiCheck.warning,
+        actor_role:       profile.role,
+      },
+    }).catch(err => console.error('[authorize-external] ai_precondition_override_applied audit failed:', err))
   }
 
   // ── STEP 1: Release gate (10 conditions, rail-aware) ───────────────────────

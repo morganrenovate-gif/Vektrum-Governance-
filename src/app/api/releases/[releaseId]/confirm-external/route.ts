@@ -262,9 +262,18 @@ export async function POST(
     }
   }
 
-  // If admin, require justification BEFORE any writes
+  // If admin, require justification AND proof document BEFORE any writes.
+  // Admins confirming payment on behalf of the funder must attach evidence —
+  // there is no implicit trust that the admin personally executed the transfer.
   let adminJustification: string | null = null
   if (isAdmin) {
+    if (!proofDocumentId) {
+      return validationError([
+        'Admin confirmations require a proof_document_id. ' +
+        'Attach a signed wire confirmation, check image, or bank statement to the milestone ' +
+        'and supply its document id before recording admin-confirmed external payment.',
+      ])
+    }
     try {
       adminJustification = extractAdminJustification(request, body as unknown as Record<string, unknown>)
     } catch (err) {
