@@ -277,7 +277,7 @@ function InsightSlide() {
 function SolutionSlide() {
   const flow = [
     {
-      label:    'Funder authorisation',
+      label:    'Funder authorization',
       sub:      'Funder triggers release. Admins cannot.',
       icon:     Landmark,
       border:   'border-blue-500/20',
@@ -336,7 +336,7 @@ function SolutionSlide() {
 
             <p className="text-[15px] text-white/54 leading-relaxed mb-9 max-w-[460px]">
               Vektrum determines whether construction funds are allowed to move.
-              Authorisation is separated from execution — funds flow through Stripe
+              Authorization is separated from execution — funds flow through Stripe
               Connect or a partner-controlled external process. Vektrum never holds,
               escrows, transmits, or forwards money.
             </p>
@@ -345,7 +345,7 @@ function SolutionSlide() {
               {[
                 'Server-side 10-condition release gate — no UI path around it',
                 'AI-assisted draw review as a precondition, not the release authority',
-                'Stripe Connect automated rail + external/manual authorised rail',
+                'Stripe Connect automated rail + external/manual authorized rail',
                 'Append-only, hash-chained audit log with admin dual-logging',
                 'Hourly Stripe reconciliation with 1-hour SLA escalation',
                 'Funder-triggered release. Admin oversight. Admin cannot release.',
@@ -409,7 +409,7 @@ function ReleaseGateSlide() {
     { n: '01', label: 'Milestone approved',         desc: 'Funder has explicitly approved the work' },
     { n: '02', label: 'Protection ready',           desc: 'Milestone protection cleared for release' },
     { n: '03', label: 'Sufficient funded balance',  desc: 'Available capital covers milestone + fee' },
-    { n: '04', label: 'Payout readiness verified',  desc: 'Rail-aware: Stripe payouts enabled, or external rail authorised' },
+    { n: '04', label: 'Payout readiness verified',  desc: 'Rail-aware: Stripe payouts enabled, or external rail authorized' },
     { n: '05', label: 'Onboarding complete',        desc: 'Contractor platform onboarding finalised' },
     { n: '06', label: 'No existing release',        desc: 'No pending or confirmed release for this milestone' },
     { n: '07', label: 'No open change orders',      desc: 'All change orders resolved before release' },
@@ -444,7 +444,7 @@ function ReleaseGateSlide() {
             <div className="rounded-xl border border-white/[0.07] bg-white/[0.025] p-4">
               <p className="text-[11px] text-white/45 leading-relaxed">
                 Funds cannot move unless all conditions pass. Reservation is atomic:
-                concurrent releases against the same balance cannot over-authorise.
+                concurrent releases against the same balance cannot over-authorize.
               </p>
             </div>
 
@@ -565,13 +565,13 @@ function ExecutionRailsSlide() {
         <Eyebrow>Execution Rails</Eyebrow>
 
         <h2 className="text-[44px] font-black tracking-[-0.038em] text-white leading-[1.02] mb-4">
-          Authorisation is separated
+          Authorization is separated
           <br />
           <span className="text-white/38">from execution.</span>
         </h2>
 
         <p className="text-[14px] text-white/50 leading-relaxed mb-10 max-w-[640px]">
-          Vektrum authorises release. Execution happens on a payment rail. Funds
+          Vektrum authorizes release. Execution happens on a payment rail. Funds
           never touch Vektrum infrastructure — on either rail.
         </p>
 
@@ -621,12 +621,12 @@ function ExecutionRailsSlide() {
             <p className="text-[13px] text-white/60 leading-relaxed mb-5">
               Funds never touch Vektrum infrastructure at all. The funder (or their
               treasury, escrow, or title partner) executes payment off-platform
-              after Vektrum authorises.
+              after Vektrum authorizes.
             </p>
             <div className="space-y-2">
               {[
                 'Same 10-condition gate (Stripe payouts check skipped)',
-                'Authorisation recorded; funder executes externally',
+                'Authorization recorded; funder executes externally',
                 'Confirmation records method, reference, proof, actor',
                 'SLA-tracked; unconfirmed releases escalate',
               ].map((x) => (
@@ -716,7 +716,7 @@ function TrustOpsSlide() {
 
         <p className="text-[14px] text-white/50 leading-relaxed mb-10 max-w-[620px]">
           A release is only as trustworthy as the record behind it. Vektrum writes
-          an immutable, operationally-monitored record of every authorisation,
+          an immutable, operationally-monitored record of every authorization,
           confirmation, and override.
         </p>
 
@@ -791,7 +791,7 @@ function RolesSlide() {
 
         <p className="text-[14px] text-white/50 leading-relaxed mb-10 max-w-[620px]">
           The release gate rejects any caller whose role is not `funder`. This is a
-          deliberate security boundary — admin compromise cannot become unauthorised
+          deliberate security boundary — admin compromise cannot become unauthorized
           disbursement.
         </p>
 
@@ -852,7 +852,7 @@ function MarketSlide() {
     },
     {
       title: 'Payment rails are fragmented',
-      body:  'Lenders use Stripe, existing treasury, escrow, and title. A rail-agnostic authorisation layer is the high-leverage position.',
+      body:  'Lenders use Stripe, existing treasury, escrow, and title. A rail-agnostic authorization layer is the high-leverage position.',
     },
   ]
 
@@ -922,7 +922,7 @@ function CompetitiveSlide() {
 
   const rows: Row[] = [
     { feature: '10-condition release gate (server-side)', vektrum: 'check', built: 'cross', procore: 'cross', banks: 'cross', stripe: 'cross' },
-    { feature: 'Authorisation separated from execution',  vektrum: 'check', built: 'cross', procore: 'cross', banks: 'half',  stripe: 'cross' },
+    { feature: 'zation separated from execution',  vektrum: 'check', built: 'cross', procore: 'cross', banks: 'half',  stripe: 'cross' },
     { feature: 'Rail-agnostic (Stripe + external)',       vektrum: 'check', built: 'cross', procore: 'cross', banks: 'half',  stripe: 'cross' },
     { feature: 'AI draw review as precondition',          vektrum: 'check', built: 'cross', procore: 'cross', banks: 'cross', stripe: 'cross' },
     { feature: 'Hash-chained audit log',                  vektrum: 'check', built: 'cross', procore: 'half',  banks: 'cross', stripe: 'cross' },
@@ -956,7 +956,7 @@ function CompetitiveSlide() {
           <h2 className="text-[42px] font-black tracking-[-0.038em] text-white leading-[1.02]">
             Others track, manage, or execute.
             <br />
-            <span className="text-white/38">Vektrum controls authorisation.</span>
+            <span className="text-white/38">Vektrum controls authorization.</span>
           </h2>
           <p className="text-[12px] text-white/38 max-w-[280px] leading-relaxed text-right pb-1">
             Construction platforms manage workflow. Payment processors move money.
