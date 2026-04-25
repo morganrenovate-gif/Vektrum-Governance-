@@ -79,7 +79,7 @@ export default function ContractorsPage() {
               {
                 icon: FileText,
                 title: 'Proof of approval',
-                desc: 'Immutable record that your work was reviewed and approved. Permanent and tamper-proof.',
+                desc: 'Immutable record that your work was reviewed and approved. Permanent and tamper-evident.',
               },
               {
                 icon: Clock,
@@ -111,7 +111,7 @@ export default function ContractorsPage() {
           <ol className="space-y-6">
             {[
               'You receive an invite from your funder to join a deal on Vektrum.',
-              'Set up your Stripe Connect account for direct deposit — takes minutes.',
+              'For Stripe Connect deals, complete Stripe onboarding for direct deposit — takes minutes. For external/manual deals, payment is executed by the funder\'s institutional partner and Stripe onboarding is not required.',
               'Complete milestones and submit draw requests with supporting documentation.',
               'The funder reviews and approves. The 10-condition gate verifies everything server-side.',
               'Funds deposit directly to your bank. Immutable audit trail confirms every release.',

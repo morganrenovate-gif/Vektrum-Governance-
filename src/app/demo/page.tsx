@@ -26,7 +26,7 @@ export default function DemoPage() {
             Verified Before Release.
           </h1>
           <p className="mt-6 mx-auto max-w-2xl text-base sm:text-lg text-vektrum-canvas-text/70">
-            Vektrum governs the $2.19T U.S. construction spend with AI-assisted
+            Built for the $2.19T U.S. construction disbursement market — AI-assisted
             draw review, a 10-condition server-side release gate, and immutable
             audit trails.
           </p>
@@ -104,7 +104,7 @@ export default function DemoPage() {
               {
                 step: 1,
                 title: 'Deal Created',
-                desc: 'Funder deposits funds into Project Trust Account',
+                desc: 'Deal funded — capital held by Stripe Connect or the customer\'s institutional payment partner, not by Vektrum.',
                 icon: Banknote,
               },
               {
@@ -159,7 +159,7 @@ export default function DemoPage() {
               {[
                 'Before any milestone payment releases, the AI draw review reads the submitted evidence against the deal context.',
                 'The review scores the draw request 0\u2013100, flags risk factors, and issues a formal recommendation: Approve, Hold, or Reject. A funder must still approve before funds move.',
-                'Every assessment is cryptographically logged to an immutable audit trail \u2014 permanent, tamper-proof, legally defensible.',
+                'Every assessment is cryptographically logged to an immutable audit trail \u2014 permanent, tamper-evident, legally defensible.',
               ].map((text, i) => (
                 <div key={i} className="flex items-start gap-3">
                   <div className="mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-vektrum-blue/20">

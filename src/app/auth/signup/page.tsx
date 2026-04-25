@@ -138,7 +138,7 @@ export default function SignupPage() {
         </div>
 
         <p className="text-xs text-white/70">
-          Payments powered by Stripe Connect · Vektrum never holds funds
+          Payments powered by Stripe Connect · Vektrum governs authorization, not custody
         </p>
       </div>
 

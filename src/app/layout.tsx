@@ -78,7 +78,7 @@ export default async function RootLayout({
         "name": "Vektrum",
         "url": "https://vektrum.io",
         "logo": "https://vektrum.io/logo.png",
-        "description": "Vektrum is a construction disbursement governance platform providing controlled draw disbursements with a 10-condition release gate, AI-assisted draw review preconditions, and immutable audit trails for funders and contractors.",
+        "description": "Vektrum is a construction disbursement governance platform providing authorization infrastructure for construction draw releases — 10-condition release gate, AI-assisted draw review preconditions, and immutable audit trails for funders and contractors.",
         "contactPoint": {
           "@type": "ContactPoint",
           "email": "operations@vektrum.io",
@@ -297,13 +297,13 @@ export default async function RootLayout({
                 &copy; {new Date().getFullYear()} Vektrum. All rights reserved.
               </p>
               <p className="text-[11px] text-white/65">
-                Funds are held in Stripe Connect managed accounts, not by Vektrum.
+                Vektrum does not hold or custody funds. For Stripe Connect deals, funds are held in Stripe-managed accounts. For external/manual deals, funds are held by the funder&apos;s institutional payment partner.
               </p>
               <p className="mt-1 text-[11px] text-white/60 leading-relaxed">
                 Vektrum is not a bank, lender, or money transmitter. Platform security reviewed annually. Data encrypted in transit and at rest.
               </p>
               <p className="mt-1 text-[11px] text-white/55 leading-relaxed">
-                Vektrum is authorization software. Vektrum does not hold, move, or custody funds in ordinary operations. All payments are executed by your licensed payment partner or financial institution.
+                Vektrum is authorization infrastructure. Vektrum does not hold or custody funds. Stripe Connect or the customer&apos;s institutional payment process handles execution.
               </p>
               <div className="flex flex-col gap-1 sm:items-end">
                 <p className="text-[12px] text-white/65">

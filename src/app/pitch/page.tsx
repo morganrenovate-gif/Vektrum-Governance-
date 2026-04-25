@@ -571,8 +571,9 @@ function ExecutionRailsSlide() {
         </h2>
 
         <p className="text-[14px] text-white/50 leading-relaxed mb-10 max-w-[640px]">
-          Vektrum authorizes release. Execution happens on a payment rail. Funds
-          never touch Vektrum infrastructure — on either rail.
+          Vektrum authorizes release. Execution happens on a payment rail. Vektrum
+          never holds or custodies funds — on either rail. On external/manual releases,
+          funds never interact with Vektrum infrastructure at all.
         </p>
 
         <div className="grid grid-cols-2 gap-5">
@@ -922,7 +923,7 @@ function CompetitiveSlide() {
 
   const rows: Row[] = [
     { feature: '10-condition release gate (server-side)', vektrum: 'check', built: 'cross', procore: 'cross', banks: 'cross', stripe: 'cross' },
-    { feature: 'zation separated from execution',  vektrum: 'check', built: 'cross', procore: 'cross', banks: 'half',  stripe: 'cross' },
+    { feature: 'Authorization separated from execution', vektrum: 'check', built: 'cross', procore: 'cross', banks: 'half',  stripe: 'cross' },
     { feature: 'Rail-agnostic (Stripe + external)',       vektrum: 'check', built: 'cross', procore: 'cross', banks: 'half',  stripe: 'cross' },
     { feature: 'AI draw review as precondition',          vektrum: 'check', built: 'cross', procore: 'cross', banks: 'cross', stripe: 'cross' },
     { feature: 'Hash-chained audit log',                  vektrum: 'check', built: 'cross', procore: 'half',  banks: 'cross', stripe: 'cross' },

@@ -110,7 +110,7 @@ export function StripeOnboardingWizard({
                     : [
                         '10-condition release gate — every check runs server-side',
                         'Full audit trail — immutable, timestamped, actor-logged',
-                        'Stripe holds funds in your Project Trust Account until every condition is met',
+                        'Stripe holds capital in Stripe-managed accounts until every release condition is met',
                       ]
                   ).map((item) => (
                     <li key={item} className="flex items-start gap-2.5">

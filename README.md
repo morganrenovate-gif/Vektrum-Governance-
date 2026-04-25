@@ -7,7 +7,7 @@
 
 The construction industry loses billions annually to payment disputes, draw fraud, and frozen funds. In a typical legacy scenario, a funder wires the full project amount to a contractor at deal start — when a dispute arises over one milestone, the entire capital freezes, halting work site-wide.
 
-Vektrum replaces bulk upfront transfers with **milestone-conditional payment authorization**: capital is held by Stripe at deal creation, and each tranche releases only after passing a **10-condition server-side release gate** plus an AI precondition. Every action — from status changes to Stripe transfers to admin overrides — is written to a **hash-chained, append-only audit log** that cannot be modified or deleted.
+Vektrum replaces bulk upfront transfers with **milestone-conditional payment authorization**: for Stripe Connect deals, capital is held through Stripe Connect infrastructure; for external/manual deals, capital is held by the funder's institutional payment partner — and each tranche releases only after passing a **10-condition server-side release gate** plus an AI precondition. Every action — from status changes to Stripe transfers to admin overrides — is written to a **hash-chained, append-only audit log** that cannot be modified or deleted.
 
 ### Core guarantees
 

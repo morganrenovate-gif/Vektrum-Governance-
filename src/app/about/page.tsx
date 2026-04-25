@@ -72,7 +72,7 @@ export default function AboutPage() {
               {
                 icon: Shield,
                 title: 'Governance, not custody',
-                desc: 'Vektrum governs authorization conditions. Stripe holds the funds. We never touch your money.',
+                desc: 'Vektrum never holds or custodies funds. For Stripe Connect releases, funds are held in Stripe-managed accounts. For external/manual releases, payment is executed entirely outside Vektrum by the funder\'s institutional partner.',
               },
               {
                 icon: Lock,

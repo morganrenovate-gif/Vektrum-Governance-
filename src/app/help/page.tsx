@@ -28,7 +28,11 @@ const FAQ: FaqItem[] = [
   },
   {
     q: 'Does Vektrum hold my money?',
-    a: 'No. All funds are held by Stripe via Stripe Connect. Vektrum governs when and how funds are released, but never holds or touches the money directly.',
+    a: 'No. Vektrum does not hold funds in its own bank account or act as escrow. For Stripe Connect releases, payment execution runs through Stripe Connect infrastructure — funds are held in Stripe-managed accounts. For external/manual releases, payment is executed outside Vektrum by the funder, title company, escrow company, or partner treasury process. Vektrum governs authorization and records proof.',
+  },
+  {
+    q: 'How does Vektrum work with institutional payment partners?',
+    a: 'For deals using an institutional partner (title company, escrow company, construction loan servicer, or treasury team), the partner executes payment through its existing process. Vektrum authorizes or blocks the release and records confirmation, reference, proof, actor, timestamp, and audit trail. Stripe Connect is not required for these deals.',
   },
   {
     q: 'What is the 10-condition release gate?',

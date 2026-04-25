@@ -131,7 +131,7 @@ function Step3({ role }: { role: Profile['role'] }) {
         <p className="mt-2 text-[14px] leading-relaxed text-white/55">
           {role === 'contractor'
             ? 'Connect your bank account via Stripe Connect to receive milestone payments directly. No intermediary holds your money.'
-            : 'Vektrum never holds funds. Stripe holds the funds. Vektrum holds the rules. Your capital stays in your Stripe account until every condition is met.'}
+            : 'Vektrum does not hold or custody funds. For Stripe Connect deals, your capital stays in Stripe-managed accounts until every release condition is met.'}
         </p>
       </div>
       <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.08] p-4">
@@ -141,7 +141,7 @@ function Step3({ role }: { role: Profile['role'] }) {
         <p className="mt-1 text-[13px] leading-relaxed text-white/55">
           {role === 'contractor'
             ? 'Stripe Connect Express — bank-grade security, instant payouts, zero markup on transfer fees.'
-            : 'Stripe holds funds in your Project Trust Account. Vektrum governs release. Fees passed through at cost — never marked up.'}
+            : 'Stripe holds capital in Stripe-managed accounts. Vektrum governs release authorization. Fees passed through at cost — never marked up.'}
         </p>
       </div>
       {role === 'contractor' && (
