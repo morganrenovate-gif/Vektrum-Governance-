@@ -60,8 +60,13 @@ function validateTransition(currentStatus, newStatus, userRole) {
 async function validateRelease(supabase, milestoneId, callerProfile) {
   const errors = []
 
-  if (callerProfile.role !== 'funder' && callerProfile.role !== 'admin') {
-    errors.push(`Only funders and admins can release milestone payments. Your account is registered as a '${callerProfile.role}'. If you believe this is incorrect, contact your account administrator.`)
+  if (callerProfile.role !== 'funder') {
+    errors.push(
+      `Only the deal funder can release milestone payments. ` +
+      `Your account is registered as a '${callerProfile.role}'. ` +
+      `Admin accounts cannot directly trigger releases — contact the deal ` +
+      `funder to authorise this payment.`
+    )
     return { allowed: false, errors }
   }
 
@@ -215,9 +220,11 @@ await test('ROLE: funder passes role check — happy path all clear', async () =
   assert(r.allowed, `Should allow but got: ${r.errors.join(' | ')}`)
 })
 
-await test('ROLE: admin passes role check — happy path all clear', async () => {
+await test('ROLE: admin cannot trigger release — blocked with funder-only message', async () => {
   const r = await validateRelease(buildMock(), 'ms-1', { ...funder(), role: 'admin' })
-  assert(r.allowed, `Should allow but got: ${r.errors.join(' | ')}`)
+  assert(!r.allowed, 'Admin should be blocked from triggering a release')
+  assertContains(r.errors.join(' '), 'admin')
+  assertNoStackTrace(r.errors)
 })
 
 // Condition 1

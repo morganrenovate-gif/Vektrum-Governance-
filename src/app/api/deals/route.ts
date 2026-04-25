@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createSupabaseAdminClient } from '@/lib/supabase/server'
 import { getAuthUser, requireRole } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
 import { BILLING_RATES, calculateGovernanceFacility } from '@/lib/engine/billing'
@@ -103,6 +103,13 @@ export async function POST(request: NextRequest) {
     description?: string
     total_amount?: number
     funder_id?: string
+    /**
+     * Optional execution-rail partner ID. When provided, the deal uses
+     * the external_manual rail and the named partner receives the
+     * release.authorized webhook for execution. Must be a valid active
+     * partner UUID from the partners table.
+     */
+    partner_id?: string
     /** When true, milestones must be released in ascending order_index order. Default false. */
     sequential_release_required?: boolean
     /**
@@ -149,6 +156,31 @@ export async function POST(request: NextRequest) {
     return validationError(validationErrors)
   }
 
+  // ── Validate partner_id if provided ────────────────────────────────────────
+  const partnerId = typeof body.partner_id === 'string' && body.partner_id.trim()
+    ? body.partner_id.trim()
+    : null
+
+  if (partnerId) {
+    // Only admin role can assign a partner_id to a deal
+    if (profile.role !== 'admin') {
+      return validationError(['Only platform admins can assign an execution-rail partner to a deal.'])
+    }
+    const admin = createSupabaseAdminClient()
+    const { data: partnerRow, error: partnerErr } = await admin
+      .from('partners')
+      .select('id, is_active')
+      .eq('id', partnerId)
+      .maybeSingle()
+    if (partnerErr || !partnerRow) {
+      return validationError([`partner_id '${partnerId}' does not reference a valid partner.`])
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (!(partnerRow as any).is_active) {
+      return validationError([`Partner '${partnerId}' is not active. Only active partners can be assigned to deals.`])
+    }
+  }
+
   try {
     const supabase = await createClient()
 
@@ -189,6 +221,7 @@ export async function POST(request: NextRequest) {
         return Math.round(pct * 100) / 100
       })(),
       ...(body.funder_id && { funder_id: body.funder_id }),
+      ...(partnerId && { partner_id: partnerId }),
     }
 
     const { data: deal, error } = await supabase
@@ -218,6 +251,7 @@ export async function POST(request: NextRequest) {
         contractor_id:                deal.contractor_id,
         sequential_release_required:  deal.sequential_release_required,
         retainage_percentage:         deal.retainage_percentage,
+        partner_id:                   partnerId,
         construction_budget:          governance.constructionBudget,
         governance_fee_bps:           governance.governanceFeeBps,
         governance_fee_total:         governance.governanceFeeTotal,

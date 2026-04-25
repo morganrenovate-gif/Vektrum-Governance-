@@ -4,6 +4,7 @@ import { getAuthUser, requireDealAccess, requireMFA } from '@/lib/auth/middlewar
 import { logAudit } from '@/lib/engine/audit'
 import { validateRelease, checkAiPrecondition } from '@/lib/engine/release-gate'
 import { calculateFee, calculateRetainage } from '@/lib/engine/billing'
+import { deliverPartnerWebhook } from '@/lib/engine/partner-webhook'
 import { internalError, notFoundError, validationError } from '@/lib/errors'
 
 export const dynamic = 'force-dynamic'
@@ -79,7 +80,7 @@ export async function POST(
   const { data: deal, error: dealError } = await supabase
     .from('deals')
     .select(
-      'id, title, contractor_id, funder_id, funded_amount, released_amount, fees_collected, reserved_amount, billing_rate_bps, total_amount, retainage_percentage',
+      'id, title, contractor_id, funder_id, funded_amount, released_amount, fees_collected, reserved_amount, billing_rate_bps, total_amount, retainage_percentage, partner_id',
     )
     .eq('id', milestone.deal_id)
     .single()
@@ -365,6 +366,35 @@ export async function POST(
     // Success — reservation will be settled (or freed) by a downstream
     // confirm-external / mark-external-failed call. Do not cancel here.
     reservationMade = false
+
+    // ── STEP 6: Fire partner webhook (non-fatal, fire-and-forget) ───────────
+    // If this deal has an institutional partner assigned, deliver the signed
+    // authorization signal so they can execute payment on their own rail.
+    // deliverPartnerWebhook never throws and never blocks the response.
+    deliverPartnerWebhook(
+      milestone.deal_id,
+      {
+        event:             'release.authorized',
+        api_version:       '2026-04-25',
+        release_id:        releaseInsertedId!,
+        deal_id:           milestone.deal_id,
+        deal_title:        deal.title,
+        milestone_id:      milestoneId,
+        milestone_title:   milestone.title,
+        amount:            fee.grossAmount,
+        fee_amount:        fee.feeAmount,
+        retainage_amount:  retainage.retainageAmount,
+        net_to_contractor: netToContractor,
+        contractor_id:     deal.contractor_id,
+        funder_id:         deal.funder_id!,
+        authorized_at:     new Date().toISOString(),
+        authorized_by:     user.id,
+        idempotency_key:   idempotencyKey,
+      },
+      user.id,
+    ).catch((err) => {
+      console.error('[authorize-external] deliverPartnerWebhook rejected unexpectedly:', err)
+    })
 
     return NextResponse.json({
       success: true,

@@ -128,7 +128,7 @@ function CoverSlide() {
 
         <p className="text-[18px] text-white/62 leading-[1.6] max-w-[620px] mx-auto mb-12">
           Money does not move unless all release conditions pass.
-          Vektrum governs disbursement. Vektrum never holds funds.
+          Vektrum governs authorization. Vektrum does not hold funds directly.
         </p>
 
         <div className="grid grid-cols-3 gap-4 max-w-[620px] mx-auto mb-14">
@@ -336,7 +336,7 @@ function SolutionSlide() {
 
             <p className="text-[15px] text-white/54 leading-relaxed mb-9 max-w-[460px]">
               Vektrum determines whether construction funds are allowed to move.
-              Authorization is separated from execution — funds flow through Stripe
+              Authorisation is separated from execution — funds flow through Stripe
               Connect or a partner-controlled external process. Vektrum never holds,
               escrows, transmits, or forwards money.
             </p>
@@ -641,8 +641,8 @@ function ExecutionRailsSlide() {
 
         <div className="mt-6 rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 text-center">
           <p className="text-[13px] text-white/65">
-            <span className="text-white font-semibold">Vektrum governs disbursement.</span>{' '}
-            <span className="text-white/50">Vektrum never holds funds.</span>
+            <span className="text-white font-semibold">Vektrum governs authorization.</span>{' '}
+            <span className="text-white/50">Vektrum does not hold funds directly.</span>
           </p>
         </div>
       </div>
@@ -1338,7 +1338,7 @@ function ClosingSlide() {
 
         <p className="text-[17px] text-white/60 leading-[1.6] max-w-[560px] mx-auto mb-12">
           Money does not move unless all release conditions pass. Vektrum governs
-          disbursement. Vektrum never holds funds.
+          authorization. Vektrum does not hold funds directly.
         </p>
 
         <div className="grid grid-cols-3 gap-4 max-w-[680px] mx-auto mb-14">
