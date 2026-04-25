@@ -5,9 +5,10 @@ Last updated: 2026-04-24 (Phase-1 landing)
 ## What this document is
 
 Vektrum is **governance / authorisation infrastructure for construction
-disbursements**. Vektrum never holds, collects, forwards, or transmits funds on
-its own balance sheet. Every release of money to a contractor happens on a
-**payment rail** that is separate from Vektrum's governance layer.
+disbursements**. Vektrum does not hold, collect, forward, or transmit funds on
+its own balance sheet in ordinary operations. Every release of money to a
+contractor happens on a **payment rail** that is separate from Vektrum's
+governance layer.
 
 This document is the canonical reference for how rails are modeled, how the
 release pipeline differs per rail, and where the legal boundaries are drawn.
@@ -25,7 +26,7 @@ All pre-existing releases are backfilled with `execution_rail='stripe_connect'`.
 
 ## The invariant Vektrum preserves across both rails
 
-> **Vektrum governs authorization. Vektrum never holds funds.**
+> **Vektrum governs authorization. Vektrum does not hold funds directly.**
 
 For `stripe_connect`: funds are held in Stripe-managed accounts. Vektrum
 instructs Stripe when to transfer; Stripe controls movement.
@@ -216,7 +217,7 @@ by `GET /api/admin/ops/external-releases`:
 
 Claims that remain safe:
 
-- "Vektrum governs authorization. Vektrum never holds funds."
+- "Vektrum governs authorization. Vektrum does not hold funds directly."
 - "Funds are held in Stripe Connect managed accounts — not by Vektrum." (for
   Stripe-rail deals)
 - "Append-only, hash-chained audit log."

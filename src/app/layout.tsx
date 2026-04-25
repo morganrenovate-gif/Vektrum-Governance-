@@ -303,11 +303,11 @@ export default async function RootLayout({
                 Vektrum is not a bank, lender, or money transmitter. Platform security reviewed annually. Data encrypted in transit and at rest.
               </p>
               <p className="mt-1 text-[11px] text-white/55 leading-relaxed">
-                Vektrum is authorization software. Vektrum does not hold, move, or custody funds. All payments are executed by your licensed payment partner or financial institution.
+                Vektrum is authorization software. Vektrum does not hold, move, or custody funds in ordinary operations. All payments are executed by your licensed payment partner or financial institution.
               </p>
               <div className="flex flex-col gap-1 sm:items-end">
                 <p className="text-[12px] text-white/65">
-                  Vektrum governs authorization. Vektrum never holds funds.
+                  Vektrum governs authorization. Vektrum does not hold funds directly.
                 </p>
                 {/* Removed footer attribution */}
               </div>

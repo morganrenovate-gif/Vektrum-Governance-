@@ -34,7 +34,7 @@ const AUTH_TRUST = [
   {
     icon: Shield,
     title: "Funds held by Stripe",
-    desc: "Vektrum governs disbursement — your capital is held by Stripe, not us.",
+    desc: "Vektrum governs authorization — your capital is held by Stripe, not us.",
   },
   {
     icon: FileCheck,

@@ -465,7 +465,7 @@ export default function PricingPage() {
           <div className="grid gap-6 lg:grid-cols-3">
             <EngagementCard
               name="Standalone"
-              descriptor="Independent projects · Developers · Private lenders"
+              descriptor="Stripe Connect rail — for direct lenders · Independent projects · Developers · Private lenders"
               ratePercent="1%"
               rateExample="$500,000 release → $5,000 governance fee"
               retainer="None"
@@ -482,7 +482,7 @@ export default function PricingPage() {
 
             <EngagementCard
               name="Institutional Portfolio"
-              descriptor="Banks · Private credit funds · Regional lenders"
+              descriptor="External rail — for lenders with existing payment infrastructure · Banks · Private credit funds · Regional lenders"
               ratePercent="0.70%"
               rateExample="$500,000 release → $3,500 governance fee"
               retainer="7.5 bps of ACV / year"
@@ -502,7 +502,7 @@ export default function PricingPage() {
 
             <EngagementCard
               name="Enterprise / Platform"
-              descriptor="Large lenders · Construction owners · Platform integrators"
+              descriptor="External rail — for lenders with existing payment infrastructure · Large lenders · Construction owners · Platform integrators"
               ratePercent="0.65%"
               rateExample="$500,000 release → $3,250 governance fee"
               retainer="50 – 100 bps of ACV / year"
@@ -776,7 +776,7 @@ export default function PricingPage() {
               {
                 icon: Building2,
                 headline: 'Stripe holds the money.',
-                body: 'Funds never pass through Vektrum. All capital is held in Stripe Connect managed accounts. Vektrum never holds, transmits, or controls funds directly.',
+                body: 'Funds do not pass through Vektrum. All capital is held in Stripe Connect managed accounts or processed through licensed payment partners. Vektrum does not hold, transmit, or control funds directly.',
               },
               {
                 icon: FileText,
@@ -847,6 +847,38 @@ export default function PricingPage() {
                 />
                 <ConstantRow label="Funds held by" value="Stripe — not Vektrum" />
                 <ConstantRow label="Audit trail" value="Append-only — no application deletion" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── 9b. Which plan is right for me? ─────────────────────────────────── */}
+      <section className="bg-surface-0 py-14 sm:py-16">
+        <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="rounded-2xl border border-white/[0.08] bg-surface-2 p-7 sm:p-10">
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/75 mb-1">
+              Choosing your model
+            </p>
+            <h2 className="text-lg font-bold tracking-[-0.02em] text-white mb-8">
+              Which plan is right for me?
+            </h2>
+            <div className="grid gap-6 sm:grid-cols-2">
+              <div className="rounded-xl border border-vektrum-blue/20 bg-vektrum-blue/[0.04] p-6">
+                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-vektrum-blue mb-2">
+                  Standalone — Stripe Connect rail
+                </p>
+                <p className="text-[13px] leading-relaxed text-white/65">
+                  Choose Standalone if you are a private lender, hard money lender, family office, or developer who does not have an existing payment infrastructure. Vektrum connects to Stripe and manages the full draw workflow end-to-end: submission, AI review, 10-condition gate, and automated contractor payout.
+                </p>
+              </div>
+              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.04] p-6">
+                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-emerald-400 mb-2">
+                  Institutional or Enterprise — External rail
+                </p>
+                <p className="text-[13px] leading-relaxed text-white/65">
+                  Choose Institutional or Enterprise if you are a bank, credit union, construction loan servicer, title company, or fund manager with existing licensed payment infrastructure. Vektrum enforces your conditions and fires a signed authorization signal to your execution system — you retain full control of how funds move.
+                </p>
               </div>
             </div>
           </div>

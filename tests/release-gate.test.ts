@@ -54,7 +54,7 @@ function buildSupabaseMock(overrides: MockOverrides) {
     from: (table: string) => ({
       select: (_cols: string) => ({
         eq: (col: string, val: unknown) => {
-          // change_orders has two .eq() calls
+          // change_orders uses two chained .eq() calls
           if (table === 'change_orders') {
             return {
               eq: (_col2: string, _val2: unknown) => ({
@@ -66,6 +66,26 @@ function buildSupabaseMock(overrides: MockOverrides) {
           return {
             eq: (_col2: string, _val2: unknown) => ({
               data: null, error: null,
+            }),
+            // contracts query: .eq('deal_id', ...).not('status', 'eq', 'voided').maybeSingle()
+            not: (_col: string, _op: string, _val: unknown) => ({
+              maybeSingle: () => {
+                if (table === 'contracts') {
+                  return { data: { status: 'signed' }, error: null }
+                }
+                return { data: null, error: null }
+              },
+            }),
+            // releases query: .eq('milestone_id', ...).in('transfer_status', [...]).maybeSingle()
+            in: (_col: string, _vals: unknown[]) => ({
+              maybeSingle: () => {
+                if (table === 'releases') {
+                  return overrides.releaseQueryError
+                    ? { data: null, error: { message: 'DB error' } }
+                    : { data: existingRelease, error: null }
+                }
+                return { data: null, error: null }
+              },
             }),
             single: () => {
               if (table === 'milestones') {
@@ -85,14 +105,7 @@ function buildSupabaseMock(overrides: MockOverrides) {
               }
               return { data: null, error: null }
             },
-            maybeSingle: () => {
-              if (table === 'releases') {
-                return overrides.releaseQueryError
-                  ? { data: null, error: { message: 'DB error' } }
-                  : { data: existingRelease, error: null }
-              }
-              return { data: null, error: null }
-            },
+            maybeSingle: () => ({ data: null, error: null }),
           }
         },
       }),
@@ -156,9 +169,11 @@ await test('ROLE: funder passes role check (happy path)', async () => {
   assert(result.allowed, `Should be allowed but got: ${result.errors.join(' | ')}`)
 })
 
-await test('ROLE: admin passes role check (happy path)', async () => {
+await test('ROLE: admin cannot trigger release — funder-only gate', async () => {
   const result = await validateRelease(buildSupabaseMock({}) as any, 'ms-1', { ...funder(), role: 'admin' })
-  assert(result.allowed, `Should be allowed but got: ${result.errors.join(' | ')}`)
+  assert(!result.allowed, 'Admin should be blocked from triggering a release')
+  assertContains(result.errors.join(' '), 'admin')
+  assertNoStackTrace(result.errors)
 })
 
 // ─── CONDITION 1: Milestone status must be 'approved' ─────────────────────────
