@@ -336,7 +336,7 @@ function SolutionSlide() {
 
             <p className="text-[15px] text-white/54 leading-relaxed mb-9 max-w-[460px]">
               Vektrum determines whether construction funds are allowed to move.
-              Authorisation is separated from execution — funds flow through Stripe
+              Authorization is separated from execution — funds flow through Stripe
               Connect or a partner-controlled external process. Vektrum never holds,
               escrows, transmits, or forwards money.
             </p>
