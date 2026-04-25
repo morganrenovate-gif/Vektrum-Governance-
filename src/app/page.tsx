@@ -44,14 +44,14 @@ export default async function HomePage() {
               </div>
 
               <h1 className="animate-fade-in font-display text-center lg:text-left text-[2.5rem] font-bold tracking-[-0.04em] text-white sm:text-5xl lg:text-[3.5rem] lg:leading-[1.1] leading-[1.08]">
-                Construction funds don&apos;t move<br />
-                unless all release<br />
-                <em className="not-italic text-white/70">conditions pass.</em>
+                The conditional authorization<br />
+                layer for construction<br />
+                <em className="not-italic text-white/70">draws.</em>
               </h1>
 
               <p className="animate-fade-in-delay mx-auto lg:mx-0 mt-6 max-w-lg text-center lg:text-left text-[17px] leading-relaxed text-white/70">
-                Vektrum enforces 10 server-side conditions before any milestone funds can
-                move. Every approval is gated, every release is logged, every dispute is isolated.
+                Vektrum is the conditional authorization layer for construction draws. Enforce
+                your conditions. Issue the signal. Your licensed partner executes.
               </p>
 
               <div className="animate-fade-in-delay-3 mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-3">
@@ -304,6 +304,85 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ─── 3b. How Vektrum fits your workflow ───────────────────────────────── */}
+      <section className="bg-[#0D1B2A] py-20 sm:py-28 border-t border-white/[0.06]">
+        <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="mb-12 text-center">
+            <div className="inline-flex items-center gap-3 mb-4">
+              <div className="h-px w-5 bg-vektrum-blue" />
+              <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">How Vektrum fits your workflow</p>
+              <div className="h-px w-5 bg-vektrum-blue" />
+            </div>
+            <h2 className="font-display text-[2.75rem] sm:text-5xl font-bold tracking-[-0.04em] text-white leading-[1.05]">
+              Two paths to the same enforcement layer.
+            </h2>
+            <p className="mt-4 text-[16px] leading-relaxed text-white/55 max-w-xl mx-auto">
+              Whether you&apos;re starting from scratch or plugging into existing infrastructure, Vektrum fits the same way: enforce your conditions, issue the signal, your partner executes.
+            </p>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-2">
+
+            {/* Column 1 — Private & direct lenders */}
+            <div className="rounded-2xl border border-vektrum-blue/25 bg-[#111827] p-8 flex flex-col">
+              <div className="mb-5">
+                <span className="inline-block rounded-full bg-vektrum-blue/10 border border-vektrum-blue/25 px-3.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-vektrum-blue mb-4">
+                  Stripe Connect rail — for direct lenders
+                </span>
+                <h3 className="font-display text-[22px] font-bold tracking-[-0.03em] text-white leading-snug mb-3">
+                  No existing draw infrastructure? Start in minutes.
+                </h3>
+                <p className="text-[14px] leading-relaxed text-white/60">
+                  Replace spreadsheet-based draw approvals with a 10-condition gate, AI draw review, and a complete audit trail. Vektrum manages the full workflow — connect Stripe and you&apos;re live.
+                </p>
+              </div>
+              <ul className="flex flex-col gap-2.5 mt-auto pt-5 border-t border-white/[0.07]">
+                {[
+                  'Hard money lenders, family offices, developer self-funding',
+                  'Stripe Connect handles fund custody and contractor payouts',
+                  'Full workflow: draw submission, AI review, 10-condition gate, release',
+                  'Self-service setup — no integration required',
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-2.5">
+                    <CheckCircle2 size={13} className="mt-0.5 flex-shrink-0 text-vektrum-blue" />
+                    <span className="text-[13px] leading-relaxed text-white/60">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Column 2 — Institutional lenders & title/escrow partners */}
+            <div className="rounded-2xl border border-emerald-500/25 bg-[#111827] p-8 flex flex-col">
+              <div className="mb-5">
+                <span className="inline-block rounded-full bg-emerald-500/10 border border-emerald-500/25 px-3.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-400 mb-4">
+                  External rail — for lenders with existing payment infrastructure
+                </span>
+                <h3 className="font-display text-[22px] font-bold tracking-[-0.03em] text-white leading-snug mb-3">
+                  Already have a payment rail? Plug in the governance layer.
+                </h3>
+                <p className="text-[14px] leading-relaxed text-white/60">
+                  Keep your licensed payment infrastructure. Vektrum enforces your conditions, then fires a signed authorization signal directly to your execution system. Your rail, your control, Vektrum&apos;s audit trail.
+                </p>
+              </div>
+              <ul className="flex flex-col gap-2.5 mt-auto pt-5 border-t border-white/[0.07]">
+                {[
+                  'Banks, credit unions, construction loan servicers, title companies',
+                  'Vektrum fires a signed release.authorized webhook to your endpoint',
+                  'Your licensed system executes — Vektrum records the confirmation',
+                  'API integration: confirm or fail via partner API endpoints',
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-2.5">
+                    <CheckCircle2 size={13} className="mt-0.5 flex-shrink-0 text-emerald-400" />
+                    <span className="text-[13px] leading-relaxed text-white/60">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
       {/* ─── 4. Release Gate + AI Precondition ────────────────────────────────── */}
       <section className="bg-[#F8F9FB] py-20 sm:py-28 border-t border-black/[0.06]">
         <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
@@ -535,7 +614,7 @@ export default async function HomePage() {
               },
               {
                 title: 'Contractor account not connected',
-                without: 'Payment fails at the bank level after funds leave escrow',
+                without: 'Payment fails at the bank level after funds are sent',
                 condition: 'Condition 4 — contractor payment account must be verified',
               },
               {
@@ -714,7 +793,7 @@ export default async function HomePage() {
                 step: '02',
                 icon: Shield,
                 title: 'Funder deposits',
-                desc: 'Funder deposits via Stripe Connect. Funds held in Stripe-managed accounts. Vektrum governs disbursement but never holds funds.',
+                desc: 'Funder deposits via Stripe Connect. Funds held in Stripe-managed accounts. Vektrum governs authorization but never holds funds.',
                 bg: 'bg-vektrum-blue/10',
                 color: 'text-vektrum-blue',
               },
@@ -798,7 +877,7 @@ export default async function HomePage() {
               {
                 icon: FileText,
                 title: 'Vektrum governs. Stripe holds.',
-                desc: 'Funds held in Stripe Connect managed accounts — not by Vektrum. Vektrum governs disbursement. Vektrum never holds, collects, forwards, or transmits funds.',
+                desc: 'Funds held in Stripe Connect managed accounts — not by Vektrum. Vektrum governs authorization. Vektrum never holds, collects, forwards, or transmits funds.',
               },
               {
                 icon: AlertCircle,
@@ -829,7 +908,7 @@ export default async function HomePage() {
               </div>
               <div className="sm:px-6">
                 <p className="text-[12px] text-white/85 leading-relaxed font-medium">
-                  Vektrum governs disbursement. Vektrum never holds, collects, forwards, or transmits funds.
+                  Vektrum governs authorization. Vektrum never holds, collects, forwards, or transmits funds.
                 </p>
               </div>
               <div className="sm:pl-6">

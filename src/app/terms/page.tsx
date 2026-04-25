@@ -62,7 +62,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-lg font-semibold text-white">5. Funder Terms</h2>
             <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-white/55">
-              <p>Funders use the platform to fund deals into a Project Trust Account and approve milestone-gated releases. Funders acknowledge and agree that:</p>
+              <p>Funders use the platform to fund deals and approve milestone-gated releases. Funders acknowledge and agree that:</p>
               <ul className="space-y-2 list-disc pl-5">
                 <li>Funds are held in Stripe Connect managed accounts, not by Vektrum.</li>
                 <li>Release of funds is subject to the platform&rsquo;s 10-condition server-side release gate, preceded by an AI-assisted draw review precondition. Together these verify milestone approval, contract status, funded balance, contractor payout eligibility, documentation, change-order status, lien-waiver status (where required), and sequential-release ordering (where required) before any transfer is authorized.</li>

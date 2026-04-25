@@ -72,7 +72,7 @@ export default function AboutPage() {
               {
                 icon: Shield,
                 title: 'Governance, not custody',
-                desc: 'Vektrum governs disbursement rules. Stripe holds the funds. We never touch your money.',
+                desc: 'Vektrum governs authorization conditions. Stripe holds the funds. We never touch your money.',
               },
               {
                 icon: Lock,

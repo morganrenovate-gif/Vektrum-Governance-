@@ -1,19 +1,26 @@
 "use client";
 
 import { ContractImportFlow } from "@/components/ai/ContractImportFlow";
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Input, Textarea } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle, ArrowLeft, FileUp, ListOrdered, Lock } from "lucide-react";
+import { AlertCircle, ArrowLeft, FileUp, ListOrdered, Lock, Building2 } from "lucide-react";
 import type { DealMetadata } from "@/lib/actions/analyze-contract";
+import { createClient } from "@/lib/supabase/client";
 
 function formatCurrency(value: string): string {
   const num = parseFloat(value.replace(/[^0-9.]/g, ""));
   if (isNaN(num)) return "";
   return num.toFixed(2);
+}
+
+interface Partner {
+  id: string;
+  name: string;
+  is_active: boolean;
 }
 
 export default function NewDealPage() {
@@ -24,10 +31,40 @@ export default function NewDealPage() {
     total_amount: "",
     sequential_release_required: false,
     retainage_percentage: "",
+    partner_id: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [serverError, setServerError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [partners, setPartners] = useState<Partner[]>([]);
+
+  useEffect(() => {
+    async function checkAdminAndFetchPartners() {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+      if (profile?.role === "admin") {
+        setIsAdmin(true);
+        // Fetch partner list for the selector
+        try {
+          const res = await fetch("/api/admin/partners");
+          if (res.ok) {
+            const data = await res.json();
+            setPartners((data.partners ?? []).filter((p: Partner) => p.is_active));
+          }
+        } catch {
+          // Non-fatal — admin may not have MFA active; silently ignore
+        }
+      }
+    }
+    checkAdminAndFetchPartners();
+  }, []);
 
   const update =
     (field: string) =>
@@ -84,6 +121,7 @@ export default function NewDealPage() {
           total_amount: parseFloat(form.total_amount),
           sequential_release_required: form.sequential_release_required,
           retainage_percentage: retainagePct > 0 ? retainagePct : undefined,
+          ...(form.partner_id ? { partner_id: form.partner_id } : {}),
         }),
       });
 
@@ -278,6 +316,46 @@ export default function NewDealPage() {
                           </p>
                         )}
                     </div>
+
+                    {/* Execution-rail partner selector — admin only */}
+                    {isAdmin && (
+                      <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-4 space-y-3">
+                        <div className="flex items-center gap-1.5">
+                          <Building2 size={13} className="text-white/50 flex-shrink-0" aria-hidden="true" />
+                          <span className="text-[13px] font-semibold text-white/85">
+                            Execution-rail partner
+                          </span>
+                          <span className="ml-auto text-[11px] text-white/65">
+                            Admin only — optional
+                          </span>
+                        </div>
+                        <p className="text-[12px] text-white/75 leading-relaxed">
+                          Assign an institutional execution-rail partner (escrow company, title company,
+                          or construction loan servicer) to this deal. When a release is authorized,
+                          Vektrum will fire a signed webhook to the partner&rsquo;s endpoint for execution.
+                          Leave as &ldquo;None&rdquo; to use Stripe Connect.
+                        </p>
+                        <select
+                          value={form.partner_id}
+                          onChange={(e) =>
+                            setForm((prev) => ({ ...prev, partner_id: e.target.value }))
+                          }
+                          className="w-full rounded-lg border border-white/[0.14] bg-white/[0.04] px-3 py-2 text-[13px] text-white focus:outline-none focus:ring-2 focus:ring-vektrum-blue/50 focus:border-vektrum-blue"
+                        >
+                          <option value="">None (use Stripe Connect)</option>
+                          {partners.map((p) => (
+                            <option key={p.id} value={p.id}>
+                              {p.name}
+                            </option>
+                          ))}
+                        </select>
+                        {form.partner_id && (
+                          <p className="text-[11px] font-medium text-vektrum-blue">
+                            External rail selected — Vektrum will issue authorization signals to this partner.
+                          </p>
+                        )}
+                      </div>
+                    )}
 
                     {serverError && (
                       <div
