@@ -71,6 +71,29 @@ export async function POST(request: NextRequest) {
     )
   }
 
+  // ── Atomic idempotency guard ─────────────────────────────────────────────────
+  // Insert into stripe_processed_events BEFORE processing. A unique violation
+  // (SQLSTATE 23505) means this event was already handled — return 200 immediately
+  // so Stripe stops retrying. This is DB-atomic: two concurrent deliveries cannot
+  // both succeed the insert, eliminating the race window in application-level checks.
+  const adminClient = createSupabaseAdminClient()
+  const processingStart = Date.now()
+
+  const { error: dedupError } = await adminClient
+    .from('stripe_processed_events')
+    .insert({ stripe_event_id: event.id, event_type: event.type, result: 'ok' })
+
+  if (dedupError) {
+    if (dedupError.code === '23505') {
+      // Duplicate delivery — already processed. Acknowledge without re-processing.
+      console.log(`[webhook] Duplicate event ${event.id} (${event.type}) — already processed, skipping.`)
+      return NextResponse.json({ received: true, event_id: event.id, duplicate: true })
+    }
+    // Non-uniqueness DB error — log but continue processing. Worst case: duplicate
+    // side-effects, which the downstream conditional writes already guard against.
+    console.error(`[webhook] stripe_processed_events insert failed for ${event.id}:`, dedupError.message)
+  }
+
   // ── Route Event ─────────────────────────────────────────────────────────────
   // Cast to string so we can handle event types that Stripe's SDK union does
   // not yet enumerate (e.g. transfer.failed, transfer.reversed are real webhook
@@ -125,6 +148,15 @@ export async function POST(request: NextRequest) {
     const message = handlerError instanceof Error ? handlerError.message : String(handlerError)
     console.error(`[webhook] Handler error for event ${event.type} (${event.id}):`, message)
 
+    // Mark the event as errored so it can be retried (update, not insert — row exists).
+    adminClient
+      .from('stripe_processed_events')
+      .update({ result: 'error', processing_ms: Date.now() - processingStart })
+      .eq('stripe_event_id', event.id)
+      .then(({ error }) => {
+        if (error) console.error(`[webhook] Failed to mark event ${event.id} as error:`, error.message)
+      })
+
     // Return 500 so Stripe will retry the event
     return NextResponse.json(
       {
@@ -133,6 +165,15 @@ export async function POST(request: NextRequest) {
       { status: 500 },
     )
   }
+
+  // Record processing duration for monitoring.
+  adminClient
+    .from('stripe_processed_events')
+    .update({ processing_ms: Date.now() - processingStart })
+    .eq('stripe_event_id', event.id)
+    .then(({ error }) => {
+      if (error) console.error(`[webhook] Failed to record processing_ms for ${event.id}:`, error.message)
+    })
 
   return NextResponse.json({ received: true, event_id: event.id })
 }

@@ -30,6 +30,10 @@ export type IssueType =
   | 'missing_billing_record'
   | 'fee_ledger_drift'
   | 'metadata_mismatch'
+  /** Stripe transfer was created (transfer_id exists in DB) but no transfer.succeeded/failed
+   *  webhook has arrived after STRIPE_TRANSFER_STUCK_HOURS (default 4 h). Detected purely
+   *  from DB age — does not require a live Stripe API call, so it fires even during outages. */
+  | 'stripe_transfer_stuck'
   // ── Funding confirmation passes (Pass 5) ──
   /** funded_amount in DB exceeds the sum of bank-confirmed Stripe PaymentIntents. Phantom balance. */
   | 'funding_phantom_balance'
@@ -104,6 +108,8 @@ const SEVERITY: Record<IssueType, IssueSeverity> = {
   missing_billing_record:     'high',
   fee_ledger_drift:           'high',
   metadata_mismatch:          'medium',
+  // Stuck transfer: transfer_id exists but no webhook arrived after threshold
+  stripe_transfer_stuck:      'high',
   // Pass 5 — funding confirmation
   funding_phantom_balance:    'critical',  // funded_amount > confirmed — real money risk
   funding_missing_webhook:    'high',      // confirmed > funded_amount — likely missed webhook
@@ -124,6 +130,7 @@ const AUTO_FIXABLE: Record<IssueType, boolean> = {
   missing_billing_record:     true,   // insert from release + deal data
   fee_ledger_drift:           true,   // recompute from billing_records table
   metadata_mismatch:          false,
+  stripe_transfer_stuck:      false,  // requires human + Stripe investigation
   // Pass 5 — cannot auto-fix financial discrepancies without human approval
   funding_phantom_balance:    false,
   funding_missing_webhook:    false,
@@ -206,6 +213,7 @@ export async function runReconciliation(
       .from('releases')
       .select(
         'id, milestone_id, deal_id, amount, stripe_transfer_id, idempotency_key, released_at, released_by, ' +
+        'created_at, transfer_status, ' +
         'execution_rail, execution_status, external_payment_reference, external_executed_at, ' +
         'external_executed_by, proof_of_payment_document_id',
       )
@@ -230,6 +238,65 @@ export async function runReconciliation(
     const externalReleases = allReleases.filter(
       r => r.execution_rail === 'external_manual',
     )
+
+    // ── Pass 0: Stuck Stripe transfers (DB-only, Stripe-API-independent) ──────
+    // Detects Stripe-rail releases where the transfer_id exists in DB but no
+    // transfer.succeeded / transfer.failed webhook has arrived after a configurable
+    // threshold. This check runs BEFORE the Stripe API calls so it fires even
+    // during a Stripe API outage — protecting against the blind-spot where
+    // Pass 1 throws and stuck releases are never escalated.
+    //
+    // A release is "stuck" when:
+    //   1. stripe_transfer_id IS NOT NULL (transfer was created on Stripe)
+    //   2. transfer_status is NOT 'confirmed', 'failed', or 'reversed'
+    //      (no terminal webhook arrived)
+    //   3. created_at is older than STRIPE_TRANSFER_STUCK_HOURS (default 4 h)
+    {
+      const stuckHoursEnv = parseFloat(process.env.STRIPE_TRANSFER_STUCK_HOURS ?? '4')
+      const stuckHours    = isFinite(stuckHoursEnv) && stuckHoursEnv > 0 ? stuckHoursEnv : 4
+      const stuckCutoffMs = Date.now() - stuckHours * 3_600_000
+      const terminalStatuses = new Set(['confirmed', 'failed', 'reversed'])
+
+      for (const release of releases) {
+        if (
+          release.stripe_transfer_id &&
+          !terminalStatuses.has(release.transfer_status ?? '') &&
+          release.created_at &&
+          new Date(release.created_at).getTime() < stuckCutoffMs
+        ) {
+          const ageHours = Math.floor((Date.now() - new Date(release.created_at).getTime()) / 3_600_000)
+          issues.push({
+            issueType:        'stripe_transfer_stuck',
+            severity:         SEVERITY.stripe_transfer_stuck,
+            dealId:           release.deal_id,
+            milestoneId:      release.milestone_id,
+            releaseId:        release.id,
+            stripeTransferId: release.stripe_transfer_id,
+            actualAmount:     Number(release.amount),
+            description:
+              `Release ${release.id} created Stripe transfer ${release.stripe_transfer_id} ` +
+              `${ageHours} hours ago but no transfer.succeeded / transfer.failed webhook ` +
+              `has arrived (transfer_status='${release.transfer_status ?? 'null'}'). ` +
+              `This may indicate a dropped webhook or a Stripe API issue. ` +
+              `Verify the transfer status in the Stripe dashboard and replay the webhook ` +
+              `or manually update transfer_status if confirmed externally.`,
+            rawEvidence: {
+              db_release: {
+                id:                  release.id,
+                created_at:          release.created_at,
+                transfer_status:     release.transfer_status,
+                stripe_transfer_id:  release.stripe_transfer_id,
+                amount:              release.amount,
+              },
+              stuck_threshold_hours: stuckHours,
+              age_hours:             ageHours,
+            },
+            dedupKey:    `stripe_transfer_stuck:${release.id}`,
+            autoFixable: false,
+          })
+        }
+      }
+    }
 
     // ── Fetch DB billing_records in window ─────────────────────────────────
     const { data: dbBillingRecords, error: brError } = await admin

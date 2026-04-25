@@ -83,6 +83,39 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return err as NextResponse
   }
 
+  // ── Rate-limit guard ────────────────────────────────────────────────────────
+  // Prevents burst requests from the same actor on the same milestone from
+  // amplifying DB load across the 5+ gate queries. Checks the audit_log for any
+  // release attempt from this actor on this milestone in the last 10 seconds.
+  // Uses RELEASE_RATE_LIMIT_WINDOW_SECS env var (default 10).
+  {
+    const windowSecs  = Math.max(1, parseInt(process.env.RELEASE_RATE_LIMIT_WINDOW_SECS ?? '10', 10))
+    const windowStart = new Date(Date.now() - windowSecs * 1000).toISOString()
+
+    const { data: recentAttempts } = await supabase
+      .from('audit_log')
+      .select('id')
+      .eq('entity_type', 'milestone')
+      .eq('entity_id', milestoneId)
+      .eq('actor_id', user.id)
+      .in('action', ['milestone_released', 'release_validation_failed', 'ai_precondition_override_applied'])
+      .gte('created_at', windowStart)
+      .limit(1)
+
+    if (recentAttempts && recentAttempts.length > 0) {
+      return NextResponse.json(
+        {
+          error:
+            `A release attempt for this milestone was recorded in the last ${windowSecs} seconds. ` +
+            'Please wait before retrying.',
+          code: 'RATE_LIMITED',
+          retry_after_seconds: windowSecs,
+        },
+        { status: 429 },
+      )
+    }
+  }
+
   // ── STEP 0: AI Draw Review Precondition ─────────────────────────────────────
   const aiCheck = await checkAiPrecondition(milestoneId, supabase)
   if (!aiCheck.passed) {
@@ -90,6 +123,26 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       { error: aiCheck.reason },
       { status: 422 },
     )
+  }
+
+  // If an admin override is active, write a dedicated audit record at the point
+  // the override is consumed. This is separate from the release audit entry so
+  // the override decision is independently traceable without parsing release metadata.
+  if (aiCheck.warning) {
+    logAudit({
+      entity_type: 'milestone',
+      entity_id:   milestoneId,
+      action:      'ai_precondition_override_applied',
+      actor_id:    user.id,
+      old_values:  null,
+      new_values:  null,
+      metadata: {
+        deal_id:          milestone.deal_id,
+        execution_rail:   'stripe_connect',
+        override_warning: aiCheck.warning,
+        actor_role:       profile.role,
+      },
+    }).catch(err => console.error('[release] ai_precondition_override_applied audit failed:', err))
   }
 
   // ── STEP 1: Run Release Gate (all 10 conditions + role check) ──────────────

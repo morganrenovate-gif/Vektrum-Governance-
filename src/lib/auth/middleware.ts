@@ -223,35 +223,33 @@ export async function requireDealAccess(
 const ADMIN_JUSTIFICATION_MIN_CHARS = 20
 
 /**
- * Extracts and validates the admin justification from a request.
+ * Extracts and validates the admin justification from the X-Admin-Justification
+ * request header.
  *
- * Checks the X-Admin-Justification header first, then falls back to the
- * `admin_justification` field on an already-parsed body object.
+ * Header-only (body fallback removed) to prevent justification text from appearing
+ * in structured request-body logs (Vercel function logs, proxy access logs).
  *
  * Returns the trimmed justification string, or throws a 400 NextResponse
  * if it is missing or under ADMIN_JUSTIFICATION_MIN_CHARS characters.
  *
- * @param request     - The incoming Next.js request (header source).
- * @param parsedBody  - Optional already-parsed request body (body source).
+ * @param request     - The incoming Next.js request.
+ * @param _parsedBody - Kept for call-site compatibility; ignored.
+ *                      Callers that previously relied on the body fallback
+ *                      must migrate to the X-Admin-Justification header.
  */
 export function extractAdminJustification(
   request: NextRequest,
-  parsedBody?: Record<string, unknown> | null,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _parsedBody?: Record<string, unknown> | null,
 ): string {
-  const fromHeader = request.headers.get('x-admin-justification')?.trim()
-  const fromBody   = typeof parsedBody?.admin_justification === 'string'
-    ? parsedBody.admin_justification.trim()
-    : undefined
-
-  const justification = fromHeader ?? fromBody ?? ''
+  const justification = request.headers.get('x-admin-justification')?.trim() ?? ''
 
   if (!justification) {
     throw NextResponse.json(
       {
         error:
           'Admin actions require a justification. ' +
-          `Pass admin_justification (≥ ${ADMIN_JUSTIFICATION_MIN_CHARS} characters) ` +
-          'in the request body or the X-Admin-Justification header.',
+          `Pass the X-Admin-Justification header (≥ ${ADMIN_JUSTIFICATION_MIN_CHARS} characters).`,
       },
       { status: 400 },
     )
