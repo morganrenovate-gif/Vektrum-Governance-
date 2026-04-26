@@ -291,12 +291,17 @@ Report that an external payment execution failed. Cancels the balance reservatio
 - [ ] On payment failure: call `POST /api/partner/releases/:id/fail` with a clear reason string
 - [ ] Handle `409` with a short retry delay (concurrent state changes resolve quickly)
 - [ ] Handle `alreadyConfirmed: true` gracefully — it is a successful idempotent response, not an error
+- [ ] **If webhooks enabled:** receive partner-specific signing secret (`whsec_<64hex>`) from Vektrum admin
+- [ ] **If webhooks enabled:** verify `X-Vektrum-Signature` on each inbound delivery
+- [ ] **If webhooks enabled:** enforce 5-minute timestamp tolerance to prevent replay attacks
 
 ---
 
 ## Webhooks (Outbound)
 
-Vektrum can notify your endpoint when a release is authorized. Webhook payloads are signed with a `whsec_<64hex>` secret provisioned alongside your API key. Webhook integration is configured during onboarding.
+Outbound webhooks are optional and configured per integration. If a webhook URL is registered for your partner account, Vektrum delivers a signed `release.authorized` event when the 10-condition release gate passes on an external-rail deal. Partners without a configured webhook URL can poll `GET /api/partner/releases/:id` instead.
+
+When webhooks are enabled, each delivery is signed with a partner-specific `whsec_<64hex>` secret. The secret is issued alongside your API key during onboarding and is rotatable on demand via the Vektrum admin dashboard. If outbound webhooks are not part of your integration, no signing secret is required.
 
 ---
 

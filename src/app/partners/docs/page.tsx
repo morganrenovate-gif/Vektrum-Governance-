@@ -77,6 +77,18 @@ function EndpointBlock({
 export default function PartnerDocsPage() {
   return (
     <div className="bg-[#0D1B2A] min-h-screen">
+      {/* Print / PDF styles ─────────────────────────────────────────────────
+          Hide root-layout nav (<header>) and marketing footer (<footer>).
+          The compact API doc footer inside this page is a <div>, not <footer>,
+          so it prints correctly. Code blocks wrap instead of clipping.          ─────────────────────────────────────────────────────────────────────── */}
+      <style>{`
+        @media print {
+          header, footer { display: none !important; }
+          pre { white-space: pre-wrap !important; word-break: break-word !important; overflow: visible !important; }
+          * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+          a { text-decoration: none; }
+        }
+      `}</style>
       <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 py-16 sm:py-20">
 
         {/* Header */}
@@ -119,7 +131,7 @@ export default function PartnerDocsPage() {
                 key, an admin must rotate it (the previous key is immediately invalidated).
               </p>
               <p>
-                To obtain your API key and webhook signing secret, contact{' '}
+                To obtain your API key, contact{' '}
                 <a href="mailto:operations@vektrum.io" className="text-vektrum-blue hover:underline">
                   operations@vektrum.io
                 </a>
@@ -127,7 +139,8 @@ export default function PartnerDocsPage() {
                 <code className="text-white/80 bg-white/[0.06] px-1.5 py-0.5 rounded text-[13px]">
                   /dashboard/admin/partners
                 </code>
-                .
+                . If outbound webhooks are enabled for your integration, Vektrum will also issue
+                a partner-specific webhook signing secret.
               </p>
             </div>
           </Section>
@@ -284,7 +297,16 @@ export default function PartnerDocsPage() {
           <Section id="webhook-verification" title="Webhook Verification">
             <div className="space-y-5 text-[14px] leading-relaxed text-white/60">
               <p>
-                Every outbound webhook from Vektrum includes an{' '}
+                Outbound webhooks are optional. If a webhook URL is configured for your integration,
+                Vektrum will deliver a signed{' '}
+                <code className="text-white/80 bg-white/[0.06] px-1.5 py-0.5 rounded text-[13px]">release.authorized</code>{' '}
+                event when the 10-condition gate passes on an external-rail deal. Partners without a
+                configured webhook URL can poll{' '}
+                <code className="text-white/80 bg-white/[0.06] px-1.5 py-0.5 rounded text-[13px]">GET /api/partner/releases/:id</code>{' '}
+                instead.
+              </p>
+              <p>
+                When Vektrum delivers a webhook to your endpoint, it includes an{' '}
                 <code className="text-white/80 bg-white/[0.06] px-1.5 py-0.5 rounded text-[13px]">X-Vektrum-Signature</code>{' '}
                 header with this format:
               </p>
@@ -376,34 +398,36 @@ def verify_vektrum_signature(
 
           {/* ── Error Codes ──────────────────────────────────────────────────── */}
           <Section id="error-codes" title="Error Codes">
-            <div className="overflow-hidden rounded-2xl border border-white/[0.08]">
-              <div className="grid grid-cols-[80px_1fr_2fr] border-b border-white/[0.08] bg-white/[0.02] px-5 py-3">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-white/50">Status</span>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-white/50">Code</span>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-white/50">Meaning in Vektrum context</span>
-              </div>
-              {[
-                { status: '200', code: 'OK', meaning: 'Request succeeded. For confirm, check alreadyConfirmed field for idempotent re-submissions.' },
-                { status: '400', code: 'Bad Request', meaning: 'Missing required field or invalid value. Check the errors array in the response body.' },
-                { status: '401', code: 'Unauthorized', meaning: 'API key missing, malformed, or inactive. Verify your Authorization: Bearer header.' },
-                { status: '403', code: 'Forbidden', meaning: 'Your partner account does not own the deal that contains this release.' },
-                { status: '404', code: 'Not Found', meaning: 'Release not found.' },
-                { status: '409', code: 'Conflict', meaning: 'A concurrent request changed the release state before yours completed. Fetch current state and retry if appropriate.' },
-                { status: '429', code: 'Too Many Requests', meaning: 'Rate limit exceeded for your partner API key. Back off and retry.' },
-                { status: '422', code: 'Unprocessable', meaning: 'The release is not in the expected state for this operation (e.g. confirming an already-failed release).' },
-                { status: '500', code: 'Internal Error', meaning: 'Vektrum server error. Retry with exponential backoff. If persistent, contact support.' },
-              ].map((row, i) => (
-                <div
-                  key={row.status}
-                  className={`grid grid-cols-[80px_1fr_2fr] px-5 py-3.5 border-b border-white/[0.04] last:border-0 ${
-                    i % 2 === 1 ? 'bg-white/[0.013]' : ''
-                  }`}
-                >
-                  <code className="text-[13px] font-mono text-white/80">{row.status}</code>
-                  <span className="text-[13px] text-white/55">{row.code}</span>
-                  <span className="text-[13px] text-white/55 leading-snug">{row.meaning}</span>
+            <div className="overflow-x-auto rounded-2xl border border-white/[0.08]">
+              <div className="min-w-[540px]">
+                <div className="grid grid-cols-[72px_140px_1fr] border-b border-white/[0.08] bg-white/[0.02] px-5 py-3">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-white/50">Status</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-white/50">Code</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-white/50">Meaning in Vektrum context</span>
                 </div>
-              ))}
+                {[
+                  { status: '200', code: 'OK', meaning: 'Request succeeded. For confirm, check alreadyConfirmed field for idempotent re-submissions.' },
+                  { status: '400', code: 'Bad Request', meaning: 'Missing required field or invalid value. Check the errors array in the response body.' },
+                  { status: '401', code: 'Unauthorized', meaning: 'API key missing, malformed, or inactive. Verify your Authorization: Bearer header.' },
+                  { status: '403', code: 'Forbidden', meaning: 'Your partner account does not own the deal that contains this release.' },
+                  { status: '404', code: 'Not Found', meaning: 'Release not found.' },
+                  { status: '409', code: 'Conflict', meaning: 'A concurrent request changed the release state before yours completed. Fetch current state and retry if appropriate.' },
+                  { status: '422', code: 'Unprocessable', meaning: 'The release is not in the expected state for this operation (e.g. confirming an already-failed release).' },
+                  { status: '429', code: 'Too Many Requests', meaning: 'Rate limit exceeded for your partner API key. Back off and retry.' },
+                  { status: '500', code: 'Internal Error', meaning: 'Vektrum server error. Retry with exponential backoff. If persistent, contact support.' },
+                ].map((row, i) => (
+                  <div
+                    key={row.status}
+                    className={`grid grid-cols-[72px_140px_1fr] px-5 py-3.5 border-b border-white/[0.04] last:border-0 ${
+                      i % 2 === 1 ? 'bg-white/[0.013]' : ''
+                    }`}
+                  >
+                    <code className="text-[13px] font-mono text-white/80">{row.status}</code>
+                    <span className="text-[13px] text-white/55">{row.code}</span>
+                    <span className="text-[13px] text-white/55 leading-snug">{row.meaning}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </Section>
 
@@ -415,14 +439,15 @@ def verify_vektrum_signature(
             <div className="rounded-2xl border border-white/[0.08] bg-[#111827] p-7">
               <ul className="space-y-3">
                 {[
-                  'Received API key and webhook signing secret from Vektrum admin',
-                  'Verified HMAC signature on a test webhook delivery',
+                  'Received API key from Vektrum admin',
                   'Confirmed GET /api/partner/releases/:id returns expected shape',
                   'Tested confirm endpoint with a sandbox release',
                   'Tested fail endpoint with a sandbox release',
                   'Set up idempotency handling (retry on network error, check alreadyConfirmed)',
-                  'Enforced 5-minute timestamp tolerance on webhook verification',
                   'Confirmed audit log entries appear in Vektrum dashboard after confirm/fail calls',
+                  'If webhooks enabled: received partner signing secret from Vektrum admin',
+                  'If webhooks enabled: verified HMAC signature on a test delivery',
+                  'If webhooks enabled: enforced 5-minute timestamp tolerance on signature verification',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3">
                     <span className="flex-shrink-0 mt-0.5 w-4 h-4 rounded border border-white/[0.15] bg-white/[0.03]" />
