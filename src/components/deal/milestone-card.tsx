@@ -564,7 +564,7 @@ export function MilestoneCard({
               <div className="rounded-lg border border-vektrum-blue/20 bg-vektrum-blue/[0.04] px-4 py-3 space-y-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-start gap-2.5 min-w-0">
-                    <FileText size={13} className="text-vektrum-blue flex-shrink-0 mt-0.5" aria-hidden="true" />
+                    <FileText size={13} className="text-blue-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
                     <div className="min-w-0">
                       <p className="text-[12px] font-semibold text-white/80">
                         {role === "funder" ? "Waiver Uploaded — Review Required" : "Waiver Uploaded"}

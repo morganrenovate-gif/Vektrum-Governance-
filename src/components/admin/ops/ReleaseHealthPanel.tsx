@@ -250,7 +250,7 @@ function FailedRow({
             type="button"
             onClick={(e) => { e.stopPropagation(); handleRetry() }}
             disabled={retrying}
-            className="mt-2 flex items-center gap-1.5 rounded-lg border border-vektrum-blue/25 bg-vektrum-blue/[0.08] px-3 py-1.5 text-[12px] font-medium text-vektrum-blue hover:bg-vektrum-blue/[0.14] disabled:opacity-50 transition-colors"
+            className="mt-2 flex items-center gap-1.5 rounded-lg border border-vektrum-blue/40 bg-vektrum-blue/[0.10] px-3 py-1.5 text-[12px] font-medium text-blue-300 hover:bg-vektrum-blue/[0.18] disabled:opacity-50 transition-colors"
           >
             {retrying
               ? <Loader2 size={11} className="animate-spin" />

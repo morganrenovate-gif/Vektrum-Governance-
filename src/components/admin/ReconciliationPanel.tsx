@@ -294,7 +294,7 @@ export function ReconciliationPanel({
           {total > sortedIssues.length && (
             <div className="px-5 py-3 border-t border-white/[0.06] text-[12px] text-white/70">
               Showing {sortedIssues.length} of {total} issues.
-              {' '}<a href="/dashboard/audit" className="text-vektrum-blue hover:underline">View all in audit log →</a>
+              {' '}<a href="/dashboard/audit" className="text-blue-300 hover:text-blue-200 hover:underline">View all in audit log →</a>
             </div>
           )}
         </div>
@@ -501,7 +501,7 @@ function ActionButton({
   const colors = {
     muted:  'border-white/[0.16] bg-white/[0.05] text-white/85 hover:text-white hover:bg-white/[0.1] hover:border-white/[0.24]',
     green:  'border-emerald-500/30 bg-emerald-500/[0.1] text-emerald-400 hover:bg-emerald-500/[0.16]',
-    blue:   'border-vektrum-blue/30 bg-vektrum-blue/[0.1] text-vektrum-blue hover:bg-vektrum-blue/[0.16]',
+    blue:   'border-vektrum-blue/40 bg-vektrum-blue/[0.12] text-blue-300 hover:bg-vektrum-blue/[0.20]',
     red:    'border-red-500/30 bg-red-500/[0.1] text-red-400 hover:bg-red-500/[0.16]',
   }
 

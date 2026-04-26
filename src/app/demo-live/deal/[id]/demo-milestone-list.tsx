@@ -78,7 +78,7 @@ function DemoMilestoneCard({
 
   const statusConfig = {
     released: { label: 'Released', color: 'text-emerald-400', bg: 'bg-emerald-500/[0.08] border-emerald-500/20', border: 'border-l-vektrum-green' },
-    approved: { label: 'Approved', color: 'text-vektrum-blue', bg: 'bg-vektrum-blue/10 border-vektrum-blue/20', border: '' },
+    approved: { label: 'Approved', color: 'text-blue-300', bg: 'bg-vektrum-blue/10 border-vektrum-blue/30', border: '' },
     ready_for_review: { label: 'Ready for Review', color: 'text-amber-400', bg: 'bg-amber-500/[0.08] border-amber-500/20', border: '' },
     in_progress: { label: 'In Progress', color: 'text-white/55', bg: 'bg-surface-3 border-white/[0.08]', border: '' },
     not_started: { label: 'Not Started', color: 'text-white/65', bg: 'bg-surface-3 border-white/[0.08]', border: '' },
@@ -102,7 +102,7 @@ function DemoMilestoneCard({
           <button
             type="button"
             onClick={() => setExpanded(true)}
-            className="inline-flex items-center gap-1 text-[12px] text-vektrum-blue hover:text-vektrum-blue-hover transition-colors flex-shrink-0"
+            className="inline-flex items-center gap-1 text-[12px] text-blue-300 hover:text-blue-200 transition-colors flex-shrink-0"
           >
             <ChevronDown size={14} aria-hidden="true" />
             Details
@@ -212,7 +212,7 @@ function DemoMilestoneCard({
             <button
               type="button"
               onClick={() => setExpanded(false)}
-              className="inline-flex items-center gap-1 text-[12px] text-vektrum-blue hover:text-vektrum-blue-hover transition-colors"
+              className="inline-flex items-center gap-1 text-[12px] text-blue-300 hover:text-blue-200 transition-colors"
             >
               <ChevronUp size={14} aria-hidden="true" />
               Hide
@@ -236,13 +236,13 @@ function DemoMilestoneCard({
             {/* AI Review Panel */}
             <div className="rounded-lg border border-vektrum-blue/20 bg-vektrum-blue/10 p-4">
               <div className="flex items-center gap-2 mb-3">
-                <Brain size={14} className="text-vektrum-blue" aria-hidden="true" />
-                <span className="text-[13px] font-semibold text-vektrum-blue">AI Draw Review</span>
+                <Brain size={14} className="text-blue-400" aria-hidden="true" />
+                <span className="text-[13px] font-semibold text-blue-300">AI Draw Review</span>
               </div>
               <div className="grid grid-cols-3 gap-4 mb-3">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-widest text-white/70">Score</p>
-                  <p className="text-xl font-bold text-vektrum-blue tabular-nums">{ms.aiScore}/100</p>
+                  <p className="text-xl font-bold text-blue-300 tabular-nums">{ms.aiScore}/100</p>
                 </div>
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-widest text-white/70">Risk</p>
@@ -255,7 +255,7 @@ function DemoMilestoneCard({
               </div>
               <ul className="space-y-1.5">
                 {ms.findings?.map((f, i) => (
-                  <li key={i} className="flex items-center gap-2 text-[12px] text-vektrum-blue">
+                  <li key={i} className="flex items-center gap-2 text-[12px] text-blue-300">
                     <CheckCircle2 size={12} aria-hidden="true" />
                     {f}
                   </li>
@@ -287,7 +287,7 @@ function DemoMilestoneCard({
             {/* 10-condition gate checklist */}
             <div className="rounded-lg border border-white/[0.08] bg-surface-2 p-4">
               <div className="flex items-center gap-2 mb-3">
-                <Shield size={14} className="text-vektrum-blue" aria-hidden="true" />
+                <Shield size={14} className="text-blue-400" aria-hidden="true" />
                 <span className="text-[12px] font-semibold text-white">10-Condition Release Gate</span>
               </div>
               <ul className="space-y-2">

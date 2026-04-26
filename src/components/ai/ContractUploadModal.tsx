@@ -90,7 +90,7 @@ export function ContractUploadModal({ metadata, onSuccess, onClose }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between border-b border-white/[0.06] px-6 py-4">
           <div>
-            <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-vektrum-blue">
+            <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-blue-300">
               AI Contract Import
             </p>
             <h2 className="text-[16px] font-semibold tracking-[-0.01em] text-white">
@@ -117,7 +117,7 @@ export function ContractUploadModal({ metadata, onSuccess, onClose }: Props) {
               <div className="relative">
                 <div className="h-12 w-12 animate-spin rounded-full border-2 border-vektrum-blue/20 border-t-vektrum-blue" />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <FileText size={16} className="text-vektrum-blue" />
+                  <FileText size={16} className="text-blue-400" />
                 </div>
               </div>
 
@@ -163,7 +163,7 @@ export function ContractUploadModal({ metadata, onSuccess, onClose }: Props) {
                 {state === 'selected' && file ? (
                   <>
                     <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-vektrum-blue/15">
-                      <FileText size={20} className="text-vektrum-blue" />
+                      <FileText size={20} className="text-blue-400" />
                     </div>
                     <p className="text-[14px] font-semibold text-white">{file.name}</p>
                     <p className="mt-0.5 text-[12px] text-white/75">{fileSizeMB} MB · PDF</p>

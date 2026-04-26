@@ -85,7 +85,7 @@ export function AiReviewModal({ open, onClose, milestoneContext }: AiReviewModal
 
         {phase === 'loading' ? (
           <div className="py-8 text-center">
-            <Loader2 size={40} className="text-vektrum-blue mx-auto mb-4 animate-spin" />
+            <Loader2 size={40} className="text-blue-400 mx-auto mb-4 animate-spin" />
             <p className="text-sm font-medium text-white/70 mb-4">Vektrum AI is running draw precondition analysis...</p>
             <div className="space-y-2 text-left max-w-xs mx-auto mb-6">
               {step1 && (
@@ -128,7 +128,7 @@ export function AiReviewModal({ open, onClose, milestoneContext }: AiReviewModal
             <div className="grid grid-cols-3 gap-4 mb-5">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-white/70">Score</p>
-                <p className="text-3xl font-bold text-vektrum-blue">82/100</p>
+                <p className="text-3xl font-bold text-blue-300">82/100</p>
               </div>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-white/70">Risk</p>

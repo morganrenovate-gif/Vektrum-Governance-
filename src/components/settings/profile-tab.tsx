@@ -134,7 +134,7 @@ export function ProfileTab({ profile, userEmail }: ProfileTabProps) {
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-3">
             <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-vektrum-blue/10 mt-0.5">
-              <Mail size={15} className="text-vektrum-blue" aria-hidden="true" />
+              <Mail size={15} className="text-blue-400" aria-hidden="true" />
             </div>
             <div>
               <p className="text-[13px] font-semibold text-white">Email Address</p>

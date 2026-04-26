@@ -29,22 +29,22 @@ const AUTH_TRUST = [
   {
     icon: Lock,
     title: "10-condition release gate",
-    desc: "Every payment passes 10 server-side checks before a single dollar moves.",
+    desc: "Every release passes deterministic server-side checks before payment execution can proceed.",
   },
   {
     icon: Shield,
-    title: "Funds held by Stripe",
-    desc: "Vektrum governs authorization — your capital is held by Stripe, not us.",
+    title: "Custody stays outside Vektrum",
+    desc: "Vektrum governs authorization. Funds remain with Stripe Connect or the customer's existing title, escrow, treasury, banking, or institutional partner process.",
   },
   {
     icon: FileCheck,
     title: "Immutable audit trail",
-    desc: "Every action is logged with timestamp and actor. No edits. No deletes.",
+    desc: "Every action is logged with timestamp, actor, and supporting evidence.",
   },
   {
     icon: CheckCircle2,
     title: "Milestone isolation",
-    desc: "A dispute on one milestone never freezes the others. Your project keeps moving.",
+    desc: "A dispute on one milestone does not have to freeze the entire project.",
   },
 ];
 
@@ -127,7 +127,7 @@ export default function LoginPage() {
 
         {/* Bottom note */}
         <p className="text-xs text-white/70">
-          Payments powered by Stripe Connect · Vektrum governs authorization, not custody
+          Vektrum governs authorization, not custody. Execution runs through Stripe Connect or the customer&rsquo;s existing external process.
         </p>
       </div>
 
@@ -168,7 +168,7 @@ export default function LoginPage() {
               />
 
               <div className="flex justify-end">
-                <Link href="/forgot-password" className="text-sm text-vektrum-blue hover:underline">
+                <Link href="/forgot-password" className="text-sm text-blue-300 hover:text-blue-200 hover:underline">
                   Forgot password?
                 </Link>
               </div>
@@ -199,7 +199,7 @@ export default function LoginPage() {
             Don&rsquo;t have an account?{" "}
             <Link
               href="/auth/signup"
-              className="font-medium text-vektrum-blue hover:underline"
+              className="font-medium text-blue-300 hover:text-blue-200 hover:underline"
             >
               Create account
             </Link>
@@ -207,9 +207,9 @@ export default function LoginPage() {
 
           {/* Mobile trust note (only on small screens) */}
           <div className="mt-8 lg:hidden flex items-start gap-2 rounded-lg border border-white/[0.08] bg-surface-2 px-4 py-3">
-            <Shield size={14} className="text-vektrum-blue mt-0.5 flex-shrink-0" aria-hidden="true" />
+            <Shield size={14} className="text-blue-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
             <p className="text-xs text-white/55">
-              Payments powered by Stripe Connect. Vektrum governs release — never holds your funds.
+              Vektrum governs authorization, not custody. Execution runs through Stripe Connect or the customer&rsquo;s existing external process.
             </p>
           </div>
         </div>

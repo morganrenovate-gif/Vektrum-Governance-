@@ -27,7 +27,7 @@ const ROLE_LABELS: Record<string, string> = {
 }
 
 const ROLE_COLORS: Record<string, string> = {
-  contractor: 'bg-vektrum-blue/10 border-vektrum-blue/20 text-vektrum-blue',
+  contractor: 'bg-vektrum-blue/20 border-vektrum-blue/40 text-blue-300',
   funder:     'bg-emerald-500/[0.08] border-emerald-500/20 text-emerald-400',
   admin:      'bg-amber-500/[0.08] border-amber-500/20 text-amber-400',
 }
@@ -171,7 +171,7 @@ export function UserTable({ profiles, deals, emailMap = {} }: UserTableProps) {
                   </span>
                   <Link
                     href={`/dashboard/admin/users/${profile.id}`}
-                    className="text-[11px] font-medium text-vektrum-blue hover:underline whitespace-nowrap"
+                    className="text-[11px] font-medium text-blue-300 hover:text-blue-200 hover:underline whitespace-nowrap"
                   >
                     View user
                   </Link>

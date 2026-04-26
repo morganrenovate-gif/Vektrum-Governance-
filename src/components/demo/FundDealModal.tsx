@@ -71,7 +71,7 @@ export function FundDealModal({ open, onConfirm, onClose }: FundDealModalProps) 
             {/* Amount */}
             <div className="mb-5">
               <label className="block text-xs font-semibold uppercase tracking-wide text-white/70 mb-1">Amount</label>
-              <p className="text-2xl font-bold text-vektrum-blue">{formatCurrency(4_750_000)}</p>
+              <p className="text-2xl font-bold text-blue-300">{formatCurrency(4_750_000)}</p>
             </div>
 
             {/* Checkboxes */}

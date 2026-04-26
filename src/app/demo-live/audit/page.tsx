@@ -432,13 +432,13 @@ function actionBadgeClasses(action: string): string {
   if (action === 'Dispute Opened' || action === 'Release Blocked')
     return 'bg-red-500/[0.12] text-red-400'
   if (action === 'Deal Created' || action === 'User Signed Up')
-    return 'bg-vektrum-blue/10 text-vektrum-blue'
+    return 'bg-vektrum-blue/20 text-blue-300'
   return 'bg-white/[0.06] text-white/75'
 }
 
 function roleBadgeClasses(role: string): string {
   switch (role) {
-    case 'funder':     return 'bg-vektrum-blue/10 text-vektrum-blue'
+    case 'funder':     return 'bg-vektrum-blue/20 text-blue-300'
     case 'contractor': return 'bg-amber-500/[0.12] text-amber-400'
     case 'admin':      return 'bg-purple-500/[0.12] text-purple-400'
     case 'system':     return 'bg-white/[0.06] text-white/75'
@@ -469,7 +469,7 @@ export default function DemoAuditPage() {
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-vektrum-blue/10">
-          <Shield size={18} className="text-vektrum-blue" aria-hidden="true" />
+          <Shield size={18} className="text-blue-400" aria-hidden="true" />
         </div>
         <div>
           <h1 className="font-display text-2xl font-bold text-white">

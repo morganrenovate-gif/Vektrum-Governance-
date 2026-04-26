@@ -83,7 +83,7 @@ function SectionToggle({
 
 function ResponsibleBadge({ party }: { party: 'CONTRACTOR' | 'FUNDER' | 'EITHER' }) {
   const styles = {
-    CONTRACTOR: 'bg-vektrum-blue/10 text-vektrum-blue border-vektrum-blue/20',
+    CONTRACTOR: 'bg-vektrum-blue/20 text-blue-300 border-vektrum-blue/40',
     FUNDER: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
     EITHER: 'bg-white/5 text-white/75 border-white/10',
   }
@@ -319,7 +319,7 @@ export function DisputeBrief({ brief, role, milestoneId, milestoneName }: Props)
             count={brief.resolution_steps.length}
             open={showSteps}
             onToggle={() => setShowSteps((v) => !v)}
-            accent="text-vektrum-blue"
+            accent="text-blue-300"
           />
           {showSteps && (
             <div className="mt-3 space-y-2">
@@ -328,7 +328,7 @@ export function DisputeBrief({ brief, role, milestoneId, milestoneName }: Props)
                   key={i}
                   className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-3"
                 >
-                  <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-vektrum-blue/15 text-[10px] font-bold text-vektrum-blue mt-0.5">
+                  <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-vektrum-blue/20 text-[10px] font-bold text-blue-300 mt-0.5">
                     {step.step}
                   </span>
                   <div className="flex-1">
@@ -380,7 +380,7 @@ export function DisputeBrief({ brief, role, milestoneId, milestoneName }: Props)
         {/* Contractor: action prompt */}
         {role === 'contractor' && brief.status === 'OPEN' && brief.resolution_steps.length > 0 && (
           <div className="flex items-start gap-2.5 rounded-xl border border-vektrum-blue/15 bg-vektrum-blue/5 px-4 py-3">
-            <ArrowRight size={13} className="text-vektrum-blue flex-shrink-0 mt-0.5" />
+            <ArrowRight size={13} className="text-blue-400 flex-shrink-0 mt-0.5" />
             <p className="text-[12px] text-white/55 leading-relaxed">
               Complete the steps above and resubmit your draw package. The funder will review and can mark the dispute resolved once satisfied.
             </p>

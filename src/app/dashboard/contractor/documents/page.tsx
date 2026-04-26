@@ -105,7 +105,7 @@ export default async function ContractorDocumentsPage() {
                         href={doc.file_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-vektrum-blue hover:text-vektrum-blue-hover transition-colors text-xs font-semibold"
+                        className="inline-flex items-center gap-1 text-blue-300 hover:text-blue-200 transition-colors text-xs font-semibold"
                       >
                         <Download size={12} />
                         Download

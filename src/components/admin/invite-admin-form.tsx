@@ -52,7 +52,7 @@ export function InviteAdminForm() {
     <div className="rounded-xl border border-white/[0.08] bg-surface-2 px-5 py-5 shadow-sm">
       <div className="flex items-center gap-2.5 mb-3">
         <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-vektrum-blue/10">
-          <Mail size={13} className="text-vektrum-blue" aria-hidden="true" />
+          <Mail size={13} className="text-blue-400" aria-hidden="true" />
         </div>
         <h3 className="text-[13px] font-semibold text-white">Invite New Admin</h3>
       </div>

@@ -118,7 +118,7 @@ export default async function BillingPortalPage() {
 
   function statusBadgeClass(status: string): string {
     switch (status) {
-      case 'active':    return 'bg-vektrum-blue/10 text-vektrum-blue border-vektrum-blue/20'
+      case 'active':    return 'bg-vektrum-blue/10 text-blue-300 border-vektrum-blue/30'
       case 'completed': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
       case 'disputed':  return 'bg-red-500/10 text-red-400 border-red-500/20'
       case 'draft':     return 'bg-white/[0.05] text-white/75 border-white/[0.14]'
@@ -145,7 +145,7 @@ export default async function BillingPortalPage() {
 
       {/* Account fee tier */}
       <div className="flex items-start gap-3 rounded-xl border border-vektrum-blue/20 bg-vektrum-blue/5 p-4">
-        <Info size={15} className="text-vektrum-blue flex-shrink-0 mt-0.5" />
+        <Info size={15} className="text-blue-400 flex-shrink-0 mt-0.5" />
         <div className="text-[13px]">
           <p className="font-medium text-white/80">Your account plan</p>
           <p className="text-white/50 mt-0.5">
@@ -192,7 +192,7 @@ export default async function BillingPortalPage() {
                 {label}
               </p>
               <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-white/[0.05] border border-white/[0.08]">
-                <Icon size={12} className="text-vektrum-blue" />
+                <Icon size={12} className="text-blue-400" />
               </div>
             </div>
             <p className="font-display text-xl font-bold tabular-nums text-white">{value}</p>

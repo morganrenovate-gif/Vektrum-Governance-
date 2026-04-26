@@ -32,7 +32,7 @@ export default function DemoAdminPage() {
 
         {/* Demo info */}
         <div className="rounded-xl border border-vektrum-blue/20 bg-vektrum-blue/10 px-5 py-4">
-          <p className="text-[13px] text-vektrum-blue leading-relaxed">
+          <p className="text-[13px] text-blue-200 leading-relaxed">
             You&apos;re viewing the Admin dashboard in demo mode. In the live app, all data comes from real platform activity.
           </p>
         </div>
@@ -60,8 +60,8 @@ export default function DemoAdminPage() {
 
         {/* Security notice */}
         <div className="flex items-start gap-3 rounded-xl border border-vektrum-blue/20 bg-vektrum-blue/10 px-5 py-4">
-          <Shield size={15} className="text-vektrum-blue flex-shrink-0 mt-0.5" aria-hidden="true" />
-          <p className="text-[13px] text-vektrum-blue leading-relaxed">
+          <Shield size={15} className="text-blue-300 flex-shrink-0 mt-0.5" aria-hidden="true" />
+          <p className="text-[13px] text-blue-200 leading-relaxed">
             <strong>Admin access is read-only for financial data.</strong> You cannot release funds, modify milestone amounts,
             or alter deal terms from this panel. All payment actions require the full 10-condition release gate
             to be satisfied by the deal participants.
@@ -128,7 +128,7 @@ export default function DemoAdminPage() {
                   <tr key={d.name} className="border-t border-white/[0.06] hover:bg-white/[0.03] transition-colors">
                     <td className="px-4 py-3">
                       {d.slug
-                        ? <Link href={`/demo-live/deal/${d.slug}?from=admin`} className="text-vektrum-blue hover:underline font-medium">{d.name}</Link>
+                        ? <Link href={`/demo-live/deal/${d.slug}?from=admin`} className="text-blue-300 hover:text-blue-200 hover:underline font-medium">{d.name}</Link>
                         : <span className="text-white/70 font-medium">{d.name}</span>
                       }
                     </td>
@@ -170,7 +170,7 @@ export default function DemoAdminPage() {
                       <td className="px-4 py-3">
                         <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
                           u.role === 'funder'
-                            ? 'bg-vektrum-blue/10 text-vektrum-blue border-vektrum-blue/20'
+                            ? 'bg-vektrum-blue/10 text-blue-300 border-vektrum-blue/30'
                             : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                         }`}>
                           {u.role}
@@ -238,7 +238,7 @@ export default function DemoAdminPage() {
         <section className="mt-6" id="audit-activity">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/75">Recent Audit Activity</h2>
-            <Link href="/demo-live/audit" className="text-sm text-vektrum-blue hover:underline">View full audit log →</Link>
+            <Link href="/demo-live/audit" className="text-sm text-blue-300 hover:text-blue-200 hover:underline">View full audit log →</Link>
           </div>
           <div className="rounded-2xl border border-white/[0.08] bg-surface-2 divide-y divide-white/[0.06] text-sm overflow-hidden" >
             {[
@@ -251,7 +251,7 @@ export default function DemoAdminPage() {
               <div key={i} className="px-4 py-3 flex items-center gap-4">
                 <span className="text-white/50 w-24 shrink-0">{e.time}</span>
                 <span className="font-medium text-white w-28 shrink-0">{e.actor}</span>
-                <span className="bg-vektrum-blue/10 text-vektrum-blue border border-vektrum-blue/20 px-2 py-0.5 rounded-full text-xs">{e.action}</span>
+                <span className="bg-vektrum-blue/10 text-blue-300 border border-vektrum-blue/30 px-2 py-0.5 rounded-full text-xs">{e.action}</span>
                 <span className="text-white/55 flex-1 truncate">{e.entity}</span>
                 <span className="text-white/50 text-xs">{e.details}</span>
               </div>
@@ -281,10 +281,10 @@ function AdminTile({
       <div className="flex items-start justify-between gap-3 mb-3">
         <p className="text-[10px] font-semibold uppercase tracking-widest text-white/75">{label}</p>
         <div className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg ${warning ? 'bg-vektrum-amber/10' : 'bg-vektrum-blue/10'}`}>
-          <Icon size={13} className={warning ? 'text-amber-400' : 'text-vektrum-blue'} aria-hidden="true" />
+          <Icon size={13} className={warning ? 'text-amber-400' : 'text-blue-400'} aria-hidden="true" />
         </div>
       </div>
-      <p className={`font-display text-2xl font-bold tabular-nums leading-none break-all ${accent ? 'text-vektrum-blue' : warning ? 'text-amber-400' : 'text-white'}`}>
+      <p className={`font-display text-2xl font-bold tabular-nums leading-none break-all ${accent ? 'text-blue-300' : warning ? 'text-amber-400' : 'text-white'}`}>
         {value}
       </p>
       {sub && <p className="mt-1.5 text-[11px] text-white/75">{sub}</p>}

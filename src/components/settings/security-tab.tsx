@@ -69,7 +69,7 @@ export function SecurityTab() {
       <div className="rounded-xl border border-white/[0.08] bg-surface-2 p-6 shadow-sm">
         <div className="flex items-center gap-2.5 mb-5">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-vektrum-blue/10">
-            <Shield size={14} className="text-vektrum-blue" aria-hidden="true" />
+            <Shield size={14} className="text-blue-400" aria-hidden="true" />
           </div>
           <div>
             <p className="text-[14px] font-semibold text-white">Change Password</p>

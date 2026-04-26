@@ -119,7 +119,7 @@ function AlertRow({ alert }: { alert: OpsAlert }) {
         </p>
         <Link
           href={alert.action_url}
-          className="flex items-center gap-1 text-[10px] text-vektrum-blue hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue rounded transition-colors"
+          className="flex items-center gap-1 text-[10px] text-blue-300 hover:text-blue-200 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400 rounded transition-colors"
         >
           View <ExternalLink size={9} />
         </Link>

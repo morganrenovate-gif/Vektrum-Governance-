@@ -578,7 +578,7 @@ export default async function DealDetailPage({
                             </span>
                           )}
                           {waiver?.status === "uploaded" && (
-                            <span className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium bg-vektrum-blue/10 text-vektrum-blue border border-vektrum-blue/20">
+                            <span className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium bg-vektrum-blue/10 text-blue-300 border border-vektrum-blue/30">
                               <FileText size={10} aria-hidden="true" />
                               Awaiting review
                             </span>
@@ -616,7 +616,7 @@ export default async function DealDetailPage({
             </CardHeader>
             <CardBody>
               {/* Running total */}
-              <div className="mb-5 flex items-start gap-2.5 rounded-lg border border-vektrum-blue/20 bg-vektrum-blue/[0.07] px-4 py-3 text-[13px] text-vektrum-blue">
+              <div className="mb-5 flex items-start gap-2.5 rounded-lg border border-vektrum-blue/25 bg-vektrum-blue/[0.12] px-4 py-3 text-[13px] text-blue-200">
                 <Info size={14} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
                 <span>
                   Milestones allocated:{" "}

@@ -234,7 +234,7 @@ export default async function DashboardPage() {
             <div className="rounded-xl border border-white/[0.08] bg-surface-2 overflow-hidden shadow-card">
               <div className="flex items-center gap-3 px-5 py-4 border-b border-white/[0.06]">
                 <div className="h-px w-5 bg-vektrum-blue flex-shrink-0" aria-hidden="true" />
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-vektrum-blue">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-blue-300">
                   Draw Review Status
                 </p>
               </div>

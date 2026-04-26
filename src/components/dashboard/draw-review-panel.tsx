@@ -68,7 +68,7 @@ export function DrawReviewPanel({ deals, embedded = false }: DrawReviewPanelProp
                   </span>
                   <RiskScoreBadge level={riskLevel} />
                 </div>
-                <ArrowRight size={14} className="flex-shrink-0 text-white/65 group-hover:text-vektrum-blue transition-colors" />
+                <ArrowRight size={14} className="flex-shrink-0 text-white/65 group-hover:text-blue-300 transition-colors" />
               </div>
             </Link>
           )
@@ -83,7 +83,7 @@ export function DrawReviewPanel({ deals, embedded = false }: DrawReviewPanelProp
       <div className="rounded-xl border border-white/[0.08] bg-surface-2 shadow-card p-6">
         <div className="flex items-center gap-2 mb-4">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-vektrum-blue/10">
-            <Clock size={15} className="text-vektrum-blue" />
+            <Clock size={15} className="text-blue-400" />
           </div>
           <h3 className="text-[14px] font-semibold text-white">Draw Review Status</h3>
         </div>

@@ -93,14 +93,14 @@ async function getUserDetail(targetUserId: string): Promise<{
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const ROLE_COLORS: Record<string, string> = {
-  contractor: 'bg-vektrum-blue/10 border-vektrum-blue/20 text-vektrum-blue',
+  contractor: 'bg-vektrum-blue/10 border-vektrum-blue/30 text-blue-300',
   funder:     'bg-emerald-500/[0.08] border-emerald-500/20 text-emerald-400',
   admin:      'bg-amber-500/[0.08] border-amber-500/20 text-amber-400',
 }
 
 const STATUS_COLORS: Record<string, string> = {
   active:      'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
-  in_progress: 'bg-vektrum-blue/10 border-vektrum-blue/20 text-vektrum-blue',
+  in_progress: 'bg-vektrum-blue/10 border-vektrum-blue/30 text-blue-300',
   completed:   'bg-white/[0.06] border-white/[0.12] text-white/65',
   draft:       'bg-white/[0.04] border-white/[0.08] text-white/50',
   disputed:    'bg-amber-500/10 border-amber-500/20 text-amber-400',

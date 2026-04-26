@@ -30,7 +30,7 @@ const darkVariantClasses: Record<BadgeVariant, string> = {
   success: "bg-emerald-500/10 text-emerald-400 ring-emerald-500/20",
   warning: "bg-amber-500/10 text-amber-400 ring-amber-500/20",
   error:   "bg-red-500/10 text-red-400 ring-red-500/20",
-  info:    "bg-vektrum-blue/15 text-vektrum-blue ring-vektrum-blue/20",
+  info:    "bg-vektrum-blue/20 text-blue-300 ring-vektrum-blue/30",
 };
 
 // ── Light-context badge variants (for marketing / light section use) ──────────
@@ -40,7 +40,7 @@ const lightVariantClasses: Record<BadgeVariant, string> = {
   success: "bg-emerald-500/[0.08] text-emerald-400 ring-emerald-500/20",
   warning: "bg-amber-500/[0.08] text-amber-400 ring-amber-500/20",
   error:   "bg-red-500/[0.08] text-red-400 ring-red-500/20",
-  info:    "bg-vektrum-blue/10 text-vektrum-blue ring-vektrum-blue/20",
+  info:    "bg-vektrum-blue/20 text-blue-300 ring-vektrum-blue/30",
 };
 
 export function Badge({

@@ -148,7 +148,7 @@ function roleBadgeClasses(role: string | null | undefined): string {
     case "contractor":
       return "bg-vektrum-amber/10 text-amber-400 border border-vektrum-amber/20";
     case "funder":
-      return "bg-vektrum-blue/15 text-vektrum-blue border border-vektrum-blue/20";
+      return "bg-vektrum-blue/15 text-blue-300 border border-vektrum-blue/30";
     case "admin":
       return "bg-white/[0.08] text-white/90 border border-white/[0.16]";
     default:
@@ -390,7 +390,7 @@ export default async function AuditLogPage({
         {hasFilters && (
           <Link
             href="?"
-            className="inline-flex items-center gap-1 text-xs text-white/75 hover:text-vektrum-blue focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue rounded transition-colors"
+            className="inline-flex items-center gap-1 text-xs text-white/75 hover:text-blue-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400 rounded transition-colors"
           >
             <X size={12} />
             Clear
@@ -556,7 +556,7 @@ function AuditRow({ log, isAdmin }: { log: AuditLog; isAdmin: boolean }) {
         {/* Metadata details */}
         {log.metadata && Object.keys(log.metadata).length > 0 ? (
           <details className="group cursor-pointer">
-            <summary className="select-none list-none text-xs text-vektrum-blue hover:underline">
+            <summary className="select-none list-none text-xs text-blue-300 hover:text-blue-200 hover:underline">
               View details
             </summary>
             <div className="mt-2 max-w-xs overflow-auto rounded-xl bg-white/[0.05] border border-white/[0.08] p-2.5">
@@ -582,7 +582,7 @@ function AuditRow({ log, isAdmin }: { log: AuditLog; isAdmin: boolean }) {
           </details>
         ) : isAdmin && (log.session_id || log.ip_address) ? (
           <details className="group cursor-pointer">
-            <summary className="select-none list-none text-xs text-vektrum-blue hover:underline">
+            <summary className="select-none list-none text-xs text-blue-300 hover:text-blue-200 hover:underline">
               View details
             </summary>
             <div className="mt-2 max-w-xs overflow-auto rounded-xl bg-white/[0.05] border border-white/[0.08] p-2.5">

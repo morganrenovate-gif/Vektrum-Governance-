@@ -120,9 +120,9 @@ export function StripeTab({ profile }: StripeTabProps) {
 
         {/* Advisor 10: Warn unconditionally about account switching mid-deal */}
         {isConnected && (
-          <div className="mt-5 flex items-start gap-2.5 rounded-lg border border-vektrum-blue/20 bg-vektrum-blue/10 px-4 py-3">
-            <Info size={13} className="text-vektrum-blue flex-shrink-0 mt-0.5" aria-hidden="true" />
-            <p className="text-[12px] text-vektrum-blue leading-relaxed">
+          <div className="mt-5 flex items-start gap-2.5 rounded-lg border border-vektrum-blue/25 bg-vektrum-blue/[0.12] px-4 py-3">
+            <Info size={13} className="text-blue-300 flex-shrink-0 mt-0.5" aria-hidden="true" />
+            <p className="text-[12px] text-blue-200 leading-relaxed">
               <strong>Changing your connected account</strong> will not affect funds already in transit on existing milestones.
               Payments for any milestone already in the release process will continue to route to the account on file at the time of release.
             </p>

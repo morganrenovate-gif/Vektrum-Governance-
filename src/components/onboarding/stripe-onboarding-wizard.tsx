@@ -88,7 +88,7 @@ export function StripeOnboardingWizard({
             {step === 1 && (
               <div className="space-y-5">
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-vektrum-blue/10">
-                  <Shield size={28} className="text-vektrum-blue" />
+                  <Shield size={28} className="text-blue-400" />
                 </div>
                 <div>
                   <h2 className="font-display text-xl font-bold tracking-[-0.025em] text-white">
@@ -271,7 +271,7 @@ export function StripeOnboardingWizard({
         {/* Skip link (below card) */}
         <p className="mt-4 text-center text-[12px] text-white/70">
           Having trouble?{' '}
-          <a href="/dashboard/settings" className="text-vektrum-blue hover:underline">
+          <a href="/dashboard/settings" className="text-blue-300 hover:text-blue-200 hover:underline">
             Go to Settings
           </a>
           {' '}to connect Stripe later.

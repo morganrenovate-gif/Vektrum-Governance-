@@ -27,7 +27,7 @@ export function CapitalSummary({ totalFunded, totalReleased, totalFacility, tota
           <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/65">
             Total Funded
           </p>
-          <p className="mt-1 text-xl font-bold tabular-nums text-vektrum-blue">
+          <p className="mt-1 text-xl font-bold tabular-nums text-blue-300">
             {formatMoney(totalFunded)}
           </p>
         </div>
