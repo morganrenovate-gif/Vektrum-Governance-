@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "tsx tests/release-gate.test.ts && tsx tests/docusign-webhook-hmac.test.ts && tsx tests/stripe-webhook-security.test.ts"
+    "test": "tsx tests/release-gate.test.ts && tsx tests/docusign-webhook-hmac.test.ts && tsx tests/stripe-webhook-security.test.ts && tsx tests/partner-scope-isolation.test.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.0",
