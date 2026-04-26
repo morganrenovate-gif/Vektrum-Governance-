@@ -28,6 +28,7 @@ const testFiles = [
   path.join(__dirname, 'docusign-webhook-hmac.test.ts'),
   path.join(__dirname, 'stripe-webhook-security.test.ts'),
   path.join(__dirname, 'partner-scope-isolation.test.ts'),
+  path.join(__dirname, 'demo-reset-safety.test.ts'),
 ]
 
 let anyFailed = false
