@@ -93,7 +93,7 @@ export function ReleaseButton({
       if (!res.ok) {
         setUiState("error");
         setServerError(
-          data.error ?? "External authorisation failed. Please contact support.",
+          data.error ?? "External authorization failed. Please contact support.",
         );
       } else {
         setUiState("success_external_pending");
@@ -122,7 +122,7 @@ export function ReleaseButton({
     );
   }
 
-  // ── Success: External rail (authorised; awaiting off-platform execution) ──
+  // ── Success: External rail (authorized; awaiting off-platform execution) ──
   // Critically: we do NOT say "Payment released" here — no money has moved.
   if (uiState === "success_external_pending") {
     return (
@@ -133,7 +133,7 @@ export function ReleaseButton({
             Approved for external execution — awaiting payment confirmation
           </p>
           <p className="mt-0.5 text-sm text-amber-400/80">
-            Vektrum has authorised release of{" "}
+            Vektrum has authorized release of{" "}
             <span className="tabular-nums font-bold">{formatMoney(amount)}</span>{" "}
             to {contractorName}. Execute the payment via your chosen rail (wire / ACH / check) and
             return to record confirmation.
@@ -176,7 +176,7 @@ export function ReleaseButton({
         <div className="px-6 py-5 flex items-center justify-center gap-3">
           <span className="h-5 w-5 animate-spin rounded-full border-2 border-vektrum-blue/30 border-t-vektrum-blue" aria-hidden="true" />
           <p className="text-sm font-semibold text-white">
-            {selectedRail === "stripe_connect" ? "Processing Stripe release…" : "Authorising external release…"}
+            {selectedRail === "stripe_connect" ? "Processing Stripe release…" : "Authorizing external release…"}
           </p>
         </div>
       </div>
@@ -236,7 +236,7 @@ export function ReleaseButton({
               onSelect={() => setSelectedRail("external_manual")}
               icon={<FileSignature size={16} />}
               title="External / manual execution"
-              blurb="Vektrum authorises the release. Your team (or escrow / title / treasury partner) executes payment outside Vektrum via wire, ACH, or check. Return to record confirmation and attach proof."
+              blurb="Vektrum authorizes the release. Your team (or escrow / title / treasury partner) executes payment outside Vektrum via wire, ACH, or check. Return to record confirmation and attach proof."
             />
           </fieldset>
 
@@ -319,15 +319,15 @@ export function ReleaseButton({
     return (
       <ConfirmShell
         titleId="confirm-release-title-external"
-        title="Authorise external execution"
+        title="Authorize external execution"
         subtitle="Vektrum approves the release. Your team executes payment outside Vektrum."
         onClose={() => setUiState("picking_rail")}
       >
         <AmountHero amount={amount} contractorName={contractorName} milestoneTitle={milestoneTitle} />
 
-        <ul className="space-y-2" aria-label="External authorisation consequences">
+        <ul className="space-y-2" aria-label="External authorization consequences">
           {[
-            "Milestone marked released — governance authorisation is recorded",
+            "Milestone marked released — governance authorization is recorded",
             "No Stripe transfer is initiated; no funds move through Vektrum",
             "Platform fee is NOT billed until you record external confirmation",
             "You return later to record payment method, reference, and proof",
@@ -341,7 +341,7 @@ export function ReleaseButton({
         </ul>
 
         <div className="rounded-md border border-amber-500/20 bg-amber-500/[0.06] px-3 py-2 text-[11px] leading-relaxed text-amber-400/85">
-          Vektrum is governance / authorisation infrastructure — not a payment processor. Funds never
+          Vektrum is governance / authorization infrastructure — not a payment processor. Funds never
           pass through Vektrum on this rail. Confirmation must be recorded after execution.
         </div>
 
@@ -353,7 +353,7 @@ export function ReleaseButton({
             onClick={handleExternalAuthorize}
           >
             <FileSignature size={15} aria-hidden="true" />
-            Authorise {formatMoney(amount)}
+            Authorize {formatMoney(amount)}
           </Button>
           <Button
             variant="secondary"

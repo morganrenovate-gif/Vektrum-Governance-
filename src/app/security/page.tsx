@@ -40,7 +40,7 @@ export default function SecurityPage() {
             Security at Vektrum
           </h1>
           <p className="text-[15px] leading-relaxed text-white/55">
-            Vektrum is authorization software. This page describes what data we store,
+            Vektrum is authorization infrastructure. This page describes what data we store,
             how credentials are secured, and how the audit and access control layers
             are designed for tamper-evidence and auditability.
           </p>
@@ -104,7 +104,7 @@ export default function SecurityPage() {
               {[
                 {
                   title: 'Fund balances or cash positions',
-                  desc: 'Vektrum is authorization software, not a ledger for real money. Funded balance in Vektrum tracks authorization capacity — actual funds are held by Stripe or your payment partner.',
+                  desc: 'Vektrum is authorization infrastructure, not a ledger for real money. Funded balance in Vektrum tracks authorization capacity — actual funds are held by Stripe or your institutional payment partner.',
                 },
                 {
                   title: 'Contractor bank account numbers or routing numbers',

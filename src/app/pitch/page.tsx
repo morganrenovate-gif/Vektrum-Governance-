@@ -491,7 +491,7 @@ function AiPreconditionSlide() {
   const guards = [
     { label: 'Risk below critical',   desc: 'Critical risk flags block the gate; admin review required.' },
     { label: 'Assessment < 48h old',  desc: 'Stale reviews do not satisfy the precondition.' },
-    { label: 'Provider fallback',     desc: 'Perplexity → Anthropic → OpenAI. Malformed responses default to critical.' },
+    { label: 'Provider fallback',     desc: 'Multi-provider AI with fallback chain. Malformed responses default to critical.' },
     { label: 'Admin override (AAL2)', desc: 'Emergency bypass is time-boxed, audit-logged, and does not touch the gate.' },
   ]
 
@@ -571,8 +571,9 @@ function ExecutionRailsSlide() {
         </h2>
 
         <p className="text-[14px] text-white/50 leading-relaxed mb-10 max-w-[640px]">
-          Vektrum authorizes release. Execution happens on a payment rail. Funds
-          never touch Vektrum infrastructure — on either rail.
+          Vektrum authorizes release. Execution happens on a payment rail. Vektrum
+          never holds or custodies funds — on either rail. On external/manual releases,
+          funds never interact with Vektrum infrastructure at all.
         </p>
 
         <div className="grid grid-cols-2 gap-5">
@@ -922,7 +923,7 @@ function CompetitiveSlide() {
 
   const rows: Row[] = [
     { feature: '10-condition release gate (server-side)', vektrum: 'check', built: 'cross', procore: 'cross', banks: 'cross', stripe: 'cross' },
-    { feature: 'zation separated from execution',  vektrum: 'check', built: 'cross', procore: 'cross', banks: 'half',  stripe: 'cross' },
+    { feature: 'Authorization separated from execution', vektrum: 'check', built: 'cross', procore: 'cross', banks: 'half',  stripe: 'cross' },
     { feature: 'Rail-agnostic (Stripe + external)',       vektrum: 'check', built: 'cross', procore: 'cross', banks: 'half',  stripe: 'cross' },
     { feature: 'AI draw review as precondition',          vektrum: 'check', built: 'cross', procore: 'cross', banks: 'cross', stripe: 'cross' },
     { feature: 'Hash-chained audit log',                  vektrum: 'check', built: 'cross', procore: 'half',  banks: 'cross', stripe: 'cross' },
@@ -1543,6 +1544,159 @@ function ApiArchitectureSlide() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// SLIDE 7b — WHERE VEKTRUM PLUGS IN
+// ─────────────────────────────────────────────────────────────────────────────
+
+function PlacementSlide() {
+  type FlowNode = {
+    icon: React.ElementType
+    label: string
+    sub: string
+    vektrum: boolean
+    core: boolean
+  }
+
+  const institutionalFlow: FlowNode[] = [
+    { icon: FileCheck,    label: 'Draw package submitted',           sub: 'Documents, inspection reports, lien waivers — submitted in-platform',             vektrum: false, core: false },
+    { icon: Cpu,          label: 'AI draw pre-review',               sub: 'Completeness, conflict detection, risk flags — informs; does not decide',         vektrum: true,  core: false },
+    { icon: Shield,       label: '10-condition release gate',         sub: 'Funder-triggered, server-enforced — pass or block with audit record',             vektrum: true,  core: true  },
+    { icon: ArrowRight,   label: 'Signed authorization signal',       sub: 'Vektrum issues auth — your wire, ACH, check, or treasury system executes',       vektrum: false, core: false },
+    { icon: CheckCircle2, label: 'Reference + proof returned',        sub: 'Method, bank reference, proof document — funder confirms in Vektrum',            vektrum: true,  core: false },
+    { icon: GitBranch,    label: 'Audit + reconciliation',            sub: 'Ledger settled, SLA-tracked, confirmation permanently logged',                   vektrum: true,  core: false },
+  ]
+
+  const directFlow: FlowNode[] = [
+    { icon: Landmark,     label: 'Funder deposits',                  sub: 'Capital held in Stripe-managed accounts — not by Vektrum',                        vektrum: false, core: false },
+    { icon: Cpu,          label: 'AI draw pre-review',               sub: 'Same precondition check — risk flags before the gate evaluates',                  vektrum: true,  core: false },
+    { icon: Shield,       label: '10-condition release gate',         sub: 'Stripe payouts condition included. All 10 pass — no UI bypass',                  vektrum: true,  core: true  },
+    { icon: CreditCard,   label: 'Stripe Connect automated execution',sub: 'Vektrum instructs Stripe. Stripe controls movement. Fees at cost.',              vektrum: false, core: false },
+    { icon: CheckCircle2, label: 'Contractor receives payment',       sub: 'Direct deposit. Full gross amount — no fee deducted from contractor.',           vektrum: false, core: false },
+    { icon: GitBranch,    label: 'Audit + reconciliation',            sub: 'Reconciled hourly against Stripe API. Hash-chained entry every step.',           vektrum: true,  core: false },
+  ]
+
+  function FlowColumn({ nodes, label, sub, borderColor, bgColor }: {
+    nodes: FlowNode[]
+    label: string
+    sub: string
+    borderColor: string
+    bgColor: string
+  }) {
+    return (
+      <div className={cn('rounded-2xl border p-5 flex flex-col', borderColor, bgColor)}>
+        <div className="mb-4">
+          <p className={cn('text-[9px] font-black uppercase tracking-[0.16em] mb-0.5', label.startsWith('I') ? 'text-emerald-300' : 'text-blue-300')}>
+            {label}
+          </p>
+          <p className="text-[12px] font-semibold text-white/75 leading-snug">{sub}</p>
+        </div>
+        <div className="flex-1 space-y-0">
+          {nodes.map((node, i) => {
+            const Icon = node.icon
+            return (
+              <div key={node.label}>
+                <div className={cn(
+                  'flex items-start gap-2.5 px-2.5 py-2 rounded-lg',
+                  node.core ? 'bg-vektrum-blue/[0.10] border border-vektrum-blue/35' : '',
+                )}>
+                  <div className={cn(
+                    'w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 mt-px',
+                    node.core ? 'bg-vektrum-blue/20' : 'bg-white/[0.06]',
+                  )}>
+                    <Icon size={11} className={node.core ? 'text-white' : node.vektrum ? 'text-blue-300' : 'text-white/45'} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <p className="text-[11px] font-semibold text-white leading-tight">{node.label}</p>
+                      {node.vektrum && (
+                        <span className="text-[7.5px] font-black uppercase tracking-wider px-1 py-px rounded bg-vektrum-blue/15 text-blue-300 border border-vektrum-blue/20 flex-shrink-0">V</span>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-white/40 leading-snug mt-px">{node.sub}</p>
+                  </div>
+                </div>
+                {i < nodes.length - 1 && (
+                  <div className="flex pl-[15px] h-3">
+                    <div className="w-px h-full bg-white/[0.10]" />
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="relative flex flex-col justify-center h-full px-20 py-14 overflow-hidden">
+      <DotGrid opacity={0.15} />
+      <Glow className="w-[480px] h-[380px] top-0 right-0 translate-x-1/3 -translate-y-1/4 bg-emerald-500/[0.07]" />
+      <Glow className="w-[480px] h-[380px] bottom-0 left-0 -translate-x-1/3 translate-y-1/4" />
+
+      <div className="relative z-10 max-w-[980px] mx-auto w-full">
+        <Eyebrow>Where Vektrum Plugs In</Eyebrow>
+
+        <div className="grid grid-cols-[260px_1fr] gap-10 items-start">
+
+          {/* Left: description + boundary notes */}
+          <div>
+            <h2 className="text-[38px] font-black tracking-[-0.038em] text-white leading-[1.02] mb-4">
+              One layer.
+              <br />
+              <span className="text-white/38">Two paths.</span>
+            </h2>
+            <p className="text-[13px] text-white/52 leading-relaxed mb-6">
+              Vektrum enforces authorization between approval and execution.
+              Your payment infrastructure — Stripe, title, escrow, treasury —
+              remains in place. The gate is identical on both paths.
+            </p>
+            <div className="space-y-2">
+              {[
+                'Does not replace title or escrow',
+                'Does not execute wires',
+                'Existing payment rails stay in place',
+                'Stripe Connect is one supported rail — not required',
+              ].map((x) => (
+                <div key={x} className="flex items-start gap-2">
+                  <CheckCircle2 size={11} className="text-blue-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-[11px] text-white/55 leading-snug">{x}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-6 rounded-xl border border-white/[0.07] bg-white/[0.025] px-4 py-3">
+              <p className="text-[10px] text-white/45 leading-relaxed">
+                <span className="text-white/70 font-semibold">V = Vektrum layer.</span>{' '}
+                The gate, AI precondition, and audit log are identical on both paths.
+              </p>
+            </div>
+          </div>
+
+          {/* Right: two flow columns */}
+          <div className="grid grid-cols-2 gap-4">
+            <FlowColumn
+              nodes={institutionalFlow}
+              label="Institutional · External rail"
+              sub="Lender with existing payment infrastructure"
+              borderColor="border-emerald-500/25"
+              bgColor="bg-emerald-500/[0.04]"
+            />
+            <FlowColumn
+              nodes={directFlow}
+              label="Direct · Stripe Connect rail"
+              sub="Private lender / family office / developer"
+              borderColor="border-vektrum-blue/25"
+              bgColor="bg-vektrum-blue/[0.04]"
+            />
+          </div>
+
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // DECK SHELL + NAVIGATION
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -1554,6 +1708,7 @@ const SLIDES = [
   { id: 'gate',        label: 'Release Gate',       component: ReleaseGateSlide },
   { id: 'ai',          label: 'AI Precondition',    component: AiPreconditionSlide },
   { id: 'rails',       label: 'Execution Rails',    component: ExecutionRailsSlide },
+  { id: 'placement',   label: 'Where We Plug In',   component: PlacementSlide },
   { id: 'api-arch',    label: 'API Architecture',   component: ApiArchitectureSlide },
   { id: 'trust',       label: 'Trust · Audit',      component: TrustOpsSlide },
   { id: 'roles',       label: 'Role Separation',    component: RolesSlide },

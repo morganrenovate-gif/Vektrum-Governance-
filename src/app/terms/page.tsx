@@ -31,7 +31,7 @@ export default function TermsPage() {
                 Vektrum is a milestone-gated construction project financing governance platform. The Service provides tools for contractors and funders to structure deals, define milestones, manage draw requests, and govern the release of funds based on verified conditions.
               </p>
               <p>
-                Vektrum is a governance and authorization layer. Funds are held in Stripe Connect managed accounts, not by Vektrum. Vektrum is not a bank, lender, or money transmitter.
+                Vektrum is a governance and authorization layer. Vektrum does not hold funds in its own bank account or act as escrow. For Stripe Connect deals, funds are held in Stripe-managed accounts. For external/manual deals, funds are held and disbursed by the funder&rsquo;s institutional payment partner outside Vektrum entirely. Vektrum is not a bank, lender, or money transmitter.
               </p>
             </div>
           </section>

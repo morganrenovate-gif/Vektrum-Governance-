@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { BOOK_CALL_URL, BOOK_CALL_EXTERNAL } from '@/lib/book-call'
 import {
   Shield,
   GitBranch,
@@ -11,6 +12,8 @@ import {
   Zap,
   X,
   AlertCircle,
+  Building2,
+  CreditCard,
 } from 'lucide-react'
 
 export default async function HomePage() {
@@ -62,12 +65,13 @@ export default async function HomePage() {
                   Start your first deal
                   <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
                 </Link>
-                <a
-                  href="https://cal.com/vektrum"
+                <Link
+                  href={BOOK_CALL_URL}
+                  {...(BOOK_CALL_EXTERNAL ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                   className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/[0.07] px-7 py-3 text-[14px] font-semibold text-white/80 hover:bg-white/[0.12] hover:text-white transition-all"
                 >
-                  Schedule a call
-                </a>
+                  Book a call
+                </Link>
               </div>
 
               {/* Proof stats */}
@@ -77,8 +81,8 @@ export default async function HomePage() {
                   <span className="text-[12px] text-white/55">Server-side release conditions</span>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <span className="font-display text-[19px] font-bold text-white leading-none tracking-[-0.02em] pt-1">Stripe Connect</span>
-                  <span className="text-[12px] text-white/55">Funds held by Stripe, not Vektrum</span>
+                  <span className="font-display text-[19px] font-bold text-white leading-none tracking-[-0.02em] pt-1">Two execution rails</span>
+                  <span className="text-[12px] text-white/55">Vektrum does not hold funds — on either rail</span>
                 </div>
                 <div className="flex flex-col gap-1">
                   <span className="font-display text-[19px] font-bold text-white leading-none tracking-[-0.02em] pt-1">Hash-chained</span>
@@ -383,6 +387,153 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ─── 3c. Where Vektrum plugs in ───────────────────────────────────────── */}
+      <section className="bg-[#031226] py-20 sm:py-28 border-t border-white/[0.06]">
+        <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
+
+          <div className="mb-12">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-px w-5 bg-vektrum-blue" />
+              <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">Where Vektrum plugs in</p>
+            </div>
+            <h2 className="font-display text-[2.75rem] sm:text-5xl font-bold tracking-[-0.04em] text-white leading-[1.05]">
+              Two topologies.<br />One enforcement layer.
+            </h2>
+            <p className="mt-4 text-[16px] leading-relaxed text-white/60 max-w-xl">
+              Vektrum slots between approval and execution. Whether your payment runs through Stripe Connect or through an existing title, escrow, or treasury process — the gate is identical. Your rail stays yours.
+            </p>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-2">
+
+            {/* ── Institutional / external rail ──────────────────────────────── */}
+            <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.04] p-7 flex flex-col">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/15 flex-shrink-0">
+                  <Building2 size={16} className="text-emerald-400" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-400 mb-0.5">Institutional · External rail</p>
+                  <p className="text-[14px] font-semibold text-white leading-tight">Lender / Title / Escrow / Treasury</p>
+                </div>
+              </div>
+
+              <div className="flex-1">
+                {[
+                  { icon: FileText,      label: 'Draw package submitted',           sub: 'Documentation, inspection reports, and lien waivers submitted in-platform',                                        vektrum: false, core: false },
+                  { icon: Zap,           label: 'AI draw pre-review',               sub: 'Completeness, conflict detection, risk flags — informs the gate; AI does not decide',                              vektrum: true,  core: false },
+                  { icon: Shield,        label: '10-condition release gate',         sub: 'Server-side, atomic, funder-triggered — pass or block with full audit record',                                   vektrum: true,  core: true  },
+                  { icon: ArrowRight,    label: 'Signed authorization signal fired', sub: 'Vektrum issues authorization — your wire, ACH, check, or treasury system executes',                              vektrum: false, core: false },
+                  { icon: CheckCircle2,  label: 'Reference + proof returned',        sub: 'Funder records payment method, bank reference, and proof document in Vektrum',                                   vektrum: true,  core: false },
+                  { icon: GitBranch,     label: 'Audit + reconciliation',            sub: 'Ledger settled, SLA-tracked, confirmation permanently and immutably logged',                                     vektrum: true,  core: false },
+                ].map(({ icon: Icon, label, sub, vektrum, core }, i, arr) => (
+                  <div key={label}>
+                    <div className={`flex items-start gap-3 px-3 py-2.5 rounded-xl${core ? ' bg-vektrum-blue/[0.08] border border-vektrum-blue/25' : ''}`}>
+                      <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg mt-0.5 ${core ? 'bg-vektrum-blue/20' : 'bg-white/[0.06]'}`}>
+                        <Icon size={14} className={core ? 'text-white' : vektrum ? 'text-vektrum-blue' : 'text-white/50'} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="text-[13px] font-semibold text-white leading-tight">{label}</p>
+                          {vektrum && (
+                            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-vektrum-blue/15 text-vektrum-blue border border-vektrum-blue/20 flex-shrink-0">Vektrum</span>
+                          )}
+                        </div>
+                        <p className="text-[11.5px] text-white/50 leading-snug mt-0.5">{sub}</p>
+                      </div>
+                    </div>
+                    {i < arr.length - 1 && (
+                      <div className="flex pl-[19px] h-4">
+                        <div className="w-px h-full bg-white/[0.10]" />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-5 rounded-xl border border-emerald-500/15 bg-emerald-500/[0.04] px-4 py-3">
+                <p className="text-[12px] text-white/55 leading-relaxed">
+                  <span className="text-emerald-400 font-semibold">Funds never touch Vektrum.</span>{' '}
+                  Your existing payment infrastructure — title, escrow, wire, ACH — remains in place and fully under your control.
+                </p>
+              </div>
+            </div>
+
+            {/* ── Direct / Stripe Connect rail ───────────────────────────────── */}
+            <div className="rounded-2xl border border-vektrum-blue/20 bg-vektrum-blue/[0.04] p-7 flex flex-col">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-vektrum-blue/15 flex-shrink-0">
+                  <CreditCard size={16} className="text-vektrum-blue" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-vektrum-blue mb-0.5">Direct · Stripe Connect rail</p>
+                  <p className="text-[14px] font-semibold text-white leading-tight">Private lender / family office / developer</p>
+                </div>
+              </div>
+
+              <div className="flex-1">
+                {[
+                  { icon: Shield,        label: 'Funder deposits',                       sub: 'Capital held in Stripe-managed accounts — not by Vektrum',                                                           vektrum: false, core: false },
+                  { icon: Zap,           label: 'AI draw pre-review',                    sub: 'Same precondition — completeness and risk flags before the gate evaluates',                                           vektrum: true,  core: false },
+                  { icon: Lock,          label: '10-condition release gate',              sub: 'Stripe payouts condition included. All 10 must pass — server-side, no UI bypass',                                   vektrum: true,  core: true  },
+                  { icon: CreditCard,    label: 'Stripe Connect automated execution',     sub: 'Vektrum instructs Stripe to transfer. Stripe controls movement. Fees at cost.',                                     vektrum: false, core: false },
+                  { icon: CheckCircle2,  label: 'Contractor receives payment',            sub: 'Direct deposit. Full gross milestone amount — no fee deducted from contractor.',                                    vektrum: false, core: false },
+                  { icon: GitBranch,     label: 'Audit + reconciliation',                 sub: 'Reconciled hourly against Stripe API. Hash-chained log entry at every step.',                                       vektrum: true,  core: false },
+                ].map(({ icon: Icon, label, sub, vektrum, core }, i, arr) => (
+                  <div key={label}>
+                    <div className={`flex items-start gap-3 px-3 py-2.5 rounded-xl${core ? ' bg-vektrum-blue/[0.08] border border-vektrum-blue/25' : ''}`}>
+                      <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg mt-0.5 ${core ? 'bg-vektrum-blue/20' : 'bg-white/[0.06]'}`}>
+                        <Icon size={14} className={core ? 'text-white' : vektrum ? 'text-vektrum-blue' : 'text-white/50'} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="text-[13px] font-semibold text-white leading-tight">{label}</p>
+                          {vektrum && (
+                            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-vektrum-blue/15 text-vektrum-blue border border-vektrum-blue/20 flex-shrink-0">Vektrum</span>
+                          )}
+                        </div>
+                        <p className="text-[11.5px] text-white/50 leading-snug mt-0.5">{sub}</p>
+                      </div>
+                    </div>
+                    {i < arr.length - 1 && (
+                      <div className="flex pl-[19px] h-4">
+                        <div className="w-px h-full bg-white/[0.10]" />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-5 rounded-xl border border-vektrum-blue/15 bg-vektrum-blue/[0.04] px-4 py-3">
+                <p className="text-[12px] text-white/55 leading-relaxed">
+                  <span className="text-vektrum-blue font-semibold">No existing payment infrastructure required.</span>{' '}
+                  Stripe Connect handles fund custody and contractor payouts end-to-end.
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Boundary clarification strip */}
+          <div className="mt-6 rounded-2xl border border-white/[0.06] bg-white/[0.02] px-6 py-5">
+            <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2">
+              {[
+                'Vektrum does not replace title or escrow',
+                'Vektrum does not execute wires',
+                'Existing payment rails remain in place',
+                'Stripe Connect is one supported rail — not required for every deployment',
+              ].map((item) => (
+                <p key={item} className="flex items-center gap-2 text-[12px] text-white/50">
+                  <span className="inline-block h-1 w-1 rounded-full bg-white/25 flex-shrink-0" />
+                  {item}
+                </p>
+              ))}
+            </div>
+          </div>
+
+        </div>
+      </section>
+
       {/* ─── 4. Release Gate + AI Precondition ────────────────────────────────── */}
       <section className="bg-[#F8F9FB] py-20 sm:py-28 border-t border-black/[0.06]">
         <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
@@ -473,9 +624,6 @@ export default async function HomePage() {
                   ))}
                 </div>
 
-                <p className="text-[11px] text-vektrum-muted/60 leading-relaxed mb-4">
-                  Provider fallback: Perplexity sonar-pro → Anthropic Claude → OpenAI GPT-4o
-                </p>
 
                 <div className="pt-3 border-t border-black/[0.06]">
                   <p className="text-[12px] font-semibold text-vektrum-text text-center tracking-[0.02em]">
@@ -681,8 +829,7 @@ export default async function HomePage() {
                 Release only what&apos;s earned.
               </h3>
               <p className="text-[14px] leading-relaxed text-vektrum-muted mb-6">
-                Full control over every disbursement. Fund via Stripe Connect — funds
-                held in Stripe-managed accounts, not by Vektrum.
+                Full control over every disbursement. Vektrum does not hold funds. Capital is held in Stripe-managed accounts (Stripe Connect rail) or by the funder&apos;s institutional payment partner (external rail).
               </p>
               <ul className="flex flex-col gap-3 mt-auto">
                 {[
@@ -793,7 +940,7 @@ export default async function HomePage() {
                 step: '02',
                 icon: Shield,
                 title: 'Funder deposits',
-                desc: 'Funder deposits via Stripe Connect. Funds held in Stripe-managed accounts. Vektrum governs authorization but does not hold funds directly.',
+                desc: 'Funder deposits capital. On Stripe Connect deals, funds are held in Stripe-managed accounts. On external-rail deals, funds are held by the funder\'s institutional payment partner. Vektrum governs authorization and does not hold funds directly.',
                 bg: 'bg-vektrum-blue/10',
                 color: 'text-vektrum-blue',
               },
@@ -876,8 +1023,8 @@ export default async function HomePage() {
               },
               {
                 icon: FileText,
-                title: 'Vektrum governs. Stripe holds.',
-                desc: 'Funds held in Stripe Connect managed accounts — not by Vektrum. Vektrum governs authorization. Vektrum does not hold, collect, forward, or transmit funds directly.',
+                title: 'Vektrum governs. Partners hold.',
+                desc: 'Vektrum does not hold or custody funds — on either rail. On Stripe Connect deals, funds are held in Stripe-managed accounts. On external-rail deals, funds are held by the funder\'s institutional payment partner.',
               },
               {
                 icon: AlertCircle,
@@ -903,7 +1050,7 @@ export default async function HomePage() {
             <div className="grid gap-4 sm:grid-cols-3 text-center sm:text-left sm:divide-x sm:divide-white/[0.06]">
               <div className="sm:pr-6">
                 <p className="text-[12px] text-white/85 leading-relaxed font-medium">
-                  Funds held in Stripe Connect managed accounts — not by Vektrum.
+                  Vektrum does not hold funds — on either rail. On Stripe Connect deals, funds are held in Stripe-managed accounts. On external-rail deals, funds are held by the funder's institutional payment partner.
                 </p>
               </div>
               <div className="sm:px-6">
@@ -956,6 +1103,64 @@ export default async function HomePage() {
                 </p>
                 <p className="text-[12px] text-white/50 leading-relaxed">{r.desc}</p>
               </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── 10b. Trust FAQ ──────────────────────────────────────────────────────── */}
+      <section className="bg-surface-2 py-16 sm:py-20 border-t border-white/[0.06]">
+        <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="text-center mb-10">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/40 mb-3">
+              Trust &amp; Compliance
+            </p>
+            <h2 className="font-display text-2xl font-bold tracking-[-0.025em] text-white sm:text-3xl">
+              Common questions from institutional buyers
+            </h2>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {[
+              {
+                q: 'Is Vektrum a payment processor?',
+                a: 'No. Vektrum is a conditional authorization and audit layer. Payment execution happens through Stripe Connect or the customer\'s existing title, escrow, treasury, or banking process.',
+              },
+              {
+                q: 'Does Vektrum hold funds?',
+                a: 'No. Vektrum does not hold funds in its own bank account or act as escrow. For Stripe Connect releases, funds are held in Stripe-managed accounts. For external/manual releases, payment is executed outside Vektrum by the funder, title company, escrow company, or treasury process.',
+              },
+              {
+                q: 'Does every customer need to use Stripe?',
+                a: 'No. Stripe Connect is available for automated execution. Institutional customers can use external/manual execution through their existing payment process.',
+              },
+              {
+                q: 'Does Vektrum replace title or escrow companies?',
+                a: 'No. Vektrum can give title and escrow teams a release authorization and audit layer before they execute disbursements.',
+              },
+              {
+                q: 'Does AI approve releases?',
+                a: 'No. AI-assisted review flags missing documents, conflicts, and risk signals. The funder triggers release, and the deterministic release gate enforces whether release is allowed.',
+              },
+              {
+                q: 'Can admins release funds?',
+                a: 'No. Admins cannot trigger milestone releases. Privileged admin actions require AAL2 MFA, justification, and audit logging.',
+              },
+              {
+                q: 'What happens if a condition fails?',
+                a: 'The release is blocked until the issue is resolved. The system records the failed gate evaluation for audit visibility.',
+              },
+              {
+                q: 'What happens if Vektrum shuts down?',
+                a: 'Payment execution remains with Stripe Connect or the customer-controlled payment process. Customers can export deal and audit records at any time.',
+              },
+            ].map((item) => (
+              <div
+                key={item.q}
+                className="rounded-xl border border-white/[0.07] bg-surface-3 px-5 py-5"
+              >
+                <p className="text-[13.5px] font-semibold text-white mb-1.5">{item.q}</p>
+                <p className="text-[12.5px] leading-relaxed text-white/50">{item.a}</p>
+              </div>
             ))}
           </div>
         </div>

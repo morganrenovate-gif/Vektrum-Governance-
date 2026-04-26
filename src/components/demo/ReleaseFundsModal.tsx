@@ -293,7 +293,7 @@ export function ReleaseFundsModal({
 
             {/* Fine print below buttons */}
             <p className="text-center text-[11px] text-white/75 mt-3 leading-relaxed">
-              By confirming you authorize this transfer under the terms of the Vektrum Project Trust Agreement.
+              By confirming, you authorize this release request. Vektrum evaluates the release gate before execution proceeds through the selected rail.
             </p>
           </div>
         )}

@@ -3,6 +3,7 @@ import { Inter, Instrument_Sans, JetBrains_Mono } from "next/font/google";
 import Link from "next/link";
 import { Analytics } from "@vercel/analytics/next";
 import { ArrowRight } from "lucide-react"
+import { BOOK_CALL_URL, BOOK_CALL_EXTERNAL } from "@/lib/book-call"
 import { MobileNav } from "@/components/nav/mobile-nav";
 import { VektrumWordmark } from "@/components/ui/vektrum-logo";
 import { UserMenu } from "@/components/nav/user-menu";
@@ -78,7 +79,7 @@ export default async function RootLayout({
         "name": "Vektrum",
         "url": "https://vektrum.io",
         "logo": "https://vektrum.io/logo.png",
-        "description": "Vektrum is a construction disbursement governance platform providing controlled draw disbursements with a 10-condition release gate, AI-assisted draw review preconditions, and immutable audit trails for funders and contractors.",
+        "description": "Vektrum is a construction disbursement governance platform providing authorization infrastructure for construction draw releases — 10-condition release gate, AI-assisted draw review preconditions, and immutable audit trails for funders and contractors.",
         "contactPoint": {
           "@type": "ContactPoint",
           "email": "operations@vektrum.io",
@@ -153,6 +154,12 @@ export default async function RootLayout({
                   // ── Logged-out nav ─────────────────────────────────────────
                   <>
                     <Link
+                      href="/demo"
+                      className="rounded-lg px-3 py-2 text-[13px] font-medium text-white/75 hover:text-white hover:bg-white/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-all"
+                    >
+                      How it works
+                    </Link>
+                    <Link
                       href="/funders"
                       className="rounded-lg px-3 py-2 text-[13px] font-medium text-white/75 hover:text-white hover:bg-white/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-all"
                     >
@@ -171,12 +178,10 @@ export default async function RootLayout({
                       Pricing
                     </Link>
                     <Link
-                      href="https://cal.com/vektrum"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      href="/demo-live"
                       className="rounded-lg px-3 py-2 text-[13px] font-medium text-white/75 hover:text-white hover:bg-white/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-all"
                     >
-                      Book a call
+                      Demo
                     </Link>
                     <div className="mx-2 h-4 w-px bg-white/[0.1]" aria-hidden="true" />
                     <Link
@@ -186,10 +191,11 @@ export default async function RootLayout({
                       Sign in
                     </Link>
                     <Link
-                      href="/auth/signup"
+                      href={BOOK_CALL_URL}
+                      {...(BOOK_CALL_EXTERNAL ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                       className="group ml-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-vektrum-blue px-4 py-2 text-[13px] font-semibold text-white hover:bg-vektrum-blue-hover transition-all shadow-md shadow-vektrum-blue/20"
                     >
-                      Get Started
+                      Book a call
                       <ArrowRight
                         size={14}
                         className="transition-transform group-hover:translate-x-0.5"
@@ -234,11 +240,15 @@ export default async function RootLayout({
                   <Link href="/auth/login" className="text-[13px] text-white/75 hover:text-white focus-visible:text-white transition-colors rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue">
                     Sign in
                   </Link>
-                  <Link href="/dashboard" className="text-[13px] text-white/75 hover:text-white focus-visible:text-white transition-colors rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue">
-                    Dashboard
-                  </Link>
                   <Link href="/pricing" className="text-[13px] text-white/75 hover:text-white focus-visible:text-white transition-colors rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue">
                     Pricing
+                  </Link>
+                  <Link
+                    href={BOOK_CALL_URL}
+                    {...(BOOK_CALL_EXTERNAL ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                    className="text-[13px] text-white/75 hover:text-white focus-visible:text-white transition-colors rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue"
+                  >
+                    Book a call
                   </Link>
                 </div>
                 <div className="flex flex-col gap-3">
@@ -292,25 +302,16 @@ export default async function RootLayout({
               </div>
             </div>
 
-            <div className="mt-12 pt-6 border-t border-white/[0.05] flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-[12px] text-white/75">
+            <div className="mt-12 pt-6 border-t border-white/[0.05] flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <p className="text-[12px] text-white/75 flex-shrink-0">
                 &copy; {new Date().getFullYear()} Vektrum. All rights reserved.
               </p>
-              <p className="text-[11px] text-white/65">
-                Funds are held in Stripe Connect managed accounts, not by Vektrum.
+              <p className="text-[11px] text-white/45 leading-relaxed sm:max-w-lg sm:text-right">
+                Vektrum is authorization infrastructure — not a bank, lender, or money transmitter.
+                Vektrum does not hold or custody funds. Funds are held by Stripe (Stripe Connect deals)
+                or the funder&apos;s institutional payment partner (external-rail deals).
+                Data encrypted in transit and at rest.
               </p>
-              <p className="mt-1 text-[11px] text-white/60 leading-relaxed">
-                Vektrum is not a bank, lender, or money transmitter. Platform security reviewed annually. Data encrypted in transit and at rest.
-              </p>
-              <p className="mt-1 text-[11px] text-white/55 leading-relaxed">
-                Vektrum is authorization software. Vektrum does not hold, move, or custody funds in ordinary operations. All payments are executed by your licensed payment partner or financial institution.
-              </p>
-              <div className="flex flex-col gap-1 sm:items-end">
-                <p className="text-[12px] text-white/65">
-                  Vektrum governs authorization. Vektrum does not hold funds directly.
-                </p>
-                {/* Removed footer attribution */}
-              </div>
             </div>
           </div>
         </footer>

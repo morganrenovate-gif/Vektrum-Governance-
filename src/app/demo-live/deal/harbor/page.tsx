@@ -111,7 +111,7 @@ export default function HarborDealPage() {
                       {cfg.label}
                     </span>
 
-                    {status === 'approved' && (
+                    {status === 'approved' && from !== 'contractor' && (
                       <button
                         type="button"
                         onClick={() => setReleaseModal(true)}

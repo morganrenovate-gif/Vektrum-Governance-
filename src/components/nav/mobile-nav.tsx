@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Menu, X, LogOut, Settings, FileText, Shield, Briefcase, FileBox, DollarSign, HelpCircle } from 'lucide-react'
+import { Menu, X, LogOut, Settings, FileText, Shield, Briefcase, FileBox, DollarSign, HelpCircle, ArrowRight } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { BOOK_CALL_URL, BOOK_CALL_EXTERNAL } from '@/lib/book-call'
 
 interface MobileNavProps {
   isLoggedIn?: boolean
@@ -190,6 +191,13 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
                 // ── Logged-out drawer ───────────────────────────────────────
                 <>
                   <Link
+                    href="/demo"
+                    className="flex items-center min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-white/55 hover:text-white hover:bg-surface-3 transition-all"
+                    onClick={() => setOpen(false)}
+                  >
+                    How it works
+                  </Link>
+                  <Link
                     href="/funders"
                     className="flex items-center min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-white/55 hover:text-white hover:bg-surface-3 transition-all"
                     onClick={() => setOpen(false)}
@@ -201,7 +209,7 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
                     className="flex items-center min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-white/55 hover:text-white hover:bg-surface-3 transition-all"
                     onClick={() => setOpen(false)}
                   >
-                    For Contractors
+                    Contractors
                   </Link>
                   <Link
                     href="/pricing"
@@ -211,11 +219,11 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
                     Pricing
                   </Link>
                   <Link
-                    href="/dashboard"
+                    href="/demo-live"
                     className="flex items-center min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-white/55 hover:text-white hover:bg-surface-3 transition-all"
                     onClick={() => setOpen(false)}
                   >
-                    Dashboard
+                    Demo
                   </Link>
                   <Link
                     href="/auth/login"
@@ -224,13 +232,22 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
                   >
                     Sign in
                   </Link>
-                  <div className="mt-3 pt-3 border-t border-white/[0.08]">
+                  <div className="mt-3 pt-3 border-t border-white/[0.08] flex flex-col gap-2">
                     <Link
-                      href="/auth/signup"
-                      className="flex items-center justify-center min-h-[48px] w-full rounded-xl bg-vektrum-blue text-[15px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 hover:bg-vektrum-blue-hover transition-all"
+                      href={BOOK_CALL_URL}
+                      {...(BOOK_CALL_EXTERNAL ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                      className="flex items-center justify-center gap-2 min-h-[48px] w-full rounded-xl bg-vektrum-blue text-[15px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 hover:bg-vektrum-blue-hover transition-all"
                       onClick={() => setOpen(false)}
                     >
-                      Get started
+                      Book a call
+                      <ArrowRight size={15} />
+                    </Link>
+                    <Link
+                      href="/auth/signup"
+                      className="flex items-center justify-center min-h-[48px] w-full rounded-xl border border-white/[0.08] bg-surface-3 text-[15px] font-medium text-white/70 hover:text-white hover:border-vektrum-blue/40 transition-all"
+                      onClick={() => setOpen(false)}
+                    >
+                      Start a deal
                     </Link>
                   </div>
                 </>

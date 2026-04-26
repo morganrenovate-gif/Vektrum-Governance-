@@ -4,7 +4,7 @@ Last updated: 2026-04-24 (Phase-1 landing)
 
 ## What this document is
 
-Vektrum is **governance / authorisation infrastructure for construction
+Vektrum is **governance / authorization infrastructure for construction
 disbursements**. Vektrum does not hold, collect, forward, or transmit funds on
 its own balance sheet in ordinary operations. Every release of money to a
 contractor happens on a **payment rail** that is separate from Vektrum's
@@ -18,7 +18,7 @@ release pipeline differs per rail, and where the legal boundaries are drawn.
 | Rail               | Execution                                                                 | Vektrum's role                                                                        |
 | ------------------ | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
 | `stripe_connect`   | Automated via Stripe Connect. Funds are held in a Stripe-managed account. | Runs the 10-condition release gate, triggers the Stripe transfer, records everything. |
-| `external_manual`  | Executed outside Vektrum (wire / ACH / check / partner treasury).         | Runs the same release gate. Authorises release. Records confirmation evidence.        |
+| `external_manual`  | Executed outside Vektrum (wire / ACH / check / partner treasury).         | Runs the same release gate. Authorizes release. Records confirmation evidence.        |
 
 Only `stripe_connect` has existed historically. `external_manual` was added in
 migration [`20260425000000_rail_abstraction.sql`](../supabase/migrations/20260425000000_rail_abstraction.sql).
@@ -32,7 +32,7 @@ For `stripe_connect`: funds are held in Stripe-managed accounts. Vektrum
 instructs Stripe when to transfer; Stripe controls movement.
 
 For `external_manual`: funds never touch any Vektrum infrastructure at all.
-Vektrum records an authorisation and later a confirmation; the funder (or their
+Vektrum records an authorization and later a confirmation; the funder (or their
 escrow / title / treasury partner) executes payment outside Vektrum.
 
 Public-facing copy must preserve both halves of that invariant.
@@ -98,12 +98,12 @@ Additive columns introduced in migration `20260425000000_rail_abstraction`:
 5. `validateRelease(..., { executionRail: 'external_manual' })` — same gate, but
    Condition 4 (Stripe payouts) is skipped. All other 9 conditions apply.
 6. `reserve_release_funds` RPC — still required; prevents concurrent
-   over-authorisation against the same funded balance.
+   over-authorization against the same funded balance.
 7. **No Stripe call.**
 8. Insert release row: `execution_rail='external_manual', execution_status='pending',
    stripe_transfer_id=NULL`.
 9. **No billing row.**
-10. Milestone `approved` → `released` (governance authorisation).
+10. Milestone `approved` → `released` (governance authorization).
 11. **No deal-financial increment.** Ledger remains truthful: reserved_amount is
     still held; released_amount / fees_collected / retainage_held are not yet
     increased.
@@ -127,7 +127,7 @@ Additive columns introduced in migration `20260425000000_rail_abstraction`:
 `external_execution_notes`. The **milestone remains in `released` state** — the
 DB trigger `enforce_milestone_status_transition` blocks `released → approved`
 for non-system callers by design. Admin action is required if the funder wants
-to revert milestone status and re-authorise.
+to revert milestone status and re-authorize.
 
 No auto-revert of `released → approved` is safe because a funder who typed the
 wrong reference, then tried again and succeeded out of band, would otherwise
@@ -193,11 +193,11 @@ by `GET /api/admin/ops/external-releases`:
 
 ## Audit actions added
 
-- `external_release_authorized` — governance authorised external release.
+- `external_release_authorized` — governance authorized external release.
 - `external_release_reservation_failed` — reserve_release_funds failed.
 - `external_release_insert_failed` — release row insert failed.
 - `external_release_concurrent_conflict` — milestone flipped by a concurrent
-  authorisation.
+  authorization.
 - `external_release_authorization_failed` — any error in the authorize-external
   try/catch block.
 - `external_release_confirmed` — funder recorded external execution.
@@ -241,7 +241,7 @@ Manual QA for Phase 1:
    `execution_rail='stripe_connect'`, and CHECK constraints pass.
 2. Stripe-rail regression: run an end-to-end Stripe release — confirm nothing
    has changed in behaviour, audit log, or billing records.
-3. External authorise: hit `POST /authorize-external` as funder; verify
+3. External authorize: hit `POST /authorize-external` as funder; verify
    - release row inserted with `execution_rail='external_manual', execution_status='pending'`
    - milestone is `released`
    - `reserved_amount` increased, `released_amount` unchanged
