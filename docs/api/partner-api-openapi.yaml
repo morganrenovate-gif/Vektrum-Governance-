@@ -1,0 +1,543 @@
+openapi: 3.1.0
+info:
+  title: Vektrum Partner API
+  version: "1.0"
+  description: |
+    Partner API for integrating with Vektrum's construction disbursement authorization layer.
+
+    Partners use this API to view release status, confirm external payment execution, and report
+    execution failures. The API does not move funds and does not allow bypassing the release gate.
+
+    All requests are scoped to the authenticated partner's deals. Every call is written to the
+    Vektrum append-only, hash-chained audit log.
+
+    **Partner inquiries:** operations@vektrum.io
+  contact:
+    email: operations@vektrum.io
+    url: https://vektrum.io/partners/placement
+
+servers:
+  - url: https://vektrum.io
+    description: Production
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: |
+        Vektrum partner API key. Format: `vkp_live_<64hex>` (production) or `vkp_test_<64hex>` (test).
+        Keys are provisioned by Vektrum. Each key is scoped to a single partner account.
+
+  schemas:
+    Release:
+      type: object
+      description: A Vektrum release record with authorization and execution state.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Release UUID
+        deal_id:
+          type: string
+          format: uuid
+          description: Deal UUID
+        deal_title:
+          type: string
+          description: Human-readable deal name
+        milestone_id:
+          type: string
+          format: uuid
+          description: Milestone UUID
+        milestone_title:
+          type: string
+          description: Human-readable milestone name
+        amount:
+          type: number
+          description: Gross release amount in USD dollars
+        fee_amount:
+          type: number
+          description: Vektrum platform fee in USD dollars
+        retainage_amount:
+          type: number
+          description: Retainage withheld in USD dollars
+        net_to_contractor:
+          type: number
+          description: Amount disbursed to contractor in USD dollars
+        execution_status:
+          type: string
+          enum: [pending, confirmed, failed]
+          description: |
+            Current state of the release execution:
+            - `pending`: Vektrum authorized the release; awaiting partner confirmation
+            - `confirmed`: Partner confirmed payment execution
+            - `failed`: Partner reported execution failure
+        execution_rail:
+          type: string
+          enum: [external_manual, stripe_connect]
+          description: |
+            Payment execution method:
+            - `external_manual`: Payment executed by partner via wire, ACH, check, or other
+            - `stripe_connect`: Payment executed via Stripe Connect (confirm/fail not available)
+        execution_notes:
+          type: string
+          nullable: true
+          description: Internal notes on execution state
+        authorized_at:
+          type: string
+          format: date-time
+          description: ISO-8601 timestamp when Vektrum authorized this release
+
+    ConfirmRequest:
+      type: object
+      required:
+        - payment_method
+        - payment_reference
+      properties:
+        payment_method:
+          type: string
+          enum: [wire, ach, check, other]
+          description: Method used to execute the payment
+        payment_reference:
+          type: string
+          maxLength: 512
+          description: Payment reference number (wire ID, ACH trace number, check number, etc.)
+        executed_at:
+          type: string
+          format: date-time
+          description: |
+            ISO-8601 timestamp of when the payment was executed.
+            Defaults to the current time if omitted.
+            Cannot be a future timestamp.
+            Cannot be more than 90 days in the past.
+        notes:
+          type: string
+          description: Optional free-text notes for the audit record
+        proof_document_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: UUID of a document already associated with the release's milestone
+
+    ConfirmResponse:
+      type: object
+      description: |
+        Returned on first confirmation. Does not include `alreadyConfirmed` on the primary path.
+        See the idempotent variant (AlreadyConfirmedResponse) for repeat calls.
+      properties:
+        success:
+          type: boolean
+        releaseId:
+          type: string
+          format: uuid
+        execution_status:
+          type: string
+          enum: [confirmed]
+        execution_rail:
+          type: string
+          enum: [external_manual]
+        confirmed_by:
+          type: string
+          description: Always "partner" for API-confirmed releases
+        partner_id:
+          type: string
+          format: uuid
+          description: The partner account that confirmed this release
+        external:
+          type: object
+          properties:
+            payment_method:
+              type: string
+              enum: [wire, ach, check, other]
+            payment_reference:
+              type: string
+            executed_at:
+              type: string
+              format: date-time
+            notes:
+              type: string
+              nullable: true
+            proof_document_id:
+              type: string
+              format: uuid
+              nullable: true
+        billing:
+          type: object
+          description: All amounts in USD dollars. Fee is funder-paid; net_to_contractor = gross minus retainage only.
+          properties:
+            gross_amount:
+              type: number
+            fee_amount:
+              type: number
+            retainage_amount:
+              type: number
+            net_to_contractor:
+              type: number
+            billing_rate_bps:
+              type: number
+              description: Fee rate in basis points (e.g. 100 = 1.00%)
+            total_debit:
+              type: number
+              description: Total deducted from funded balance — gross_amount + fee_amount
+            committed:
+              type: boolean
+              description: Whether the billing record was successfully written
+        ledger_updated:
+          type: boolean
+          description: Whether the deal financials were successfully incremented
+        warnings:
+          type: array
+          items:
+            type: string
+          description: Non-empty only if billing or ledger updates failed and are flagged for reconciliation
+
+    AlreadyConfirmedResponse:
+      type: object
+      description: Returned when confirm is called on a release that is already confirmed (idempotent path).
+      properties:
+        success:
+          type: boolean
+        releaseId:
+          type: string
+          format: uuid
+        alreadyConfirmed:
+          type: boolean
+          enum: [true]
+        execution_status:
+          type: string
+          enum: [confirmed]
+        external_payment_reference:
+          type: string
+          nullable: true
+          description: The payment reference recorded at original confirmation
+        external_executed_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: The execution timestamp recorded at original confirmation
+        note:
+          type: string
+
+    FailRequest:
+      type: object
+      required:
+        - reason
+      properties:
+        reason:
+          type: string
+          minLength: 10
+          maxLength: 2000
+          description: Description of why the payment execution failed
+
+    FailResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        releaseId:
+          type: string
+          format: uuid
+        execution_status:
+          type: string
+          enum: [failed]
+        execution_rail:
+          type: string
+          enum: [external_manual]
+        reason:
+          type: string
+        reservation_cancelled:
+          type: boolean
+          description: True if the balance reservation was successfully cancelled
+        milestone_status_unchanged:
+          type: boolean
+          description: Always true — milestone status is not reverted on failure; admin action required
+        note:
+          type: string
+          description: Informational note about milestone status
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        details:
+          type: string
+
+security:
+  - bearerAuth: []
+
+paths:
+  /api/partner/releases/{id}:
+    get:
+      summary: Get Release
+      operationId: getRelease
+      description: |
+        Retrieve the current status of a release. Returns release ID, deal and milestone context,
+        amount breakdown, execution status, execution rail, and authorization timestamp.
+
+        Only returns releases that belong to the authenticated partner's deals.
+      tags:
+        - Releases
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Release UUID
+      responses:
+        "200":
+          description: Release found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  release:
+                    $ref: "#/components/schemas/Release"
+              example:
+                release:
+                  id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                  deal_id: "d1e2f3a4-b5c6-7890-abcd-ef1234567891"
+                  deal_title: "Riverside Phase 2"
+                  milestone_id: "m1n2o3p4-q5r6-7890-abcd-ef1234567892"
+                  milestone_title: "Foundation Complete"
+                  amount: 125000
+                  fee_amount: 1250
+                  retainage_amount: 6250
+                  net_to_contractor: 118750
+                  execution_status: "pending"
+                  execution_rail: "external_manual"
+                  execution_notes: null
+                  authorized_at: "2025-04-15T14:32:00.000Z"
+        "401":
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "Unauthorized"
+        "403":
+          description: Release exists but does not belong to this partner
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "Forbidden"
+        "404":
+          description: Release not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "Release not found"
+
+  /api/partner/releases/{id}/confirm:
+    post:
+      summary: Confirm Release Execution
+      operationId: confirmRelease
+      description: |
+        Confirm that an external payment was executed. Records the payment method, reference,
+        and proof in the Vektrum audit trail.
+
+        **Only available when:**
+        - `execution_rail` is `external_manual`
+        - `execution_status` is `pending`
+
+        **Idempotent:** Calling this on an already-confirmed release returns 200 with
+        `alreadyConfirmed: true`. It does not create a duplicate confirmation or return a 4xx.
+      tags:
+        - Releases
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Release UUID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConfirmRequest"
+            example:
+              payment_method: "wire"
+              payment_reference: "FED-20250415-00123"
+              executed_at: "2025-04-15T16:00:00.000Z"
+              notes: "Confirmed by treasury at 4pm Eastern"
+      responses:
+        "200":
+          description: Release confirmed (or already confirmed)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfirmResponse"
+              examples:
+                confirmed:
+                  summary: New confirmation
+                  value:
+                    success: true
+                    releaseId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                    execution_status: "confirmed"
+                    execution_rail: "external_manual"
+                    confirmed_by: "partner"
+                    partner_id: "p1a2b3c4-d5e6-7890-abcd-ef1234567893"
+                    external:
+                      payment_method: "wire"
+                      payment_reference: "FED-20250415-00123"
+                      executed_at: "2025-04-15T16:00:00.000Z"
+                      notes: null
+                      proof_document_id: null
+                    billing:
+                      gross_amount: 125000
+                      fee_amount: 1250
+                      retainage_amount: 6250
+                      net_to_contractor: 118750
+                      billing_rate_bps: 100
+                      total_debit: 126250
+                      committed: true
+                    ledger_updated: true
+                    warnings: []
+                alreadyConfirmed:
+                  summary: Already confirmed (idempotent)
+                  value:
+                    success: true
+                    releaseId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                    alreadyConfirmed: true
+                    execution_status: "confirmed"
+                    external_payment_reference: "FED-20250415-00123"
+                    external_executed_at: "2025-04-15T16:00:00.000Z"
+                    note: "This release has already been confirmed. No further action was taken."
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Release does not belong to this partner
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Release not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Concurrent state change in progress — retry after a short delay
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: |
+            Release is not confirmable:
+            - `execution_rail` is `stripe_connect` (only `external_manual` is supported)
+            - `execution_status` is not `pending` (e.g., already `failed`)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/partner/releases/{id}/fail:
+    post:
+      summary: Fail Release Execution
+      operationId: failRelease
+      description: |
+        Report that an external payment execution failed. Cancels the balance reservation
+        and preserves audit visibility.
+
+        **Only available when:**
+        - `execution_rail` is `external_manual`
+        - `execution_status` is `pending`
+
+        **Important:** Failing a release does NOT revert the milestone status. The milestone
+        remains `released`. Contact Vektrum if the milestone needs to be reverted.
+      tags:
+        - Releases
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Release UUID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FailRequest"
+            example:
+              reason: "Wire rejected by receiving bank — account number mismatch."
+      responses:
+        "200":
+          description: Release marked as failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FailResponse"
+              example:
+                success: true
+                releaseId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                execution_status: "failed"
+                execution_rail: "external_manual"
+                reason: "Wire rejected by receiving bank — account number mismatch."
+                reservation_cancelled: true
+                milestone_status_unchanged: true
+                note: "Release marked failed and funded-balance reservation freed. Milestone remains in released state — contact Vektrum admin to revert if needed."
+        "400":
+          description: Invalid request body (reason too short or too long)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Release does not belong to this partner
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Release not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Concurrent state change in progress — retry after a short delay
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: |
+            Release is not failable:
+            - `execution_rail` is `stripe_connect`
+            - `execution_status` is not `pending`
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"

@@ -94,7 +94,7 @@ export default function PartnerDocsPage() {
           </p>
           <p className="mt-4 text-[13px] text-white/40">
             API version: <code className="text-white/60">2026-04-25</code> — Base URL:{' '}
-            <code className="text-white/60">https://app.vektrum.io</code>
+            <code className="text-white/60">https://vektrum.io</code>
           </p>
         </div>
 
@@ -107,17 +107,21 @@ export default function PartnerDocsPage() {
                 All partner API endpoints require a partner API key passed as a Bearer token in the
                 Authorization header:
               </p>
-              <CodeBlock language="http">{`Authorization: Bearer vkp_<your_api_key>`}</CodeBlock>
+              <CodeBlock language="http">{`Authorization: Bearer vkp_live_<your_64hex_key>`}</CodeBlock>
               <p>
-                Keys are prefixed <code className="text-white/80 bg-white/[0.06] px-1.5 py-0.5 rounded text-[13px]">vkp_</code>{' '}
-                and are 68 characters total. Only the SHA-256 hash is stored in Vektrum&apos;s database —
+                Keys are issued in two environments:{' '}
+                <code className="text-white/80 bg-white/[0.06] px-1.5 py-0.5 rounded text-[13px]">vkp_live_</code>{' '}
+                for production and{' '}
+                <code className="text-white/80 bg-white/[0.06] px-1.5 py-0.5 rounded text-[13px]">vkp_test_</code>{' '}
+                for sandbox. Each prefix is followed by 64 hex characters (73 characters total).
+                Only the SHA-256 hash is stored in Vektrum&apos;s database —
                 the plaintext key is shown once at issuance and cannot be recovered. If you lose your
                 key, an admin must rotate it (the previous key is immediately invalidated).
               </p>
               <p>
                 To obtain your API key and webhook signing secret, contact{' '}
-                <a href="mailto:partners@vektrum.com" className="text-vektrum-blue hover:underline">
-                  partners@vektrum.com
+                <a href="mailto:operations@vektrum.io" className="text-vektrum-blue hover:underline">
+                  operations@vektrum.io
                 </a>
                 . An admin will issue credentials via the Vektrum admin dashboard at{' '}
                 <code className="text-white/80 bg-white/[0.06] px-1.5 py-0.5 rounded text-[13px]">
@@ -140,6 +144,7 @@ export default function PartnerDocsPage() {
               >
                 <div>
                   <p className="text-[12px] font-semibold text-white/70 mb-2">Response 200:</p>
+                  <p className="text-[12px] text-white/40 mb-2">All amount fields are USD dollars. Fee is charged to the funder on top of the milestone amount — the contractor always receives the full gross minus any retainage.</p>
                   <CodeBlock language="json">{`{
   "release": {
     "id": "uuid",
@@ -148,9 +153,9 @@ export default function PartnerDocsPage() {
     "milestone_id": "uuid",
     "milestone_title": "string",
     "amount": 50000,
-    "fee_amount": 750,
+    "fee_amount": 500,
     "retainage_amount": 5000,
-    "net_to_contractor": 44250,
+    "net_to_contractor": 45000,
     "execution_status": "pending | confirmed | failed",
     "execution_rail": "external_manual",
     "execution_notes": "string | null",
@@ -174,7 +179,7 @@ export default function PartnerDocsPage() {
               <EndpointBlock
                 method="POST"
                 path="/api/partner/releases/:id/confirm"
-                description="Record that you have executed the authorized payment on your rail. Vektrum settles the deal ledger, creates a billing record, and transitions the release to confirmed status. This endpoint is idempotent — if the release is already confirmed, it returns 200 with alreadyConfirmed: true and takes no further action. Safe to retry on network error."
+                description="Record that you have executed the authorized payment on your rail. Vektrum records the external execution and updates internal release, billing, and audit records, then transitions the release to confirmed status. This endpoint is idempotent — if the release is already confirmed, it returns 200 with alreadyConfirmed: true and takes no further action. Safe to retry on network error."
               >
                 <div className="grid gap-6 lg:grid-cols-2">
                   <div>
@@ -188,12 +193,42 @@ export default function PartnerDocsPage() {
 }`}</CodeBlock>
                   </div>
                   <div>
-                    <p className="text-[12px] font-semibold text-white/70 mb-2">Response 200:</p>
+                    <p className="text-[12px] font-semibold text-white/70 mb-2">Response 200 (first confirmation):</p>
                     <CodeBlock language="json">{`{
   "success": true,
   "releaseId": "uuid",
   "execution_status": "confirmed",
-  "alreadyConfirmed": true
+  "execution_rail": "external_manual",
+  "confirmed_by": "partner",
+  "partner_id": "uuid",
+  "external": {
+    "payment_method": "wire",
+    "payment_reference": "FED-20250415-00123",
+    "executed_at": "2025-04-15T16:00:00.000Z",
+    "notes": null,
+    "proof_document_id": null
+  },
+  "billing": {
+    "gross_amount": 50000,
+    "fee_amount": 500,
+    "retainage_amount": 5000,
+    "net_to_contractor": 45000,
+    "billing_rate_bps": 100,
+    "total_debit": 50500,
+    "committed": true
+  },
+  "ledger_updated": true,
+  "warnings": []
+}`}</CodeBlock>
+                    <p className="text-[12px] font-semibold text-white/70 mt-4 mb-2">Response 200 (already confirmed — idempotent):</p>
+                    <CodeBlock language="json">{`{
+  "success": true,
+  "releaseId": "uuid",
+  "alreadyConfirmed": true,
+  "execution_status": "confirmed",
+  "external_payment_reference": "FED-20250415-00123",
+  "external_executed_at": "2025-04-15T16:00:00.000Z",
+  "note": "This release has already been confirmed. No further action was taken."
 }`}</CodeBlock>
                     <div className="mt-3 space-y-2">
                       <div className="rounded-lg border border-amber-500/15 bg-amber-500/[0.04] px-3 py-2.5">
@@ -217,7 +252,7 @@ export default function PartnerDocsPage() {
               <EndpointBlock
                 method="POST"
                 path="/api/partner/releases/:id/fail"
-                description="Record that execution failed on your rail. Vektrum cancels the balance reservation, transitions the release to failed status, and records the reason in the audit log. The authorization signal is voided. Funder must re-authorize via the Vektrum dashboard if the payment is to be retried."
+                description="Record that execution failed on your rail. Vektrum cancels the balance reservation, transitions the release to failed status, and records the reason in the audit log. The pending authorization is marked failed and must be re-authorized before retry. The milestone remains in released state — contact Vektrum admin if the milestone itself needs to be reverted."
               >
                 <div className="grid gap-6 lg:grid-cols-2">
                   <div>
@@ -232,7 +267,11 @@ export default function PartnerDocsPage() {
   "success": true,
   "releaseId": "uuid",
   "execution_status": "failed",
-  "reservation_cancelled": true
+  "execution_rail": "external_manual",
+  "reason": "Wire rejected by receiving bank — account number mismatch.",
+  "reservation_cancelled": true,
+  "milestone_status_unchanged": true,
+  "note": "Release marked failed and funded-balance reservation freed. Milestone remains in released state — contact Vektrum admin to revert if needed."
 }`}</CodeBlock>
                   </div>
                 </div>
@@ -295,7 +334,7 @@ function verifyVektrumSignature(
 
   const expected = crypto
     .createHmac('sha256', secret)
-    .update(\`\${ts}.\${rawBody}\`)
+    .update(ts + '.' + rawBody)
     .digest('hex')
 
   return crypto.timingSafeEqual(
@@ -324,9 +363,10 @@ def verify_vektrum_signature(
         return False
     if abs(time.time() - int(ts)) > tolerance:
         return False
+    signed_payload = (ts + "." + raw_body).encode()
     expected = hmac.new(
         secret.encode(),
-        f"{ts}.{raw_body}".encode(),
+        signed_payload,
         hashlib.sha256
     ).hexdigest()
     return hmac.compare_digest(received, expected)`}</CodeBlock>
@@ -347,8 +387,9 @@ def verify_vektrum_signature(
                 { status: '400', code: 'Bad Request', meaning: 'Missing required field or invalid value. Check the errors array in the response body.' },
                 { status: '401', code: 'Unauthorized', meaning: 'API key missing, malformed, or inactive. Verify your Authorization: Bearer header.' },
                 { status: '403', code: 'Forbidden', meaning: 'Your partner account does not own the deal that contains this release.' },
-                { status: '404', code: 'Not Found', meaning: 'Release ID does not exist, or the release belongs to a different partner.' },
+                { status: '404', code: 'Not Found', meaning: 'Release not found.' },
                 { status: '409', code: 'Conflict', meaning: 'A concurrent request changed the release state before yours completed. Fetch current state and retry if appropriate.' },
+                { status: '429', code: 'Too Many Requests', meaning: 'Rate limit exceeded for your partner API key. Back off and retry.' },
                 { status: '422', code: 'Unprocessable', meaning: 'The release is not in the expected state for this operation (e.g. confirming an already-failed release).' },
                 { status: '500', code: 'Internal Error', meaning: 'Vektrum server error. Retry with exponential backoff. If persistent, contact support.' },
               ].map((row, i) => (
@@ -396,12 +437,11 @@ def verify_vektrum_signature(
 
         {/* Footer note */}
         <div className="mt-16 pt-6 border-t border-white/[0.06]">
-          <p className="text-[13px] text-white/40 leading-relaxed">
-            Questions or issues? Contact{' '}
-            <a href="mailto:partners@vektrum.com" className="text-vektrum-blue hover:underline">
-              partners@vektrum.com
+          <p className="text-[12px] text-white/35">
+            Vektrum Partner API v1 &middot; For approved integration partners &middot;{' '}
+            <a href="mailto:operations@vektrum.io" className="text-vektrum-blue hover:underline">
+              operations@vektrum.io
             </a>
-            . API version 2026-04-25. This reference is updated with each API change.
           </p>
         </div>
 
