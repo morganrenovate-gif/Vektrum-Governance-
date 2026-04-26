@@ -4,6 +4,7 @@ import {
   Shield, Activity, Zap
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format'
+import { DemoResetButton } from '@/components/demo/DemoResetButton'
 
 // ── Mock data ────────────────────────────────────────────────────────────────
 
@@ -223,6 +224,14 @@ export default function DemoAdminPage() {
               icon={Zap}
             />
           </div>
+        </section>
+
+        {/* Demo Controls */}
+        <section>
+          <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/75">
+            Demo Controls
+          </h2>
+          <DemoResetButton variant="admin" />
         </section>
 
         {/* Recent Audit Activity */}
