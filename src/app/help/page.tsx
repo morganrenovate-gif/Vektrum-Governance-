@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { BOOK_CALL_URL, BOOK_CALL_EXTERNAL } from '@/lib/book-call'
 import {
   ArrowRight,
   HelpCircle,
@@ -20,6 +21,41 @@ interface FaqItem {
   q: string
   a: string
 }
+
+const TRUST_FAQ: FaqItem[] = [
+  {
+    q: 'Is Vektrum a payment processor?',
+    a: 'No. Vektrum is a conditional authorization and audit layer. Payment execution happens through Stripe Connect or the customer\'s existing title, escrow, treasury, or banking process.',
+  },
+  {
+    q: 'Does Vektrum hold funds?',
+    a: 'Vektrum does not hold funds in its own bank account or act as escrow. For Stripe Connect releases, payment execution runs through Stripe Connect infrastructure. For external/manual releases, payment is executed outside Vektrum by the funder, title company, escrow company, or treasury process.',
+  },
+  {
+    q: 'Does every customer need to use Stripe?',
+    a: 'No. Stripe Connect is available for automated execution, especially for direct/private lending workflows. Institutional customers can use external/manual execution through their existing payment process.',
+  },
+  {
+    q: 'Does Vektrum replace title or escrow companies?',
+    a: 'No. Vektrum can give title and escrow teams a release authorization and audit layer before they execute disbursements.',
+  },
+  {
+    q: 'Does AI approve releases?',
+    a: 'No. AI-assisted review flags missing documents, conflicts, and risk signals. The funder triggers release, and the deterministic release gate enforces whether release is allowed.',
+  },
+  {
+    q: 'Can admins release funds?',
+    a: 'No. Admins cannot trigger milestone releases. Privileged admin actions require AAL2 MFA, justification, and audit logging.',
+  },
+  {
+    q: 'What happens if a condition fails?',
+    a: 'The release is blocked until the issue is resolved. The system records the failed gate evaluation for audit visibility.',
+  },
+  {
+    q: 'What happens if Vektrum shuts down?',
+    a: 'Payment execution remains with Stripe Connect or the customer-controlled payment process. Vektrum\'s role is authorization, audit, and recordkeeping. Customers can export deal and audit records.',
+  },
+]
 
 const FAQ: FaqItem[] = [
   {
@@ -110,6 +146,31 @@ export default function HelpPage() {
         </div>
       </section>
 
+      {/* ─── Trust & Compliance FAQ ─────────────────────────────────────────── */}
+      <section className="bg-surface-2 py-16 sm:py-20 border-t border-white/[0.08]">
+        <div className="max-w-3xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="mb-8">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/40 mb-2">
+              Trust &amp; Compliance
+            </p>
+            <h2 className="font-display text-xl font-bold tracking-[-0.02em] text-white">
+              Common questions from institutional buyers
+            </h2>
+          </div>
+          <div className="space-y-3">
+            {TRUST_FAQ.map((item) => (
+              <div
+                key={item.q}
+                className="rounded-xl border border-white/[0.06] bg-vektrum-bg p-6"
+              >
+                <h3 className="text-[14px] font-semibold text-white">{item.q}</h3>
+                <p className="mt-2 text-[13px] leading-relaxed text-white/55">{item.a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ─── Contact ───────────────────────────────────────────────────────── */}
       <section className="border-t border-white/[0.08] bg-surface-2 py-20 sm:py-24">
         <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
@@ -121,17 +182,18 @@ export default function HelpPage() {
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
             <Link
-              href="mailto:operations@vektrum.io"
+              href={BOOK_CALL_URL}
+              {...(BOOK_CALL_EXTERNAL ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
               className="group inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-7 py-3 text-[14px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 hover:bg-vektrum-blue-hover transition-all"
             >
-              Contact us
+              Book a call
               <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
             </Link>
             <Link
-              href="/auth/signup"
+              href="/demo-live"
               className="inline-flex min-h-[48px] items-center justify-center rounded-xl border border-white/[0.08] bg-surface-2 px-7 py-3 text-[14px] font-semibold text-white/55 shadow-sm hover:bg-surface-3 hover:border-vektrum-blue/40 transition-all"
             >
-              Get started
+              Try the demo
             </Link>
           </div>
         </div>

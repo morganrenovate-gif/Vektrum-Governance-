@@ -218,8 +218,8 @@ export default function DemoAdminPage() {
           <div className="mt-3">
             <AdminTile
               label="AI Draw Review"
-              value="Active — Perplexity Sonar Pro (primary)"
-              sub="Anthropic + OpenAI configured as fallback providers for draw review"
+              value="Active — multi-provider AI with fallback"
+              sub="Draw review uses primary and fallback providers for resilience"
               icon={Zap}
             />
           </div>

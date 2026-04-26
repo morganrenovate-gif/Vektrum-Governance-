@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { BOOK_CALL_URL, BOOK_CALL_EXTERNAL } from '@/lib/book-call'
 import {
   ArrowRight,
   CheckCircle2,
@@ -114,7 +115,7 @@ export default function FundersPage() {
           <ol className="space-y-6">
             {[
               'Contractor creates a deal with milestones and amounts.',
-              'You fund the deal via Stripe Connect. Funds are held by Stripe — not Vektrum.',
+              'You fund the deal. On Stripe Connect deals, funds are held in Stripe-managed accounts. On external-rail deals, funds are held by your institutional payment partner. Vektrum does not hold funds in either case.',
               'As work completes, contractors submit draw requests with documentation.',
               'You review and approve each milestone. The 10-condition gate enforces your rules.',
               'Approved releases execute via Stripe Connect or — on institutional deals — via your own treasury rail (wire / ACH / check) with Vektrum recording authorization and confirmation. Full audit trail either way.',
@@ -148,10 +149,11 @@ export default function FundersPage() {
               <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
             </Link>
             <Link
-              href="mailto:operations@vektrum.io"
+              href={BOOK_CALL_URL}
+              {...(BOOK_CALL_EXTERNAL ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
               className="inline-flex min-h-[48px] items-center justify-center rounded-xl border border-white/[0.08] bg-surface-2 px-7 py-3 text-[14px] font-semibold text-white/55 shadow-sm hover:bg-surface-3 hover:border-vektrum-blue/40 transition-all"
             >
-              Talk to us
+              Book a call
             </Link>
           </div>
         </div>

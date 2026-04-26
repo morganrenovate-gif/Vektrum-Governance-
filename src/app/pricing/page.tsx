@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { BOOK_CALL_URL, BOOK_CALL_EXTERNAL } from '@/lib/book-call'
 import {
   ArrowRight,
   Shield,
@@ -59,6 +60,7 @@ interface EngagementCardProps {
   badge?: string
   cta?: string
   ctaHref?: string
+  ctaExternal?: boolean
 }
 
 function EngagementCard({
@@ -74,6 +76,7 @@ function EngagementCard({
   badge,
   cta = 'Get started',
   ctaHref = '/auth/signup',
+  ctaExternal = false,
 }: EngagementCardProps) {
   return (
     <div
@@ -156,6 +159,7 @@ function EngagementCard({
 
       <Link
         href={ctaHref}
+        {...(ctaExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
         className={[
           'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl text-[13px] font-semibold transition-all',
           highlight
@@ -218,9 +222,9 @@ export default function PricingPage() {
 
           {/* What it actually is */}
           <p className="mt-6 mx-auto max-w-xl text-[16px] leading-relaxed text-white/65">
-            Vektrum charges a governance fee only when a milestone transfer
-            completes — 10 conditions verified simultaneously, release
-            authorized and funds disbursed to the contractor. We earn when funds move.
+            Vektrum charges a governance fee only when a milestone release
+            completes — 10 conditions verified simultaneously and release
+            authorized. Payment execution runs through Stripe Connect or the funder&apos;s institutional partner. We earn when the release executes.
           </p>
 
           {/* The anchor sentence */}
@@ -508,8 +512,9 @@ export default function PricingPage() {
               retainer="50 – 100 bps of ACV / year"
               retainerNote="Floor $25,000 — negotiated annually"
               setup="$15,000 – $50,000 — integration included"
-              cta="Contact us"
-              ctaHref="mailto:operations@vektrum.io"
+              cta="Book a call"
+              ctaHref={BOOK_CALL_URL}
+              ctaExternal={BOOK_CALL_EXTERNAL}
               features={[
                 'Everything in Institutional',
                 'LOS / core banking API integration (included)',
@@ -845,7 +850,7 @@ export default function PricingPage() {
                   label="Fee label"
                   value="Vektrum Compliance Review Fee"
                 />
-                <ConstantRow label="Funds held by" value="Stripe — not Vektrum" />
+                <ConstantRow label="Funds held by" value="Stripe or institutional partner — not Vektrum" />
                 <ConstantRow label="Audit trail" value="Append-only — no application deletion" />
               </div>
             </div>
@@ -911,10 +916,11 @@ export default function PricingPage() {
               />
             </Link>
             <Link
-              href="mailto:operations@vektrum.io"
+              href={BOOK_CALL_URL}
+              {...(BOOK_CALL_EXTERNAL ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
               className="inline-flex min-h-[50px] items-center justify-center rounded-xl border border-white/[0.10] bg-transparent px-8 py-3 text-[14px] font-semibold text-white/55 hover:bg-white/[0.04] hover:border-white/[0.18] hover:text-white transition-all"
             >
-              Talk to us about Institutional
+              Book a call
             </Link>
           </div>
 

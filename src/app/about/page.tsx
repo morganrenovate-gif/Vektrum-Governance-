@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ArrowRight, Shield, Lock, GitBranch } from 'lucide-react'
+import { BOOK_CALL_URL, BOOK_CALL_EXTERNAL } from '@/lib/book-call'
 
 export const metadata = {
   title: 'About — Vektrum',
@@ -112,17 +113,18 @@ export default function AboutPage() {
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
             <Link
-              href="/auth/signup"
+              href={BOOK_CALL_URL}
+              {...(BOOK_CALL_EXTERNAL ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
               className="group inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-7 py-3 text-[14px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 hover:bg-vektrum-blue-hover transition-all"
             >
-              Get started
+              Book a call
               <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
             </Link>
             <Link
-              href="/pricing"
+              href="/auth/signup"
               className="inline-flex min-h-[48px] items-center justify-center rounded-xl border border-white/[0.08] bg-surface-2 px-7 py-3 text-[14px] font-semibold text-white/55 shadow-sm hover:bg-surface-3 hover:border-vektrum-blue/40 transition-all"
             >
-              View pricing
+              Start a deal
             </Link>
           </div>
         </div>

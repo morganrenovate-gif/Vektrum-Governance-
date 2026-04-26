@@ -121,7 +121,7 @@ export default function RiversideDealPage() {
                     </span>
 
                     {/* Action buttons */}
-                    {status === 'approved' && (
+                    {status === 'approved' && from !== 'contractor' && (
                       <button
                         type="button"
                         onClick={() => setReleaseModal(true)}

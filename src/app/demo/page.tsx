@@ -122,7 +122,7 @@ export default function DemoPage() {
               {
                 step: 4,
                 title: 'AI Reviews Draw',
-                desc: 'AI-assisted draw review analyzes documentation against milestone criteria and flags risks (Perplexity primary, Anthropic/OpenAI fallback).',
+                desc: 'AI-assisted draw review analyzes documentation against milestone criteria and flags risks. AI informs the gate; the funder still approves.',
                 icon: Brain,
               },
               {
@@ -151,7 +151,7 @@ export default function DemoPage() {
             AI-assisted draw review, with human final approval
           </h2>
           <p className="text-center text-sm text-vektrum-canvas-text/60 mb-12 max-w-2xl mx-auto">
-            Before any milestone payment releases, an AI-assisted draw review evaluates the evidence and issues a formal assessment. Perplexity Sonar is the primary provider, with Anthropic and OpenAI configured as fallbacks for draw review. The funder still gives final approval.
+            Before any milestone payment releases, an AI-assisted draw review evaluates the evidence and issues a formal assessment. The funder still gives final approval.
           </p>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
             {/* Left: Explanation */}
@@ -364,7 +364,7 @@ export default function DemoPage() {
             </Link>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-white/75">
-            <span>AI draw review: Perplexity + Anthropic/OpenAI fallback</span>
+            <span>AI draw review: multi-provider with fallback chain</span>
             <span className="hidden sm:inline">|</span>
             <span>Next.js 15</span>
             <span className="hidden sm:inline">|</span>

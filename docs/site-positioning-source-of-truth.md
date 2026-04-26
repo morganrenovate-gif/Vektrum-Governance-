@@ -2,7 +2,7 @@
 
 > **For developers and contributors:** Read this document before editing any public-facing copy, marketing pages, help content, legal disclaimers, demo flows, or pitch materials. Every positioning decision in this file exists for a legal, regulatory, or product-accuracy reason. When in doubt, ask before publishing.
 
-Last updated: 2026-04-25
+Last updated: 2026-04-25 · Copy pass applied: all known gaps resolved
 
 ---
 
@@ -239,15 +239,34 @@ The following phrases are banned from all public-facing copy, demo flows, pitch 
 4. If the copy describes the release flow, confirm it represents both execution rails accurately (Section 3).
 5. If the copy mentions AI, confirm it uses approved framing (Section 7).
 
-**Files with known copy gaps (as of last audit):**
-- `src/app/demo/page.tsx` — "Project Trust Account" (critical; fix before any demo)
-- `src/components/demo/ReleaseFundsModal.tsx` — "Vektrum Project Trust Agreement" (critical)
-- `src/app/about/page.tsx` — "We never touch your money" (high)
-- `src/app/contractors/page.tsx` — "tamper-proof" and Stripe-only framing (high)
-- `src/app/help/page.tsx` — Stripe-only custody description; no external rail (high)
-- `src/app/layout.tsx` — "does not hold, move, or custody funds" (high)
-- `src/app/pitch/page.tsx` — "Funds never touch Vektrum infrastructure — on either rail" (medium); truncated competitive table cell (medium)
-- `docs/payment-rails.md` — British spelling throughout (medium)
+**Known copy gaps — status as of 2026-04-25 copy pass:**
+
+All previously identified gaps have been resolved. The following files were updated:
+
+| File | Fix applied |
+|------|-------------|
+| `src/app/demo/page.tsx` | "Project Trust Account" removed; "$2.19T governs" → market framing; "tamper-proof" → "tamper-evident" |
+| `src/components/demo/ReleaseFundsModal.tsx` | "Vektrum Project Trust Agreement" removed |
+| `src/components/demo/FundDealModal.tsx` | "Vektrum Project Trust Account" removed |
+| `src/app/about/page.tsx` | "We never touch your money" → both-rail accurate statement |
+| `src/app/contractors/page.tsx` | "tamper-proof" → "tamper-evident"; Stripe onboarding qualified as rail-specific |
+| `src/app/help/page.tsx` | Both-rail custody answer; external rail FAQ entry added |
+| `src/app/layout.tsx` | JSON-LD and footer disclaimers updated; "does not move funds" removed |
+| `src/app/pitch/page.tsx` | "Funds never touch — on either rail" → accurate two-rail statement; competitive table string bug fixed |
+| `src/app/terms/page.tsx` | External rail custody language added to Section 2 |
+| `src/app/auth/signup/page.tsx` | "Vektrum never holds funds" removed |
+| `src/app/auth/login/page.tsx` | "Vektrum never holds funds" removed |
+| `src/components/onboarding/onboarding-wizard.tsx` | "Project Trust Account" × 2 removed |
+| `src/components/onboarding/stripe-onboarding-wizard.tsx` | "Project Trust Account" removed |
+| `docs/payment-rails.md` | British spelling normalized throughout |
+| `README.md` | Stripe-only capital custody claim updated for both rails |
+
+**Remaining low-priority items (not public-facing):**
+
+| File | Item | Disposition |
+|------|------|-------------|
+| `src/lib/types/database.ts` | JSDoc comments referencing "Project Trust Account" / "trust account" | Developer-facing code comments only. No UI exposure. Flag for JSDoc cleanup pass. |
+| Various API route `.ts` files | "authorisation/authorise" in backend code comments and internal error messages | Not consumer-visible. Normalize in a separate developer-docs pass. |
 
 ---
 
