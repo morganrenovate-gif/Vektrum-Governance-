@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { X } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format'
+import { DEMO_RESET_EVENT } from '@/lib/demo-data'
 
 interface DrawRequestModalProps {
   open: boolean
@@ -13,12 +14,27 @@ interface DrawRequestModalProps {
 
 export function DrawRequestModal({ open, milestone, onConfirm, onClose }: DrawRequestModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Cancel any in-flight submit timer when demo is reset
+  useEffect(() => {
+    const onReset = () => {
+      if (timerRef.current !== null) {
+        clearTimeout(timerRef.current)
+        timerRef.current = null
+      }
+      setIsSubmitting(false)
+    }
+    window.addEventListener(DEMO_RESET_EVENT, onReset)
+    return () => window.removeEventListener(DEMO_RESET_EVENT, onReset)
+  }, [])
 
   if (!open) return null
 
   function handleSubmit() {
     setIsSubmitting(true)
-    setTimeout(() => {
+    timerRef.current = setTimeout(() => {
+      timerRef.current = null
       setIsSubmitting(false)
       onConfirm()
     }, 800)

@@ -3,7 +3,8 @@
  *
  * Proves the demo reset system is structurally isolated from production data:
  *
- *   1. DEMO_RESET_ENABLED missing or false → 403 in production
+ *   0. AUTH: unauthenticated callers receive 401 (auth guard is enforced)
+ *   1. DEMO_RESET_ENABLED missing or false → 403 in production (auth required to reach gate)
  *   2. DEMO_RESET_ENABLED=true in production → 200
  *   3. Reset only operates on frontend state — route makes zero DB calls
  *   4. User-supplied arbitrary deal IDs in the request body have no effect
@@ -14,10 +15,10 @@
  *   9b. No demo files use localStorage or sessionStorage (all state is React useState)
  *
  * Design notes:
- *   - The route imports ONLY next/server; no Supabase, no auth, no DB.
- *   - We intentionally do NOT install a Supabase mock — if the route ever
- *     silently acquires a DB import, missing the mock will cause the test to
- *     throw rather than silently pass. Absence of mock = absence of DB path.
+ *   - The route imports @/lib/supabase/server for auth ONLY (no DB queries).
+ *   - We inject a Supabase auth mock that provides ONLY auth.getUser().
+ *     The mock intentionally has NO from() method — any DB call would throw
+ *     a TypeError, making the absence of DB queries self-enforcing.
  *   - process.env mutations are contained with a save/restore helper and do
  *     not leak between tests.
  *   - Demo-data IDs (ms-rv-1, ms-hb-1, etc.) are verified to be non-UUID
@@ -85,12 +86,50 @@ function withEnv(
   })
 }
 
+// ─── Supabase auth mock ───────────────────────────────────────────────────────
+//
+// The route uses createClient().auth.getUser() to enforce authentication.
+// We inject a mock that controls currentUser per test.
+//
+// Key design: the mock provides ONLY auth.getUser() — NO from() method.
+// Any attempt by the route to call supabase.from(...) throws a TypeError,
+// preserving the structural proof that the route makes zero DB calls.
+//
+// currentUser = { id: '...' }  → authenticated (default for most tests)
+// currentUser = null           → unauthenticated (AUTH tests only)
+
+let currentUser: { id: string } | null = { id: 'demo-test-user' }
+
+const supabaseServerPath = path.resolve(ROOT, 'src/lib/supabase/server')
+// Resolve the .ts extension so the tsx cache key matches
+const supabaseServerPathTs = supabaseServerPath.endsWith('.ts')
+  ? supabaseServerPath
+  : `${supabaseServerPath}.ts`
+
+const supabaseMockModule = {
+  id:       supabaseServerPathTs,
+  filename: supabaseServerPathTs,
+  loaded:   true,
+  children: [] as NodeModule[],
+  parent:   null,
+  paths:    [] as string[],
+  exports: {
+    createClient: async () => ({
+      auth: {
+        getUser: async () => ({ data: { user: currentUser }, error: null }),
+      },
+      // Intentionally no from() — any DB call would throw TypeError.
+    }),
+    createSupabaseAdminClient: () => ({}),
+  },
+} as unknown as NodeModule
+
+require.cache[supabaseServerPathTs] = supabaseMockModule
+
 // ─── Load route ───────────────────────────────────────────────────────────────
 //
-// Loaded once — no per-test reload needed since the route reads env at call time.
-// We deliberately DO NOT mock @/lib/supabase/admin. If the route ever acquires
-// a Supabase import, the missing mock will cause a runtime error rather than a
-// silent pass, making the absence of DB calls self-enforcing.
+// Loaded once — no per-test reload needed since the route reads env at call time
+// and the currentUser variable is read at request time via the auth mock above.
 
 const resetRoutePath = path.resolve(ROOT, 'src/app/api/demo/reset/route.ts')
 delete require.cache[resetRoutePath]
@@ -117,6 +156,36 @@ const UUID_REGEX =
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
 async function main() {
+
+// ── 0a. No session → 401 in development ──────────────────────────────────────
+//
+// Auth is checked before the env gate. An unauthenticated caller must receive
+// 401 regardless of NODE_ENV or DEMO_RESET_ENABLED.
+
+await test('AUTH: unauthenticated → 401 in development', async () => {
+  currentUser = null
+  await withEnv({ NODE_ENV: 'development', DEMO_RESET_ENABLED: undefined }, async () => {
+    const res = await POST(makeResetRequest())
+    assert(res.status === 401, `Expected 401 for unauthenticated request, got ${res.status}`)
+    const body = await res.json() as { error?: string }
+    assert(typeof body.error === 'string', `Expected error field in 401 body, got: ${JSON.stringify(body)}`)
+  })
+  currentUser = { id: 'demo-test-user' }  // restore
+})
+
+// ── 0b. No session → 401 in production with flag enabled ─────────────────────
+//
+// Even with DEMO_RESET_ENABLED=true, unauthenticated callers cannot reach the
+// allowed path — they are blocked by the auth check first.
+
+await test('AUTH: unauthenticated → 401 in production even with DEMO_RESET_ENABLED=true', async () => {
+  currentUser = null
+  await withEnv({ NODE_ENV: 'production', DEMO_RESET_ENABLED: 'true' }, async () => {
+    const res = await POST(makeResetRequest())
+    assert(res.status === 401, `Expected 401 for unauthenticated request, got ${res.status}`)
+  })
+  currentUser = { id: 'demo-test-user' }  // restore
+})
 
 // ── 1a. Production, no flag → 403 ────────────────────────────────────────────
 
@@ -181,18 +250,17 @@ await test('SCOPE: response declares scope=frontend_state_only', async () => {
   })
 })
 
-// ── 3b. Route carries no Supabase import → cannot reach DB ────────────────────
+// ── 3b. Route makes no DB calls ───────────────────────────────────────────────
 //
-// This is the structural proof: we loaded the route WITHOUT installing a
-// Supabase mock. If the route attempted to call createSupabaseAdminClient(),
-// it would throw a TypeError (undefined is not a function) and the test
-// above would have failed. The fact that test 3a passed without a mock
-// is machine-verifiable proof that no DB path exists.
+// Structural proof: the Supabase mock injected above provides ONLY
+// auth.getUser() — there is no from() method on the mock client.
 //
-// This test just makes that reasoning explicit and adds a direct check.
+// If the route ever attempts a DB query (supabase.from(...)), it would throw
+// "supabase.from is not a function", causing this test to fail. Three
+// consecutive successful calls without an exception is machine-verifiable
+// proof that no DB path exists in the route beyond the auth check.
 
-await test('ISOLATION: route has no DB calls (loaded without Supabase mock)', async () => {
-  // We can call POST multiple times without a Supabase mock and it never throws.
+await test('ISOLATION: route makes no DB calls (auth mock has no from() method)', async () => {
   await withEnv({ NODE_ENV: 'development' }, async () => {
     let threw = false
     try {
@@ -202,7 +270,7 @@ await test('ISOLATION: route has no DB calls (loaded without Supabase mock)', as
     } catch {
       threw = true
     }
-    assert(!threw, 'Route threw without a Supabase mock — it attempted a DB call')
+    assert(!threw, 'Route threw — it may have attempted a DB call (supabase.from is not mocked)')
   })
 })
 
