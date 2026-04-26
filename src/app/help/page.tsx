@@ -150,7 +150,7 @@ export default function HelpPage() {
       <section className="bg-surface-2 py-16 sm:py-20 border-t border-white/[0.08]">
         <div className="max-w-3xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="mb-8">
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/40 mb-2">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/65 mb-2">
               Trust &amp; Compliance
             </p>
             <h2 className="font-display text-xl font-bold tracking-[-0.02em] text-white">
@@ -161,10 +161,10 @@ export default function HelpPage() {
             {TRUST_FAQ.map((item) => (
               <div
                 key={item.q}
-                className="rounded-xl border border-white/[0.06] bg-vektrum-bg p-6"
+                className="rounded-xl border border-white/[0.08] bg-surface-3 p-6"
               >
                 <h3 className="text-[14px] font-semibold text-white">{item.q}</h3>
-                <p className="mt-2 text-[13px] leading-relaxed text-white/55">{item.a}</p>
+                <p className="mt-2 text-[13px] leading-relaxed text-white/70">{item.a}</p>
               </div>
             ))}
           </div>

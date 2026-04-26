@@ -81,7 +81,7 @@ function FlowStep({
           {label}
         </p>
         {sub && (
-          <p className={`text-[11px] mt-0.5 ${highlight ? 'text-vektrum-blue' : 'text-white/40'}`}>
+          <p className={`text-[11px] mt-0.5 ${highlight ? 'text-vektrum-blue' : 'text-white/60'}`}>
             {sub}
           </p>
         )}
@@ -123,7 +123,7 @@ export default function PartnerPlacementPage() {
               allowed to release, then records the authorization, proof, and audit trail.
               Existing payment rails remain in place.
             </p>
-            <p className="mt-4 text-[12px] text-white/40">
+            <p className="mt-4 text-[12px] text-white/60">
               Partner inquiries:{' '}
               <a href="mailto:operations@vektrum.io" className="text-vektrum-blue hover:underline">
                 operations@vektrum.io
@@ -148,7 +148,7 @@ export default function PartnerPlacementPage() {
               </div>
               <div>
                 <p className="text-[13px] font-semibold text-white">{label}</p>
-                <p className="text-[11.5px] text-white/45 mt-0.5">{sub}</p>
+                <p className="text-[11.5px] text-white/65 mt-0.5">{sub}</p>
               </div>
             </div>
           ))}
@@ -195,7 +195,7 @@ export default function PartnerPlacementPage() {
               <FlowStep label="Payment reference and proof returned" sub="Method, reference, actor, timestamp" />
               <FlowStep label="Vektrum audit and reconciliation" sub="Append-only, hash-chained record" last />
             </div>
-            <p className="mt-5 text-[11.5px] leading-relaxed text-white/40 border-t border-white/[0.06] pt-4">
+            <p className="mt-5 text-[11.5px] leading-relaxed text-white/60 border-t border-white/[0.06] pt-4">
               Vektrum does not replace the payment process. It enforces whether the release is
               allowed before that process executes.
             </p>
@@ -219,7 +219,7 @@ export default function PartnerPlacementPage() {
                   <p className="text-[11px] text-emerald-400/70">Institutional partners · existing infrastructure</p>
                 </div>
               </div>
-              <p className="text-[12px] text-white/45 mb-3">Best for:</p>
+              <p className="text-[12px] text-white/65 mb-3">Best for:</p>
               <ul className="space-y-1 mb-5">
                 {['Title companies', 'Escrow companies', 'Construction lenders', 'Credit funds', 'Institutional treasury teams'].map((item) => (
                   <li key={item} className="flex items-center gap-2 text-[12.5px] text-white/65">
@@ -261,7 +261,7 @@ export default function PartnerPlacementPage() {
                   <p className="text-[11px] text-vektrum-blue/70">Direct and private lenders · automated disbursement</p>
                 </div>
               </div>
-              <p className="text-[12px] text-white/45 mb-3">Best for:</p>
+              <p className="text-[12px] text-white/65 mb-3">Best for:</p>
               <ul className="space-y-1 mb-5">
                 {['Private lenders', 'Direct lenders', 'Operators without existing disbursement infrastructure'].map((item) => (
                   <li key={item} className="flex items-center gap-2 text-[12.5px] text-white/65">
@@ -333,7 +333,7 @@ export default function PartnerPlacementPage() {
               </div>
             ))}
           </div>
-          <p className="mt-4 text-[11.5px] text-white/35 leading-relaxed">
+          <p className="mt-4 text-[11.5px] text-white/60 leading-relaxed">
             Customers may add configured release requirements on top of the core gate.
           </p>
         </div>
@@ -391,7 +391,7 @@ export default function PartnerPlacementPage() {
           <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
             {['Scoped API keys', 'Partner-specific access', 'Audit logging on every call', 'No direct fund movement'].map((item) => (
               <div key={item} className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-center">
-                <p className="text-[11.5px] text-white/45 leading-snug">{item}</p>
+                <p className="text-[11.5px] text-white/65 leading-snug">{item}</p>
               </div>
             ))}
           </div>
@@ -437,7 +437,7 @@ export default function PartnerPlacementPage() {
                 <NoBullet key={item}>{item}</NoBullet>
               ))}
             </ul>
-            <p className="mt-5 text-[11.5px] leading-relaxed text-white/35 border-t border-white/[0.06] pt-4">
+            <p className="mt-5 text-[11.5px] leading-relaxed text-white/60 border-t border-white/[0.06] pt-4">
               Vektrum governs authorization and records proof. Payment execution remains with
               Stripe Connect or the customer&apos;s partner-controlled process.
             </p>
@@ -482,15 +482,15 @@ export default function PartnerPlacementPage() {
 
         {/* ── Footer note ────────────────────────────────────────────────────── */}
         <div className="border-t border-white/[0.06] pt-5 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-[11px] text-white/30">
+          <p className="text-[11px] text-white/60">
             Vektrum is authorization infrastructure — not a bank, lender, payment processor, or money transmitter.
             Vektrum does not hold or custody funds.
           </p>
           <div className="flex items-center gap-4 print:hidden">
-            <Link href="/partners/docs" className="text-[11px] text-white/30 hover:text-white/55 transition-colors">
+            <Link href="/partners/docs" className="text-[11px] text-white/60 hover:text-white transition-colors">
               Partner API reference →
             </Link>
-            <Link href="/security" className="text-[11px] text-white/30 hover:text-white/55 transition-colors">
+            <Link href="/security" className="text-[11px] text-white/60 hover:text-white transition-colors">
               Security →
             </Link>
           </div>

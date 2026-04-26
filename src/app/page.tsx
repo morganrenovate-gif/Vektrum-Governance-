@@ -787,7 +787,7 @@ export default async function HomePage() {
                   </span>
                 </div>
                 <p className="text-[12px] text-white/55 leading-relaxed mb-3">
-                  <span className="text-white/35 font-medium">Without enforcement: </span>
+                  <span className="text-white/55 font-medium">Without enforcement: </span>
                   {scenario.without}
                 </p>
                 <div className="flex items-start gap-2 pt-3 border-t border-white/[0.06]">
@@ -1112,7 +1112,7 @@ export default async function HomePage() {
       <section className="bg-surface-2 py-16 sm:py-20 border-t border-white/[0.06]">
         <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center mb-10">
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/40 mb-3">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/65 mb-3">
               Trust &amp; Compliance
             </p>
             <h2 className="font-display text-2xl font-bold tracking-[-0.025em] text-white sm:text-3xl">

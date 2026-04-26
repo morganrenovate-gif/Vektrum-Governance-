@@ -306,7 +306,7 @@ export default async function RootLayout({
               <p className="text-[12px] text-white/75 flex-shrink-0">
                 &copy; {new Date().getFullYear()} Vektrum. All rights reserved.
               </p>
-              <p className="text-[11px] text-white/45 leading-relaxed sm:max-w-lg sm:text-right">
+              <p className="text-[11px] text-white/65 leading-relaxed sm:max-w-lg sm:text-right">
                 Vektrum is authorization infrastructure — not a bank, lender, or money transmitter.
                 Vektrum does not hold or custody funds. Funds are held by Stripe (Stripe Connect deals)
                 or the funder&apos;s institutional payment partner (external-rail deals).

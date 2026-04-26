@@ -104,7 +104,7 @@ export default function PartnerDocsPage() {
             It covers authentication, all three partner API endpoints, webhook verification, error codes,
             and an integration checklist.
           </p>
-          <p className="mt-4 text-[13px] text-white/40">
+          <p className="mt-4 text-[13px] text-white/60">
             API version: <code className="text-white/60">2026-04-25</code> — Base URL:{' '}
             <code className="text-white/60">https://vektrum.io</code>
           </p>
@@ -157,7 +157,7 @@ export default function PartnerDocsPage() {
               >
                 <div>
                   <p className="text-[12px] font-semibold text-white/70 mb-2">Response 200:</p>
-                  <p className="text-[12px] text-white/40 mb-2">All amount fields are USD dollars. Fee is charged to the funder on top of the milestone amount — the contractor always receives the full gross minus any retainage.</p>
+                  <p className="text-[12px] text-white/60 mb-2">All amount fields are USD dollars. Fee is charged to the funder on top of the milestone amount — the contractor always receives the full gross minus any retainage.</p>
                   <CodeBlock language="json">{`{
   "release": {
     "id": "uuid",
@@ -462,7 +462,7 @@ def verify_vektrum_signature(
 
         {/* Footer note */}
         <div className="mt-16 pt-6 border-t border-white/[0.06]">
-          <p className="text-[12px] text-white/35">
+          <p className="text-[12px] text-white/60">
             Vektrum Partner API v1 &middot; For approved integration partners &middot;{' '}
             <a href="mailto:operations@vektrum.io" className="text-vektrum-blue hover:underline">
               operations@vektrum.io
