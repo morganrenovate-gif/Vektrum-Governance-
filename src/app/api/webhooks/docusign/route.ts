@@ -3,6 +3,7 @@ import { createSupabaseAdminClient } from '@/lib/supabase/server'
 import { logAudit } from '@/lib/engine/audit'
 import {
   verifyWebhookSignature,
+  isHmacBypassAllowed,
   downloadSignedDocument,
   type DocuSignWebhookEvent,
 } from '@/lib/engine/docusign'
@@ -29,6 +30,13 @@ export const dynamic = 'force-dynamic'
 // Security: HMAC-SHA256 signature verified against DOCUSIGN_WEBHOOK_SECRET
 //           before any payload is processed.
 //
+// IMPORTANT — staging / preview / CI environments:
+//   DOCUSIGN_WEBHOOK_SECRET must be set in ALL deployed environments, including
+//   Vercel preview branches and any staging server. Missing the secret in a
+//   deployed context returns 500 and processes nothing. There is no bypass for
+//   any deployed build; the dev bypass requires both NODE_ENV=development AND
+//   DOCUSIGN_WEBHOOK_DEV_BYPASS=true (see isHmacBypassAllowed in docusign.ts).
+//
 // DocuSign Connect setup:
 //   Admin Console → Connect → Add Configuration
 //   URL:             {APP_URL}/api/webhooks/docusign
@@ -50,17 +58,41 @@ export async function POST(request: NextRequest) {
   const rawBody = Buffer.from(await request.arrayBuffer())
 
   // ── Verify webhook signature ─────────────────────────────────────────────────
+  //
+  // Gate logic (evaluated in order):
+  //
+  //   1. Secret present → always verify HMAC; 401 on missing/invalid signature.
+  //
+  //   2. Secret missing + bypass allowed (NODE_ENV=development AND
+  //      DOCUSIGN_WEBHOOK_DEV_BYPASS=true) → skip HMAC with a noisy warning.
+  //      Next.js sets NODE_ENV='production' for every Vercel build, so this
+  //      branch is unreachable in any deployed context (preview, staging, prod).
+  //
+  //   3. Secret missing + bypass NOT allowed (all other cases, including any
+  //      deployed environment) → 500 immediately; nothing is parsed or mutated.
+  //
   const webhookSecret = process.env.DOCUSIGN_WEBHOOK_SECRET
   if (!webhookSecret) {
-    if (process.env.NODE_ENV === 'production') {
-      console.error('[docusign-webhook] DOCUSIGN_WEBHOOK_SECRET is not set in production')
+    if (!isHmacBypassAllowed(process.env)) {
+      // Missing secret with no bypass: fail closed.
+      // This covers production, staging, preview, CI, and any Node server where
+      // NODE_ENV is not 'development' or DOCUSIGN_WEBHOOK_DEV_BYPASS is absent.
+      console.error(
+        '[docusign-webhook] DOCUSIGN_WEBHOOK_SECRET is not configured. ' +
+        'Set it in all deployed environments. ' +
+        'For local development only, also set DOCUSIGN_WEBHOOK_DEV_BYPASS=true.',
+      )
       return NextResponse.json(
         { error: 'Webhook secret not configured.' },
         { status: 500 },
       )
     }
-    // Development: accept without signature (log a warning)
-    console.warn('[docusign-webhook] DOCUSIGN_WEBHOOK_SECRET not set — skipping HMAC check (dev mode only)')
+    // Local dev explicit bypass — log loudly so it is never silently active.
+    console.warn(
+      '[docusign-webhook] DOCUSIGN_WEBHOOK_SECRET not set — HMAC check BYPASSED. ' +
+      'DOCUSIGN_WEBHOOK_DEV_BYPASS=true is active. ' +
+      'This must NEVER be set in staging, preview, or production.',
+    )
   } else {
     // DocuSign sends up to 5 HMAC signatures (X-DocuSign-Signature-1 through -5).
     // We verify against the first one.

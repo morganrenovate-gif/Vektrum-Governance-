@@ -343,6 +343,32 @@ export function verifyWebhookSignature(
   return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature))
 }
 
+/**
+ * Returns true ONLY when webhook HMAC verification may safely be skipped.
+ *
+ * Two conditions must BOTH be true simultaneously:
+ *   1. NODE_ENV === 'development'   — rules out all deployed environments.
+ *      Next.js sets NODE_ENV='production' for every Vercel deployment,
+ *      including preview branches and staging — so the bypass is impossible
+ *      in any deployed context regardless of the second flag.
+ *   2. DOCUSIGN_WEBHOOK_DEV_BYPASS === 'true' — explicit per-developer opt-in.
+ *      This must never appear in staging, preview, or production env files.
+ *
+ * Rationale: the old check (`NODE_ENV !== 'production'`) was fragile because
+ * non-Next.js runners (Jest, custom scripts, Node servers) may set NODE_ENV
+ * to 'test', 'staging', or another non-production value while actually being
+ * reachable by real DocuSign Connect webhooks. A missing HMAC secret in that
+ * situation would allow unsigned requests to mutate deal and contract state.
+ *
+ * Exported so the route can call it with process.env and tests can call it
+ * with synthetic env objects — no process.env mutation needed in tests.
+ */
+export function isHmacBypassAllowed(
+  env: Pick<NodeJS.ProcessEnv, 'NODE_ENV' | 'DOCUSIGN_WEBHOOK_DEV_BYPASS'>,
+): boolean {
+  return env.NODE_ENV === 'development' && env.DOCUSIGN_WEBHOOK_DEV_BYPASS === 'true'
+}
+
 // ─── Webhook Payload Types ────────────────────────────────────────────────────
 
 export interface DocuSignWebhookEvent {
