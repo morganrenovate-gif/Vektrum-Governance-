@@ -7,8 +7,27 @@ import { POLICIES, checkRateLimit, rateLimitResponse, logRateLimitViolation } fr
 export const dynamic = 'force-dynamic'
 
 // ─── POST /api/admin/promote ─────────────────────────────────────────────────
-// Promotes an existing user to admin role. Restricted to admins.
-// Body: { userId: string }
+//
+// Promotes an existing user to admin role.
+//
+// INTENTIONALLY DISABLED BY DEFAULT.
+//
+// Admin creation is an owner-controlled operation and must not be available
+// through normal dashboard flows. Granting admin access via a web UI exposes
+// the platform to privilege-escalation attacks if an admin account is
+// compromised. New admins should be created through a secured, owner-controlled
+// process (CLI, Supabase dashboard with service-role credentials, or a
+// dedicated owner-only provisioning flow).
+//
+// This route is kept in the codebase to preserve the audit infrastructure but
+// is gated behind ADMIN_PROMOTION_ENABLED=true, which must be set explicitly
+// in the environment. Never set this to true in production unless you have a
+// specific, time-limited operational need and revert it immediately after.
+//
+// All existing security controls (admin role, MFA/AAL2, rate-limit, justification
+// required, self-promotion blocked, dual audit write) remain active when the
+// route is enabled, so the blast radius of a compromised admin session is
+// still constrained.
 
 export async function POST(request: NextRequest) {
   let authContext
@@ -32,6 +51,16 @@ export async function POST(request: NextRequest) {
     await requireMFA(supabase, profile)
   } catch (err) {
     return err as NextResponse
+  }
+
+  // ── Env gate — disabled unless explicitly enabled ────────────────────────
+  // Checked after auth/role/MFA so unauthenticated or unprivileged callers
+  // receive the normal auth response rather than leaking feature state.
+  if (process.env.ADMIN_PROMOTION_ENABLED !== 'true') {
+    return NextResponse.json(
+      { error: 'Admin promotion is disabled in this environment.' },
+      { status: 403 }
+    )
   }
 
   // ── Rate limit — admin write ───────────────────────────────────────────────

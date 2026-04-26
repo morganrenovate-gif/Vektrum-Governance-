@@ -3,11 +3,13 @@
 // Advisor 10 (Adversarial): Admins see user data but cannot modify financial records.
 // Advisor 8 (Ops): Search + filter by role is essential for support workflows.
 // Advisor 4 (Security): Email display only — no ability to impersonate or modify auth.
+// Admin promotion is intentionally removed from the UI.
+// Use the CLI / owner-controlled process to create new admins.
 
 import { useState } from 'react'
 import Link from 'next/link'
 import type { Profile, Deal } from '@/lib/types'
-import { CheckCircle2, AlertCircle, Search, ShieldPlus, X, AlertTriangle } from 'lucide-react'
+import { CheckCircle2, AlertCircle, Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface UserTableProps {
@@ -31,38 +33,8 @@ const ROLE_COLORS: Record<string, string> = {
 }
 
 export function UserTable({ profiles, deals, emailMap = {} }: UserTableProps) {
-  const [search, setSearch]           = useState('')
-  const [roleFilter, setRoleFilter]   = useState<RoleFilter>('all')
-  const [promotingId, setPromotingId] = useState<string | null>(null)
-  const [promotedIds, setPromotedIds] = useState<Set<string>>(new Set())
-  const [promoteError, setPromoteError] = useState<string | null>(null)
-  const [promoteTarget, setPromoteTarget] = useState<{ id: string; full_name: string } | null>(null)
-
-  async function executePromote(userId: string) {
-    setPromotingId(userId)
-    setPromoteError(null)
-    setPromoteTarget(null)
-
-    try {
-      const res = await fetch('/api/admin/promote', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId }),
-      })
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({ error: 'Request failed' }))
-        setPromoteError(data.error ?? 'Failed to promote user.')
-        return
-      }
-
-      setPromotedIds((prev) => new Set(prev).add(userId))
-    } catch {
-      setPromoteError('Network error. Please try again.')
-    } finally {
-      setPromotingId(null)
-    }
-  }
+  const [search, setSearch]         = useState('')
+  const [roleFilter, setRoleFilter] = useState<RoleFilter>('all')
 
   const dealCountByUser = deals.reduce<Record<string, number>>((acc, deal) => {
     acc[deal.contractor_id] = (acc[deal.contractor_id] ?? 0) + 1
@@ -116,16 +88,9 @@ export function UserTable({ profiles, deals, emailMap = {} }: UserTableProps) {
         </div>
       </div>
 
-      {/* Promote error banner */}
-      {promoteError && (
-        <div className="px-5 py-3 bg-red-50 border-b border-red-200">
-          <p className="text-[12px] text-red-700">{promoteError}</p>
-        </div>
-      )}
-
       {/* Column headers */}
-      <div className="hidden md:grid grid-cols-[2fr_1fr_1fr_1fr_auto_auto] gap-4 px-5 py-3 border-b border-white/[0.05]">
-        {['User', 'Role', 'Stripe', 'Deals', 'Joined', 'Actions'].map((h) => (
+      <div className="hidden md:grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-5 py-3 border-b border-white/[0.05]">
+        {['User', 'Role', 'Stripe', 'Deals', 'Joined'].map((h) => (
           <p key={h} className="text-[10px] font-semibold uppercase tracking-widest text-white/65">{h}</p>
         ))}
       </div>
@@ -142,13 +107,10 @@ export function UserTable({ profiles, deals, emailMap = {} }: UserTableProps) {
             const stripeOk  = profile.stripe_payouts_enabled
             const hasStripe = !!profile.stripe_account_id
 
-            const isPromoted = promotedIds.has(profile.id)
-            const effectiveRole = isPromoted ? 'admin' : profile.role
-
             return (
               <div
                 key={profile.id}
-                className="flex flex-col gap-2 md:grid md:grid-cols-[2fr_1fr_1fr_1fr_auto_auto] md:items-center md:gap-4 px-5 py-3.5 hover:bg-white/[0.03] transition-colors"
+                className="flex flex-col gap-2 md:grid md:grid-cols-[2fr_1fr_1fr_1fr_auto] md:items-center md:gap-4 px-5 py-3.5 hover:bg-white/[0.03] transition-colors"
               >
                 {/* User info */}
                 <div className="min-w-0">
@@ -163,13 +125,13 @@ export function UserTable({ profiles, deals, emailMap = {} }: UserTableProps) {
                   )}
                 </div>
 
-                {/* Role badge */}
+                {/* Role badge — read-only */}
                 <div>
                   <span className={cn(
                     'inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-semibold capitalize',
-                    ROLE_COLORS[effectiveRole] ?? 'bg-surface-3 border-white/[0.12] text-white/80'
+                    ROLE_COLORS[profile.role] ?? 'bg-surface-3 border-white/[0.12] text-white/80'
                   )}>
-                    {ROLE_LABELS[effectiveRole] ?? effectiveRole}
+                    {ROLE_LABELS[profile.role] ?? profile.role}
                   </span>
                 </div>
 
@@ -202,40 +164,17 @@ export function UserTable({ profiles, deals, emailMap = {} }: UserTableProps) {
                   <span className="text-[11px] text-white/65 ml-1">deal{dealCount !== 1 ? 's' : ''}</span>
                 </div>
 
-                {/* Joined date + view deals */}
+                {/* Joined + view user link */}
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] text-white/65 whitespace-nowrap">
                     {new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </span>
-                  {dealCount > 0 && (
-                    <Link
-                      href={`/dashboard?userId=${profile.id}`}
-                      className="text-[11px] font-medium text-vektrum-blue hover:underline whitespace-nowrap"
-                    >
-                      View deals
-                    </Link>
-                  )}
-                </div>
-
-                {/* Promote action */}
-                <div>
-                  {effectiveRole !== 'admin' ? (
-                    <button
-                      onClick={() => setPromoteTarget({ id: profile.id, full_name: profile.full_name ?? 'this user' })}
-                      disabled={promotingId === profile.id}
-                      className={cn(
-                        'inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[11px] font-medium transition-all',
-                        promotingId === profile.id
-                          ? 'border-white/[0.08] bg-surface-3 text-white/55 cursor-not-allowed'
-                          : 'border-vektrum-blue/30 bg-vektrum-blue/10 text-vektrum-blue hover:bg-vektrum-blue hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue'
-                      )}
-                    >
-                      <ShieldPlus size={12} aria-hidden="true" />
-                      {promotingId === profile.id ? 'Promoting…' : 'Promote'}
-                    </button>
-                  ) : (
-                    <span className="text-[11px] text-white/50" aria-label="Already an admin">—</span>
-                  )}
+                  <Link
+                    href={`/dashboard/admin/users/${profile.id}`}
+                    className="text-[11px] font-medium text-vektrum-blue hover:underline whitespace-nowrap"
+                  >
+                    View user
+                  </Link>
                 </div>
               </div>
             )
@@ -249,48 +188,6 @@ export function UserTable({ profiles, deals, emailMap = {} }: UserTableProps) {
           Showing {filtered.length} of {profiles.length} users
         </p>
       </div>
-
-      {/* Promote confirmation modal */}
-      {promoteTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setPromoteTarget(null)} />
-          <div className="relative max-w-md w-full mx-4 rounded-xl bg-white shadow-2xl p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Promote to Admin</h2>
-              <button type="button" onClick={() => setPromoteTarget(null)} className="text-gray-400 hover:text-gray-600 transition-colors">
-                <X size={20} />
-              </button>
-            </div>
-            <p className="text-sm text-gray-700 mb-4">
-              You are about to grant admin privileges to <strong>{promoteTarget.full_name}</strong>.
-              This gives them full access to user management, audit logs, and platform oversight.
-              This action will be logged.
-            </p>
-            <div className="flex items-start gap-2.5 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 mb-5">
-              <AlertTriangle size={14} className="text-amber-600 flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-amber-700">
-                Admin role grants access to all user data and audit records. Only promote trusted team members.
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setPromoteTarget(null)}
-                className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => executePromote(promoteTarget.id)}
-                className="flex-1 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 transition-colors"
-              >
-                Confirm Promotion
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
