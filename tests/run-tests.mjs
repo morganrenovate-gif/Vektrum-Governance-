@@ -1,17 +1,19 @@
 /**
- * DEPRECATED — this file previously contained an inlined copy of validateRelease
- * and an inlined state machine that did not match the production source.
+ * Test runner shim — delegates to all TypeScript test files via tsx.
  *
- * All tests now live in tests/release-gate.test.ts, which imports and exercises
- * the REAL production functions from src/lib/engine/release-gate.ts and
- * src/lib/engine/state-machine.ts.
+ * Previously this file contained an inlined copy of validateRelease and an
+ * inlined state machine that did not match production source. That logic has
+ * been removed. All tests now import directly from src/ and exercise the real
+ * production functions.
  *
- * This shim delegates to that file so any existing CI invocation of
- * `node tests/run-tests.mjs` continues to work.
+ * Test files:
+ *   tests/release-gate.test.ts        — release gate (10 conditions), state machine, AI precondition
+ *   tests/docusign-webhook-hmac.test.ts — DocuSign HMAC gate + verifyWebhookSignature
  *
  * To run tests directly:
  *   npx tsx tests/release-gate.test.ts
- *   npm test
+ *   npx tsx tests/docusign-webhook-hmac.test.ts
+ *   npm test   (runs both)
  */
 
 import { execSync } from 'child_process'
@@ -20,12 +22,20 @@ import path from 'path'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const root      = path.resolve(__dirname, '..')
-const testFile  = path.join(__dirname, 'release-gate.test.ts')
 
-console.log('[run-tests.mjs] Delegating to release-gate.test.ts (real source, via tsx)\n')
+const testFiles = [
+  path.join(__dirname, 'release-gate.test.ts'),
+  path.join(__dirname, 'docusign-webhook-hmac.test.ts'),
+]
 
-try {
-  execSync(`npx tsx "${testFile}"`, { cwd: root, stdio: 'inherit' })
-} catch {
-  process.exit(1)
+let anyFailed = false
+for (const file of testFiles) {
+  console.log(`\n[run-tests.mjs] Running ${path.basename(file)}\n`)
+  try {
+    execSync(`npx tsx "${file}"`, { cwd: root, stdio: 'inherit' })
+  } catch {
+    anyFailed = true
+  }
 }
+
+if (anyFailed) process.exit(1)
