@@ -101,7 +101,7 @@ export default async function HomePage() {
                   <div className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
                   <div className="mx-auto flex items-center gap-2 rounded-md border border-white/[0.06] bg-white/[0.03] px-3 py-1">
                     <div className="h-1.5 w-1.5 rounded-full bg-vektrum-blue" />
-                    <span className="text-[11px] text-white/65">app.vektrum.io — Release Gate</span>
+                    <span className="text-[11px] text-white/65">vektrum.io — Release Gate</span>
                   </div>
                 </div>
 
