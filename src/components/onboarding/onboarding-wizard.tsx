@@ -42,7 +42,7 @@ function Step1({ role }: { role: Profile['role'] }) {
   return (
     <div className="space-y-5">
       <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-vektrum-blue/10">
-        <Shield size={28} className="text-vektrum-blue" />
+        <Shield size={28} className="text-blue-400" />
       </div>
       <div>
         <h2 className="text-xl font-bold tracking-[-0.025em] text-white">

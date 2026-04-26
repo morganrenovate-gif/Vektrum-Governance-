@@ -162,7 +162,7 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
                       className="flex items-center gap-3 min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-white/55 hover:text-white hover:bg-surface-3 transition-all"
                       onClick={() => setOpen(false)}
                     >
-                      <Shield size={16} className="text-vektrum-blue" aria-hidden="true" />
+                      <Shield size={16} className="text-blue-400" aria-hidden="true" />
                       Admin Dashboard
                     </Link>
                   )}

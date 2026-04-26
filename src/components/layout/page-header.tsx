@@ -36,7 +36,7 @@ export function PageHeader({
             <div className="flex items-center gap-2.5">
               {/* Vertical bar accent — more structural than horizontal line */}
               <div className="h-4 w-[3px] rounded-full bg-vektrum-blue flex-shrink-0" aria-hidden="true" />
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-vektrum-blue">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-blue-300">
                 {eyebrow}
               </p>
             </div>
@@ -87,7 +87,7 @@ export function SectionHeader({
     variant === "warning"
       ? "text-amber-400"
       : variant === "blue"
-      ? "text-vektrum-blue"
+      ? "text-blue-300"
       : "text-white/65";
 
   const barColor =

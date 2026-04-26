@@ -9,7 +9,7 @@ const roles = [
     description: 'See portfolio overview, capital deployed, deal action queue, and draw request reviews.',
     href: '/demo-live/funder',
     icon: Landmark,
-    badge: 'bg-vektrum-blue/10 text-vektrum-blue border-vektrum-blue/20',
+    badge: 'bg-vektrum-blue/10 text-blue-300 border-vektrum-blue/30',
     dot: 'bg-vektrum-blue',
   },
   {
@@ -47,7 +47,7 @@ export default function DemoLivePage() {
         <div className="text-center mb-16">
           <div className="mb-5 inline-flex items-center gap-3">
             <div className="h-px w-5 bg-vektrum-blue" />
-            <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">
+            <p className="text-[11px] tracking-[0.12em] uppercase text-blue-300 font-semibold">
               Interactive Demo
             </p>
             <div className="h-px w-5 bg-vektrum-blue" />
@@ -91,12 +91,12 @@ export default function DemoLivePage() {
 
               {/* CTA */}
               <div className="mt-6 pt-5 border-t border-white/[0.06] flex items-center justify-between">
-                <span className="text-[13px] font-semibold text-vektrum-blue">
+                <span className="text-[13px] font-semibold text-blue-300">
                   Enter demo
                 </span>
                 <ArrowRight
                   size={14}
-                  className="text-vektrum-blue transition-transform duration-200 group-hover:translate-x-1"
+                  className="text-blue-300 transition-transform duration-200 group-hover:translate-x-1"
                 />
               </div>
             </Link>

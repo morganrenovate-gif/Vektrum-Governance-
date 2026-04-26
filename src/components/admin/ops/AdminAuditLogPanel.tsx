@@ -279,7 +279,7 @@ export function AdminAuditLogPanel({ initialData }: AdminAuditLogPanelProps) {
 
                       {/* Action */}
                       <td className="px-4 py-3 align-top">
-                        <code className="text-vektrum-blue bg-vektrum-blue/[0.12] border border-vektrum-blue/20 px-1.5 py-0.5 rounded text-[11px] font-mono">
+                        <code className="text-blue-300 bg-vektrum-blue/[0.15] border border-vektrum-blue/30 px-1.5 py-0.5 rounded text-[11px] font-mono">
                           {entry.action}
                         </code>
                       </td>
@@ -323,7 +323,7 @@ export function AdminAuditLogPanel({ initialData }: AdminAuditLogPanelProps) {
                             <button
                               onClick={() => markReviewed(entry.id)}
                               disabled={isReviewing}
-                              className="mt-1 px-2.5 py-1 rounded-md bg-vektrum-blue/10 border border-vektrum-blue/20 text-vektrum-blue text-[11px] font-medium hover:bg-vektrum-blue/20 transition-colors disabled:opacity-40"
+                              className="mt-1 px-2.5 py-1 rounded-md bg-vektrum-blue/20 border border-vektrum-blue/40 text-blue-300 text-[11px] font-medium hover:bg-vektrum-blue/30 transition-colors disabled:opacity-40"
                             >
                               {isReviewing ? "Marking…" : "Mark Reviewed"}
                             </button>

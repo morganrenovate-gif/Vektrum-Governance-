@@ -130,7 +130,7 @@ function TierBadge({ tier }: { tier: SubscriptionTier | null }) {
   }
   const colors: Record<SubscriptionTier, string> = {
     standalone:    'bg-white/[0.05] text-white/60 border-white/[0.1]',
-    institutional: 'bg-vektrum-blue/10 text-vektrum-blue border-vektrum-blue/20',
+    institutional: 'bg-vektrum-blue/10 text-blue-300 border-vektrum-blue/30',
     enterprise:    'bg-amber-500/10 text-amber-400 border-amber-500/20',
   }
   const labels: Record<SubscriptionTier, string> = {
@@ -193,7 +193,7 @@ export default async function SubscriptionsPage() {
 
       {/* Compliance notice */}
       <div className="flex items-start gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] p-4">
-        <ShieldCheck size={15} className="text-vektrum-blue flex-shrink-0 mt-0.5" />
+        <ShieldCheck size={15} className="text-blue-400 flex-shrink-0 mt-0.5" />
         <div className="text-[13px] text-white/75 space-y-0.5">
           <p className="font-medium text-white/70">Tier changes are audit-logged</p>
           <p>
@@ -208,7 +208,7 @@ export default async function SubscriptionsPage() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
           { label: 'Standalone',    count: tierBreakdown.standalone,    color: 'text-white/60' },
-          { label: 'Institutional', count: tierBreakdown.institutional, color: 'text-vektrum-blue' },
+          { label: 'Institutional', count: tierBreakdown.institutional, color: 'text-blue-300' },
           { label: 'Enterprise',    count: tierBreakdown.enterprise,    color: 'text-amber-400' },
           { label: 'Unset',         count: tierBreakdown.unset,         color: 'text-white/70' },
         ].map(({ label, count, color }) => (
@@ -275,7 +275,7 @@ export default async function SubscriptionsPage() {
                         <div className="flex items-center gap-2">
                           <span className="tabular-nums">{funder.totalDeals}</span>
                           {funder.activeDeals > 0 && (
-                            <span className="inline-flex items-center rounded-full bg-vektrum-blue/10 border border-vektrum-blue/20 px-1.5 py-0.5 text-[10px] text-vektrum-blue">
+                            <span className="inline-flex items-center rounded-full bg-vektrum-blue/10 border border-vektrum-blue/30 px-1.5 py-0.5 text-[10px] text-blue-300">
                               {funder.activeDeals} active
                             </span>
                           )}

@@ -1,6 +1,10 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { HardHat, TrendingUp, DollarSign, CheckCircle2, Clock, ArrowRight, ArrowLeft } from 'lucide-react'
+import { HardHat, TrendingUp, DollarSign, CheckCircle2, Clock, ArrowRight, ArrowLeft, Sparkles, Loader2 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format'
+import { DEMO_RESET_EVENT } from '@/lib/demo-data'
 
 // ── Mock data ────────────────────────────────────────────────────────────────
 
@@ -30,10 +34,37 @@ const MOCK_DEALS = [
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export default function DemoContractorPage() {
+  // ── Demo state ────────────────────────────────────────────────────────────
+  //
+  // reviewSubmitted tracks whether the contractor has clicked "Request Review"
+  // for the pending MEP Rough-In draw. Resets to false on demo reset so the
+  // button returns to its original state for the next demo visitor.
+  const [reviewSubmitted, setReviewSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+
+  useEffect(() => {
+    const onReset = () => {
+      setReviewSubmitted(false)
+      setSubmitting(false)
+    }
+    window.addEventListener(DEMO_RESET_EVENT, onReset)
+    return () => window.removeEventListener(DEMO_RESET_EVENT, onReset)
+  }, [])
+
+  function handleRequestReview() {
+    if (submitting || reviewSubmitted) return
+    setSubmitting(true)
+    // Simulate submission delay, then mark as submitted
+    setTimeout(() => {
+      setSubmitting(false)
+      setReviewSubmitted(true)
+    }, 900)
+  }
+
   const totalDeals = MOCK_DEALS.length
   const totalFunded = MOCK_DEALS.reduce((s, d) => s + d.total, 0)
   const totalReleased = 3_940_000   // Riverside $480K + Harbor $3.46M
-  const pendingReview = 1
+  const pendingReview = reviewSubmitted ? 0 : 1
 
   return (
     <div className="min-h-screen bg-surface-0">
@@ -49,7 +80,7 @@ export default function DemoContractorPage() {
 
       {/* Demo info */}
       <div className="rounded-xl border border-vektrum-blue/20 bg-vektrum-blue/10 px-5 py-4">
-        <p className="text-[13px] text-vektrum-blue leading-relaxed">
+        <p className="text-[13px] text-blue-200 leading-relaxed">
           You&apos;re viewing the Contractor dashboard as <strong>Marcus Webb</strong>. In the live app, this connects to your real deals and payments.
         </p>
       </div>
@@ -59,7 +90,7 @@ export default function DemoContractorPage() {
         <div>
           <div className="mb-3 flex items-center gap-3">
             <div className="h-px w-5 bg-vektrum-blue" />
-            <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">Contractor Dashboard</p>
+            <p className="text-[11px] tracking-[0.12em] uppercase text-blue-300 font-semibold">Contractor Dashboard</p>
           </div>
           <h1 className="font-display text-[2.25rem] font-bold tracking-[-0.04em] text-white leading-[1.05]">
             Welcome back, Marcus
@@ -81,31 +112,78 @@ export default function DemoContractorPage() {
         <StatTile label="Total Deals" value={totalDeals} href="#your-deals" />
         <MoneyTile label="Total Funded" amount={totalFunded} href="#your-deals" />
         <MoneyTile label="Total Released" amount={totalReleased} href="#your-deals" />
-        <StatTile label="Pending Review" value={pendingReview} warning href="#draw-review" />
+        <StatTile
+          label="Pending Review"
+          value={pendingReview}
+          warning={pendingReview > 0}
+          href={pendingReview > 0 ? '#draw-review' : undefined}
+        />
       </div>
 
       {/* Draw Review Status */}
       <section
         id="draw-review"
         className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden"
-        
       >
         <div className="border-l-4 border-vektrum-blue px-5 py-4 border-b border-white/[0.06]">
           <p className="text-[13px] font-semibold text-white">Draw Review Status</p>
         </div>
         <div className="p-5">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-[13px] font-medium text-white/80">MEP Rough-In &mdash; Riverside Mixed-Use Development</p>
-              <p className="text-[12px] text-white/75 mt-0.5">Status: Awaiting AI Review &middot; Amount: {formatCurrency(680_000)}</p>
+          {reviewSubmitted ? (
+            /* ── Submitted state ─────────────────────────────────────────── */
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-[13px] font-medium text-white/80">MEP Rough-In &mdash; Riverside Mixed-Use Development</p>
+                <p className="text-[12px] text-white/75 mt-0.5">Amount: {formatCurrency(680_000)}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/[0.08] border border-emerald-500/20 px-3 py-1 text-[12px] font-semibold text-emerald-400">
+                  <CheckCircle2 size={13} aria-hidden="true" />
+                  Review Submitted
+                </span>
+                <Link
+                  href="/demo-live/deal/riverside?from=contractor"
+                  className="group inline-flex items-center gap-1.5 rounded-xl border border-white/[0.10] bg-surface-3 px-3 py-2 text-[12px] font-semibold text-white/65 whitespace-nowrap hover:text-white hover:border-white/[0.20] transition-all"
+                >
+                  View Deal <ArrowRight size={12} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                </Link>
+              </div>
             </div>
-            <Link
-              href="/demo-live/deal/riverside?from=contractor"
-              className="group inline-flex items-center gap-1.5 rounded-xl bg-vektrum-blue px-3 py-2 text-[12px] font-semibold text-white whitespace-nowrap hover:bg-vektrum-blue-hover transition-all hover:-translate-y-0.5"
-            >
-              View Deal <ArrowRight size={12} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
-            </Link>
-          </div>
+          ) : (
+            /* ── Default state — Request Review button ───────────────────── */
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-[13px] font-medium text-white/80">MEP Rough-In &mdash; Riverside Mixed-Use Development</p>
+                <p className="text-[12px] text-white/75 mt-0.5">Status: Awaiting AI Review &middot; Amount: {formatCurrency(680_000)}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleRequestReview}
+                  disabled={submitting}
+                  className="group inline-flex items-center gap-1.5 rounded-xl bg-vektrum-blue px-3 py-2 text-[12px] font-semibold text-white whitespace-nowrap hover:bg-vektrum-blue-hover transition-all hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 size={12} className="animate-spin" aria-hidden="true" />
+                      Submitting&hellip;
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles size={12} aria-hidden="true" />
+                      Request Review
+                    </>
+                  )}
+                </button>
+                <Link
+                  href="/demo-live/deal/riverside?from=contractor"
+                  className="group inline-flex items-center gap-1.5 rounded-xl border border-white/[0.10] bg-surface-3 px-3 py-2 text-[12px] font-semibold text-white/65 whitespace-nowrap hover:text-white hover:border-white/[0.20] transition-all"
+                >
+                  View Deal <ArrowRight size={12} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -120,7 +198,6 @@ export default function DemoContractorPage() {
               key={deal.slug}
               href={`/demo-live/deal/${deal.slug}?from=contractor`}
               className="group rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card p-5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.14]"
-              
             >
               <div className="flex items-center justify-between mb-3">
                 <span className="inline-flex items-center rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">
@@ -152,7 +229,6 @@ function StatTile({ label, value, warning = false, href }: { label: string; valu
   const inner = (
     <div
       className={`rounded-2xl border bg-surface-2 shadow-card px-5 py-5 transition-all duration-300 ${warning ? 'border-vektrum-amber/30' : 'border-white/[0.08]'} ${href ? 'hover:-translate-y-0.5 hover:border-white/[0.14] cursor-pointer' : ''}`}
-      
     >
       <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/75">{label}</p>
       <p className={`mt-2 font-display text-4xl font-bold tabular-nums leading-none ${warning ? 'text-amber-400' : 'text-white'}`}>{value}</p>
@@ -165,7 +241,6 @@ function MoneyTile({ label, amount, href }: { label: string; amount: number; hre
   const inner = (
     <div
       className={`rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card px-5 py-5 transition-all duration-300 ${href ? 'hover:-translate-y-0.5 hover:border-white/[0.14] cursor-pointer' : ''}`}
-      
     >
       <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/75">{label}</p>
       <p className="mt-2 font-display text-xl font-bold tabular-nums leading-none text-white">{formatCurrency(amount)}</p>

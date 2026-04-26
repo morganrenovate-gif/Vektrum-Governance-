@@ -85,7 +85,7 @@ export function InviteFunderButton({ dealId }: Props) {
   const LinkBox = ({ url, isCopied, onCopy }: { url: string; isCopied: boolean; onCopy: () => void }) => (
     <div className="flex gap-1.5">
       <div className="min-w-0 flex-1 rounded-lg border border-vektrum-blue/25 bg-vektrum-blue/10 px-3 py-2.5">
-        <p className="truncate font-mono text-xs text-vektrum-blue">{url}</p>
+        <p className="truncate font-mono text-xs text-blue-300">{url}</p>
       </div>
       <button
         onClick={onCopy}
@@ -148,7 +148,7 @@ export function InviteFunderButton({ dealId }: Props) {
   if (state.phase === 'loading') {
     return (
       <div className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-surface-3 px-4 py-3 text-sm text-white/55">
-        <Loader2 className="h-4 w-4 animate-spin text-vektrum-blue" aria-hidden="true" />
+        <Loader2 className="h-4 w-4 animate-spin text-blue-400" aria-hidden="true" />
         {email.trim() ? 'Sending invite…' : 'Generating secure link…'}
       </div>
     )

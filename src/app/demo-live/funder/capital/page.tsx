@@ -5,14 +5,14 @@ import { formatCurrency } from '@/lib/utils/format'
 // ── Data ─────────────────────────────────────────────────────────────────────
 
 const PROJECTS = [
-  { name: 'Riverside Mixed-Use', amount: 2_400_000, pct: 14.8, color: 'bg-vektrum-blue', textColor: 'text-vektrum-blue', released: 480_000, total: 2_400_000, status: 'active' },
+  { name: 'Riverside Mixed-Use', amount: 2_400_000, pct: 14.8, color: 'bg-vektrum-blue', textColor: 'text-blue-300', released: 480_000, total: 2_400_000, status: 'active' },
   { name: 'Harbor Logistics', amount: 9_100_000, pct: 56.0, color: 'bg-vektrum-green', textColor: 'text-emerald-400', released: 3_460_000, total: 9_100_000, status: 'active' },
   { name: 'Westside Medical', amount: 4_750_000, pct: 29.2, color: 'bg-vektrum-amber', textColor: 'text-amber-400', released: 950_000, total: 4_750_000, status: 'active' },
 ]
 
 const MILESTONE_STATUS = [
   { label: 'Released', count: 4, bg: 'bg-emerald-500/[0.08]', border: 'border-emerald-500/20', text: 'text-emerald-400' },
-  { label: 'Approved (pending release)', count: 2, bg: 'bg-vektrum-blue/10', border: 'border-vektrum-blue/20', text: 'text-vektrum-blue' },
+  { label: 'Approved (pending release)', count: 2, bg: 'bg-vektrum-blue/10', border: 'border-vektrum-blue/30', text: 'text-blue-300' },
   { label: 'In Review / In Progress', count: 3, bg: 'bg-amber-500/[0.08]', border: 'border-amber-500/20', text: 'text-amber-400' },
   { label: 'Not Started', count: 4, bg: 'bg-surface-3', border: 'border-white/[0.08]', text: 'text-white/55' },
 ]
@@ -49,7 +49,7 @@ export default function CapitalPage() {
       <div className="flex flex-col gap-1">
         <Link
           href="/demo-live/funder"
-          className="inline-flex items-center gap-1 text-[13px] text-white/70 hover:text-vektrum-blue transition-colors w-fit"
+          className="inline-flex items-center gap-1 text-[13px] text-white/70 hover:text-blue-300 transition-colors w-fit"
         >
           <ArrowLeft size={13} aria-hidden="true" />
           Back to Dashboard
@@ -211,7 +211,7 @@ export default function CapitalPage() {
                 { name: 'Westside Medical Office Campus', href: '/demo-live/deal/westside?from=funder', risk: 'Low', riskColor: 'text-emerald-400', score: '74/100', status: 'On Schedule' },
               ].map(p => (
                 <tr key={p.name} className="border-t border-white/[0.06] hover:bg-white/[0.03]">
-                  <td className="px-4 py-3"><Link href={p.href} className="text-vektrum-blue hover:underline">{p.name}</Link></td>
+                  <td className="px-4 py-3"><Link href={p.href} className="text-blue-300 hover:text-blue-200 hover:underline">{p.name}</Link></td>
                   <td className={`px-4 py-3 font-medium ${p.riskColor}`}>{p.risk}</td>
                   <td className="px-4 py-3 text-white">{p.score}</td>
                   <td className="px-4 py-3 text-white/55">{p.status}</td>

@@ -58,7 +58,7 @@ export function DrawRequestModal({ open, milestone, onConfirm, onClose }: DrawRe
         {/* Milestone info */}
         <div className="rounded-lg bg-surface-3 border border-white/[0.06] px-4 py-3 mb-4">
           <p className="text-sm font-medium text-white/80">{milestone.name}</p>
-          <p className="text-lg font-bold text-vektrum-blue mt-1">{formatCurrency(milestone.amount)}</p>
+          <p className="text-lg font-bold text-blue-300 mt-1">{formatCurrency(milestone.amount)}</p>
         </div>
 
         {/* Checklist */}

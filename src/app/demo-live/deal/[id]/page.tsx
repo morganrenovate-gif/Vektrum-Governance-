@@ -180,7 +180,7 @@ export default async function DemoDealPage({
       {/* Back link */}
       <Link
         href={backHref}
-        className="inline-flex items-center gap-1 text-[13px] text-white/70 hover:text-vektrum-blue transition-colors"
+        className="inline-flex items-center gap-1 text-[13px] text-white/70 hover:text-blue-300 transition-colors"
       >
         {backLabel}
       </Link>

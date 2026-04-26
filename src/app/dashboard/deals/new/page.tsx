@@ -168,7 +168,7 @@ export default function NewDealPage() {
             <div className="mb-8">
               <div className="mb-3 flex items-center gap-3">
                 <div className="h-px w-5 bg-vektrum-blue" />
-                <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">
+                <p className="text-[11px] tracking-[0.12em] uppercase text-blue-300 font-semibold">
                   New Deal
                 </p>
               </div>
@@ -258,7 +258,7 @@ export default function NewDealPage() {
                             disbursement.
                           </p>
                           {form.sequential_release_required && (
-                            <p className="mt-1.5 text-[11px] font-medium text-vektrum-blue">
+                            <p className="mt-1.5 text-[11px] font-medium text-blue-300">
                               Sequential enforcement enabled — cannot be changed after first funding.
                             </p>
                           )}
@@ -350,7 +350,7 @@ export default function NewDealPage() {
                           ))}
                         </select>
                         {form.partner_id && (
-                          <p className="text-[11px] font-medium text-vektrum-blue">
+                          <p className="text-[11px] font-medium text-blue-300">
                             External rail selected — Vektrum will issue authorization signals to this partner.
                           </p>
                         )}
@@ -405,7 +405,7 @@ export default function NewDealPage() {
                               type="button"
                               onClick={openImport}
                               disabled={loading}
-                              className="inline-flex items-center gap-2 rounded-xl border border-vektrum-blue/30 bg-vektrum-blue/5 px-4 py-2 text-[13px] font-semibold text-vektrum-blue hover:bg-vektrum-blue/10 hover:border-vektrum-blue/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="inline-flex items-center gap-2 rounded-xl border border-vektrum-blue/30 bg-vektrum-blue/[0.08] px-4 py-2 text-[13px] font-semibold text-blue-300 hover:bg-vektrum-blue/[0.14] hover:border-vektrum-blue/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               <FileUp size={14} />
                               Import from contract

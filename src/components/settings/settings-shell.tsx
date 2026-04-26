@@ -48,7 +48,7 @@ export function SettingsShell({ profile, userEmail }: SettingsShellProps) {
         <div className="pb-7 border-b border-white/[0.06]">
           <div className="flex items-center gap-2.5 mb-3">
             <div className="h-4 w-[3px] rounded-full bg-vektrum-blue flex-shrink-0" aria-hidden="true" />
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-vektrum-blue">Settings</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-blue-300">Settings</p>
           </div>
           <h1 className="type-page-title">
             Account Settings
@@ -74,7 +74,7 @@ export function SettingsShell({ profile, userEmail }: SettingsShellProps) {
                   className={cn(
                     'flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-all whitespace-nowrap min-w-fit text-left',
                     isActive
-                      ? 'bg-vektrum-blue/10 text-vektrum-blue border border-vektrum-blue/20'
+                      ? 'bg-vektrum-blue/20 text-blue-200 border border-vektrum-blue/40'
                       : 'text-white/80 hover:text-white hover:bg-white/[0.05] border border-transparent'
                   )}
                   aria-current={isActive ? 'page' : undefined}

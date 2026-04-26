@@ -173,11 +173,11 @@ export function DrawReviewAgent({
     return (
       <div className="rounded-lg border border-vektrum-blue/20 bg-vektrum-blue/10 p-5">
         <div className="flex items-center gap-2 mb-2">
-          <Shield size={16} className="text-vektrum-blue" />
+          <Shield size={16} className="text-blue-400" />
           <h4 className="text-sm font-semibold text-white">AI Draw Review</h4>
         </div>
         <div className="flex items-center gap-2 text-sm text-white/55">
-          <Loader2 size={14} className="animate-spin text-vektrum-blue" />
+          <Loader2 size={14} className="animate-spin text-blue-400" />
           AI review in progress — analyzing this draw request...
         </div>
         <p className="mt-1 text-xs text-white/65">This usually takes 10–15 seconds.</p>
@@ -189,7 +189,7 @@ export function DrawReviewAgent({
     return (
       <div className="rounded-lg border border-white/[0.08] bg-surface-2 p-5">
         <div className="flex items-center gap-2 mb-3">
-          <Shield size={16} className="text-vektrum-blue" />
+          <Shield size={16} className="text-blue-400" />
           <h4 className="text-sm font-semibold text-white">AI Draw Review</h4>
         </div>
         <div className="flex items-center gap-2 mb-3">
@@ -240,7 +240,7 @@ export function DrawReviewAgent({
       {/* Header */}
       <div className="px-5 py-3 border-b border-white/[0.05] flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Shield size={16} className="text-vektrum-blue" />
+          <Shield size={16} className="text-blue-400" />
           <h4 className="text-sm font-semibold text-white">AI Draw Review</h4>
           <span className="inline-flex items-center gap-1 text-xs text-emerald-400">
             <CheckCircle2 size={12} />
@@ -251,7 +251,7 @@ export function DrawReviewAgent({
           type="button"
           onClick={requestReview}
           disabled={isLoading}
-          className="inline-flex items-center gap-1 text-xs text-white/75 hover:text-vektrum-blue transition-colors disabled:opacity-40"
+          className="inline-flex items-center gap-1 text-xs text-white/75 hover:text-blue-300 transition-colors disabled:opacity-40"
         >
           <RefreshCw size={12} />
           Fresh Review

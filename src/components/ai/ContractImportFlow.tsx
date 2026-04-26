@@ -43,7 +43,7 @@ export function ContractImportFlow({ metadata, children, renderTrigger }: Props)
           <button
             type="button"
             onClick={openImport}
-            className="inline-flex items-center gap-2 rounded-xl border border-vektrum-blue/30 bg-vektrum-blue/5 px-4 py-2 text-[13px] font-semibold text-vektrum-blue hover:bg-vektrum-blue/10 hover:border-vektrum-blue/50 transition-all"
+            className="inline-flex items-center gap-2 rounded-xl border border-vektrum-blue/40 bg-vektrum-blue/10 px-4 py-2 text-[13px] font-semibold text-blue-300 hover:bg-vektrum-blue/[0.16] hover:border-vektrum-blue/60 transition-all"
           >
             <FileUp size={14} />
             Import from contract

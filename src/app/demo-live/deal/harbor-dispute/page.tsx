@@ -42,7 +42,7 @@ export default function HarborDisputeDealPage() {
   return (
     <div className="min-h-screen bg-surface-0">
     <div className="page-container section space-y-8">
-      <Link href={backHref} className="inline-flex items-center gap-1 text-[13px] text-white/55 hover:text-vektrum-blue transition-colors">
+      <Link href={backHref} className="inline-flex items-center gap-1 text-[13px] text-white/55 hover:text-blue-300 transition-colors">
         {backLabel}
       </Link>
 
@@ -95,8 +95,8 @@ export default function HarborDisputeDealPage() {
       </section>
 
       {/* Isolation callout */}
-      <div className="rounded-xl border border-vektrum-blue/20 bg-vektrum-blue/[0.08] p-4">
-        <p className="text-sm font-semibold text-vektrum-blue mb-1">Vektrum Milestone Isolation</p>
+      <div className="rounded-xl border border-vektrum-blue/30 bg-vektrum-blue/[0.10] p-4">
+        <p className="text-sm font-semibold text-blue-300 mb-1">Vektrum Milestone Isolation</p>
         <p className="text-sm text-white/55 leading-relaxed">
           The dispute on Milestone 5 does not freeze the rest of the project. Milestones 1–4 have already released {formatCurrency(7_640_000)} (84% of total). Milestone 6 has released the undisputed portion ({formatCurrency(1_633_000)}). Only the {formatCurrency(487_000)} in dispute is held.
         </p>

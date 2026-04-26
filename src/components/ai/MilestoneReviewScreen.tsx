@@ -76,7 +76,7 @@ function ConditionList({
       ))}
       <button
         onClick={() => onChange([...conditions, ''])}
-        className="text-[12px] text-vektrum-blue hover:text-vektrum-blue-hover transition-colors flex items-center gap-1"
+        className="text-[12px] text-blue-300 hover:text-blue-200 transition-colors flex items-center gap-1"
       >
         <Plus size={12} /> Add condition
       </button>
@@ -265,7 +265,7 @@ export function MilestoneReviewScreen({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-vektrum-blue mb-1">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-blue-300 mb-1">
             AI Contract Import
           </p>
           <h1 className="text-[1.75rem] font-bold tracking-[-0.03em] text-white">
@@ -328,7 +328,7 @@ export function MilestoneReviewScreen({
       {/* Add milestone */}
       <button
         onClick={addMilestone}
-        className="w-full rounded-xl border border-dashed border-white/[0.08] py-3.5 text-[13px] font-semibold text-white/55 hover:border-vektrum-blue/50 hover:text-vektrum-blue transition-all flex items-center justify-center gap-2"
+        className="w-full rounded-xl border border-dashed border-white/[0.08] py-3.5 text-[13px] font-semibold text-white/55 hover:border-vektrum-blue/50 hover:text-blue-300 transition-all flex items-center justify-center gap-2"
       >
         <Plus size={15} />
         Add milestone

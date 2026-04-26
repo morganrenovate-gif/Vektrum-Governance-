@@ -80,7 +80,7 @@ export default function DemoFunderPage() {
 
       {/* Demo info banner */}
       <div className="rounded-xl border border-vektrum-blue/20 bg-vektrum-blue/10 px-5 py-4">
-        <p className="text-[13px] text-vektrum-blue leading-relaxed">
+        <p className="text-[13px] text-blue-200 leading-relaxed">
           You&apos;re viewing the Funder dashboard as <strong>Sarah Chen</strong>. In the live app, this connects to your real portfolio.
         </p>
       </div>
@@ -90,7 +90,7 @@ export default function DemoFunderPage() {
         <div>
           <div className="mb-3 flex items-center gap-3">
             <div className="h-px w-5 bg-vektrum-blue" />
-            <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">Funder Dashboard</p>
+            <p className="text-[11px] tracking-[0.12em] uppercase text-blue-300 font-semibold">Funder Dashboard</p>
           </div>
           <h1 className="font-display text-[2.25rem] font-bold tracking-[-0.04em] text-white leading-[1.05]">
             Welcome back, Sarah
@@ -114,7 +114,7 @@ export default function DemoFunderPage() {
       >
         <div className="border-l-4 border-vektrum-blue px-5 py-4 border-b border-white/[0.06]">
           <div className="flex items-center gap-2">
-            <Lightbulb size={15} className="text-vektrum-blue" aria-hidden="true" />
+            <Lightbulb size={15} className="text-blue-400" aria-hidden="true" />
             <p className="text-[13px] font-semibold text-white">Weekly Intelligence Briefing</p>
           </div>
         </div>
@@ -248,13 +248,13 @@ export default function DemoFunderPage() {
               <Zap size={16} className="text-red-400" aria-hidden="true" />
             </div>
             <div>
-              <p className="text-[14px] font-semibold text-white group-hover:text-vektrum-blue transition-colors">
+              <p className="text-[14px] font-semibold text-white group-hover:text-blue-300 transition-colors">
                 Partial Dispute Scenario
               </p>
               <p className="mt-1 text-[13px] text-white/65 leading-relaxed">
                 See how Vektrum handles a flagged line item while keeping 84% of project funds flowing.
               </p>
-              <span className="mt-2 inline-flex items-center gap-1 text-[12px] font-semibold text-vektrum-blue">
+              <span className="mt-2 inline-flex items-center gap-1 text-[12px] font-semibold text-blue-300">
                 View Scenario
                 <ArrowRight size={12} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
               </span>
@@ -278,7 +278,7 @@ function StatTile({ label, value, icon: Icon, href }: { label: string; value: st
       <div className="flex items-start justify-between gap-3 mb-2">
         <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/75">{label}</p>
         <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08]">
-          <Icon size={13} className="text-vektrum-blue" aria-hidden="true" />
+          <Icon size={13} className="text-blue-400" aria-hidden="true" />
         </div>
       </div>
       <p className="font-display text-4xl font-bold tabular-nums leading-none text-white">{value}</p>
@@ -296,7 +296,7 @@ function MoneyTile({ label, amount, icon: Icon, href }: { label: string; amount:
       <div className="flex items-start justify-between gap-3 mb-2">
         <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/75">{label}</p>
         <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08]">
-          <Icon size={13} className="text-vektrum-blue" aria-hidden="true" />
+          <Icon size={13} className="text-blue-400" aria-hidden="true" />
         </div>
       </div>
       <p className="font-display text-2xl font-bold tabular-nums leading-none text-white">{formatCurrency(amount)}</p>

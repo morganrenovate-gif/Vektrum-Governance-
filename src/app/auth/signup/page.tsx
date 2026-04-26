@@ -96,7 +96,7 @@ export default function SignupPage() {
           </div>
           <Link
             href="/auth/login"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-vektrum-blue hover:underline"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-300 hover:text-blue-200 hover:underline"
           >
             Back to sign in
           </Link>
@@ -191,7 +191,7 @@ export default function SignupPage() {
                         <div>
                           <p className={cn(
                             "text-[13px] font-semibold",
-                            isSelected ? "text-vektrum-blue" : "text-white"
+                            isSelected ? "text-blue-300" : "text-white"
                           )}>
                             {label}
                           </p>
@@ -285,14 +285,14 @@ export default function SignupPage() {
             Already have an account?{" "}
             <Link
               href="/auth/login"
-              className="font-medium text-vektrum-blue hover:underline"
+              className="font-medium text-blue-300 hover:text-blue-200 hover:underline"
             >
               Sign in
             </Link>
           </p>
 
           <div className="mt-6 lg:hidden flex items-start gap-2 rounded-lg border border-white/[0.08] bg-surface-2 px-4 py-3">
-            <Shield size={14} className="text-vektrum-blue mt-0.5 flex-shrink-0" aria-hidden="true" />
+            <Shield size={14} className="text-blue-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
             <p className="text-xs text-white/55">
               Payments powered by Stripe Connect. Vektrum governs release — never holds your funds.
             </p>

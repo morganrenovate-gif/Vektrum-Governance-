@@ -66,7 +66,7 @@ export function DealCard({ deal, className, viewerRole }: DealCardProps) {
           {/* Title row */}
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
-              <h3 className="text-[14px] font-semibold tracking-[-0.01em] text-white group-hover:text-vektrum-blue transition-colors leading-tight truncate">
+              <h3 className="text-[14px] font-semibold tracking-[-0.01em] text-white group-hover:text-blue-300 transition-colors leading-tight truncate">
                 {deal.title}
               </h3>
 
@@ -91,7 +91,7 @@ export function DealCard({ deal, className, viewerRole }: DealCardProps) {
               <DealStatusBadge status={deal.status} />
               <ChevronRight
                 size={14}
-                className="text-white/60 group-hover:text-vektrum-blue transition-colors"
+                className="text-white/60 group-hover:text-blue-300 transition-colors"
                 aria-hidden="true"
               />
             </div>
@@ -111,7 +111,7 @@ export function DealCard({ deal, className, viewerRole }: DealCardProps) {
               <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/65 mb-1">
                 Funded
               </p>
-              <p className="text-[13px] font-semibold tabular-nums text-vektrum-blue font-mono tracking-tight">
+              <p className="text-[13px] font-semibold tabular-nums text-blue-300 font-mono tracking-tight">
                 {formatMoney(deal.funded_amount)}
               </p>
             </div>
@@ -172,7 +172,7 @@ export function DealCard({ deal, className, viewerRole }: DealCardProps) {
                   "text-[10px] font-semibold px-2 py-0.5 rounded-full border tracking-wide uppercase",
                   action.variant === 'danger'
                     ? "bg-red-500/10 text-red-400 border-red-500/20"
-                    : "bg-vektrum-blue/10 text-vektrum-blue border-vektrum-blue/20"
+                    : "bg-vektrum-blue/20 text-blue-300 border-vektrum-blue/40"
                 )}>
                   {action.label}
                 </span>

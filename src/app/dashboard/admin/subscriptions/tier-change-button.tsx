@@ -16,7 +16,7 @@ const TIER_LABELS: Record<SubscriptionTier, string> = {
 
 const TIER_COLORS: Record<SubscriptionTier, string> = {
   standalone:    'text-white/85',
-  institutional: 'text-vektrum-blue',
+  institutional: 'text-blue-300',
   enterprise:    'text-amber-400',
 }
 

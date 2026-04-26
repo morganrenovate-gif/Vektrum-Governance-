@@ -205,10 +205,10 @@ function AdminStatTile({
       <div className="flex items-start justify-between gap-3 mb-3">
         <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/65">{label}</p>
         <div className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08]`}>
-          <Icon size={13} className={warning ? 'text-amber-400' : 'text-vektrum-blue'} aria-hidden="true" />
+          <Icon size={13} className={warning ? 'text-amber-400' : 'text-blue-400'} aria-hidden="true" />
         </div>
       </div>
-      <p className={`font-display text-2xl font-bold tabular-nums leading-none break-all ${accent ? 'text-vektrum-blue' : warning ? 'text-amber-400' : 'text-white'}`}>
+      <p className={`font-display text-2xl font-bold tabular-nums leading-none break-all ${accent ? 'text-blue-300' : warning ? 'text-amber-400' : 'text-white'}`}>
         {value}
       </p>
       {sub && <p className="mt-1.5 text-[11px] text-white/60">{sub}</p>}
@@ -302,7 +302,7 @@ export default async function AdminDashboardPage() {
           <Users size={12} />
           {healthMetrics.onboardingBacklog} pending onboarding
         </div>
-        <div className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[12px] font-semibold border ${healthMetrics.blockedReleases > 0 ? 'bg-vektrum-blue/10 border-vektrum-blue/20 text-vektrum-blue' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'}`}>
+        <div className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[12px] font-semibold border ${healthMetrics.blockedReleases > 0 ? 'bg-vektrum-blue/10 border-vektrum-blue/30 text-blue-300' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'}`}>
           <Clock size={12} />
           {healthMetrics.blockedReleases} releases pending
         </div>
@@ -310,7 +310,7 @@ export default async function AdminDashboardPage() {
           <AlertTriangle size={12} />
           {healthMetrics.openDisputes} open disputes
         </div>
-        <div className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[12px] font-semibold border ${healthMetrics.recentRoleChanges > 0 ? 'bg-vektrum-blue/10 border-vektrum-blue/20 text-vektrum-blue' : 'bg-white/[0.05] border-white/[0.12] text-white/75'}`}>
+        <div className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[12px] font-semibold border ${healthMetrics.recentRoleChanges > 0 ? 'bg-vektrum-blue/10 border-vektrum-blue/30 text-blue-300' : 'bg-white/[0.05] border-white/[0.12] text-white/75'}`}>
           <Shield size={12} />
           {healthMetrics.recentRoleChanges} role changes (7d)
         </div>
@@ -356,7 +356,7 @@ export default async function AdminDashboardPage() {
           >
             <div className="flex items-start justify-between gap-3 mb-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-vektrum-blue/10 border border-vektrum-blue/20">
-                <Building2 size={15} className="text-vektrum-blue" aria-hidden="true" />
+                <Building2 size={15} className="text-blue-400" aria-hidden="true" />
               </div>
             </div>
             <p className="text-[13px] font-semibold text-white mb-1">Partners / API Integrations</p>
@@ -500,7 +500,7 @@ export default async function AdminDashboardPage() {
                   : entry.action?.includes('blocked') || entry.action?.includes('dispute') || entry.action?.includes('failed')
                   ? 'text-amber-400'
                   : entry.action?.includes('ai_draw_review')
-                  ? 'text-vektrum-blue'
+                  ? 'text-blue-300'
                   : 'text-white/75'
 
                 // Exact UTC timestamp — never relative time for audit records
@@ -536,7 +536,7 @@ export default async function AdminDashboardPage() {
             <div className="border-t border-white/[0.05] px-5 py-3 bg-white/[0.02]">
               <Link
                 href="/dashboard/audit"
-                className="text-[13px] font-medium text-vektrum-blue hover:text-vektrum-blue-hover transition-colors"
+                className="text-[13px] font-medium text-blue-300 hover:text-blue-200 transition-colors"
               >
                 View full audit log &rarr;
               </Link>

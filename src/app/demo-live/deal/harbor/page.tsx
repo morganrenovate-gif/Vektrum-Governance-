@@ -13,7 +13,7 @@ const deal = harbor
 
 const STATUS_CONFIG: Record<DemoMilestoneStatus, { label: string; badge: string; border: string }> = {
   released:        { label: 'Released',         badge: 'bg-emerald-500/[0.12] text-emerald-400 border border-emerald-500/20',    border: 'border-l-4 border-emerald-500' },
-  approved:        { label: 'Approved',          badge: 'bg-vektrum-blue/10 text-vektrum-blue border border-vektrum-blue/20',      border: 'border-l-4 border-vektrum-blue' },
+  approved:        { label: 'Approved',          badge: 'bg-vektrum-blue/20 text-blue-300 border border-vektrum-blue/40',         border: 'border-l-4 border-vektrum-blue' },
   ready_for_review:{ label: 'Ready for Review',  badge: 'bg-amber-500/[0.12] text-amber-400 border border-amber-500/20',          border: 'border-l-4 border-amber-500' },
   in_progress:     { label: 'In Progress',       badge: 'bg-white/[0.06] text-white/50 border border-white/[0.08]',               border: 'border-l-4 border-white/20' },
   not_started:     { label: 'Not Started',       badge: 'bg-white/[0.04] text-white/65 border border-white/[0.06]',               border: 'border-l-4 border-white/[0.08]' },
@@ -58,7 +58,7 @@ export default function HarborDealPage() {
   return (
     <div className="min-h-screen bg-surface-0">
     <div className="page-container section space-y-8">
-      <Link href={backHref} className="inline-flex items-center gap-1 text-[13px] text-white/55 hover:text-vektrum-blue transition-colors">
+      <Link href={backHref} className="inline-flex items-center gap-1 text-[13px] text-white/55 hover:text-blue-300 transition-colors">
         {backLabel}
       </Link>
 
@@ -113,7 +113,7 @@ export default function HarborDealPage() {
 
                   <div className="flex items-center gap-2 flex-wrap">
                     {status === 'approved' && ms.aiScore && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-vektrum-blue/[0.08] border border-vektrum-blue/20 px-2 py-0.5 text-[11px] font-medium text-vektrum-blue">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-vektrum-blue/[0.12] border border-vektrum-blue/30 px-2 py-0.5 text-[11px] font-medium text-blue-300">
                         <Brain size={11} /> AI: {ms.aiScore}/100
                       </span>
                     )}

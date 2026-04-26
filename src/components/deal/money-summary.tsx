@@ -146,7 +146,7 @@ export function MoneySummary({
                 Full funder commitment including governance
               </p>
             </div>
-            <span className="text-[15px] font-bold tabular-nums text-vektrum-blue">
+            <span className="text-[15px] font-bold tabular-nums text-blue-300">
               {formatMoney(facilityTotal!)}
             </span>
           </div>
