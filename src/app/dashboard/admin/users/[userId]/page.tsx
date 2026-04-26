@@ -22,25 +22,36 @@ import {
   FileText,
 } from 'lucide-react'
 
+export const metadata = { title: 'User Detail — Admin — Vektrum' }
+
 // ─── Data fetching ────────────────────────────────────────────────────────────
+// Select only columns confirmed present in the admin dashboard queries.
+// Deliberately excludes subscription_tier — not selected elsewhere in admin
+// queries, may not be present in Supabase generated types for all envs.
 
 async function getUserDetail(targetUserId: string): Promise<{
-  profile: (Profile & { company_name?: string | null }) | null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  profile: any | null
   email: string | null
-  deals: Deal[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  deals: any[]
 }> {
   const adminClient = createSupabaseAdminClient()
 
-  // Load profile from DB
-  const { data: profileRow } = await adminClient
+  // Load profile — same column set as getAdminData() in /dashboard/admin/page.tsx
+  const { data: profileRow, error: profileError } = await adminClient
     .from('profiles')
     .select(
       'id, role, full_name, company_name, stripe_account_id, ' +
-      'stripe_payouts_enabled, onboarding_complete, subscription_tier, ' +
-      'created_at, updated_at'
+      'stripe_payouts_enabled, onboarding_complete, created_at'
     )
     .eq('id', targetUserId)
     .maybeSingle()
+
+  if (profileError) {
+    console.error('[admin/users] profile query error:', profileError.message)
+    return { profile: null, email: null, deals: [] }
+  }
 
   if (!profileRow) return { profile: null, email: null, deals: [] }
 
@@ -53,23 +64,30 @@ async function getUserDetail(targetUserId: string): Promise<{
     // Non-fatal — email display is best-effort
   }
 
-  // Load all deals where the user is contractor or funder
-  const { data: dealsRaw } = await adminClient
-    .from('deals')
-    .select(
-      'id, title, status, total_amount, funded_amount, released_amount, ' +
-      'contractor_id, funder_id, created_at'
-    )
-    .or(`contractor_id.eq.${targetUserId},funder_id.eq.${targetUserId}`)
-    .order('created_at', { ascending: false })
+  // Load deals — two queries instead of .or() for maximum compatibility
+  const [{ data: contractorDeals }, { data: funderDeals }] = await Promise.all([
+    adminClient
+      .from('deals')
+      .select('id, title, status, total_amount, funded_amount, released_amount, contractor_id, funder_id, created_at')
+      .eq('contractor_id', targetUserId)
+      .order('created_at', { ascending: false }),
+    adminClient
+      .from('deals')
+      .select('id, title, status, total_amount, funded_amount, released_amount, contractor_id, funder_id, created_at')
+      .eq('funder_id', targetUserId)
+      .order('created_at', { ascending: false }),
+  ])
 
-  return {
+  // Merge and deduplicate (a user could theoretically appear on both sides)
+  const seen = new Set<string>()
+  const allDeals: unknown[] = []
+  for (const deal of [...(contractorDeals ?? []), ...(funderDeals ?? [])]) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    profile: profileRow as unknown as Profile & { company_name?: string | null },
-    email,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    deals: (dealsRaw ?? []) as unknown as Deal[],
+    const d = deal as any
+    if (!seen.has(d.id)) { seen.add(d.id); allDeals.push(d) }
   }
+
+  return { profile: profileRow, email, deals: allDeals }
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -97,10 +115,6 @@ function fmtDate(iso: string) {
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
-
-export async function generateMetadata({ params }: { params: Promise<{ userId: string }> }) {
-  return { title: 'User Detail — Admin — Vektrum' }
-}
 
 export default async function AdminUserDetailPage({
   params,
@@ -131,10 +145,12 @@ export default async function AdminUserDetailPage({
   if (!profile) notFound()
 
   // ── Partition deals by relationship ───────────────────────────────────────
-  const dealsAsFunder     = deals.filter((d) => d.funder_id     === userId)
-  const dealsAsContractor = deals.filter((d) => d.contractor_id === userId)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const dealsAsFunder     = deals.filter((d: any) => d.funder_id     === userId)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const dealsAsContractor = deals.filter((d: any) => d.contractor_id === userId)
 
-  const stripeOk  = profile.stripe_payouts_enabled
+  const stripeOk  = !!profile.stripe_payouts_enabled
   const hasStripe = !!profile.stripe_account_id
 
   return (
@@ -180,7 +196,7 @@ export default async function AdminUserDetailPage({
             {/* Role badge */}
             <span
               className={`inline-flex self-start rounded-full border px-3 py-1 text-[11px] font-semibold capitalize flex-shrink-0 ${
-                ROLE_COLORS[profile.role] ?? 'bg-surface-3 border-white/[0.12] text-white/80'
+                ROLE_COLORS[profile.role as string] ?? 'bg-surface-3 border-white/[0.12] text-white/80'
               }`}
             >
               {profile.role}
@@ -188,7 +204,7 @@ export default async function AdminUserDetailPage({
           </div>
 
           {/* Meta grid */}
-          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
 
             {/* Stripe status */}
             <div className="rounded-lg bg-surface-3 border border-white/[0.06] px-4 py-3">
@@ -240,16 +256,6 @@ export default async function AdminUserDetailPage({
                 </span>
               </div>
             </div>
-
-            {/* Subscription tier */}
-            <div className="rounded-lg bg-surface-3 border border-white/[0.06] px-4 py-3">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-white/50 mb-1.5">
-                Plan
-              </p>
-              <span className="text-[12px] font-medium text-white/80 capitalize">
-                {profile.subscription_tier ?? 'standalone'}
-              </span>
-            </div>
           </div>
 
           {/* User ID — read-only reference for support */}
@@ -275,7 +281,7 @@ export default async function AdminUserDetailPage({
                 </span>
               </h2>
             </div>
-            <DealTable deals={dealsAsFunder} currentUserId={userId} role="funder" />
+            <DealTable deals={dealsAsFunder} role="funder" />
           </section>
         )}
 
@@ -293,7 +299,7 @@ export default async function AdminUserDetailPage({
                 </span>
               </h2>
             </div>
-            <DealTable deals={dealsAsContractor} currentUserId={userId} role="contractor" />
+            <DealTable deals={dealsAsContractor} role="contractor" />
           </section>
         )}
 
@@ -317,11 +323,10 @@ export default async function AdminUserDetailPage({
 
 function DealTable({
   deals,
-  currentUserId,
   role,
 }: {
-  deals: Deal[]
-  currentUserId: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  deals: any[]
   role: 'funder' | 'contractor'
 }) {
   return (
@@ -338,7 +343,7 @@ function DealTable({
       <div className="divide-y divide-white/[0.04]">
         {deals.map((deal) => {
           const statusClass =
-            STATUS_COLORS[deal.status] ?? 'bg-white/[0.04] border-white/[0.08] text-white/50'
+            STATUS_COLORS[deal.status as string] ?? 'bg-white/[0.04] border-white/[0.08] text-white/50'
 
           return (
             <div
@@ -348,29 +353,27 @@ function DealTable({
               {/* Title */}
               <div className="min-w-0">
                 <p className="text-[13px] font-semibold text-white truncate">{deal.title}</p>
-                <p className="text-[10px] font-mono text-white/35 mt-0.5">{deal.id.slice(0, 8)}…</p>
+                <p className="text-[10px] font-mono text-white/35 mt-0.5">{String(deal.id).slice(0, 8)}…</p>
               </div>
 
               {/* Status badge */}
               <div>
-                <span
-                  className={`inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-semibold capitalize ${statusClass}`}
-                >
-                  {deal.status.replace('_', ' ')}
+                <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-semibold capitalize ${statusClass}`}>
+                  {String(deal.status).replace('_', ' ')}
                 </span>
               </div>
 
               {/* Total */}
               <div>
                 <span className="text-[13px] tabular-nums text-white/80">
-                  {formatMoney(deal.total_amount)}
+                  {formatMoney(Number(deal.total_amount))}
                 </span>
               </div>
 
               {/* Released */}
               <div>
                 <span className="text-[13px] tabular-nums text-white/65">
-                  {formatMoney(deal.released_amount)}
+                  {formatMoney(Number(deal.released_amount))}
                 </span>
               </div>
 
@@ -391,7 +394,7 @@ function DealTable({
 
       <div className="border-t border-white/[0.05] px-5 py-3 bg-white/[0.015]">
         <p className="text-[11px] text-white/40">
-          {deals.length} deal{deals.length !== 1 ? 's' : ''} as {role} · All financial actions are governed by the release gate.
+          {deals.length} deal{deals.length !== 1 ? 's' : ''} as {role} · All financial actions governed by the release gate.
         </p>
       </div>
     </div>
