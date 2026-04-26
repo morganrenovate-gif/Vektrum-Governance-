@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { CheckCircle2, AlertCircle, Brain, FileText, ChevronDown, ChevronUp } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format'
-import { harborDisputeMilestones } from '@/lib/demo-data'
+import { harborDisputeMilestones, DEMO_RESET_EVENT } from '@/lib/demo-data'
 import type { DisputeMilestone } from '@/lib/demo-data'
 import { ResolveDisputeModal } from '@/components/demo/ResolveDisputeModal'
 import { AiReviewModal } from '@/components/demo/AiReviewModal'
@@ -25,6 +25,17 @@ export default function HarborDisputeDealPage() {
   const [aiModal, setAiModal] = useState(false)
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
   const [disputeResolved, setDisputeResolved] = useState(false)
+
+  useEffect(() => {
+    const onReset = () => {
+      setResolveModal(false)
+      setAiModal(false)
+      setExpanded({})
+      setDisputeResolved(false)
+    }
+    window.addEventListener(DEMO_RESET_EVENT, onReset)
+    return () => window.removeEventListener(DEMO_RESET_EVENT, onReset)
+  }, [])
 
   const pct = DEAL_TOTAL > 0 ? Math.round((DEAL_RELEASED / DEAL_TOTAL) * 100) : 0
 

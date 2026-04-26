@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { CheckCircle2, ChevronDown, ChevronUp, Brain, FileText } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format'
-import { harbor } from '@/lib/demo-data'
+import { harbor, DEMO_RESET_EVENT } from '@/lib/demo-data'
 import type { DemoMilestoneStatus } from '@/lib/demo-data'
 import { ReleaseFundsModal } from '@/components/demo/ReleaseFundsModal'
 
@@ -30,6 +30,17 @@ export default function HarborDealPage() {
   const [newlyReleased, setNewlyReleased] = useState<Set<string>>(new Set())
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
   const [releaseModal, setReleaseModal] = useState(false)
+
+  useEffect(() => {
+    const onReset = () => {
+      setOverrides({})
+      setNewlyReleased(new Set())
+      setExpanded({})
+      setReleaseModal(false)
+    }
+    window.addEventListener(DEMO_RESET_EVENT, onReset)
+    return () => window.removeEventListener(DEMO_RESET_EVENT, onReset)
+  }, [])
 
   function getStatus(id: string, defaultStatus: DemoMilestoneStatus): DemoMilestoneStatus {
     return overrides[id] ?? defaultStatus

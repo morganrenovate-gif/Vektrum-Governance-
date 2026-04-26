@@ -10,6 +10,8 @@
  *   5. Reset is idempotent — two calls return identical structure
  *   6. Response body never contains values from env secrets
  *   7. Response carries an explicit JSON summary with ok, message, and scope
+ *   9a. DEMO_RESET_EVENT constant equals the documented event name string
+ *   9b. No demo files use localStorage or sessionStorage (all state is React useState)
  *
  * Design notes:
  *   - The route imports ONLY next/server; no Supabase, no auth, no DB.
@@ -29,7 +31,7 @@ import { fileURLToPath } from 'url'
 import { createRequire } from 'module'
 import { NextRequest, NextResponse } from 'next/server'
 import {
-  riverside, harbor, westside, harborDisputeMilestones,
+  riverside, harbor, westside, harborDisputeMilestones, DEMO_RESET_EVENT,
 } from '../src/lib/demo-data/index'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -351,6 +353,52 @@ await test('DEMO IDs: all demo milestone IDs are non-UUID slugs (cannot match re
     assert(
       /^ms-[a-z]+-\d+$/.test(id),
       `Demo ID "${id}" does not match expected slug pattern ms-<prefix>-<digit>`,
+    )
+  }
+})
+
+// ── 9a. DEMO_RESET_EVENT constant value is the documented event name ──────────
+//
+// Any component that listens for this event and any tool that dispatches it
+// must use the same string. This test pins the value so a rename is caught
+// immediately rather than silently breaking the reset mechanism.
+
+await test('EVENT: DEMO_RESET_EVENT constant equals "vektrum:demo-reset"', () => {
+  assert(
+    DEMO_RESET_EVENT === 'vektrum:demo-reset',
+    `Expected DEMO_RESET_EVENT="vektrum:demo-reset", got "${DEMO_RESET_EVENT}"`,
+  )
+})
+
+// ── 9b. No demo files use localStorage or sessionStorage ─────────────────────
+//
+// Demo state is React useState only. If localStorage is ever introduced we
+// want a failing test to remind the developer to add a clear() call to
+// DemoResetButton and this test suite.
+
+await test('STORAGE: no demo files use localStorage or sessionStorage', async () => {
+  const { execSync } = await import('child_process')
+  const demoFiles = [
+    'src/app/demo-live',
+    'src/components/demo',
+    'src/lib/demo-data',
+  ]
+
+  for (const dir of demoFiles) {
+    let output = ''
+    try {
+      output = execSync(
+        `grep -r --include="*.ts" --include="*.tsx" -l "localStorage\\|sessionStorage" "${dir}"`,
+        { cwd: ROOT, encoding: 'utf-8' },
+      ).trim()
+    } catch {
+      // grep exits 1 when no matches — that's the expected case
+      output = ''
+    }
+    assert(
+      output === '',
+      `Found localStorage/sessionStorage usage in ${dir}: ${output} — ` +
+      `these keys must be cleared by DemoResetButton and documented in tests`,
     )
   }
 })
