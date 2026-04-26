@@ -15,7 +15,7 @@ import type { Profile, Deal } from '@/lib/types'
 import { formatMoney } from '@/lib/utils'
 import {
   Users, DollarSign, AlertTriangle, FileText,
-  CheckCircle2, Clock, XCircle, Shield, Activity, Zap
+  CheckCircle2, Clock, XCircle, Shield, Activity, Zap, Building2
 } from 'lucide-react'
 import { DisputeQueue } from '@/components/admin/dispute-queue'
 import { UserTable } from '@/components/admin/user-table'
@@ -262,13 +262,20 @@ export default async function AdminDashboardPage() {
         title="Platform Overview"
         description="Read-only. All financial actions require the 10-condition release gate."
         action={
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Link
               href="/dashboard/admin/ops"
               className="inline-flex items-center gap-2 rounded-xl border border-white/[0.22] bg-white/[0.09] px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/[0.14] hover:border-white/[0.32] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-all self-start"
             >
               <Activity size={14} aria-hidden="true" />
               Ops Dashboard
+            </Link>
+            <Link
+              href="/dashboard/admin/partners"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/[0.22] bg-white/[0.09] px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/[0.14] hover:border-white/[0.32] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-all self-start"
+            >
+              <Building2 size={14} aria-hidden="true" />
+              Partners / API Integrations
             </Link>
             <Link
               href="/dashboard/audit"
@@ -337,6 +344,57 @@ export default async function AdminDashboardPage() {
           <StatBlock inline label="Total Released" value={formatMoney(totalReleased)} money />
           <StatBlock inline label="Open Disputes" value={openDisputes.length} alert={openDisputes.length > 0} />
         </MetricStrip>
+      </section>
+
+      {/* ── Section: Admin Navigation ────────────────────────────────────── */}
+      <section>
+        <SectionHeader label="Admin Tools" />
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <Link
+            href="/dashboard/admin/partners"
+            className="group rounded-xl border border-white/[0.08] bg-surface-2 shadow-card px-5 py-5 hover:border-vektrum-blue/30 hover:bg-surface-3 transition-all"
+          >
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-vektrum-blue/10 border border-vektrum-blue/20">
+                <Building2 size={15} className="text-vektrum-blue" aria-hidden="true" />
+              </div>
+            </div>
+            <p className="text-[13px] font-semibold text-white mb-1">Partners / API Integrations</p>
+            <p className="text-[12px] text-white/55 leading-relaxed">
+              Create partners, issue API keys, rotate credentials, and assign deals.
+            </p>
+          </Link>
+
+          <Link
+            href="/dashboard/admin/ops"
+            className="group rounded-xl border border-white/[0.08] bg-surface-2 shadow-card px-5 py-5 hover:border-white/[0.18] hover:bg-surface-3 transition-all"
+          >
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08]">
+                <Activity size={15} className="text-white/65" aria-hidden="true" />
+              </div>
+            </div>
+            <p className="text-[13px] font-semibold text-white mb-1">Ops Dashboard</p>
+            <p className="text-[12px] text-white/55 leading-relaxed">
+              Release health, webhook monitoring, external release queue, and ops search.
+            </p>
+          </Link>
+
+          <Link
+            href="/dashboard/audit"
+            className="group rounded-xl border border-white/[0.08] bg-surface-2 shadow-card px-5 py-5 hover:border-white/[0.18] hover:bg-surface-3 transition-all"
+          >
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08]">
+                <FileText size={15} className="text-white/65" aria-hidden="true" />
+              </div>
+            </div>
+            <p className="text-[13px] font-semibold text-white mb-1">Full Audit Log</p>
+            <p className="text-[12px] text-white/55 leading-relaxed">
+              Immutable, tamper-evident log of all platform events and admin actions.
+            </p>
+          </Link>
+        </div>
       </section>
 
       {/* ── Section: Invite New Admin ────────────────────────────────────── */}

@@ -10,14 +10,14 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <div className="bg-vektrum-bg">
+    <div className="bg-surface-0">
       <div className="mx-auto max-w-3xl px-6 sm:px-8 py-16 sm:py-20">
 
         <div className="mb-10">
           <h1 className="font-display text-2xl sm:text-3xl font-bold text-white tracking-[-0.025em]">
             Contact
           </h1>
-          <p className="mt-3 text-[15px] leading-relaxed text-white/55">
+          <p className="mt-3 text-[15px] leading-relaxed text-white/65">
             For institutional buyers, a call is the fastest path to onboarding.
             For everything else, email works.
           </p>
@@ -26,15 +26,15 @@ export default function ContactPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
 
           {/* Book a call — primary */}
-          <div className="rounded-2xl border border-vektrum-blue/25 bg-vektrum-blue/[0.05] p-6 flex flex-col gap-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-vektrum-blue/15">
-              <Calendar size={18} className="text-vektrum-blue" />
+          <div className="rounded-2xl border border-vektrum-blue/30 bg-vektrum-blue/10 p-6 flex flex-col gap-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-vektrum-blue/20">
+              <Calendar size={18} className="text-vektrum-blue-subtle" />
             </div>
             <div>
               <h2 className="text-[15px] font-semibold text-white mb-1">
                 Book a call
               </h2>
-              <p className="text-[13px] leading-relaxed text-white/55">
+              <p className="text-[13px] leading-relaxed text-white/65">
                 Institutional funders, lenders, and platform integrators — schedule
                 a 30-minute onboarding call with the Vektrum team.
               </p>
@@ -52,19 +52,19 @@ export default function ContactPage() {
           {/* Email */}
           <div className="rounded-2xl border border-white/[0.08] bg-surface-2 p-6 flex flex-col gap-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.06]">
-              <Mail size={18} className="text-white/55" />
+              <Mail size={18} className="text-white/65" />
             </div>
             <div>
               <h2 className="text-[15px] font-semibold text-white mb-1">
                 Email
               </h2>
-              <p className="text-[13px] leading-relaxed text-white/55">
+              <p className="text-[13px] leading-relaxed text-white/65">
                 General inquiries, support questions, and vendor due diligence packages.
               </p>
             </div>
             <a
               href="mailto:operations@vektrum.io"
-              className="mt-auto text-[14px] font-medium text-vektrum-blue hover:underline"
+              className="mt-auto text-[14px] font-medium text-vektrum-blue-subtle hover:text-white transition-colors"
             >
               operations@vektrum.io
             </a>
@@ -72,10 +72,10 @@ export default function ContactPage() {
 
         </div>
 
-        <div className="mt-8 rounded-xl border border-white/[0.06] bg-surface-2 px-5 py-4">
-          <p className="text-[13px] leading-relaxed text-white/50">
+        <div className="mt-8 rounded-xl border border-white/[0.08] bg-surface-2 px-5 py-4">
+          <p className="text-[13px] leading-relaxed text-white/65">
             Self-serve: contractors and standalone funders can{' '}
-            <Link href="/auth/signup" className="text-white/70 hover:text-white underline underline-offset-2">
+            <Link href="/auth/signup" className="text-white/80 hover:text-white underline underline-offset-2">
               create a free account
             </Link>{' '}
             and start a deal without a call. Institutional onboarding (portfolio setup,

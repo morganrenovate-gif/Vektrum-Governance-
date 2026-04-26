@@ -130,7 +130,7 @@ export default function HelpPage() {
       </section>
 
       {/* ─── FAQ ───────────────────────────────────────────────────────────── */}
-      <section className="bg-vektrum-bg py-16 sm:py-20">
+      <section className="bg-[#0A1628] py-16 sm:py-20">
         <div className="max-w-3xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="space-y-4">
             {FAQ.map((item) => (
