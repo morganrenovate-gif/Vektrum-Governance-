@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { CheckCircle2, ChevronDown, ChevronUp, Brain, FileText, Paperclip, Sparkles } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format'
-import { riverside } from '@/lib/demo-data'
+import { riverside, DEMO_RESET_EVENT } from '@/lib/demo-data'
 import type { DemoMilestoneStatus } from '@/lib/demo-data'
 import { DrawRequestModal } from '@/components/demo/DrawRequestModal'
 import { ReleaseFundsModal } from '@/components/demo/ReleaseFundsModal'
@@ -36,6 +36,23 @@ export default function RiversideDealPage() {
   const [releaseModal, setReleaseModal] = useState(false)
   const [aiModal, setAiModal] = useState(false)
   const [uploadModal, setUploadModal] = useState(false)
+
+  // Reset all local state when the demo reset event fires.
+  // Empty dep array is safe: React setState setters are stable and initial
+  // values are all literals — no stale-closure risk.
+  useEffect(() => {
+    const onReset = () => {
+      setOverrides({})
+      setNewlyReleased(new Set())
+      setExpanded({})
+      setDrawModal(false)
+      setReleaseModal(false)
+      setAiModal(false)
+      setUploadModal(false)
+    }
+    window.addEventListener(DEMO_RESET_EVENT, onReset)
+    return () => window.removeEventListener(DEMO_RESET_EVENT, onReset)
+  }, [])
 
   function getStatus(id: string, defaultStatus: DemoMilestoneStatus): DemoMilestoneStatus {
     return overrides[id] ?? defaultStatus

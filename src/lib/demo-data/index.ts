@@ -1,6 +1,23 @@
 // ── Demo Data ────────────────────────────────────────────────────────────────
 // Hardcoded mock data for all 4 demo deals. No real API calls.
 
+/**
+ * Browser CustomEvent name dispatched by DemoResetButton after a successful
+ * POST /api/demo/reset call. All stateful demo components listen for this
+ * event to restore their initial state without requiring a full page reload.
+ *
+ * Usage (dispatch):
+ *   window.dispatchEvent(new CustomEvent(DEMO_RESET_EVENT))
+ *
+ * Usage (listen):
+ *   useEffect(() => {
+ *     const onReset = () => { setFoo(initial); ... }
+ *     window.addEventListener(DEMO_RESET_EVENT, onReset)
+ *     return () => window.removeEventListener(DEMO_RESET_EVENT, onReset)
+ *   }, [])
+ */
+export const DEMO_RESET_EVENT = 'vektrum:demo-reset'
+
 export type DemoMilestoneStatus =
   | 'not_started'
   | 'in_progress'

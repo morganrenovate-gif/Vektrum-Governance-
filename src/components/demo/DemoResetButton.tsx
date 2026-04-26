@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { RotateCcw, CheckCircle2, Loader2 } from 'lucide-react'
+import { DEMO_RESET_EVENT } from '@/lib/demo-data'
 
 type Variant = 'banner' | 'admin'
 type ResetState = 'idle' | 'loading' | 'done'
@@ -33,6 +34,11 @@ export function DemoResetButton({ variant = 'banner' }: DemoResetButtonProps) {
     } catch {
       // Swallow fetch errors — the navigation achieves the reset regardless.
     }
+
+    // Broadcast reset event so every in-page demo component immediately
+    // restores its initial state. This fires before the 1100 ms navigation
+    // delay so users see buttons snap back to baseline while still on-screen.
+    window.dispatchEvent(new CustomEvent(DEMO_RESET_EVENT))
 
     setResetState('done')
 

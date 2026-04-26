@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { X, CheckCircle2, AlertTriangle, Loader2, ShieldCheck, ArrowLeft } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format'
 import { calculateFee } from '@/lib/engine/billing'
+import { DEMO_RESET_EVENT } from '@/lib/demo-data'
 
 interface ReleaseFundsModalProps {
   open: boolean
@@ -45,6 +46,7 @@ export function ReleaseFundsModal({
   const [releaseTimestamp, setReleaseTimestamp] = useState<string>('')
   const [refId] = useState<string>(() => generateRefId())
   const cancelRef = useRef<HTMLButtonElement>(null)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Reset to review phase whenever modal opens
   useEffect(() => {
@@ -52,6 +54,19 @@ export function ReleaseFundsModal({
       setPhase('review')
     }
   }, [open])
+
+  // Cancel any in-flight release timer when demo is reset
+  useEffect(() => {
+    const onReset = () => {
+      if (timerRef.current !== null) {
+        clearTimeout(timerRef.current)
+        timerRef.current = null
+      }
+      setPhase('review')
+    }
+    window.addEventListener(DEMO_RESET_EVENT, onReset)
+    return () => window.removeEventListener(DEMO_RESET_EVENT, onReset)
+  }, [])
 
   // On confirm phase mount, move initial focus to Cancel — not the release button
   useEffect(() => {
@@ -68,7 +83,8 @@ export function ReleaseFundsModal({
 
   function handleRelease() {
     setPhase('loading')
-    setTimeout(() => {
+    timerRef.current = setTimeout(() => {
+      timerRef.current = null
       setReleaseTimestamp(formatTimestamp(new Date()))
       setPhase('success')
       onConfirm()
