@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Vektrum Partner API",
-    "description": "Partner API for confirming and failing external release executions on Vektrum-authorized construction disbursements.\n\nBase URL: {{base_url}}\n\nAuthentication: Bearer token — set `partner_api_key` in the environment.\n\nAll requests are scoped to the authenticated partner's deals only. Every call is written to the Vektrum audit log.",
+    "description": "Partner API for confirming and failing external release executions on Vektrum-authorized construction disbursements.\n\nBase URL: {{base_url}}\n\nAuthentication: Bearer token \u2014 set `partner_api_key` in the environment.\n\nAll requests are scoped to the authenticated partner's deals only. Every call is written to the Vektrum audit log.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "version": {
       "major": 1,
@@ -32,14 +32,21 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/partner/releases/{{release_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "partner", "releases", "{{release_id}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "partner",
+                "releases",
+                "{{release_id}}"
+              ]
             },
             "description": "Retrieve the current status of a release.\n\nReturns the release ID, deal and milestone context, amount breakdown, execution status, execution rail, and authorization timestamp.\n\nOnly returns releases that belong to the authenticated partner's deals."
           },
           "response": [
             {
-              "name": "200 OK — Pending release",
+              "name": "200 OK \u2014 Pending release",
               "status": "OK",
               "code": 200,
               "header": [
@@ -48,14 +55,21 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"release\": {\n    \"id\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n    \"deal_id\": \"d1e2f3a4-b5c6-7890-abcd-ef1234567891\",\n    \"deal_title\": \"Riverside Phase 2\",\n    \"milestone_id\": \"m1n2o3p4-q5r6-7890-abcd-ef1234567892\",\n    \"milestone_title\": \"Foundation Complete\",\n    \"amount\": 125000,\n    \"fee_amount\": 1250,\n    \"retainage_amount\": 6250,\n    \"net_to_contractor\": 117500,\n    \"execution_status\": \"pending\",\n    \"execution_rail\": \"external_manual\",\n    \"execution_notes\": null,\n    \"authorized_at\": \"2025-04-15T14:32:00.000Z\"\n  }\n}",
+              "body": "{\n  \"release\": {\n    \"id\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n    \"deal_id\": \"d1e2f3a4-b5c6-7890-abcd-ef1234567891\",\n    \"deal_title\": \"Riverside Phase 2\",\n    \"milestone_id\": \"m1n2o3p4-q5r6-7890-abcd-ef1234567892\",\n    \"milestone_title\": \"Foundation Complete\",\n    \"amount\": 125000,\n    \"fee_amount\": 1250,\n    \"retainage_amount\": 6250,\n    \"net_to_contractor\": 118750,\n    \"execution_status\": \"pending\",\n    \"execution_rail\": \"external_manual\",\n    \"execution_notes\": null,\n    \"authorized_at\": \"2025-04-15T14:32:00.000Z\"\n  }\n}",
               "originalRequest": {
                 "method": "GET",
                 "header": [],
                 "url": {
                   "raw": "{{base_url}}/api/partner/releases/{{release_id}}",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "partner", "releases", "{{release_id}}"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "partner",
+                    "releases",
+                    "{{release_id}}"
+                  ]
                 }
               }
             },
@@ -75,8 +89,15 @@
                 "header": [],
                 "url": {
                   "raw": "{{base_url}}/api/partner/releases/{{release_id}}",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "partner", "releases", "{{release_id}}"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "partner",
+                    "releases",
+                    "{{release_id}}"
+                  ]
                 }
               }
             },
@@ -96,8 +117,15 @@
                 "header": [],
                 "url": {
                   "raw": "{{base_url}}/api/partner/releases/{{release_id}}",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "partner", "releases", "{{release_id}}"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "partner",
+                    "releases",
+                    "{{release_id}}"
+                  ]
                 }
               }
             },
@@ -117,8 +145,15 @@
                 "header": [],
                 "url": {
                   "raw": "{{base_url}}/api/partner/releases/{{release_id}}",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "partner", "releases", "{{release_id}}"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "partner",
+                    "releases",
+                    "{{release_id}}"
+                  ]
                 }
               }
             }
@@ -187,14 +222,22 @@
             },
             "url": {
               "raw": "{{base_url}}/api/partner/releases/{{release_id}}/confirm",
-              "host": ["{{base_url}}"],
-              "path": ["api", "partner", "releases", "{{release_id}}", "confirm"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "partner",
+                "releases",
+                "{{release_id}}",
+                "confirm"
+              ]
             },
-            "description": "Confirm that an external payment was executed. Records the payment method, reference, and proof in the Vektrum audit trail.\n\n**Only available for:**\n- `execution_rail` = `external_manual`\n- `execution_status` = `pending`\n\n**Idempotent:** Calling this on an already-confirmed release returns 200 with `alreadyConfirmed: true`.\n\n**`payment_method`** must be one of: `wire`, `ach`, `check`, `other`\n\n**`executed_at`** (optional) — ISO-8601 timestamp. Defaults to current time. Cannot be a future timestamp. Cannot be more than 90 days in the past.\n\n**`proof_document_id`** (optional) — UUID of a document already associated with the release's milestone."
+            "description": "Confirm that an external payment was executed. Records the payment method, reference, and proof in the Vektrum audit trail.\n\n**Only available for:**\n- `execution_rail` = `external_manual`\n- `execution_status` = `pending`\n\n**Idempotent:** Calling this on an already-confirmed release returns 200 with `alreadyConfirmed: true`.\n\n**`payment_method`** must be one of: `wire`, `ach`, `check`, `other`\n\n**`executed_at`** (optional) \u2014 ISO-8601 timestamp. Defaults to current time. Cannot be a future timestamp. Cannot be more than 90 days in the past.\n\n**`proof_document_id`** (optional) \u2014 UUID of a document already associated with the release's milestone."
           },
           "response": [
             {
-              "name": "200 OK — Confirmed",
+              "name": "200 OK \u2014 Confirmed",
               "status": "OK",
               "code": 200,
               "header": [
@@ -203,11 +246,14 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"success\": true,\n  \"releaseId\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n  \"execution_status\": \"confirmed\",\n  \"alreadyConfirmed\": false,\n  \"billing\": {\n    \"amount\": 125000,\n    \"fee_amount\": 1250,\n    \"retainage_amount\": 6250,\n    \"net_to_contractor\": 117500\n  },\n  \"warnings\": []\n}",
+              "body": "{\n  \"success\": true,\n  \"releaseId\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n  \"execution_status\": \"confirmed\",\n  \"execution_rail\": \"external_manual\",\n  \"confirmed_by\": \"partner\",\n  \"partner_id\": \"p1a2b3c4-d5e6-7890-abcd-ef1234567893\",\n  \"external\": {\n    \"payment_method\": \"wire\",\n    \"payment_reference\": \"FED-20250415-00123\",\n    \"executed_at\": \"2025-04-15T16:00:00.000Z\",\n    \"notes\": null,\n    \"proof_document_id\": null\n  },\n  \"billing\": {\n    \"gross_amount\": 125000,\n    \"fee_amount\": 1250,\n    \"retainage_amount\": 6250,\n    \"net_to_contractor\": 118750,\n    \"billing_rate_bps\": 100,\n    \"total_debit\": 126250,\n    \"committed\": true\n  },\n  \"ledger_updated\": true,\n  \"warnings\": []\n}",
               "originalRequest": {
                 "method": "POST",
                 "header": [
-                  { "key": "Content-Type", "value": "application/json" }
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
                 ],
                 "body": {
                   "mode": "raw",
@@ -215,13 +261,21 @@
                 },
                 "url": {
                   "raw": "{{base_url}}/api/partner/releases/{{release_id}}/confirm",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "partner", "releases", "{{release_id}}", "confirm"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "partner",
+                    "releases",
+                    "{{release_id}}",
+                    "confirm"
+                  ]
                 }
               }
             },
             {
-              "name": "200 OK — Already Confirmed (idempotent)",
+              "name": "200 OK \u2014 Already Confirmed (idempotent)",
               "status": "OK",
               "code": 200,
               "header": [
@@ -230,11 +284,14 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"success\": true,\n  \"releaseId\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n  \"execution_status\": \"confirmed\",\n  \"alreadyConfirmed\": true,\n  \"billing\": {\n    \"amount\": 125000,\n    \"fee_amount\": 1250,\n    \"retainage_amount\": 6250,\n    \"net_to_contractor\": 117500\n  },\n  \"warnings\": []\n}",
+              "body": "{\n  \"success\": true,\n  \"releaseId\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n  \"alreadyConfirmed\": true,\n  \"execution_status\": \"confirmed\",\n  \"external_payment_reference\": \"FED-20250415-00123\",\n  \"external_executed_at\": \"2025-04-15T16:00:00.000Z\",\n  \"note\": \"This release has already been confirmed. No further action was taken.\"\n}",
               "originalRequest": {
                 "method": "POST",
                 "header": [
-                  { "key": "Content-Type", "value": "application/json" }
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
                 ],
                 "body": {
                   "mode": "raw",
@@ -242,8 +299,16 @@
                 },
                 "url": {
                   "raw": "{{base_url}}/api/partner/releases/{{release_id}}/confirm",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "partner", "releases", "{{release_id}}", "confirm"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "partner",
+                    "releases",
+                    "{{release_id}}",
+                    "confirm"
+                  ]
                 }
               }
             },
@@ -261,7 +326,10 @@
               "originalRequest": {
                 "method": "POST",
                 "header": [
-                  { "key": "Content-Type", "value": "application/json" }
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
                 ],
                 "body": {
                   "mode": "raw",
@@ -269,8 +337,16 @@
                 },
                 "url": {
                   "raw": "{{base_url}}/api/partner/releases/{{release_id}}/confirm",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "partner", "releases", "{{release_id}}", "confirm"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "partner",
+                    "releases",
+                    "{{release_id}}",
+                    "confirm"
+                  ]
                 }
               }
             },
@@ -288,7 +364,10 @@
               "originalRequest": {
                 "method": "POST",
                 "header": [
-                  { "key": "Content-Type", "value": "application/json" }
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
                 ],
                 "body": {
                   "mode": "raw",
@@ -296,8 +375,16 @@
                 },
                 "url": {
                   "raw": "{{base_url}}/api/partner/releases/{{release_id}}/confirm",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "partner", "releases", "{{release_id}}", "confirm"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "partner",
+                    "releases",
+                    "{{release_id}}",
+                    "confirm"
+                  ]
                 }
               }
             }
@@ -357,7 +444,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reason\": \"Wire rejected by receiving bank — account number mismatch.\"\n}",
+              "raw": "{\n  \"reason\": \"Wire rejected by receiving bank \u2014 account number mismatch.\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -366,14 +453,22 @@
             },
             "url": {
               "raw": "{{base_url}}/api/partner/releases/{{release_id}}/fail",
-              "host": ["{{base_url}}"],
-              "path": ["api", "partner", "releases", "{{release_id}}", "fail"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "partner",
+                "releases",
+                "{{release_id}}",
+                "fail"
+              ]
             },
             "description": "Report that an external payment execution failed. Cancels the balance reservation and preserves audit visibility.\n\n**Only available for:**\n- `execution_rail` = `external_manual`\n- `execution_status` = `pending`\n\n**Important:** Failing a release does NOT revert the milestone status. The milestone remains `released`. Contact Vektrum if the milestone needs to be reverted.\n\n**`reason`** is required. Minimum 10 characters, maximum 2000 characters."
           },
           "response": [
             {
-              "name": "200 OK — Failed",
+              "name": "200 OK \u2014 Failed",
               "status": "OK",
               "code": 200,
               "header": [
@@ -382,25 +477,36 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"success\": true,\n  \"releaseId\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n  \"execution_status\": \"failed\",\n  \"execution_rail\": \"external_manual\",\n  \"reason\": \"Wire rejected by receiving bank — account number mismatch.\",\n  \"reservation_cancelled\": true,\n  \"milestone_status_unchanged\": true,\n  \"note\": \"Milestone status was not reverted. Contact Vektrum to revert the milestone if needed.\"\n}",
+              "body": "{\n  \"success\": true,\n  \"releaseId\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n  \"execution_status\": \"failed\",\n  \"execution_rail\": \"external_manual\",\n  \"reason\": \"Wire rejected by receiving bank \\u2014 account number mismatch.\",\n  \"reservation_cancelled\": true,\n  \"milestone_status_unchanged\": true,\n  \"note\": \"Release marked failed and funded-balance reservation freed. Milestone remains in released state \\u2014 contact Vektrum admin to revert if needed.\"\n}",
               "originalRequest": {
                 "method": "POST",
                 "header": [
-                  { "key": "Content-Type", "value": "application/json" }
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"reason\": \"Wire rejected by receiving bank — account number mismatch.\"\n}"
+                  "raw": "{\n  \"reason\": \"Wire rejected by receiving bank \u2014 account number mismatch.\"\n}"
                 },
                 "url": {
                   "raw": "{{base_url}}/api/partner/releases/{{release_id}}/fail",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "partner", "releases", "{{release_id}}", "fail"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "partner",
+                    "releases",
+                    "{{release_id}}",
+                    "fail"
+                  ]
                 }
               }
             },
             {
-              "name": "400 Bad Request — reason too short",
+              "name": "400 Bad Request \u2014 reason too short",
               "status": "Bad Request",
               "code": 400,
               "header": [
@@ -413,7 +519,10 @@
               "originalRequest": {
                 "method": "POST",
                 "header": [
-                  { "key": "Content-Type", "value": "application/json" }
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
                 ],
                 "body": {
                   "mode": "raw",
@@ -421,8 +530,16 @@
                 },
                 "url": {
                   "raw": "{{base_url}}/api/partner/releases/{{release_id}}/fail",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "partner", "releases", "{{release_id}}", "fail"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "partner",
+                    "releases",
+                    "{{release_id}}",
+                    "fail"
+                  ]
                 }
               }
             },
@@ -440,7 +557,10 @@
               "originalRequest": {
                 "method": "POST",
                 "header": [
-                  { "key": "Content-Type", "value": "application/json" }
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
                 ],
                 "body": {
                   "mode": "raw",
@@ -448,8 +568,16 @@
                 },
                 "url": {
                   "raw": "{{base_url}}/api/partner/releases/{{release_id}}/fail",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "partner", "releases", "{{release_id}}", "fail"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "partner",
+                    "releases",
+                    "{{release_id}}",
+                    "fail"
+                  ]
                 }
               }
             }

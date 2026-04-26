@@ -17,7 +17,7 @@ info:
     url: https://vektrum.io/partners/placement
 
 servers:
-  - url: https://app.vektrum.io
+  - url: https://vektrum.io
     description: Production
 
 components:
@@ -54,16 +54,16 @@ components:
           description: Human-readable milestone name
         amount:
           type: number
-          description: Gross release amount in USD cents
+          description: Gross release amount in USD dollars
         fee_amount:
           type: number
-          description: Vektrum platform fee in USD cents
+          description: Vektrum platform fee in USD dollars
         retainage_amount:
           type: number
-          description: Retainage withheld in USD cents
+          description: Retainage withheld in USD dollars
         net_to_contractor:
           type: number
-          description: Amount disbursed to contractor in USD cents
+          description: Amount disbursed to contractor in USD dollars
         execution_status:
           type: string
           enum: [pending, confirmed, failed]
@@ -121,6 +121,9 @@ components:
 
     ConfirmResponse:
       type: object
+      description: |
+        Returned on first confirmation. Does not include `alreadyConfirmed` on the primary path.
+        See the idempotent variant (AlreadyConfirmedResponse) for repeat calls.
       properties:
         success:
           type: boolean
@@ -130,13 +133,39 @@ components:
         execution_status:
           type: string
           enum: [confirmed]
-        alreadyConfirmed:
-          type: boolean
-          description: True if this release was already confirmed before this call (idempotent response)
-        billing:
+        execution_rail:
+          type: string
+          enum: [external_manual]
+        confirmed_by:
+          type: string
+          description: Always "partner" for API-confirmed releases
+        partner_id:
+          type: string
+          format: uuid
+          description: The partner account that confirmed this release
+        external:
           type: object
           properties:
-            amount:
+            payment_method:
+              type: string
+              enum: [wire, ach, check, other]
+            payment_reference:
+              type: string
+            executed_at:
+              type: string
+              format: date-time
+            notes:
+              type: string
+              nullable: true
+            proof_document_id:
+              type: string
+              format: uuid
+              nullable: true
+        billing:
+          type: object
+          description: All amounts in USD dollars. Fee is funder-paid; net_to_contractor = gross minus retainage only.
+          properties:
+            gross_amount:
               type: number
             fee_amount:
               type: number
@@ -144,10 +173,50 @@ components:
               type: number
             net_to_contractor:
               type: number
+            billing_rate_bps:
+              type: number
+              description: Fee rate in basis points (e.g. 100 = 1.00%)
+            total_debit:
+              type: number
+              description: Total deducted from funded balance — gross_amount + fee_amount
+            committed:
+              type: boolean
+              description: Whether the billing record was successfully written
+        ledger_updated:
+          type: boolean
+          description: Whether the deal financials were successfully incremented
         warnings:
           type: array
           items:
             type: string
+          description: Non-empty only if billing or ledger updates failed and are flagged for reconciliation
+
+    AlreadyConfirmedResponse:
+      type: object
+      description: Returned when confirm is called on a release that is already confirmed (idempotent path).
+      properties:
+        success:
+          type: boolean
+        releaseId:
+          type: string
+          format: uuid
+        alreadyConfirmed:
+          type: boolean
+          enum: [true]
+        execution_status:
+          type: string
+          enum: [confirmed]
+        external_payment_reference:
+          type: string
+          nullable: true
+          description: The payment reference recorded at original confirmation
+        external_executed_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: The execution timestamp recorded at original confirmation
+        note:
+          type: string
 
     FailRequest:
       type: object
@@ -237,7 +306,7 @@ paths:
                   amount: 125000
                   fee_amount: 1250
                   retainage_amount: 6250
-                  net_to_contractor: 117500
+                  net_to_contractor: 118750
                   execution_status: "pending"
                   execution_rail: "external_manual"
                   execution_notes: null
@@ -316,26 +385,35 @@ paths:
                     success: true
                     releaseId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
                     execution_status: "confirmed"
-                    alreadyConfirmed: false
+                    execution_rail: "external_manual"
+                    confirmed_by: "partner"
+                    partner_id: "p1a2b3c4-d5e6-7890-abcd-ef1234567893"
+                    external:
+                      payment_method: "wire"
+                      payment_reference: "FED-20250415-00123"
+                      executed_at: "2025-04-15T16:00:00.000Z"
+                      notes: null
+                      proof_document_id: null
                     billing:
-                      amount: 125000
+                      gross_amount: 125000
                       fee_amount: 1250
                       retainage_amount: 6250
-                      net_to_contractor: 117500
+                      net_to_contractor: 118750
+                      billing_rate_bps: 100
+                      total_debit: 126250
+                      committed: true
+                    ledger_updated: true
                     warnings: []
                 alreadyConfirmed:
                   summary: Already confirmed (idempotent)
                   value:
                     success: true
                     releaseId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-                    execution_status: "confirmed"
                     alreadyConfirmed: true
-                    billing:
-                      amount: 125000
-                      fee_amount: 1250
-                      retainage_amount: 6250
-                      net_to_contractor: 117500
-                    warnings: []
+                    execution_status: "confirmed"
+                    external_payment_reference: "FED-20250415-00123"
+                    external_executed_at: "2025-04-15T16:00:00.000Z"
+                    note: "This release has already been confirmed. No further action was taken."
         "400":
           description: Invalid request body
           content:
@@ -423,7 +501,7 @@ paths:
                 reason: "Wire rejected by receiving bank — account number mismatch."
                 reservation_cancelled: true
                 milestone_status_unchanged: true
-                note: "Milestone status was not reverted. Contact Vektrum to revert the milestone if needed."
+                note: "Release marked failed and funded-balance reservation freed. Milestone remains in released state — contact Vektrum admin to revert if needed."
         "400":
           description: Invalid request body (reason too short or too long)
           content:

@@ -1,7 +1,7 @@
 # Vektrum Partner API
 
 **Version:** 1.0  
-**Base URL:** `https://app.vektrum.io`  
+**Base URL:** `https://vektrum.io`  
 **Partner inquiries:** operations@vektrum.io
 
 ---
@@ -75,6 +75,8 @@ Retrieve the current status of a release.
 
 **Response `200 OK`:**
 
+> All amount fields are USD dollars. The platform fee is charged to the funder on top of the gross milestone amount — it is never deducted from contractor proceeds. `net_to_contractor` = gross minus retainage only.
+
 ```json
 {
   "release": {
@@ -86,7 +88,7 @@ Retrieve the current status of a release.
     "amount": 125000,
     "fee_amount": 1250,
     "retainage_amount": 6250,
-    "net_to_contractor": 117500,
+    "net_to_contractor": 118750,
     "execution_status": "pending",
     "execution_rail": "external_manual",
     "execution_notes": null,
@@ -152,20 +154,33 @@ Confirm that an external payment was executed. Records the payment method, refer
 | `notes` | string | No | Free text. Optional. |
 | `proof_document_id` | string (UUID) | No | Must be a valid document UUID associated with the release's milestone. |
 
-**Response `200 OK` (new confirmation):**
+**Response `200 OK` (first confirmation):**
 
 ```json
 {
   "success": true,
   "releaseId": "uuid",
   "execution_status": "confirmed",
-  "alreadyConfirmed": false,
+  "execution_rail": "external_manual",
+  "confirmed_by": "partner",
+  "partner_id": "uuid",
+  "external": {
+    "payment_method": "wire",
+    "payment_reference": "FED-20250415-00123",
+    "executed_at": "2025-04-15T16:00:00.000Z",
+    "notes": null,
+    "proof_document_id": null
+  },
   "billing": {
-    "amount": 125000,
+    "gross_amount": 125000,
     "fee_amount": 1250,
     "retainage_amount": 6250,
-    "net_to_contractor": 117500
+    "net_to_contractor": 118750,
+    "billing_rate_bps": 100,
+    "total_debit": 126250,
+    "committed": true
   },
+  "ledger_updated": true,
   "warnings": []
 }
 ```
@@ -176,10 +191,11 @@ Confirm that an external payment was executed. Records the payment method, refer
 {
   "success": true,
   "releaseId": "uuid",
-  "execution_status": "confirmed",
   "alreadyConfirmed": true,
-  "billing": { ... },
-  "warnings": []
+  "execution_status": "confirmed",
+  "external_payment_reference": "FED-20250415-00123",
+  "external_executed_at": "2025-04-15T16:00:00.000Z",
+  "note": "This release has already been confirmed. No further action was taken."
 }
 ```
 
@@ -234,7 +250,7 @@ Report that an external payment execution failed. Cancels the balance reservatio
   "reason": "Wire rejected by receiving bank — account number mismatch.",
   "reservation_cancelled": true,
   "milestone_status_unchanged": true,
-  "note": "Milestone status was not reverted. Contact Vektrum to revert the milestone if needed."
+  "note": "Release marked failed and funded-balance reservation freed. Milestone remains in released state — contact Vektrum admin to revert if needed."
 }
 ```
 
