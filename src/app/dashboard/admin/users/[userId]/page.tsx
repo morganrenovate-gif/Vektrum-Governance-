@@ -64,9 +64,11 @@ async function getUserDetail(targetUserId: string): Promise<{
     .order('created_at', { ascending: false })
 
   return {
-    profile: profileRow as Profile & { company_name?: string | null },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    profile: profileRow as unknown as Profile & { company_name?: string | null },
     email,
-    deals: (dealsRaw ?? []) as Deal[],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    deals: (dealsRaw ?? []) as unknown as Deal[],
   }
 }
 
