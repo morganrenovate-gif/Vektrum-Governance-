@@ -69,7 +69,8 @@ export async function GET(request: NextRequest) {
        deals:deals!releases_deal_id_fkey (
          id, title,
          contractor:profiles!deals_contractor_id_fkey ( id, full_name, company_name ),
-         funder:profiles!deals_funder_id_fkey         ( id, full_name, company_name )
+         funder:profiles!deals_funder_id_fkey         ( id, full_name, company_name ),
+         partner:partners!deals_partner_id_fkey       ( id, name )
        )`,
     )
     .eq('execution_rail', 'external_manual')
@@ -100,6 +101,7 @@ export async function GET(request: NextRequest) {
       title: string
       contractor: { id: string; full_name: string | null; company_name: string | null } | null
       funder:     { id: string; full_name: string | null; company_name: string | null } | null
+      partner:    { id: string; name: string | null }                                   | null
     } | null
   }
 
@@ -126,6 +128,7 @@ export async function GET(request: NextRequest) {
     proof_document_id:r.proof_of_payment_document_id,
     contractor_name:  partyName(r.deals?.contractor ?? null),
     funder_name:      partyName(r.deals?.funder ?? null),
+    partner_name:     r.deals?.partner?.name ?? null,
   })
 
   const all = (rows ?? []) as JoinedRow[]
