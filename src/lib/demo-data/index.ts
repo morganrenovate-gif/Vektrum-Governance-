@@ -130,7 +130,7 @@ export const harbor: DemoDeal = {
   title: 'Harbor Logistics Center',
   total: 9_100_000,
   funded: 9_100_000,
-  released: 3_460_000,
+  released: 2_160_000, // ms-hb-1 ($320k) + ms-hb-2 ($1,840k); ms-hb-3 is approved/pending release
   status: 'active',
   startedAgo: '180 days ago',
   contractor: 'Marcus Webb',
@@ -164,8 +164,12 @@ export const harbor: DemoDeal = {
       id: 'ms-hb-3',
       name: 'Structural Steel Erection',
       amount: 2_180_000,
-      status: 'released',
-      releasedAt: '3 days ago',
+      // Starting state: approved and awaiting funder release — this is the
+      // milestone the demo flow releases. Must NOT be 'released' on load.
+      status: 'approved',
+      aiScore: 91,
+      aiRisk: 'low',
+      aiRecommendation: 'Approve',
       documents: [
         'Inspection Report — Steel Erection',
         'Lien Waiver — Webb Construction',
@@ -176,15 +180,8 @@ export const harbor: DemoDeal = {
       id: 'ms-hb-4',
       name: 'Building Envelope & Roofing',
       amount: 2_640_000,
-      status: 'approved',
-      aiScore: 92,
-      aiRisk: 'low',
-      aiRecommendation: 'Approve',
-      documents: [
-        'Inspection Report — Building Envelope',
-        'Lien Waiver — Webb Construction',
-        'Draw Request #4 — $2,640,000',
-      ],
+      status: 'in_progress',
+      documents: [],
     },
     {
       id: 'ms-hb-5',

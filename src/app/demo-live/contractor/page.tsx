@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { HardHat, TrendingUp, DollarSign, CheckCircle2, Clock, ArrowRight, ArrowLeft, Sparkles, Loader2 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format'
-import { DEMO_RESET_EVENT } from '@/lib/demo-data'
+import { useDemoAutoReset } from '@/lib/demo-data/use-demo-auto-reset'
 
 // ── Mock data ────────────────────────────────────────────────────────────────
 
@@ -42,14 +42,10 @@ export default function DemoContractorPage() {
   const [reviewSubmitted, setReviewSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
-  useEffect(() => {
-    const onReset = () => {
-      setReviewSubmitted(false)
-      setSubmitting(false)
-    }
-    window.addEventListener(DEMO_RESET_EVENT, onReset)
-    return () => window.removeEventListener(DEMO_RESET_EVENT, onReset)
-  }, [])
+  useDemoAutoReset(() => {
+    setReviewSubmitted(false)
+    setSubmitting(false)
+  })
 
   function handleRequestReview() {
     if (submitting || reviewSubmitted) return

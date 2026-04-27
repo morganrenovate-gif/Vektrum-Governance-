@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { Landmark, TrendingUp, DollarSign, AlertCircle, Lightbulb, ArrowRight, ArrowLeft, CheckCircle2, Clock, Zap } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format'
 import { FundDealModal } from '@/components/demo/FundDealModal'
-import { DEMO_RESET_EVENT } from '@/lib/demo-data'
+import { useDemoAutoReset } from '@/lib/demo-data/use-demo-auto-reset'
 
 // ── Mock data ────────────────────────────────────────────────────────────────
 
@@ -26,7 +26,7 @@ const MOCK_DEALS = [
     title: 'Harbor Logistics Center',
     total: 9_100_000,
     funded: 9_100_000,
-    released: 3_460_000,
+    released: 2_160_000,
     status: 'active',
     milestoneCount: 5,
     contractor: 'Marcus Webb',
@@ -56,11 +56,9 @@ const BRIEFING_INSIGHTS = [
 export default function DemoFunderPage() {
   const [fundModal, setFundModal] = useState(false)
 
-  useEffect(() => {
-    const onReset = () => setFundModal(false)
-    window.addEventListener(DEMO_RESET_EVENT, onReset)
-    return () => window.removeEventListener(DEMO_RESET_EVENT, onReset)
-  }, [])
+  useDemoAutoReset(() => {
+    setFundModal(false)
+  })
 
   const totalDeals = MOCK_DEALS.length
   const capitalDeployed = MOCK_DEALS.reduce((s, d) => s + d.funded, 0)
