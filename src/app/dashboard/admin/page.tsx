@@ -22,6 +22,7 @@ import { UserTable } from '@/components/admin/user-table'
 import { InviteAdminForm } from '@/components/admin/invite-admin-form'
 import { ReconciliationPanel } from '@/components/admin/ReconciliationPanel'
 import { AuditChainHealthBadge } from '@/components/admin/AuditChainHealthBadge'
+import { ExternalReleasesPanel } from '@/components/admin/ExternalReleasesPanel'
 import { getRecentAuditChainHealth } from '@/lib/engine/audit-chain-health'
 import { PageHeader, SectionHeader, MetricStrip, StatBlock } from '@/components/layout'
 
@@ -80,6 +81,97 @@ async function getReconciliationData() {
       open_high:     openHigh,
       open_total:    totalIssues ?? 0,
     },
+  }
+}
+
+// ─── External-manual releases data ────────────────────────────────────────────
+//
+// Mirrors the projection produced by /api/admin/ops/external-releases but runs
+// in-process to avoid an unnecessary HTTP round-trip on the same server.
+// Read-only — no mutation. The API route remains the canonical surface for
+// external callers (curl, scripts, future ops dashboard).
+
+async function getExternalReleasesData() {
+  const adminClient = createSupabaseAdminClient()
+  const SLA_HOURS = 72
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: rows } = await (adminClient as any)
+    .from('releases')
+    .select(
+      `id, milestone_id, deal_id, amount, created_at,
+       execution_rail, execution_status,
+       external_payment_method, external_payment_reference,
+       external_executed_at, external_executed_by,
+       external_execution_notes, proof_of_payment_document_id,
+       milestones:milestones!releases_milestone_id_fkey ( id, title ),
+       deals:deals!releases_deal_id_fkey (
+         id, title,
+         contractor:profiles!deals_contractor_id_fkey ( id, full_name, company_name ),
+         funder:profiles!deals_funder_id_fkey         ( id, full_name, company_name ),
+         partner:partners!deals_partner_id_fkey       ( id, name )
+       )`,
+    )
+    .eq('execution_rail', 'external_manual')
+    .order('created_at', { ascending: false })
+    .limit(500)
+
+  type Party = { full_name: string | null; company_name: string | null } | null
+  const partyName = (p: Party) => p?.full_name ?? p?.company_name ?? 'Unknown'
+  const hoursSince = (iso: string | null): number | null =>
+    iso ? Math.round((Date.now() - new Date(iso).getTime()) / 3_600_000) : null
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const shape = (r: any) => ({
+    release_id:        r.id,
+    milestone_id:      r.milestone_id,
+    milestone_title:   r.milestones?.title ?? 'Unknown milestone',
+    deal_id:           r.deal_id,
+    deal_title:        r.deals?.title ?? 'Unknown deal',
+    amount:            Number(r.amount),
+    created_at:        r.created_at,
+    age_hours:         hoursSince(r.created_at),
+    execution_status:  r.execution_status,
+    payment_method:    r.external_payment_method,
+    payment_reference: r.external_payment_reference,
+    executed_at:       r.external_executed_at,
+    executed_by:       r.external_executed_by,
+    proof_document_id: r.proof_of_payment_document_id,
+    contractor_name:   partyName(r.deals?.contractor ?? null),
+    funder_name:       partyName(r.deals?.funder ?? null),
+    partner_name:      r.deals?.partner?.name ?? null,
+  })
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const all = ((rows ?? []) as any[]).map(shape)
+
+  const awaiting = all.filter(r => r.execution_status === 'pending')
+  const overdue  = awaiting.filter(r => r.age_hours !== null && r.age_hours >= SLA_HOURS)
+  const confirmedMissingRef   = all.filter(r => r.execution_status === 'confirmed' && !r.payment_reference)
+  const confirmedMissingProof = all.filter(r => r.execution_status === 'confirmed' && !r.proof_document_id)
+  const failed = all.filter(r => r.execution_status === 'failed')
+
+  return {
+    scanned_at: new Date().toISOString(),
+    sla_hours:  SLA_HOURS,
+    counts: {
+      awaiting_confirmation:       awaiting.length,
+      overdue:                     overdue.length,
+      confirmed_missing_reference: confirmedMissingRef.length,
+      confirmed_missing_proof:     confirmedMissingProof.length,
+      failed:                      failed.length,
+      // Rail mismatches are CHECK-constraint guarded at the DB layer; the
+      // dedicated /api/admin/ops/external-releases route also surfaces them.
+      // The in-process query above does not select stripe_transfer_id, so we
+      // report 0 here and defer the strict check to the API route.
+      rail_mismatches:             0,
+    },
+    awaiting_confirmation:       awaiting,
+    overdue,
+    confirmed_missing_reference: confirmedMissingRef,
+    confirmed_missing_proof:     confirmedMissingProof,
+    failed,
+    rail_mismatches:             [],
   }
 }
 
@@ -241,10 +333,12 @@ export default async function AdminDashboardPage() {
     { profiles, deals, disputes, recentAudit, healthMetrics, emailMap },
     reconciliationData,
     auditChainHealthRows,
+    externalReleasesData,
   ] = await Promise.all([
     getAdminData(),
     getReconciliationData(),
     getRecentAuditChainHealth(1),
+    getExternalReleasesData(),
   ])
   const latestAuditChainHealth = auditChainHealthRows[0] ?? null
 
@@ -492,6 +586,23 @@ export default async function AdminDashboardPage() {
             health={reconciliationData.health}
           />
         </div>
+      </section>
+
+      {/* ── External-Manual Releases (read-only operator view) ──────────── */}
+      <section>
+        <SectionHeader
+          label="External-Manual Releases"
+          count={(() => {
+            const t =
+              externalReleasesData.counts.overdue +
+              externalReleasesData.counts.awaiting_confirmation +
+              externalReleasesData.counts.confirmed_missing_reference +
+              externalReleasesData.counts.confirmed_missing_proof
+            return t > 0 ? t : undefined
+          })()}
+          variant={externalReleasesData.counts.overdue > 0 ? 'warning' : 'default'}
+        />
+        <ExternalReleasesPanel data={externalReleasesData} />
       </section>
 
       {/* ── Section 6: Recent Audit Activity ─────────────────────────────── */}
