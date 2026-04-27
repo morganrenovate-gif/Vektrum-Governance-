@@ -1,16 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { CheckCircle2, ChevronDown, ChevronUp, FileText, Sparkles } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format'
-import { westside } from '@/lib/demo-data'
+import { getFreshWestsideDeal } from '@/lib/demo-data'
 import type { DemoMilestoneStatus } from '@/lib/demo-data'
 import { useDemoAutoReset } from '@/lib/demo-data/use-demo-auto-reset'
 import { AiReviewModal } from '@/components/demo/AiReviewModal'
-
-const deal = westside
 
 const STATUS_CONFIG: Record<DemoMilestoneStatus, { label: string; badge: string; border: string }> = {
   released:        { label: 'Released',         badge: 'bg-emerald-500/[0.12] text-emerald-400 border border-emerald-500/20',    border: 'border-l-4 border-emerald-500' },
@@ -26,6 +24,11 @@ export default function WestsideDealPage() {
   const from = searchParams.get('from')
   const backHref = from === 'contractor' ? '/demo-live/contractor' : from === 'admin' ? '/demo-live/admin' : '/demo-live/funder'
   const backLabel = from === 'contractor' ? '← Back to contractor dashboard' : from === 'admin' ? '← Back to admin dashboard' : '← Back to funder dashboard'
+
+  // Defensive: each component instance gets its own deep clone of the
+  // canonical Westside deal so any future mutation cannot leak across
+  // mounts or back into the shared canonical export.
+  const deal = useMemo(() => getFreshWestsideDeal(), [])
 
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
   const [aiModal, setAiModal] = useState(false)

@@ -1,20 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { CheckCircle2, AlertCircle, Brain, FileText, ChevronDown, ChevronUp } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format'
-import { harborDisputeMilestones } from '@/lib/demo-data'
+import { getFreshHarborDisputeMilestones } from '@/lib/demo-data'
 import type { DisputeMilestone } from '@/lib/demo-data'
 import { useDemoAutoReset } from '@/lib/demo-data/use-demo-auto-reset'
 import { ResolveDisputeModal } from '@/components/demo/ResolveDisputeModal'
 import { AiReviewModal } from '@/components/demo/AiReviewModal'
-
-// Pull HVAC milestone once so the modal receives the same data the card shows.
-// Single source of truth: score, risk, and findings come from demo-data, not
-// from a second hardcoded copy in this file.
-const HVAC_MS = harborDisputeMilestones.find((m) => m.id === 'ms-hbd-5')!
 
 const DEAL_TITLE = 'Harbor Logistics Center — Partial Dispute'
 const DEAL_TOTAL = 9_100_000
@@ -26,6 +21,14 @@ export default function HarborDisputeDealPage() {
   const from = searchParams.get('from')
   const backHref = from === 'admin' ? '/demo-live/admin' : from === 'contractor' ? '/demo-live/contractor' : '/demo-live/funder'
   const backLabel = from === 'admin' ? '← Back to admin dashboard' : from === 'contractor' ? '← Back to contractor dashboard' : '← Back to funder dashboard'
+
+  // Defensive: each component instance gets its own deep clone of the
+  // canonical Harbor-dispute milestone list so any future mutation cannot
+  // leak across mounts or back into the shared canonical export. The HVAC
+  // milestone is derived from this fresh copy so the modal and the card
+  // always see identical data.
+  const milestones = useMemo(() => getFreshHarborDisputeMilestones(), [])
+  const HVAC_MS    = useMemo(() => milestones.find((m) => m.id === 'ms-hbd-5')!, [milestones])
 
   const [resolveModal, setResolveModal] = useState(false)
   const [aiModal, setAiModal] = useState(false)
@@ -81,7 +84,7 @@ export default function HarborDisputeDealPage() {
       <section>
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white/55">Milestones</h2>
         <div className="space-y-4">
-          {harborDisputeMilestones.map((ms) => {
+          {milestones.map((ms) => {
             if (ms.status === 'disputed') {
               if (disputeResolved) {
                 return <ResolvedCard key={ms.id} ms={ms} />
