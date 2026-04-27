@@ -68,7 +68,39 @@ const WEBHOOK_HEALTH = path.join(OPS, 'webhook-health/route.ts')
 
 async function main() {
 
-// ── 1. No nested and() inside .or() ─────────────────────────────────────────
+// ── 1. milestones.approved_at never queried (column does not exist in schema) ─
+
+await test('ALERTS: does not SELECT or filter on milestones.approved_at (column does not exist)', () => {
+  // milestones.approved_at is on change_orders, not milestones.
+  // Querying it causes a PostgreSQL column-not-found error → 500 → "Failed to load".
+  // The correct column is updated_at, which is bumped on every status transition.
+  const src = read(ALERTS)
+  // Check the .select() template literals — codeOnly() blanks them so read raw source.
+  // We specifically want to catch 'approved_at' appearing inside a .from('milestones') context.
+  // Simpler: assert the column name does not appear at all in the milestones SELECT calls.
+  const milestoneBlocks = src.match(/\.from\('milestones'\)[\s\S]*?\.limit\(/g) ?? []
+  for (const block of milestoneBlocks) {
+    assert(
+      !block.includes('approved_at'),
+      'alerts/route.ts milestones query must not reference approved_at — ' +
+      'that column does not exist on milestones (it lives on change_orders). Use updated_at.',
+    )
+  }
+})
+
+await test('RELEASE-HEALTH: does not SELECT or filter on milestones.approved_at (column does not exist)', () => {
+  const src = read(RELEASE_HEALTH)
+  const milestoneBlocks = src.match(/\.from\('milestones'\)[\s\S]*?\.limit\(/g) ?? []
+  for (const block of milestoneBlocks) {
+    assert(
+      !block.includes('approved_at'),
+      'release-health/route.ts milestones query must not reference approved_at — ' +
+      'that column does not exist on milestones (it lives on change_orders). Use updated_at.',
+    )
+  }
+})
+
+// ── 2. No nested and() inside .or() ─────────────────────────────────────────
 
 await test('ALERTS: does not use nested and() inside .or() — PostgREST compatibility', () => {
   // codeOnly() replaces template literals with ``, so the pattern ,and( can
@@ -76,8 +108,7 @@ await test('ALERTS: does not use nested and() inside .or() — PostgREST compati
   const src = codeOnly(read(ALERTS))
   assert(
     !/\.or\s*\(.*,\s*and\s*\(/.test(src),
-    'alerts/route.ts must not use nested and() inside .or(). ' +
-    'Split into two queries (approved_at set / approved_at null) instead.',
+    'alerts/route.ts must not use nested and() inside .or(). Use separate .lt() / .is() queries.',
   )
 })
 
@@ -85,8 +116,7 @@ await test('RELEASE-HEALTH: does not use nested and() inside .or() — PostgREST
   const src = codeOnly(read(RELEASE_HEALTH))
   assert(
     !/\.or\s*\(.*,\s*and\s*\(/.test(src),
-    'release-health/route.ts must not use nested and() inside .or(). ' +
-    'Split into two queries (approved_at set / approved_at null) instead.',
+    'release-health/route.ts must not use nested and() inside .or(). Use separate .lt() / .is() queries.',
   )
 })
 
