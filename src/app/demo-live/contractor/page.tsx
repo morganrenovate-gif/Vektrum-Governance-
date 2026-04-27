@@ -5,29 +5,39 @@ import Link from 'next/link'
 import { HardHat, TrendingUp, DollarSign, CheckCircle2, Clock, ArrowRight, ArrowLeft, Sparkles, Loader2 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format'
 import { useDemoAutoReset } from '@/lib/demo-data/use-demo-auto-reset'
+import { riverside, harbor, getMilestoneSummary } from '@/lib/demo-data'
 
 // ── Mock data ────────────────────────────────────────────────────────────────
+//
+// Derived from the canonical demo data so dashboard tiles stay in sync with
+// the deal pages.  Previously had stale hardcoded values (totalReleased
+// $3,940,000 with a comment referencing Harbor's old $3.46M figure, and
+// Harbor pct=38 / milestonesCompleted=4 which counted Structural Steel as
+// released when it now starts as 'approved').
+
+const RIVERSIDE_SUMMARY = getMilestoneSummary(riverside)
+const HARBOR_SUMMARY    = getMilestoneSummary(harbor)
 
 const MOCK_DEALS = [
   {
     slug: 'riverside',
-    title: 'Riverside Mixed-Use Development',
-    funder: 'Sarah Chen',
+    title: riverside.title,
+    funder: riverside.funder,
     funderCompany: 'Meridian Capital Partners',
-    total: 2_400_000,
-    pct: 20,
-    milestonesCompleted: 3,
-    milestonesTotal: 4,
+    total: riverside.total,
+    pct: RIVERSIDE_SUMMARY.pct,
+    milestonesCompleted: RIVERSIDE_SUMMARY.released,
+    milestonesTotal: RIVERSIDE_SUMMARY.total,
   },
   {
     slug: 'harbor',
-    title: 'Harbor Logistics Center',
-    funder: 'Sarah Chen',
+    title: harbor.title,
+    funder: harbor.funder,
     funderCompany: 'Meridian Capital Partners',
-    total: 9_100_000,
-    pct: 38,
-    milestonesCompleted: 4,
-    milestonesTotal: 5,
+    total: harbor.total,
+    pct: HARBOR_SUMMARY.pct,
+    milestonesCompleted: HARBOR_SUMMARY.released,
+    milestonesTotal: HARBOR_SUMMARY.total,
   },
 ]
 
@@ -59,7 +69,10 @@ export default function DemoContractorPage() {
 
   const totalDeals = MOCK_DEALS.length
   const totalFunded = MOCK_DEALS.reduce((s, d) => s + d.total, 0)
-  const totalReleased = 3_940_000   // Riverside $480K + Harbor $3.46M
+  // Derived from canonical demo data — Riverside.released + Harbor.released.
+  // Harbor's canonical released is $2,160,000 (ms-hb-3 starts approved, not
+  // released), giving a contractor portfolio total of $2,640,000.
+  const totalReleased = riverside.released + harbor.released
   const pendingReview = reviewSubmitted ? 0 : 1
 
   return (

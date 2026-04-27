@@ -302,10 +302,11 @@ export function DrawReviewAgent({
         <p className="text-sm text-white/55">{assessment.reasoning}</p>
       </div>
 
-      {/* Findings */}
+      {/* Findings — labeled "AI Review Findings" so the list isn't mistaken
+          for the deterministic 10-condition release gate. */}
       {assessment.findings.length > 0 && (
         <div className="px-5 py-3">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/65 mb-2">Findings</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/65 mb-2">AI Review Findings</p>
           <ul className="space-y-1.5">
             {assessment.findings.map((finding, i) => (
               <li key={i} className="flex items-start gap-2 text-sm text-white/55">

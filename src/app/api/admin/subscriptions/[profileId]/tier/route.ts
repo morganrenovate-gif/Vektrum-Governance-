@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createSupabaseAdminClient } from '@/lib/supabase/server'
 import { getAuthUser, requireMFA } from '@/lib/auth/middleware'
 import { billingRateFromTier, getFeeDescription } from '@/lib/engine/billing'
+import { logAdminAudit } from '@/lib/engine/audit'
 import { errorResponse, internalError, notFoundError } from '@/lib/errors'
 import { POLICIES, checkRateLimit, rateLimitResponse, logRateLimitViolation } from '@/lib/engine/rate-limit'
 import type { SubscriptionTier } from '@/lib/engine/billing'
@@ -15,7 +16,9 @@ export const dynamic = 'force-dynamic'
 //
 // On success:
 //   1. profiles: subscription_tier updated, billing_rate_bps derived from new tier
-//   2. admin_audit_log: subscription_tier_changed with old/new tier + justification
+//   2. audit_log + admin_audit_log: subscription_tier_changed with old/new tier
+//      + justification (dual-written via logAdminAudit so the change appears in
+//      both the platform-wide chronology and the admin compliance register).
 //
 // Note: This does NOT retroactively change existing deal billing_rate_bps values.
 // Deals lock in the funder's rate at the time of funding — the new rate applies
@@ -143,35 +146,32 @@ export async function POST(
     )
   }
 
-  // ── Admin Audit Log ───────────────────────────────────────────────────────
-  const { error: auditError } = await adminClient
-    .from('admin_audit_log')
-    .insert({
-      actor_id:            user.id,
-      actor_role:          'admin',
-      action:              'subscription_tier_changed',
-      entity_type:         'profile',
-      entity_id:           profileId,
-      admin_justification: adminJustification,
-      old_values: {
-        subscription_tier:  oldTier,
-        billing_rate_bps:   oldBillingRateBps,
-        fee_description:    oldTier ? getFeeDescription(oldTier) : null,
-      },
-      new_values: {
-        subscription_tier:  newTier,
-        billing_rate_bps:   newBillingRateBps,
-        fee_description:    getFeeDescription(newTier),
-      },
-    })
-
-  if (auditError) {
-    // Non-fatal: tier was updated; audit failure should be investigated but
-    // must not roll back a legitimate tier change.
-    console.error(
-      `[admin/subscriptions/tier] Audit log insert failed for profile ${profileId}: ${auditError.message}`,
-    )
-  }
+  // ── Admin Audit Log (dual-write) ──────────────────────────────────────────
+  // logAdminAudit writes to BOTH audit_log and admin_audit_log so the change
+  // appears in the platform-wide chronological history AND in the admin
+  // compliance register (with justification). The helper never throws —
+  // failures are caught and logged inside the audit module.
+  await logAdminAudit({
+    entity_type:             'profile',
+    entity_id:               profileId,
+    action:                  'subscription_tier_changed',
+    actor_id:                user.id,
+    actor_role:              'admin',
+    actor_email:             user.email,
+    system_source:           'api/admin/subscriptions/tier',
+    ip_address:              request.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? null,
+    admin_justification:     adminJustification,
+    old_values: {
+      subscription_tier:  oldTier,
+      billing_rate_bps:   oldBillingRateBps,
+      fee_description:    oldTier ? getFeeDescription(oldTier) : null,
+    },
+    new_values: {
+      subscription_tier:  newTier,
+      billing_rate_bps:   newBillingRateBps,
+      fee_description:    getFeeDescription(newTier),
+    },
+  })
 
   return NextResponse.json(
     {

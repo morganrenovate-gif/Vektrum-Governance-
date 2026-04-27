@@ -226,8 +226,9 @@ export function AiReviewModal({ open, onClose, milestoneContext, aiReview }: AiR
               Milestone: {milestoneName} — {formattedAmount}
             </p>
             <p className="text-[11px] text-white/55 mb-4 leading-relaxed">
-              Precondition layer. Runs before the 10-condition release gate.
-              AI informs; the gate decides.
+              AI assessment only — informational. The 10-condition release gate
+              runs separately at release time. AI informs; the deterministic
+              gate decides.
             </p>
 
             {/* Score / Risk / Result row */}
@@ -248,10 +249,13 @@ export function AiReviewModal({ open, onClose, milestoneContext, aiReview }: AiR
               </div>
             </div>
 
-            {/* Findings */}
+            {/* Findings — explicitly labeled "AI Review Findings" so users do
+                not confuse this list with the 10-condition release gate. The
+                count uses "item(s) reviewed" to discourage comparison with the
+                gate's fixed 10 conditions. */}
             <div className="mb-5">
               <p className="text-sm font-semibold text-white mb-2">
-                Findings <span className="text-[11px] font-normal text-white/55">— {findings.length} check{findings.length !== 1 ? 's' : ''}</span>
+                AI Review Findings <span className="text-[11px] font-normal text-white/55">— {findings.length} item{findings.length !== 1 ? 's' : ''} reviewed</span>
               </p>
               <div className="space-y-1.5">
                 {findings.map((finding, i) => (
@@ -266,11 +270,11 @@ export function AiReviewModal({ open, onClose, milestoneContext, aiReview }: AiR
               <p className="text-sm text-white/65 leading-relaxed">{recommendation}</p>
             </div>
 
-            {/* Precondition vs gate reminder */}
+            {/* Boundary reminder — pins the AI/gate separation in plain copy. */}
             <p className="text-[11px] text-white/50 leading-relaxed mb-5">
-              This assessment is one of two independent layers. The 10-condition release gate
-              evaluates separately at release time — a passing AI assessment does not bypass
-              gate conditions.
+              The 10-condition release gate is evaluated separately at release time.
+              A passing AI review does not authorize release and does not satisfy
+              gate conditions. AI informs; the deterministic gate decides.
             </p>
 
             <button

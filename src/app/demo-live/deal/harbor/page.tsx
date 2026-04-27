@@ -3,12 +3,13 @@
 import { useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { CheckCircle2, ChevronDown, ChevronUp, Brain, FileText } from 'lucide-react'
+import { CheckCircle2, ChevronDown, ChevronUp, Brain, FileText, Sparkles } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format'
 import { harbor } from '@/lib/demo-data'
 import type { DemoMilestoneStatus } from '@/lib/demo-data'
 import { useDemoAutoReset } from '@/lib/demo-data/use-demo-auto-reset'
 import { ReleaseFundsModal } from '@/components/demo/ReleaseFundsModal'
+import { DrawRequestModal } from '@/components/demo/DrawRequestModal'
 
 const deal = harbor
 
@@ -31,17 +32,28 @@ export default function HarborDealPage() {
   const [newlyReleased, setNewlyReleased] = useState<Set<string>>(new Set())
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
   const [releaseModal, setReleaseModal] = useState(false)
+  // Submit-for-Review modal — null when closed, otherwise the milestone the
+  // contractor is submitting. Contractor-only flow.
+  const [submitModal, setSubmitModal] = useState<{ id: string; name: string; amount: number } | null>(null)
 
   useDemoAutoReset(() => {
     setOverrides({})
     setNewlyReleased(new Set())
     setExpanded({})
     setReleaseModal(false)
+    setSubmitModal(null)
   })
 
   function getStatus(id: string, defaultStatus: DemoMilestoneStatus): DemoMilestoneStatus {
     return overrides[id] ?? defaultStatus
   }
+
+  // Contractor "Submit for Review" target: the first in_progress milestone in
+  // canonical order. Only this milestone is contractor-submittable in the demo
+  // — later in_progress milestones are too early in the sequence. Computed
+  // from canonical data (not from overrides) so the target stays pinned even
+  // after the contractor submits and the milestone moves to ready_for_review.
+  const submittableMilestoneId = deal.milestones.find((m) => m.status === 'in_progress')?.id ?? null
 
   // Recompute released total whenever user releases a milestone in this session
   const totalReleased =
@@ -129,9 +141,34 @@ export default function HarborDealPage() {
                       </button>
                     )}
 
-                    {status === 'in_progress' && (
+                    {status === 'approved' && from === 'contractor' && (
+                      <span className="bg-vektrum-blue/[0.08] text-blue-300 border border-vektrum-blue/20 cursor-not-allowed px-4 py-2 rounded-lg text-sm">
+                        Awaiting Funder Release
+                      </span>
+                    )}
+
+                    {/* Contractor: submit the next in_progress milestone for review. */}
+                    {status === 'in_progress' && from === 'contractor' && ms.id === submittableMilestoneId && (
+                      <button
+                        type="button"
+                        onClick={() => setSubmitModal({ id: ms.id, name: ms.name, amount: ms.amount })}
+                        className="inline-flex items-center gap-1.5 bg-vektrum-blue hover:bg-vektrum-blue-hover text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                      >
+                        <Sparkles size={14} /> Submit for Review
+                      </button>
+                    )}
+
+                    {/* All other in_progress cases: read-only pill */}
+                    {status === 'in_progress' && !(from === 'contractor' && ms.id === submittableMilestoneId) && (
                       <span className="bg-white/[0.04] text-white/65 cursor-not-allowed px-4 py-2 rounded-lg text-sm">
                         In Progress
+                      </span>
+                    )}
+
+                    {/* Submitted by contractor — pending funder review (any viewer). */}
+                    {status === 'ready_for_review' && (
+                      <span className="bg-amber-500/[0.08] text-amber-400 border border-amber-500/20 cursor-not-allowed px-4 py-2 rounded-lg text-sm">
+                        {from === 'contractor' ? 'Submitted — Awaiting Funder Review' : 'Awaiting Your Review'}
                       </span>
                     )}
 
@@ -232,6 +269,20 @@ export default function HarborDealPage() {
           setNewlyReleased((prev) => new Set([...prev, 'ms-hb-3']))
         }}
         onClose={() => setReleaseModal(false)}
+      />
+
+      {/* Contractor: Submit for Review modal — moves the milestone from
+          in_progress → ready_for_review in demo state. Frontend only. */}
+      <DrawRequestModal
+        open={submitModal !== null}
+        milestone={submitModal ?? { id: '', name: '', amount: 0 }}
+        onConfirm={() => {
+          if (submitModal) {
+            setOverrides((prev) => ({ ...prev, [submitModal.id]: 'ready_for_review' }))
+          }
+          setSubmitModal(null)
+        }}
+        onClose={() => setSubmitModal(null)}
       />
     </div>
     </div>

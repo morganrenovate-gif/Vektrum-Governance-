@@ -9,6 +9,7 @@
  * Test files:
  *   tests/release-gate.test.ts          — release gate (10 conditions), state machine, AI precondition
  *   tests/docusign-webhook-hmac.test.ts — DocuSign HMAC gate + verifyWebhookSignature
+ *   tests/ai-review-consistency.test.ts — AI draw review score/risk/findings consistency
  *   tests/route-smoke.test.ts           — route file existence and export-shape checks
  *
  * To run tests directly:
@@ -31,6 +32,10 @@ const testFiles = [
   path.join(__dirname, 'stripe-webhook-security.test.ts'),
   path.join(__dirname, 'partner-scope-isolation.test.ts'),
   path.join(__dirname, 'demo-reset-safety.test.ts'),
+  path.join(__dirname, 'ai-review-consistency.test.ts'),
+  path.join(__dirname, 'demo-canonical-data.test.ts'),
+  path.join(__dirname, 'demo-contractor-flow.test.ts'),
+  path.join(__dirname, 'audit-p0-coverage.test.ts'),
   path.join(__dirname, 'route-smoke.test.ts'),
 ]
 
