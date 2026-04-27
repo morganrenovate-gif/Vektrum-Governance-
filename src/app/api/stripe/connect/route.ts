@@ -23,8 +23,6 @@ export const dynamic = 'force-dynamic'
 // which updates stripe_payouts_enabled on the profile.
 
 export async function POST(request: NextRequest) {
-  console.log('[stripe/connect] STRIPE_SECRET_KEY prefix:', process.env.STRIPE_SECRET_KEY?.slice(0, 12))
-
   let authContext
 
   try {
