@@ -41,7 +41,7 @@ export default async function HomePage() {
             <div>
               <div className="animate-fade-in mb-6 flex items-center justify-center lg:justify-start gap-3">
                 <div className="h-px w-5 bg-vektrum-blue" />
-                <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">
+                <p className="text-[11px] tracking-[0.12em] uppercase text-blue-300 font-semibold">
                   Construction Draw Governance
                 </p>
               </div>
@@ -190,7 +190,7 @@ export default async function HomePage() {
             <div>
               <div className="mb-6 flex items-center gap-3">
                 <div className="h-px w-5 bg-vektrum-blue" />
-                <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">
+                <p className="text-[11px] tracking-[0.12em] uppercase text-blue-300 font-semibold">
                   The defining scenario
                 </p>
               </div>
@@ -225,7 +225,7 @@ export default async function HomePage() {
                 ].map((item) => (
                   <div key={item.title} className="flex items-start gap-4">
                     <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-vektrum-blue/10">
-                      <item.icon size={16} className="text-vektrum-blue" />
+                      <item.icon size={16} className="text-blue-300" />
                     </div>
                     <div>
                       <p className="text-[14px] font-semibold text-white mb-1">{item.title}</p>
@@ -250,7 +250,7 @@ export default async function HomePage() {
                 {[
                   { name: 'Site Preparation',   amount: '$320,000',    status: 'Released', dot: 'bg-emerald-500', badge: 'bg-emerald-500/15 text-emerald-400', row: 'border-emerald-500/15 bg-emerald-500/5' },
                   { name: 'Concrete Sub-grade', amount: '$15,000',     status: 'Locked',   dot: 'bg-red-500',     badge: 'bg-red-500/15 text-red-400',           row: 'border-red-500/20 bg-red-500/5'        },
-                  { name: 'Structural Steel',   amount: '$2,180,000',  status: 'Active',   dot: 'bg-vektrum-blue', badge: 'bg-vektrum-blue/15 text-vektrum-blue', row: 'border-white/[0.06] bg-white/[0.02]'  },
+                  { name: 'Structural Steel',   amount: '$2,180,000',  status: 'Active',   dot: 'bg-vektrum-blue', badge: 'bg-vektrum-blue/15 text-blue-300', row: 'border-white/[0.06] bg-white/[0.02]'  },
                   { name: 'MEP Systems',        amount: '$1,640,000',  status: 'Queued',   dot: 'bg-white/20',    badge: 'bg-white/[0.06] text-white/75',        row: 'border-white/[0.06] bg-white/[0.02]'  },
                   { name: 'Finishes & Cert',    amount: '$4,845,000',  status: 'Queued',   dot: 'bg-white/20',    badge: 'bg-white/[0.06] text-white/75',        row: 'border-white/[0.06] bg-white/[0.02]'  },
                 ].map((m) => (
@@ -294,7 +294,7 @@ export default async function HomePage() {
         <div className="max-w-3xl mx-auto px-6 sm:px-8 text-center">
           <div className="inline-flex items-center gap-3 mb-5">
             <div className="h-px w-5 bg-vektrum-blue" />
-            <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">The shift</p>
+            <p className="text-[11px] tracking-[0.12em] uppercase text-blue-300 font-semibold">The shift</p>
             <div className="h-px w-5 bg-vektrum-blue" />
           </div>
           <h2 className="font-display text-[2rem] sm:text-[2.5rem] font-bold tracking-[-0.04em] text-white leading-[1.1]">
@@ -314,7 +314,7 @@ export default async function HomePage() {
           <div className="mb-12 text-center">
             <div className="inline-flex items-center gap-3 mb-4">
               <div className="h-px w-5 bg-vektrum-blue" />
-              <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">How Vektrum fits your workflow</p>
+              <p className="text-[11px] tracking-[0.12em] uppercase text-blue-300 font-semibold">How Vektrum fits your workflow</p>
               <div className="h-px w-5 bg-vektrum-blue" />
             </div>
             <h2 className="font-display text-[2.75rem] sm:text-5xl font-bold tracking-[-0.04em] text-white leading-[1.05]">
@@ -330,7 +330,7 @@ export default async function HomePage() {
             {/* Column 1 — Private & direct lenders */}
             <div className="rounded-2xl border border-vektrum-blue/25 bg-[#111827] p-8 flex flex-col">
               <div className="mb-5">
-                <span className="inline-block rounded-full bg-vektrum-blue/10 border border-vektrum-blue/25 px-3.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-vektrum-blue mb-4">
+                <span className="inline-block rounded-full bg-vektrum-blue/10 border border-vektrum-blue/25 px-3.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-blue-300 mb-4">
                   Stripe Connect rail — for direct lenders
                 </span>
                 <h3 className="font-display text-[22px] font-bold tracking-[-0.03em] text-white leading-snug mb-3">
@@ -348,7 +348,7 @@ export default async function HomePage() {
                   'Self-service setup — no integration required',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
-                    <CheckCircle2 size={13} className="mt-0.5 flex-shrink-0 text-vektrum-blue" />
+                    <CheckCircle2 size={13} className="mt-0.5 flex-shrink-0 text-blue-300" />
                     <span className="text-[13px] leading-relaxed text-white/60">{item}</span>
                   </li>
                 ))}
@@ -394,7 +394,7 @@ export default async function HomePage() {
           <div className="mb-12">
             <div className="flex items-center gap-3 mb-4">
               <div className="h-px w-5 bg-vektrum-blue" />
-              <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">Where Vektrum plugs in</p>
+              <p className="text-[11px] tracking-[0.12em] uppercase text-blue-300 font-semibold">Where Vektrum plugs in</p>
             </div>
             <h2 className="font-display text-[2.75rem] sm:text-5xl font-bold tracking-[-0.04em] text-white leading-[1.05]">
               Two topologies.<br />One enforcement layer.
@@ -430,13 +430,13 @@ export default async function HomePage() {
                   <div key={label}>
                     <div className={`flex items-start gap-3 px-3 py-2.5 rounded-xl${core ? ' bg-vektrum-blue/[0.08] border border-vektrum-blue/25' : ''}`}>
                       <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg mt-0.5 ${core ? 'bg-vektrum-blue/20' : 'bg-white/[0.06]'}`}>
-                        <Icon size={14} className={core ? 'text-white' : vektrum ? 'text-vektrum-blue' : 'text-white/50'} />
+                        <Icon size={14} className={core ? 'text-white' : vektrum ? 'text-blue-300' : 'text-white/50'} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <p className="text-[13px] font-semibold text-white leading-tight">{label}</p>
                           {vektrum && (
-                            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-vektrum-blue/15 text-vektrum-blue border border-vektrum-blue/20 flex-shrink-0">Vektrum</span>
+                            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-vektrum-blue/15 text-blue-300 border border-vektrum-blue/20 flex-shrink-0">Vektrum</span>
                           )}
                         </div>
                         <p className="text-[11.5px] text-white/50 leading-snug mt-0.5">{sub}</p>
@@ -463,10 +463,10 @@ export default async function HomePage() {
             <div className="rounded-2xl border border-vektrum-blue/20 bg-vektrum-blue/[0.04] p-7 flex flex-col">
               <div className="flex items-center gap-3 mb-6">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-vektrum-blue/15 flex-shrink-0">
-                  <CreditCard size={16} className="text-vektrum-blue" />
+                  <CreditCard size={16} className="text-blue-300" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-vektrum-blue mb-0.5">Direct · Stripe Connect rail</p>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-blue-300 mb-0.5">Direct · Stripe Connect rail</p>
                   <p className="text-[14px] font-semibold text-white leading-tight">Private lender / family office / developer</p>
                 </div>
               </div>
@@ -483,13 +483,13 @@ export default async function HomePage() {
                   <div key={label}>
                     <div className={`flex items-start gap-3 px-3 py-2.5 rounded-xl${core ? ' bg-vektrum-blue/[0.08] border border-vektrum-blue/25' : ''}`}>
                       <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg mt-0.5 ${core ? 'bg-vektrum-blue/20' : 'bg-white/[0.06]'}`}>
-                        <Icon size={14} className={core ? 'text-white' : vektrum ? 'text-vektrum-blue' : 'text-white/50'} />
+                        <Icon size={14} className={core ? 'text-white' : vektrum ? 'text-blue-300' : 'text-white/50'} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <p className="text-[13px] font-semibold text-white leading-tight">{label}</p>
                           {vektrum && (
-                            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-vektrum-blue/15 text-vektrum-blue border border-vektrum-blue/20 flex-shrink-0">Vektrum</span>
+                            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-vektrum-blue/15 text-blue-300 border border-vektrum-blue/20 flex-shrink-0">Vektrum</span>
                           )}
                         </div>
                         <p className="text-[11.5px] text-white/50 leading-snug mt-0.5">{sub}</p>
@@ -506,7 +506,7 @@ export default async function HomePage() {
 
               <div className="mt-5 rounded-xl border border-vektrum-blue/15 bg-vektrum-blue/[0.04] px-4 py-3">
                 <p className="text-[12px] text-white/55 leading-relaxed">
-                  <span className="text-vektrum-blue font-semibold">No existing payment infrastructure required.</span>{' '}
+                  <span className="text-blue-300 font-semibold">No existing payment infrastructure required.</span>{' '}
                   Stripe Connect handles fund custody and contractor payouts end-to-end.
                 </p>
               </div>
@@ -727,7 +727,7 @@ export default async function HomePage() {
           <div className="mb-12">
             <div className="flex items-center gap-3 mb-4">
               <div className="h-px w-5 bg-vektrum-blue" />
-              <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">Prevention</p>
+              <p className="text-[11px] tracking-[0.12em] uppercase text-blue-300 font-semibold">Prevention</p>
             </div>
             <h2 className="font-display text-[2.75rem] sm:text-5xl font-bold tracking-[-0.04em] text-white leading-[1.05]">
               The gate stops this.
@@ -791,8 +791,8 @@ export default async function HomePage() {
                   {scenario.without}
                 </p>
                 <div className="flex items-start gap-2 pt-3 border-t border-white/[0.06]">
-                  <Shield size={11} className="text-vektrum-blue mt-0.5 flex-shrink-0" />
-                  <p className="text-[11px] text-vektrum-blue/80 leading-relaxed">{scenario.condition}</p>
+                  <Shield size={11} className="text-blue-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-[11px] text-blue-200 leading-relaxed">{scenario.condition}</p>
                 </div>
               </div>
             ))}
@@ -988,7 +988,7 @@ export default async function HomePage() {
           <div className="mb-12">
             <div className="flex items-center gap-3 mb-4">
               <div className="h-px w-5 bg-vektrum-blue" />
-              <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">Trust infrastructure</p>
+              <p className="text-[11px] tracking-[0.12em] uppercase text-blue-300 font-semibold">Trust infrastructure</p>
             </div>
             <h2 className="font-display text-[2.75rem] sm:text-5xl font-bold tracking-[-0.04em] text-white leading-[1.05]">
               Built to be audited.
@@ -1037,7 +1037,7 @@ export default async function HomePage() {
                 className="rounded-2xl border border-white/[0.08] bg-[#111827] p-7"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-vektrum-blue/10 mb-5">
-                  <card.icon size={18} className="text-vektrum-blue" />
+                  <card.icon size={18} className="text-blue-300" />
                 </div>
                 <h3 className="text-[14px] font-semibold text-white leading-snug mb-2.5">{card.title}</h3>
                 <p className="text-[13px] leading-relaxed text-white/55">{card.desc}</p>
@@ -1075,7 +1075,7 @@ export default async function HomePage() {
         <div className="relative max-w-4xl mx-auto px-6 sm:px-8 text-center">
           <div className="mb-6 inline-flex items-center gap-3">
             <div className="h-px w-5 bg-vektrum-blue" />
-            <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">Interactive demo</p>
+            <p className="text-[11px] tracking-[0.12em] uppercase text-blue-300 font-semibold">Interactive demo</p>
             <div className="h-px w-5 bg-vektrum-blue" />
           </div>
           <h2 className="font-display text-[2.75rem] sm:text-5xl font-bold tracking-[-0.04em] text-white leading-[1.05]">
@@ -1097,7 +1097,7 @@ export default async function HomePage() {
                 href={r.href}
                 className="group rounded-xl border border-white/[0.08] bg-white/[0.04] px-5 py-5 text-left hover:bg-white/[0.08] hover:border-vektrum-blue/30 transition-all"
               >
-                <p className="text-[13px] font-semibold text-white mb-1.5 group-hover:text-vektrum-blue transition-colors">
+                <p className="text-[13px] font-semibold text-white mb-1.5 group-hover:text-blue-300 transition-colors">
                   {r.role} view
                   <ArrowRight size={12} className="inline-block ml-1.5 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </p>
@@ -1206,7 +1206,7 @@ export default async function HomePage() {
               >
                 <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/55 mb-2">{t.tier}</p>
                 <p className="font-display text-[2rem] font-bold text-white tracking-[-0.03em] leading-none mb-1">{t.rate}</p>
-                <p className="text-[12px] text-vektrum-blue font-medium mb-1">{t.detail}</p>
+                <p className="text-[12px] text-blue-300 font-medium mb-1">{t.detail}</p>
                 <p className="text-[11px] text-white/40">{t.note}</p>
               </div>
             ))}

@@ -64,7 +64,7 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-2.5 mb-5">
       <div className="h-[3px] w-4 rounded-full bg-vektrum-blue flex-shrink-0" />
-      <p className="text-[10px] font-black uppercase tracking-[0.22em] text-vektrum-blue">
+      <p className="text-[10px] font-black uppercase tracking-[0.22em] text-blue-300">
         {children}
       </p>
     </div>
@@ -109,7 +109,7 @@ function CoverSlide() {
 
         <div className="inline-flex items-center gap-2 rounded-full border border-vektrum-blue/30 bg-vektrum-blue/[0.07] px-3.5 py-1.5 mb-11">
           <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-          <span className="text-[10px] font-black text-vektrum-blue tracking-[0.18em] uppercase">
+          <span className="text-[10px] font-black text-blue-300 tracking-[0.18em] uppercase">
             Construction Finance Infrastructure
           </span>
         </div>
@@ -249,7 +249,7 @@ function InsightSlide() {
             </p>
           </div>
           <div className="rounded-2xl border border-vektrum-blue/30 bg-vektrum-blue/[0.06] p-7">
-            <p className="text-[11px] font-black tracking-[0.2em] uppercase text-vektrum-blue mb-3">Still unsolved</p>
+            <p className="text-[11px] font-black tracking-[0.2em] uppercase text-blue-300 mb-3">Still unsolved</p>
             <p className="text-[16px] text-white leading-relaxed">
               Enforcement at the moment of release. A server-side answer
               to a single question —
@@ -462,7 +462,7 @@ function ReleaseGateSlide() {
                 key={c.n}
                 className="group flex items-start gap-3 rounded-xl border border-white/[0.055] bg-white/[0.02] px-4 py-3 hover:border-blue-400/20 hover:bg-blue-400/[0.03] transition-all duration-200"
               >
-                <span className="text-[9.5px] font-mono text-vektrum-blue/65 mt-0.5 w-5 flex-shrink-0 select-none">
+                <span className="text-[9.5px] font-mono text-blue-300/65 mt-0.5 w-5 flex-shrink-0 select-none">
                   {c.n}
                 </span>
                 <div className="flex-1 min-w-0">
@@ -1323,7 +1323,7 @@ function ClosingSlide() {
 
       <div className="relative z-10 max-w-[860px] mx-auto">
 
-        <p className="text-[11px] font-black tracking-[0.22em] text-vektrum-blue uppercase mb-6">
+        <p className="text-[11px] font-black tracking-[0.22em] text-blue-300 uppercase mb-6">
           Closing
         </p>
 
@@ -1524,7 +1524,7 @@ function ApiArchitectureSlide() {
             <div className="grid grid-cols-2 gap-2">
               {endpoints.map((ep) => (
                 <div key={ep.path} className="rounded-lg border border-white/[0.07] bg-white/[0.025] px-3 py-2.5 flex items-start gap-2.5">
-                  <span className="text-[9px] font-black font-mono tracking-wider text-vektrum-blue bg-vektrum-blue/15 rounded px-1.5 py-0.5 flex-shrink-0 mt-0.5">
+                  <span className="text-[9px] font-black font-mono tracking-wider text-blue-300 bg-vektrum-blue/15 rounded px-1.5 py-0.5 flex-shrink-0 mt-0.5">
                     {ep.method}
                   </span>
                   <div className="min-w-0">

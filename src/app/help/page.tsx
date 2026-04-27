@@ -113,7 +113,7 @@ export default function HelpPage() {
 
         <div className="relative max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-surface-2 px-4 py-1.5 shadow-sm mb-8">
-            <HelpCircle size={14} className="text-vektrum-blue" />
+            <HelpCircle size={14} className="text-blue-300" />
             <span className="text-[12px] font-medium text-white/55 tracking-wide">
               Help center
             </span>

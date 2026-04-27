@@ -24,7 +24,7 @@ function Scene1() {
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-vektrum-blue/10">
-              <FileText size={15} className="text-vektrum-blue" />
+              <FileText size={15} className="text-blue-300" />
             </div>
             <div>
               <p className="text-[13px] font-semibold text-white">Riverside Mixed-Use</p>
@@ -41,7 +41,7 @@ function Scene1() {
       <div className="space-y-2">
         {[
           { label: 'Foundation & Site Prep', amount: '$480,000', status: 'released', icon: CheckCircle2, color: 'text-emerald-400' },
-          { label: 'Framing & Structural', amount: '$720,000', status: 'approved', icon: CheckCircle2, color: 'text-vektrum-blue' },
+          { label: 'Framing & Structural', amount: '$720,000', status: 'approved', icon: CheckCircle2, color: 'text-blue-300' },
           { label: 'MEP Rough-In', amount: '$680,000', status: 'in progress', icon: Zap, color: 'text-amber-400' },
           { label: 'Finishes & Certificate', amount: '$520,000', status: 'not started', icon: Lock, color: 'text-white/65' },
         ].map((m) => (
@@ -65,7 +65,7 @@ function Scene1() {
       <div className="rounded-xl border border-white/[0.08] bg-surface-2 p-4">
         <div className="flex items-center justify-between mb-2">
           <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/65">Funded</span>
-          <span className="text-[12px] font-bold tabular-nums text-vektrum-blue">$2,400,000</span>
+          <span className="text-[12px] font-bold tabular-nums text-blue-300">$2,400,000</span>
         </div>
         <div className="relative h-2 w-full overflow-hidden rounded-full bg-surface-3">
           <div className="absolute left-0 top-0 h-full w-4/5 rounded-full bg-vektrum-blue" />
@@ -89,7 +89,7 @@ function Scene2() {
         <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/65">
           AI draw review
         </p>
-        <span className="inline-flex items-center gap-1 rounded-full border border-vektrum-blue/20 bg-vektrum-blue/[0.08] px-2.5 py-0.5 text-[10px] font-medium text-vektrum-blue">
+        <span className="inline-flex items-center gap-1 rounded-full border border-vektrum-blue/20 bg-vektrum-blue/[0.08] px-2.5 py-0.5 text-[10px] font-medium text-blue-300">
           Live
         </span>
       </div>
@@ -98,7 +98,7 @@ function Scene2() {
       <div className="rounded-xl border border-vektrum-blue/30 bg-vektrum-blue/5 p-4">
         <div className="flex items-center gap-2.5 mb-3">
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-vektrum-blue/15">
-            <Shield size={14} className="text-vektrum-blue" />
+            <Shield size={14} className="text-blue-300" />
           </div>
           <div>
             <p className="text-[12px] font-semibold text-white">MEP Rough-In — $680,000</p>
@@ -192,10 +192,10 @@ function Scene3() {
           <div key={m.label} className="rounded-lg border border-white/[0.08] bg-surface-2 px-3.5 py-2.5">
             <div className="flex items-center justify-between gap-2 mb-1.5">
               <div className="flex items-center gap-2">
-                <Banknote size={13} className="text-vektrum-blue flex-shrink-0" />
+                <Banknote size={13} className="text-blue-300 flex-shrink-0" />
                 <span className="text-[12px] font-medium text-white">{m.label}</span>
               </div>
-              <span className="text-[11px] font-semibold tabular-nums text-vektrum-blue">{m.amount}</span>
+              <span className="text-[11px] font-semibold tabular-nums text-blue-300">{m.amount}</span>
             </div>
             <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-surface-3">
               <div
@@ -209,7 +209,7 @@ function Scene3() {
 
       {/* Key insight */}
       <div className="rounded-xl border border-vektrum-blue/20 bg-vektrum-blue/5 px-4 py-3">
-        <p className="text-[12px] font-semibold text-vektrum-blue">
+        <p className="text-[12px] font-semibold text-blue-300">
           $8,985,000 continues flowing
         </p>
         <p className="mt-0.5 text-[11px] text-white/55">
@@ -287,7 +287,7 @@ export function DemoScene() {
             <p
               className={[
                 'text-[11px] sm:text-[12px] font-semibold',
-                active === i ? 'text-vektrum-blue' : 'text-white/55',
+                active === i ? 'text-blue-300' : 'text-white/55',
               ].join(' ')}
             >
               {s.label}

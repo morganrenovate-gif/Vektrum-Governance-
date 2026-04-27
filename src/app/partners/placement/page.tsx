@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-vektrum-blue mb-2">
+    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-blue-300 mb-2">
       {children}
     </p>
   )
@@ -42,7 +42,7 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
 function Bullet({ children }: { children: React.ReactNode }) {
   return (
     <li className="flex items-start gap-2.5">
-      <CheckCircle2 size={13} className="text-vektrum-blue flex-shrink-0 mt-[3px]" aria-hidden="true" />
+      <CheckCircle2 size={13} className="text-blue-300 flex-shrink-0 mt-[3px]" aria-hidden="true" />
       <span className="text-[13px] leading-relaxed text-white/65">{children}</span>
     </li>
   )
@@ -81,7 +81,7 @@ function FlowStep({
           {label}
         </p>
         {sub && (
-          <p className={`text-[11px] mt-0.5 ${highlight ? 'text-vektrum-blue' : 'text-white/60'}`}>
+          <p className={`text-[11px] mt-0.5 ${highlight ? 'text-blue-300' : 'text-white/60'}`}>
             {sub}
           </p>
         )}
@@ -108,14 +108,14 @@ export default function PartnerPlacementPage() {
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-4">
               <div className="h-px w-5 bg-vektrum-blue flex-shrink-0" />
-              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-vektrum-blue">
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-blue-300">
                 Partner Overview
               </p>
             </div>
             <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-[-0.035em] text-white leading-[1.1] mb-4">
               Where Vektrum Plugs In
             </h1>
-            <p className="text-[15px] font-semibold text-vektrum-blue mb-3">
+            <p className="text-[15px] font-semibold text-blue-300 mb-3">
               Conditional authorization infrastructure for construction disbursements.
             </p>
             <p className="text-[14px] leading-relaxed text-white/60 max-w-2xl">
@@ -125,7 +125,7 @@ export default function PartnerPlacementPage() {
             </p>
             <p className="mt-4 text-[12px] text-white/60">
               Partner inquiries:{' '}
-              <a href="mailto:operations@vektrum.io" className="text-vektrum-blue hover:underline">
+              <a href="mailto:operations@vektrum.io" className="text-blue-300 hover:underline">
                 operations@vektrum.io
               </a>
             </p>
@@ -144,7 +144,7 @@ export default function PartnerPlacementPage() {
           ].map(({ icon: Icon, label, sub }) => (
             <div key={label} className="rounded-xl border border-white/[0.07] bg-white/[0.03] px-4 py-3.5 flex items-start gap-3">
               <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-vektrum-blue/10 mt-0.5">
-                <Icon size={15} className="text-vektrum-blue" aria-hidden="true" />
+                <Icon size={15} className="text-blue-300" aria-hidden="true" />
               </div>
               <div>
                 <p className="text-[13px] font-semibold text-white">{label}</p>
@@ -254,11 +254,11 @@ export default function PartnerPlacementPage() {
             <div className="rounded-2xl border border-vektrum-blue/20 bg-vektrum-blue/[0.03] p-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-vektrum-blue/10">
-                  <CreditCard size={17} className="text-vektrum-blue" aria-hidden="true" />
+                  <CreditCard size={17} className="text-blue-300" aria-hidden="true" />
                 </div>
                 <div>
                   <p className="text-[14px] font-bold text-white">Stripe Connect Automated Execution</p>
-                  <p className="text-[11px] text-vektrum-blue/70">Direct and private lenders · automated disbursement</p>
+                  <p className="text-[11px] text-blue-300/70">Direct and private lenders · automated disbursement</p>
                 </div>
               </div>
               <p className="text-[12px] text-white/65 mb-3">Best for:</p>
@@ -285,7 +285,7 @@ export default function PartnerPlacementPage() {
                   </li>
                 ))}
               </ol>
-              <p className="text-[11.5px] leading-relaxed text-vektrum-blue/70 border-t border-vektrum-blue/15 pt-3">
+              <p className="text-[11.5px] leading-relaxed text-blue-300/70 border-t border-vektrum-blue/15 pt-3">
                 For Stripe Connect releases, payment execution runs through Stripe Connect
                 infrastructure.
               </p>
@@ -308,7 +308,7 @@ export default function PartnerPlacementPage() {
             <div className="flex-shrink-0">
               <div className="rounded-xl border border-vektrum-blue/20 bg-vektrum-blue/[0.06] px-4 py-3 text-center min-w-[80px]">
                 <p className="font-display text-3xl font-bold text-white">10</p>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-vektrum-blue mt-0.5">Conditions</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-blue-300 mt-0.5">Conditions</p>
               </div>
             </div>
           </div>
@@ -326,7 +326,7 @@ export default function PartnerPlacementPage() {
               'Approved lien waiver on file (where required)',
             ].map((condition, i) => (
               <div key={i} className="flex items-start gap-3 rounded-lg border border-white/[0.05] bg-white/[0.02] px-3.5 py-2.5">
-                <span className="flex-shrink-0 flex h-5 w-5 items-center justify-center rounded-full bg-vektrum-blue/10 text-[9px] font-bold text-vektrum-blue mt-0.5">
+                <span className="flex-shrink-0 flex h-5 w-5 items-center justify-center rounded-full bg-vektrum-blue/10 text-[9px] font-bold text-blue-300 mt-0.5">
                   {i + 1}
                 </span>
                 <span className="text-[12.5px] text-white/65 leading-snug">{condition}</span>
@@ -371,7 +371,7 @@ export default function PartnerPlacementPage() {
               const methodStyle =
                 ep.color === 'emerald'
                   ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                  : 'bg-vektrum-blue/10 text-vektrum-blue border-vektrum-blue/20'
+                  : 'bg-vektrum-blue/10 text-blue-300 border-vektrum-blue/20'
               return (
                 <div
                   key={ep.path}
@@ -448,7 +448,7 @@ export default function PartnerPlacementPage() {
         <div className="rounded-2xl border border-vektrum-blue/20 bg-vektrum-blue/[0.04] p-8 text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
             <div className="h-px w-6 bg-vektrum-blue" />
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-vektrum-blue">Partner Integration</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-blue-300">Partner Integration</p>
             <div className="h-px w-6 bg-vektrum-blue" />
           </div>
           <h2 className="font-display text-2xl font-bold tracking-[-0.025em] text-white mb-4">

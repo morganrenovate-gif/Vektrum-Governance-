@@ -92,7 +92,7 @@ export default function ContractorsPage() {
                 className="rounded-2xl border border-white/[0.08] bg-surface-2 p-8 hover:border-vektrum-blue/40 hover:shadow-lg hover:shadow-vektrum-blue/5 transition-all"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-vektrum-blue/10 mb-5">
-                  <item.icon size={20} className="text-vektrum-blue" />
+                  <item.icon size={20} className="text-blue-300" />
                 </div>
                 <h3 className="text-[15px] font-semibold text-white">{item.title}</h3>
                 <p className="mt-3 text-[13px] leading-relaxed text-white/55">{item.desc}</p>
