@@ -54,7 +54,7 @@ function EndpointBlock({
 }) {
   const methodColors = {
     GET: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-    POST: 'bg-vektrum-blue/10 text-vektrum-blue border-vektrum-blue/20',
+    POST: 'bg-vektrum-blue/10 text-blue-300 border-vektrum-blue/20',
   }
   return (
     <div className="rounded-2xl border border-white/[0.08] bg-[#111827] p-7 space-y-5">
@@ -93,7 +93,7 @@ export default function PartnerDocsPage() {
 
         {/* Header */}
         <div className="mb-12">
-          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-vektrum-blue mb-3">
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-blue-300 mb-3">
             Partner API Reference
           </p>
           <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-[-0.035em] text-white mb-4">
@@ -132,7 +132,7 @@ export default function PartnerDocsPage() {
               </p>
               <p>
                 To obtain your API key, contact{' '}
-                <a href="mailto:operations@vektrum.io" className="text-vektrum-blue hover:underline">
+                <a href="mailto:operations@vektrum.io" className="text-blue-300 hover:underline">
                   operations@vektrum.io
                 </a>
                 . An admin will issue credentials via the Vektrum admin dashboard at{' '}
@@ -335,7 +335,7 @@ export default function PartnerDocsPage() {
 
             <div className="mt-6 grid gap-6 lg:grid-cols-2">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-vektrum-blue mb-3">TypeScript</p>
+                <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-blue-300 mb-3">TypeScript</p>
                 <CodeBlock language="typescript">{`import crypto from 'crypto'
 
 function verifyVektrumSignature(
@@ -464,7 +464,7 @@ def verify_vektrum_signature(
         <div className="mt-16 pt-6 border-t border-white/[0.06]">
           <p className="text-[12px] text-white/60">
             Vektrum Partner API v1 &middot; For approved integration partners &middot;{' '}
-            <a href="mailto:operations@vektrum.io" className="text-vektrum-blue hover:underline">
+            <a href="mailto:operations@vektrum.io" className="text-blue-300 hover:underline">
               operations@vektrum.io
             </a>
           </p>

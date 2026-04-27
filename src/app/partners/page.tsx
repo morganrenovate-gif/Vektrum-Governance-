@@ -37,7 +37,7 @@ function StepCard({
         {number}
       </div>
       <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-vektrum-blue/10 mb-4">
-        <Icon size={18} className="text-vektrum-blue" />
+        <Icon size={18} className="text-blue-300" />
       </div>
       <h3 className="text-[15px] font-semibold text-white mb-2 leading-snug">{title}</h3>
       <p className="text-[13px] leading-relaxed text-white/55">{body}</p>
@@ -58,7 +58,7 @@ export default function PartnersPage() {
         <div className="relative max-w-5xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-vektrum-blue/30 bg-vektrum-blue/[0.07] px-4 py-1.5 mb-8">
             <span className="w-1.5 h-1.5 rounded-full bg-vektrum-blue" />
-            <span className="text-[11px] font-bold text-vektrum-blue tracking-[0.14em] uppercase">
+            <span className="text-[11px] font-bold text-blue-300 tracking-[0.14em] uppercase">
               Execution-Rail Partners
             </span>
           </div>
@@ -99,7 +99,7 @@ export default function PartnersPage() {
           <div className="mb-12 text-center">
             <div className="inline-flex items-center gap-3 mb-4">
               <div className="h-px w-5 bg-vektrum-blue" />
-              <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">How it works</p>
+              <p className="text-[11px] tracking-[0.12em] uppercase text-blue-300 font-semibold">How it works</p>
               <div className="h-px w-5 bg-vektrum-blue" />
             </div>
             <h2 className="font-display text-[2.25rem] font-bold tracking-[-0.035em] text-white leading-[1.08]">
@@ -136,7 +136,7 @@ export default function PartnersPage() {
           <div className="mb-10">
             <div className="flex items-center gap-3 mb-4">
               <div className="h-px w-5 bg-vektrum-blue" />
-              <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">Webhook payload</p>
+              <p className="text-[11px] tracking-[0.12em] uppercase text-blue-300 font-semibold">Webhook payload</p>
             </div>
             <h2 className="font-display text-[2rem] font-bold tracking-[-0.03em] text-white leading-[1.08] mb-3">
               The release.authorized event
@@ -144,7 +144,7 @@ export default function PartnersPage() {
             <p className="text-[15px] leading-relaxed text-white/55 max-w-2xl">
               When all 10 conditions pass, Vektrum fires this payload to your registered webhook endpoint.
               All monetary amounts are in USD as a decimal number. The{' '}
-              <code className="text-vektrum-blue text-[13px] bg-white/[0.06] px-1.5 py-0.5 rounded">idempotency_key</code>{' '}
+              <code className="text-blue-300 text-[13px] bg-white/[0.06] px-1.5 py-0.5 rounded">idempotency_key</code>{' '}
               is a UUID stable for the lifetime of the release — safe to use as a deduplication key on retries.
             </p>
           </div>
@@ -185,14 +185,14 @@ export default function PartnersPage() {
           <div className="mb-10">
             <div className="flex items-center gap-3 mb-4">
               <div className="h-px w-5 bg-vektrum-blue" />
-              <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">Signature verification</p>
+              <p className="text-[11px] tracking-[0.12em] uppercase text-blue-300 font-semibold">Signature verification</p>
             </div>
             <h2 className="font-display text-[2rem] font-bold tracking-[-0.03em] text-white leading-[1.08] mb-3">
               Verify every webhook before processing.
             </h2>
             <p className="text-[15px] leading-relaxed text-white/55 max-w-2xl">
               Every outbound webhook is signed:{' '}
-              <code className="text-vektrum-blue text-[13px] bg-white/[0.06] px-1.5 py-0.5 rounded">
+              <code className="text-blue-300 text-[13px] bg-white/[0.06] px-1.5 py-0.5 rounded">
                 X-Vektrum-Signature: t=&lt;unix_ts&gt;,sha256=HMAC-SHA256(&lt;ts&gt;.&lt;body&gt;, secret)
               </code>
               . Enforce a 5-minute tolerance window on the timestamp to prevent replay attacks.
@@ -201,7 +201,7 @@ export default function PartnersPage() {
 
           <div className="grid gap-6 lg:grid-cols-2">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-vektrum-blue mb-3">TypeScript</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-blue-300 mb-3">TypeScript</p>
               <CodeBlock language="typescript">{`import crypto from 'crypto'
 
 function verifyVektrumSignature(
@@ -269,18 +269,18 @@ def verify_vektrum_signature(
           <div className="mb-10">
             <div className="flex items-center gap-3 mb-4">
               <div className="h-px w-5 bg-vektrum-blue" />
-              <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">Partner API endpoints</p>
+              <p className="text-[11px] tracking-[0.12em] uppercase text-blue-300 font-semibold">Partner API endpoints</p>
             </div>
             <h2 className="font-display text-[2rem] font-bold tracking-[-0.03em] text-white leading-[1.08] mb-3">
               Three endpoints. All authenticated with your API key.
             </h2>
             <p className="text-[15px] leading-relaxed text-white/55 max-w-2xl">
               Authenticate all requests with{' '}
-              <code className="text-vektrum-blue text-[13px] bg-white/[0.06] px-1.5 py-0.5 rounded">
+              <code className="text-blue-300 text-[13px] bg-white/[0.06] px-1.5 py-0.5 rounded">
                 Authorization: Bearer &lt;your_api_key&gt;
               </code>
               . API keys are prefixed{' '}
-              <code className="text-vektrum-blue text-[13px] bg-white/[0.06] px-1.5 py-0.5 rounded">vkp_</code>{' '}
+              <code className="text-blue-300 text-[13px] bg-white/[0.06] px-1.5 py-0.5 rounded">vkp_</code>{' '}
               and 68 characters total.
             </p>
           </div>
@@ -334,7 +334,7 @@ def verify_vektrum_signature(
             {/* POST /api/partner/releases/:id/confirm */}
             <div className="rounded-2xl border border-white/[0.08] bg-[#111827] p-7">
               <div className="flex items-center gap-3 mb-4">
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded bg-vektrum-blue/10 text-vektrum-blue border border-vektrum-blue/20">
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded bg-vektrum-blue/10 text-blue-300 border border-vektrum-blue/20">
                   POST
                 </span>
                 <code className="text-[14px] font-mono text-white">/api/partner/releases/:id/confirm</code>
@@ -375,7 +375,7 @@ def verify_vektrum_signature(
             {/* POST /api/partner/releases/:id/fail */}
             <div className="rounded-2xl border border-white/[0.08] bg-[#111827] p-7">
               <div className="flex items-center gap-3 mb-4">
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded bg-vektrum-blue/10 text-vektrum-blue border border-vektrum-blue/20">
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded bg-vektrum-blue/10 text-blue-300 border border-vektrum-blue/20">
                   POST
                 </span>
                 <code className="text-[14px] font-mono text-white">/api/partner/releases/:id/fail</code>
@@ -409,7 +409,7 @@ def verify_vektrum_signature(
           <div className="mt-6 text-center">
             <Link
               href="/partners/docs"
-              className="inline-flex items-center gap-2 text-[14px] font-semibold text-vektrum-blue hover:underline"
+              className="inline-flex items-center gap-2 text-[14px] font-semibold text-blue-300 hover:underline"
             >
               View full API reference
               <ArrowRight size={14} />
@@ -423,7 +423,7 @@ def verify_vektrum_signature(
         <div className="max-w-3xl mx-auto px-6 sm:px-8 text-center">
           <div className="mb-6 inline-flex items-center gap-3">
             <div className="h-px w-5 bg-vektrum-blue" />
-            <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">Get started</p>
+            <p className="text-[11px] tracking-[0.12em] uppercase text-blue-300 font-semibold">Get started</p>
             <div className="h-px w-5 bg-vektrum-blue" />
           </div>
           <h2 className="font-display text-[2.25rem] font-bold tracking-[-0.035em] text-white leading-[1.08] mb-5">
@@ -438,17 +438,17 @@ def verify_vektrum_signature(
           <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] px-8 py-8 mb-8">
             <div className="grid gap-4 sm:grid-cols-3 text-center sm:text-left sm:divide-x sm:divide-white/[0.06]">
               <div className="sm:pr-6">
-                <FileText size={16} className="text-vektrum-blue mx-auto sm:mx-0 mb-2" />
+                <FileText size={16} className="text-blue-300 mx-auto sm:mx-0 mb-2" />
                 <p className="text-[13px] font-semibold text-white mb-1">API key + secret</p>
                 <p className="text-[12px] text-white/50 leading-relaxed">Issued by Vektrum admin. Shown once, stored as SHA-256 hash. Rotatable on demand.</p>
               </div>
               <div className="sm:px-6">
-                <Zap size={16} className="text-vektrum-blue mx-auto sm:mx-0 mb-2" />
+                <Zap size={16} className="text-blue-300 mx-auto sm:mx-0 mb-2" />
                 <p className="text-[13px] font-semibold text-white mb-1">Sandbox testing</p>
                 <p className="text-[12px] text-white/50 leading-relaxed">Test confirm and fail endpoints with sandbox releases before going live.</p>
               </div>
               <div className="sm:pl-6">
-                <Shield size={16} className="text-vektrum-blue mx-auto sm:mx-0 mb-2" />
+                <Shield size={16} className="text-blue-300 mx-auto sm:mx-0 mb-2" />
                 <p className="text-[13px] font-semibold text-white mb-1">Audit trail</p>
                 <p className="text-[12px] text-white/50 leading-relaxed">Every confirm and fail call is logged in the hash-chained audit log.</p>
               </div>

@@ -78,7 +78,7 @@ export default function FoundersPage() {
               >
                 <div className="flex items-center gap-5 mb-6">
                   <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-vektrum-blue/10 border border-vektrum-blue/20 select-none">
-                    <span className="font-display text-[17px] font-bold tracking-tight text-vektrum-blue">
+                    <span className="font-display text-[17px] font-bold tracking-tight text-blue-300">
                       {founder.initials}
                     </span>
                   </div>

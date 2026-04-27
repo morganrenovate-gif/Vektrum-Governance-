@@ -16,7 +16,7 @@ export default function DemoPage() {
           <div className="flex justify-center mb-6">
             <VektrumWordmark markSize={40} dark showTagline />
           </div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-vektrum-blue mb-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-300 mb-6">
             AI-assisted draw review with multi-provider fallback
           </p>
           <div className="mx-auto h-px w-16 bg-vektrum-blue mb-8" />
@@ -80,7 +80,7 @@ export default function DemoPage() {
                 className="rounded-xl border border-white/[0.08] bg-surface-2 p-6 text-center shadow-sm"
               >
                 <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-vektrum-blue/10">
-                  <item.icon size={18} className="text-vektrum-blue" />
+                  <item.icon size={18} className="text-blue-300" />
                 </div>
                 <p className="font-display text-3xl font-bold text-white">{item.stat}</p>
                 <p className="mt-2 text-sm text-white/70">{item.desc}</p>
@@ -163,7 +163,7 @@ export default function DemoPage() {
               ].map((text, i) => (
                 <div key={i} className="flex items-start gap-3">
                   <div className="mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-vektrum-blue/20">
-                    <CheckCircle2 size={14} className="text-vektrum-blue" />
+                    <CheckCircle2 size={14} className="text-blue-300" />
                   </div>
                   <p className="text-sm text-vektrum-canvas-text leading-relaxed">{text}</p>
                 </div>
@@ -174,7 +174,7 @@ export default function DemoPage() {
             <div className="rounded-lg border border-white/10 bg-white/5 overflow-hidden">
               {/* Header */}
               <div className="px-5 py-3 border-b border-white/10 flex items-center gap-2">
-                <Shield size={16} className="text-vektrum-blue" />
+                <Shield size={16} className="text-blue-300" />
                 <span className="text-sm font-semibold text-white">AI Draw Review</span>
                 <span className="inline-flex items-center gap-1 text-xs text-green-400">
                   <CheckCircle2 size={12} />
@@ -265,7 +265,7 @@ export default function DemoPage() {
                 <div className="flex h-4 w-4 items-center justify-center rounded-sm bg-vektrum-blue text-white flex-shrink-0">
                   <span className="text-[8px] font-bold">+</span>
                 </div>
-                <span className="text-sm font-semibold text-vektrum-blue">
+                <span className="text-sm font-semibold text-blue-300">
                   AI-assisted draw review: current, documented, and no unresolved critical risk.
                 </span>
               </li>
@@ -297,7 +297,7 @@ export default function DemoPage() {
                     <p className="text-[13px] font-semibold text-white">{tier}</p>
                     <p className="text-[12px] text-white/70">{desc}</p>
                   </div>
-                  <span className="text-[12px] font-semibold text-vektrum-blue-subtle whitespace-nowrap">{price}</span>
+                  <span className="text-[12px] font-semibold text-blue-300-subtle whitespace-nowrap">{price}</span>
                 </div>
               ))}
               <div className="px-5 py-3">

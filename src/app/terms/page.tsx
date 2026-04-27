@@ -131,7 +131,7 @@ export default function TermsPage() {
             <h2 className="text-lg font-semibold text-white">11. Contact</h2>
             <p className="mt-3 text-[15px] leading-relaxed text-white/55">
               For questions about these Terms, contact us at{' '}
-              <a href="mailto:legal@vektrum.io" className="text-vektrum-blue hover:underline">
+              <a href="mailto:legal@vektrum.io" className="text-blue-300 hover:underline">
                 legal@vektrum.io
               </a>.
             </p>

@@ -78,7 +78,7 @@ export default function PrivacyPage() {
               </ul>
               <p>
                 To exercise any of these rights, contact us at{' '}
-                <a href="mailto:support@vektrum.io" className="text-vektrum-blue hover:underline">
+                <a href="mailto:support@vektrum.io" className="text-blue-300 hover:underline">
                   support@vektrum.io
                 </a>.
               </p>
@@ -104,7 +104,7 @@ export default function PrivacyPage() {
             <h2 className="text-lg font-semibold text-white">7. Contact</h2>
             <p className="mt-3 text-[15px] leading-relaxed text-white/55">
               If you have questions about this Privacy Policy or our data practices, contact us at{' '}
-              <a href="mailto:support@vektrum.io" className="text-vektrum-blue hover:underline">
+              <a href="mailto:support@vektrum.io" className="text-blue-300 hover:underline">
                 support@vektrum.io
               </a>.
             </p>

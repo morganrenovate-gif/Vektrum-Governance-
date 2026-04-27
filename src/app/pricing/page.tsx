@@ -104,7 +104,7 @@ function EngagementCard({
           <span
             className={[
               'font-display text-[54px] font-bold tracking-[-0.04em] leading-none',
-              highlight ? 'text-vektrum-blue' : 'text-white',
+              highlight ? 'text-blue-300' : 'text-white',
             ].join(' ')}
           >
             {ratePercent}
@@ -308,7 +308,7 @@ export default function PricingPage() {
                 className="rounded-2xl border border-white/[0.08] bg-surface-2 p-7"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-vektrum-blue/10 mb-5">
-                  <pillar.icon size={19} className="text-vektrum-blue" />
+                  <pillar.icon size={19} className="text-blue-300" />
                 </div>
                 <h3 className="text-[14px] font-bold text-white mb-3">
                   {pillar.title}
@@ -390,7 +390,7 @@ export default function PricingPage() {
 
             {/* Right: the comparison math */}
             <div className="rounded-2xl border border-vektrum-blue/25 bg-vektrum-blue/[0.07] p-8">
-              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-vektrum-blue/70 mb-6">
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-blue-300/70 mb-6">
                 In context
               </p>
 
@@ -576,7 +576,7 @@ export default function PricingPage() {
             {/* Example 2 — Institutional */}
             <div className="rounded-2xl border border-vektrum-blue/30 bg-surface-3 overflow-hidden">
               <div className="px-6 py-4 border-b border-vektrum-blue/20 bg-vektrum-blue/[0.08]">
-                <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-vektrum-blue/70">
+                <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-blue-300/70">
                   Institutional Portfolio
                 </p>
                 <p className="text-[14px] font-semibold text-white mt-1">
@@ -719,7 +719,7 @@ export default function PricingPage() {
             <div className="rounded-2xl border border-vektrum-blue/20 bg-vektrum-blue/[0.05] p-7">
               <div className="flex items-center gap-2 mb-7">
                 <div className="h-px flex-1 bg-vektrum-blue/20" />
-                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-vektrum-blue/60">
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-blue-300/60">
                   With Vektrum governance
                 </p>
                 <div className="h-px flex-1 bg-vektrum-blue/20" />
@@ -799,7 +799,7 @@ export default function PricingPage() {
                 className="rounded-2xl border border-white/[0.08] bg-surface-2 p-6"
               >
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-vektrum-blue/10 mb-4">
-                  <pillar.icon size={17} className="text-vektrum-blue" />
+                  <pillar.icon size={17} className="text-blue-300" />
                 </div>
                 <p className="text-[13px] font-bold text-white mb-2">
                   {pillar.headline}
@@ -870,7 +870,7 @@ export default function PricingPage() {
             </h2>
             <div className="grid gap-6 sm:grid-cols-2">
               <div className="rounded-xl border border-vektrum-blue/20 bg-vektrum-blue/[0.04] p-6">
-                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-vektrum-blue mb-2">
+                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-blue-300 mb-2">
                   Standalone — Stripe Connect rail
                 </p>
                 <p className="text-[13px] leading-relaxed text-white/65">
