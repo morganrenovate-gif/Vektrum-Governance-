@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient, createSupabaseAdminClient } from '@/lib/supabase/server'
+import { logAudit } from '@/lib/engine/audit'
 import type { Profile } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
@@ -45,6 +46,24 @@ export async function PATCH() {
         { status: 500 },
       )
     }
+
+    // ── Audit ───────────────────────────────────────────────────────────────
+    // Records the irreversible onboarding gate transition. Metadata is
+    // intentionally minimal: no Stripe IDs, bank details, tokens, or raw
+    // form payloads — only the boolean transition + the route source.
+    await logAudit({
+      entity_type:   'profile',
+      entity_id:     user.id,
+      action:        'onboarding_completed',
+      actor_id:      user.id,
+      system_source: 'api/onboarding',
+      new_values: {
+        onboarding_complete: true,
+      },
+      metadata: {
+        route: '/api/onboarding',
+      },
+    })
 
     return NextResponse.json({ success: true })
   } catch (err) {

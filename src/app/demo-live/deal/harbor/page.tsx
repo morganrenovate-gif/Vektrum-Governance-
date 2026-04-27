@@ -35,6 +35,10 @@ export default function HarborDealPage() {
   // Submit-for-Review modal — null when closed, otherwise the milestone the
   // contractor is submitting. Contractor-only flow.
   const [submitModal, setSubmitModal] = useState<{ id: string; name: string; amount: number } | null>(null)
+  // Activity events appended in this session by demo actions (release
+  // authorization, contractor submission). Rendered alongside the canonical
+  // static activity entries below. Frontend-only state — no API/DB calls.
+  const [releaseEvents, setReleaseEvents] = useState<Array<{ text: string; date: string }>>([])
 
   useDemoAutoReset(() => {
     setOverrides({})
@@ -42,6 +46,7 @@ export default function HarborDealPage() {
     setExpanded({})
     setReleaseModal(false)
     setSubmitModal(null)
+    setReleaseEvents([])
   })
 
   function getStatus(id: string, defaultStatus: DemoMilestoneStatus): DemoMilestoneStatus {
@@ -238,7 +243,10 @@ export default function HarborDealPage() {
         </div>
       </section>
 
-      {/* Activity Timeline */}
+      {/* Activity Timeline — canonical events first, then any in-session
+          events appended by the release / submit flows. The appended block
+          is what Demosmith and other watchers look for to confirm the
+          release was authorized. */}
       <section>
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white/55">Activity</h2>
         <div className="space-y-3">
@@ -248,6 +256,7 @@ export default function HarborDealPage() {
             { text: 'Concrete Sub-grade & Foundations released — $1,840,000', date: '7 days ago' },
             { text: 'AI Draw Review for Structural Steel Erection — score 91/100', date: '3 days ago' },
             { text: 'Structural Steel Erection approved — awaiting release', date: '2 days ago' },
+            ...releaseEvents,
           ].map((event, i) => (
             <div key={i} className="flex items-start gap-3 text-sm">
               <div className="mt-1.5 h-2 w-2 rounded-full bg-vektrum-blue flex-shrink-0" />
@@ -267,6 +276,16 @@ export default function HarborDealPage() {
         onConfirm={() => {
           setOverrides((prev) => ({ ...prev, 'ms-hb-3': 'released' }))
           setNewlyReleased((prev) => new Set([...prev, 'ms-hb-3']))
+          // Append a visible activity/audit-feed event so external watchers
+          // (Demosmith) can confirm the release was authorized. Frontend
+          // state only — no API or production audit_log call.
+          setReleaseEvents((prev) => [
+            ...prev,
+            {
+              text: 'Release authorized — Structural Steel Erection — $2,180,000 — funder authorized release; audit evidence recorded.',
+              date: 'Just now',
+            },
+          ])
         }}
         onClose={() => setReleaseModal(false)}
       />
@@ -279,6 +298,15 @@ export default function HarborDealPage() {
         onConfirm={() => {
           if (submitModal) {
             setOverrides((prev) => ({ ...prev, [submitModal.id]: 'ready_for_review' }))
+            // Activity-feed parity: contractor submission is also
+            // user-visible audit evidence.
+            setReleaseEvents((prev) => [
+              ...prev,
+              {
+                text: `Draw submitted for review — ${submitModal.name} — contractor submitted draw package; audit evidence recorded.`,
+                date: 'Just now',
+              },
+            ])
           }
           setSubmitModal(null)
         }}
