@@ -3,6 +3,7 @@ import { runReconciliation }          from '@/lib/engine/reconciliation'
 import { sendSlackAlert }             from '@/lib/engine/alerts'
 import { sendAdminAlert }             from '@/lib/engine/notifications'
 import { createSupabaseAdminClient }  from '@/lib/supabase/admin'
+import { logAudit }                   from '@/lib/engine/audit'
 import { POLICIES, checkRateLimit, rateLimitResponse, logRateLimitViolation, getRequestIp } from '@/lib/engine/rate-limit'
 
 export const dynamic = 'force-dynamic'
@@ -86,19 +87,61 @@ async function handler(request: NextRequest): Promise<NextResponse> {
   const lookbackHours = process.env.RECONCILIATION_LOOKBACK_HOURS
     ? parseInt(process.env.RECONCILIATION_LOOKBACK_HOURS, 10)
     : 72
+  const effectiveLookbackHours = isFinite(lookbackHours) ? lookbackHours : 72
+
+  // Audit: cron run started — system actor, no PII / secrets / headers in
+  // metadata. The runId is generated inside runReconciliation, so the
+  // started event uses 'reconcile' as a stable correlation key; the
+  // completed/failed events carry the actual runId.
+  await logAudit({
+    entity_type:   'reconciliation_run',
+    entity_id:     'reconcile',
+    action:        'cron_reconcile_started',
+    actor_id:      null,
+    actor_role:    'system',
+    system_source: 'api/cron/reconcile',
+    metadata: {
+      route:          '/api/cron/reconcile',
+      started_at:     runStart.toISOString(),
+      lookback_hours: effectiveLookbackHours,
+      triggered_by:   'cron',
+    },
+  })
 
   const result = await runReconciliation({
-    windowHours:  isFinite(lookbackHours) ? lookbackHours : 72,
+    windowHours: effectiveLookbackHours,
     triggeredBy: 'cron',
   })
 
-  const durationSeconds = (Date.now() - runStart.getTime()) / 1000
+  const durationMs      = Date.now() - runStart.getTime()
+  const durationSeconds = durationMs / 1000
 
   if (result.status === 'failed') {
     console.error(
       `[cron/reconcile] Run ${result.runId} FAILED after ${durationSeconds.toFixed(1)}s:`,
       result.error,
     )
+
+    // Audit: cron run failed. The error_summary is the FIRST LINE of
+    // result.error only and is truncated to 500 chars — never a full stack
+    // trace, never an Error object. result.error is already considered safe
+    // for outbound Slack/email alerts above.
+    await logAudit({
+      entity_type:   'reconciliation_run',
+      entity_id:     result.runId ?? 'reconcile',
+      action:        'cron_reconcile_failed',
+      actor_id:      null,
+      actor_role:    'system',
+      system_source: 'api/cron/reconcile',
+      metadata: {
+        route:         '/api/cron/reconcile',
+        run_id:        result.runId ?? null,
+        duration_ms:   durationMs,
+        error_summary: ((result.error ?? 'unknown')
+          .split('\n')[0] ?? 'unknown')
+          .slice(0, 500),
+      },
+    })
 
     // Alert on run failure
     await Promise.allSettled([
@@ -133,6 +176,26 @@ async function handler(request: NextRequest): Promise<NextResponse> {
     `Checked: ${result.releasesChecked} releases, ${result.transfersChecked} transfers, ` +
     `${result.dealsChecked} deals. Issues found: ${result.issuesFound}.`,
   )
+
+  // Audit: cron run completed. Only counts + duration + run_id are recorded.
+  // No request headers, no CRON_SECRET, no environment vars.
+  await logAudit({
+    entity_type:   'reconciliation_run',
+    entity_id:     result.runId,
+    action:        'cron_reconcile_completed',
+    actor_id:      null,
+    actor_role:    'system',
+    system_source: 'api/cron/reconcile',
+    metadata: {
+      route:             '/api/cron/reconcile',
+      run_id:            result.runId,
+      duration_ms:       durationMs,
+      releases_checked:  result.releasesChecked,
+      transfers_checked: result.transfersChecked,
+      deals_checked:     result.dealsChecked,
+      issues_found:      result.issuesFound,
+    },
+  })
 
   // ── 3. Alert on NEW findings ───────────────────────────────────────────────
   //

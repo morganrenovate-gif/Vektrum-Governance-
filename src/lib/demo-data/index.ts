@@ -340,3 +340,50 @@ export function getMilestoneSummary(deal: DemoDeal): {
   const pct      = deal.total > 0 ? Math.round((deal.released / deal.total) * 100) : 0
   return { released, total, pct }
 }
+
+// ── Fresh-deal factories (defense-in-depth) ─────────────────────────────────
+//
+// Demo client pages historically read the canonical exports (`harbor`,
+// `riverside`, etc.) by reference. Nothing in code mutates those objects
+// today, but if a future change ever did — for example, splicing a milestone
+// or assigning `ms.status = 'released'` directly — the mutation would persist
+// for every subsequent demo visitor in the same browser session, since the
+// canonical object lives at module scope.
+//
+// These factories return a structured deep clone so each demo entry has its
+// own isolated copy. Use them at the top of every client demo deal page:
+//
+//   const deal = useMemo(() => getFreshHarborDeal(), [])
+//
+// or for one-shot reads:
+//
+//   const deal = getFreshHarborDeal()
+
+function clone<T>(value: T): T {
+  // structuredClone is available in Node 17+ and all modern browsers.
+  // The fallback path is only exercised in unusual runtimes (e.g. very
+  // old Edge functions) — JSON round-trip is sufficient for our plain
+  // demo data (no Dates, Maps, BigInts, or functions in the payload).
+  if (typeof structuredClone === 'function') return structuredClone(value)
+  return JSON.parse(JSON.stringify(value)) as T
+}
+
+/** Returns a deep clone of the canonical Harbor deal. */
+export function getFreshHarborDeal(): DemoDeal {
+  return clone(harbor)
+}
+
+/** Returns a deep clone of the canonical Riverside deal. */
+export function getFreshRiversideDeal(): DemoDeal {
+  return clone(riverside)
+}
+
+/** Returns a deep clone of the canonical Westside deal. */
+export function getFreshWestsideDeal(): DemoDeal {
+  return clone(westside)
+}
+
+/** Returns a deep clone of the canonical Harbor-dispute milestone list. */
+export function getFreshHarborDisputeMilestones(): DisputeMilestone[] {
+  return clone(harborDisputeMilestones)
+}
