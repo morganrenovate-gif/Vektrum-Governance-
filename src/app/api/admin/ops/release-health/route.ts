@@ -57,48 +57,29 @@ export async function GET(request: NextRequest) {
 
   // ── 1. Stuck releases ─────────────────────────────────────────────────────
   // Milestones approved but not yet released beyond the threshold.
-  // approved_at is set when a funder approves the milestone; if approved_at is
-  // NULL we fall back to updated_at (edge case: data pre-migration).
+  // milestones.approved_at does NOT exist in the schema (that column lives on
+  // change_orders). updated_at is the correct proxy — it is bumped on every
+  // status transition, including the transition to 'approved'.
   const stuckCutoff = new Date(Date.now() - stuckHours * 60 * 60 * 1000).toISOString()
 
-  // Split into two queries to avoid nested and() inside .or() — the compound
-  // form is PostgREST-version-sensitive and can fail with ISO timestamps.
-  const STUCK_SELECT = `
-    id, title, amount, status, approved_at, updated_at, deal_id,
-    deals (
-      id, title, total_amount, status,
-      contractor:profiles!deals_contractor_id_fkey ( id, full_name, company_name ),
-      funder:profiles!deals_funder_id_fkey ( id, full_name, company_name )
-    )
-  `
-  const [{ data: stuckWithApprovedAt, error: errA }, { data: stuckWithoutApprovedAt, error: errB }] =
-    await Promise.all([
-      adminClient
-        .from('milestones')
-        .select(STUCK_SELECT)
-        .eq('status', 'approved')
-        .lt('approved_at', stuckCutoff)
-        .order('approved_at', { ascending: true })
-        .limit(100),
-      adminClient
-        .from('milestones')
-        .select(STUCK_SELECT)
-        .eq('status', 'approved')
-        .is('approved_at', null)
-        .lt('updated_at', stuckCutoff)
-        .order('updated_at', { ascending: true })
-        .limit(100),
-    ])
+  const { data: stuckRows, error: stuckError } = await adminClient
+    .from('milestones')
+    .select(`
+      id, title, amount, status, updated_at, deal_id,
+      deals (
+        id, title, total_amount, status,
+        contractor:profiles!deals_contractor_id_fkey ( id, full_name, company_name ),
+        funder:profiles!deals_funder_id_fkey ( id, full_name, company_name )
+      )
+    `)
+    .eq('status', 'approved')
+    .lt('updated_at', stuckCutoff)
+    .order('updated_at', { ascending: true })
+    .limit(100)
 
-  const stuckError = errA ?? errB
   if (stuckError) {
     return internalError('Failed to fetch stuck releases.', stuckError.message)
   }
-
-  const seenIds = new Set<string>()
-  const stuckRows = [...(stuckWithApprovedAt ?? []), ...(stuckWithoutApprovedAt ?? [])].filter(
-    (m) => { if (seenIds.has(m.id)) return false; seenIds.add(m.id); return true },
-  )
 
   // ── 2. Failed payouts ─────────────────────────────────────────────────────
   // Milestones in payout_failed state — need ops attention for retry or
@@ -106,26 +87,12 @@ export async function GET(request: NextRequest) {
   const { data: failedRows, error: failedError } = await adminClient
     .from('milestones')
     .select(`
-      id,
-      title,
-      amount,
-      status,
-      payout_failure_count,
-      last_payout_failure_at,
-      deal_id,
-      approved_at,
-      updated_at,
+      id, title, amount, status, payout_failure_count, last_payout_failure_at,
+      deal_id, updated_at,
       deals (
-        id,
-        title,
-        total_amount,
-        status,
-        contractor:profiles!deals_contractor_id_fkey (
-          id, full_name, company_name
-        ),
-        funder:profiles!deals_funder_id_fkey (
-          id, full_name, company_name
-        )
+        id, title, total_amount, status,
+        contractor:profiles!deals_contractor_id_fkey ( id, full_name, company_name ),
+        funder:profiles!deals_funder_id_fkey ( id, full_name, company_name )
       )
     `)
     .eq('status', 'payout_failed')
@@ -191,12 +158,13 @@ export async function GET(request: NextRequest) {
 
   const stuckReleases = (stuckRows ?? []).map((m) => {
     const deal = m.deals as unknown as DealJoin | null
-    const approvedAt = m.approved_at ?? m.updated_at
+    // milestones.approved_at does not exist; updated_at is the approval timestamp proxy.
+    const approvedAt = m.updated_at
     return {
       milestone_id:      m.id,
       milestone_title:   m.title,
       amount:            m.amount,
-      approved_at:       approvedAt,
+      approved_at:       approvedAt,   // field name kept for UI compatibility
       hours_stuck:       hoursSince(approvedAt),
       deal_id:           m.deal_id,
       deal_title:        deal?.title ?? 'Unknown deal',

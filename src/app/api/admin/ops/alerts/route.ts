@@ -83,50 +83,28 @@ export async function GET(request: NextRequest) {
   const stuckCriticalCutoff = new Date(now - STUCK_CRITICAL_HOURS * 3_600_000).toISOString()
 
   // ── Signal 1 & 2: Stuck approved milestones ───────────────────────────────
-  // Split into two queries to avoid nested and() inside .or() — the compound
-  // form is PostgREST-version-sensitive and can fail with ISO timestamps.
-  // Query A: explicit approved_at set and past the cutoff.
-  // Query B: no approved_at, fallback to updated_at.
-  const STUCK_SELECT = `
-    id, title, amount, approved_at, updated_at, deal_id,
-    deals ( id, title,
-      contractor:profiles!deals_contractor_id_fkey ( full_name, company_name )
-    )
-  `
-  const [{ data: stuckWithApprovedAt, error: errA }, { data: stuckWithoutApprovedAt, error: errB }] =
-    await Promise.all([
-      adminClient
-        .from('milestones')
-        .select(STUCK_SELECT)
-        .eq('status', 'approved')
-        .lt('approved_at', stuckHighCutoff)
-        .order('approved_at', { ascending: true })
-        .limit(50),
-      adminClient
-        .from('milestones')
-        .select(STUCK_SELECT)
-        .eq('status', 'approved')
-        .is('approved_at', null)
-        .lt('updated_at', stuckHighCutoff)
-        .order('updated_at', { ascending: true })
-        .limit(50),
-    ])
+  // milestones.approved_at does NOT exist in the schema — the column is on
+  // change_orders. The correct timestamp is updated_at, which is bumped
+  // whenever milestone status changes (including the transition to 'approved').
+  const { data: stuckMilestones, error: stuckError } = await adminClient
+    .from('milestones')
+    .select(`
+      id, title, amount, updated_at, deal_id,
+      deals ( id, title,
+        contractor:profiles!deals_contractor_id_fkey ( full_name, company_name )
+      )
+    `)
+    .eq('status', 'approved')
+    .lt('updated_at', stuckHighCutoff)
+    .order('updated_at', { ascending: true })
+    .limit(50)
 
-  const stuckError = errA ?? errB
   if (stuckError) {
     return internalError('Failed to fetch stuck milestones.', stuckError.message)
   }
 
-  // Merge and deduplicate (both queries may theoretically return the same row
-  // if approved_at becomes non-null between the two fetches — extremely unlikely
-  // but safe to guard).
-  const seenIds = new Set<string>()
-  const stuckMilestones = [...(stuckWithApprovedAt ?? []), ...(stuckWithoutApprovedAt ?? [])].filter(
-    (m) => { if (seenIds.has(m.id)) return false; seenIds.add(m.id); return true },
-  )
-
   for (const m of stuckMilestones ?? []) {
-    const approvedAt = m.approved_at ?? m.updated_at
+    const approvedAt = m.updated_at  // updated_at is the approval timestamp proxy
     const hoursSince = approvedAt
       ? Math.round((now - new Date(approvedAt).getTime()) / 3_600_000)
       : STUCK_HIGH_HOURS
