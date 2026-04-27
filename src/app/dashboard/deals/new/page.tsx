@@ -48,7 +48,7 @@ export default function NewDealPage() {
         .from("profiles")
         .select("role")
         .eq("id", user.id)
-        .single();
+        .single<{ role: string }>();
       if (profile?.role === "admin") {
         setIsAdmin(true);
         // Fetch partner list for the selector

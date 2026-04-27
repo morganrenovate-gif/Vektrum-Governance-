@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.json({
-    partners: (partners ?? [] as PartnerRow[]).map((p: PartnerRow) => ({
+    partners: ((partners ?? []) as unknown as PartnerRow[]).map((p: PartnerRow) => ({
       ...p,
       deal_count:             dealCountMap[p.id] ?? 0,
       pending_confirmations:  pendingMap[p.id]  ?? 0,
