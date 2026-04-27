@@ -20,8 +20,10 @@ export async function GET(request: NextRequest) {
   }
 
   // ── Diagnostics ────────────────────────────────────────────────────────────
-  const keySet = !!process.env.STRIPE_SECRET_KEY
-  const keyPrefix = process.env.STRIPE_SECRET_KEY?.slice(0, 12) ?? ''
+  // Never expose any fragment of the secret key in the response. Booleans
+  // are sufficient to diagnose configuration without leaking key material.
+  const keySet           = !!process.env.STRIPE_SECRET_KEY
+  const keyLooksLikeLive = process.env.STRIPE_SECRET_KEY?.startsWith('sk_live_') ?? false
 
   let listSuccess = false
   let listError: string | null = null
@@ -36,7 +38,7 @@ export async function GET(request: NextRequest) {
   } catch (err) {
     return NextResponse.json({
       key_set: keySet,
-      key_prefix: keyPrefix,
+      key_looks_like_live: keyLooksLikeLive,
       list_success: false,
       list_error: err instanceof Error ? err.message : String(err),
       create_success: false,
@@ -82,7 +84,7 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({
     key_set: keySet,
-    key_prefix: keyPrefix,
+    key_looks_like_live: keyLooksLikeLive,
     list_success: listSuccess,
     list_error: listError,
     create_success: createSuccess,
