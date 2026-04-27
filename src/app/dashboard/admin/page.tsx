@@ -21,6 +21,8 @@ import { DisputeQueue } from '@/components/admin/dispute-queue'
 import { UserTable } from '@/components/admin/user-table'
 import { InviteAdminForm } from '@/components/admin/invite-admin-form'
 import { ReconciliationPanel } from '@/components/admin/ReconciliationPanel'
+import { AuditChainHealthBadge } from '@/components/admin/AuditChainHealthBadge'
+import { getRecentAuditChainHealth } from '@/lib/engine/audit-chain-health'
 import { PageHeader, SectionHeader, MetricStrip, StatBlock } from '@/components/layout'
 
 export const metadata = {
@@ -238,10 +240,13 @@ export default async function AdminDashboardPage() {
   const [
     { profiles, deals, disputes, recentAudit, healthMetrics, emailMap },
     reconciliationData,
+    auditChainHealthRows,
   ] = await Promise.all([
     getAdminData(),
     getReconciliationData(),
+    getRecentAuditChainHealth(1),
   ])
+  const latestAuditChainHealth = auditChainHealthRows[0] ?? null
 
   // ── Computed platform stats ────────────────────────────────────────────────
   const contractors    = profiles.filter(p => p.role === 'contractor')
@@ -476,14 +481,17 @@ export default async function AdminDashboardPage() {
           count={reconciliationData.health.open_total > 0 ? reconciliationData.health.open_total : undefined}
           variant={reconciliationData.health.open_critical > 0 ? 'warning' : 'default'}
         />
-        <ReconciliationPanel
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          initialIssues={reconciliationData.issues as any}
-          initialTotal={reconciliationData.total}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          lastRun={reconciliationData.lastRun as any}
-          health={reconciliationData.health}
-        />
+        <div className="space-y-3">
+          <AuditChainHealthBadge latest={latestAuditChainHealth} />
+          <ReconciliationPanel
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            initialIssues={reconciliationData.issues as any}
+            initialTotal={reconciliationData.total}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            lastRun={reconciliationData.lastRun as any}
+            health={reconciliationData.health}
+          />
+        </div>
       </section>
 
       {/* ── Section 6: Recent Audit Activity ─────────────────────────────── */}
