@@ -61,37 +61,44 @@ export async function GET(request: NextRequest) {
   // NULL we fall back to updated_at (edge case: data pre-migration).
   const stuckCutoff = new Date(Date.now() - stuckHours * 60 * 60 * 1000).toISOString()
 
-  const { data: stuckRows, error: stuckError } = await adminClient
-    .from('milestones')
-    .select(`
-      id,
-      title,
-      amount,
-      status,
-      approved_at,
-      updated_at,
-      deal_id,
-      deals (
-        id,
-        title,
-        total_amount,
-        status,
-        contractor:profiles!deals_contractor_id_fkey (
-          id, full_name, company_name
-        ),
-        funder:profiles!deals_funder_id_fkey (
-          id, full_name, company_name
-        )
-      )
-    `)
-    .eq('status', 'approved')
-    .or(`approved_at.lt.${stuckCutoff},and(approved_at.is.null,updated_at.lt.${stuckCutoff})`)
-    .order('approved_at', { ascending: true, nullsFirst: false })
-    .limit(100)
+  // Split into two queries to avoid nested and() inside .or() — the compound
+  // form is PostgREST-version-sensitive and can fail with ISO timestamps.
+  const STUCK_SELECT = `
+    id, title, amount, status, approved_at, updated_at, deal_id,
+    deals (
+      id, title, total_amount, status,
+      contractor:profiles!deals_contractor_id_fkey ( id, full_name, company_name ),
+      funder:profiles!deals_funder_id_fkey ( id, full_name, company_name )
+    )
+  `
+  const [{ data: stuckWithApprovedAt, error: errA }, { data: stuckWithoutApprovedAt, error: errB }] =
+    await Promise.all([
+      adminClient
+        .from('milestones')
+        .select(STUCK_SELECT)
+        .eq('status', 'approved')
+        .lt('approved_at', stuckCutoff)
+        .order('approved_at', { ascending: true })
+        .limit(100),
+      adminClient
+        .from('milestones')
+        .select(STUCK_SELECT)
+        .eq('status', 'approved')
+        .is('approved_at', null)
+        .lt('updated_at', stuckCutoff)
+        .order('updated_at', { ascending: true })
+        .limit(100),
+    ])
 
+  const stuckError = errA ?? errB
   if (stuckError) {
     return internalError('Failed to fetch stuck releases.', stuckError.message)
   }
+
+  const seenIds = new Set<string>()
+  const stuckRows = [...(stuckWithApprovedAt ?? []), ...(stuckWithoutApprovedAt ?? [])].filter(
+    (m) => { if (seenIds.has(m.id)) return false; seenIds.add(m.id); return true },
+  )
 
   // ── 2. Failed payouts ─────────────────────────────────────────────────────
   // Milestones in payout_failed state — need ops attention for retry or
