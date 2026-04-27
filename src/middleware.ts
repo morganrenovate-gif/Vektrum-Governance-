@@ -184,6 +184,10 @@ export async function middleware(request: NextRequest) {
     const { supabaseResponse, user } = await updateSession(request);
 
     if (!user) {
+      // API routes must never redirect to login. Route handlers validate Bearer
+      // tokens or session cookies themselves and return JSON 401/403 directly.
+      if (pathname.startsWith("/api/")) return NextResponse.next();
+
       // Redirect to login, preserving the destination for post-auth redirect
       const loginUrl = new URL("/auth/login", request.url);
       loginUrl.searchParams.set("next", pathname);
