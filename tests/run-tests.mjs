@@ -38,6 +38,7 @@ const testFiles = [
   path.join(__dirname, 'demo-activity-feed.test.ts'),
   path.join(__dirname, 'audit-p0-coverage.test.ts'),
   path.join(__dirname, 'audit-p1-auth-onboarding.test.ts'),
+  path.join(__dirname, 'audit-p1-recon-cron.test.ts'),
   path.join(__dirname, 'route-smoke.test.ts'),
 ]
 
