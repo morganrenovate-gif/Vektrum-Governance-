@@ -151,16 +151,24 @@ export async function GET(request: NextRequest) {
 
   // ── Determine feed health ─────────────────────────────────────────────────
   // Signal levels:
-  //   ok      — last webhook < 2h ago AND no stale transfers
-  //   warning — last webhook 2-6h ago OR stale transfers exist
-  //   critical — last webhook > 6h ago OR stale transfers > 30 min old
+  //   ok       — last webhook < 2h ago AND no stale transfers
+  //   warning  — last webhook 2-6h ago OR stale transfers exist
+  //   critical — last webhook > 6h ago AND there are pending unconfirmed
+  //              transfers (silence + pending = real problem), OR any stale
+  //              transfer > 30 min old.
+  //
+  // "No webhooks but no pending transfers" is intentionally downgraded to
+  // 'warning': the Stripe webhook feed is silent, but there's nothing stuck.
+  // This happens naturally when no Stripe payments move for extended periods
+  // (e.g. during pre-production or between active deals).
   const maxStaleMins = staleTransfers.reduce((m, r) => Math.max(m, r.minutes_pending), 0)
+  const hasPendingTransfers = (unconfirmedCount ?? 0) > 0
 
   let feedHealth: 'ok' | 'warning' | 'critical' = 'ok'
 
   if (
-    (minutesSinceLastWebhook !== null && minutesSinceLastWebhook > 360) ||
-    maxStaleMins > 30
+    maxStaleMins > 30 ||
+    (minutesSinceLastWebhook !== null && minutesSinceLastWebhook > 360 && hasPendingTransfers)
   ) {
     feedHealth = 'critical'
   } else if (
