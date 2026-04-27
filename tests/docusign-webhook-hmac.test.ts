@@ -84,8 +84,12 @@ await test('BYPASS: NODE_ENV=test + DEV_BYPASS=true → NOT allowed (non-dev env
 })
 
 await test('BYPASS: NODE_ENV=staging + DEV_BYPASS=true → NOT allowed', () => {
+  // NodeJS.ProcessEnv['NODE_ENV'] is typed as 'development' | 'production' | 'test'.
+  // Real deployments may set arbitrary values like 'staging' — exercise that path
+  // explicitly by widening the literal type. The function under test accepts
+  // a plain `{ NODE_ENV?: string; ... }` so this is a safe cast.
   const result = isHmacBypassAllowed({
-    NODE_ENV:                   'staging',
+    NODE_ENV:                   'staging' as string,
     DOCUSIGN_WEBHOOK_DEV_BYPASS: 'true',
   })
   assert(result === false, 'staging env must be denied regardless of flag')

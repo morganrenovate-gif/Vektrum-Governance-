@@ -88,7 +88,10 @@ function queueRpc(response: { data: unknown; error: unknown }) {
 // ─── require.cache helpers ────────────────────────────────────────────────────
 
 function makeModule(filename: string, exports: Record<string, unknown>) {
-  return { id: filename, filename, loaded: true, exports, children: [], paths: [] } as NodeJS.Module
+  // Two-step cast: the partial shape doesn't satisfy NodeJS.Module's full
+  // surface (parent, path, require, isPreloading), but the require.cache
+  // injection only ever reads `exports`, so the missing fields are unused.
+  return { id: filename, filename, loaded: true, exports, children: [], paths: [] } as unknown as NodeJS.Module
 }
 
 // ─── Mock: Supabase admin client ──────────────────────────────────────────────

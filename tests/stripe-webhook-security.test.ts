@@ -53,10 +53,15 @@ const FAKE_EVENT = {
 // response so the route's idempotency guard fires and returns 200 early —
 // this prevents the route from trying to reach event handlers that would need
 // deeper mocking.
-function makeSupabaseChain(): ReturnType<typeof makeSupabaseChain> {
-  const chain: Record<string, unknown> & {
-    then: (r: (v: unknown) => unknown, j?: (e: unknown) => unknown) => Promise<unknown>
-  } = {
+// Explicit type for the Supabase chain mock — was previously declared via
+// `ReturnType<typeof makeSupabaseChain>`, which TS now flags as a circular
+// self-reference.
+type SupabaseChain = Record<string, unknown> & {
+  then: (r: (v: unknown) => unknown, j?: (e: unknown) => unknown) => Promise<unknown>
+}
+
+function makeSupabaseChain(): SupabaseChain {
+  const chain: SupabaseChain = {
     select:     () => chain,
     insert:     () => chain,
     update:     () => chain,
@@ -70,7 +75,7 @@ function makeSupabaseChain(): ReturnType<typeof makeSupabaseChain> {
       Promise.resolve({ data: null, error: { code: '23505', message: 'duplicate key' } })
         .then(resolve, reject),
   }
-  return chain as ReturnType<typeof makeSupabaseChain>
+  return chain
 }
 
 // ─── Patch require.cache before loading the route ────────────────────────────

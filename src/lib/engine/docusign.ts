@@ -364,7 +364,7 @@ export function verifyWebhookSignature(
  * with synthetic env objects — no process.env mutation needed in tests.
  */
 export function isHmacBypassAllowed(
-  env: Pick<NodeJS.ProcessEnv, 'NODE_ENV' | 'DOCUSIGN_WEBHOOK_DEV_BYPASS'>,
+  env: { NODE_ENV?: string; DOCUSIGN_WEBHOOK_DEV_BYPASS?: string },
 ): boolean {
   return env.NODE_ENV === 'development' && env.DOCUSIGN_WEBHOOK_DEV_BYPASS === 'true'
 }
