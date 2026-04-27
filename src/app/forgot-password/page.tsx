@@ -70,7 +70,7 @@ export default function ForgotPasswordPage() {
               </p>
               <Link
                 href="/auth/login"
-                className="mt-4 text-sm font-medium text-vektrum-blue hover:underline"
+                className="mt-4 text-sm font-medium text-blue-300 hover:text-blue-200 hover:underline"
               >
                 Back to login
               </Link>

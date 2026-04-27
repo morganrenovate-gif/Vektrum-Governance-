@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { CheckCircle2, ChevronDown, ChevronUp, Brain, FileText } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format'
-import { harbor, DEMO_RESET_EVENT } from '@/lib/demo-data'
+import { harbor } from '@/lib/demo-data'
 import type { DemoMilestoneStatus } from '@/lib/demo-data'
+import { useDemoAutoReset } from '@/lib/demo-data/use-demo-auto-reset'
 import { ReleaseFundsModal } from '@/components/demo/ReleaseFundsModal'
 
 const deal = harbor
@@ -31,16 +32,12 @@ export default function HarborDealPage() {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
   const [releaseModal, setReleaseModal] = useState(false)
 
-  useEffect(() => {
-    const onReset = () => {
-      setOverrides({})
-      setNewlyReleased(new Set())
-      setExpanded({})
-      setReleaseModal(false)
-    }
-    window.addEventListener(DEMO_RESET_EVENT, onReset)
-    return () => window.removeEventListener(DEMO_RESET_EVENT, onReset)
-  }, [])
+  useDemoAutoReset(() => {
+    setOverrides({})
+    setNewlyReleased(new Set())
+    setExpanded({})
+    setReleaseModal(false)
+  })
 
   function getStatus(id: string, defaultStatus: DemoMilestoneStatus): DemoMilestoneStatus {
     return overrides[id] ?? defaultStatus
@@ -212,8 +209,8 @@ export default function HarborDealPage() {
             { text: 'Deal created — Sarah Chen & Marcus Webb', date: 'October 25, 2025' },
             { text: 'Site Preparation & Grading released — $320,000', date: '14 days ago' },
             { text: 'Concrete Sub-grade & Foundations released — $1,840,000', date: '7 days ago' },
-            { text: 'Structural Steel Erection released — $2,180,000', date: '3 days ago' },
-            { text: 'AI Draw Review for Building Envelope — score 92/100', date: '2 days ago' },
+            { text: 'AI Draw Review for Structural Steel Erection — score 91/100', date: '3 days ago' },
+            { text: 'Structural Steel Erection approved — awaiting release', date: '2 days ago' },
           ].map((event, i) => (
             <div key={i} className="flex items-start gap-3 text-sm">
               <div className="mt-1.5 h-2 w-2 rounded-full bg-vektrum-blue flex-shrink-0" />
@@ -229,10 +226,10 @@ export default function HarborDealPage() {
       {/* Modals */}
       <ReleaseFundsModal
         open={releaseModal}
-        milestone={{ name: 'Building Envelope & Roofing', amount: 2_640_000 }}
+        milestone={{ name: 'Structural Steel Erection', amount: 2_180_000 }}
         onConfirm={() => {
-          setOverrides((prev) => ({ ...prev, 'ms-hb-4': 'released' }))
-          setNewlyReleased((prev) => new Set([...prev, 'ms-hb-4']))
+          setOverrides((prev) => ({ ...prev, 'ms-hb-3': 'released' }))
+          setNewlyReleased((prev) => new Set([...prev, 'ms-hb-3']))
         }}
         onClose={() => setReleaseModal(false)}
       />

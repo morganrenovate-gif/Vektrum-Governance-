@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { CheckCircle2, Clock, Brain, Shield, AlertCircle, Lock, ChevronDown, ChevronUp } from 'lucide-react'
-import { DEMO_RESET_EVENT } from '@/lib/demo-data'
+import { useDemoAutoReset } from '@/lib/demo-data/use-demo-auto-reset'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -70,11 +70,7 @@ function DemoMilestoneCard({
 
   // Restore initial expanded state on demo reset.
   // ms.status is a constant prop from hardcoded demo data and never changes at runtime.
-  useEffect(() => {
-    const onReset = () => setExpanded(ms.status !== 'released')
-    window.addEventListener(DEMO_RESET_EVENT, onReset)
-    return () => window.removeEventListener(DEMO_RESET_EVENT, onReset)
-  }, [ms.status])
+  useDemoAutoReset(() => setExpanded(ms.status !== 'released'))
 
   const statusConfig = {
     released: { label: 'Released', color: 'text-emerald-400', bg: 'bg-emerald-500/[0.08] border-emerald-500/20', border: 'border-l-vektrum-green' },

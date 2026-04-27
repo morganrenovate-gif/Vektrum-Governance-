@@ -455,8 +455,13 @@ await test('STORAGE: no demo files use localStorage or sessionStorage', async ()
   for (const dir of demoFiles) {
     let output = ''
     try {
+      // Pipe through grep -v to exclude comment lines (// ... and JSDoc * ...)
+      // so that documentation mentions like "No localStorage / sessionStorage"
+      // don't trip the test — we only want to flag actual runtime code usage.
+      // Output format from grep -n is: "file:linenum: content"
+      // We filter lines where the content (after file:linenum:) starts with * or //
       output = execSync(
-        `grep -r --include="*.ts" --include="*.tsx" -l "localStorage\\|sessionStorage" "${dir}"`,
+        `grep -rn --include="*.ts" --include="*.tsx" "localStorage\\|sessionStorage" "${dir}" | grep -v ":[0-9]*:[[:space:]]*//" | grep -v ":[0-9]*:[[:space:]]*\\*"`,
         { cwd: ROOT, encoding: 'utf-8' },
       ).trim()
     } catch {
@@ -469,6 +474,105 @@ await test('STORAGE: no demo files use localStorage or sessionStorage', async ()
       `these keys must be cleared by DemoResetButton and documented in tests`,
     )
   }
+})
+
+// ── 10a. ms-hb-3 (Structural Steel Erection) starts non-released ─────────────
+//
+// Demosmith's funder flow requires releasing ms-hb-3.  If it already has
+// status 'released' on load the Release Funds button is never shown and the
+// demo fails.  This test pins the initial status so any accidental revert to
+// 'released' is caught immediately.
+
+await test('DEMO DATA: ms-hb-3 initial status is not "released"', () => {
+  const ms = harbor.milestones.find(m => m.id === 'ms-hb-3')
+  assert(ms !== undefined, 'ms-hb-3 not found in harbor.milestones')
+  assert(
+    ms.status !== 'released',
+    `ms-hb-3 status is "${ms.status}" — must not be "released" on load (demo flow requires releasing it)`,
+  )
+})
+
+// ── 10b. ms-hb-3 starts 'approved' (releasable state) ────────────────────────
+//
+// The Release Funds button renders only when status === 'approved'.
+// Pinning the exact initial status prevents other non-released states (e.g.
+// 'in_progress', 'ready_for_review') from silently breaking the demo flow.
+
+await test('DEMO DATA: ms-hb-3 initial status is "approved" (funder release button is shown)', () => {
+  const ms = harbor.milestones.find(m => m.id === 'ms-hb-3')
+  assert(ms !== undefined, 'ms-hb-3 not found in harbor.milestones')
+  assert(
+    ms.status === 'approved',
+    `ms-hb-3 status is "${ms.status}" — expected "approved" so the Release Funds button renders`,
+  )
+})
+
+// ── 10c. harbor.released equals the sum of the two released milestones ────────
+//
+// harbor.released is used to seed the Released stat tile.  It must equal the
+// sum of ms-hb-1 + ms-hb-2 only; ms-hb-3 must NOT be counted because it
+// hasn't been released yet at demo start.
+
+await test('DEMO DATA: harbor.released equals ms-hb-1 + ms-hb-2 amounts ($2,160,000)', () => {
+  const ms1 = harbor.milestones.find(m => m.id === 'ms-hb-1')
+  const ms2 = harbor.milestones.find(m => m.id === 'ms-hb-2')
+  assert(ms1 !== undefined, 'ms-hb-1 not found')
+  assert(ms2 !== undefined, 'ms-hb-2 not found')
+  const expected = ms1.amount + ms2.amount
+  assert(
+    harbor.released === expected,
+    `harbor.released is ${harbor.released}, expected ${expected} (ms-hb-1 $${ms1.amount} + ms-hb-2 $${ms2.amount})`,
+  )
+})
+
+// ── 10d. useDemoAutoReset hook uses an empty dep array (no infinite loop) ─────
+//
+// Structural proof: grep the hook source for the empty dep array comment and
+// the literal "}, [])" closing. An infinite loop would require a non-empty dep
+// array or a missing dep array entirely.
+
+await test('HOOK: useDemoAutoReset uses empty dep array — no infinite render loop', async () => {
+  const { readFileSync } = await import('fs')
+  const hookSrc = readFileSync(
+    path.resolve(ROOT, 'src/lib/demo-data/use-demo-auto-reset.ts'),
+    'utf-8',
+  )
+  // The hook must contain useEffect(..., []) — empty array is the only safe pattern
+  // given that onReset only invokes stable React setState setters.
+  assert(
+    hookSrc.includes('}, [])'),
+    'useDemoAutoReset does not contain }, []) — the dep array may be missing or non-empty, risking an infinite loop',
+  )
+  // Must NOT contain a non-empty dep array like [onReset]
+  assert(
+    !hookSrc.includes('[onReset]'),
+    'useDemoAutoReset contains [onReset] in dep array — would cause infinite render loop',
+  )
+})
+
+// ── 10e. useDemoAutoReset hook calls onReset on mount (auto-reset on entry) ───
+//
+// The hook must call onReset() directly inside useEffect before registering the
+// event listener so fresh demo visitors start from a clean state without needing
+// to click the manual reset button.
+
+await test('HOOK: useDemoAutoReset calls onReset on mount for clean initial state', async () => {
+  const { readFileSync } = await import('fs')
+  const hookSrc = readFileSync(
+    path.resolve(ROOT, 'src/lib/demo-data/use-demo-auto-reset.ts'),
+    'utf-8',
+  )
+  // onReset() must be called before the addEventListener line
+  const resetCallIdx   = hookSrc.indexOf('onReset()')
+  const addListenerIdx = hookSrc.indexOf('addEventListener')
+  assert(
+    resetCallIdx !== -1,
+    'useDemoAutoReset does not call onReset() directly — mount-time auto-reset is missing',
+  )
+  assert(
+    resetCallIdx < addListenerIdx,
+    'useDemoAutoReset calls onReset() after addEventListener — it should be called first (mount reset)',
+  )
 })
 
 // ── 9. 403 response body matches expected error shape ─────────────────────────

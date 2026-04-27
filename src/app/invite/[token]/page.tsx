@@ -196,7 +196,7 @@ export default function InviteAcceptPage() {
             className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card p-10 text-center"
             
           >
-            <Loader2 className="mx-auto mb-4 h-8 w-8 animate-spin text-vektrum-blue" aria-hidden="true" />
+            <Loader2 className="mx-auto mb-4 h-8 w-8 animate-spin text-blue-400" aria-hidden="true" />
             <p className="text-sm font-medium text-white">Loading your invite…</p>
             <p className="mt-1 text-xs text-white/75">Verifying invite token</p>
           </div>
@@ -260,7 +260,7 @@ export default function InviteAcceptPage() {
             <div className="px-6 pt-6 pb-5 border-b border-white/[0.06]">
               <div className="inline-flex items-center gap-1.5 rounded-full border border-vektrum-blue/25 bg-vektrum-blue/10 px-3 py-1 mb-3">
                 <div className="h-1.5 w-1.5 rounded-full bg-vektrum-blue animate-pulse" />
-                <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-vektrum-blue">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-blue-300">
                   Deal Invitation
                 </span>
               </div>
@@ -323,7 +323,7 @@ export default function InviteAcceptPage() {
                 {TRUST_SIGNALS.map(({ icon: Icon, label, desc }) => (
                   <div key={label} className="flex items-start gap-2.5 rounded-xl bg-white/[0.04] border border-white/[0.06] px-3 py-2.5">
                     <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-lg bg-vektrum-blue/10 mt-0.5">
-                      <Icon size={12} className="text-vektrum-blue" aria-hidden="true" />
+                      <Icon size={12} className="text-blue-400" aria-hidden="true" />
                     </div>
                     <div>
                       <p className="text-xs font-semibold text-white/80">{label}</p>
@@ -347,7 +347,7 @@ export default function InviteAcceptPage() {
               <p className="mt-3 text-center text-[12px] text-white/65">
                 You must be signed in with a Funder account to accept.
                 {' '}
-                <Link href="/auth/signup" className="text-vektrum-blue hover:underline">
+                <Link href="/auth/signup" className="text-blue-300 hover:text-blue-200 hover:underline">
                   Create a free account
                 </Link>
               </p>
@@ -362,7 +362,7 @@ export default function InviteAcceptPage() {
             
           >
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-vektrum-blue/10">
-              <Loader2 className="h-6 w-6 animate-spin text-vektrum-blue" aria-hidden="true" />
+              <Loader2 className="h-6 w-6 animate-spin text-blue-400" aria-hidden="true" />
             </div>
             <p className="text-base font-semibold text-white">Setting up your deal room…</p>
             <p className="mt-1.5 text-sm text-white/75">Assigning funder role and verifying access.</p>
@@ -403,7 +403,7 @@ export default function InviteAcceptPage() {
 
         {/* Footer trust stamp */}
         <div className="mt-8 flex items-center justify-center gap-2 text-[12px] text-white/65">
-          <Shield size={12} className="text-vektrum-blue" aria-hidden="true" />
+          <Shield size={12} className="text-blue-400" aria-hidden="true" />
           <span>Protected by Vektrum · Payments powered by Stripe</span>
         </div>
       </div>

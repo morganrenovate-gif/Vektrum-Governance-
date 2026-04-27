@@ -1,14 +1,20 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { CheckCircle2, AlertCircle, Brain, FileText, ChevronDown, ChevronUp } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format'
-import { harborDisputeMilestones, DEMO_RESET_EVENT } from '@/lib/demo-data'
+import { harborDisputeMilestones } from '@/lib/demo-data'
 import type { DisputeMilestone } from '@/lib/demo-data'
+import { useDemoAutoReset } from '@/lib/demo-data/use-demo-auto-reset'
 import { ResolveDisputeModal } from '@/components/demo/ResolveDisputeModal'
 import { AiReviewModal } from '@/components/demo/AiReviewModal'
+
+// Pull HVAC milestone once so the modal receives the same data the card shows.
+// Single source of truth: score, risk, and findings come from demo-data, not
+// from a second hardcoded copy in this file.
+const HVAC_MS = harborDisputeMilestones.find((m) => m.id === 'ms-hbd-5')!
 
 const DEAL_TITLE = 'Harbor Logistics Center — Partial Dispute'
 const DEAL_TOTAL = 9_100_000
@@ -26,16 +32,12 @@ export default function HarborDisputeDealPage() {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
   const [disputeResolved, setDisputeResolved] = useState(false)
 
-  useEffect(() => {
-    const onReset = () => {
-      setResolveModal(false)
-      setAiModal(false)
-      setExpanded({})
-      setDisputeResolved(false)
-    }
-    window.addEventListener(DEMO_RESET_EVENT, onReset)
-    return () => window.removeEventListener(DEMO_RESET_EVENT, onReset)
-  }, [])
+  useDemoAutoReset(() => {
+    setResolveModal(false)
+    setAiModal(false)
+    setExpanded({})
+    setDisputeResolved(false)
+  })
 
   const pct = DEAL_TOTAL > 0 ? Math.round((DEAL_RELEASED / DEAL_TOTAL) * 100) : 0
 

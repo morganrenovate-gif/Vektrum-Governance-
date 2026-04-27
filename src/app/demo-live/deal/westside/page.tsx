@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { CheckCircle2, ChevronDown, ChevronUp, FileText, Sparkles } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format'
-import { westside, DEMO_RESET_EVENT } from '@/lib/demo-data'
+import { westside } from '@/lib/demo-data'
 import type { DemoMilestoneStatus } from '@/lib/demo-data'
+import { useDemoAutoReset } from '@/lib/demo-data/use-demo-auto-reset'
 import { AiReviewModal } from '@/components/demo/AiReviewModal'
 
 const deal = westside
@@ -29,14 +30,10 @@ export default function WestsideDealPage() {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
   const [aiModal, setAiModal] = useState(false)
 
-  useEffect(() => {
-    const onReset = () => {
-      setExpanded({})
-      setAiModal(false)
-    }
-    window.addEventListener(DEMO_RESET_EVENT, onReset)
-    return () => window.removeEventListener(DEMO_RESET_EVENT, onReset)
-  }, [])
+  useDemoAutoReset(() => {
+    setExpanded({})
+    setAiModal(false)
+  })
 
   const pct = deal.total > 0 ? Math.round((deal.released / deal.total) * 100) : 0
 

@@ -546,7 +546,7 @@ function ConfirmShell({
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-vektrum-blue/10">
-              <Shield size={18} className="text-vektrum-blue" aria-hidden="true" />
+              <Shield size={18} className="text-blue-400" aria-hidden="true" />
             </div>
             <div>
               <h3 id={titleId} className="font-display text-base font-bold text-white">
