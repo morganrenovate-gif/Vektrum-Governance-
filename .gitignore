@@ -17,3 +17,4 @@ tsconfig.tsbuildinfo
 *.tsbuildinfo
 tsconfig.tsbuildinfo
 *.tsbuildinfo
+.claude/worktrees/
