@@ -47,7 +47,7 @@ const MOCK_DEALS = [
 
 const BRIEFING_INSIGHTS = [
   'Milestone 3 on Riverside Mixed-Use is ready for AI review — $680,000 pending',
-  'Harbor Logistics Milestone 4 passed AI review with score 92 — ready to approve',
+  'Harbor Logistics Milestone 3 (Structural Steel) passed AI review with score 91 — ready to approve',
   'Westside Medical Site Work released on time — project 20% complete',
 ]
 

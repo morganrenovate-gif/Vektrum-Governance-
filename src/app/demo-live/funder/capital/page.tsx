@@ -1,29 +1,110 @@
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format'
+import { riverside, harbor, westside, type DemoDeal } from '@/lib/demo-data'
 
 // ── Data ─────────────────────────────────────────────────────────────────────
+//
+// All financial figures (totals, releases, milestone counts, recent releases)
+// are derived from the canonical demo data in src/lib/demo-data/index.ts.
+//
+// Previously this file kept its own hardcoded copies — a stale Harbor
+// `released: 3_460_000` / `pct: 56.0`, an entry for "Structural Steel
+// Erection" in RECENT_RELEASES even though canonical state has that milestone
+// as `approved`, and milestone-status counts that were off by one. Deriving
+// from canonical exports prevents this kind of drift.
+//
+// Only colour / label / sort-position metadata lives in this file.
 
-const PROJECTS = [
-  { name: 'Riverside Mixed-Use', amount: 2_400_000, pct: 14.8, color: 'bg-vektrum-blue', textColor: 'text-blue-300', released: 480_000, total: 2_400_000, status: 'active' },
-  { name: 'Harbor Logistics', amount: 9_100_000, pct: 56.0, color: 'bg-vektrum-green', textColor: 'text-emerald-400', released: 3_460_000, total: 9_100_000, status: 'active' },
-  { name: 'Westside Medical', amount: 4_750_000, pct: 29.2, color: 'bg-vektrum-amber', textColor: 'text-amber-400', released: 950_000, total: 4_750_000, status: 'active' },
+interface DealDisplay {
+  display:   string
+  color:     string
+  textColor: string
+}
+
+const DEAL_DISPLAY: Record<string, DealDisplay> = {
+  riverside: { display: 'Riverside Mixed-Use', color: 'bg-vektrum-blue',  textColor: 'text-blue-300' },
+  harbor:    { display: 'Harbor Logistics',     color: 'bg-vektrum-green', textColor: 'text-emerald-400' },
+  westside:  { display: 'Westside Medical',     color: 'bg-vektrum-amber', textColor: 'text-amber-400' },
+}
+
+const CANONICAL_DEALS: ReadonlyArray<{ id: string; deal: DemoDeal }> = [
+  { id: 'riverside', deal: riverside },
+  { id: 'harbor',    deal: harbor },
+  { id: 'westside',  deal: westside },
 ]
+
+// ── Summary tile values ─────────────────────────────────────────────────────
+
+const totalCommitted = CANONICAL_DEALS.reduce((sum, { deal }) => sum + deal.total,    0)
+const totalReleased  = CANONICAL_DEALS.reduce((sum, { deal }) => sum + deal.released, 0)
+const heldPending    = totalCommitted - totalReleased
+
+// ── Section 1 / 2: Allocation + Velocity ────────────────────────────────────
+
+const PROJECTS = CANONICAL_DEALS.map(({ id, deal }) => {
+  const display = DEAL_DISPLAY[id]
+  // Each deal's share of total committed capital (drives the stacked bar chart).
+  // Rounded to one decimal place, matching the previous visual.
+  const pct = totalCommitted > 0
+    ? Math.round((deal.total / totalCommitted) * 1000) / 10
+    : 0
+  return {
+    name:      display.display,
+    color:     display.color,
+    textColor: display.textColor,
+    amount:    deal.total,
+    pct,
+    released:  deal.released,
+    total:     deal.total,
+    status:    'active',
+  }
+})
+
+// ── Section 3: Milestone Status Distribution ────────────────────────────────
+
+const allMilestones = CANONICAL_DEALS.flatMap(({ deal }) => deal.milestones)
 
 const MILESTONE_STATUS = [
-  { label: 'Released', count: 4, bg: 'bg-emerald-500/[0.08]', border: 'border-emerald-500/20', text: 'text-emerald-400' },
-  { label: 'Approved (pending release)', count: 2, bg: 'bg-vektrum-blue/10', border: 'border-vektrum-blue/30', text: 'text-blue-300' },
-  { label: 'In Review / In Progress', count: 3, bg: 'bg-amber-500/[0.08]', border: 'border-amber-500/20', text: 'text-amber-400' },
-  { label: 'Not Started', count: 4, bg: 'bg-surface-3', border: 'border-white/[0.08]', text: 'text-white/55' },
+  {
+    label: 'Released',
+    count: allMilestones.filter((m) => m.status === 'released').length,
+    bg: 'bg-emerald-500/[0.08]', border: 'border-emerald-500/20', text: 'text-emerald-400',
+  },
+  {
+    label: 'Approved (pending release)',
+    count: allMilestones.filter((m) => m.status === 'approved').length,
+    bg: 'bg-vektrum-blue/10', border: 'border-vektrum-blue/30', text: 'text-blue-300',
+  },
+  {
+    label: 'In Review / In Progress',
+    count: allMilestones.filter((m) => m.status === 'ready_for_review' || m.status === 'in_progress').length,
+    bg: 'bg-amber-500/[0.08]', border: 'border-amber-500/20', text: 'text-amber-400',
+  },
+  {
+    label: 'Not Started',
+    count: allMilestones.filter((m) => m.status === 'not_started').length,
+    bg: 'bg-surface-3', border: 'border-white/[0.08]', text: 'text-white/55',
+  },
 ]
 
-const RECENT_RELEASES = [
-  { date: 'Apr 1, 2026', project: 'Harbor Logistics', milestone: 'Structural Steel Erection', amount: 2_180_000 },
-  { date: 'Mar 25, 2026', project: 'Harbor Logistics', milestone: 'Concrete Foundations', amount: 1_840_000 },
-  { date: 'Mar 18, 2026', project: 'Westside Medical', milestone: 'Site Work & Utilities', amount: 475_000 },
-  { date: 'Mar 10, 2026', project: 'Harbor Logistics', milestone: 'Site Preparation', amount: 320_000 },
-  { date: 'Feb 23, 2026', project: 'Riverside Mixed-Use', milestone: 'Foundation & Site Prep', amount: 480_000 },
-]
+// ── Section 4: Recent Releases ──────────────────────────────────────────────
+//
+// Built strictly from milestones with status === 'released'. A milestone like
+// Harbor's Structural Steel Erection — which starts the demo as `approved`
+// (not yet released) — must NOT appear here.
+
+const RECENT_RELEASES = CANONICAL_DEALS.flatMap(({ id, deal }) => {
+  const display = DEAL_DISPLAY[id]
+  return deal.milestones
+    .filter((m) => m.status === 'released')
+    .map((m) => ({
+      date:      m.releasedAt ?? '',
+      project:   display.display,
+      milestone: m.name,
+      amount:    m.amount,
+    }))
+})
 
 function fmt(n: number) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
@@ -38,10 +119,6 @@ function fmtShort(n: number) {
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export default function CapitalPage() {
-  const totalCommitted = 16_250_000
-  const totalReleased = 4_890_000
-  const heldPending = 11_360_000
-
   return (
     <div className="min-h-screen bg-surface-0">
     <div className="page-container section space-y-8">

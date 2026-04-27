@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { RotateCcw, CheckCircle2, Loader2 } from 'lucide-react'
 import { DEMO_RESET_EVENT } from '@/lib/demo-data'
 
@@ -19,10 +19,31 @@ interface DemoResetButtonProps {
  * a reset is achieved by calling POST /api/demo/reset (safety-gated) and
  * then navigating back to /demo-live — which unmounts all deal pages and
  * returns every milestone, modal, and override to its initial value.
+ *
+ * ── Recording mode ─────────────────────────────────────────────────────────
+ *
+ * Append `?recording=1` or `?demosmith=1` to any /demo-live URL to hide this
+ * button so it does not appear in screen recordings. The button is purely a
+ * human-fallback affordance: every demo-live page already auto-resets on
+ * mount via `useDemoAutoReset`, so a recorder never needs to click it.
+ *
+ * Recording mode is decided by the URL param on the current page only — it
+ * does not propagate across Link navigation. Demosmith should add the param
+ * to each URL it visits, or simply ignore the button (it does not block any
+ * interactive demo flow).
  */
 export function DemoResetButton({ variant = 'banner' }: DemoResetButtonProps) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [resetState, setResetState] = useState<ResetState>('idle')
+
+  // Hide the button entirely in recording mode. Returning null on the
+  // server-render pass keeps the button out of the SSR HTML, so no flash.
+  const isRecordingMode =
+    searchParams?.get('recording') === '1' ||
+    searchParams?.get('demosmith') === '1'
+
+  if (isRecordingMode) return null
 
   async function handleReset() {
     if (resetState !== 'idle') return

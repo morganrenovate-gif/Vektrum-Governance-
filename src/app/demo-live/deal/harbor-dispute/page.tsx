@@ -156,7 +156,13 @@ export default function HarborDisputeDealPage() {
       <AiReviewModal
         open={aiModal}
         onClose={() => setAiModal(false)}
-        milestoneContext={{ name: 'HVAC Equipment Procurement', amount: 487_000 }}
+        milestoneContext={{ name: HVAC_MS.name, amount: HVAC_MS.amount }}
+        aiReview={{
+          score:          HVAC_MS.aiScore!,
+          risk:           HVAC_MS.aiRisk!,
+          findings:       HVAC_MS.findings ?? [],
+          recommendation: 'Hold funds pending resolution of invoice mismatch and change order CO-004 signature from funder. AI score (34/100) does not clear the release threshold.',
+        }}
       />
     </div>
     </div>

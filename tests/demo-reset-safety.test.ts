@@ -575,6 +575,117 @@ await test('HOOK: useDemoAutoReset calls onReset on mount for clean initial stat
   )
 })
 
+// ── 11. Auto-reset is wired into every interactive demo-live client page ────
+//
+// useDemoAutoReset fires on mount and on DEMO_RESET_EVENT, so a fresh page
+// load always starts from the canonical scenario without needing the manual
+// reset button. Demosmith depends on this — it should never have to click
+// the reset chrome.
+
+const INTERACTIVE_DEMO_PAGES = [
+  'src/app/demo-live/funder/page.tsx',
+  'src/app/demo-live/contractor/page.tsx',
+  'src/app/demo-live/audit/page.tsx',
+  'src/app/demo-live/deal/harbor/page.tsx',
+  'src/app/demo-live/deal/riverside/page.tsx',
+  'src/app/demo-live/deal/westside/page.tsx',
+  'src/app/demo-live/deal/harbor-dispute/page.tsx',
+  'src/app/demo-live/deal/[id]/demo-milestone-list.tsx',
+]
+
+for (const rel of INTERACTIVE_DEMO_PAGES) {
+  await test(`AUTO-RESET: ${rel} calls useDemoAutoReset`, () => {
+    const { readFileSync } = require('fs')
+    const path = require('path')
+    const file = readFileSync(path.resolve(ROOT, rel), 'utf-8') as string
+    assert(
+      file.includes('useDemoAutoReset'),
+      `${rel} does not call useDemoAutoReset — page may not auto-reset on mount`,
+    )
+  })
+}
+
+// ── 12. Server-rendered demo pages don't need useDemoAutoReset ───────────────
+//
+// /demo-live (role selector), /demo-live/admin, /demo-live/funder/capital,
+// and /demo-live/deal/[id]/page.tsx are server components that re-render from
+// canonical demo-data on every request. They have no useState to reset.
+// This test pins that fact so a future refactor that adds useState without
+// useDemoAutoReset is caught.
+
+const SERVER_RENDERED_DEMO_PAGES = [
+  'src/app/demo-live/page.tsx',
+  'src/app/demo-live/admin/page.tsx',
+  'src/app/demo-live/funder/capital/page.tsx',
+  'src/app/demo-live/deal/[id]/page.tsx',
+]
+
+for (const rel of SERVER_RENDERED_DEMO_PAGES) {
+  await test(`SERVER-RENDERED: ${rel} does not use 'use client'`, () => {
+    const { readFileSync } = require('fs')
+    const path = require('path')
+    const file = readFileSync(path.resolve(ROOT, rel), 'utf-8') as string
+    assert(
+      !file.startsWith("'use client'") && !file.startsWith('"use client"'),
+      `${rel} declares 'use client' — if it now has useState it must also call useDemoAutoReset`,
+    )
+  })
+}
+
+// ── 13. DemoResetButton recording mode ───────────────────────────────────────
+//
+// Appending ?recording=1 or ?demosmith=1 hides the manual reset button so
+// screen recordings (Demosmith) don't capture demo chrome. Auto-reset on
+// mount means recording mode loses no functionality.
+
+await test('RECORDING MODE: DemoResetButton reads useSearchParams', () => {
+  const { readFileSync } = require('fs')
+  const path = require('path')
+  const file = readFileSync(path.resolve(ROOT, 'src/components/demo/DemoResetButton.tsx'), 'utf-8') as string
+  assert(
+    file.includes('useSearchParams'),
+    'DemoResetButton does not use useSearchParams — recording-mode URL param check is missing',
+  )
+})
+
+await test('RECORDING MODE: DemoResetButton returns null when ?recording=1 or ?demosmith=1', () => {
+  const { readFileSync } = require('fs')
+  const path = require('path')
+  const file = readFileSync(path.resolve(ROOT, 'src/components/demo/DemoResetButton.tsx'), 'utf-8') as string
+  // Must check both param names
+  assert(
+    file.includes("'recording'") || file.includes('"recording"'),
+    'DemoResetButton does not check the "recording" URL param',
+  )
+  assert(
+    file.includes("'demosmith'") || file.includes('"demosmith"'),
+    'DemoResetButton does not check the "demosmith" URL param',
+  )
+  // Must return null for the recording branch (otherwise the button still renders)
+  assert(
+    file.includes('if (isRecordingMode) return null') ||
+    file.includes('isRecordingMode ?'),
+    'DemoResetButton has the param check but does not return null for recording mode',
+  )
+})
+
+await test('RECORDING MODE: button is preserved for normal (non-recording) mode', () => {
+  const { readFileSync } = require('fs')
+  const path = require('path')
+  const file = readFileSync(path.resolve(ROOT, 'src/components/demo/DemoResetButton.tsx'), 'utf-8') as string
+  // The button rendering JSX (variant === 'banner' branch and the admin
+  // variant) must still be present. We assert the two onClick handlers exist
+  // — they wire up the manual fallback path.
+  assert(
+    file.includes('onClick={handleReset}'),
+    'DemoResetButton no longer wires the manual handleReset onClick — fallback is broken',
+  )
+  assert(
+    file.includes("variant === 'banner'") || file.includes('variant==="banner"'),
+    'DemoResetButton no longer branches on variant — banner variant may be lost',
+  )
+})
+
 // ── 9. 403 response body matches expected error shape ─────────────────────────
 
 await test('GATE SHAPE: 403 response body has only an error field (no secret fields)', async () => {

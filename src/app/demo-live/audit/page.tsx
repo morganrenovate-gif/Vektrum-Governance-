@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Shield, ArrowLeft } from 'lucide-react'
+import { useDemoAutoReset } from '@/lib/demo-data/use-demo-auto-reset'
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -450,6 +451,10 @@ function roleBadgeClasses(role: string): string {
 
 export default function DemoAuditPage() {
   const [activeTab, setActiveTab] = useState<AuditCategory>('all')
+
+  // Auto-reset filter to 'all' on mount and on DEMO_RESET_EVENT so a fresh
+  // demo visitor (or Demosmith recording) always starts on the All-events tab.
+  useDemoAutoReset(() => setActiveTab('all'))
 
   const filtered = activeTab === 'all'
     ? auditEvents

@@ -305,3 +305,38 @@ export const harborDisputeMilestones: DisputeMilestone[] = [
     documents: ['Inspection Report — MEP Partial', 'Draw Request #6 — Partial'],
   },
 ]
+
+// ── Canonical dashboard helpers ──────────────────────────────────────────────
+//
+// Single source of truth for derived values that dashboard pages need to show:
+// total released, percent released, and milestone-released counts. Reading
+// these from helpers prevents the stale-duplicate-constant problem where
+// dashboard pages drifted from the canonical deal data.
+
+/**
+ * Returns the canonical released total for a deal at demo-start.
+ * This is the value every dashboard summary tile should display before any
+ * in-session releases happen.
+ */
+export function getDealReleasedAtStart(deal: DemoDeal): number {
+  return deal.released
+}
+
+/**
+ * Milestone summary for dashboard tiles and progress bars. Computed from the
+ * canonical deal data — never hardcoded.
+ *
+ * - `released`  — count of milestones with status === 'released' at demo-start
+ * - `total`     — total milestone count
+ * - `pct`       — Math.round(deal.released / deal.total * 100), or 0 if total is 0
+ */
+export function getMilestoneSummary(deal: DemoDeal): {
+  released: number
+  total:    number
+  pct:      number
+} {
+  const released = deal.milestones.filter((m) => m.status === 'released').length
+  const total    = deal.milestones.length
+  const pct      = deal.total > 0 ? Math.round((deal.released / deal.total) * 100) : 0
+  return { released, total, pct }
+}

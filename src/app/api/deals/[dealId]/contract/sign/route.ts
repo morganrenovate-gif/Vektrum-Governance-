@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getAuthUser, requireDealAccess, requireMFA } from '@/lib/auth/middleware'
 import { getSigningUrl, DocuSignError, type DocuSignSigner } from '@/lib/engine/docusign'
+import { logAudit } from '@/lib/engine/audit'
 import { internalError, notFoundError } from '@/lib/errors'
 
 export const dynamic = 'force-dynamic'
@@ -195,6 +196,28 @@ export async function POST(
       message,
     )
   }
+
+  // ── Audit ───────────────────────────────────────────────────────────────────
+  // Records that a signing session was initiated for this contract by this
+  // party. Metadata captures who is signing (role) and which envelope, but
+  // NOT the signer's email address — DocuSign holds the authoritative
+  // recipient record, and the auth.users row remains the source of truth
+  // for re-resolving identity if needed.
+  await logAudit({
+    entity_type:   'contract',
+    entity_id:     contract.id,
+    action:        'contract_signing_initiated',
+    actor_id:      user.id,
+    actor_role:    profile.role,
+    system_source: 'api/deals/contract/sign',
+    metadata: {
+      deal_id:      dealId,
+      contract_id:  contract.id,
+      envelope_id:  contract.docusign_envelope_id,
+      signer_role:  isFunder ? 'funder' : 'contractor',
+      signer_count: 1,
+    },
+  })
 
   return NextResponse.json({
     signing_url:  signingUrl,

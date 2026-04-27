@@ -3,6 +3,7 @@ import { getAuthUser } from '@/lib/auth/middleware'
 import { getReceiptByReleaseId, markReceiptEmailSent } from '@/lib/engine/receipts'
 import { notifyTransactionReceipt } from '@/lib/engine/notifications'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
+import { logAudit } from '@/lib/engine/audit'
 import { notFoundError, internalError } from '@/lib/errors'
 
 export const dynamic = 'force-dynamic'
@@ -106,6 +107,27 @@ export async function POST(
   )
 
   await markReceiptEmailSent(receipt.id)
+
+  // ── Audit ───────────────────────────────────────────────────────────────────
+  // Records a compliance-grade trail of who triggered the resend without
+  // capturing PII. Recipients are intentionally summarised as a count: raw
+  // email addresses, receipt body, and Stripe IDs are NOT included in the
+  // audit metadata (they remain available on the underlying receipt row,
+  // which is still accessible to authorised parties).
+  await logAudit({
+    entity_type:   'receipt',
+    entity_id:     receipt.id,
+    action:        'receipt_resent',
+    actor_id:      user.id,
+    actor_role:    profile.role,
+    system_source: 'api/releases/receipt/resend',
+    metadata: {
+      release_id:       releaseId,
+      receipt_id:       receipt.id,
+      recipient_count:  2,
+      delivery_channel: 'email',
+    },
+  })
 
   return NextResponse.json({
     success:       true,
