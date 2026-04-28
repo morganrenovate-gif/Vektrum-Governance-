@@ -18,7 +18,9 @@
  *  9.  Panel shows "Enter a reason before running."
  * 10.  Panel clears justification and hides prompt on confirm (setShowRunPrompt(false)).
  * 11.  Backend route calls extractAdminJustification.
- * 12.  Backend route calls requireAdminAudit.
+ * 12.  Backend route awaits logAdminAudit directly (not fire-and-forget via requireAdminAudit).
+ * 12b. Backend route uses action 'manual_reconciliation_run'.
+ * 12c. Backend route passes admin_justification into logAdminAudit.
  * 13.  Backend route requires admin role (requireRole).
  * 14.  Backend route requires MFA (requireMFA).
  * 15.  Backend route is read-only for GET (no insert/upsert in GET handler).
@@ -186,11 +188,37 @@ await test('11. Backend route calls extractAdminJustification', () => {
   )
 })
 
-await test('12. Backend route calls requireAdminAudit', () => {
+await test('12. Backend route calls logAdminAudit for the dual-write (awaited, not fire-and-forget)', () => {
+  const src = read(ROUTE)
+  // The route must await logAdminAudit directly so the audit_log write completes
+  // before the response is returned. requireAdminAudit fires it fire-and-forget
+  // which risks abandonment in serverless runtimes.
+  assert(
+    src.includes('logAdminAudit'),
+    `${ROUTE} must call logAdminAudit to dual-write to audit_log + admin_audit_log.`,
+  )
+  // Must be awaited (not fire-and-forget) so the record lands before the response flushes
+  assert(
+    src.includes('await logAdminAudit'),
+    `${ROUTE} must await logAdminAudit — unawaited calls risk abandonment in serverless runtimes.`,
+  )
+})
+
+await test("12b. Backend route uses action 'manual_reconciliation_run' for the audit event", () => {
   const src = read(ROUTE)
   assert(
-    src.includes('requireAdminAudit'),
-    `${ROUTE} must call requireAdminAudit to dual-write to the admin audit log.`,
+    src.includes('manual_reconciliation_run'),
+    `${ROUTE} must use action 'manual_reconciliation_run' so the event is identifiable ` +
+    `in the admin audit log and Recent Audit Activity.`,
+  )
+})
+
+await test('12c. Backend route passes admin_justification into logAdminAudit', () => {
+  const src = read(ROUTE)
+  assert(
+    src.includes('admin_justification'),
+    `${ROUTE} must pass admin_justification into logAdminAudit so the justification is ` +
+    `recorded in admin_audit_log.`,
   )
 })
 

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createSupabaseAdminClient } from '@/lib/supabase/server'
-import { getAuthUser, requireRole, requireMFA, extractAdminJustification, requireAdminAudit } from '@/lib/auth/middleware'
+import { getAuthUser, requireRole, requireMFA, extractAdminJustification } from '@/lib/auth/middleware'
 import { runReconciliation } from '@/lib/engine/reconciliation'
+import { logAdminAudit } from '@/lib/engine/audit'
 import { internalError } from '@/lib/errors'
 
 export const dynamic = 'force-dynamic'
@@ -194,15 +195,22 @@ export async function POST(request: NextRequest) {
     runId:       run.id,
   })
 
-  // Dual-write audit — fire-and-forget
-  await requireAdminAudit(authContext.profile, user, justification, {
-    action:                 'reconciliation_run_triggered',
-    entityType:             'reconciliation_run',
-    entityId:               run.id,
-    systemSource:           'api/admin/reconciliation',
-    authorizationReference: authorizationRef,
-    ipAddress:              ip,
-    newValues: {
+  // Dual-write to audit_log + admin_audit_log.
+  // Awaited directly so both writes complete before the response is returned —
+  // requireAdminAudit fires logAdminAudit as fire-and-forget which risks
+  // abandonment in serverless runtimes before the response flushes.
+  await logAdminAudit({
+    entity_type:             'reconciliation_run',
+    entity_id:               run.id,
+    action:                  'manual_reconciliation_run',
+    actor_id:                user.id,
+    actor_role:              authContext.profile.role,
+    actor_email:             user.email,
+    system_source:           'api/admin/reconciliation',
+    ip_address:              ip,
+    admin_justification:     justification.trim(),
+    authorization_reference: authorizationRef,
+    new_values: {
       run_id:      result.runId,
       status:      result.status,
       window_days: windowDays,
@@ -213,6 +221,7 @@ export async function POST(request: NextRequest) {
       deals_checked:     result.dealsChecked,
       issues_found:      result.issuesFound,
       duration_ms:       result.durationMs,
+      triggered_by:      `manual:${user.id}`,
     },
   })
 
