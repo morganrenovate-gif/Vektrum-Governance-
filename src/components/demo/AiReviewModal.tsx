@@ -51,13 +51,13 @@ function defaultFindings(formattedAmount: string, retainageAmount: string): stri
     `✓ Invoice amount (${formattedAmount}) matches approved scope of values`,
     '✓ MEP inspection report dated April 28, 2026 attached and within 14-day window',
     '✓ Conditional lien waiver from Webb Construction Group on file (CA Civil Code §8132 form)',
-    '✓ Sub-tier lien waivers collected for 3 of 3 disclosed subcontractors',
+    '✓ Primary conditional lien waiver on file — sub-tier collection not configured on this deal',
     '✓ No open disputes on this milestone or deal',
-    '✓ Change orders reconciled — CO-001 and CO-002 both approved and reflected in draw',
-    `✓ Retainage calculation correct — 10% withheld (${retainageAmount})`,
+    '✓ No open change-order blockers detected — CO-001 and CO-002 show approved status',
+    `✓ Retainage rule identified — 10% configured for this deal (${retainageAmount} at this milestone amount)`,
     "✓ Draw velocity consistent with contractor's 14-deal history on platform",
-    '✓ Document authenticity verified — no metadata anomalies on 6 attachments',
-    '✓ Photographic evidence (22 site photos) timestamped within submission window',
+    '✓ 6 supporting documents on record — content review is performed by the funder, not the AI layer',
+    '✓ Photo attachments present — timestamp verification relies on funder review of uploaded metadata',
     '⚠ Rough-in completion estimated at 94% per inspection (punch-list items remain — not release-blocking, flagged for funder awareness)',
   ]
 }
@@ -204,7 +204,7 @@ export function AiReviewModal({ open, onClose, milestoneContext, aiReview }: AiR
                 <p className="text-xs text-white/60 animate-fade-in">• Validating inspection and lien-waiver evidence...</p>
               )}
               {step4 && (
-                <p className="text-xs text-white/60 animate-fade-in">• Reconciling change orders and retainage math...</p>
+                <p className="text-xs text-white/60 animate-fade-in">• Checking for open change-order blockers and retainage configuration...</p>
               )}
               {step5 && (
                 <p className="text-xs text-white/60 animate-fade-in">• Comparing against contractor draw-velocity history...</p>
