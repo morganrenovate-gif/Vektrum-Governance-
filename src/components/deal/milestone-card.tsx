@@ -1070,7 +1070,7 @@ export function MilestoneCard({
                   ))}
                 </ul>
                 <p className="mt-2 text-[10px] text-white/25 italic">
-                  Guidance only — not a release-gate requirement.
+                  Suggested guidance only — upload requirements may vary by contract, funder review, and release-gate settings.
                 </p>
               </div>
             )}
