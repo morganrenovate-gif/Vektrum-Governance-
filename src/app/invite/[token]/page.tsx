@@ -24,6 +24,7 @@ interface InvitePreview {
   invite: {
     id: string
     status: string
+    role: string
     expires_at: string
     invited_email: string | null
   }
@@ -40,7 +41,7 @@ interface InvitePreview {
 type PageState =
   | { phase: 'loading' }
   | { phase: 'preview'; data: InvitePreview }
-  | { phase: 'invalid'; reason: 'not_found' | 'expired' | 'used' }
+  | { phase: 'invalid'; reason: 'not_found' | 'expired' | 'used' | 'wrong_role' | 'missing_role' }
   | { phase: 'accepting' }
   | { phase: 'accepted'; dealId: string; dealTitle: string }
   | { phase: 'error'; message: string }
@@ -87,7 +88,15 @@ export default function InviteAcceptPage() {
       const res = await fetch(`/api/invites/${token}`)
 
       if (res.status === 404) {
-        setState({ phase: 'invalid', reason: 'not_found' })
+        // Parse the body — role failures include a machine-readable `reason` field
+        // so the UI can show a helpful message rather than a generic "not found".
+        let reason: PageState['reason'] = 'not_found'
+        try {
+          const body = await res.json() as { reason?: string }
+          if (body.reason === 'missing_role') reason = 'missing_role'
+          else if (body.reason === 'wrong_role') reason = 'wrong_role'
+        } catch { /* non-JSON body — treat as generic not_found */ }
+        setState({ phase: 'invalid', reason })
         return
       }
       if (!res.ok) {
@@ -203,29 +212,35 @@ export default function InviteAcceptPage() {
         )}
 
         {/* ── Invalid / not found ── */}
-        {state.phase === 'invalid' && (
-          <div
-            className="rounded-2xl border border-red-500/20 bg-surface-2 shadow-card p-8 text-center"
-            
-          >
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10">
-              <AlertCircle className="h-6 w-6 text-red-400" aria-hidden="true" />
-            </div>
-            <h1 className="font-display text-lg font-bold text-white">
-              Invite link no longer valid
-            </h1>
-            <p className="mt-2 text-sm text-white/55">
-              This link may have already been used or expired.
-              Ask the contractor to generate a new invite link.
-            </p>
-            <Link
-              href="/"
-              className="mt-6 inline-flex items-center gap-1.5 rounded-xl border border-white/[0.1] bg-white/[0.05] px-5 py-2.5 text-sm font-semibold text-white/60 hover:bg-white/[0.08] hover:text-white transition-all"
+        {state.phase === 'invalid' && (() => {
+          const isRoleIssue = state.reason === 'wrong_role' || state.reason === 'missing_role'
+          return (
+            <div
+              className="rounded-2xl border border-red-500/20 bg-surface-2 shadow-card p-8 text-center"
             >
-              Learn about Vektrum
-            </Link>
-          </div>
-        )}
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10">
+                <AlertCircle className="h-6 w-6 text-red-400" aria-hidden="true" />
+              </div>
+              <h1 className="font-display text-lg font-bold text-white">
+                {isRoleIssue ? 'Invite link not valid for this account' : 'Invite link no longer valid'}
+              </h1>
+              <p className="mt-2 text-sm text-white/55">
+                {state.reason === 'missing_role'
+                  ? 'This invite link is incomplete — it is missing the intended role. Ask the contractor to generate a new invite link.'
+                  : state.reason === 'wrong_role'
+                  ? 'This invite link is not intended for a funder account. Ensure you are signed in with the correct account type.'
+                  : 'This link may have already been used or expired. Ask the contractor to generate a new invite link.'
+                }
+              </p>
+              <Link
+                href="/"
+                className="mt-6 inline-flex items-center gap-1.5 rounded-xl border border-white/[0.1] bg-white/[0.05] px-5 py-2.5 text-sm font-semibold text-white/60 hover:bg-white/[0.08] hover:text-white transition-all"
+              >
+                Learn about Vektrum
+              </Link>
+            </div>
+          )
+        })()}
 
         {/* ── Error ── */}
         {state.phase === 'error' && (

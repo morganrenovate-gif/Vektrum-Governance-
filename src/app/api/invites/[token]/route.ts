@@ -39,6 +39,7 @@ export async function GET(
       `
       id,
       status,
+      role,
       expires_at,
       invited_email,
       accepted_at,
@@ -82,6 +83,32 @@ export async function GET(
     return notFoundError('This invite link is invalid or has expired.')
   }
 
+  // Validate role — every funder invite must have role = 'funder'.
+  // A null role means the invite was created by an older code path that did not
+  // persist the role. This is a data integrity issue, not a security issue, so
+  // we return a distinct machine-readable reason so the UI can show a helpful
+  // message rather than a generic error. The HTTP status is still 404 so token
+  // existence is not revealed to an attacker who doesn't already have the token.
+  if (!invite.role) {
+    return NextResponse.json(
+      {
+        error: 'This invite link is incomplete — it is missing the intended role. Ask the contractor to generate a new invite link.',
+        reason: 'missing_role',
+      },
+      { status: 404 },
+    )
+  }
+
+  if (invite.role !== 'funder') {
+    return NextResponse.json(
+      {
+        error: 'This invite link is not intended for a funder account.',
+        reason: 'wrong_role',
+      },
+      { status: 404 },
+    )
+  }
+
   // Return only the preview data needed for the accept page
   type DealPreview = {
     id: string
@@ -98,6 +125,7 @@ export async function GET(
     invite: {
       id: invite.id,
       status: invite.status,
+      role: invite.role,
       expires_at: invite.expires_at,
       invited_email: invite.invited_email,
     },
