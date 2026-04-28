@@ -463,8 +463,8 @@ export default async function DealDetailPage({
           <CardBody>
             <p className="mb-4 text-[13px] text-white/80 leading-relaxed">
               Share a secure invite link with your funder. When they accept, they will be
-              assigned to this deal room and can begin reviewing milestones and funding the
-              project. The link is valid for 7 days and is single-use.
+              assigned to this deal and can verify terms, review milestones, and manage
+              release authorization. The link is valid for 7 days and is single-use.
             </p>
             <InviteFunderButton dealId={typedDeal.id} />
           </CardBody>

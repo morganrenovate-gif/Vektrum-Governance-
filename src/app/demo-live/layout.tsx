@@ -10,8 +10,8 @@ export const metadata = {
 export default function DemoLiveLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      {/* Demo banner */}
-      <div className="flex h-10 items-center justify-between gap-3 border-b border-white/10 bg-black px-4">
+      {/* Demo banner — sticky so the disclaimer stays visible while scrolling */}
+      <div className="sticky top-0 z-50 flex h-10 items-center justify-between gap-3 border-b border-white/10 bg-black px-4">
         <p className="text-[12px] font-semibold text-red-500">
           Demo Mode — All data is simulated. No real funds, accounts, or deals.
         </p>
