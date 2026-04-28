@@ -350,6 +350,55 @@ await test('21f. Contractor documents page does not reference phantom columns', 
   }
 })
 
+// ─── 7b. Suggested evidence checklist ────────────────────────────────────────
+
+await test('23. MilestoneCard renders a "Suggested for funder review" checklist', () => {
+  const src = read(MILESTONE_CARD)
+  assert(
+    src.includes('Suggested for funder review') || src.includes('Suggested evidence'),
+    'milestone-card.tsx does not render a "Suggested for funder review" checklist in the Supporting Documents panel.',
+  )
+})
+
+await test('24. Checklist includes key evidence items', () => {
+  const src = read(MILESTONE_CARD)
+  assert(
+    src.includes('Invoice') || src.includes('pay application'),
+    'milestone-card.tsx checklist does not include invoice / pay application item.',
+  )
+  assert(
+    src.includes('Inspection report') || src.includes('Site photos') || src.includes('site visit'),
+    'milestone-card.tsx checklist does not include inspection report or site photos item.',
+  )
+  assert(
+    src.includes('Receipts') || src.includes('supplier'),
+    'milestone-card.tsx checklist does not include receipts / supplier invoices item.',
+  )
+  assert(
+    src.includes('Change order backup') || src.includes('if applicable'),
+    'milestone-card.tsx checklist does not include change order backup item.',
+  )
+})
+
+await test('25. Checklist does not say "required for release"', () => {
+  const src = read(MILESTONE_CARD)
+  assert(
+    !src.toLowerCase().includes('required for release'),
+    'milestone-card.tsx checklist contains "required for release" — use "Guidance only" framing.',
+  )
+})
+
+await test('26. Checklist explicitly marks itself as guidance, not a gate requirement', () => {
+  const src = read(MILESTONE_CARD)
+  assert(
+    src.includes('Guidance only') ||
+    src.includes('guidance only') ||
+    src.includes('not a release-gate requirement') ||
+    src.includes('not required for release'),
+    'milestone-card.tsx checklist does not include a "Guidance only — not a release-gate requirement" disclaimer.',
+  )
+})
+
 // ─── 8. Unchanged safety surfaces ────────────────────────────────────────────
 
 await test('21. Release gate file is unchanged (no document-related modification)', () => {
