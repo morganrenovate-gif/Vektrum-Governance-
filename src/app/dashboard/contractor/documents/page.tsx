@@ -38,11 +38,10 @@ export default async function ContractorDocumentsPage() {
   let documents: {
     id: string
     milestone_id: string
-    uploader_id: string
-    file_name: string
+    uploaded_by: string
     file_url: string
-    file_size: number
-    mime_type: string
+    file_type: string | null
+    description: string | null
     created_at: string
     milestone?: { deal_id: string; title: string }
   }[] = []
@@ -51,7 +50,7 @@ export default async function ContractorDocumentsPage() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: docs } = await (supabase as any)
       .from('milestone_documents')
-      .select('id, milestone_id, uploader_id, file_name, file_url, file_size, mime_type, created_at, milestone:milestones!milestone_documents_milestone_id_fkey(deal_id, title)')
+      .select('id, milestone_id, uploaded_by, file_url, file_type, description, created_at, milestone:milestones!milestone_documents_milestone_id_fkey(deal_id, title)')
       .in('milestone_id', await getMilestoneIds(supabase, dealIds))
       .order('created_at', { ascending: false })
 
@@ -94,9 +93,13 @@ export default async function ContractorDocumentsPage() {
                   : 'Unknown Deal'
                 return (
                   <tr key={doc.id} className="hover:bg-white/[0.025] transition-colors">
-                    <td className="px-4 py-3 font-medium text-white">{doc.file_name}</td>
+                    <td className="px-4 py-3 font-medium text-white">
+                      {doc.description?.trim() || doc.file_url.split('/').pop()?.split('?')[0] || 'File'}
+                    </td>
                     <td className="px-4 py-3 text-white/80">{dealTitle as string}</td>
-                    <td className="px-4 py-3 text-white/75 font-mono text-[11px]">{doc.mime_type}</td>
+                    <td className="px-4 py-3 text-white/75 font-mono text-[11px]">
+                      {doc.file_type === 'photo' ? 'Photo' : doc.file_type === 'change_order' ? 'Change Order' : 'Document'}
+                    </td>
                     <td className="px-4 py-3 text-white/80">
                       {new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(doc.created_at))}
                     </td>

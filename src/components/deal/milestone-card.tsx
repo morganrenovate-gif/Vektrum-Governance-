@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation";
 import { cn, formatMoney } from "@/lib/utils";
 import { MilestoneStatusBadge, ProtectionStatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { Milestone, UserRole, LienWaiver, ChangeOrder } from "@/lib/types";
+import type { Milestone, UserRole, LienWaiver, ChangeOrder, MilestoneDocument } from "@/lib/types";
 import {
   CheckCircle2, AlertCircle, ChevronDown, ListOrdered, Lock,
   FileText, Upload, Clock, XCircle, Copy, Check, Plus, GitPullRequest,
+  Paperclip, Download,
 } from "lucide-react";
 import { DrawReviewAgent } from "@/components/ai/draw-review-agent";
 
@@ -69,6 +70,11 @@ interface MilestoneCardProps {
    * Provided by the deal page via changeOrdersMap.get(milestone.id) ?? [].
    */
   changeOrders?: ChangeOrder[];
+  /**
+   * Evidence / supporting documents uploaded for this milestone, newest-first.
+   * Provided by the deal page via documentsMap.get(milestone.id) ?? [].
+   */
+  documents?: MilestoneDocument[];
 }
 
 export function MilestoneCard({
@@ -81,6 +87,7 @@ export function MilestoneCard({
   lienWaiver,
   lienWaiverRequired = false,
   changeOrders = [],
+  documents = [],
 }: MilestoneCardProps) {
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
@@ -229,6 +236,40 @@ export function MilestoneCard({
 
   // The actionable submitted CO for this milestone (there can be at most one).
   const submittedCO = localOrders.find((co) => co.status === "submitted") ?? null
+
+  // ── Evidence / Document state ───────────────────────────────────────────────
+  const [localDocs, setLocalDocs] = useState<MilestoneDocument[]>(documents)
+  const [docUploadLoading, setDocUploadLoading] = useState(false)
+  const [docError, setDocError] = useState<string | null>(null)
+  const docFileInputRef = useRef<HTMLInputElement>(null)
+
+  const canUploadDocs =
+    role === "contractor" &&
+    (milestone.status === "in_progress" || milestone.status === "ready_for_review")
+
+  const handleDocUpload = async (file: File) => {
+    setDocUploadLoading(true)
+    setDocError(null)
+    const fd = new FormData()
+    fd.append("file", file)
+    try {
+      const res = await fetch(`/api/milestones/${milestone.id}/documents/upload`, {
+        method: "POST",
+        body: fd,
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setDocError(data.error ?? "Failed to upload evidence file.")
+      } else {
+        setLocalDocs([data.document, ...localDocs])
+        router.refresh()
+      }
+    } catch {
+      setDocError("Network error. Please try again.")
+    } finally {
+      setDocUploadLoading(false)
+    }
+  }
 
   const handleCreateCO = async () => {
     const amountNum = parseFloat(coAmount)
@@ -946,6 +987,139 @@ export function MilestoneCard({
               <div className="flex items-start gap-1.5 rounded-md bg-red-500/[0.08] border border-red-500/20 px-3 py-2 text-[12px] text-red-400">
                 <AlertCircle size={13} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
                 {coError}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Evidence / Supporting Documents panel ──────────────────────── */}
+        {(localDocs.length > 0 || canUploadDocs) && (
+          <div className="mt-3 rounded-lg border border-white/[0.07] bg-white/[0.02] p-3 space-y-2">
+            {/* Header row */}
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5">
+                <Paperclip size={13} className="text-white/45 flex-shrink-0" aria-hidden="true" />
+                <span className="text-[11px] font-semibold uppercase tracking-[0.09em] text-white/55">
+                  Supporting Documents
+                </span>
+                {localDocs.length > 0 && (
+                  <span className="ml-0.5 inline-flex items-center rounded-full bg-white/[0.07] px-1.5 py-px text-[10px] font-semibold text-white/55">
+                    {localDocs.length}
+                  </span>
+                )}
+              </div>
+              {/* Upload button — contractor only, eligible status only */}
+              {canUploadDocs && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => docFileInputRef.current?.click()}
+                    disabled={docUploadLoading}
+                    className="inline-flex items-center gap-1 rounded-md border border-white/[0.12] bg-white/[0.04] px-2 py-1 text-[11px] font-medium text-white/70 hover:bg-white/[0.07] hover:text-white/90 transition-colors disabled:pointer-events-none disabled:opacity-50"
+                    aria-label="Attach evidence file"
+                  >
+                    {docUploadLoading ? (
+                      <>
+                        <Clock size={11} className="animate-spin" aria-hidden="true" />
+                        Uploading…
+                      </>
+                    ) : (
+                      <>
+                        <Upload size={11} aria-hidden="true" />
+                        Attach Evidence
+                      </>
+                    )}
+                  </button>
+                  {/* Hidden file input — PDF, PNG, JPEG up to 20 MB */}
+                  <input
+                    ref={docFileInputRef}
+                    type="file"
+                    accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg"
+                    className="sr-only"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) {
+                        handleDocUpload(file)
+                        e.target.value = ""
+                      }
+                    }}
+                    aria-hidden="true"
+                  />
+                </>
+              )}
+            </div>
+
+            {/* Document list */}
+            {localDocs.length === 0 ? (
+              <p className="text-[11px] text-white/35 italic pl-0.5">
+                No evidence uploaded for this milestone yet.
+              </p>
+            ) : (
+              <div className="space-y-1.5">
+                {localDocs.map((doc) => {
+                  // Human-friendly type label from file_type (DB enum values)
+                  const typeLabel =
+                    doc.file_type === "photo"
+                      ? "Photo"
+                      : doc.file_type === "change_order"
+                      ? "Change Order"
+                      : "Document"
+
+                  // Display name: description stores the original filename at upload time.
+                  // Fall back to the last path segment of the URL if description is blank.
+                  const displayName =
+                    doc.description?.trim() ||
+                    doc.file_url.split("/").pop()?.split("?")[0] ||
+                    "File"
+
+                  return (
+                    <div key={doc.id} className="flex items-center justify-between gap-2 rounded-md bg-white/[0.03] border border-white/[0.05] px-2.5 py-1.5">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <FileText size={11} className="flex-shrink-0 text-white/40" aria-hidden="true" />
+                          <span className="truncate text-[12px] font-medium text-white/80">{displayName}</span>
+                          <span className="flex-shrink-0 rounded bg-white/[0.06] px-1 py-px text-[10px] text-white/40 font-mono">
+                            {typeLabel}
+                          </span>
+                        </div>
+                        <div className="mt-0.5 pl-[19px]">
+                          <span className="text-[10px] text-white/30">
+                            {new Date(doc.created_at).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
+                          </span>
+                        </div>
+                      </div>
+                      <a
+                        href={doc.file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-shrink-0 inline-flex items-center gap-1 rounded border border-white/[0.10] px-2 py-1 text-[11px] font-medium text-white/55 hover:text-white/80 hover:border-white/20 transition-colors"
+                        aria-label={`Download ${doc.description || 'document'}`}
+                      >
+                        <Download size={11} aria-hidden="true" />
+                        Open
+                      </a>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* Upload hint — safe wording, no authenticity claims */}
+            {canUploadDocs && (
+              <p className="text-[10px] text-white/25 pl-0.5">
+                PDF, PNG, or JPEG · max 20 MB · uploaded files are visible to your funder
+              </p>
+            )}
+
+            {/* Upload error */}
+            {docError && (
+              <div className="flex items-start gap-1.5 rounded-md bg-red-500/[0.08] border border-red-500/20 px-3 py-2 text-[12px] text-red-400">
+                <AlertCircle size={13} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
+                {docError}
               </div>
             )}
           </div>
