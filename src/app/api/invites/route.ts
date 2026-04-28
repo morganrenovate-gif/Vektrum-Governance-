@@ -159,15 +159,18 @@ export async function POST(request: NextRequest) {
   // ── Create invite ──────────────────────────────────────────────────────────
   // token and expires_at are set by DB defaults (gen_random_uuid(), now()+7d).
   // We never supply a token from the application layer.
+  // role is always 'funder' — contractors invite funders; this endpoint is
+  // contractor-only (requireRole enforces this above).
   const { data: invite, error: insertError } = await admin
     .from('deal_invites')
     .insert({
       deal_id: dealId,
       invited_by: user.id,
       invited_email: invitedEmail,
+      role: 'funder',
       status: 'pending',
     })
-    .select('id, token, deal_id, invited_email, status, expires_at, created_at')
+    .select('id, token, deal_id, invited_email, role, status, expires_at, created_at')
     .single()
 
   if (insertError || !invite) {
