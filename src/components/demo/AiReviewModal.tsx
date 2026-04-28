@@ -199,7 +199,10 @@ export function AiReviewModal({ open, onClose, milestoneContext, aiReview, onRev
       <div className="relative max-w-md w-full mx-4 rounded-2xl bg-surface-2 border border-white/[0.08] shadow-2xl p-6 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-semibold text-white">AI Draw Review</h2>
+          <div>
+            <h2 className="text-lg font-semibold text-white">Perplexity Draw Control Brief</h2>
+            <p className="text-[11px] text-blue-400/80 mt-0.5">Required before release gate evaluation</p>
+          </div>
           <button type="button" onClick={onClose} className="text-white/65 hover:text-white transition-colors">
             <X size={20} />
           </button>
@@ -208,25 +211,25 @@ export function AiReviewModal({ open, onClose, milestoneContext, aiReview, onRev
         {phase === 'loading' ? (
           <div className="py-8 text-center">
             <Loader2 size={40} className="text-blue-400 mx-auto mb-4 animate-spin" />
-            <p className="text-sm font-medium text-white/70 mb-4">Vektrum AI is running draw precondition analysis...</p>
+            <p className="text-sm font-medium text-white/70 mb-4">Perplexity Computer is generating the Draw Control Brief...</p>
             <div className="space-y-2 text-left max-w-xs mx-auto mb-6">
               {step1 && (
-                <p className="text-xs text-white/60 animate-fade-in">• Parsing invoice and supporting documents...</p>
+                <p className="text-xs text-white/60 animate-fade-in">• Reading invoice and supporting documents from the draw package...</p>
               )}
               {step2 && (
                 <p className="text-xs text-white/60 animate-fade-in">• Cross-referencing against approved schedule of values...</p>
               )}
               {step3 && (
-                <p className="text-xs text-white/60 animate-fade-in">• Validating inspection and lien-waiver evidence...</p>
+                <p className="text-xs text-white/60 animate-fade-in">• Extracting lien-waiver status, inspection report date, retainage term...</p>
               )}
               {step4 && (
-                <p className="text-xs text-white/60 animate-fade-in">• Checking for open change-order blockers and retainage configuration...</p>
+                <p className="text-xs text-white/60 animate-fade-in">• Flagging missing evidence and open change-order blockers...</p>
               )}
               {step5 && (
-                <p className="text-xs text-white/60 animate-fade-in">• Comparing against contractor draw-velocity history...</p>
+                <p className="text-xs text-white/60 animate-fade-in">• Checking for conflicts against approved scope and draw history...</p>
               )}
               {step6 && (
-                <p className="text-xs text-white/60 animate-fade-in">• Generating risk assessment...</p>
+                <p className="text-xs text-white/60 animate-fade-in">• Compiling Draw Control Brief for release gate evaluation...</p>
               )}
             </div>
             <div className="h-2 rounded-full bg-surface-3 overflow-hidden max-w-xs mx-auto">
@@ -242,9 +245,11 @@ export function AiReviewModal({ open, onClose, milestoneContext, aiReview, onRev
               Milestone: {milestoneName} — {formattedAmount}
             </p>
             <p className="text-[11px] text-white/55 mb-4 leading-relaxed">
-              AI assessment only — informational. The 10-condition release gate
-              runs separately at release time. AI informs; the deterministic
-              gate decides.
+              Perplexity Computer reads the draw package, extracts structured release facts,
+              and flags missing evidence and conflicts. This Draw Control Brief is required
+              before the release gate evaluates the draw. AI assessment only — informational.
+              The 10-condition release gate runs separately at release time.
+              AI informs; the deterministic gate decides.
             </p>
 
             {/* Score / Risk / Result row */}
@@ -265,13 +270,17 @@ export function AiReviewModal({ open, onClose, milestoneContext, aiReview, onRev
               </div>
             </div>
 
-            {/* Findings — explicitly labeled "AI Review Findings" so users do
-                not confuse this list with the 10-condition release gate. The
-                count uses "item(s) reviewed" to discourage comparison with the
-                gate's fixed 10 conditions. */}
+            {/* Findings — labeled "Draw Control Brief — Extracted Evidence" to make
+                Perplexity Computer's role as the evidence-to-policy layer visible.
+                AI Review Findings is retained as a secondary label for gate-boundary
+                clarity. The count uses "item(s) reviewed" not "checks" to avoid
+                confusion with the deterministic 10-condition release gate. */}
             <div className="mb-5">
-              <p className="text-sm font-semibold text-white mb-2">
-                AI Review Findings <span className="text-[11px] font-normal text-white/55">— {findings.length} item{findings.length !== 1 ? 's' : ''} reviewed</span>
+              <p className="text-sm font-semibold text-white mb-0.5">
+                Draw Control Brief — Extracted Evidence
+              </p>
+              <p className="text-[10px] text-white/45 mb-2 uppercase tracking-wider">
+                AI Review Findings · {findings.length} item{findings.length !== 1 ? 's' : ''} reviewed
               </p>
               <div className="space-y-1.5">
                 {findings.map((finding, i) => (
@@ -286,11 +295,11 @@ export function AiReviewModal({ open, onClose, milestoneContext, aiReview, onRev
               <p className="text-sm text-white/65 leading-relaxed">{recommendation}</p>
             </div>
 
-            {/* Boundary reminder — pins the AI/gate separation in plain copy. */}
+            {/* Boundary reminder — pins the four-layer authority model. */}
             <p className="text-[11px] text-white/50 leading-relaxed mb-5">
-              The 10-condition release gate is evaluated separately at release time.
-              A passing AI review does not authorize release and does not satisfy
-              gate conditions. AI informs; the deterministic gate decides.
+              Perplexity Computer prepares the brief. The 10-condition release gate is evaluated separately at release time.
+              A passing brief does not authorize release and does not satisfy
+              gate conditions. AI informs; the deterministic gate decides; the funder authorizes; the selected rail executes.
             </p>
 
             <button

@@ -292,11 +292,14 @@ test('E3: AiReviewModal findings count is dynamic (not hardcoded "11 checks")', 
 // The AI Draw Review modal must not be confusable with the 10-condition
 // release gate. Pin the disambiguating copy so it cannot regress.
 
-test('F1: AiReviewModal findings header reads "AI Review Findings"', () => {
+test('F1: AiReviewModal findings section labels the AI/gate boundary clearly', () => {
   const src_ = src('src/components/demo/AiReviewModal.tsx')
+  // The section must contain "AI Review Findings" (as a gate-boundary anchor) AND/OR
+  // "Draw Control Brief" (as the evidence-to-policy framing). Accepting either ensures
+  // the label cannot silently collapse to an unmarked list that is confused with the gate.
   assert(
-    src_.includes('AI Review Findings'),
-    'AiReviewModal findings section is not labeled "AI Review Findings" — readers may confuse it with the release gate',
+    src_.includes('AI Review Findings') || src_.includes('Draw Control Brief'),
+    'AiReviewModal findings section must include "AI Review Findings" or "Draw Control Brief" — readers may confuse an unlabeled list with the release gate',
   )
   // The bare "Findings — N check" pattern is the old confusing label. Make
   // sure it is not the visible header anymore.
@@ -361,11 +364,13 @@ test('F4: AiReviewModal preamble does not call AI a "Precondition layer"', () =>
   )
 })
 
-test('F5: real-dashboard DrawReviewAgent findings header also reads "AI Review Findings"', () => {
+test('F5: real-dashboard DrawReviewAgent findings section labels the AI/gate boundary clearly', () => {
   const src_ = src('src/components/ai/draw-review-agent.tsx')
+  // Must include "AI Review Findings" and/or "Draw Control Brief" so the findings list
+  // cannot be mistaken for the deterministic 10-condition release gate.
   assert(
-    src_.includes('AI Review Findings'),
-    'DrawReviewAgent findings header is not labeled "AI Review Findings" — same confusion risk as demo modal',
+    src_.includes('AI Review Findings') || src_.includes('Draw Control Brief') || src_.includes('Brief Findings'),
+    'DrawReviewAgent findings section must include "AI Review Findings", "Draw Control Brief", or "Brief Findings" — same confusion risk as demo modal',
   )
 })
 
