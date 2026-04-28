@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getAuthUser, requireRole, requireDealAccess } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
+import { notifyChangeOrderSubmitted } from '@/lib/engine/notify'
 import { errorResponse, internalError, notFoundError, validationError } from '@/lib/errors'
 
 export const dynamic = 'force-dynamic'
@@ -181,6 +182,16 @@ export async function POST(request: NextRequest) {
         status: 'submitted',
       },
     })
+
+    // Fire-and-forget — notification failure must never block the 201 response.
+    notifyChangeOrderSubmitted({
+      changeOrderId: changeOrder.id,
+      milestoneId:   milestone.id,
+      dealId:        milestone.deal_id,
+      amount:        body.amount!,
+      description:   body.description!.trim(),
+      contractorId:  user.id,
+    }).catch(() => { /* swallowed — see notify.ts safety contract */ })
 
     return NextResponse.json({ change_order: changeOrder }, { status: 201 })
   } catch (err) {
