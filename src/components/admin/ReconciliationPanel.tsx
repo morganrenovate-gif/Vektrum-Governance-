@@ -122,19 +122,30 @@ export function ReconciliationPanel({
   const [total,      setTotal]      = useState(initialTotal)
   const [lastRunObj, setLastRunObj] = useState<ReconciliationRun | null>(lastRun)
   const [healthObj,  setHealthObj]  = useState(health)
-  const [running,    setRunning]    = useState(false)
-  const [runError,   setRunError]   = useState<string | null>(null)
-  const [expandedId, setExpandedId] = useState<string | null>(null)
-  const [,           startTransition] = useTransition()
+  const [running,       setRunning]       = useState(false)
+  const [runError,      setRunError]       = useState<string | null>(null)
+  const [expandedId,    setExpandedId]     = useState<string | null>(null)
+  const [showRunPrompt, setShowRunPrompt]  = useState(false)
+  const [runJustif,     setRunJustif]      = useState('')
+  const [,              startTransition]   = useTransition()
 
-  // ── Trigger manual run ────────────────────────────────────────────────────
+  const MIN_JUSTIF_LEN = 20
+  const justifValid = runJustif.trim().length >= MIN_JUSTIF_LEN
+
+  // ── Trigger manual run (called after justification is collected) ──────────
   async function handleRunNow() {
+    const justification = runJustif.trim()
+    setShowRunPrompt(false)
+    setRunJustif('')
     setRunning(true)
     setRunError(null)
     try {
       const res = await fetch('/api/admin/reconciliation', {
         method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type':          'application/json',
+          'X-Admin-Justification': justification,
+        },
         body:    JSON.stringify({ window_days: 30 }),
       })
       const json = await res.json()
@@ -243,8 +254,8 @@ export function ReconciliationPanel({
 
         <button
           type="button"
-          onClick={handleRunNow}
-          disabled={running}
+          onClick={() => { setShowRunPrompt(true); setRunError(null) }}
+          disabled={running || showRunPrompt}
           className="flex items-center gap-2 rounded-xl border border-white/[0.16] bg-white/[0.05] px-3.5 py-2 text-[12px] font-medium text-white/85 hover:bg-white/[0.1] hover:text-white hover:border-white/[0.24] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue disabled:opacity-50 transition-all flex-shrink-0"
         >
           {running
@@ -254,6 +265,55 @@ export function ReconciliationPanel({
           {running ? 'Running…' : 'Run Now'}
         </button>
       </div>
+
+      {/* ── Run Now justification prompt ──────────────────────────────── */}
+      {showRunPrompt && (
+        <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-4 py-3.5 space-y-3">
+          <div className="flex items-start gap-2">
+            <AlertTriangle size={13} className="text-amber-400 flex-shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              <p className="text-[13px] font-semibold text-white/90">
+                Confirm manual reconciliation run
+              </p>
+              <p className="text-[11px] text-white/65">
+                Manual reconciliation runs are recorded in the admin audit log.
+                Enter a reason before running.
+              </p>
+            </div>
+          </div>
+          <textarea
+            value={runJustif}
+            onChange={(e) => setRunJustif(e.target.value)}
+            placeholder="Reason for manual reconciliation run (min 20 chars)…"
+            rows={2}
+            autoFocus
+            className="w-full rounded-lg border border-white/[0.14] bg-white/[0.05] px-3 py-2 text-[12px] text-white placeholder:text-white/45 focus:outline-none focus:ring-2 focus:ring-vektrum-blue/50 focus:border-vektrum-blue resize-none"
+          />
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleRunNow}
+              disabled={!justifValid}
+              className="flex items-center gap-1.5 rounded-lg border border-vektrum-blue/40 bg-vektrum-blue/[0.12] px-3 py-1.5 text-[12px] font-medium text-blue-300 hover:bg-vektrum-blue/[0.20] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              <RefreshCw size={11} />
+              Run reconciliation
+            </button>
+            <button
+              type="button"
+              onClick={() => { setShowRunPrompt(false); setRunJustif('') }}
+              className="rounded-lg border border-white/[0.16] bg-white/[0.04] px-3 py-1.5 text-[12px] text-white/85 hover:text-white hover:border-white/[0.24] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-colors"
+            >
+              Cancel
+            </button>
+            {runJustif.trim().length > 0 && !justifValid && (
+              <p className="text-[11px] text-white/55">
+                {MIN_JUSTIF_LEN - runJustif.trim().length} more character{MIN_JUSTIF_LEN - runJustif.trim().length === 1 ? '' : 's'} needed
+              </p>
+            )}
+          </div>
+        </div>
+      )}
 
       {runError && (
         <div className="rounded-lg border border-red-500/20 bg-red-500/[0.08] px-4 py-2.5 text-[12px] text-red-400">
