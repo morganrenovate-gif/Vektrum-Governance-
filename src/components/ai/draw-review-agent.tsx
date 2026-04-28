@@ -163,7 +163,7 @@ export function DrawReviewAgent({
       <div className="rounded-lg border border-white/[0.08] bg-surface-2 p-4">
         <div className="flex items-center gap-2 text-sm text-white/55">
           <Loader2 size={14} className="animate-spin" />
-          Loading AI assessment...
+          Loading Draw Control Brief...
         </div>
       </div>
     )
@@ -172,13 +172,14 @@ export function DrawReviewAgent({
   if (isLoading) {
     return (
       <div className="rounded-lg border border-vektrum-blue/20 bg-vektrum-blue/10 p-5">
-        <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-center gap-2 mb-1">
           <Shield size={16} className="text-blue-400" />
-          <h4 className="text-sm font-semibold text-white">AI Draw Review</h4>
+          <h4 className="text-sm font-semibold text-white">Perplexity Draw Control Brief</h4>
         </div>
+        <p className="text-[11px] text-blue-400/70 mb-2">Required before release gate evaluation</p>
         <div className="flex items-center gap-2 text-sm text-white/55">
           <Loader2 size={14} className="animate-spin text-blue-400" />
-          AI review in progress — analyzing this draw request...
+          Perplexity Computer is generating the Draw Control Brief...
         </div>
         <p className="mt-1 text-xs text-white/65">This usually takes 10–15 seconds.</p>
       </div>
@@ -188,18 +189,20 @@ export function DrawReviewAgent({
   if (!assessment) {
     return (
       <div className="rounded-lg border border-white/[0.08] bg-surface-2 p-5">
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center gap-2 mb-1">
           <Shield size={16} className="text-blue-400" />
-          <h4 className="text-sm font-semibold text-white">AI Draw Review</h4>
+          <h4 className="text-sm font-semibold text-white">Perplexity Draw Control Brief</h4>
         </div>
+        <p className="text-[11px] text-blue-400/70 mb-3">Required before release gate evaluation</p>
         <div className="flex items-center gap-2 mb-3">
           <div className="h-5 w-5 rounded-md border border-white/[0.08] flex items-center justify-center">
             <span className="text-xs text-white/65">–</span>
           </div>
           <div>
-            <p className="text-sm text-white/55">No AI assessment on file</p>
+            <p className="text-sm text-white/55">No Draw Control Brief on file</p>
             <p className="text-xs text-white/65">
-              Request an AI-assisted draw review before this milestone can be released.
+              Generate a Perplexity Draw Control Brief before this milestone can be released.
+              The brief is a required precondition — the release gate will not evaluate until one exists.
             </p>
           </div>
         </div>
@@ -222,7 +225,7 @@ export function DrawReviewAgent({
           )}
         >
           <Shield size={14} />
-          Request AI Review
+          Generate Draw Control Brief
         </button>
       </div>
     )
@@ -241,7 +244,7 @@ export function DrawReviewAgent({
       <div className="px-5 py-3 border-b border-white/[0.05] flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Shield size={16} className="text-blue-400" />
-          <h4 className="text-sm font-semibold text-white">AI Draw Review</h4>
+          <h4 className="text-sm font-semibold text-white">Perplexity Draw Control Brief</h4>
           <span className="inline-flex items-center gap-1 text-xs text-emerald-400">
             <CheckCircle2 size={12} />
             Reviewed
@@ -254,7 +257,7 @@ export function DrawReviewAgent({
           className="inline-flex items-center gap-1 text-xs text-white/75 hover:text-blue-300 transition-colors disabled:opacity-40"
         >
           <RefreshCw size={12} />
-          Fresh Review
+          Refresh Brief
         </button>
       </div>
 
@@ -302,11 +305,13 @@ export function DrawReviewAgent({
         <p className="text-sm text-white/55">{assessment.reasoning}</p>
       </div>
 
-      {/* Findings — labeled "AI Review Findings" so the list isn't mistaken
-          for the deterministic 10-condition release gate. */}
+      {/* Findings — labeled "Brief Findings" with "AI Review Findings" as a
+          secondary subtitle to maintain gate-boundary clarity while surfacing
+          the Draw Control Brief framing. */}
       {assessment.findings.length > 0 && (
         <div className="px-5 py-3">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/65 mb-2">AI Review Findings</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/65 mb-0.5">Brief Findings</p>
+          <p className="text-[9px] uppercase tracking-widest text-white/35 mb-2">AI Review Findings — evidence extracted for release gate</p>
           <ul className="space-y-1.5">
             {assessment.findings.map((finding, i) => (
               <li key={i} className="flex items-start gap-2 text-sm text-white/55">

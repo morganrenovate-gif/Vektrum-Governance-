@@ -45,12 +45,12 @@ const TOUR_STEPS: TourStep[] = [
       'Click "Review Draw" on the Riverside milestone (Action Queue below) to see the supporting documents panel.',
   },
   {
-    stepLabel: 'AI review',
-    title: 'AI assists. The gate decides.',
+    stepLabel: 'Draw Control Brief',
+    title: 'Perplexity Computer generates the Draw Control Brief',
     body:
-      "Vektrum's AI draw review flags risks and summarizes evidence. It informs your review — it cannot approve a release. The 10-condition release gate is deterministic: all conditions must pass before authorization is issued.",
+      'Before the release gate runs, Perplexity Computer reads the draw package, extracts structured release facts, and flags missing evidence and conflicts. The result is the Draw Control Brief — required before the release gate can evaluate a draw. Without a current brief, the governed release workflow cannot proceed. AI informs; the gate decides; the funder authorizes.',
     hint:
-      'On a deal page, click "Request AI Review" on a milestone to see the AI pre-review panel in action.',
+      'On a deal page, click "Generate Draw Control Brief" on a milestone to see the evidence-to-policy layer in action.',
   },
   {
     stepLabel: 'Release gate',
