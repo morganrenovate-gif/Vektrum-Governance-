@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Landmark, TrendingUp, DollarSign, AlertCircle, Lightbulb, ArrowRight, ArrowLeft, CheckCircle2, Clock, Zap } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format'
 import { FundDealModal } from '@/components/demo/FundDealModal'
+import { DemoFunderTour } from '@/components/demo/DemoFunderTour'
 import { useDemoAutoReset } from '@/lib/demo-data/use-demo-auto-reset'
 
 // ── Mock data ────────────────────────────────────────────────────────────────
@@ -82,6 +83,9 @@ export default function DemoFunderPage() {
           You&apos;re viewing the Funder dashboard as <strong>Sarah Chen</strong>. In the live app, this connects to your real portfolio.
         </p>
       </div>
+
+      {/* Guided walkthrough — renders only when ?tour=1 is present */}
+      <DemoFunderTour />
 
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
