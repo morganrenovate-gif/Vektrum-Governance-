@@ -1049,6 +1049,32 @@ export function MilestoneCard({
               )}
             </div>
 
+            {/* Suggested evidence checklist — contractor guidance only, not a gate requirement */}
+            {canUploadDocs && (
+              <div className="rounded-md border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-white/45 mb-1.5">
+                  Suggested for funder review
+                </p>
+                <ul className="space-y-1">
+                  {[
+                    "Invoice or pay application",
+                    "Inspection report or site visit summary",
+                    "Site photos",
+                    "Receipts or supplier invoices",
+                    "Change order backup, if applicable",
+                  ].map((item) => (
+                    <li key={item} className="flex items-center gap-1.5 text-[11px] text-white/40">
+                      <span className="h-1 w-1 rounded-full bg-white/20 flex-shrink-0" aria-hidden="true" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-2 text-[10px] text-white/25 italic">
+                  Guidance only — not a release-gate requirement.
+                </p>
+              </div>
+            )}
+
             {/* Document list */}
             {localDocs.length === 0 ? (
               <p className="text-[11px] text-white/35 italic pl-0.5">
