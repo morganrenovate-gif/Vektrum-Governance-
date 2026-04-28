@@ -170,33 +170,59 @@ function CredentialBox({ label, value }: { label: string; value: string }) {
 
 function ConfirmInline({
   message,
-  confirmLabel = 'Confirm',
-  confirmClass  = 'bg-red-700 hover:bg-red-600 text-white',
+  confirmLabel             = 'Confirm',
+  confirmClass             = 'bg-red-700 hover:bg-red-600 text-white',
   onConfirm,
   onCancel,
+  requireJustification     = false,
+  justification            = '',
+  onJustificationChange,
+  justificationPlaceholder = 'Enter reason for this action (min 20 chars)…',
+  minJustificationLen      = 20,
 }: {
-  message:       string
-  confirmLabel?: string
-  confirmClass?: string
-  onConfirm:     () => void
-  onCancel:      () => void
+  message:                  string
+  confirmLabel?:            string
+  confirmClass?:            string
+  onConfirm:                () => void
+  onCancel:                 () => void
+  /** When true, a justification textarea is shown and confirm is disabled until met. */
+  requireJustification?:    boolean
+  justification?:           string
+  onJustificationChange?:   (v: string) => void
+  justificationPlaceholder?: string
+  minJustificationLen?:     number
 }) {
+  const justificationMet = !requireJustification || justification.trim().length >= minJustificationLen
   return (
-    <div className="flex items-center gap-2 text-xs text-zinc-300 bg-zinc-800/80 border border-zinc-700 rounded px-3 py-2">
-      <AlertTriangle size={12} className="text-amber-400 flex-shrink-0" />
-      <span className="flex-1">{message}</span>
-      <button
-        onClick={onConfirm}
-        className={`px-2 py-1 rounded text-xs font-medium transition-colors ${confirmClass}`}
-      >
-        {confirmLabel}
-      </button>
-      <button
-        onClick={onCancel}
-        className="px-2 py-1 rounded text-xs text-zinc-400 hover:text-white transition-colors"
-      >
-        Cancel
-      </button>
+    <div className="flex flex-col gap-2 text-xs text-zinc-300 bg-zinc-800/80 border border-zinc-700 rounded px-3 py-2">
+      <div className="flex items-center gap-2">
+        <AlertTriangle size={12} className="text-amber-400 flex-shrink-0" />
+        <span className="flex-1">{message}</span>
+        <button
+          onClick={onConfirm}
+          disabled={!justificationMet}
+          title={!justificationMet ? `Enter at least ${minJustificationLen} characters to confirm` : undefined}
+          className={`px-2 py-1 rounded text-xs font-medium transition-colors ${confirmClass} disabled:opacity-40 disabled:cursor-not-allowed`}
+        >
+          {confirmLabel}
+        </button>
+        <button
+          onClick={onCancel}
+          className="px-2 py-1 rounded text-xs text-zinc-400 hover:text-white transition-colors"
+        >
+          Cancel
+        </button>
+      </div>
+      {requireJustification && (
+        <textarea
+          value={justification}
+          onChange={(e) => onJustificationChange?.(e.target.value)}
+          placeholder={justificationPlaceholder}
+          rows={2}
+          className="w-full bg-zinc-950 border border-zinc-700 rounded px-2 py-1.5 text-xs text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-blue-600 resize-none"
+          aria-label="Justification for this action"
+        />
+      )}
     </div>
   )
 }
@@ -604,13 +630,17 @@ function PartnerCard({
   onUpdated:    (updated: Partner, credentials?: NewCredentials) => void
   onDealAssign: (partner: Partner) => void
 }) {
-  const [loading,          setLoading]          = useState<string | null>(null)
-  const [error,            setError]            = useState<string | null>(null)
-  const [showDestructive,  setShowDestructive]  = useState(false)
-  const [confirmRevoke,    setConfirmRevoke]     = useState(false)
-  const [confirmRotateKey, setConfirmRotateKey]  = useState(false)
-  const [confirmRotateSec, setConfirmRotateSec]  = useState(false)
-  const [confirmToggle,    setConfirmToggle]     = useState(false)
+  const [loading,              setLoading]              = useState<string | null>(null)
+  const [error,                setError]                = useState<string | null>(null)
+  const [showDestructive,      setShowDestructive]      = useState(false)
+  const [confirmRevoke,        setConfirmRevoke]        = useState(false)
+  const [confirmRotateKey,     setConfirmRotateKey]     = useState(false)
+  const [confirmRotateSec,     setConfirmRotateSec]     = useState(false)
+  const [confirmToggle,        setConfirmToggle]        = useState(false)
+  // Justification text for admin_audit_log (required for destructive credential operations)
+  const [rotateKeyJustif,      setRotateKeyJustif]      = useState('')
+  const [rotateSecJustif,      setRotateSecJustif]      = useState('')
+  const [revokeJustif,         setRevokeJustif]         = useState('')
 
   const patch = async (body: Record<string, unknown>) => {
     setError(null)
@@ -637,25 +667,28 @@ function PartnerCard({
 
   const rotateKey = async () => {
     setLoading('rotate_key')
-    const data = await patch({ action: 'rotate_key' })
+    const data = await patch({ action: 'rotate_key', justification: rotateKeyJustif.trim() })
     if (data) onUpdated(data.partner, { ...data.credentials, key_environment: partner.key_environment })
     setConfirmRotateKey(false)
+    setRotateKeyJustif('')
     setLoading(null)
   }
 
   const rotateSecret = async () => {
     setLoading('rotate_secret')
-    const data = await patch({ action: 'rotate_secret' })
+    const data = await patch({ action: 'rotate_secret', justification: rotateSecJustif.trim() })
     if (data) onUpdated(data.partner, data.credentials)
     setConfirmRotateSec(false)
+    setRotateSecJustif('')
     setLoading(null)
   }
 
   const revokePartner = async () => {
     setLoading('revoke')
-    const data = await patch({ action: 'revoke' })
+    const data = await patch({ action: 'revoke', justification: revokeJustif.trim() })
     if (data) onUpdated(data.partner)
     setConfirmRevoke(false)
+    setRevokeJustif('')
     setLoading(null)
   }
 
@@ -821,7 +854,11 @@ function PartnerCard({
               message={`Rotate API key for ${partner.name}? The current key will stop working immediately.`}
               confirmLabel="Rotate key"
               onConfirm={rotateKey}
-              onCancel={() => setConfirmRotateKey(false)}
+              onCancel={() => { setConfirmRotateKey(false); setRotateKeyJustif('') }}
+              requireJustification
+              justification={rotateKeyJustif}
+              onJustificationChange={setRotateKeyJustif}
+              justificationPlaceholder="Reason for rotating this key (min 20 chars)…"
             />
           )}
 
@@ -845,7 +882,11 @@ function PartnerCard({
               message={`Rotate webhook signing secret for ${partner.name}? Ensure their verification logic is updated first.`}
               confirmLabel="Rotate secret"
               onConfirm={rotateSecret}
-              onCancel={() => setConfirmRotateSec(false)}
+              onCancel={() => { setConfirmRotateSec(false); setRotateSecJustif('') }}
+              requireJustification
+              justification={rotateSecJustif}
+              onJustificationChange={setRotateSecJustif}
+              justificationPlaceholder="Reason for rotating this webhook secret (min 20 chars)…"
             />
           )}
 
@@ -871,7 +912,11 @@ function PartnerCard({
                   message={`Revoke ${partner.name}? This logs a partner_key_revoked audit event and immediately deactivates their access.`}
                   confirmLabel="Revoke access"
                   onConfirm={revokePartner}
-                  onCancel={() => setConfirmRevoke(false)}
+                  onCancel={() => { setConfirmRevoke(false); setRevokeJustif('') }}
+                  requireJustification
+                  justification={revokeJustif}
+                  onJustificationChange={setRevokeJustif}
+                  justificationPlaceholder="Reason for revoking this partner's access (min 20 chars)…"
                 />
               )}
             </>

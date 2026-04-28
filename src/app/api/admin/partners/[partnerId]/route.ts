@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { getAuthUser, requireRole, requireMFA } from '@/lib/auth/middleware'
-import { logAudit } from '@/lib/engine/audit'
+import { logAudit, logAdminAudit } from '@/lib/engine/audit'
 import { generatePartnerApiKey, generateWebhookSigningSecret } from '@/lib/auth/partner'
 import { internalError, notFoundError, validationError } from '@/lib/errors'
 import { POLICIES, checkRateLimit, rateLimitResponse, logRateLimitViolation } from '@/lib/engine/rate-limit'
@@ -102,6 +102,8 @@ interface PatchPartnerBody {
   is_active?:       boolean
   action?:          'rotate_key' | 'rotate_secret' | 'revoke'
   key_environment?: string
+  /** Required for destructive actions (rotate_key, rotate_secret, revoke). Min 20 chars. */
+  justification?:   string
 }
 
 export async function PATCH(
@@ -147,6 +149,21 @@ export async function PATCH(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ex = existing as any
 
+  // ── Justification required for credential operations ──────────────────────
+  // rotate_key, rotate_secret, and revoke are logged to admin_audit_log and
+  // require a justification of at least 20 characters, matching the pattern
+  // used by subscription tier changes and admin audit reviews.
+  const DESTRUCTIVE_ACTIONS = ['rotate_key', 'rotate_secret', 'revoke'] as const
+  let justification = ''
+  if (body.action && (DESTRUCTIVE_ACTIONS as readonly string[]).includes(body.action)) {
+    justification = typeof body.justification === 'string' ? body.justification.trim() : ''
+    if (justification.length < 20) {
+      return validationError([
+        'justification is required for credential operations and must be at least 20 characters.',
+      ])
+    }
+  }
+
   // ── Revoke: hard deactivation with distinct audit action ──────────────────
   if (body.action === 'revoke') {
     if (!ex.is_active) {
@@ -167,15 +184,16 @@ export async function PATCH(
       return internalError('Failed to revoke partner.', revokeError?.message)
     }
 
-    await logAudit({
-      entity_type:   'partner',
-      entity_id:     partnerId,
-      action:        'partner_key_revoked',
-      actor_id:      authContext.user.id,
-      actor_role:    authContext.profile.role,
-      system_source: 'api/admin/partners/[partnerId]',
-      old_values:    { is_active: true },
-      new_values:    { is_active: false },
+    await logAdminAudit({
+      entity_type:         'partner',
+      entity_id:           partnerId,
+      action:              'partner_key_revoked',
+      actor_id:            authContext.user.id,
+      actor_role:          authContext.profile.role,
+      system_source:       'api/admin/partners/[partnerId]',
+      old_values:          { is_active: true },
+      new_values:          { is_active: false },
+      admin_justification: justification,
       metadata: {
         partner_name:    ex.name,
         api_key_prefix:  ex.api_key_prefix,
@@ -265,12 +283,18 @@ export async function PATCH(
     return internalError('Failed to update partner.', updateError?.message)
   }
 
-  await logAudit({
-    entity_type:   'partner',
+  // Credential operations (rotate_key, rotate_secret) → logAdminAudit (dual-writes
+  // to both audit_log and admin_audit_log with mandatory justification).
+  // Non-credential field updates → logAudit (normal audit trail only).
+  const auditAction =
+    body.action === 'rotate_key'    ? 'partner_key_rotated'
+    : body.action === 'rotate_secret' ? 'partner_webhook_secret_rotated'
+    : 'partner_updated'
+
+  const auditBase = {
+    entity_type:   'partner' as const,
     entity_id:     partnerId,
-    action:        body.action === 'rotate_key'    ? 'partner_key_rotated'
-                 : body.action === 'rotate_secret' ? 'partner_webhook_secret_rotated'
-                 : 'partner_updated',
+    action:        auditAction,
     actor_id:      authContext.user.id,
     actor_role:    authContext.profile.role,
     system_source: 'api/admin/partners/[partnerId]',
@@ -284,7 +308,13 @@ export async function PATCH(
     metadata: {
       ...(rotatedKey ? { new_key_prefix: (updated as any).api_key_prefix, key_environment: rotatedKeyEnv } : {}),
     },
-  })
+  }
+
+  if (body.action === 'rotate_key' || body.action === 'rotate_secret') {
+    await logAdminAudit({ ...auditBase, admin_justification: justification })
+  } else {
+    await logAudit(auditBase)
+  }
 
   const response: Record<string, unknown> = { partner: updated }
 
