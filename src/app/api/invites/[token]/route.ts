@@ -13,8 +13,17 @@ export const dynamic = 'force-dynamic'
 //     RLS on deal_invites. The table's RLS policies restrict SELECT to authenticated
 //     users only — unauthenticated reads via the anon key will return 0 rows even
 //     for valid tokens, causing a false "not found" response.
+//   - We use three separate flat queries (invite → deal → profile) rather than a
+//     nested/joined select. Nested relationship selects can fail if foreign-key hints
+//     are ambiguous or if PostgREST relationship inference differs from expectations.
+//     Flat queries are explicit, debuggable, and produce distinct error messages.
 //   - We validate every field server-side before returning any preview data.
 //   - We return only safe preview fields — no token, no billing data, no secrets.
+//
+// Error handling:
+//   - Supabase query errors  → HTTP 500, reason: lookup_error (never collapsed to not_found)
+//   - Valid query, null data → HTTP 404, reason: not_found
+//   - Invalid invite state  → HTTP 404, reason: <specific code>
 //
 // Valid invite requirements:
 //   - token matches a deal_invites row
@@ -24,21 +33,21 @@ export const dynamic = 'force-dynamic'
 //   - accepted_at IS NULL
 //   - accepted_by IS NULL
 //
-// All invalid states return HTTP 404 with a machine-readable `reason` field.
-// Using 404 (rather than distinct status codes) prevents token enumeration:
-// an attacker who doesn't have the token can't determine why a lookup failed.
-// The `reason` field is only useful if you already possess the token.
-//
 // Reason codes:
-//   not_found       — token not in DB (or service not configured)
+//   not_found        — token not in DB (or service not configured)
 //   already_accepted — accepted_at or accepted_by is set
-//   wrong_status    — status is not 'pending'
-//   expired         — expires_at <= now()
-//   missing_role    — role column is null (stale invite from older code path)
-//   wrong_role      — role is set but is not 'funder'
+//   wrong_status     — status is not 'pending'
+//   expired          — expires_at <= now()
+//   missing_role     — role column is null (stale invite from older code path)
+//   wrong_role       — role is set but is not 'funder'
+//   lookup_error     — Supabase returned a query error (DB/config issue, not missing token)
 
 function invalidResponse(reason: string, message: string): NextResponse {
   return NextResponse.json({ error: message, reason }, { status: 404 })
+}
+
+function lookupErrorResponse(message: string): NextResponse {
+  return NextResponse.json({ error: message, reason: 'lookup_error' }, { status: 500 })
 }
 
 export async function GET(
@@ -64,41 +73,28 @@ export async function GET(
 
   const admin = createSupabaseAdminClient()
 
-  // ── Fetch the invite row — use maybeSingle() to distinguish "not found" from errors ──
-  // We do NOT filter accepted_at/accepted_by in the query so we can return distinct
-  // reason codes for each failure mode rather than collapsing everything to not_found.
-  const { data: invite, error } = await admin
+  // ── Query 1: Fetch invite row ─────────────────────────────────────────────────
+  // Flat query only — no nested relationship selects. Nested selects can fail due
+  // to ambiguous foreign-key hints or PostgREST relationship inference differences.
+  const { data: invite, error: inviteError } = await admin
     .from('deal_invites')
-    .select(
-      `
-      id,
-      status,
-      role,
-      expires_at,
-      invited_email,
-      accepted_at,
-      accepted_by,
-      deal:deals (
-        id,
-        title,
-        description,
-        total_amount,
-        status,
-        contractor:profiles!deals_contractor_id_fkey (
-          full_name,
-          company_name
-        )
-      )
-    `,
-    )
+    .select('id, deal_id, status, role, expires_at, invited_email, accepted_at, accepted_by')
     .eq('token', token)
     .maybeSingle()
 
-  if (error) {
-    // Query failed — likely a DB connectivity issue. Log for ops visibility but
-    // return not_found to prevent leaking server error details to clients.
-    console.error('[invites/preview] DB query error for invite lookup:', error.message, error.code)
-    return invalidResponse('not_found', 'This invite link is invalid or has expired.')
+  if (inviteError) {
+    // Query error — this is NOT a missing token. Return 500 so the caller can
+    // distinguish a DB/config problem from a genuinely invalid token.
+    console.error('[invites/preview] invite lookup error:', {
+      code: inviteError.code,
+      message: inviteError.message,
+      token_present: !!token,
+      token_length: token.length,
+      service_key_present: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+    })
+    return lookupErrorResponse(
+      'Invite lookup failed. Please try again in a moment.',
+    )
   }
 
   if (!invite) {
@@ -152,19 +148,54 @@ export async function GET(
     )
   }
 
+  // ── Query 2: Fetch deal ───────────────────────────────────────────────────────
+  const { data: deal, error: dealError } = await admin
+    .from('deals')
+    .select('id, title, description, total_amount, status, contractor_id')
+    .eq('id', invite.deal_id)
+    .maybeSingle()
+
+  if (dealError) {
+    console.error('[invites/preview] deal lookup error:', {
+      code: dealError.code,
+      message: dealError.message,
+      deal_id_present: !!invite.deal_id,
+      service_key_present: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+    })
+    return lookupErrorResponse(
+      'Deal lookup failed. Please try again in a moment.',
+    )
+  }
+
+  if (!deal) {
+    return invalidResponse('not_found', 'The deal associated with this invite could not be found.')
+  }
+
+  // ── Query 3: Fetch contractor profile ─────────────────────────────────────────
+  // Profile is optional — if the lookup errors or returns null we fall back to a
+  // generic name rather than failing the entire preview response.
+  const { data: contractor, error: contractorError } = await admin
+    .from('profiles')
+    .select('full_name, company_name')
+    .eq('id', deal.contractor_id)
+    .maybeSingle()
+
+  if (contractorError) {
+    console.error('[invites/preview] contractor profile lookup error:', {
+      code: contractorError.code,
+      message: contractorError.message,
+      service_key_present: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+    })
+    return lookupErrorResponse(
+      'Contractor profile lookup failed. Please try again in a moment.',
+    )
+  }
+
+  const contractorName =
+    contractor?.company_name ?? contractor?.full_name ?? 'A contractor'
+
   // ── Build safe preview response ───────────────────────────────────────────────
   // Returning only fields needed for the accept page — no token, no billing data, no secrets.
-  type DealPreview = {
-    id: string
-    title: string
-    description: string | null
-    total_amount: number
-    status: string
-    contractor: { full_name: string; company_name: string | null } | { full_name: string; company_name: string | null }[] | null
-  }
-  const deal = invite.deal as unknown as DealPreview
-  const contractorData = Array.isArray(deal.contractor) ? deal.contractor[0] ?? null : deal.contractor
-
   return NextResponse.json({
     invite: {
       id: invite.id,
@@ -179,8 +210,7 @@ export async function GET(
       description: deal.description,
       total_amount: deal.total_amount,
       status: deal.status,
-      contractor_name:
-        contractorData?.company_name ?? contractorData?.full_name ?? 'A contractor',
+      contractor_name: contractorName,
     },
   })
 }

@@ -4,6 +4,12 @@ import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { logAudit } from '@/lib/engine/audit'
 import { conflictError, errorResponse, internalError, notFoundError } from '@/lib/errors'
 
+// Separate from notFoundError: DB returned a query error, not a missing row.
+// Callers can distinguish a configuration/connectivity problem from an invalid token.
+function lookupErrorResponse(message: string): NextResponse {
+  return NextResponse.json({ error: message, reason: 'lookup_error' }, { status: 500 })
+}
+
 export const dynamic = 'force-dynamic'
 
 // ─── POST /api/invites/[token]/accept ─────────────────────────────────────────
@@ -69,8 +75,14 @@ export async function POST(
     .maybeSingle()
 
   if (inviteError) {
-    console.error('[invites/accept] DB query error:', inviteError.message)
-    return notFoundError('This invite link is invalid or has already been used.')
+    console.error('[invites/accept] invite lookup error:', {
+      code: inviteError.code,
+      message: inviteError.message,
+      token_present: !!token,
+      token_length: token.length,
+      service_key_present: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+    })
+    return lookupErrorResponse('Invite lookup failed. Please try again in a moment.')
   }
 
   if (!invite) {
@@ -125,7 +137,17 @@ export async function POST(
     .eq('id', invite.deal_id)
     .single()
 
-  if (dealError || !deal) {
+  if (dealError) {
+    console.error('[invites/accept] deal lookup error:', {
+      code: dealError.code,
+      message: dealError.message,
+      deal_id_present: !!invite.deal_id,
+      service_key_present: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+    })
+    return lookupErrorResponse('Deal lookup failed. Please try again in a moment.')
+  }
+
+  if (!deal) {
     return notFoundError('The deal associated with this invite could not be found.')
   }
 
