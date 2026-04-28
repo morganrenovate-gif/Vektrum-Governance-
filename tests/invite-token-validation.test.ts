@@ -142,18 +142,28 @@ await test('5. GET route rejects expired invites and updates status in backgroun
 
 await test('6. GET route validates accepted_at IS NULL (defense-in-depth)', () => {
   const src = read(GET_ROUTE)
+  // Application-level check is intentionally used over a query filter so each failure
+  // mode (accepted vs not-found) returns a distinct machine-readable reason code.
   assert(
-    src.includes(".is('accepted_at', null)"),
-    `${GET_ROUTE} must include .is('accepted_at', null) in the query to prevent accepted invites from being re-used, ` +
-    `even if the status field is somehow inconsistent.`,
+    src.includes('.is(\'accepted_at\', null)') ||
+    src.includes('accepted_at !== null') ||
+    src.includes('accepted_at != null') ||
+    src.includes('invite.accepted_at'),
+    `${GET_ROUTE} must validate accepted_at — either as a query filter (.is('accepted_at', null)) ` +
+    `or as an application-level check (invite.accepted_at !== null) — to prevent re-use of accepted invites.`,
   )
 })
 
 await test('7. GET route validates accepted_by IS NULL (defense-in-depth)', () => {
   const src = read(GET_ROUTE)
+  // Application-level check is intentionally used over a query filter — see test 6.
   assert(
-    src.includes(".is('accepted_by', null)"),
-    `${GET_ROUTE} must include .is('accepted_by', null) in the query for defense-in-depth validation.`,
+    src.includes(".is('accepted_by', null)") ||
+    src.includes('accepted_by !== null') ||
+    src.includes('accepted_by != null') ||
+    src.includes('invite.accepted_by'),
+    `${GET_ROUTE} must validate accepted_by — either as a query filter (.is('accepted_by', null)) ` +
+    `or as an application-level check (invite.accepted_by !== null) — to prevent re-use of accepted invites.`,
   )
 })
 

@@ -41,7 +41,16 @@ interface InvitePreview {
 type PageState =
   | { phase: 'loading' }
   | { phase: 'preview'; data: InvitePreview }
-  | { phase: 'invalid'; reason: 'not_found' | 'expired' | 'used' | 'wrong_role' | 'missing_role' }
+  | {
+      phase: 'invalid'
+      reason:
+        | 'not_found'
+        | 'expired'
+        | 'already_accepted'
+        | 'wrong_status'
+        | 'wrong_role'
+        | 'missing_role'
+    }
   | { phase: 'accepting' }
   | { phase: 'accepted'; dealId: string; dealTitle: string }
   | { phase: 'error'; message: string }
@@ -88,13 +97,17 @@ export default function InviteAcceptPage() {
       const res = await fetch(`/api/invites/${token}`)
 
       if (res.status === 404) {
-        // Parse the body — role failures include a machine-readable `reason` field
-        // so the UI can show a helpful message rather than a generic "not found".
-        let reason: PageState['reason'] = 'not_found'
+        // Parse the body — every failure mode has a machine-readable `reason` field
+        // so the UI can show targeted copy rather than a generic "not found".
+        // Reason codes: not_found | expired | already_accepted | wrong_status | wrong_role | missing_role
+        let reason: Extract<PageState, { phase: 'invalid' }>['reason'] = 'not_found'
         try {
           const body = await res.json() as { reason?: string }
-          if (body.reason === 'missing_role') reason = 'missing_role'
-          else if (body.reason === 'wrong_role') reason = 'wrong_role'
+          if (body.reason === 'missing_role')      reason = 'missing_role'
+          else if (body.reason === 'wrong_role')   reason = 'wrong_role'
+          else if (body.reason === 'expired')      reason = 'expired'
+          else if (body.reason === 'already_accepted') reason = 'already_accepted'
+          else if (body.reason === 'wrong_status') reason = 'wrong_status'
         } catch { /* non-JSON body — treat as generic not_found */ }
         setState({ phase: 'invalid', reason })
         return
@@ -214,6 +227,28 @@ export default function InviteAcceptPage() {
         {/* ── Invalid / not found ── */}
         {state.phase === 'invalid' && (() => {
           const isRoleIssue = state.reason === 'wrong_role' || state.reason === 'missing_role'
+
+          const heading = (() => {
+            if (isRoleIssue) return 'Invite link not valid for this account'
+            if (state.reason === 'expired') return 'Invite link has expired'
+            if (state.reason === 'already_accepted') return 'Invite link already used'
+            return 'Invite link no longer valid'
+          })()
+
+          const body = (() => {
+            if (state.reason === 'missing_role')
+              return 'This invite link is incomplete — it is missing the intended role. Ask the contractor to generate a new invite link.'
+            if (state.reason === 'wrong_role')
+              return 'This invite link is not intended for a funder account. Ensure you are signed in with the correct account type.'
+            if (state.reason === 'expired')
+              return 'This invite link has expired. Ask the contractor to generate a new invite link.'
+            if (state.reason === 'already_accepted')
+              return 'This invite link has already been used. Each invite link can only be accepted once. Ask the contractor to generate a new invite link.'
+            if (state.reason === 'wrong_status')
+              return 'This invite link is no longer active. Ask the contractor to generate a new invite link.'
+            return 'This link may have already been used or expired. Ask the contractor to generate a new invite link.'
+          })()
+
           return (
             <div
               className="rounded-2xl border border-red-500/20 bg-surface-2 shadow-card p-8 text-center"
@@ -221,17 +256,8 @@ export default function InviteAcceptPage() {
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10">
                 <AlertCircle className="h-6 w-6 text-red-400" aria-hidden="true" />
               </div>
-              <h1 className="font-display text-lg font-bold text-white">
-                {isRoleIssue ? 'Invite link not valid for this account' : 'Invite link no longer valid'}
-              </h1>
-              <p className="mt-2 text-sm text-white/55">
-                {state.reason === 'missing_role'
-                  ? 'This invite link is incomplete — it is missing the intended role. Ask the contractor to generate a new invite link.'
-                  : state.reason === 'wrong_role'
-                  ? 'This invite link is not intended for a funder account. Ensure you are signed in with the correct account type.'
-                  : 'This link may have already been used or expired. Ask the contractor to generate a new invite link.'
-                }
-              </p>
+              <h1 className="font-display text-lg font-bold text-white">{heading}</h1>
+              <p className="mt-2 text-sm text-white/55">{body}</p>
               <Link
                 href="/"
                 className="mt-6 inline-flex items-center gap-1.5 rounded-xl border border-white/[0.1] bg-white/[0.05] px-5 py-2.5 text-sm font-semibold text-white/60 hover:bg-white/[0.08] hover:text-white transition-all"

@@ -59,29 +59,63 @@ export async function POST(
   const admin = createSupabaseAdminClient()
 
   // ── 3. Fetch and validate invite ───────────────────────────────────────────
+  // Select role, accepted_at, and accepted_by for defense-in-depth validation.
+  // We do NOT filter accepted_at/accepted_by in the query so we can return
+  // distinct, actionable errors for each failure mode.
   const { data: invite, error: inviteError } = await admin
     .from('deal_invites')
-    .select('id, deal_id, invited_by, status, expires_at')
+    .select('id, deal_id, invited_by, status, role, expires_at, accepted_at, accepted_by')
     .eq('token', token)
-    .single()
+    .maybeSingle()
 
-  if (inviteError || !invite) {
+  if (inviteError) {
+    console.error('[invites/accept] DB query error:', inviteError.message)
     return notFoundError('This invite link is invalid or has already been used.')
   }
 
-  if (invite.status !== 'pending') {
+  if (!invite) {
     return notFoundError('This invite link is invalid or has already been used.')
+  }
+
+  // ── Defense-in-depth: already accepted ────────────────────────────────────
+  if (invite.accepted_at !== null || invite.accepted_by !== null) {
+    return errorResponse(
+      409,
+      'This invite link has already been used. Each invite link can only be accepted once.',
+    )
+  }
+
+  if (invite.status !== 'pending') {
+    return notFoundError('This invite link is no longer active. Ask the contractor to generate a new invite link.')
   }
 
   const expiresAt = new Date(invite.expires_at)
   if (expiresAt <= new Date()) {
-    // Mark as expired
-    await admin
+    // Mark as expired (fire-and-forget — must not delay the response)
+    admin
       .from('deal_invites')
       .update({ status: 'expired' })
       .eq('id', invite.id)
+      .then(() => {})
 
     return notFoundError('This invite link has expired. Ask the contractor to generate a new one.')
+  }
+
+  // ── Defense-in-depth: role validation ─────────────────────────────────────
+  // Ensures the invite was created with role='funder' — stale invites from
+  // older code paths may have role=null, which must never be accepted.
+  if (!invite.role) {
+    return errorResponse(
+      400,
+      'This invite link is incomplete — it is missing the intended role. Ask the contractor to generate a new invite link.',
+    )
+  }
+
+  if (invite.role !== 'funder') {
+    return errorResponse(
+      403,
+      'This invite link is not intended for a funder account. Ensure you are using the correct link.',
+    )
   }
 
   // ── 4. Fetch deal and verify it can still accept a funder ─────────────────
