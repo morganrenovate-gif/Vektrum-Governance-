@@ -11,7 +11,7 @@ import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { AddMilestoneForm } from "./add-milestone-form";
 import { FundDealButton } from "./fund-deal-button";
 import { ReleaseRetainageButton } from "./release-retainage-button";
-import type { Deal, Profile, Milestone, LienWaiver, ReleaseGateResult, ContractStatus } from "@/lib/types";
+import type { Deal, Profile, Milestone, LienWaiver, ChangeOrder, ReleaseGateResult, ContractStatus } from "@/lib/types";
 import { formatMoney } from "@/lib/utils";
 import { ArrowLeft, Info, FolderOpen, FileText, CheckCircle2, Clock, XCircle, AlertCircle, ShieldAlert, ShieldCheck, PenLine } from "lucide-react";
 import { SectionHeader, EmptyState } from "@/components/layout";
@@ -230,6 +230,22 @@ export default async function DealDetailPage({
   const outstandingWaivers = (lienWaiversRaw ?? []).filter(
     (w: any) => w.status !== "approved" && w.milestone_id
   ) as LienWaiver[];
+
+  // Fetch change orders for all milestones on this deal (all statuses, newest first).
+  // Build a map: milestone_id → ChangeOrder[] for O(1) lookup per milestone card.
+  const { data: changeOrdersRaw } = milestoneIds.length
+    ? await supabase
+        .from("change_orders")
+        .select("id, milestone_id, deal_id, amount, description, status, submitted_by, approved_by, approved_at, created_at, updated_at")
+        .eq("deal_id", dealId)
+        .order("created_at", { ascending: false })
+    : { data: [] };
+
+  const changeOrdersMap = new Map<string, ChangeOrder[]>();
+  for (const co of (changeOrdersRaw ?? []) as ChangeOrder[]) {
+    const existing = changeOrdersMap.get(co.milestone_id) ?? [];
+    changeOrdersMap.set(co.milestone_id, [...existing, co]);
+  }
 
   const milestonesTotal = milestones.reduce((s, m) => s + m.amount, 0);
   const remaining = Math.max(0, typedDeal.total_amount - milestonesTotal);
@@ -498,6 +514,7 @@ export default async function DealDetailPage({
                     sequentialDeal={typedDeal.sequential_release_required ?? false}
                     lienWaiver={lienWaiverMap.get(milestone.id) ?? null}
                     lienWaiverRequired={typedDeal.lien_waiver_required ?? false}
+                    changeOrders={changeOrdersMap.get(milestone.id) ?? []}
                   />
                   <MilestoneDisputeSection
                     milestone={{

@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import { cn, formatMoney } from "@/lib/utils";
 import { MilestoneStatusBadge, ProtectionStatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { Milestone, UserRole, LienWaiver } from "@/lib/types";
+import type { Milestone, UserRole, LienWaiver, ChangeOrder } from "@/lib/types";
 import {
   CheckCircle2, AlertCircle, ChevronDown, ListOrdered, Lock,
-  FileText, Upload, Clock, XCircle, Copy, Check,
+  FileText, Upload, Clock, XCircle, Copy, Check, Plus, GitPullRequest,
 } from "lucide-react";
 import { DrawReviewAgent } from "@/components/ai/draw-review-agent";
 
@@ -64,6 +64,11 @@ interface MilestoneCardProps {
   lienWaiver?: LienWaiver | null;
   /** True when deal.lien_waiver_required = true. */
   lienWaiverRequired?: boolean;
+  /**
+   * All change orders for this milestone (all statuses), newest-first.
+   * Provided by the deal page via changeOrdersMap.get(milestone.id) ?? [].
+   */
+  changeOrders?: ChangeOrder[];
 }
 
 export function MilestoneCard({
@@ -75,6 +80,7 @@ export function MilestoneCard({
   sequentialDeal = false,
   lienWaiver,
   lienWaiverRequired = false,
+  changeOrders = [],
 }: MilestoneCardProps) {
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
@@ -209,6 +215,83 @@ export function MilestoneCard({
       setTimeout(() => setCopied(false), 2000)
     } catch {
       // Clipboard API unavailable
+    }
+  }
+
+  // ── Change order state ──────────────────────────────────────────────────────
+  const [localOrders, setLocalOrders] = useState<ChangeOrder[]>(changeOrders)
+  const [showCOForm, setShowCOForm]       = useState(false)
+  const [coAmount, setCoAmount]           = useState("")
+  const [coDescription, setCoDescription] = useState("")
+  const [coSubmitLoading, setCoSubmitLoading] = useState(false)
+  const [coDecideLoading, setCoDecideLoading] = useState<string | null>(null)
+  const [coError, setCoError]             = useState<string | null>(null)
+
+  // The actionable submitted CO for this milestone (there can be at most one).
+  const submittedCO = localOrders.find((co) => co.status === "submitted") ?? null
+
+  const handleCreateCO = async () => {
+    const amountNum = parseFloat(coAmount)
+    if (!coAmount || isNaN(amountNum) || amountNum === 0) {
+      setCoError("Amount must be a non-zero number (use negative for decreases).")
+      return
+    }
+    if (coDescription.trim().length < 10) {
+      setCoError("Description must be at least 10 characters.")
+      return
+    }
+    setCoSubmitLoading(true)
+    setCoError(null)
+    try {
+      const res = await fetch("/api/change-orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          milestone_id: milestone.id,
+          amount:       amountNum,
+          description:  coDescription.trim(),
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setCoError(data.error ?? "Failed to submit change order.")
+      } else {
+        setLocalOrders([data.change_order, ...localOrders])
+        setShowCOForm(false)
+        setCoAmount("")
+        setCoDescription("")
+        router.refresh()
+      }
+    } catch {
+      setCoError("Network error. Please try again.")
+    } finally {
+      setCoSubmitLoading(false)
+    }
+  }
+
+  const handleDecideCO = async (changeOrderId: string, decision: "approved" | "rejected") => {
+    setCoDecideLoading(changeOrderId)
+    setCoError(null)
+    try {
+      const res = await fetch(`/api/change-orders/${changeOrderId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ decision }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setCoError(data.error ?? `Failed to ${decision} change order.`)
+      } else {
+        // Update local state: replace the CO with the updated version
+        setLocalOrders(localOrders.map((co) =>
+          co.id === changeOrderId ? data.change_order : co
+        ))
+        router.refresh()
+      }
+    } catch {
+      setCoError("Network error. Please try again.")
+    } finally {
+      setCoDecideLoading(null)
     }
   }
 
@@ -688,6 +771,181 @@ export function MilestoneCard({
               <div className="mt-2 flex items-start gap-1.5 rounded-md bg-red-500/[0.08] border border-red-500/20 px-3 py-2 text-[12px] text-red-400">
                 <AlertCircle size={13} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
                 {lienError}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Change Order Panel ────────────────────────────────────────────── */}
+        {/* Visible to:
+              • Contractor (any non-released milestone) — to submit a CO request.
+              • Funder (when a submitted CO awaits decision).
+              • Both roles (when COs exist in history).
+            Does NOT: touch DB directly, bypass the release gate, or allow self-approval. */}
+        {(localOrders.length > 0 || (role === "contractor" && milestone.status !== "released")) && (
+          <div className="mt-3 space-y-2">
+
+            {/* ── Section label ── */}
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-white/55">
+                <GitPullRequest size={11} aria-hidden="true" />
+                Change Orders
+              </div>
+              {/* Contractor: "Request" button only when no submitted CO and milestone not released */}
+              {role === "contractor" && !submittedCO && milestone.status !== "released" && !showCOForm && (
+                <button
+                  type="button"
+                  onClick={() => { setShowCOForm(true); setCoError(null) }}
+                  className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-white/65 border border-white/[0.12] hover:bg-white/[0.06] hover:text-white/90 transition-colors"
+                >
+                  <Plus size={11} aria-hidden="true" />
+                  Request
+                </button>
+              )}
+            </div>
+
+            {/* ── Submitted CO — awaiting decision ── */}
+            {submittedCO && (
+              <div className="rounded-lg border border-amber-500/20 bg-amber-500/[0.04] px-4 py-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-2.5 min-w-0">
+                    <Clock size={13} className="text-amber-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
+                    <div className="min-w-0">
+                      <p className="text-[12px] font-semibold text-amber-400">
+                        {role === "funder" ? "Change Order Pending — Decision Required" : "Change Order Submitted"}
+                      </p>
+                      <p className="text-[11px] text-amber-400/70 mt-0.5 break-words">
+                        {submittedCO.description}
+                      </p>
+                      <p className="text-[11px] text-amber-400/50 mt-1 tabular-nums">
+                        {submittedCO.amount > 0 ? "+" : ""}{formatMoney(submittedCO.amount)} delta
+                        {" · "}
+                        {new Date(submittedCO.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      </p>
+                    </div>
+                  </div>
+                  {/* Funder approve / reject */}
+                  {role === "funder" && (
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <Button
+                        variant="success"
+                        size="sm"
+                        loading={coDecideLoading === submittedCO.id}
+                        disabled={coDecideLoading !== null}
+                        onClick={() => handleDecideCO(submittedCO.id, "approved")}
+                      >
+                        Approve
+                      </Button>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        loading={coDecideLoading === submittedCO.id}
+                        disabled={coDecideLoading !== null}
+                        onClick={() => handleDecideCO(submittedCO.id, "rejected")}
+                      >
+                        Reject
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* ── Contractor: inline create form ── */}
+            {role === "contractor" && showCOForm && (
+              <div className="rounded-lg border border-white/[0.12] bg-white/[0.03] px-4 py-3 space-y-3">
+                <p className="text-[12px] font-semibold text-white/80">Request Change Order</p>
+                <div className="space-y-2">
+                  <div>
+                    <label className="block text-[11px] font-medium text-white/65 mb-1">
+                      Amount delta ($)
+                      <span className="ml-1 text-white/40 font-normal">Positive = increase, negative = decrease</span>
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      placeholder="e.g. 2500 or -500"
+                      value={coAmount}
+                      onChange={(e) => setCoAmount(e.target.value)}
+                      className="w-full rounded-lg border border-white/[0.14] bg-white/[0.04] px-3 py-2 text-[12px] text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-vektrum-blue/50 focus:border-vektrum-blue/60 tabular-nums"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-white/65 mb-1">
+                      Description
+                      <span className="ml-1 text-white/40 font-normal">Min 10 characters</span>
+                    </label>
+                    <textarea
+                      rows={2}
+                      placeholder="Explain why this change is needed…"
+                      value={coDescription}
+                      onChange={(e) => setCoDescription(e.target.value)}
+                      className="w-full rounded-lg border border-white/[0.14] bg-white/[0.04] px-3 py-2 text-[12px] text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-vektrum-blue/50 focus:border-vektrum-blue/60 resize-none"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    loading={coSubmitLoading}
+                    disabled={coSubmitLoading}
+                    onClick={handleCreateCO}
+                  >
+                    Submit
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={coSubmitLoading}
+                    onClick={() => { setShowCOForm(false); setCoAmount(""); setCoDescription(""); setCoError(null) }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* ── CO history (approved / rejected / paid) ── */}
+            {localOrders.filter((co) => co.status !== "submitted").length > 0 && (
+              <div className="divide-y divide-white/[0.06] rounded-lg border border-white/[0.08] bg-white/[0.02] overflow-hidden">
+                {localOrders
+                  .filter((co) => co.status !== "submitted")
+                  .map((co) => (
+                    <div key={co.id} className="flex items-start gap-2.5 px-4 py-2.5">
+                      {co.status === "approved" && <CheckCircle2 size={13} className="text-emerald-400 flex-shrink-0 mt-0.5" aria-hidden="true" />}
+                      {co.status === "rejected" && <XCircle size={13} className="text-red-400 flex-shrink-0 mt-0.5" aria-hidden="true" />}
+                      {co.status === "paid"     && <CheckCircle2 size={13} className="text-blue-400 flex-shrink-0 mt-0.5" aria-hidden="true" />}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className={cn(
+                            "text-[11px] font-semibold uppercase tracking-wide",
+                            co.status === "approved" ? "text-emerald-400"
+                            : co.status === "rejected" ? "text-red-400"
+                            : "text-blue-400"
+                          )}>
+                            {co.status.charAt(0).toUpperCase() + co.status.slice(1)}
+                          </span>
+                          <span className="text-[11px] text-white/50 tabular-nums">
+                            {co.amount > 0 ? "+" : ""}{formatMoney(co.amount)}
+                          </span>
+                          <span className="text-[11px] text-white/35">
+                            {new Date(co.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-white/55 mt-0.5 break-words">{co.description}</p>
+                      </div>
+                    </div>
+                  ))
+                }
+              </div>
+            )}
+
+            {/* CO error feedback */}
+            {coError && (
+              <div className="flex items-start gap-1.5 rounded-md bg-red-500/[0.08] border border-red-500/20 px-3 py-2 text-[12px] text-red-400">
+                <AlertCircle size={13} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
+                {coError}
               </div>
             )}
           </div>
