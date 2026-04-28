@@ -369,6 +369,103 @@ test('F5: real-dashboard DrawReviewAgent findings header also reads "AI Review F
   )
 })
 
+// ─── G. COPY TRUTH-LOCK — no overclaims in demo modal ────────────────────────
+//
+// The demo AI Review modal must not assert capabilities that the platform does
+// not have. These tests fail if any banned phrase is re-introduced into the
+// defaultFindings() fallback or the loading animation copy.
+//
+// Banned because they imply the AI layer (or platform) performs verification it
+// cannot actually perform from the information available at review time:
+//
+//   • "Sub-tier lien waivers collected"  — platform records only primary
+//     contractor waiver; sub-tier collection is not implemented.
+//   • "Change orders reconciled"         — platform checks open-CO status;
+//     "reconciled" implies mathematical cross-checking not performed.
+//   • "Retainage calculation correct"    — platform stores the retainage rule;
+//     it does not independently verify arithmetic on the draw.
+//   • "Document authenticity verified"   — AI receives document URLs, not
+//     content; it cannot verify metadata or detect tampering.
+//   • "Photographic evidence … timestamped within submission window" — the AI
+//     layer does not parse photo EXIF data or verify submission timing.
+//   • "tamper-proof"                     — use "tamper-evident" per hard rule.
+//   • "AI approves" / "AI approved"      — AI informs; the gate decides.
+//   • "Reconciling change orders and retainage math" in loading animation —
+//     the platform checks for open blockers and the configured retainage rule,
+//     not the arithmetic.
+
+test('G1: defaultFindings does not claim "sub-tier lien waivers collected"', () => {
+  const src_ = src('src/components/demo/AiReviewModal.tsx')
+  assert(
+    !/sub-tier lien waivers collected/i.test(src_),
+    'AiReviewModal contains "sub-tier lien waivers collected" — platform only records the primary contractor waiver. ' +
+    'Use: "Primary conditional lien waiver on file — sub-tier collection not configured on this deal".',
+  )
+})
+
+test('G2: defaultFindings does not claim "Change orders reconciled"', () => {
+  const src_ = src('src/components/demo/AiReviewModal.tsx')
+  assert(
+    !/change orders reconciled/i.test(src_),
+    'AiReviewModal contains "Change orders reconciled" — platform checks open-CO status, not mathematical reconciliation. ' +
+    'Use: "No open change-order blockers detected".',
+  )
+})
+
+test('G3: defaultFindings does not claim "Retainage calculation correct"', () => {
+  const src_ = src('src/components/demo/AiReviewModal.tsx')
+  assert(
+    !/retainage calculation correct/i.test(src_),
+    'AiReviewModal contains "Retainage calculation correct" — platform stores the rule, does not verify arithmetic. ' +
+    'Use: "Retainage rule identified".',
+  )
+})
+
+test('G4: defaultFindings does not claim "Document authenticity verified"', () => {
+  const src_ = src('src/components/demo/AiReviewModal.tsx')
+  assert(
+    !/document authenticity verified/i.test(src_),
+    'AiReviewModal contains "Document authenticity verified" — AI receives only document URLs and cannot inspect content. ' +
+    'Use copy that attributes document review to the funder.',
+  )
+})
+
+test('G5: defaultFindings does not claim photographic evidence is timestamp-verified by the platform', () => {
+  const src_ = src('src/components/demo/AiReviewModal.tsx')
+  // The old claim was "Photographic evidence (22 site photos) timestamped within submission window"
+  // which implies the platform verified photo EXIF/timestamp data — it does not.
+  assert(
+    !/photographic evidence.*timestamped within/i.test(src_),
+    'AiReviewModal implies the platform verified photo timestamps — it cannot. ' +
+    'Use copy that notes photo attachments are present for funder review.',
+  )
+})
+
+test('G6: loading animation step 4 does not say "Reconciling change orders and retainage math"', () => {
+  const src_ = src('src/components/demo/AiReviewModal.tsx')
+  assert(
+    !/Reconciling change orders and retainage math/i.test(src_),
+    'AiReviewModal loading step 4 says "Reconciling change orders and retainage math" — implies arithmetic verification. ' +
+    'Use: "Checking for open change-order blockers and retainage configuration".',
+  )
+})
+
+test('G7: AiReviewModal does not contain "tamper-proof" (must be "tamper-evident")', () => {
+  const src_ = src('src/components/demo/AiReviewModal.tsx')
+  assert(
+    !/tamper-proof/i.test(src_),
+    'AiReviewModal contains "tamper-proof" — the audit chain is tamper-evident, not tamper-proof.',
+  )
+})
+
+test('G8: AiReviewModal does not say "AI approves" or "AI approved"', () => {
+  const src_ = src('src/components/demo/AiReviewModal.tsx')
+  assert(
+    !/\bAI approves\b/i.test(src_) && !/\bAI approved\b/i.test(src_),
+    'AiReviewModal contains "AI approves" or "AI approved" — AI informs; the 10-condition gate decides.',
+  )
+})
+
 // ─── Results ──────────────────────────────────────────────────────────────────
 
 const passed  = results.filter((r) => r.passed).length
