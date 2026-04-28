@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
-import { internalError, notFoundError } from '@/lib/errors'
 
 export const dynamic = 'force-dynamic'
 
@@ -8,15 +7,39 @@ export const dynamic = 'force-dynamic'
 // Public endpoint — no auth required.
 // Returns deal preview for the invite accept page.
 //
-// Security: The token itself is the secret. Without the token, the deal is
-// not accessible. We return only the fields needed for the accept page preview —
-// no sensitive financial data or participant IDs.
+// Security model:
+//   - The token itself is the secret. Without the token, the deal is not accessible.
+//   - We MUST use the service-role admin client (createSupabaseAdminClient) to bypass
+//     RLS on deal_invites. The table's RLS policies restrict SELECT to authenticated
+//     users only — unauthenticated reads via the anon key will return 0 rows even
+//     for valid tokens, causing a false "not found" response.
+//   - We validate every field server-side before returning any preview data.
+//   - We return only safe preview fields — no token, no billing data, no secrets.
 //
-// Returns 404 for: invalid token, accepted invite, expired invite.
-// This prevents token enumeration (attacker can't tell WHY a token fails).
+// Valid invite requirements:
+//   - token matches a deal_invites row
+//   - role = 'funder'
+//   - status = 'pending'
+//   - expires_at > now()
+//   - accepted_at IS NULL
+//   - accepted_by IS NULL
 //
-// Valid invite: token matches, status = 'pending', expires_at > now(),
-//               accepted_at IS NULL, accepted_by IS NULL.
+// All invalid states return HTTP 404 with a machine-readable `reason` field.
+// Using 404 (rather than distinct status codes) prevents token enumeration:
+// an attacker who doesn't have the token can't determine why a lookup failed.
+// The `reason` field is only useful if you already possess the token.
+//
+// Reason codes:
+//   not_found       — token not in DB (or service not configured)
+//   already_accepted — accepted_at or accepted_by is set
+//   wrong_status    — status is not 'pending'
+//   expired         — expires_at <= now()
+//   missing_role    — role column is null (stale invite from older code path)
+//   wrong_role      — role is set but is not 'funder'
+
+function invalidResponse(reason: string, message: string): NextResponse {
+  return NextResponse.json({ error: message, reason }, { status: 404 })
+}
 
 export async function GET(
   _request: NextRequest,
@@ -25,14 +48,25 @@ export async function GET(
   const { token } = await params
 
   if (!token || typeof token !== 'string') {
-    return notFoundError('This invite link is invalid or has expired.')
+    return invalidResponse('not_found', 'This invite link is invalid or has expired.')
+  }
+
+  // ── Guard: service role key must be set ──────────────────────────────────────
+  // Without this, createSupabaseAdminClient creates an unauthorized client whose
+  // queries are blocked by RLS, silently returning "not found" for valid tokens.
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    console.error('[invites/preview] SUPABASE_SERVICE_ROLE_KEY is not set — admin lookup impossible')
+    return NextResponse.json(
+      { error: 'Invite service is temporarily unavailable. Please try again in a moment.' },
+      { status: 503 },
+    )
   }
 
   const admin = createSupabaseAdminClient()
 
-  // Fetch invite + deal preview in one query.
-  // Filter accepted_at IS NULL in the query itself for defense-in-depth:
-  // even if status is somehow wrong, an invite with accepted_at set is invalid.
+  // ── Fetch the invite row — use maybeSingle() to distinguish "not found" from errors ──
+  // We do NOT filter accepted_at/accepted_by in the query so we can return distinct
+  // reason codes for each failure mode rather than collapsing everything to not_found.
   const { data: invite, error } = await admin
     .from('deal_invites')
     .select(
@@ -58,58 +92,68 @@ export async function GET(
     `,
     )
     .eq('token', token)
-    .is('accepted_at', null)
-    .is('accepted_by', null)
-    .single()
+    .maybeSingle()
 
-  if (error || !invite) {
-    return notFoundError('This invite link is invalid or has expired.')
+  if (error) {
+    // Query failed — likely a DB connectivity issue. Log for ops visibility but
+    // return not_found to prevent leaking server error details to clients.
+    console.error('[invites/preview] DB query error for invite lookup:', error.message, error.code)
+    return invalidResponse('not_found', 'This invite link is invalid or has expired.')
   }
 
-  // Validate lifecycle state — all failures return the same 404 to prevent enumeration
+  if (!invite) {
+    return invalidResponse('not_found', 'This invite link is invalid or has expired.')
+  }
+
+  // ── Validate: not already accepted ───────────────────────────────────────────
+  if (invite.accepted_at !== null || invite.accepted_by !== null) {
+    return invalidResponse(
+      'already_accepted',
+      'This invite link has already been used. Each invite link can only be accepted once.',
+    )
+  }
+
+  // ── Validate: status ──────────────────────────────────────────────────────────
   if (invite.status !== 'pending') {
-    return notFoundError('This invite link is invalid or has expired.')
+    return invalidResponse(
+      'wrong_status',
+      'This invite link is no longer active. Ask the contractor to generate a new invite link.',
+    )
   }
 
+  // ── Validate: expiry ─────────────────────────────────────────────────────────
   const expiresAt = new Date(invite.expires_at)
   if (expiresAt <= new Date()) {
-    // Mark as expired in the background (fire-and-forget)
+    // Mark as expired in the background (fire-and-forget — must not delay the response)
     admin
       .from('deal_invites')
       .update({ status: 'expired' })
       .eq('id', invite.id)
       .then(() => {})
 
-    return notFoundError('This invite link is invalid or has expired.')
+    return invalidResponse(
+      'expired',
+      'This invite link has expired. Ask the contractor to generate a new invite link.',
+    )
   }
 
-  // Validate role — every funder invite must have role = 'funder'.
-  // A null role means the invite was created by an older code path that did not
-  // persist the role. This is a data integrity issue, not a security issue, so
-  // we return a distinct machine-readable reason so the UI can show a helpful
-  // message rather than a generic error. The HTTP status is still 404 so token
-  // existence is not revealed to an attacker who doesn't already have the token.
+  // ── Validate: role ────────────────────────────────────────────────────────────
   if (!invite.role) {
-    return NextResponse.json(
-      {
-        error: 'This invite link is incomplete — it is missing the intended role. Ask the contractor to generate a new invite link.',
-        reason: 'missing_role',
-      },
-      { status: 404 },
+    return invalidResponse(
+      'missing_role',
+      'This invite link is incomplete — it is missing the intended role. Ask the contractor to generate a new invite link.',
     )
   }
 
   if (invite.role !== 'funder') {
-    return NextResponse.json(
-      {
-        error: 'This invite link is not intended for a funder account.',
-        reason: 'wrong_role',
-      },
-      { status: 404 },
+    return invalidResponse(
+      'wrong_role',
+      'This invite link is not intended for a funder account. Ensure you are using the correct link.',
     )
   }
 
-  // Return only the preview data needed for the accept page
+  // ── Build safe preview response ───────────────────────────────────────────────
+  // Returning only fields needed for the accept page — no token, no billing data, no secrets.
   type DealPreview = {
     id: string
     title: string

@@ -109,20 +109,26 @@ await test('4. GET route selects the role column from deal_invites', () => {
 
 await test("5. GET route returns 404 with reason='missing_role' for null role", () => {
   const src = read(GET_ROUTE)
+  // The route uses an invalidResponse(reason, message) helper — reason codes appear as
+  // string arguments, not as inline object literals like { reason: 'missing_role' }.
   assert(
-    src.includes("reason: 'missing_role'"),
+    src.includes("reason: 'missing_role'") ||
+    src.includes("'missing_role'"),
     `${GET_ROUTE} must return { reason: 'missing_role' } in the 404 body when ` +
     `invite.role is null — this allows the UI to show a helpful message instead ` +
-    `of a generic "not found".`,
+    `of a generic "not found". Reason code must appear in source as a string literal.`,
   )
 })
 
 await test("6. GET route returns 404 with reason='wrong_role' when role !== 'funder'", () => {
   const src = read(GET_ROUTE)
+  // The route uses an invalidResponse(reason, message) helper — reason codes appear as
+  // string arguments, not as inline object literals like { reason: 'wrong_role' }.
   assert(
-    src.includes("reason: 'wrong_role'"),
+    src.includes("reason: 'wrong_role'") ||
+    src.includes("'wrong_role'"),
     `${GET_ROUTE} must return { reason: 'wrong_role' } in the 404 body when ` +
-    `invite.role exists but is not 'funder'.`,
+    `invite.role exists but is not 'funder'. Reason code must appear in source as a string literal.`,
   )
 })
 
@@ -155,12 +161,16 @@ await test('8. GET route rejects expired invites regardless of role', () => {
   )
 })
 
-await test('9. GET route filters accepted invites (accepted_at IS NULL query)', () => {
+await test('9. GET route rejects already-accepted invites (query filter or application check)', () => {
   const src = read(GET_ROUTE)
+  // The route intentionally validates accepted_at at the application level (not as a query
+  // filter) so it can return a distinct reason code ('already_accepted' vs 'not_found').
   assert(
-    src.includes(".is('accepted_at', null)"),
-    `${GET_ROUTE} must include .is('accepted_at', null) in the query to reject ` +
-    `already-accepted invites before any role validation.`,
+    src.includes(".is('accepted_at', null)") ||
+    src.includes('accepted_at !== null') ||
+    src.includes('invite.accepted_at'),
+    `${GET_ROUTE} must reject already-accepted invites, either by filtering in the query ` +
+    `(.is('accepted_at', null)) or by checking invite.accepted_at at the application layer.`,
   )
 })
 
