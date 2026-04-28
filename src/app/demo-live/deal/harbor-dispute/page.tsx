@@ -8,7 +8,7 @@ import { formatCurrency } from '@/lib/utils/format'
 import { getFreshHarborDisputeMilestones } from '@/lib/demo-data'
 import type { DisputeMilestone } from '@/lib/demo-data'
 import { useDemoAutoReset } from '@/lib/demo-data/use-demo-auto-reset'
-import { ResolveDisputeModal } from '@/components/demo/ResolveDisputeModal'
+import { ResolveDisputeModal, type DisputeResolution } from '@/components/demo/ResolveDisputeModal'
 import { AiReviewModal } from '@/components/demo/AiReviewModal'
 
 const DEAL_TITLE = 'Harbor Logistics Center — Partial Dispute'
@@ -30,16 +30,19 @@ export default function HarborDisputeDealPage() {
   const milestones = useMemo(() => getFreshHarborDisputeMilestones(), [])
   const HVAC_MS    = useMemo(() => milestones.find((m) => m.id === 'ms-hbd-5')!, [milestones])
 
-  const [resolveModal, setResolveModal] = useState(false)
-  const [aiModal, setAiModal] = useState(false)
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({})
-  const [disputeResolved, setDisputeResolved] = useState(false)
+  const [resolveModal, setResolveModal]   = useState(false)
+  const [aiModal, setAiModal]             = useState(false)
+  const [expanded, setExpanded]           = useState<Record<string, boolean>>({})
+  const [disputeOutcome, setDisputeOutcome] = useState<{
+    resolution:     DisputeResolution
+    partialAmount?: number
+  } | null>(null)
 
   useDemoAutoReset(() => {
     setResolveModal(false)
     setAiModal(false)
     setExpanded({})
-    setDisputeResolved(false)
+    setDisputeOutcome(null)
   })
 
   const pct = DEAL_TOTAL > 0 ? Math.round((DEAL_RELEASED / DEAL_TOTAL) * 100) : 0
@@ -86,8 +89,25 @@ export default function HarborDisputeDealPage() {
         <div className="space-y-4">
           {milestones.map((ms) => {
             if (ms.status === 'disputed') {
-              if (disputeResolved) {
-                return <ResolvedCard key={ms.id} ms={ms} />
+              if (disputeOutcome) {
+                if (disputeOutcome.resolution === 'partial' && disputeOutcome.partialAmount != null) {
+                  return (
+                    <PartialReleaseCard
+                      key={ms.id}
+                      ms={ms}
+                      releasedOverride={disputeOutcome.partialAmount}
+                      heldOverride={ms.amount - disputeOutcome.partialAmount}
+                    />
+                  )
+                }
+                return (
+                  <ResolvedCard
+                    key={ms.id}
+                    ms={ms}
+                    resolution={disputeOutcome.resolution}
+                    amount={ms.amount}
+                  />
+                )
               }
               return <DisputedCard key={ms.id} ms={ms} onResolve={() => setResolveModal(true)} onViewAi={() => setAiModal(true)} />
             }
@@ -153,7 +173,11 @@ export default function HarborDisputeDealPage() {
       {/* Modals */}
       <ResolveDisputeModal
         open={resolveModal}
-        onConfirm={() => setDisputeResolved(true)}
+        disputedAmount={HVAC_MS.amount}
+        onConfirm={(resolution, partialAmount) => {
+          setDisputeOutcome({ resolution, partialAmount })
+          setResolveModal(false)
+        }}
         onClose={() => setResolveModal(false)}
       />
       <AiReviewModal
@@ -289,7 +313,20 @@ function DisputedCard({ ms, onResolve, onViewAi }: { ms: DisputeMilestone; onRes
   )
 }
 
-function ResolvedCard({ ms }: { ms: DisputeMilestone }) {
+function ResolvedCard({
+  ms,
+  resolution,
+  amount,
+}: {
+  ms:         DisputeMilestone
+  resolution: DisputeResolution
+  amount:     number
+}) {
+  const message =
+    resolution === 'reject'
+      ? `Claim rejected — ${formatCurrency(amount)} returned to funded balance. Contractor notified.`
+      : `${formatCurrency(amount)} released to contractor. Dispute resolved.`
+
   return (
     <div className="rounded-xl border border-white/[0.08] bg-surface-2 shadow-sm overflow-hidden border-l-4 border-emerald-500">
       <div className="px-5 py-4 flex items-center gap-3">
@@ -305,14 +342,24 @@ function ResolvedCard({ ms }: { ms: DisputeMilestone }) {
       <div className="border-t border-white/[0.06] px-5 py-3">
         <p className="text-sm text-emerald-400 flex items-center gap-1.5">
           <CheckCircle2 size={13} />
-          Claim rejected — $487,000 returned to funded balance. Contractor notified.
+          {message}
         </p>
       </div>
     </div>
   )
 }
 
-function PartialReleaseCard({ ms }: { ms: DisputeMilestone }) {
+function PartialReleaseCard({
+  ms,
+  releasedOverride,
+  heldOverride,
+}: {
+  ms:               DisputeMilestone
+  releasedOverride?: number
+  heldOverride?:     number
+}) {
+  const released = releasedOverride ?? ms.fundsReleased ?? 0
+  const held     = heldOverride     ?? ms.fundsHeld     ?? 0
   return (
     <div className="rounded-xl border border-white/[0.08] bg-surface-2 shadow-sm overflow-hidden border-l-4 border-emerald-500">
       <div className="px-5 py-4">
@@ -329,11 +376,11 @@ function PartialReleaseCard({ ms }: { ms: DisputeMilestone }) {
         <div className="flex flex-wrap gap-3">
           <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/[0.08] px-4 py-2">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-white/75">Released</p>
-            <p className="text-[14px] font-bold tabular-nums text-emerald-400">{formatCurrency(ms.fundsReleased ?? 0)}</p>
+            <p className="text-[14px] font-bold tabular-nums text-emerald-400">{formatCurrency(released)}</p>
           </div>
           <div className="rounded-lg border border-red-500/20 bg-red-500/[0.08] px-4 py-2">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-white/75">Held — Under Dispute</p>
-            <p className="text-[14px] font-bold tabular-nums text-red-400">{formatCurrency(ms.fundsHeld ?? 0)}</p>
+            <p className="text-[14px] font-bold tabular-nums text-red-400">{formatCurrency(held)}</p>
           </div>
         </div>
       </div>
