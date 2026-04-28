@@ -353,7 +353,24 @@ export interface LienWaiver {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type ChangeOrderStatus = 'pending' | 'approved' | 'rejected'
+/** Status values match the public.change_order_status DB enum exactly. */
+export type ChangeOrderStatus = 'submitted' | 'approved' | 'rejected' | 'paid'
+
+export interface ChangeOrder {
+  id:           string
+  milestone_id: string
+  deal_id:      string
+  /** Signed amount delta: positive = increase, negative = decrease. */
+  amount:       number
+  description:  string
+  status:       ChangeOrderStatus
+  /** Profile UUID — do not render raw in UI. */
+  submitted_by: string
+  approved_by:  string | null
+  approved_at:  string | null
+  created_at:   string
+  updated_at:   string
+}
 export type DisputeStatus = 'open' | 'resolved' | 'escalated'
 export type ReleaseStatus = 'completed' | 'failed'
 export type TransferStatus = 'pending' | 'confirmed' | 'failed' | 'reversed'
