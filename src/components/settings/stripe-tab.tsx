@@ -7,7 +7,7 @@
 
 import { useState } from 'react'
 import type { Profile } from '@/lib/types'
-import { CheckCircle2, AlertCircle, ExternalLink, Info, Loader2 } from 'lucide-react'
+import { CheckCircle2, AlertCircle, ExternalLink, Info, Loader2, RefreshCw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface StripeTabProps {
@@ -16,13 +16,18 @@ interface StripeTabProps {
 
 export function StripeTab({ profile }: StripeTabProps) {
   const isConnected = !!profile.stripe_account_id
-  const payoutsEnabled = profile.stripe_payouts_enabled
+  // Local state mirrors profile.stripe_payouts_enabled so a manual refresh
+  // can update the UI without a full page reload.
+  const [payoutsEnabled, setPayoutsEnabled] = useState(profile.stripe_payouts_enabled)
   const [connecting, setConnecting] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [refreshSuccess, setRefreshSuccess] = useState<string | null>(null)
 
   async function handleConnectStripe() {
     setConnecting(true)
     setError(null)
+    setRefreshSuccess(null)
     try {
       const res = await fetch('/api/stripe/connect', { method: 'POST' })
       const data = await res.json()
@@ -36,6 +41,30 @@ export function StripeTab({ profile }: StripeTabProps) {
       setError('Network error. Please check your connection and try again.')
     } finally {
       setConnecting(false)
+    }
+  }
+
+  async function handleRefreshStatus() {
+    setRefreshing(true)
+    setError(null)
+    setRefreshSuccess(null)
+    try {
+      const res = await fetch('/api/contractor/stripe/status/refresh', { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error ?? 'Could not refresh Stripe status. Please try again.')
+        return
+      }
+      setPayoutsEnabled(data.stripe_payouts_enabled as boolean)
+      setRefreshSuccess(
+        data.stripe_payouts_enabled
+          ? 'Stripe status updated — payouts are now enabled.'
+          : 'Stripe status refreshed. Payouts are not yet enabled; check your Stripe dashboard for required information.',
+      )
+    } catch {
+      setError('Network error. Please check your connection and try again.')
+    } finally {
+      setRefreshing(false)
     }
   }
 
@@ -98,15 +127,32 @@ export function StripeTab({ profile }: StripeTabProps) {
             </button>
           )}
           {isConnected && (
-            <a
-              href="https://connect.stripe.com/express_login"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-shrink-0 inline-flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-surface-2 px-4 py-2 text-[13px] font-semibold text-white hover:bg-surface-3 transition-all"
-            >
-              Manage in Stripe
-              <ExternalLink size={12} aria-hidden="true" />
-            </a>
+            <div className="flex flex-shrink-0 items-center gap-2">
+              {/* Refresh status — syncs stripe_payouts_enabled from Stripe directly */}
+              {profile.role === 'contractor' && (
+                <button
+                  onClick={handleRefreshStatus}
+                  disabled={refreshing}
+                  title="Refresh Stripe status"
+                  aria-label="Refresh Stripe status"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-surface-2 px-3 py-2 text-[13px] font-semibold text-white hover:bg-surface-3 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {refreshing
+                    ? <Loader2 size={13} className="animate-spin" aria-hidden="true" />
+                    : <RefreshCw size={13} aria-hidden="true" />}
+                  {refreshing ? 'Refreshing…' : 'Refresh status'}
+                </button>
+              )}
+              <a
+                href="https://connect.stripe.com/express_login"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-surface-2 px-4 py-2 text-[13px] font-semibold text-white hover:bg-surface-3 transition-all"
+              >
+                Manage in Stripe
+                <ExternalLink size={12} aria-hidden="true" />
+              </a>
+            </div>
           )}
         </div>
 
@@ -115,6 +161,14 @@ export function StripeTab({ profile }: StripeTabProps) {
           <div className="mt-4 flex items-start gap-2.5 rounded-lg border border-red-500/20 bg-vektrum-red-subtle px-4 py-3">
             <AlertCircle size={13} className="text-red-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
             <p className="text-[12px] text-red-400 leading-relaxed">{error}</p>
+          </div>
+        )}
+
+        {/* Refresh success banner */}
+        {refreshSuccess && (
+          <div className="mt-4 flex items-start gap-2.5 rounded-lg border border-emerald-500/20 bg-emerald-500/[0.08] px-4 py-3">
+            <CheckCircle2 size={13} className="text-emerald-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
+            <p className="text-[12px] text-emerald-300 leading-relaxed">{refreshSuccess}</p>
           </div>
         )}
 
