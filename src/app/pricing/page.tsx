@@ -252,8 +252,8 @@ export default function PricingPage() {
             />
             <ClarityCell
               label="When"
-              value="After transfer"
-              sub="Never before funds move"
+              value="After release"
+              sub="Stripe rail: after transfer · External rail: invoiced after execution verified"
             />
             <ClarityCell
               label="How"
@@ -780,8 +780,8 @@ export default function PricingPage() {
             {[
               {
                 icon: Building2,
-                headline: 'Stripe holds the money.',
-                body: 'Funds do not pass through Vektrum. All capital is held in Stripe Connect managed accounts or processed through licensed payment partners. Vektrum does not hold, transmit, or control funds directly.',
+                headline: 'Vektrum does not hold your money.',
+                body: 'For Stripe-rail deals, funds are held in Stripe Connect managed accounts — not by Vektrum. For external/institutional rail deals, funds never touch Vektrum at all: your existing bank, escrow, title company, or treasury executes payment on your rail.',
               },
               {
                 icon: FileText,
@@ -884,6 +884,86 @@ export default function PricingPage() {
                 <p className="text-[13px] leading-relaxed text-white/65">
                   Choose Institutional or Enterprise if you are a bank, credit union, construction loan servicer, title company, or fund manager with existing licensed payment infrastructure. Vektrum enforces your conditions and fires a signed authorization signal to your execution system — you retain full control of how funds move.
                 </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── 9c. Rail billing model ───────────────────────────────────────────── */}
+      {/* Clarifies how Vektrum gets paid on each rail — no ambiguity for institutional buyers. */}
+      <section className="bg-surface-2 py-14 sm:py-16">
+        <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="rounded-2xl border border-white/[0.08] bg-surface-3 p-7 sm:p-10">
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/75 mb-1">
+              How billing works by rail
+            </p>
+            <h2 className="text-lg font-bold tracking-[-0.02em] text-white mb-6">
+              Keep your payment rail. Vektrum bills for release-control infrastructure.
+            </h2>
+
+            <div className="grid gap-5 sm:grid-cols-2 mb-8">
+              <div className="rounded-xl border border-vektrum-blue/20 bg-vektrum-blue/[0.04] p-5">
+                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-blue-300 mb-2">
+                  Stripe Connect rail
+                </p>
+                <p className="text-[13px] leading-relaxed text-white/65">
+                  Governance fees are applied after the Stripe transfer completes. No separate invoice
+                  is required — fees are automated through the Stripe rail where supported. Pricing is
+                  based on authorized releases and deal volume.
+                </p>
+              </div>
+              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.04] p-5">
+                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-emerald-400 mb-2">
+                  External / institutional rail
+                </p>
+                <p className="text-[13px] leading-relaxed text-white/65">
+                  External/manual rail customers are invoiced directly for platform access, deal volume,
+                  and authorized releases. Vektrum does not deduct fees from contractor disbursements —
+                  your rail executes payment in full. Pricing is custom institutional; contact us to
+                  configure your engagement.
+                </p>
+              </div>
+            </div>
+
+            {/* FAQ */}
+            <div className="border-t border-white/[0.08] pt-6 space-y-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/75">
+                Frequently asked
+              </p>
+              <div className="space-y-5">
+                <div>
+                  <p className="text-[13px] font-semibold text-white mb-1">
+                    How does Vektrum get paid on external/manual rails?
+                  </p>
+                  <p className="text-[13px] leading-relaxed text-white/55">
+                    Vektrum invoices the funder, partner, or customer for the release-control platform.
+                    The customer&apos;s existing rail executes payment; Vektrum does not deduct fees from
+                    contractor disbursements on external/manual rails.
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[13px] font-semibold text-white mb-1">
+                    Does Vektrum take a percentage of the wire or ACH transfer?
+                  </p>
+                  <p className="text-[13px] leading-relaxed text-white/55">
+                    No. On external/manual rail deals, funds never touch Vektrum infrastructure.
+                    Vektrum records the authorization and confirmation; your bank or treasury partner
+                    executes payment. The governance fee is a separate invoice from Vektrum — not a
+                    deduction from the contractor&apos;s payment.
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[13px] font-semibold text-white mb-1">
+                    Is there a monthly software fee?
+                  </p>
+                  <p className="text-[13px] leading-relaxed text-white/55">
+                    Standalone (Stripe rail): no monthly fee — governance fees are per verified
+                    disbursement only. Institutional and Enterprise (external rail): an annual governance
+                    retainer applies, invoiced in advance, credited against per-release fees throughout
+                    the year. See the fee structure above for retainer rates.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
