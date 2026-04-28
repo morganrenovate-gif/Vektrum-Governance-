@@ -271,15 +271,16 @@ export default function NewDealPage() {
                       <div className="flex items-center gap-1.5">
                         <Lock size={13} className="text-white/50 flex-shrink-0" aria-hidden="true" />
                         <span className="text-[13px] font-semibold text-white/85">
-                          Retainage Withholding
+                          Contract Retainage Term
                         </span>
                         <span className="ml-auto text-[11px] text-white/65">
                           Optional — default 0%
                         </span>
                       </div>
                       <p className="text-[12px] text-white/75 leading-relaxed">
-                        Withhold a percentage of each milestone payment until project completion.
-                        Industry standard is 5–10% for institutional construction lending.
+                        Enter the retainage percentage shown in the contract, if any. The funder
+                        will verify this before releases. Vektrum records retained amounts but does
+                        not hold funds. Contractors cannot release retainage.
                         Leave blank or 0 for no retainage.
                       </p>
                       <div className="flex items-center gap-3">
@@ -397,7 +398,7 @@ export default function NewDealPage() {
 
                               <p className="text-xs text-white/70">
                                 After creating the deal, you&rsquo;ll be able to add milestones and
-                                invite a funder.
+                                invite the funder to verify terms and manage release authorization.
                               </p>
                             </div>
 
