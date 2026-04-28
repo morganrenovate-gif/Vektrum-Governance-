@@ -384,18 +384,27 @@ await test('25. Checklist does not say "required for release"', () => {
   const src = read(MILESTONE_CARD)
   assert(
     !src.toLowerCase().includes('required for release'),
-    'milestone-card.tsx checklist contains "required for release" — use "Guidance only" framing.',
+    'milestone-card.tsx checklist contains "required for release" — use "Suggested guidance only" framing.',
   )
 })
 
-await test('26. Checklist explicitly marks itself as guidance, not a gate requirement', () => {
+await test('26. Checklist uses safer "Suggested guidance only" disclaimer with correct qualifications', () => {
   const src = read(MILESTONE_CARD)
   assert(
-    src.includes('Guidance only') ||
-    src.includes('guidance only') ||
-    src.includes('not a release-gate requirement') ||
-    src.includes('not required for release'),
-    'milestone-card.tsx checklist does not include a "Guidance only — not a release-gate requirement" disclaimer.',
+    src.includes('Suggested guidance only'),
+    'milestone-card.tsx checklist does not include "Suggested guidance only" disclaimer.',
+  )
+  assert(
+    src.includes('contract'),
+    'milestone-card.tsx checklist disclaimer does not reference "contract" as a qualifying factor.',
+  )
+  assert(
+    src.includes('funder review'),
+    'milestone-card.tsx checklist disclaimer does not reference "funder review" as a qualifying factor.',
+  )
+  assert(
+    src.includes('release-gate settings'),
+    'milestone-card.tsx checklist disclaimer does not reference "release-gate settings" as a qualifying factor.',
   )
 })
 
