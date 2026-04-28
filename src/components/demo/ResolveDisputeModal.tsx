@@ -9,7 +9,16 @@ export type DisputeResolution = 'reject' | 'partial' | 'full'
 interface ResolveDisputeModalProps {
   open:           boolean
   disputedAmount: number
-  onConfirm:      (resolution: DisputeResolution, partialAmount?: number) => void
+  /**
+   * Fired when the funder confirms the resolution (while the success screen
+   * is showing). Includes:
+   *  - resolution:     the outcome type chosen by the funder
+   *  - partialAmount:  only present for 'partial' resolution
+   *  - notifyParties:  whether the funder checked "Notify both parties"
+   *
+   * All three values are demo-only — no real email or audit call is made.
+   */
+  onConfirm:      (resolution: DisputeResolution, partialAmount: number | undefined, notifyParties: boolean) => void
   onClose:        () => void
 }
 
@@ -69,7 +78,7 @@ export function ResolveDisputeModal({
 
     setTimeout(() => {
       setPhase('success')
-      onConfirm(resolution, resolvedPartialAmount)
+      onConfirm(resolution, resolvedPartialAmount, notifyParties)
       setTimeout(() => {
         setPhase('idle')
         onClose()

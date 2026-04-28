@@ -38,6 +38,13 @@ interface AiReviewModalProps {
    * Pass `null` or omit for the "simulate a new review" flow (Riverside/Westside).
    */
   aiReview?: AiReviewData | null
+  /**
+   * Optional callback fired once the simulated review phase completes
+   * (i.e. when the loading animation finishes and the result is shown).
+   * Receives the resolved score and risk level so callers can log a demo
+   * activity entry. This is demo-only — no production audit call is made.
+   */
+  onReviewComplete?: (score: number, risk: string) => void
 }
 
 // ── Default findings (MEP Rough-In pass scenario) ────────────────────────────
@@ -98,7 +105,7 @@ function findingClass(finding: string): string {
 
 // ── Component ────────────────────────────────────────────────────────────────
 
-export function AiReviewModal({ open, onClose, milestoneContext, aiReview }: AiReviewModalProps) {
+export function AiReviewModal({ open, onClose, milestoneContext, aiReview, onReviewComplete }: AiReviewModalProps) {
   const [phase, setPhase] = useState<'loading' | 'complete'>('loading')
   const [step1, setStep1] = useState(false)
   const [step2, setStep2] = useState(false)
@@ -127,7 +134,16 @@ export function AiReviewModal({ open, onClose, milestoneContext, aiReview }: AiR
     const t4 = setTimeout(() => setStep4(true), 1350)
     const t5 = setTimeout(() => setStep5(true), 1700)
     const t6 = setTimeout(() => setStep6(true), 2050)
-    const tComplete = setTimeout(() => setPhase('complete'), 2500)
+    // Resolve score/risk here so the closure captures the correct values.
+    // Mirrors the derivation logic in the render body below.
+    const effectScore = aiReview?.score ?? 82
+    const effectRisk  = aiReview?.risk  ?? 'low'
+
+    const tComplete = setTimeout(() => {
+      setPhase('complete')
+      // Demo-only callback — no production audit call is made.
+      onReviewComplete?.(effectScore, effectRisk)
+    }, 2500)
 
     // Progress bar animation
     const interval = setInterval(() => {
@@ -147,7 +163,7 @@ export function AiReviewModal({ open, onClose, milestoneContext, aiReview }: AiR
       clearTimeout(tComplete)
       clearInterval(interval)
     }
-  }, [open])
+  }, [open, aiReview, onReviewComplete])
 
   if (!open) return null
 

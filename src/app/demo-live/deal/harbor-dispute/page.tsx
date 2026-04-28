@@ -8,8 +8,10 @@ import { formatCurrency } from '@/lib/utils/format'
 import { getFreshHarborDisputeMilestones } from '@/lib/demo-data'
 import type { DisputeMilestone } from '@/lib/demo-data'
 import { useDemoAutoReset } from '@/lib/demo-data/use-demo-auto-reset'
+import { useDemoActivityLog } from '@/lib/demo-data/use-demo-activity-log'
 import { ResolveDisputeModal, type DisputeResolution } from '@/components/demo/ResolveDisputeModal'
 import { AiReviewModal } from '@/components/demo/AiReviewModal'
+import { DemoActivityLog } from '@/components/demo/DemoActivityLog'
 
 const DEAL_TITLE = 'Harbor Logistics Center — Partial Dispute'
 const DEAL_TOTAL = 9_100_000
@@ -38,11 +40,15 @@ export default function HarborDisputeDealPage() {
     partialAmount?: number
   } | null>(null)
 
+  // Client-side-only demo activity log — no production audit_log interaction.
+  const { entries: activityEntries, addEntry, resetLog } = useDemoActivityLog()
+
   useDemoAutoReset(() => {
     setResolveModal(false)
     setAiModal(false)
     setExpanded({})
     setDisputeOutcome(null)
+    resetLog()
   })
 
   const pct = DEAL_TOTAL > 0 ? Math.round((DEAL_RELEASED / DEAL_TOTAL) * 100) : 0
@@ -109,7 +115,22 @@ export default function HarborDisputeDealPage() {
                   />
                 )
               }
-              return <DisputedCard key={ms.id} ms={ms} onResolve={() => setResolveModal(true)} onViewAi={() => setAiModal(true)} />
+              return (
+                <DisputedCard
+                  key={ms.id}
+                  ms={ms}
+                  onResolve={() => setResolveModal(true)}
+                  onViewAi={() => {
+                    setAiModal(true)
+                    addEntry({
+                      actor:  'Funder Demo User',
+                      role:   'funder',
+                      action: 'AI Draw Review Requested',
+                      detail: `${HVAC_MS.name} · ${formatCurrency(HVAC_MS.amount)}`,
+                    })
+                  }}
+                />
+              )
             }
             if (ms.fundsReleased != null && ms.fundsHeld != null) {
               return <PartialReleaseCard key={ms.id} ms={ms} />
@@ -170,13 +191,47 @@ export default function HarborDisputeDealPage() {
         </div>
       </section>
 
+      {/* Demo Activity Log — client-side only, no production audit_log interaction */}
+      <DemoActivityLog entries={activityEntries} />
+
       {/* Modals */}
       <ResolveDisputeModal
         open={resolveModal}
         disputedAmount={HVAC_MS.amount}
-        onConfirm={(resolution, partialAmount) => {
+        onConfirm={(resolution, partialAmount, notifyParties) => {
+          // Update dispute state — do NOT close modal here; let onClose handle it
+          // so the success screen inside the modal shows for its full duration.
           setDisputeOutcome({ resolution, partialAmount })
-          setResolveModal(false)
+
+          // ── Demo Activity Log entries (client-side only) ──────────────────
+          const amount = HVAC_MS.amount
+          const outcomeDetail =
+            resolution === 'reject'
+              ? `${formatCurrency(amount)} returned to funded balance`
+              : resolution === 'full'
+              ? `${formatCurrency(amount)} released to contractor`
+              : `${formatCurrency(partialAmount ?? 0)} released · ${formatCurrency(amount - (partialAmount ?? 0))} held`
+
+          addEntry({
+            actor:  'Funder Demo User',
+            role:   'funder',
+            action:
+              resolution === 'reject'
+                ? 'Dispute Claim Rejected'
+                : resolution === 'full'
+                ? 'Dispute Resolved — Full Release'
+                : 'Dispute Resolved — Partial Release',
+            detail: outcomeDetail,
+          })
+
+          addEntry({
+            actor:  'System (Demo)',
+            role:   'system',
+            action: notifyParties ? 'Demo Notification Queued' : 'No Notification Sent',
+            detail: notifyParties
+              ? 'No real email was sent'
+              : 'Notification suppressed in demo mode',
+          })
         }}
         onClose={() => setResolveModal(false)}
       />
@@ -189,6 +244,15 @@ export default function HarborDisputeDealPage() {
           risk:           HVAC_MS.aiRisk!,
           findings:       HVAC_MS.findings ?? [],
           recommendation: 'Hold funds pending resolution of invoice mismatch and change order CO-004 signature from funder. AI score (34/100) does not clear the release threshold.',
+        }}
+        onReviewComplete={(score, risk) => {
+          // Demo-only callback — no production audit call is made.
+          addEntry({
+            actor:  'Vektrum AI (Demo)',
+            role:   'system',
+            action: 'AI Draw Review Completed',
+            detail: `Score: ${score}/100 · Risk: ${risk.charAt(0).toUpperCase() + risk.slice(1)}`,
+          })
         }}
       />
     </div>
