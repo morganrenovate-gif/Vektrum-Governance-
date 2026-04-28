@@ -4,14 +4,15 @@
  * Source-parse checks — no live DB, no env vars required.
  * Verifies that the public invite preview route correctly uses the admin client,
  * guards against missing service role key, returns distinct reason codes for
- * every failure mode, and does not expose secrets or weaken global RLS.
+ * every failure mode, does not expose secrets, and does not collapse query
+ * errors into not_found.
  *
  * Checks:
  *  1.  GET preview route imports createSupabaseAdminClient (not session client).
  *  2.  GET route guards SUPABASE_SERVICE_ROLE_KEY — source contains the guard.
  *  3.  GET route returns 503 when service role key is missing.
  *  4.  GET route uses maybeSingle() not single() for token lookup.
- *  5.  GET route contains all six reason codes in its source.
+ *  5.  GET route contains all six invalid-invite reason codes.
  *  6.  GET route does not include the raw token in the response JSON.
  *  7.  GET route does not reference SUPABASE_SERVICE_ROLE_KEY in response body.
  *  8.  Middleware passes /invite/ routes through without auth redirect.
@@ -27,6 +28,12 @@
  * 18.  Page shows distinct copy for 'expired' reason.
  * 19.  Page shows distinct copy for 'already_accepted' reason.
  * 20.  Test wired into npm test in package.json.
+ * 21.  GET route returns lookup_error (500) on Supabase query error — not not_found.
+ * 22.  GET route uses flat separate queries — no fragile nested relationship select.
+ * 23.  GET route returns not_found only when query succeeds and data is null.
+ * 24.  Accept route returns lookup_error (not not_found) on invite query error.
+ * 25.  Accept route returns lookup_error (not not_found) on deal query error.
+ * 26.  GET route logs safe diagnostics only (code, message, token_present, token_length).
  *
  * Run:  npx tsx tests/invite-public-access.test.ts
  */
@@ -119,7 +126,7 @@ await test('4. GET route uses maybeSingle() not single() for token lookup', () =
   )
 })
 
-await test('5. GET route contains all six reason codes', () => {
+await test('5. GET route contains all six invalid-invite reason codes', () => {
   const src = read(GET_ROUTE)
   const requiredReasons = [
     'not_found',
@@ -140,9 +147,6 @@ await test('5. GET route contains all six reason codes', () => {
 
 await test('6. GET route does not include raw token in response JSON', () => {
   const src = read(GET_ROUTE)
-  // The response JSON object block (after "Build safe preview response") must not
-  // include 'token:' as a key. We look for token: in the response NextResponse.json block.
-  // Strategy: check that the returned invite object does not include a token property.
   assert(
     !src.includes('token: invite.token') && !src.includes("token: token"),
     `${GET_ROUTE} must not include the raw token in the preview response. ` +
@@ -152,11 +156,9 @@ await test('6. GET route does not include raw token in response JSON', () => {
 
 await test('7. GET route does not expose SUPABASE_SERVICE_ROLE_KEY in response', () => {
   const src = read(GET_ROUTE)
-  // The service role key guard logs to console.error but must not appear in the JSON response
   const lines = src.split('\n')
   for (const line of lines) {
     const trimmed = line.trim()
-    // Skip console.error and comment lines — only flag if it appears in JSON output
     if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.includes('console.error') || trimmed.includes('process.env')) continue
     assert(
       !trimmed.includes('SUPABASE_SERVICE_ROLE_KEY'),
@@ -170,7 +172,6 @@ await test('7. GET route does not expose SUPABASE_SERVICE_ROLE_KEY in response',
 
 await test('8. Middleware passes /invite/ routes without auth redirect', () => {
   const src = read(MIDDLEWARE)
-  // The middleware must have a pass-through for /invite/ paths
   assert(
     src.includes('/invite/') || src.includes("'/invite'") || src.includes('invite'),
     `${MIDDLEWARE} must explicitly pass through /invite/ routes so unauthenticated ` +
@@ -303,6 +304,123 @@ await test('20. Test file is wired into npm test in package.json', () => {
   assert(
     pkg.includes('invite-public-access.test.ts'),
     `package.json npm test script must include 'invite-public-access.test.ts'.`,
+  )
+})
+
+// ─── 21-26. Error-handling and flat-query invariants ──────────────────────────
+
+await test('21. GET route returns lookup_error (500) on Supabase query error — not not_found', () => {
+  const src = read(GET_ROUTE)
+  // The route must define a lookupErrorResponse function or equivalent that returns 500
+  assert(
+    src.includes('lookup_error') && src.includes('500'),
+    `${GET_ROUTE} must return HTTP 500 with reason 'lookup_error' when Supabase returns ` +
+    `a query error. Collapsing query errors into 'not_found' hides configuration problems ` +
+    `(wrong service role key, DB connectivity issues) and makes them indistinguishable ` +
+    `from genuinely missing tokens.`,
+  )
+  // The inviteError block must call lookupErrorResponse — check that the line immediately
+  // after the inviteError console.error calls lookupErrorResponse, not invalidResponse/notFoundError.
+  assert(
+    src.includes('lookupErrorResponse'),
+    `${GET_ROUTE} must call lookupErrorResponse() when inviteError is truthy. ` +
+    `This returns HTTP 500 with reason 'lookup_error', not a 404 not_found.`,
+  )
+  // Double-check: inviteError path must never call invalidResponse with 'not_found'
+  // Extract the block between `if (inviteError) {` and `if (!invite)`
+  const inviteErrStart = src.indexOf('if (inviteError)')
+  const noInviteStart  = src.indexOf('if (!invite)', inviteErrStart)
+  const inviteErrBlock = inviteErrStart !== -1 && noInviteStart !== -1
+    ? src.slice(inviteErrStart, noInviteStart)
+    : ''
+  assert(
+    inviteErrBlock !== '' && !inviteErrBlock.includes("'not_found'"),
+    `${GET_ROUTE} must not call invalidResponse('not_found', ...) inside the inviteError block. ` +
+    `The not_found reason is reserved for when the query succeeds but returns null data.`,
+  )
+})
+
+await test('22. GET route uses flat separate queries — no nested relationship select', () => {
+  const src = read(GET_ROUTE)
+  // Nested relationship selects use the pattern: table:related_table ( columns )
+  // e.g. deal:deals ( id, title, contractor:profiles!fkey ( full_name ) )
+  assert(
+    !src.includes('deal:deals') && !src.includes('contractor:profiles'),
+    `${GET_ROUTE} must not use nested PostgREST relationship selects like ` +
+    `"deal:deals ( ... contractor:profiles!fkey ( ... ) )". These can fail silently ` +
+    `if the foreign-key hint is wrong or the relationship inference differs from ` +
+    `expectations. Use three flat queries (invite → deal → profile) instead.`,
+  )
+  // Must have three separate .from() calls
+  const fromMatches = src.match(/\.from\(/g) ?? []
+  assert(
+    fromMatches.length >= 3,
+    `${GET_ROUTE} must have at least 3 separate .from() calls (deal_invites, deals, profiles). ` +
+    `Found ${fromMatches.length}. Flat queries are explicit, debuggable, and produce distinct ` +
+    `error messages per query — nested selects give a single opaque error for all joins.`,
+  )
+})
+
+await test('23. GET route returns not_found only when query succeeds and data is null', () => {
+  const src = read(GET_ROUTE)
+  // The not_found path must follow !invite (null data) — not an error path
+  // Check that the structure is: if (inviteError) { ... lookup_error ... } if (!invite) { ... not_found ... }
+  const inviteErrorIdx = src.indexOf('if (inviteError)')
+  const noInviteIdx    = src.indexOf('if (!invite)')
+  assert(
+    inviteErrorIdx !== -1 && noInviteIdx !== -1,
+    `${GET_ROUTE} must have both 'if (inviteError)' and 'if (!invite)' checks for the ` +
+    `invite query. The error check returns lookup_error; the null check returns not_found.`,
+  )
+  assert(
+    inviteErrorIdx < noInviteIdx,
+    `${GET_ROUTE} must check for inviteError BEFORE checking for null invite. ` +
+    `Checking null first and skipping the error check would collapse errors into not_found.`,
+  )
+})
+
+await test('24. Accept route returns lookup_error (not not_found) on invite query error', () => {
+  const src = read(ACCEPT_ROUTE)
+  assert(
+    src.includes('lookup_error'),
+    `${ACCEPT_ROUTE} must return reason 'lookup_error' (HTTP 500) when the invite query ` +
+    `fails with a Supabase error. Returning notFoundError for a query error hides ` +
+    `configuration problems from callers and makes debugging impossible.`,
+  )
+  // The inviteError block must not call notFoundError
+  const inviteErrorBlock = src.split('if (inviteError)')[1]?.split('\n  }')[0] ?? ''
+  assert(
+    !inviteErrorBlock.includes('notFoundError'),
+    `${ACCEPT_ROUTE} must not call notFoundError() inside the inviteError block. ` +
+    `Query errors must return lookup_error, not not_found.`,
+  )
+})
+
+await test('25. Accept route returns lookup_error (not not_found) on deal query error', () => {
+  const src = read(ACCEPT_ROUTE)
+  // After deal lookup, dealError must lead to lookup_error — not notFoundError
+  const dealErrorBlock = src.split('if (dealError)')[1]?.split('\n  }')[0] ?? ''
+  assert(
+    dealErrorBlock.includes('lookup_error') || dealErrorBlock.includes('lookupErrorResponse'),
+    `${ACCEPT_ROUTE} must return 'lookup_error' (via lookupErrorResponse) when the deal ` +
+    `query fails. The deal-not-found case (null data, no error) uses notFoundError separately.`,
+  )
+})
+
+await test('26. GET route logs safe diagnostics only — no raw token or key in logs', () => {
+  const src = read(GET_ROUTE)
+  // Safe diagnostics: token_present (boolean), token_length (number), service_key_present (boolean)
+  assert(
+    src.includes('token_present') && src.includes('token_length') && src.includes('service_key_present'),
+    `${GET_ROUTE} must log safe diagnostics: token_present (boolean), token_length (number), ` +
+    `service_key_present (boolean). These confirm whether the token and key exist without ` +
+    `logging their values.`,
+  )
+  // Must NOT log the raw token value
+  assert(
+    !src.includes('token: token,') && !src.includes('token: token\n') && !src.includes('rawToken'),
+    `${GET_ROUTE} must not log the raw token value — the token is the secret. ` +
+    `Log token_present and token_length instead.`,
   )
 })
 

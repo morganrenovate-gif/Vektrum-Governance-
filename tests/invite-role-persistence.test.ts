@@ -100,10 +100,12 @@ await test("3. Email copy uses 'funder' as role label (not inferred from email a
 
 await test('4. GET route selects the role column from deal_invites', () => {
   const src = read(GET_ROUTE)
-  // The select template must include 'role'
+  // The select call may use a template literal or a plain string — match both forms.
+  // Flat queries use single-quoted strings: .select('id, deal_id, status, role, ...')
+  // Nested selects use template literals: .select(`\n  id,\n  role,\n  ...`)
   assert(
-    /select\s*\(`[\s\S]*?role[\s\S]*?`\)/m.test(src) || src.includes('      role,'),
-    `${GET_ROUTE} must include 'role' in the .select() query so it can be validated.`,
+    /\.select\([\s\S]{0,400}role[\s\S]{0,400}\)/m.test(src),
+    `${GET_ROUTE} must include 'role' in the .select() query on deal_invites so it can be validated.`,
   )
 })
 
