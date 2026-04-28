@@ -351,6 +351,33 @@ export interface LienWaiver {
   created_at:       string
 }
 
+// ─── Milestone Documents ──────────────────────────────────────────────────────
+
+/**
+ * Evidence or supporting document uploaded by a contractor for a milestone.
+ * Column names match the public.milestone_documents DB table exactly.
+ *
+ * Actual schema (verified against production):
+ *   id, milestone_id, uploaded_by, file_url, file_type, description, created_at
+ *
+ * NOTE: production schema stores display names in description and type in file_type.
+ *       description stores the original display filename set at upload time.
+ *       file_type uses values: 'photo' | 'document' | 'change_order'
+ */
+export interface MilestoneDocument {
+  id:           string
+  milestone_id: string
+  /** UUID of the uploading profile. Do not render raw in UI. */
+  uploaded_by:  string
+  /** Public URL to the file in Supabase Storage. */
+  file_url:     string
+  /** 'photo' | 'document' | 'change_order' — matches DB enum-like constraint. */
+  file_type:    string | null
+  /** Original filename or freeform note set at upload time. */
+  description:  string | null
+  created_at:   string
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Status values match the public.change_order_status DB enum exactly. */

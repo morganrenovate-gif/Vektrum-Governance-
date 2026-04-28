@@ -11,7 +11,7 @@ import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { AddMilestoneForm } from "./add-milestone-form";
 import { FundDealButton } from "./fund-deal-button";
 import { ReleaseRetainageButton } from "./release-retainage-button";
-import type { Deal, Profile, Milestone, LienWaiver, ChangeOrder, ReleaseGateResult, ContractStatus } from "@/lib/types";
+import type { Deal, Profile, Milestone, LienWaiver, ChangeOrder, MilestoneDocument, ReleaseGateResult, ContractStatus } from "@/lib/types";
 import { formatMoney } from "@/lib/utils";
 import { ArrowLeft, Info, FolderOpen, FileText, CheckCircle2, Clock, XCircle, AlertCircle, ShieldAlert, ShieldCheck, PenLine } from "lucide-react";
 import { SectionHeader, EmptyState } from "@/components/layout";
@@ -245,6 +245,22 @@ export default async function DealDetailPage({
   for (const co of (changeOrdersRaw ?? []) as ChangeOrder[]) {
     const existing = changeOrdersMap.get(co.milestone_id) ?? [];
     changeOrdersMap.set(co.milestone_id, [...existing, co]);
+  }
+
+  // Fetch evidence documents for all milestones on this deal (newest first).
+  // Build a map: milestone_id → MilestoneDocument[] for O(1) lookup per card.
+  const { data: documentsRaw } = milestoneIds.length
+    ? await supabase
+        .from("milestone_documents")
+        .select("id, milestone_id, uploaded_by, file_url, file_type, description, created_at")
+        .in("milestone_id", milestoneIds)
+        .order("created_at", { ascending: false })
+    : { data: [] };
+
+  const documentsMap = new Map<string, MilestoneDocument[]>();
+  for (const doc of (documentsRaw ?? []) as MilestoneDocument[]) {
+    const existing = documentsMap.get(doc.milestone_id) ?? [];
+    documentsMap.set(doc.milestone_id, [...existing, doc]);
   }
 
   const milestonesTotal = milestones.reduce((s, m) => s + m.amount, 0);
@@ -515,6 +531,7 @@ export default async function DealDetailPage({
                     lienWaiver={lienWaiverMap.get(milestone.id) ?? null}
                     lienWaiverRequired={typedDeal.lien_waiver_required ?? false}
                     changeOrders={changeOrdersMap.get(milestone.id) ?? []}
+                    documents={documentsMap.get(milestone.id) ?? []}
                   />
                   <MilestoneDisputeSection
                     milestone={{
