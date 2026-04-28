@@ -12,8 +12,11 @@ export const dynamic = 'force-dynamic'
 // not accessible. We return only the fields needed for the accept page preview —
 // no sensitive financial data or participant IDs.
 //
-// Returns 404 for: invalid token, accepted invite, revoked invite, expired invite.
+// Returns 404 for: invalid token, accepted invite, expired invite.
 // This prevents token enumeration (attacker can't tell WHY a token fails).
+//
+// Valid invite: token matches, status = 'pending', expires_at > now(),
+//               accepted_at IS NULL, accepted_by IS NULL.
 
 export async function GET(
   _request: NextRequest,
@@ -27,7 +30,9 @@ export async function GET(
 
   const admin = createSupabaseAdminClient()
 
-  // Fetch invite + deal preview in one query
+  // Fetch invite + deal preview in one query.
+  // Filter accepted_at IS NULL in the query itself for defense-in-depth:
+  // even if status is somehow wrong, an invite with accepted_at set is invalid.
   const { data: invite, error } = await admin
     .from('deal_invites')
     .select(
@@ -36,6 +41,8 @@ export async function GET(
       status,
       expires_at,
       invited_email,
+      accepted_at,
+      accepted_by,
       deal:deals (
         id,
         title,
@@ -50,6 +57,8 @@ export async function GET(
     `,
     )
     .eq('token', token)
+    .is('accepted_at', null)
+    .is('accepted_by', null)
     .single()
 
   if (error || !invite) {

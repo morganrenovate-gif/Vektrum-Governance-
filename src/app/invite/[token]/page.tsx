@@ -50,8 +50,8 @@ type PageState =
 const TRUST_SIGNALS = [
   {
     icon: Lock,
-    label: 'Funds held by Stripe',
-    desc: 'Vektrum governs release — never holds your capital',
+    label: 'Vektrum does not hold funds',
+    desc: 'Your capital stays with your execution rail — Vektrum governs release, not custody',
   },
   {
     icon: Shield,
@@ -215,7 +215,7 @@ export default function InviteAcceptPage() {
               Invite link no longer valid
             </h1>
             <p className="mt-2 text-sm text-white/55">
-              This link may have already been used, revoked, or expired.
+              This link may have already been used or expired.
               Ask the contractor to generate a new invite link.
             </p>
             <Link
@@ -402,9 +402,14 @@ export default function InviteAcceptPage() {
         )}
 
         {/* Footer trust stamp */}
-        <div className="mt-8 flex items-center justify-center gap-2 text-[12px] text-white/65">
-          <Shield size={12} className="text-blue-400" aria-hidden="true" />
-          <span>Protected by Vektrum · Payments powered by Stripe</span>
+        <div className="mt-8 flex flex-col items-center gap-1 text-center text-[11px] text-white/45">
+          <div className="flex items-center gap-1.5">
+            <Shield size={11} className="text-blue-400" aria-hidden="true" />
+            <span className="font-medium text-white/55">Protected by Vektrum</span>
+            <span>·</span>
+            <span>Release-control infrastructure for construction disbursements</span>
+          </div>
+          <span>Vektrum does not hold funds, act as escrow, or move money directly.</span>
         </div>
       </div>
     </div>

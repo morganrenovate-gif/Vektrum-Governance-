@@ -225,7 +225,7 @@ export async function POST(request: NextRequest) {
         subject: `You've been invited to fund "${deal.title}" on Vektrum`,
         html: `
           <p>Hi,</p>
-          <p>You've been invited to join <strong>${deal.title}</strong> as a funder on Vektrum — a construction payment governance platform.</p>
+          <p>You've been invited to join <strong>${deal.title}</strong> as a funder on Vektrum — release-control infrastructure for construction disbursements.</p>
           <p>Click the link below to review the deal and accept your invitation:</p>
           <p style="margin:20px 0">
             <a href="${inviteUrl}" style="color:#1A3A96;font-weight:bold;font-size:16px">${inviteUrl}</a>
@@ -233,7 +233,8 @@ export async function POST(request: NextRequest) {
           <p style="color:#6B7280;font-size:13px">This link expires on <strong>${expiryDate}</strong>. It is single-use — once accepted, it cannot be reused.</p>
           <p style="color:#6B7280;font-size:13px">If you were not expecting this invitation, you can safely ignore this email.</p>
           <hr style="border:none;border-top:1px solid #E5E7EB;margin:20px 0" />
-          <p style="color:#9CA3AF;font-size:12px">Vektrum · Construction payment governance · Powered by Stripe Connect</p>
+          <p style="color:#9CA3AF;font-size:12px">Vektrum · Release-control infrastructure for construction disbursements.</p>
+          <p style="color:#9CA3AF;font-size:12px">Vektrum does not hold funds, act as escrow, or move money directly.</p>
         `,
       })
 
