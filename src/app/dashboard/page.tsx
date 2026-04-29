@@ -49,7 +49,8 @@ async function getProfileAndDeals(userId: string) {
     query = query.eq('funder_id', userId)
   }
 
-  const { data: deals } = await query
+  const { data: rawDeals } = await query
+let deals = rawDeals ?? []
 
   // ── Funder profile fallback ─────────────────────────────────────────────────
   // The user-session client (RLS) may not allow contractors to read the funder's
@@ -67,13 +68,27 @@ async function getProfileAndDeals(userId: string) {
       .select('id, full_name, company_name, email, role')
       .in('id', uniqueFunderIds)
     if (funderProfiles) {
-      const profileById = new Map(funderProfiles.map((p) => [p.id, p]))
-      for (const d of (deals ?? []) as any[]) {
-        if (d.funder_id && !d.funder) {
-          const fp = profileById.get(d.funder_id)
-          if (fp) d.funder = fp
-        }
+      const funderById = new Map(funderProfiles.map((p) => [p.id, p]))
+
+deals = deals.map((deal: any) => {
+  if (deal.funder_id && !deal.funder) {
+    const funder = funderById.get(deal.funder_id)
+
+    if (funder) {
+      return {
+        ...deal,
+        funder,
       }
+    }
+
+    console.warn('[dashboard] funder profile fallback unresolved', {
+      deal_id: deal.id,
+      funder_id: deal.funder_id,
+    })
+  }
+
+  return deal
+})
     }
   }
 
