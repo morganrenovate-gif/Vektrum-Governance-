@@ -19,6 +19,7 @@ import { SectionHeader, EmptyState } from "@/components/layout";
 import { SovSection } from "@/components/deal/sov-section";
 import { DealReadinessBanner } from "@/components/deal/deal-readiness-banner";
 import { ContractUploadSection } from "@/components/deal/contract-upload-section";
+import { ContractSigningSection } from "@/components/deal/contract-signing-section";
 import { UploadContractTrigger } from "@/components/deal/upload-contract-trigger";
 
 // ─── Release gate computation (server-side pre-check) ────────────────────────
@@ -655,6 +656,25 @@ export default async function DealDetailPage({
           </div>
         );
       })()}
+
+      {/* ── Contract Signatures Card ── */}
+      {/* Shown when contract exists and is not yet fully signed/voided.
+          Surfaces the DocuSign send-for-signatures and open-to-sign actions
+          that were missing from the "Awaiting signatures" banner above. */}
+      {contract &&
+        contract.status !== "signed" &&
+        contract.status !== "voided" && (
+          <ContractSigningSection
+            dealId={typedDeal.id}
+            contractId={contract.id}
+            envelopeId={contract.docusign_envelope_id ?? null}
+            funderSignedAt={contract.funder_signed_at ?? null}
+            contractorSignedAt={contract.contractor_signed_at ?? null}
+            contractStatus={contract.status}
+            currentUserRole={typedProfile.role as "funder" | "contractor" | "admin"}
+            documentName={contract.document_name}
+          />
+        )}
 
       {/* ── Invite Funder Panel (contractor, draft, no funder) ── */}
       {showInviteFunder && (
