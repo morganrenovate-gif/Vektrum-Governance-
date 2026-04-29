@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import { cn, formatMoney } from "@/lib/utils";
 import { MilestoneStatusBadge, ProtectionStatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { Milestone, UserRole, LienWaiver, ChangeOrder, MilestoneDocument } from "@/lib/types";
+import type { Milestone, UserRole, LienWaiver, ChangeOrder, MilestoneDocument, SovLineItem, MilestoneSovLink } from "@/lib/types";
 import {
   CheckCircle2, AlertCircle, ChevronDown, ListOrdered, Lock,
   FileText, Upload, Clock, XCircle, Copy, Check, Plus, GitPullRequest,
-  Paperclip, Download,
+  Paperclip, Download, Link2,
 } from "lucide-react";
 import { DrawReviewAgent } from "@/components/ai/draw-review-agent";
 
@@ -75,6 +75,16 @@ interface MilestoneCardProps {
    * Provided by the deal page via documentsMap.get(milestone.id) ?? [].
    */
   documents?: MilestoneDocument[];
+  /**
+   * SOV line items available for linking (deal-level, non-superseded).
+   * Provided by the deal page. Used to populate the add-link dropdown.
+   */
+  sovItems?: SovLineItem[];
+  /**
+   * SOV links already attached to this milestone, with joined sov_line_item.
+   * Provided by the deal page via sovLinksMap.get(milestone.id) ?? [].
+   */
+  sovLinks?: MilestoneSovLink[];
 }
 
 export function MilestoneCard({
@@ -88,6 +98,8 @@ export function MilestoneCard({
   lienWaiverRequired = false,
   changeOrders = [],
   documents = [],
+  sovItems = [],
+  sovLinks: initialSovLinks = [],
 }: MilestoneCardProps) {
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
@@ -103,6 +115,86 @@ export function MilestoneCard({
     reviewed_at?: string
   } | null>(null)
   const [aiLoading, setAiLoading] = useState(false)
+
+  // ── SOV link state ──────────────────────────────────────────────────────
+  const [localSovLinks, setLocalSovLinks] = useState<MilestoneSovLink[]>(initialSovLinks)
+  const [sovLinkLoading, setSovLinkLoading] = useState(false)
+  const [sovLinkError, setSovLinkError] = useState<string | null>(null)
+  const [showSovLinkForm, setShowSovLinkForm] = useState(false)
+  const [selectedSovItemId, setSelectedSovItemId] = useState('')
+  const [sovLinkAmount, setSovLinkAmount] = useState('')
+
+  const handleAddSovLink = async () => {
+    if (!selectedSovItemId) {
+      setSovLinkError('Please select an SOV line item.')
+      return
+    }
+    const amount = parseFloat(sovLinkAmount.trim().replace(/,/g, ''))
+    if (!Number.isFinite(amount) || amount < 0) {
+      setSovLinkError('Allocated amount must be a non-negative number.')
+      return
+    }
+    setSovLinkLoading(true)
+    setSovLinkError(null)
+    try {
+      const res = await fetch(`/api/milestones/${milestone.id}/sov-links`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sov_line_item_id: selectedSovItemId, allocated_amount: amount }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setSovLinkError(data.error ?? 'Failed to link SOV item.')
+      } else {
+        setLocalSovLinks(prev => [...prev, data.link as MilestoneSovLink])
+        setShowSovLinkForm(false)
+        setSelectedSovItemId('')
+        setSovLinkAmount('')
+      }
+    } catch {
+      setSovLinkError('Network error. Please try again.')
+    } finally {
+      setSovLinkLoading(false)
+    }
+  }
+
+  const handleRemoveSovLink = async (linkId: string) => {
+    setSovLinkLoading(true)
+    setSovLinkError(null)
+    try {
+      const res = await fetch(`/api/milestones/${milestone.id}/sov-links/${linkId}`, {
+        method: 'DELETE',
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        setSovLinkError(data.error ?? 'Failed to remove SOV link.')
+      } else {
+        setLocalSovLinks(prev => prev.filter(l => l.id !== linkId))
+      }
+    } catch {
+      setSovLinkError('Network error. Please try again.')
+    } finally {
+      setSovLinkLoading(false)
+    }
+  }
+
+  // Advisory computed values — no release gate impact
+  const totalLinkedAllocation = localSovLinks.reduce((s, l) => s + l.allocated_amount, 0)
+  const hasUnapprovedSov = localSovLinks.some(
+    l => l.sov_line_item && l.sov_line_item.status !== 'approved',
+  )
+  const overAllocated =
+    localSovLinks.length > 0 && milestone.amount > 0 && totalLinkedAllocation > milestone.amount
+
+  // Items not yet linked for the add form dropdown
+  const linkedSovIds = new Set(localSovLinks.map(l => l.sov_line_item_id))
+  const unlinkableSovItems = sovItems.filter(
+    i => !linkedSovIds.has(i.id) && i.status !== 'superseded',
+  )
+
+  const canManageSovLinks =
+    (role === 'contractor' || role === 'admin') &&
+    milestone.status !== 'released'
 
   // ── Lien waiver state ───────────────────────────────────────────────────
   const [lienWaiverState, setLienWaiverState] = useState<LienWaiver | null>(lienWaiver ?? null)
@@ -843,6 +935,173 @@ export function MilestoneCard({
               <div className="mt-2 flex items-start gap-1.5 rounded-md bg-red-500/[0.08] border border-red-500/20 px-3 py-2 text-[12px] text-red-400">
                 <AlertCircle size={13} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
                 {lienError}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── SOV Link Panel ───────────────────────────────────────────────── */}
+        {/* Advisory only — shows which SOV line items are allocated to this milestone.
+            Visible when SOV items exist for the deal.
+            Contractor/admin: can add and remove links on non-released milestones.
+            Does NOT affect the release gate or payment authorization. */}
+        {sovItems.length > 0 && (
+          <div className="mt-3 space-y-2">
+
+            {/* ── Section label ── */}
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-white/55">
+                <Link2 size={11} aria-hidden="true" />
+                SOV Line Items
+              </div>
+              {canManageSovLinks && !showSovLinkForm && unlinkableSovItems.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => { setShowSovLinkForm(true); setSovLinkError(null) }}
+                  className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-white/65 border border-white/[0.12] hover:bg-white/[0.06] hover:text-white/90 transition-colors"
+                >
+                  <Plus size={11} aria-hidden="true" />
+                  Link
+                </button>
+              )}
+            </div>
+
+            {/* ── Linked SOV items list ── */}
+            {localSovLinks.length > 0 && (
+              <div className="space-y-1.5">
+                {localSovLinks.map(link => {
+                  const item = link.sov_line_item
+                  const unapproved = item && item.status !== 'approved'
+                  return (
+                    <div
+                      key={link.id}
+                      className="flex items-center justify-between gap-2 rounded-md border border-white/[0.08] bg-white/[0.02] px-3 py-2"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[11px] font-medium text-white/75 truncate">
+                          {item?.item_number ? `${item.item_number} — ` : ''}{item?.description ?? link.sov_line_item_id}
+                        </p>
+                        <p className="text-[10px] text-white/40 tabular-nums mt-0.5">
+                          Allocated: ${link.allocated_amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                          {unapproved && (
+                            <span className="ml-2 text-amber-400/70">· SOV not yet approved</span>
+                          )}
+                        </p>
+                      </div>
+                      {canManageSovLinks && (
+                        <button
+                          type="button"
+                          aria-label="Remove SOV link"
+                          disabled={sovLinkLoading}
+                          onClick={() => handleRemoveSovLink(link.id)}
+                          className="flex-shrink-0 rounded p-1 text-white/30 hover:text-red-400 hover:bg-red-500/[0.08] transition-colors disabled:opacity-40"
+                        >
+                          <XCircle size={13} aria-hidden="true" />
+                        </button>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* ── Add-link inline form — contractor/admin, non-released ── */}
+            {canManageSovLinks && showSovLinkForm && (
+              <div className="rounded-lg border border-white/[0.12] bg-white/[0.03] px-4 py-3 space-y-3">
+                <p className="text-[12px] font-semibold text-white/80">Link SOV Line Item</p>
+                <div className="space-y-2">
+                  <div>
+                    <label className="block text-[11px] font-medium text-white/65 mb-1">
+                      SOV line item
+                    </label>
+                    <select
+                      value={selectedSovItemId}
+                      onChange={e => setSelectedSovItemId(e.target.value)}
+                      className="w-full rounded-md border border-white/[0.12] bg-white/[0.04] px-3 py-1.5 text-[12px] text-white/85 focus:outline-none focus:ring-1 focus:ring-blue-500/60"
+                    >
+                      <option value="">— Select an SOV item —</option>
+                      {unlinkableSovItems.map(item => (
+                        <option key={item.id} value={item.id}>
+                          {item.item_number ? `${item.item_number} — ` : ''}{item.description}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-white/65 mb-1">
+                      Allocated amount ($)
+                      <span className="ml-1 text-white/40 font-normal">portion of this milestone covered by the SOV item</span>
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="e.g. 25000"
+                      value={sovLinkAmount}
+                      onChange={e => setSovLinkAmount(e.target.value)}
+                      className="w-full rounded-md border border-white/[0.12] bg-white/[0.04] px-3 py-1.5 text-[12px] text-white/85 placeholder-white/25 focus:outline-none focus:ring-1 focus:ring-blue-500/60"
+                    />
+                  </div>
+                </div>
+                {sovLinkError && (
+                  <p className="text-[11px] text-red-400 flex items-center gap-1">
+                    <AlertCircle size={11} aria-hidden="true" />
+                    {sovLinkError}
+                  </p>
+                )}
+                <div className="flex items-center gap-2 pt-1">
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    loading={sovLinkLoading}
+                    disabled={sovLinkLoading}
+                    onClick={handleAddSovLink}
+                  >
+                    Link
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={sovLinkLoading}
+                    onClick={() => { setShowSovLinkForm(false); setSovLinkError(null); setSelectedSovItemId(''); setSovLinkAmount('') }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* ── Advisory warnings ── */}
+            {localSovLinks.length === 0 && (
+              <div className="flex items-start gap-1.5 rounded-md bg-white/[0.02] border border-white/[0.06] px-3 py-2">
+                <AlertCircle size={11} className="text-white/30 flex-shrink-0 mt-0.5" aria-hidden="true" />
+                <span className="text-[11px] text-white/40">
+                  No SOV line items linked. Link items to track draw allocation.
+                </span>
+              </div>
+            )}
+            {hasUnapprovedSov && (
+              <div className="flex items-start gap-1.5 rounded-md bg-amber-500/[0.04] border border-amber-500/15 px-3 py-2">
+                <AlertCircle size={11} className="text-amber-400/70 flex-shrink-0 mt-0.5" aria-hidden="true" />
+                <span className="text-[11px] text-amber-400/70">
+                  One or more linked SOV items have not been approved by the funder yet.
+                </span>
+              </div>
+            )}
+            {overAllocated && (
+              <div className="flex items-start gap-1.5 rounded-md bg-amber-500/[0.04] border border-amber-500/15 px-3 py-2">
+                <AlertCircle size={11} className="text-amber-400/70 flex-shrink-0 mt-0.5" aria-hidden="true" />
+                <span className="text-[11px] text-amber-400/70">
+                  Total linked allocation (${totalLinkedAllocation.toLocaleString('en-US', { minimumFractionDigits: 2 })}) exceeds milestone amount.
+                </span>
+              </div>
+            )}
+
+            {/* SOV link error (outside form) */}
+            {sovLinkError && !showSovLinkForm && (
+              <div className="flex items-start gap-1.5 rounded-md bg-red-500/[0.08] border border-red-500/20 px-3 py-2 text-[12px] text-red-400">
+                <AlertCircle size={13} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
+                {sovLinkError}
               </div>
             )}
           </div>
