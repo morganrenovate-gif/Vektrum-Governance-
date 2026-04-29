@@ -203,6 +203,13 @@ export async function GET(request: NextRequest) {
     }
   })
 
+  // Detect Stripe rail mode from the secret key prefix.
+  // sk_test_… → test mode (no real funds at risk).
+  // sk_live_… → production mode (real funds).
+  // Absent / unrecognised → treat as live for safety.
+  const stripeKey  = process.env.STRIPE_SECRET_KEY ?? ''
+  const stripeMode: 'test' | 'live' = stripeKey.startsWith('sk_test_') ? 'test' : 'live'
+
   return NextResponse.json({
     scanned_at:          new Date().toISOString(),
     stuck_threshold_hours: stuckHours,
@@ -210,6 +217,8 @@ export async function GET(request: NextRequest) {
     failed_count:        failedPayouts.length,
     stuck_releases:      stuckReleases,
     failed_payouts:      failedPayouts,
+    // stripe_mode lets the UI distinguish test-rail pending from live-fund issues.
+    stripe_mode:         stripeMode,
     summary: {
       clean: stuckReleases.length === 0 && failedPayouts.length === 0,
       // Highest-value stuck (for summary headline)
