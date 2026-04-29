@@ -536,3 +536,48 @@ export interface TransactionReceipt {
   created_at:    string
   updated_at:    string
 }
+
+// ─── Schedule of Values ───────────────────────────────────────────────────────
+
+export type SovLineItemStatus = 'draft' | 'pending_review' | 'approved' | 'superseded'
+
+export interface SovLineItem {
+  id:                     string
+  deal_id:                string
+  item_number:            string | null
+  description:            string
+  /** Contract-allocated value for this line item. */
+  scheduled_value:        number
+  /** Cumulative approved change orders applied to this line item. */
+  approved_change_orders: number
+  /** scheduled_value + approved_change_orders. */
+  revised_value:          number
+  /** Previously released (prior draw applications). */
+  previous_released:      number
+  /** Amount requested in the current draw application. */
+  current_requested:      number
+  /** Retainage withheld on this line item. */
+  retainage_amount:       number
+  /** revised_value - previous_released - current_requested. */
+  balance_to_finish:      number
+  /** (previous_released + current_requested) / revised_value × 100, capped at 100. */
+  percent_complete:       number
+  status:                 SovLineItemStatus
+  sort_order:             number
+  created_by:             string | null
+  approved_by:            string | null
+  approved_at:            string | null
+  created_at:             string
+  updated_at:             string
+}
+
+export interface MilestoneSovLink {
+  id:               string
+  milestone_id:     string
+  sov_line_item_id: string
+  /** Portion of this milestone's amount drawn against this SOV line item. */
+  allocated_amount: number
+  created_at:       string
+  // Joined
+  sov_line_item?: SovLineItem
+}
