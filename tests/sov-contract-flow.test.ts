@@ -63,10 +63,11 @@ function codeOnly(src: string): string {
 
 // ─── File paths ───────────────────────────────────────────────────────────────
 
-const PAGE         = 'src/app/dashboard/deals/[dealId]/page.tsx'
-const SOV_SECTION  = 'src/components/deal/sov-section.tsx'
-const SOV_ROUTE    = 'src/app/api/deals/[dealId]/sov/route.ts'
-const RELEASE_GATE = 'src/lib/engine/release-gate.ts'
+const PAGE            = 'src/app/dashboard/deals/[dealId]/page.tsx'
+const SOV_SECTION     = 'src/components/deal/sov-section.tsx'
+const SOV_ROUTE       = 'src/app/api/deals/[dealId]/sov/route.ts'
+const RELEASE_GATE    = 'src/lib/engine/release-gate.ts'
+const MILESTONE_CARD  = 'src/components/deal/milestone-card.tsx'
 const STRIPE_ROUTE = 'src/app/api/stripe/webhooks/route.ts'
 const PACKAGE_JSON = 'package.json'
 
@@ -183,11 +184,12 @@ await test('8. SOV line item creation POST route still exists and validates nega
 // ── Milestone SOV advisory ────────────────────────────────────────────────────
 
 await test('9. Milestones without SOV links show advisory warning', () => {
-  const src = read(PAGE)
+  // The advisory was moved from page.tsx into MilestoneCard so it renders
+  // inline within the card panel rather than as a separate external element.
+  const src = read(MILESTONE_CARD)
   assert(
-    src.includes('not linked to an approved SOV line item') ||
-    src.includes('not linked to') && src.includes('SOV'),
-    `${PAGE} must show an advisory warning for milestones not linked to an SOV line item`,
+    src.includes('No SOV line items linked') || src.includes('not linked to'),
+    `${MILESTONE_CARD} must show an advisory warning for milestones not linked to any SOV line item`,
   )
 })
 

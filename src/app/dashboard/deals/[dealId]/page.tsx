@@ -303,18 +303,28 @@ export default async function DealDetailPage({
     .order('created_at', { ascending: true })
 
   // ── Milestone SOV links ───────────────────────────────────────────────────
-  // Used to show an advisory warning on milestones not yet linked to any
-  // SOV line item. Advisory only — does not block release.
+  // Fetched with joined SOV line item data so MilestoneCard can render
+  // linked items and advisory warnings without additional client fetches.
+  // Advisory only — does not affect release gate.
   const { data: sovLinksRaw } = milestoneIds.length
     ? await supabase
         .from('milestone_sov_links')
-        .select('milestone_id')
+        .select('*, sov_line_item:sov_line_items(*)')
         .in('milestone_id', milestoneIds)
     : { data: [] }
 
-  const milestoneSovLinkedIds = new Set(
-    (sovLinksRaw ?? []).map((l: { milestone_id: string }) => l.milestone_id),
-  )
+  const sovLinksTyped = (sovLinksRaw ?? []) as import('@/lib/types').MilestoneSovLink[]
+
+  // Map: milestone_id → MilestoneSovLink[]
+  const sovLinksMap = new Map<string, import('@/lib/types').MilestoneSovLink[]>()
+  for (const link of sovLinksTyped) {
+    const existing = sovLinksMap.get(link.milestone_id) ?? []
+    existing.push(link)
+    sovLinksMap.set(link.milestone_id, existing)
+  }
+
+  // Set of milestone IDs that have at least one link (used for checklist/next-step)
+  const milestoneSovLinkedIds = new Set(sovLinksTyped.map(l => l.milestone_id))
 
   const sovItems = (sovItemsRaw ?? []) as import('@/lib/types').SovLineItem[]
 
@@ -807,6 +817,8 @@ export default async function DealDetailPage({
                     lienWaiverRequired={typedDeal.lien_waiver_required ?? false}
                     changeOrders={changeOrdersMap.get(milestone.id) ?? []}
                     documents={documentsMap.get(milestone.id) ?? []}
+                    sovItems={sovItems}
+                    sovLinks={sovLinksMap.get(milestone.id) ?? []}
                   />
                   <MilestoneDisputeSection
                     milestone={{
@@ -822,16 +834,6 @@ export default async function DealDetailPage({
         }
         role={typedProfile.role}
      />
-
-                  {/* SOV link advisory — shown when SOV exists but milestone has no link */}
-                  {sovItems.length > 0 && !milestoneSovLinkedIds.has(milestone.id) && (
-                    <div className="flex items-start gap-1.5 px-1 py-1">
-                      <AlertCircle size={11} className="text-white/25 flex-shrink-0 mt-0.5" aria-hidden="true" />
-                      <span className="text-[11px] text-white/35">
-                        This milestone is not linked to an approved SOV line item.
-                      </span>
-                    </div>
-                  )}
 
                   {/* Release controls — funder only, unreleased milestones */}
                   {typedProfile.role === "funder" &&
