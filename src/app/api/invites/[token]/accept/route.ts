@@ -48,13 +48,23 @@ export async function POST(
   const { user, profile } = authContext
 
   // ── 2. Role check — funders only ───────────────────────────────────────────
-  try {
-    requireRole(profile, 'funder')
-  } catch {
-    return errorResponse(
-      403,
-      'Only users with the Funder role can accept deal invitations. ' +
-      'If you are a funder, ensure your account was registered with the correct role.',
+  // Return a role-specific message so the UI can show actionable guidance
+  // (e.g. "Sign out and create a funder account") rather than a generic error.
+  if (profile.role !== 'funder') {
+    const roleLabel = profile.role === 'contractor'
+      ? 'a contractor'
+      : profile.role === 'admin'
+        ? 'an admin'
+        : `a ${profile.role}`
+    return NextResponse.json(
+      {
+        error:
+          `You are signed in as ${roleLabel}. ` +
+          `Only funder accounts can accept deal invitations. ` +
+          `Sign out and sign in with or create a funder account to accept this invite.`,
+        reason: 'wrong_role',
+      },
+      { status: 403 },
     )
   }
 
@@ -217,20 +227,38 @@ export async function POST(
     console.error('[invites/accept] Failed to mark invite as accepted:', inviteUpdateError.message)
   }
 
-  // Step C: Audit log
-  await logAudit({
-    entity_type: 'deal',
-    entity_id: invite.deal_id,
-    action: 'funder_assigned',
-    actor_id: user.id,
-    actor_role: 'funder',
-    old_values: { funder_id: null },
-    new_values: {
-      funder_id: user.id,
-      invite_id: invite.id,
-      funder_name: profile.full_name,
-    },
-  })
+  // Step C: Audit log — dual-write
+  // invite_accepted: records the invite token being consumed (invite entity)
+  // funder_assigned: records the deal gaining a funder (deal entity)
+  await Promise.all([
+    logAudit({
+      entity_type: 'deal_invite',
+      entity_id: invite.id,
+      action: 'invite_accepted',
+      actor_id: user.id,
+      actor_role: 'funder',
+      old_values: { status: 'pending' },
+      new_values: {
+        status: 'accepted',
+        accepted_by: user.id,
+        accepted_at: new Date().toISOString(),
+        deal_id: invite.deal_id,
+      },
+    }),
+    logAudit({
+      entity_type: 'deal',
+      entity_id: invite.deal_id,
+      action: 'funder_assigned',
+      actor_id: user.id,
+      actor_role: 'funder',
+      old_values: { funder_id: null },
+      new_values: {
+        funder_id: user.id,
+        invite_id: invite.id,
+        funder_name: profile.full_name,
+      },
+    }),
+  ])
 
   return NextResponse.json(
     {
