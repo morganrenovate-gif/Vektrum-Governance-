@@ -17,6 +17,7 @@ import { formatMoney } from "@/lib/utils";
 import { ArrowLeft, Info, FolderOpen, FileText, CheckCircle2, Clock, XCircle, AlertCircle, ShieldAlert, ShieldCheck, PenLine } from "lucide-react";
 import { SectionHeader, EmptyState } from "@/components/layout";
 import { SovSection } from "@/components/deal/sov-section";
+import { DealReadinessBanner } from "@/components/deal/deal-readiness-banner";
 
 // ─── Release gate computation (server-side pre-check) ────────────────────────
 //
@@ -318,6 +319,16 @@ export default async function DealDetailPage({
     )
   }
 
+  // ── Pre-compute release gate for every milestone ─────────────────────────
+  // Stored in a Map so both the DealReadinessBanner and each ReleaseButton
+  // read from the same computation without redundancy.
+  const gateMap = new Map<string, ReleaseGateResult>();
+  for (const m of milestones) {
+    gateMap.set(m.id, computeReleaseGate(m, typedDeal, milestones));
+  }
+
+  const isFullyFunded = typedDeal.funded_amount >= typedDeal.total_amount;
+
   const milestonesTotal = milestones.reduce((s, m) => s + m.amount, 0);
   const remaining = Math.max(0, typedDeal.total_amount - milestonesTotal);
   const isDraftContractor =
@@ -325,6 +336,12 @@ export default async function DealDetailPage({
   const funderCanFund =
     typedProfile.role === "funder" &&
     typedDeal.funded_amount < typedDeal.total_amount;
+
+  // MFA setup URL — used by FundDealButton to redirect funders to MFA enrollment
+  // before they can fund. Encodes the deal return path so the enroll page can
+  // redirect back here after enrollment. reason=funding shows a funding-specific
+  // context callout on the enroll page.
+  const mfaSetupUrl = `/auth/mfa/enroll?next=${encodeURIComponent(`/dashboard/deals/${typedDeal.id}`)}&reason=funding`
 
   // Contractor sees invite UI when deal has no funder and is in draft
   const showInviteFunder =
@@ -403,13 +420,28 @@ export default async function DealDetailPage({
           </div>
         </div>
 
-        {/* Fund deal (funder only) */}
-        {funderCanFund && (
-          <FundDealButton
-            dealId={typedDeal.id}
-            remaining={typedDeal.total_amount - typedDeal.funded_amount}
-            stripeConnected={!!typedProfile.stripe_account_id}
-          />
+        {/* Capital status + Fund deal (funder only) */}
+        {typedProfile.role === "funder" && (
+          <div className="flex flex-col items-end gap-2">
+            <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${
+              isFullyFunded
+                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                : typedDeal.funded_amount > 0
+                ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                : "bg-white/[0.05] text-white/50 border-white/[0.10]"
+            }`}>
+              {isFullyFunded ? "Fully funded" : typedDeal.funded_amount > 0 ? "Partially funded" : "Not yet funded"}
+            </span>
+            {funderCanFund && (
+              <FundDealButton
+                dealId={typedDeal.id}
+                remaining={typedDeal.total_amount - typedDeal.funded_amount}
+                stripeConnected={!!typedProfile.stripe_account_id}
+                mfaEnrolled={!!typedProfile.mfa_enrolled}
+                mfaSetupUrl={mfaSetupUrl}
+              />
+            )}
+          </div>
         )}
       </div>
 
@@ -570,9 +602,35 @@ export default async function DealDetailPage({
         dealStatus={typedDeal.status}
       />
 
+      {/* ── Deal Readiness Banner (funder only) ── */}
+      {typedProfile.role === "funder" && milestones.length > 0 && (
+        <DealReadinessBanner
+          totalMilestones={milestones.length}
+          releasedMilestones={milestones.filter(m => m.status === "released").length}
+          approvedMilestones={milestones.filter(m => m.status === "approved").length}
+          releasableMilestones={milestones.filter(m => gateMap.get(m.id)?.can_release).length}
+          topBlockers={
+            Array.from(gateMap.values())
+              .flatMap(g => g.blockers)
+              .filter((b, i, arr) => arr.indexOf(b) === i)
+              .slice(0, 3)
+          }
+          nextAction={
+            milestones.find(m => gateMap.get(m.id)?.can_release)
+              ? "Release approved milestone"
+              : milestones.some(m => m.status === "approved")
+              ? "Resolve blockers to release"
+              : null
+          }
+        />
+      )}
+
       {/* ── Milestones ── */}
       <section>
-        <SectionHeader label="Milestones" count={milestones.length > 0 ? milestones.length : undefined} />
+        <SectionHeader
+          label={typedProfile.role === "funder" ? "Milestone Review & Release" : "Milestones"}
+          count={milestones.length > 0 ? milestones.length : undefined}
+        />
 
         {milestones.length === 0 ? (
           <EmptyState
@@ -586,7 +644,7 @@ export default async function DealDetailPage({
         ) : (
           <div className="space-y-3">
             {milestones.map((milestone) => {
-              const gate = computeReleaseGate(milestone, typedDeal, milestones);
+              const gate = gateMap.get(milestone.id) ?? computeReleaseGate(milestone, typedDeal, milestones);
               const sequentialBlockers = computeSequentialBlockers(milestone, typedDeal, milestones);
               const latestBrief = briefMap.get(milestone.id) ?? null;
               const contractorName =
@@ -620,10 +678,13 @@ export default async function DealDetailPage({
         role={typedProfile.role}
      />
 
-                  {/* Release button — funder only, approved milestones */}
+                  {/* Release controls — funder only, unreleased milestones */}
                   {typedProfile.role === "funder" &&
                     milestone.status !== "released" && (
-                      <div className="pl-4">
+                      <div className="pl-4 space-y-1.5">
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30">
+                          Release controls
+                        </p>
                         <ReleaseButton
                           milestoneId={milestone.id}
                           dealId={typedDeal.id}
