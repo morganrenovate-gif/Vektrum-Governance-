@@ -73,7 +73,7 @@ export default async function NotificationsPage() {
   // ─────────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-vektrum-bg">
+    <div className="min-h-screen bg-surface-0">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
 
         <div className="mb-8">

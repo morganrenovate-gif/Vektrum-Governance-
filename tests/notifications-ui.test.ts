@@ -410,6 +410,18 @@ await test('39. MarkAllReadButton calls mark-read API with { all: true }', () =>
   )
 })
 
+await test('41. Notifications page uses dark dashboard background (not light vektrum-bg)', () => {
+  const src = read(NOTIF_PAGE)
+  assert(
+    src.includes('bg-surface-0') || src.includes('bg-surface-1') || src.includes('bg-surface-2'),
+    `${NOTIF_PAGE} must use a dark surface class (bg-surface-0/1/2) — not bg-vektrum-bg which is a light blueprint-grey (#F4F6FA) and causes white-text-on-white-background contrast failure.`,
+  )
+  assert(
+    !src.includes('bg-vektrum-bg'),
+    `${NOTIF_PAGE} must not use bg-vektrum-bg — that is the light marketing-site background color (#F4F6FA), incompatible with white/muted text used in dark-theme dashboard components.`,
+  )
+})
+
 await test('40. Bell "View all notifications" href matches the page route', () => {
   const bell = read(BELL)
   const page = exists(NOTIF_PAGE)
