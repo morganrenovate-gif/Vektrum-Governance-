@@ -581,3 +581,27 @@ export interface MilestoneSovLink {
   // Joined
   sov_line_item?: SovLineItem
 }
+
+// ─── In-app notification ──────────────────────────────────────────────────────
+
+export type NotificationChannel = 'email' | 'in_app'
+export type NotificationStatus  = 'pending' | 'sent' | 'failed' | 'skipped'
+
+export interface AppNotification {
+  id:                string
+  recipient_user_id: string | null
+  recipient_email:   string | null
+  deal_id:           string | null
+  entity_type:       string
+  entity_id:         string
+  notification_type: string
+  channel:           NotificationChannel
+  status:            NotificationStatus
+  subject:           string | null
+  body_summary:      string | null
+  error_message:     string | null
+  created_at:        string
+  sent_at:           string | null
+  /** Null = unread. Non-null = timestamp when user marked as read. */
+  read_at:           string | null
+}
