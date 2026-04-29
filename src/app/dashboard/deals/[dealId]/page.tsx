@@ -300,6 +300,20 @@ export default async function DealDetailPage({
     .order('sort_order', { ascending: true })
     .order('created_at', { ascending: true })
 
+  // ── Milestone SOV links ───────────────────────────────────────────────────
+  // Used to show an advisory warning on milestones not yet linked to any
+  // SOV line item. Advisory only — does not block release.
+  const { data: sovLinksRaw } = milestoneIds.length
+    ? await supabase
+        .from('milestone_sov_links')
+        .select('milestone_id')
+        .in('milestone_id', milestoneIds)
+    : { data: [] }
+
+  const milestoneSovLinkedIds = new Set(
+    (sovLinksRaw ?? []).map((l: { milestone_id: string }) => l.milestone_id),
+  )
+
   const sovItems = (sovItemsRaw ?? []) as import('@/lib/types').SovLineItem[]
 
   const sovTotals = {
@@ -328,6 +342,10 @@ export default async function DealDetailPage({
   }
 
   const isFullyFunded = typedDeal.funded_amount >= typedDeal.total_amount;
+
+  // True when there is a non-voided, active contract on file.
+  // Used to show the contract-required setup card and guide the SOV flow.
+  const hasContract = !!contract && contract.status !== 'voided'
 
   const milestonesTotal = milestones.reduce((s, m) => s + m.amount, 0);
   const remaining = Math.max(0, typedDeal.total_amount - milestonesTotal);
@@ -591,6 +609,40 @@ export default async function DealDetailPage({
         </CardBody>
       </Card>
 
+      {/* ── Contract required setup card ── */}
+      {/* Shown to contractors before a contract is on file to guide the
+          contract → SOV → milestone setup sequence. Advisory only — no
+          release gate change. Funders and admins see the contract status
+          indicator section above instead. */}
+      {typedProfile.role === "contractor" && !hasContract && (
+        <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.04] px-5 py-5 space-y-3">
+          <div className="flex items-start gap-3">
+            <AlertCircle size={16} className="text-amber-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
+            <div>
+              <p className="text-[14px] font-semibold text-amber-400">Contract required</p>
+              <p className="mt-1 text-[13px] text-white/65 leading-relaxed">
+                Upload the executed contract before finalizing SOVs or releasing milestone payments.
+                The Schedule of Values should reflect the approved contract line items.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2 pl-7">
+            <a
+              href="#contract"
+              className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[12px] font-medium hover:bg-amber-500/15 transition-colors"
+            >
+              <FileText size={12} aria-hidden="true" />
+              Upload Contract
+            </a>
+            <span className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-white/[0.08] text-[12px] text-white/30 cursor-default">
+              <FileText size={12} aria-hidden="true" />
+              Import SOV from Contract
+              <span className="text-[9px] uppercase tracking-wide text-white/20">Coming soon</span>
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* ── Schedule of Values ── */}
       <SovSection
         dealId={typedDeal.id}
@@ -600,6 +652,8 @@ export default async function DealDetailPage({
         warnings={sovWarnings}
         viewerRole={typedProfile.role as 'contractor' | 'funder' | 'admin'}
         dealStatus={typedDeal.status}
+        hasContract={hasContract}
+        contractUploadHref="#contract"
       />
 
       {/* ── Deal Readiness Banner (funder only) ── */}
@@ -677,6 +731,16 @@ export default async function DealDetailPage({
         }
         role={typedProfile.role}
      />
+
+                  {/* SOV link advisory — shown when SOV exists but milestone has no link */}
+                  {sovItems.length > 0 && !milestoneSovLinkedIds.has(milestone.id) && (
+                    <div className="flex items-start gap-1.5 px-1 py-1">
+                      <AlertCircle size={11} className="text-white/25 flex-shrink-0 mt-0.5" aria-hidden="true" />
+                      <span className="text-[11px] text-white/35">
+                        This milestone is not linked to an approved SOV line item.
+                      </span>
+                    </div>
+                  )}
 
                   {/* Release controls — funder only, unreleased milestones */}
                   {typedProfile.role === "funder" &&
