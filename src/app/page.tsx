@@ -119,16 +119,16 @@ export default async function HomePage() {
                   {/* 10 gate conditions */}
                   <div className="space-y-1">
                     {[
-                      { label: 'Funder approval',            pass: true  },
-                      { label: 'No active dispute',           pass: true  },
-                      { label: 'No active hold',              pass: true  },
-                      { label: 'Contractor account verified', pass: true  },
-                      { label: 'Funded balance sufficient',   pass: true  },
-                      { label: 'Sequential order',            pass: false, reason: 'Prior milestone unreleased' },
-                      { label: 'No duplicate release',        pass: true  },
-                      { label: 'Change order CO-004',         pass: false, reason: 'Approval pending' },
-                      { label: 'Contract active',             pass: true  },
-                      { label: 'Deal not frozen',             pass: true  },
+                      { label: 'Milestone approved',              pass: true  },
+                      { label: 'Protection status cleared',       pass: true  },
+                      { label: 'Funded balance sufficient',       pass: true  },
+                      { label: 'Contractor account verified',     pass: true  },
+                      { label: 'Contractor onboarding complete',  pass: true  },
+                      { label: 'Sequential prerequisites met',    pass: false, reason: 'Prior milestone unreleased' },
+                      { label: 'No active release exists',        pass: true  },
+                      { label: 'Unresolved change order',         pass: false, reason: 'Change order awaiting approval' },
+                      { label: 'Signed contract on file',         pass: true  },
+                      { label: 'Lien waiver on file',             pass: true  },
                     ].map((cond, i) => (
                       <div
                         key={i}
@@ -534,6 +534,79 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ─── 3b. Release Workflow Spine ───────────────────────────────────────── */}
+      <section className="bg-white py-20 sm:py-28 border-t border-black/[0.06]">
+        <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
+
+          <div className="mb-12 text-center">
+            <div className="inline-flex items-center gap-3 mb-4">
+              <div className="h-px w-5 bg-vektrum-blue" />
+              <p className="text-[11px] tracking-[0.12em] uppercase text-vektrum-blue font-semibold">Release workflow</p>
+              <div className="h-px w-5 bg-vektrum-blue" />
+            </div>
+            <h2 className="font-display text-[2.75rem] sm:text-5xl font-bold tracking-[-0.04em] text-vektrum-text leading-[1.05]">
+              Contract to authorization.
+            </h2>
+            <p className="mt-4 text-[16px] leading-relaxed text-vektrum-muted max-w-2xl mx-auto">
+              Every draw follows the same governed path — from DocuSign contract execution
+              through evidence review to the authorization signal that unlocks disbursement.
+            </p>
+          </div>
+
+          {/* Workflow spine */}
+          <div className="relative">
+            {/* Connector line */}
+            <div className="hidden lg:block absolute top-[28px] left-[calc(100%/14)] right-[calc(100%/14)] h-px bg-vektrum-blue/20 z-0" />
+
+            <div className="grid gap-6 lg:grid-cols-7 relative z-10">
+              {[
+                { step: '01', label: 'Contract Executed', detail: 'Both parties sign via DocuSign before any releases are authorized.' },
+                { step: '02', label: 'Schedule of Values', detail: 'SOV links approved contract values to each draw milestone.' },
+                { step: '03', label: 'Draw Submitted', detail: 'Contractor submits draw request tied to an approved milestone.' },
+                { step: '04', label: 'Evidence Reviewed', detail: 'Inspection reports, lien waivers, and photos attached to the draw.' },
+                { step: '05', label: 'AI Draw Review', detail: 'AI pre-screens document completeness and flags risk before the gate runs.' },
+                { step: '06', label: 'Release Readiness', detail: 'All 10 gate conditions evaluated server-side simultaneously.' },
+                { step: '07', label: 'Authorization Signal', detail: 'Funder authorizes. Disbursement is unlocked on the selected rail.' },
+              ].map(({ step, label, detail }) => (
+                <div key={step} className="flex flex-col items-center text-center gap-3">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-vektrum-blue/25 bg-vektrum-blue/[0.06] flex-shrink-0">
+                    <span className="text-[11px] font-bold text-vektrum-blue tabular-nums">{step}</span>
+                  </div>
+                  <div>
+                    <p className="text-[13px] font-semibold text-vektrum-text leading-tight">{label}</p>
+                    <p className="mt-1 text-[11.5px] leading-snug text-vektrum-muted">{detail}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Clarification notes */}
+          <div className="mt-12 grid gap-4 sm:grid-cols-3">
+            {[
+              {
+                title: 'DocuSign contract execution',
+                body: 'A signed contract on file is required before Vektrum will authorize any milestone release. Both funder and contractor complete DocuSign signing before the workflow advances.',
+              },
+              {
+                title: 'Schedule of Values',
+                body: 'The SOV maps the signed contract value to individual draw milestones, ensuring each release is traceable to an approved scope line.',
+              },
+              {
+                title: 'Conditional lien waivers',
+                body: 'Where required, an approved conditional lien waiver must be on file for the milestone before the release gate will authorize disbursement.',
+              },
+            ].map(({ title, body }) => (
+              <div key={title} className="rounded-2xl border border-black/[0.07] bg-[#F8F9FB] p-6">
+                <p className="text-[13px] font-semibold text-vektrum-text mb-2">{title}</p>
+                <p className="text-[12.5px] leading-relaxed text-vektrum-muted">{body}</p>
+              </div>
+            ))}
+          </div>
+
+        </div>
+      </section>
+
       {/* ─── 4. Release Gate + AI Precondition ────────────────────────────────── */}
       <section className="bg-[#F8F9FB] py-20 sm:py-28 border-t border-black/[0.06]">
         <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
@@ -566,15 +639,15 @@ export default async function HomePage() {
               <ol className="space-y-2">
                 {[
                   'Milestone approved by funder',
-                  'No active dispute on this milestone',
-                  'No active hold on this milestone',
-                  'Contractor payment account verified',
-                  'Funded balance covers this disbursement',
-                  'Sequential milestone order satisfied',
-                  'No duplicate release on this milestone',
+                  'Protection status cleared for release',
+                  'Funded balance covers disbursement and fee',
+                  'Contractor payment account verified for selected rail',
+                  'Contractor onboarding complete',
+                  'No existing active release on this milestone',
                   'No unresolved change orders',
-                  'Contract not voided',
-                  'Deal not frozen or under admin suspension',
+                  'Signed contract on file',
+                  'Sequential milestone prerequisites satisfied',
+                  'Approved conditional lien waiver on file where required',
                 ].map((cond, i) => (
                   <li key={i} className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-[#F8F9FB] border border-black/[0.04]">
                     <span className="flex-shrink-0 w-6 h-6 rounded-full bg-vektrum-blue/10 flex items-center justify-center text-[11px] font-bold text-vektrum-blue tabular-nums">

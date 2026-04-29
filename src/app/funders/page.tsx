@@ -78,7 +78,7 @@ export default function FundersPage() {
               {
                 icon: BarChart3,
                 title: 'Portfolio dashboard',
-                desc: 'Release readiness scores, risk flags, and disbursement status across your entire book.',
+                desc: 'Deal-level release readiness, risk flags, and disbursement status across active projects.',
               },
               {
                 icon: FileText,
