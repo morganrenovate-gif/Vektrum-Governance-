@@ -178,6 +178,10 @@ export async function GET(request: NextRequest) {
     feedHealth = 'warning'
   }
 
+  // Detect Stripe rail mode from the secret key prefix.
+  const stripeKey  = process.env.STRIPE_SECRET_KEY ?? ''
+  const stripeMode: 'test' | 'live' = stripeKey.startsWith('sk_test_') ? 'test' : 'live'
+
   return NextResponse.json({
     scanned_at:               new Date().toISOString(),
     stale_threshold_minutes:  STALE_MINUTES,
@@ -193,6 +197,9 @@ export async function GET(request: NextRequest) {
 
     // Totals
     unconfirmed_total:        unconfirmedCount ?? 0,
+
+    // stripe_mode lets the UI distinguish test-rail gaps from live delivery failures.
+    stripe_mode:              stripeMode,
 
     // Recent event log (for the timeline display)
     recent_events: (recentWebhookRows ?? []).map((e) => ({

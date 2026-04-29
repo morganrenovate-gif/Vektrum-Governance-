@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react'
 import {
   Activity, AlertTriangle, CheckCircle2, Loader2,
   RefreshCw, ShieldAlert, ShieldCheck, Wifi, WifiOff,
-  Clock,
+  Clock, FlaskConical,
 } from 'lucide-react'
 import { formatMoney } from '@/lib/utils'
 
@@ -42,6 +42,8 @@ export interface WebhookHealthData {
   stale_transfers:              StaleTransfer[]
   unconfirmed_total:            number
   recent_events:                WebhookEvent[]
+  // stripe_mode: 'test' when using sk_test_ keys, 'live' otherwise.
+  stripe_mode?:                 'test' | 'live'
 }
 
 interface WebhookHealthPanelProps {
@@ -105,9 +107,25 @@ export function WebhookHealthPanel({ initialData }: WebhookHealthPanelProps) {
 
   const { feed_health, stale_count, unconfirmed_total, last_webhook_at,
           minutes_since_last_webhook, stale_transfers, recent_events } = data
+  const isTestMode = data.stripe_mode === 'test'
 
   return (
     <div className="space-y-4" id="webhook-health">
+      {/* ── Test-mode context banner ─────────────────────────────────── */}
+      {isTestMode && (feed_health === 'warning' || feed_health === 'critical' || stale_count > 0) && (
+        <div className="flex items-start gap-3 px-4 py-3 rounded-xl border border-blue-500/20 bg-blue-500/[0.06]">
+          <FlaskConical size={14} className="text-blue-400 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-[12px] font-semibold text-blue-300">Stripe test mode — webhook gaps expected</p>
+            <p className="text-[11.5px] text-blue-300/70 leading-snug mt-0.5">
+              Test-mode Stripe events are infrequent. Feed gaps and stale pending transfers
+              are normal in test/demo usage with no active Stripe traffic.
+              In production (<code className="font-mono text-blue-300/80">sk_live_</code>), feed silence requires investigation.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* ── Header ──────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between gap-4">
         <div>
@@ -195,6 +213,7 @@ export function WebhookHealthPanel({ initialData }: WebhookHealthPanelProps) {
             </div>
             <p className="text-[11px] text-white/65">
               Pending &gt;{data.stale_threshold_minutes}m — Stripe not confirming
+              {isTestMode && ' · test rail'}
             </p>
           </div>
           <ul className="divide-y divide-white/[0.04]">

@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useCallback, useTransition } from 'react'
+import Link from 'next/link'
 import {
   AlertTriangle, CheckCircle2, Clock, Loader2,
   RefreshCw, RotateCcw, ChevronDown, ChevronRight,
-  ShieldAlert, ShieldCheck, DollarSign,
+  ShieldAlert, ShieldCheck, DollarSign, FlaskConical, ExternalLink,
 } from 'lucide-react'
 import { formatMoney } from '@/lib/utils'
 
@@ -51,6 +52,10 @@ interface ReleaseHealthData {
   failed_count:           number
   stuck_releases:         StuckRelease[]
   failed_payouts:         FailedPayout[]
+  // stripe_mode: 'test' when using sk_test_ keys, 'live' otherwise.
+  // Used to contextualise warnings — stuck items on the test rail do not
+  // represent real funds at risk.
+  stripe_mode?:           'test' | 'live'
 }
 
 interface ReleaseHealthPanelProps {
@@ -100,9 +105,10 @@ function FailureBadge({ count }: { count: number }) {
 
 // ─── Stuck release row ────────────────────────────────────────────────────────
 
-function StuckRow({ item }: { item: StuckRelease }) {
+function StuckRow({ item, stripeMode }: { item: StuckRelease; stripeMode: 'test' | 'live' }) {
   const [expanded, setExpanded] = useState(false)
   const isHighValue = item.amount >= 1_000_000 // $10k in cents
+  const isTestRail  = stripeMode === 'test'
 
   return (
     <li className="hover:bg-white/[0.02] transition-colors">
@@ -117,6 +123,12 @@ function StuckRow({ item }: { item: StuckRelease }) {
 
         <StuckBadge hours={item.hours_stuck} />
 
+        {isTestRail && (
+          <span className="flex-shrink-0 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400">
+            <FlaskConical size={9} />Test rail
+          </span>
+        )}
+
         <div className="flex-1 min-w-0">
           <p className="text-[13px] font-semibold text-white truncate">
             {item.milestone_title}
@@ -126,7 +138,7 @@ function StuckRow({ item }: { item: StuckRelease }) {
           </p>
         </div>
 
-        {isHighValue && (
+        {isHighValue && !isTestRail && (
           <span className="flex-shrink-0 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/25 text-purple-400">
             <DollarSign size={9} className="inline mr-0.5" />High value
           </span>
@@ -143,6 +155,16 @@ function StuckRow({ item }: { item: StuckRelease }) {
 
       {expanded && (
         <div className="px-5 pb-4 pt-2 border-t border-white/[0.04] bg-white/[0.02] space-y-2">
+          {isTestRail && (
+            <div className="flex items-start gap-2 px-3 py-2 rounded-lg border border-blue-500/20 bg-blue-500/[0.06] mb-3">
+              <FlaskConical size={12} className="text-blue-400 flex-shrink-0 mt-0.5" />
+              <p className="text-[11.5px] text-blue-300 leading-snug">
+                <span className="font-semibold">Stripe test mode.</span>{' '}
+                No real funds are affected. This milestone is pending release on the test rail.
+                Funder action or a demo reset will clear this item.
+              </p>
+            </div>
+          )}
           <Detail label="Milestone ID"   value={item.milestone_id}   mono />
           <Detail label="Deal"           value={`${item.deal_title} (${item.deal_id.slice(0, 8)}…)`} />
           <Detail label="Deal status"    value={item.deal_status ?? '—'} />
@@ -150,6 +172,15 @@ function StuckRow({ item }: { item: StuckRelease }) {
           <Detail label="Funder"         value={item.funder_name} />
           <Detail label="Amount"         value={formatMoney(item.amount)} />
           <Detail label="Approved at"    value={item.approved_at ? new Date(item.approved_at).toLocaleString() : '—'} />
+          <div className="pt-1">
+            <Link
+              href={`/dashboard/deals/${item.deal_id}`}
+              className="inline-flex items-center gap-1.5 text-[12px] font-medium text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              <ExternalLink size={11} />
+              Open deal
+            </Link>
+          </div>
         </div>
       )}
     </li>
@@ -235,6 +266,15 @@ function FailedRow({
           <Detail label="Deal"              value={`${item.deal_title} (${item.deal_id.slice(0, 8)}…)`} />
           <Detail label="Contractor"        value={item.contractor_name} />
           <Detail label="Funder"            value={item.funder_name} />
+          <div className="pt-1">
+            <Link
+              href={`/dashboard/deals/${item.deal_id}`}
+              className="inline-flex items-center gap-1.5 text-[12px] font-medium text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              <ExternalLink size={11} />
+              Open deal
+            </Link>
+          </div>
 
           {retryMsg && (
             <p className={`text-[12px] mt-2 px-3 py-2 rounded-lg border ${
@@ -301,19 +341,47 @@ export function ReleaseHealthPanel({ initialData }: ReleaseHealthPanelProps) {
     }))
   }, [])
 
-  const totalIssues  = data.stuck_count + data.failed_count
-  const hasIssues    = totalIssues > 0
-  const hasCritical  = data.failed_count > 0 || (data.stuck_releases?.some((r) => (r.hours_stuck ?? 0) >= 24) ?? false)
+  const totalIssues    = data.stuck_count + data.failed_count
+  const hasIssues      = totalIssues > 0
+  const hasCritical    = data.failed_count > 0 || (data.stuck_releases?.some((r) => (r.hours_stuck ?? 0) >= 24) ?? false)
+  const isTestMode     = data.stripe_mode === 'test'
+  // In test mode, stuck-only items are test-rail pending — not a live-funds alarm.
+  const isTestOnlyStuck = isTestMode && data.failed_count === 0 && data.stuck_count > 0
 
   return (
     <div className="space-y-4" id="release-health">
+      {/* ── Test-mode context banner ─────────────────────────────────── */}
+      {isTestMode && (
+        <div className="flex items-start gap-3 px-4 py-3 rounded-xl border border-blue-500/20 bg-blue-500/[0.06]">
+          <FlaskConical size={14} className="text-blue-400 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-[12px] font-semibold text-blue-300">Stripe test mode active</p>
+            <p className="text-[11.5px] text-blue-300/70 leading-snug mt-0.5">
+              No real funds are at risk. Stuck releases and payout failures on this rail are
+              test-mode artifacts. In production (<code className="font-mono text-blue-300/80">sk_live_</code>),
+              these warnings require immediate attention.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* ── Header ──────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          {hasCritical ? (
+          {hasCritical && !isTestMode ? (
             <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[12px] font-semibold bg-red-500/10 border border-red-500/20 text-red-400 w-fit mb-2">
               <ShieldAlert size={12} />
               {data.failed_count} failed · {data.stuck_count} stuck
+            </div>
+          ) : hasCritical && isTestMode ? (
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[12px] font-semibold bg-red-500/10 border border-red-500/20 text-red-400 w-fit mb-2">
+              <ShieldAlert size={12} />
+              {data.failed_count} failed · {data.stuck_count} stuck (test rail)
+            </div>
+          ) : isTestOnlyStuck ? (
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[12px] font-semibold bg-blue-500/10 border border-blue-500/20 text-blue-400 w-fit mb-2">
+              <FlaskConical size={12} />
+              {data.stuck_count} pending — test rail, no live funds
             </div>
           ) : hasIssues ? (
             <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[12px] font-semibold bg-amber-500/10 border border-amber-500/20 text-amber-400 w-fit mb-2">
@@ -372,9 +440,17 @@ export function ReleaseHealthPanel({ initialData }: ReleaseHealthPanelProps) {
           <EmptyState label="No stuck releases" />
         ) : (
           <div className="rounded-xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden">
-            <ListHeader title={`Stuck Approvals (${data.stuck_count})`} subtitle={`>${data.stuck_threshold_hours}h since approval`} />
+            <ListHeader
+              title={`Stuck Approvals (${data.stuck_count})`}
+              subtitle={isTestMode
+                ? `>${data.stuck_threshold_hours}h since approval · test rail — no live funds affected`
+                : `>${data.stuck_threshold_hours}h since approval — needs attention`
+              }
+            />
             <ul className="divide-y divide-white/[0.04]">
-              {data.stuck_releases.map((r) => <StuckRow key={r.milestone_id} item={r} />)}
+              {data.stuck_releases.map((r) => (
+                <StuckRow key={r.milestone_id} item={r} stripeMode={data.stripe_mode ?? 'live'} />
+              ))}
             </ul>
           </div>
         )
