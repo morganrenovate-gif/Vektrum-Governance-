@@ -1,0 +1,452 @@
+/**
+ * tests/seo-accessibility-audit.test.ts
+ *
+ * Static source-parse checks for Sprint 1 + Sprint 2 SEO/GEO/accessibility work.
+ *
+ * Metadata presence
+ *   1. Root layout has metadataBase
+ *   2. Root layout has openGraph defaults
+ *   3. Root layout has twitter defaults
+ *   4. Homepage has per-page metadata export
+ *   5. /funders has canonical
+ *   6. /contractors has canonical
+ *   7. /pricing has canonical
+ *   8. /help has canonical
+ *   9. /demo has canonical
+ *
+ * robots.ts
+ *  10. /src/app/robots.ts exists
+ *  11. robots.ts disallows /auth/
+ *  12. robots.ts disallows /dashboard/
+ *  13. robots.ts disallows /api/
+ *  14. robots.ts references sitemap.xml
+ *
+ * Sitemap
+ *  15. sitemap.ts includes /funders
+ *  16. sitemap.ts includes /contractors
+ *  17. sitemap.ts includes /help
+ *  18. sitemap.ts includes /resources
+ *  19. sitemap.ts includes /lenders
+ *  20. sitemap.ts does NOT include /dashboard
+ *  21. sitemap.ts does NOT include /auth
+ *
+ * FAQPage schema
+ *  22. /help exports faqSchema with @type FAQPage
+ *  23. /help injects application/ld+json script
+ *
+ * SoftwareApplication schema
+ *  24. Homepage exports softwareSchema with @type SoftwareApplication
+ *
+ * Accessibility
+ *  25. Root layout has skip link with href="#main-content"
+ *  26. Root layout main element has id="main-content"
+ *  27. Mobile nav button has aria-controls
+ *  28. Mobile nav drawer has id="mobile-nav-menu"
+ *
+ * /help heading hierarchy
+ *  29. /help has an h2 for the main FAQ section
+ *
+ * llms.txt
+ *  30. /src/app/llms.txt/route.ts exists
+ *  31. llms.txt content includes company summary
+ *  32. llms.txt content includes non-custody disclaimer
+ *  33. llms.txt content includes "What Vektrum Does Not Do"
+ *
+ * /resources
+ *  34. /resources page exists
+ *  35. First article page exists
+ *  36. Article links to /funders and /help internally
+ *
+ * /funders segmentation
+ *  37. /funders includes "Private lenders" section
+ *  38. /funders includes institutional rails content
+ *  39. /funders has non-custody trust strip above benefits
+ *
+ * /contractors
+ *  40. /contractors includes invite flow explanation
+ *  41. /contractors has "Tell your funder about Vektrum" CTA
+ *
+ * Banned claims
+ *  42. /funders has no "Vektrum moves money"
+ *  43. /contractors has no "AI approves"
+ *  44. /help has no "tamper-proof"
+ *  45. /llms.txt route has no "escrow replacement"
+ *  46. Homepage has no "funds stay in Stripe" (funds held in Stripe-managed accounts is OK)
+ *
+ * OG image asset
+ *  47. public/og-image.png exists (1200×630 branded asset)
+ *  48. og-image.png is at least 1 KB (real image, not empty)
+ *  49. og-image.png declared as PNG by file header
+ *  50. Layout's openGraph references /og-image.png
+ *  51. Per-page metadata references /og-image.png consistently
+ *
+ * Citations & sources
+ *  52. No "[Citation placeholder" text remains in any public page or article
+ *  53. No "[citation needed]" text remains
+ *  54. Article includes a Sources section with id="sources"
+ *  55. Article cites at least 5 distinct sources
+ *  56. Article includes FDIC source (12% draw denial stat)
+ *  57. Article includes California Civil Code 8850 source
+ *  58. Article includes Bank Director source
+ *  59. Article includes OCC source
+ *  60. Article includes FAR source
+ *  61. /demo Section 2 stats use citations (FDIC and ACFE) and not the unsupported $3.1B/87%
+ *  62. About/Careers do not assert exact $2.19T figure (softened)
+ *
+ * Banned overclaims
+ *  63. Article does not say Vektrum prevents fraud
+ *  64. Article does not say Vektrum eliminates disputes
+ *  65. Article does not say Vektrum guarantees compliance
+ *
+ * External source links
+ *  66. Sources section contains at least 1 external link (FAR canonical)
+ *  67. FAR 52.232-5 links to acquisition.gov canonical URL
+ *  68. FAR 52.232-27 links to acquisition.gov canonical URL
+ *  69. All external links use rel="noopener noreferrer"
+ *  70. All external links use target="_blank"
+ *  71. No placeholder URLs remain (#, example.com, TODO in href)
+ *  72. Unverified sources marked with TODO(canonical-url) comments
+ *
+ * package.json
+ *  73. Test wired into npm test
+ *
+ * Run: npx tsx tests/seo-accessibility-audit.test.ts
+ */
+
+import fs   from 'fs'
+import path from 'path'
+
+const ROOT = path.resolve(process.cwd())
+
+function read(rel: string): string {
+  const full = path.resolve(ROOT, rel)
+  if (!fs.existsSync(full)) throw new Error(`File not found: ${rel}`)
+  return fs.readFileSync(full, 'utf-8')
+}
+
+function exists(rel: string): boolean {
+  return fs.existsSync(path.resolve(ROOT, rel))
+}
+
+function pass(msg: string) { console.log(`  ✓ ${msg}`) }
+function fail(msg: string) { throw new Error(`FAIL: ${msg}`) }
+function check(cond: boolean, msg: string) { cond ? pass(msg) : fail(msg) }
+
+async function main() {
+  console.log('\nseo-accessibility-audit.test.ts\n')
+
+  const layout      = read('src/app/layout.tsx')
+  const mobileNav   = read('src/components/nav/mobile-nav.tsx')
+  const homepage    = read('src/app/page.tsx')
+  const funders     = read('src/app/funders/page.tsx')
+  const contractors = read('src/app/contractors/page.tsx')
+  const pricing     = read('src/app/pricing/page.tsx')
+  const helpPage    = read('src/app/help/page.tsx')
+  const demoPage    = read('src/app/demo/page.tsx')
+  const sitemap     = read('src/app/sitemap.ts')
+  const pkg         = read('package.json')
+  const llmsRoute   = read('src/app/llms.txt/route.ts')
+  const resourcesPage  = read('src/app/resources/page.tsx')
+  const articlePage    = read('src/app/resources/construction-dispute-isolation/page.tsx')
+
+  // ── Metadata presence ────────────────────────────────────────────────────────
+  console.log('Metadata presence')
+
+  check(layout.includes('metadataBase'),                               ' 1. Root layout has metadataBase')
+  check(layout.includes('openGraph'),                                  ' 2. Root layout has openGraph defaults')
+  check(layout.includes("twitter:") || layout.includes("twitter: {"), ' 3. Root layout has twitter defaults')
+  check(homepage.includes('export const metadata'),                    ' 4. Homepage has per-page metadata export')
+  check(funders.includes("canonical: 'https://vektrum.io/funders'") || funders.includes('canonical:'), ' 5. /funders has canonical')
+  check(contractors.includes('canonical:'),                            ' 6. /contractors has canonical')
+  check(pricing.includes('canonical:'),                                ' 7. /pricing has canonical')
+  check(helpPage.includes('canonical:'),                               ' 8. /help has canonical')
+  check(demoPage.includes('canonical:'),                               ' 9. /demo has canonical')
+
+  // ── robots.ts ────────────────────────────────────────────────────────────────
+  console.log('\nrobots.ts')
+
+  check(exists('src/app/robots.ts'),                                   '10. robots.ts exists')
+  const robots = read('src/app/robots.ts')
+  check(robots.includes('/auth/'),                                     '11. robots.ts disallows /auth/')
+  check(robots.includes('/dashboard/'),                                '12. robots.ts disallows /dashboard/')
+  check(robots.includes('/api/'),                                      '13. robots.ts disallows /api/')
+  check(robots.includes('sitemap.xml'),                                '14. robots.ts references sitemap.xml')
+
+  // ── Sitemap ──────────────────────────────────────────────────────────────────
+  console.log('\nSitemap')
+
+  check(sitemap.includes('/funders'),                                  '15. sitemap includes /funders')
+  check(sitemap.includes('/contractors'),                              '16. sitemap includes /contractors')
+  check(sitemap.includes('/help'),                                     '17. sitemap includes /help')
+  check(sitemap.includes('/resources'),                                '18. sitemap includes /resources')
+  check(sitemap.includes('/lenders'),                                  '19. sitemap includes /lenders')
+  check(!sitemap.includes('/dashboard'),                               '20. sitemap does NOT include /dashboard')
+  check(!sitemap.includes('/auth'),                                    '21. sitemap does NOT include /auth')
+
+  // ── FAQPage schema ───────────────────────────────────────────────────────────
+  console.log('\nFAQPage schema')
+
+  check(helpPage.includes("'FAQPage'") || helpPage.includes('"FAQPage"'),  '22. /help exports faqSchema with @type FAQPage')
+  check(helpPage.includes('application/ld+json'),                           '23. /help injects application/ld+json script')
+
+  // ── SoftwareApplication schema ───────────────────────────────────────────────
+  console.log('\nSoftwareApplication schema')
+
+  check(
+    homepage.includes("'SoftwareApplication'") || homepage.includes('"SoftwareApplication"'),
+    '24. Homepage exports softwareSchema with @type SoftwareApplication',
+  )
+
+  // ── Accessibility ────────────────────────────────────────────────────────────
+  console.log('\nAccessibility')
+
+  check(layout.includes('href="#main-content"'),                       '25. Root layout has skip link targeting #main-content')
+  check(layout.includes('id="main-content"'),                          '26. Root layout main element has id="main-content"')
+  check(mobileNav.includes('aria-controls'),                           '27. Mobile nav button has aria-controls')
+  check(mobileNav.includes('id="mobile-nav-menu"'),                    '28. Mobile nav drawer has id="mobile-nav-menu"')
+
+  // ── /help heading hierarchy ──────────────────────────────────────────────────
+  console.log('\n/help heading hierarchy')
+
+  check(
+    helpPage.includes('General questions') && helpPage.includes('<h2'),
+    '29. /help has an h2 for the main FAQ section',
+  )
+
+  // ── llms.txt ─────────────────────────────────────────────────────────────────
+  console.log('\nllms.txt')
+
+  check(exists('src/app/llms.txt/route.ts'),                           '30. llms.txt route exists')
+  check(llmsRoute.includes('Vektrum'),                                 '31. llms.txt content includes company summary')
+  check(
+    llmsRoute.includes('does not hold') || llmsRoute.includes('Non-Custody'),
+    '32. llms.txt content includes non-custody disclaimer',
+  )
+  check(llmsRoute.includes('Does Not Do') || llmsRoute.includes('does not'),  '33. llms.txt includes What Vektrum Does Not Do')
+
+  // ── /resources ───────────────────────────────────────────────────────────────
+  console.log('\n/resources')
+
+  check(exists('src/app/resources/page.tsx'),                          '34. /resources page exists')
+  check(exists('src/app/resources/construction-dispute-isolation/page.tsx'), '35. First article page exists')
+  check(
+    articlePage.includes('/funders') && articlePage.includes('/help'),
+    '36. Article links to /funders and /help internally',
+  )
+
+  // ── /funders segmentation ────────────────────────────────────────────────────
+  console.log('\n/funders segmentation')
+
+  check(
+    funders.includes('Private lenders') || funders.includes('private lenders'),
+    '37. /funders includes private lenders section',
+  )
+  check(
+    funders.includes('institutional') || funders.includes('Institutional'),
+    '38. /funders includes institutional rails content',
+  )
+  check(
+    funders.includes('does not hold') || funders.includes('Vektrum does not hold'),
+    '39. /funders has non-custody trust strip',
+  )
+
+  // ── /contractors ─────────────────────────────────────────────────────────────
+  console.log('\n/contractors')
+
+  check(
+    contractors.includes('invite') || contractors.includes('Invite'),
+    '40. /contractors includes invite flow explanation',
+  )
+  check(
+    contractors.includes('Tell your funder') || contractors.includes('funder about Vektrum'),
+    '41. /contractors has Tell your funder CTA',
+  )
+
+  // ── Banned claims ────────────────────────────────────────────────────────────
+  console.log('\nBanned claims')
+
+  check(!funders.includes('Vektrum moves money'),                      '42. /funders has no "Vektrum moves money"')
+  check(!contractors.includes('AI approves'),                          '43. /contractors has no "AI approves"')
+  check(!helpPage.includes('tamper-proof'),                            '44. /help has no "tamper-proof"')
+  check(!llmsRoute.includes('escrow replacement'),                     '45. llms.txt has no "escrow replacement"')
+  check(!homepage.includes('funds stay in Stripe'),                    '46. Homepage has no "funds stay in Stripe"')
+
+  // ── OG image asset ───────────────────────────────────────────────────────────
+  console.log('\nOG image asset')
+
+  const ogPng = path.resolve(ROOT, 'public/og-image.png')
+  check(fs.existsSync(ogPng),                                          '47. public/og-image.png exists')
+  const ogBytes = fs.existsSync(ogPng) ? fs.statSync(ogPng).size : 0
+  check(ogBytes >= 1024,                                               `48. og-image.png is at least 1 KB (got ${ogBytes} bytes)`)
+  if (fs.existsSync(ogPng)) {
+    const head = fs.readFileSync(ogPng).slice(0, 8)
+    // PNG signature: 89 50 4E 47 0D 0A 1A 0A
+    const isPng = head[0] === 0x89 && head[1] === 0x50 && head[2] === 0x4E && head[3] === 0x47
+    check(isPng,                                                       '49. og-image.png has valid PNG header')
+  } else {
+    fail('49. og-image.png missing — cannot verify PNG header')
+  }
+  check(layout.includes('/og-image.png'),                              '50. Layout openGraph references /og-image.png')
+  check(
+    funders.includes('/og-image.png') &&
+      contractors.includes('/og-image.png') &&
+      pricing.includes('/og-image.png') &&
+      helpPage.includes('/og-image.png') &&
+      demoPage.includes('/og-image.png') &&
+      homepage.includes('/og-image.png'),
+    '51. Per-page metadata references /og-image.png consistently',
+  )
+
+  // ── Citations & sources ──────────────────────────────────────────────────────
+  console.log('\nCitations & sources')
+
+  // 52. No "[Citation placeholder" text remains anywhere in src/app
+  function walkDir(dir: string, files: string[] = []): string[] {
+    for (const entry of fs.readdirSync(dir)) {
+      const full = path.join(dir, entry)
+      const stat = fs.statSync(full)
+      if (stat.isDirectory()) walkDir(full, files)
+      else if (full.endsWith('.tsx') || full.endsWith('.ts')) files.push(full)
+    }
+    return files
+  }
+  const allSrcFiles = walkDir(path.resolve(ROOT, 'src/app'))
+  const placeholderHits = allSrcFiles.filter((f) => {
+    const c = fs.readFileSync(f, 'utf-8')
+    return c.includes('[Citation placeholder') || c.includes('[citation placeholder')
+  })
+  check(placeholderHits.length === 0, `52. No "[Citation placeholder" text remains (found in ${placeholderHits.length} files)`)
+  const citationNeededHits = allSrcFiles.filter((f) => {
+    const c = fs.readFileSync(f, 'utf-8')
+    return c.includes('[citation needed]') || c.includes('[CITATION NEEDED]')
+  })
+  check(citationNeededHits.length === 0, `53. No "[citation needed]" text remains (found in ${citationNeededHits.length} files)`)
+
+  // 54-60. Article structural checks
+  check(articlePage.includes('id="sources"'),                          '54. Article includes a Sources section with id="sources"')
+
+  const sourceIds = ['source-1', 'source-2', 'source-3', 'source-4', 'source-5', 'source-6']
+  const presentSources = sourceIds.filter((id) => articlePage.includes(`id="${id}"`))
+  check(presentSources.length >= 5,                                    `55. Article cites at least 5 distinct sources (found ${presentSources.length})`)
+
+  check(articlePage.includes('FDIC'),                                  '56. Article includes FDIC source (12% draw denial stat)')
+  check(articlePage.includes('Civil Code') || articlePage.includes('8850'), '57. Article includes California Civil Code 8850 source')
+  check(articlePage.includes('Bank Director'),                         '58. Article includes Bank Director source')
+  check(articlePage.includes('Comptroller of the Currency') || articlePage.includes('OCC'), '59. Article includes OCC source')
+  check(articlePage.includes('Federal Acquisition Regulation') || articlePage.includes('FAR '), '60. Article includes FAR source')
+
+  // 61. Demo stats: FDIC + ACFE present, $3.1B and 87% removed
+  check(
+    demoPage.includes('FDIC') &&
+      demoPage.includes('ACFE') &&
+      !demoPage.includes('$3.1B') &&
+      !demoPage.includes('87%'),
+    '61. /demo stats use FDIC + ACFE; unsupported $3.1B and 87% removed',
+  )
+
+  // 62. About/Careers softened
+  const aboutPage = read('src/app/about/page.tsx')
+  const careersPage = read('src/app/careers/page.tsx')
+  check(
+    !aboutPage.includes('$2.19 trillion') && !careersPage.includes('$2.19 trillion'),
+    '62. About/Careers do not assert exact $2.19T figure (softened)',
+  )
+
+  // ── Banned overclaims ───────────────────────────────────────────────────────
+  // We forbid AFFIRMATIVE claims like "Vektrum prevents fraud". A negative
+  // disclaimer ("does not claim to prevent fraud") is allowed.
+  console.log('\nBanned overclaims')
+
+  // Affirmative-claim regex: Vektrum + (verb) + (banned thing).
+  // Tolerates a negation immediately before — e.g. "does not", "cannot",
+  // "doesn't" — by requiring no "not" / "n't" / "never" / "no" between the
+  // subject "Vektrum" and the verb within ~20 characters.
+  const NEGATION = /\b(?:not|n['’]t|never|no\b)\b/i
+  function affirmativeClaim(text: string, verbPattern: RegExp): boolean {
+    // Walk all matches of the verb in the article body.
+    let m
+    const re = new RegExp(verbPattern, 'gi')
+    while ((m = re.exec(text)) !== null) {
+      // Look at the 60 chars *before* the match — if there's no negation,
+      // and there's "Vektrum" or "we" within that window, it's an affirmative claim.
+      const window = text.slice(Math.max(0, m.index - 60), m.index)
+      if (NEGATION.test(window)) continue
+      if (/\bVektrum\b/.test(window) || /\b(?:we|We)\b/.test(window)) return true
+    }
+    return false
+  }
+
+  check(
+    !affirmativeClaim(articlePage, /\bprevents?\s+fraud\b/),
+    '63. Article does not affirmatively claim Vektrum prevents fraud',
+  )
+  check(
+    !affirmativeClaim(articlePage, /\beliminates?\s+disputes?\b/),
+    '64. Article does not affirmatively claim Vektrum eliminates disputes',
+  )
+  check(
+    !affirmativeClaim(articlePage, /\bguarantees?\s+compliance\b/),
+    '65. Article does not affirmatively claim Vektrum guarantees compliance',
+  )
+
+  // ── External source links ────────────────────────────────────────────────────
+  console.log('\nExternal source links')
+
+  // Isolate the Sources section so we don't accidentally count the in-body
+  // [1]/[2] superscript anchors as external links.
+  const sourcesIdx    = articlePage.indexOf('id="sources"')
+  const sourcesEndIdx = articlePage.indexOf('</section>', sourcesIdx)
+  const sourcesBlock  = sourcesIdx !== -1 ? articlePage.slice(sourcesIdx, sourcesEndIdx) : ''
+
+  // Match all external <a href="https://..."> within the Sources block
+  const externalLinkRe = /<a\s+href="(https?:\/\/[^"]+)"[^>]*>/g
+  const externalLinks: string[] = []
+  let m: RegExpExecArray | null
+  while ((m = externalLinkRe.exec(sourcesBlock)) !== null) {
+    externalLinks.push(m[1])
+  }
+  check(externalLinks.length >= 1, `66. Sources section contains at least 1 external link (found ${externalLinks.length})`)
+  check(
+    sourcesBlock.includes('https://www.acquisition.gov/far/52.232-5'),
+    '67. FAR 52.232-5 links to acquisition.gov canonical URL',
+  )
+  check(
+    sourcesBlock.includes('https://www.acquisition.gov/far/52.232-27'),
+    '68. FAR 52.232-27 links to acquisition.gov canonical URL',
+  )
+
+  // Check rel/target on every external <a> in the sources block
+  const externalAnchorRe = /<a\s+href="https?:\/\/[^"]+"[^>]*>/g
+  const externalAnchors: string[] = []
+  let am: RegExpExecArray | null
+  while ((am = externalAnchorRe.exec(sourcesBlock)) !== null) {
+    externalAnchors.push(am[0])
+  }
+  const allHaveRel    = externalAnchors.every((a) => /rel="[^"]*noopener[^"]*noreferrer[^"]*"|rel="[^"]*noreferrer[^"]*noopener[^"]*"/.test(a))
+  const allHaveTarget = externalAnchors.every((a) => a.includes('target="_blank"'))
+  check(allHaveRel,    '69. All external links in Sources use rel="noopener noreferrer"')
+  check(allHaveTarget, '70. All external links in Sources use target="_blank"')
+
+  // No placeholder URLs anywhere in the Sources block
+  const hasPlaceholderUrl =
+    /href="#"/.test(sourcesBlock) ||
+    /href="example\.com|href="https?:\/\/example\./.test(sourcesBlock) ||
+    /href="[^"]*TODO/.test(sourcesBlock) ||
+    /href="\s*"/.test(sourcesBlock)
+  check(!hasPlaceholderUrl, '71. No placeholder URLs in Sources section (no #, example.com, TODO, or empty href)')
+
+  // Unverified sources marked with TODO(canonical-url) comments — confirms we
+  // didn't silently drop the "needs confirmation" markers.
+  const todoCount = (sourcesBlock.match(/TODO\(canonical-url\)/g) ?? []).length
+  check(todoCount >= 4, `72. Unverified sources marked with TODO(canonical-url) comments (found ${todoCount})`)
+
+  // ── package.json ─────────────────────────────────────────────────────────────
+  check(pkg.includes('seo-accessibility-audit.test.ts'),               '73. Test wired into npm test')
+
+  console.log('\n✓ All seo-accessibility-audit tests passed.\n')
+}
+
+main().catch((err) => {
+  console.error('\n' + err.message)
+  process.exit(1)
+})

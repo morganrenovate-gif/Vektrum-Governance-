@@ -29,7 +29,7 @@ export default function CareersPage() {
           <p className="mt-4 mx-auto max-w-2xl text-[17px] leading-relaxed text-white/55">
             Vektrum is building the governance layer for construction finance.
             We are looking for engineers, designers, and domain experts who want
-            to protect every dollar in a $2.19 trillion industry.
+            to bring release-condition enforcement to a multi-trillion-dollar industry.
           </p>
         </div>
       </section>

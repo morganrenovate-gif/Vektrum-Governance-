@@ -34,9 +34,35 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Vektrum — Construction Payment Governance",
+  metadataBase: new URL('https://vektrum.io'),
+  title: {
+    default: "Vektrum — Construction Payment Governance",
+    template: "%s | Vektrum",
+  },
   description:
-    "Construction disbursement governance — 10-condition release gate, immutable audit trail, and dispute isolation. Funds release only when all conditions are verified.",
+    "Conditional authorization infrastructure for construction disbursements. A 10-condition release gate, AI-assisted draw review, and immutable audit trail. Funds release only when all conditions are verified.",
+  openGraph: {
+    type: 'website',
+    siteName: 'Vektrum',
+    locale: 'en_US',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Vektrum — Conditional Authorization Infrastructure for Construction Disbursements',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    site: '@vektrum',
+    creator: '@vektrum',
+    images: ['/og-image.png'],
+  },
+  alternates: {
+    canonical: 'https://vektrum.io',
+  },
 };
 
 export const viewport: Viewport = {
@@ -117,6 +143,14 @@ export default async function RootLayout({
         `}} />
       </head>
       <body className="flex min-h-screen flex-col bg-vektrum-bg font-sans text-white antialiased">
+        {/* ── Skip link ── allows keyboard/screen-reader users to bypass nav ──── */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[9999] focus:flex focus:items-center focus:rounded-lg focus:bg-vektrum-blue focus:px-4 focus:py-2 focus:text-[13px] focus:font-semibold focus:text-white focus:shadow-lg focus:outline-none"
+        >
+          Skip to main content
+        </a>
+
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -214,7 +248,7 @@ export default async function RootLayout({
         </header>
 
         {/* Main */}
-        <main className="flex-1">{children}</main>
+        <main id="main-content" className="flex-1">{children}</main>
         <Analytics />
 
         {/* Footer */}

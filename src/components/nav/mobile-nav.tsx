@@ -65,6 +65,7 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
         className="flex sm:hidden items-center justify-center w-9 h-9 rounded-lg text-white/55 hover:text-white hover:bg-surface-3 transition-colors"
         aria-label={open ? 'Close menu' : 'Open menu'}
         aria-expanded={open}
+        aria-controls="mobile-nav-menu"
       >
         {open ? <X size={20} /> : <Menu size={20} />}
       </button>
@@ -80,8 +81,8 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
           />
 
           {/* Drawer */}
-          <div className="fixed inset-x-0 top-[65px] z-50 sm:hidden border-b border-white/[0.08] bg-surface-2 shadow-xl">
-            <nav className="flex flex-col px-4 py-4 gap-1">
+          <div id="mobile-nav-menu" className="fixed inset-x-0 top-[65px] z-50 sm:hidden border-b border-white/[0.08] bg-surface-2 shadow-xl">
+            <nav className="flex flex-col px-4 py-4 gap-1" aria-label="Mobile navigation">
 
               {isLoggedIn ? (
                 // ── Logged-in drawer ────────────────────────────────────────
