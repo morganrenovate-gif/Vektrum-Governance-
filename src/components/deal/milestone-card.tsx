@@ -111,7 +111,27 @@ export function MilestoneCard({
   const [copied, setCopied]         = useState(false)
   const [rejectReason, setRejectReason] = useState("")
   const [showRejectInput, setShowRejectInput] = useState(false)
+  const [pdfLoading, setPdfLoading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleViewPdf = async () => {
+    if (!lienWaiverState) return
+    setPdfLoading(true)
+    setLienError(null)
+    try {
+      const res = await fetch(`/api/lien-waivers/${lienWaiverState.id}/signed-url`)
+      const data = await res.json()
+      if (!res.ok) {
+        setLienError(data.error ?? "Could not load the waiver document.")
+      } else {
+        window.open(data.signed_url, "_blank", "noopener,noreferrer")
+      }
+    } catch {
+      setLienError("Network error. Please try again.")
+    } finally {
+      setPdfLoading(false)
+    }
+  }
 
   const handleRequestWaiver = async () => {
     setLienLoading("request")
@@ -702,6 +722,17 @@ export function MilestoneCard({
                   </div>
                   {role === "funder" && !showRejectInput && (
                     <div className="flex items-center gap-2 flex-shrink-0">
+                      <button
+                        type="button"
+                        onClick={handleViewPdf}
+                        disabled={pdfLoading}
+                        className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] font-medium text-blue-400/80 border border-blue-500/20 hover:bg-blue-500/10 transition-colors disabled:pointer-events-none disabled:opacity-50"
+                      >
+                        {pdfLoading
+                          ? <><Clock size={11} className="animate-spin" aria-hidden="true" /> Loading…</>
+                          : <><FileText size={11} aria-hidden="true" /> View PDF</>
+                        }
+                      </button>
                       <Button
                         variant="success"
                         size="sm"
