@@ -158,15 +158,26 @@ await test('dashboard: queries deal funder via profiles!deals_funder_id_fkey joi
 await test('dashboard: batch-fetches missing funder profiles via admin client', () => {
   const src = read(DASHBOARD)
   const code = codeOnly(src)
-  // Should iterate over deals with funder_id set but funder null
+  // Detect deals where funder_id is set but funder join is null
   assert(
-    /funder_id.*&&.*!.*funder|funder_id.*funder/.test(code.replace(/\s+/g, ' ')),
+    /funder_id.*&&.*funder.*===.*null|funder_id.*funder/.test(code.replace(/\s+/g, ' ')),
     `${DASHBOARD} must detect deals where funder_id is set but the profile join failed`,
   )
   // Should call admin client and query profiles
   assert(
     code.includes('createSupabaseAdminClient'),
     `${DASHBOARD} must use createSupabaseAdminClient for the funder batch fallback`,
+  )
+})
+
+await test('dashboard: uses map()+spread (not in-place mutation) to merge funder profiles', () => {
+  const src = read(DASHBOARD)
+  // The fallback must use .map() and spread to create a new deal object with the funder
+  // profile so that the property is visible to Server Component props (DealCard).
+  // In-place mutation (d.funder = fp) is unreliable in Next.js Server Components.
+  assert(
+    src.includes('.map(') && src.includes('...d'),
+    `${DASHBOARD} must use map()+spread to merge the fetched funder profile into each deal — not in-place mutation`,
   )
 })
 
