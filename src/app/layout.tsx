@@ -7,6 +7,7 @@ import { BOOK_CALL_URL, BOOK_CALL_EXTERNAL } from "@/lib/book-call"
 import { MobileNav } from "@/components/nav/mobile-nav";
 import { VektrumWordmark } from "@/components/ui/vektrum-logo";
 import { UserMenu } from "@/components/nav/user-menu";
+import { NotificationBell } from "@/components/nav/notification-bell";
 import { createClient } from "@/lib/supabase/server";
 import "./globals.css";
 
@@ -146,7 +147,8 @@ export default async function RootLayout({
                     >
                       Dashboard
                     </Link>
-                    <div className="ml-3 pl-3 border-l border-white/[0.08]">
+                    <div className="ml-3 pl-3 border-l border-white/[0.08] flex items-center gap-1">
+                      <NotificationBell />
                       <UserMenu name={userName} email={userEmail} role={userRole} />
                     </div>
                   </>
