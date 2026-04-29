@@ -1,6 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { MoneySummary } from "@/components/deal/money-summary";
 import { MilestoneCard, type SequentialBlocker } from "@/components/deal/milestone-card";
 import { MilestoneDisputeSection } from "@/components/ai/MilestoneDisputeSection";
@@ -138,6 +139,29 @@ export default async function DealDetailPage({
     .single();
 
   if (error || !deal) notFound();
+
+  // ── Funder profile fallback ───────────────────────────────────────────────
+  // The user-session client (RLS-enforced) may return null for the funder join
+  // if the profiles_select policy hasn't been migrated yet (profiles_select_own
+  // only allows reading own profile). When funder_id is set but the join is
+  // null, fetch the profile via the admin client (server-side only, safe).
+  if ((deal as any).funder_id && !(deal as any).funder) {
+    const adminClient = createSupabaseAdminClient()
+    const { data: fp, error: fpErr } = await adminClient
+      .from('profiles')
+      .select('id, full_name, company_name, email, role')
+      .eq('id', (deal as any).funder_id)
+      .single()
+    if (fp) {
+      ;(deal as any).funder = fp
+    } else {
+      // Non-fatal: funder_id is set but profile is missing — log for ops visibility.
+      console.warn(
+        '[deal-detail] funder_id set but profile not found',
+        { deal_id: dealId, funder_id: (deal as any).funder_id, err: fpErr?.message },
+      )
+    }
+  }
 
   // Access control: admin sees all; contractor/funder only their deals
   const typedDeal = deal as Deal;
@@ -331,8 +355,14 @@ export default async function DealDetailPage({
               <span>
                 Funder:{" "}
                 <strong className="text-white">
-                  {typedDeal.funder.full_name}
+                  {typedDeal.funder.company_name ?? typedDeal.funder.full_name}
                 </strong>
+              </span>
+            ) : typedDeal.funder_id ? (
+              // funder_id is set but the profile join didn't resolve — show
+              // a safe fallback rather than "No funder assigned".
+              <span className="text-white/60">
+                Funder assigned
               </span>
             ) : (
               <span className="text-amber-400 font-medium">

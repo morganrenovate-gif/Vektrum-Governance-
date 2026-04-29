@@ -78,12 +78,18 @@ export function DealCard({ deal, className, viewerRole }: DealCardProps) {
                     {deal.contractor.company_name ?? deal.contractor.full_name}
                   </span>
                 )}
-                {deal.funder && (
+                {deal.funder ? (
                   <span className="flex items-center gap-1">
                     <User size={10} aria-hidden="true" />
-                    {deal.funder.full_name}
+                    {deal.funder.company_name ?? deal.funder.full_name}
                   </span>
-                )}
+                ) : deal.funder_id ? (
+                  // funder_id is set but profile join didn't resolve — safe fallback
+                  <span className="flex items-center gap-1">
+                    <User size={10} aria-hidden="true" />
+                    Funder assigned
+                  </span>
+                ) : null}
               </div>
             </div>
 

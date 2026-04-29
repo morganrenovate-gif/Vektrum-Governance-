@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { DealCard } from '@/components/deal/deal-card'
 import { Button } from '@/components/ui/button'
 import type { Deal, Profile } from '@/lib/types'
@@ -49,6 +50,33 @@ async function getProfileAndDeals(userId: string) {
   }
 
   const { data: deals } = await query
+
+  // ── Funder profile fallback ─────────────────────────────────────────────────
+  // The user-session client (RLS) may not allow contractors to read the funder's
+  // profile, causing the funder join to return null even when funder_id is set.
+  // When any deal has funder_id set but funder join is null, batch-fetch those
+  // profiles via the admin client (server-side only).
+  const dealsMissingFunder = (deals ?? []).filter(
+    (d: any) => d.funder_id && !d.funder,
+  )
+  if (dealsMissingFunder.length > 0) {
+    const uniqueFunderIds = [...new Set(dealsMissingFunder.map((d: any) => d.funder_id as string))]
+    const adminClient = createSupabaseAdminClient()
+    const { data: funderProfiles } = await adminClient
+      .from('profiles')
+      .select('id, full_name, company_name, email, role')
+      .in('id', uniqueFunderIds)
+    if (funderProfiles) {
+      const profileById = new Map(funderProfiles.map((p) => [p.id, p]))
+      for (const d of (deals ?? []) as any[]) {
+        if (d.funder_id && !d.funder) {
+          const fp = profileById.get(d.funder_id)
+          if (fp) d.funder = fp
+        }
+      }
+    }
+  }
+
   return { profile, deals: (deals ?? []) as Deal[] }
 }
 
