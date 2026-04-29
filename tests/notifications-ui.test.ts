@@ -86,6 +86,8 @@ const MARK_READ_ROUTE  = 'src/app/api/notifications/mark-read/route.ts'
 const TYPES            = 'src/lib/types.ts'
 const MIGRATION        = 'supabase/migrations/20260429000003_notifications_read_at.sql'
 const BELL             = 'src/components/nav/notification-bell.tsx'
+const NOTIF_PAGE       = 'src/app/dashboard/notifications/page.tsx'
+const MARK_ALL_BTN     = 'src/components/notifications/mark-all-read-button.tsx'
 const LAYOUT           = 'src/app/layout.tsx'
 const GATE             = 'src/lib/engine/release-gate.ts'
 const STRIPE_ROUTE     = 'src/app/api/stripe/webhooks/route.ts'
@@ -347,6 +349,76 @@ await test('31. Test file is wired into npm test in package.json', () => {
   assert(
     src.includes('notifications-ui.test.ts'),
     `${PACKAGE_JSON} must include notifications-ui.test.ts in the test script.`,
+  )
+})
+
+// ── Notifications page (/dashboard/notifications) ─────────────────────────────
+
+await test('32. /dashboard/notifications page file exists', () => {
+  assert(exists(NOTIF_PAGE), `${NOTIF_PAGE} must exist — this is the route the bell links to.`)
+})
+
+await test('33. Notifications page has auth guard (redirects unauthenticated users)', () => {
+  const src = read(NOTIF_PAGE)
+  assert(
+    src.includes('redirect') && (src.includes('auth/login') || src.includes('getUser')),
+    `${NOTIF_PAGE} must redirect unauthenticated users to /auth/login.`,
+  )
+})
+
+await test('34. Notifications page fetches notifications for current user only', () => {
+  const src = read(NOTIF_PAGE)
+  assert(
+    src.includes('recipient_user_id') && src.includes('user.id'),
+    `${NOTIF_PAGE} must filter notifications by recipient_user_id = user.id — users only see their own.`,
+  )
+})
+
+await test('35. Notifications page renders read/unread state', () => {
+  const src = read(NOTIF_PAGE)
+  assert(
+    src.includes('read_at') && (src.includes('isUnread') || src.includes('Unread')),
+    `${NOTIF_PAGE} must visually distinguish read vs unread notifications.`,
+  )
+})
+
+await test('36. Notifications page renders empty state', () => {
+  const src = read(NOTIF_PAGE)
+  assert(
+    src.includes('No notifications') || src.includes('empty'),
+    `${NOTIF_PAGE} must render an empty state when there are no notifications.`,
+  )
+})
+
+await test('37. Notifications page renders deal links', () => {
+  const src = read(NOTIF_PAGE)
+  assert(
+    src.includes('/dashboard/deals/') && src.includes('deal_id'),
+    `${NOTIF_PAGE} must render links to /dashboard/deals/[dealId] when deal_id is present.`,
+  )
+})
+
+await test('38. MarkAllReadButton component exists', () => {
+  assert(exists(MARK_ALL_BTN), `${MARK_ALL_BTN} must exist — used by the notifications page.`)
+})
+
+await test('39. MarkAllReadButton calls mark-read API with { all: true }', () => {
+  const src = read(MARK_ALL_BTN)
+  assert(
+    src.includes('/api/notifications/mark-read') && src.includes('all'),
+    `${MARK_ALL_BTN} must POST to /api/notifications/mark-read with { all: true }.`,
+  )
+})
+
+await test('40. Bell "View all notifications" href matches the page route', () => {
+  const bell = read(BELL)
+  const page = exists(NOTIF_PAGE)
+  // Extract href from bell
+  const match = bell.match(/href="([^"]*notifications[^"]*)"/)
+  const href  = match?.[1] ?? ''
+  assert(
+    page && href === '/dashboard/notifications',
+    `Bell links to "${href}" but ${NOTIF_PAGE} must exist at that exact path.`,
   )
 })
 
