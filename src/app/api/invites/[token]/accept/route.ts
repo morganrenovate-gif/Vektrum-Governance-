@@ -3,6 +3,7 @@ import { getAuthUser, requireRole } from '@/lib/auth/middleware'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { logAudit } from '@/lib/engine/audit'
 import { conflictError, errorResponse, internalError, notFoundError } from '@/lib/errors'
+import { notifyInviteAccepted } from '@/lib/engine/notify'
 
 // Separate from notFoundError: DB returned a query error, not a missing row.
 // Callers can distinguish a configuration/connectivity problem from an invalid token.
@@ -259,6 +260,14 @@ export async function POST(
       },
     }),
   ])
+
+  // Fire-and-forget — notify the contractor that their invite was accepted
+  void notifyInviteAccepted({
+    inviteId:     invite.id,
+    dealId:       invite.deal_id,
+    funderId:     user.id,
+    contractorId: deal.contractor_id,
+  })
 
   return NextResponse.json(
     {

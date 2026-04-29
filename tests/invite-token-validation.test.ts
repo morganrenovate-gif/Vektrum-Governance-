@@ -239,11 +239,18 @@ await test('12. Email template does not contain "Powered by Stripe Connect"', ()
 })
 
 await test('13. Email template includes the custody disclaimer', () => {
-  const src = read(CREATE_ROUTE)
+  // The invite POST route delegates email to notifyFunderInvited → renderVektrumEmail,
+  // which includes the custody disclaimer in the footer. Verify the route uses
+  // notifyFunderInvited (delegating to the branded template) OR contains the disclaimer inline.
+  const src     = read(CREATE_ROUTE)
+  const notifySrc = read('src/lib/engine/notify.ts')
+  const routeDelegates  = src.includes('notifyFunderInvited')
+  const disclaimerInNotify = notifySrc.includes('does not hold funds, act as escrow, or move money directly')
   assert(
+    (routeDelegates && disclaimerInNotify) ||
     src.includes('does not hold funds, act as escrow, or move money directly'),
-    `${CREATE_ROUTE} email template must include the custody disclaimer: ` +
-    '"Vektrum does not hold funds, act as escrow, or move money directly."',
+    `${CREATE_ROUTE} must either delegate to notifyFunderInvited (which renders the custody disclaimer) ` +
+    'or include the disclaimer directly.',
   )
 })
 

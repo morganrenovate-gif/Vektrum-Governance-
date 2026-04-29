@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { Resend } from 'resend'
 import { getAuthUser, requireRole } from '@/lib/auth/middleware'
+import { notifyFunderInvited } from '@/lib/engine/notify'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { logAudit } from '@/lib/engine/audit'
 import {
@@ -209,46 +209,17 @@ export async function POST(request: NextRequest) {
   // ── Send invite email (non-blocking) ──────────────────────────────────────
   // The invite record already exists regardless of email outcome. If email
   // fails, the contractor can copy-paste the link from the response.
-  let emailSent = false
-
+  // notifyFunderInvited creates a DB notification record + sends the branded email.
+  const emailSent = !!invitedEmail
   if (invitedEmail) {
-    try {
-      const resend = new Resend(process.env.RESEND_API_KEY)
-      const from = process.env.EMAIL_FROM ?? 'Vektrum <invites@vektrum.io>'
-
-      const expiryDate = new Date(invite.expires_at).toLocaleDateString('en-US', {
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric',
-      })
-
-      const { error: emailError } = await resend.emails.send({
-        from,
-        to: invitedEmail,
-        subject: `You've been invited to fund "${deal.title}" on Vektrum`,
-        html: `
-          <p>Hi,</p>
-          <p>You've been invited to join <strong>${deal.title}</strong> as a funder on Vektrum — release-control infrastructure for construction disbursements.</p>
-          <p>Click the link below to review the deal and accept your invitation:</p>
-          <p style="margin:20px 0">
-            <a href="${inviteUrl}" style="color:#1A3A96;font-weight:bold;font-size:16px">${inviteUrl}</a>
-          </p>
-          <p style="color:#6B7280;font-size:13px">This link expires on <strong>${expiryDate}</strong>. It is single-use — once accepted, it cannot be reused.</p>
-          <p style="color:#6B7280;font-size:13px">If you were not expecting this invitation, you can safely ignore this email.</p>
-          <hr style="border:none;border-top:1px solid #E5E7EB;margin:20px 0" />
-          <p style="color:#9CA3AF;font-size:12px">Vektrum · Release-control infrastructure for construction disbursements.</p>
-          <p style="color:#9CA3AF;font-size:12px">Vektrum does not hold funds, act as escrow, or move money directly.</p>
-        `,
-      })
-
-      if (emailError) {
-        console.error('[invites] email send failed:', emailError)
-      } else {
-        emailSent = true
-      }
-    } catch (err) {
-      console.error('[invites] email send threw:', err)
-    }
+    void notifyFunderInvited({
+      inviteId:     invite.id,
+      dealId:       invite.deal_id,
+      token:        invite.token,
+      funderEmail:  invitedEmail,
+      contractorId: user.id,
+      expiresAt:    invite.expires_at,
+    })
   }
 
   return NextResponse.json(

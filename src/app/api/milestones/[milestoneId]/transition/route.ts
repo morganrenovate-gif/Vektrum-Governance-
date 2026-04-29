@@ -5,6 +5,7 @@ import { logAudit } from '@/lib/engine/audit'
 import { validateTransition } from '@/lib/engine/state-machine'
 import { errorResponse, internalError, notFoundError } from '@/lib/errors'
 import type { MilestoneStatus } from '@/lib/types'
+import { notifyMilestoneReadyForReview } from '@/lib/engine/notify'
 
 export const dynamic = 'force-dynamic'
 
@@ -156,6 +157,13 @@ if (body.new_status === 'ready_for_review') {
   } catch (err) {
     console.error('[transition] AI trigger error:', err)
   }
+
+  // Fire-and-forget — notify funder that milestone is ready for their review
+  void notifyMilestoneReadyForReview({
+    milestoneId:  milestoneId,
+    dealId:       milestone.deal_id,
+    contractorId: user.id,
+  })
 }
 
     return NextResponse.json({

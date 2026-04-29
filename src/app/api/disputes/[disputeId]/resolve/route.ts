@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getAuthUser, requireDealAccess } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
 import { errorResponse, internalError, notFoundError } from '@/lib/errors'
+import { notifyDisputeResolved } from '@/lib/engine/notify'
 
 export const dynamic = 'force-dynamic'
 
@@ -193,6 +194,16 @@ export async function PATCH(
         },
       })
 
+      // Fire-and-forget — notify both parties of resolution
+      void notifyDisputeResolved({
+        disputeId:        disputeId,
+        dealId:           dispute.deal_id,
+        milestoneId:      dispute.milestone_id,
+        resolvedByUserId: user.id,
+        resolvedByRole:   profile.role,
+        resolution:       resolution.trim(),
+      })
+
       return NextResponse.json({
         dispute: { ...dispute, status: 'resolved', resolved_by: user.id, resolved_at: now },
         milestone_unlocked: true,
@@ -242,6 +253,16 @@ export async function PATCH(
           isolation_note:
             'Only this milestone was affected. All other milestones on this deal were unaffected throughout the dispute.',
         },
+      })
+
+      // Fire-and-forget — notify both parties of resolution
+      void notifyDisputeResolved({
+        disputeId:        disputeId,
+        dealId:           dispute.deal_id,
+        milestoneId:      dispute.milestone_id,
+        resolvedByUserId: user.id,
+        resolvedByRole:   profile.role,
+        resolution:       resolution.trim(),
       })
 
       return NextResponse.json({

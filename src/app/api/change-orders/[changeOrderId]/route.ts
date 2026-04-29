@@ -4,6 +4,7 @@ import { getAuthUser, requireRole, requireDealAccess } from '@/lib/auth/middlewa
 import { logAudit } from '@/lib/engine/audit'
 import { errorResponse, internalError, notFoundError, validationError } from '@/lib/errors'
 import type { ChangeOrderStatus } from '@/lib/types'
+import { notifyChangeOrderApproved, notifyChangeOrderRejected } from '@/lib/engine/notify'
 
 export const dynamic = 'force-dynamic'
 
@@ -213,6 +214,27 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         decision,
       },
     })
+
+    // Fire-and-forget — notify contractor of approval or rejection
+    if (decision === 'approved') {
+      void notifyChangeOrderApproved({
+        changeOrderId: changeOrderId,
+        milestoneId:   changeOrder.milestone_id,
+        dealId:        changeOrder.deal_id,
+        amount:        changeOrder.amount,
+        contractorId:  changeOrder.submitted_by,
+        funderId:      user.id,
+      })
+    } else {
+      void notifyChangeOrderRejected({
+        changeOrderId: changeOrderId,
+        milestoneId:   changeOrder.milestone_id,
+        dealId:        changeOrder.deal_id,
+        amount:        changeOrder.amount,
+        contractorId:  changeOrder.submitted_by,
+        funderId:      user.id,
+      })
+    }
 
     return NextResponse.json({
       change_order: updatedChangeOrder,

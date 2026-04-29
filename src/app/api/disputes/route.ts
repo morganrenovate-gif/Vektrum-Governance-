@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getAuthUser, requireDealAccess } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
 import { errorResponse, internalError, notFoundError } from '@/lib/errors'
+import { notifyDisputeOpened } from '@/lib/engine/notify'
 
 export const dynamic = 'force-dynamic'
 
@@ -189,6 +190,15 @@ export async function POST(request: NextRequest) {
         isolation_note:
           'Only this milestone is locked. All other milestones on this deal are unaffected.',
       },
+    })
+
+    // Fire-and-forget — notify the other party that a dispute was opened
+    void notifyDisputeOpened({
+      disputeId:      dispute.id,
+      dealId:         milestone.deal_id,
+      milestoneId:    milestone_id,
+      openedByUserId: user.id,
+      openedByRole:   profile.role,
     })
 
     return NextResponse.json(

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getAuthUser, requireRole, requireDealAccess } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
+import { notifyEvidenceUploaded } from '@/lib/engine/notify'
 import { errorResponse, internalError, notFoundError } from '@/lib/errors'
 import type { MilestoneStatus } from '@/lib/types'
 
@@ -222,6 +223,15 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         deal_id: milestone.deal_id,
         milestone_status: milestone.status,
       },
+    })
+
+    // Fire-and-forget — notify funder of new evidence upload
+    void notifyEvidenceUploaded({
+      documentId:   document.id,
+      milestoneId:  milestoneId,
+      dealId:       milestone.deal_id,
+      contractorId: user.id,
+      fileType:     document.file_type,
     })
 
     return NextResponse.json({ document }, { status: 201 })

@@ -5,6 +5,7 @@ import { logAudit } from '@/lib/engine/audit'
 import { toStripeCents } from '@/lib/engine/billing'
 import { stripe } from '@/lib/stripe'
 import { errorResponse, internalError, notFoundError } from '@/lib/errors'
+import { notifyRetainageReleased } from '@/lib/engine/notify'
 
 export const dynamic = 'force-dynamic'
 
@@ -308,6 +309,14 @@ export async function POST(
       released_by_role:   profile.role,
       contractor_id:      deal.contractor_id,
     },
+  })
+
+  // Fire-and-forget — notify contractor of retainage release
+  void notifyRetainageReleased({
+    retainageReleaseId: releaseRecord.id,
+    dealId:             dealId,
+    funderId:           user.id,
+    amount:             roundedAmount,
   })
 
   return NextResponse.json(
