@@ -393,6 +393,119 @@ await test('28. auth/callback logAudit is already fire-and-forget (.catch) — s
   )
 })
 
+// ─── 29-38. Funder assignment correctness ─────────────────────────────────────
+
+await test('29. Accept route uses createSupabaseAdminClient for the assignment update', () => {
+  const src = read(ACCEPT_ROUTE)
+  assert(
+    src.includes('createSupabaseAdminClient') && src.includes(".from('deals')"),
+    `${ACCEPT_ROUTE} must use createSupabaseAdminClient (service role) for the deals update. ` +
+    `Using the user client would fail: deals_update_funder RLS USING clause requires ` +
+    `funder_id = auth.uid(), but funder_id IS NULL before assignment.`,
+  )
+})
+
+await test('30. Accept route sets funder_id = user.id on deals table', () => {
+  const src = read(ACCEPT_ROUTE)
+  assert(
+    src.includes('funder_id: user.id'),
+    `${ACCEPT_ROUTE} must SET funder_id = user.id in the deals UPDATE. ` +
+    `Without this write, deals.funder_id remains NULL after acceptance.`,
+  )
+})
+
+await test('31. Accept route does NOT mark invite accepted if assignment fails', () => {
+  const src = read(ACCEPT_ROUTE)
+  // The invite update (Step B) must come AFTER the assignment block, not before.
+  // If the assignment fails (dealUpdateError or 0 rows), we return early before Step B.
+  const assignErrorIdx = src.indexOf('assignment_failed')
+  const inviteUpdateIdx = src.indexOf("status:      'accepted'")
+  assert(
+    assignErrorIdx > 0,
+    `${ACCEPT_ROUTE} must return early with reason: 'assignment_failed' when the ` +
+    `deal update fails, before the invite is marked as accepted.`,
+  )
+  assert(
+    inviteUpdateIdx > assignErrorIdx,
+    `${ACCEPT_ROUTE} must update deal_invites AFTER the assignment succeeds, not before. ` +
+    `The invite must remain 'pending' if the funder_id write fails.`,
+  )
+})
+
+await test('32. Accept route treats same-funder re-accept as idempotent (alreadyAssigned path)', () => {
+  const src = read(ACCEPT_ROUTE)
+  assert(
+    src.includes('alreadyAssigned'),
+    `${ACCEPT_ROUTE} must handle the idempotent case where funder_id is already set ` +
+    `to user.id from a prior partial accept. The route should skip the deal UPDATE ` +
+    `and proceed to the invite-update step. Look for 'alreadyAssigned' guard.`,
+  )
+})
+
+await test('33. Accept route returns 409 deal_already_assigned when different funder assigned', () => {
+  const src = read(ACCEPT_ROUTE)
+  assert(
+    src.includes('deal_already_assigned'),
+    `${ACCEPT_ROUTE} must return 409 with reason: 'deal_already_assigned' when ` +
+    `deals.funder_id is set to a different user. The current generic conflictError ` +
+    `did not carry a machine-readable reason code.`,
+  )
+})
+
+await test('34. Accept route 409 deal_already_assigned checks funder_id !== user.id', () => {
+  const src = read(ACCEPT_ROUTE)
+  assert(
+    src.includes('deal.funder_id !== user.id') || src.includes("deal.funder_id != user.id"),
+    `${ACCEPT_ROUTE} must compare deal.funder_id !== user.id to distinguish the ` +
+    `same-funder idempotent case from the different-funder conflict case. ` +
+    `Without this check, any pre-assigned funder_id (including the same user's) ` +
+    `would incorrectly return 409.`,
+  )
+})
+
+await test('35. Accept route logs error.code and deal_id on assignment failure', () => {
+  const src = read(ACCEPT_ROUTE)
+  assert(
+    src.includes('dealUpdateError.code') && src.includes('deal_id:') && src.includes('user_id:'),
+    `${ACCEPT_ROUTE} must log dealUpdateError.code, deal_id, and user_id on assignment ` +
+    `failure. These are needed to diagnose FK violations, trigger blocks, or key issues ` +
+    `without exposing secrets or raw tokens.`,
+  )
+})
+
+await test('36. Accept route assignment error response includes reason: assignment_failed', () => {
+  const src = read(ACCEPT_ROUTE)
+  assert(
+    src.includes("reason: 'assignment_failed'"),
+    `${ACCEPT_ROUTE} must include reason: 'assignment_failed' in the 500 response body ` +
+    `so the invite page can surface a specific, actionable error rather than a generic message.`,
+  )
+})
+
+await test('37. Funder dashboard queries deals where funder_id = user.id', () => {
+  const src = read('src/app/dashboard/page.tsx')
+  assert(
+    src.includes('funder_id') &&
+    (src.includes("eq('funder_id'") || src.includes('.eq("funder_id"') ||
+     src.includes("query.eq('funder_id")),
+    `src/app/dashboard/page.tsx funder query must use .eq('funder_id', userId) ` +
+    `so a newly assigned funder can see their deal after acceptance. ` +
+    `Without this, funder_id = user.id has no UI effect.`,
+  )
+})
+
+await test('38. Accept route does not expose raw token in error responses or logs', () => {
+  const src = read(ACCEPT_ROUTE)
+  // The diagnostic console.error must not log the token variable
+  const logIdx = src.indexOf("'[invites/accept] deal assignment error:'")
+  const tokenInLog = src.slice(logIdx, logIdx + 300).includes('token')
+  assert(
+    !tokenInLog,
+    `${ACCEPT_ROUTE} diagnostic log for assignment failure must not include the raw ` +
+    `invite token. The token is a secret — logging it exposes it in server logs.`,
+  )
+})
+
 // ─── Results ──────────────────────────────────────────────────────────────────
 
 console.log('')

@@ -162,15 +162,14 @@ export async function POST(
     return notFoundError('The deal associated with this invite could not be found.')
   }
 
-  if (deal.funder_id) {
-    // Deal already has a funder — mark invite as accepted to clean up
-    await admin
-      .from('deal_invites')
-      .update({ status: 'accepted', accepted_by: user.id, accepted_at: new Date().toISOString() })
-      .eq('id', invite.id)
-
-    return conflictError(
-      'This deal already has a funder assigned. It is no longer available for new funders.',
+  if (deal.funder_id && deal.funder_id !== user.id) {
+    // A different funder has already been assigned — this deal is unavailable.
+    return NextResponse.json(
+      {
+        error: 'This deal already has a funder assigned. It is no longer available for new funders.',
+        reason: 'deal_already_assigned',
+      },
+      { status: 409 },
     )
   }
 
@@ -190,34 +189,50 @@ export async function POST(
   }
 
   // ── 6. Atomic assignment ───────────────────────────────────────────────────
-  // Step A: assign funder to deal
-  // .is('funder_id', null) ensures atomicity — if another funder accepted between
-  // our validation check and this update, the update will match 0 rows and fail
-  const { data: updatedRows, error: dealUpdateError } = await admin
-    .from('deals')
-    .update({ funder_id: user.id })
-    .eq('id', invite.deal_id)
-    .is('funder_id', null)
-    .select('id')
+  // alreadyAssigned: deal.funder_id = user.id from a prior partial accept where
+  // the deal update succeeded but the invite update failed. Skip the UPDATE to
+  // avoid a redundant write and fall through to the invite-update step.
+  const alreadyAssigned = deal.funder_id === user.id
 
-  if (dealUpdateError) {
-    return internalError(
-      'Failed to assign you as funder. Please try again.',
-      dealUpdateError.message,
-    )
-  }
+  if (!alreadyAssigned) {
+    // Step A: assign funder to deal via admin client (bypasses RLS).
+    // .is('funder_id', null) ensures atomicity — if another funder accepted
+    // between our validation check and this write, the update matches 0 rows.
+    const { data: updatedRows, error: dealUpdateError } = await admin
+      .from('deals')
+      .update({ funder_id: user.id })
+      .eq('id', invite.deal_id)
+      .is('funder_id', null)
+      .select('id')
 
-  if (!updatedRows || updatedRows.length === 0) {
-    return conflictError(
-      'Another funder accepted this deal just before you. The deal is no longer available.',
-    )
+    if (dealUpdateError) {
+      console.error('[invites/accept] deal assignment error:', {
+        code:    dealUpdateError.code,
+        message: dealUpdateError.message,
+        deal_id: invite.deal_id,
+        user_id: user.id,
+      })
+      return NextResponse.json(
+        {
+          error:  'Failed to assign you as funder. Please try again.',
+          reason: 'assignment_failed',
+        },
+        { status: 500 },
+      )
+    }
+
+    if (!updatedRows || updatedRows.length === 0) {
+      return conflictError(
+        'Another funder accepted this deal just before you. The deal is no longer available.',
+      )
+    }
   }
 
   // Step B: mark invite as accepted
   const { error: inviteUpdateError } = await admin
     .from('deal_invites')
     .update({
-      status: 'accepted',
+      status:      'accepted',
       accepted_by: user.id,
       accepted_at: new Date().toISOString(),
     })
@@ -234,28 +249,28 @@ export async function POST(
   await Promise.all([
     logAudit({
       entity_type: 'deal_invite',
-      entity_id: invite.id,
-      action: 'invite_accepted',
-      actor_id: user.id,
-      actor_role: 'funder',
-      old_values: { status: 'pending' },
+      entity_id:   invite.id,
+      action:      'invite_accepted',
+      actor_id:    user.id,
+      actor_role:  'funder',
+      old_values:  { status: 'pending' },
       new_values: {
-        status: 'accepted',
+        status:      'accepted',
         accepted_by: user.id,
         accepted_at: new Date().toISOString(),
-        deal_id: invite.deal_id,
+        deal_id:     invite.deal_id,
       },
     }),
     logAudit({
       entity_type: 'deal',
-      entity_id: invite.deal_id,
-      action: 'funder_assigned',
-      actor_id: user.id,
-      actor_role: 'funder',
-      old_values: { funder_id: null },
+      entity_id:   invite.deal_id,
+      action:      'funder_assigned',
+      actor_id:    user.id,
+      actor_role:  'funder',
+      old_values:  { funder_id: deal.funder_id },
       new_values: {
-        funder_id: user.id,
-        invite_id: invite.id,
+        funder_id:   user.id,
+        invite_id:   invite.id,
         funder_name: profile.full_name,
       },
     }),
