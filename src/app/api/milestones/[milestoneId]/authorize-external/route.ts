@@ -7,6 +7,7 @@ import { calculateFee, calculateRetainage } from '@/lib/engine/billing'
 import { deliverPartnerWebhook } from '@/lib/engine/partner-webhook'
 import { internalError, notFoundError, validationError } from '@/lib/errors'
 import { POLICIES, checkRateLimit, rateLimitResponse, logRateLimitViolation } from '@/lib/engine/rate-limit'
+import { notifyExternalPaymentConfirmationRequired } from '@/lib/engine/notify'
 
 export const dynamic = 'force-dynamic'
 
@@ -479,6 +480,15 @@ export async function POST(
       user.id,
     ).catch((err) => {
       console.error('[authorize-external] deliverPartnerWebhook rejected unexpectedly:', err)
+    })
+
+    // Fire-and-forget — notify admins that external confirmation is needed
+    void notifyExternalPaymentConfirmationRequired({
+      releaseId:   releaseInsertedId,
+      milestoneId: milestoneId,
+      dealId:      milestone.deal_id,
+      funderId:    user.id,
+      amount:      fee.grossAmount,
     })
 
     return NextResponse.json({

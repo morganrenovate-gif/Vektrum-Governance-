@@ -3,6 +3,7 @@ import { createClient, createSupabaseAdminClient } from '@/lib/supabase/server'
 import { getAuthUser } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
 import { errorResponse, internalError, notFoundError } from '@/lib/errors'
+import { notifyLienWaiverUploaded } from '@/lib/engine/notify'
 
 export const dynamic = 'force-dynamic'
 
@@ -184,6 +185,14 @@ export async function POST(
       file_size:    file.size,
       content_type: file.type,
     },
+  })
+
+  // Fire-and-forget — notify funder that lien waiver is ready for review
+  void notifyLienWaiverUploaded({
+    waiverId:     waiverId,
+    milestoneId:  waiver.milestone_id ?? waiver.deal_id, // use deal_id as fallback for deal-level waivers
+    dealId:       waiver.deal_id,
+    contractorId: user.id,
   })
 
   return NextResponse.json({ lien_waiver: updatedWaiver }, { status: 200 })

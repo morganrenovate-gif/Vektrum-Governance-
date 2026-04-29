@@ -258,11 +258,18 @@ await test('16. No Stripe-specific custody claims in invite email or page', () =
 })
 
 await test('17. Custody disclaimer present in email and page', () => {
-  const emailSrc = read(CREATE_ROUTE)
-  const pageSrc  = read(INVITE_PAGE)
+  const emailSrc  = read(CREATE_ROUTE)
+  const notifySrc = read('src/lib/engine/notify.ts')
+  const pageSrc   = read(INVITE_PAGE)
+  // The invite POST route delegates email to notifyFunderInvited → renderVektrumEmail,
+  // which includes the custody disclaimer. Accept either inline or via delegation.
+  const routeDelegates     = emailSrc.includes('notifyFunderInvited')
+  const disclaimerInNotify = notifySrc.includes('does not hold funds, act as escrow, or move money directly')
   assert(
+    (routeDelegates && disclaimerInNotify) ||
     emailSrc.includes('does not hold funds, act as escrow, or move money directly'),
-    `${CREATE_ROUTE} email must include the custody disclaimer.`,
+    `${CREATE_ROUTE} must either delegate to notifyFunderInvited (custody disclaimer in notify.ts) ` +
+    'or include the disclaimer directly.',
   )
   assert(
     pageSrc.includes('does not hold funds, act as escrow, or move money directly'),

@@ -6,6 +6,7 @@ import { validateRelease, checkAiPrecondition } from '@/lib/engine/release-gate'
 import { calculateFee, calculateRetainage, toStripeCents } from '@/lib/engine/billing'
 import { createTransactionReceipt, markReceiptEmailSent } from '@/lib/engine/receipts'
 import { notifyTransactionReceipt } from '@/lib/engine/notifications'
+import { notifyReleaseAuthorized, notifyReleaseBlocked } from '@/lib/engine/notify'
 import { stripe } from '@/lib/stripe'
 import { internalError, notFoundError, validationError } from '@/lib/errors'
 import { POLICIES, checkRateLimit, rateLimitResponse, logRateLimitViolation } from '@/lib/engine/rate-limit'
@@ -220,6 +221,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         failed_conditions: releaseValidation.errors,
       },
     }).catch(err => console.error('[release] release_gate_blocked (release_gate) audit failed:', err))
+
+    // Fire-and-forget — notify funder which conditions blocked the release
+    void notifyReleaseBlocked({
+      milestoneId:    milestoneId,
+      dealId:         milestone.deal_id,
+      funderId:       user.id,
+      blockedReasons: releaseValidation.errors,
+    })
 
     return validationError(releaseValidation.errors)
   }
@@ -706,6 +715,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         idempotency_key:      idempotencyKey,
         released_by_role:     profile.role,
       },
+    })
+
+    // ── STEP 7.5: Notify contractor that release was authorized ───────────
+    // Fire-and-forget — must not block or fail the release response.
+    void notifyReleaseAuthorized({
+      releaseId:   releaseRecord.id,
+      milestoneId: milestoneId,
+      dealId:      milestone.deal_id,
+      funderId:    user.id,
+      amount:      fee.grossAmount,
     })
 
     // ── STEP 8: Generate Transaction Receipt ───────────────────────────────
