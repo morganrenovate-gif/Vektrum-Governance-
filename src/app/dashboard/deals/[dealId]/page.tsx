@@ -348,6 +348,8 @@ export default async function DealDetailPage({
             dealId={typedDeal.id}
             remaining={typedDeal.total_amount - typedDeal.funded_amount}
             stripeConnected={!!typedProfile.stripe_account_id}
+            mfaEnrolled={!!typedProfile.mfa_enrolled}
+            mfaSetupUrl={`/auth/mfa/enroll?next=${encodeURIComponent(`/dashboard/deals/${typedDeal.id}`)}&reason=funding`}
           />
         )}
       </div>

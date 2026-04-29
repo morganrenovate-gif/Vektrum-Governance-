@@ -17,7 +17,8 @@ type EnrollStep = "loading" | "already_enrolled" | "scan" | "verify" | "success"
 export default function MfaEnrollPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get("next") ?? "/dashboard";
+  const next   = searchParams.get("next") ?? "/dashboard";
+  const reason = searchParams.get("reason");
 
   const [step, setStep]         = useState<EnrollStep>("loading");
   const [factorId, setFactorId] = useState<string>("");
@@ -163,6 +164,18 @@ export default function MfaEnrollPage() {
             such as Google Authenticator, Authy, or 1Password.
           </p>
         </div>
+
+        {/* Funding-context callout — shown when redirected from a deal funding flow */}
+        {reason === "funding" && (
+          <div className="mb-6 flex items-start gap-3 rounded-xl border border-blue-500/20 bg-blue-500/[0.06] px-4 py-3">
+            <Shield size={14} className="text-blue-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
+            <p className="text-sm text-white/75">
+              <span className="font-semibold text-blue-300">MFA required to fund deals.</span>{" "}
+              All capital authorization actions require a verified authenticator app.
+              Once set up, you&apos;ll be returned to your deal.
+            </p>
+          </div>
+        )}
 
         {/* Card */}
         <div className="rounded-xl border border-white/[0.08] bg-surface-2 p-6 shadow-sm">
