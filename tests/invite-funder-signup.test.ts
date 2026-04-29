@@ -338,6 +338,61 @@ await test('23. Test file is wired into npm test in package.json', () => {
   )
 })
 
+// ─── 24-28. Defensive audit trigger (Bug C) ────────────────────────────────
+
+await test('24. Defensive migration exists for signup audit trigger', () => {
+  const migPath = 'supabase/migrations/20260429000000_signup_audit_defensive.sql'
+  const src = read(migPath)
+  assert(
+    src.includes('audit_user_signup'),
+    `${migPath} must redefine audit_user_signup() with the defensive EXCEPTION block.`,
+  )
+})
+
+await test('25. Defensive migration wraps audit INSERT in EXCEPTION WHEN OTHERS', () => {
+  const src = read('supabase/migrations/20260429000000_signup_audit_defensive.sql')
+  assert(
+    src.includes('EXCEPTION WHEN OTHERS THEN') &&
+    src.includes('RAISE WARNING'),
+    `The migration must wrap the audit_log INSERT in EXCEPTION WHEN OTHERS THEN ` +
+    `RAISE WARNING so audit failures never abort signup. Without this, a missing ` +
+    `pgcrypto extension or sequence will block every new user.`,
+  )
+})
+
+await test('26. Defensive migration keeps actor_id = NULL (no FK risk)', () => {
+  const src = read('supabase/migrations/20260429000000_signup_audit_defensive.sql')
+  assert(
+    src.includes('actor_id') && src.includes('NULL') &&
+    !src.includes('actor_id = NEW.id') && !src.includes("actor_id,\n      NEW.id"),
+    `The defensive migration must keep actor_id = NULL. Setting actor_id = NEW.id ` +
+    `causes a FK violation because the profiles row may not exist yet when the ` +
+    `auth.users AFTER INSERT trigger fires (original Bug C root cause in migration 006).`,
+  )
+})
+
+await test('27. audit_user_signup RETURN NEW even when audit INSERT fails', () => {
+  const src = read('supabase/migrations/20260429000000_signup_audit_defensive.sql')
+  // RETURN NEW must be outside and after the exception block
+  const exceptionIdx = src.indexOf('EXCEPTION WHEN OTHERS')
+  const returnIdx    = src.lastIndexOf('RETURN NEW')
+  assert(
+    returnIdx > exceptionIdx,
+    `RETURN NEW must appear after the EXCEPTION block so the trigger always ` +
+    `returns NEW regardless of audit INSERT success or failure.`,
+  )
+})
+
+await test('28. auth/callback logAudit is already fire-and-forget (.catch) — same pattern', () => {
+  const src = read(CALLBACK_ROUTE)
+  assert(
+    src.includes('logAudit') && src.includes('.catch'),
+    `${CALLBACK_ROUTE} must use .catch() on logAudit() to ensure audit failures ` +
+    `do not block the auth callback redirect. This is the same fire-and-forget ` +
+    `pattern used by the defensive signup trigger.`,
+  )
+})
+
 // ─── Results ──────────────────────────────────────────────────────────────────
 
 console.log('')
