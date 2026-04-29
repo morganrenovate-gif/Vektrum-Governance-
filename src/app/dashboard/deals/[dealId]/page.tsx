@@ -19,6 +19,7 @@ import { SectionHeader, EmptyState } from "@/components/layout";
 import { SovSection } from "@/components/deal/sov-section";
 import { DealReadinessBanner } from "@/components/deal/deal-readiness-banner";
 import { ContractUploadSection } from "@/components/deal/contract-upload-section";
+import { UploadContractTrigger } from "@/components/deal/upload-contract-trigger";
 
 // ─── Release gate computation (server-side pre-check) ────────────────────────
 //
@@ -628,13 +629,10 @@ export default async function DealDetailPage({
             </div>
           </div>
           <div className="flex flex-wrap gap-2 pl-7">
-            <a
-              href="#contract"
-              className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[12px] font-medium hover:bg-amber-500/15 transition-colors"
-            >
+            <UploadContractTrigger className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[12px] font-medium hover:bg-amber-500/15 transition-colors">
               <FileText size={12} aria-hidden="true" />
               Upload Contract
-            </a>
+            </UploadContractTrigger>
             <span className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-white/[0.08] text-[12px] text-white/30 cursor-default">
               <FileText size={12} aria-hidden="true" />
               Import SOV from Contract
@@ -645,9 +643,9 @@ export default async function DealDetailPage({
       )}
 
       {/* ── Contract upload section ── */}
-      {/* Anchor target for href="#contract" links in the setup card above and
-          in the SOV empty state. Visible to contractors and admins when no
-          active (non-voided) contract is on file. */}
+      {/* id="contract-upload" — scroll target + event target for UploadContractTrigger
+          buttons in the setup card above and in the SOV empty state. Visible to
+          contractors and admins when no active (non-voided) contract is on file. */}
       {(typedProfile.role === "contractor" || typedProfile.role === "admin") && !hasContract && (
         <ContractUploadSection dealId={typedDeal.id} />
       )}
@@ -662,7 +660,6 @@ export default async function DealDetailPage({
         viewerRole={typedProfile.role as 'contractor' | 'funder' | 'admin'}
         dealStatus={typedDeal.status}
         hasContract={hasContract}
-        contractUploadHref="#contract"
       />
 
       {/* ── Deal Readiness Banner (funder only) ── */}
