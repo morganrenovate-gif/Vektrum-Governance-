@@ -7,12 +7,25 @@ import {
   BarChart3,
   FileText,
   Lock,
+  CreditCard,
+  Building2,
 } from 'lucide-react'
 
 export const metadata = {
-  title: 'For Funders & Capital Partners — Vektrum',
+  title: 'For Funders & Capital Partners',
   description:
-    'Automated draw management, 10-condition release gates, and immutable audit trails. Vektrum systematizes your construction lending disbursement process.',
+    'Conditional authorization infrastructure for construction lenders. 10-condition release gate, AI-assisted draw review, and immutable audit trail. Vektrum enforces your release conditions — your payment rail executes.',
+  alternates: { canonical: 'https://vektrum.io/funders' },
+  openGraph: {
+    title: 'For Funders & Capital Partners — Vektrum',
+    description: 'Conditional authorization infrastructure for construction lenders. 10-condition release gate enforces your conditions. Your rail executes.',
+    url: 'https://vektrum.io/funders',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+  },
+  twitter: {
+    title: 'For Funders & Capital Partners — Vektrum',
+    description: '10-condition release gate for construction lenders. Your draw process, enforced.',
+  },
 }
 
 export default function FundersPage() {
@@ -62,6 +75,25 @@ export default function FundersPage() {
               View pricing
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* ─── Quick answer + non-custody trust ─────────────────────────────── */}
+      <section className="bg-[#0D1B2A] pb-10 border-b border-white/[0.06]">
+        <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12">
+          {/* Non-custody trust strip */}
+          <div className="rounded-xl border border-white/[0.08] bg-surface-2 px-5 py-4 mb-8 flex items-start gap-3">
+            <Shield size={15} className="text-blue-300 flex-shrink-0 mt-0.5" />
+            <p className="text-[12px] leading-relaxed text-white/70">
+              <span className="font-semibold text-white">Vektrum does not hold funds, act as escrow, or execute wires.</span>{' '}
+              For Stripe Connect deals, funds are held in Stripe-managed accounts. For institutional deals, your existing bank, title company, escrow company, or treasury executes payment. Vektrum enforces release conditions and records authorization proof.
+            </p>
+          </div>
+          {/* Quick Answer */}
+          <p className="text-[15px] leading-relaxed text-white/70 max-w-3xl">
+            <strong className="text-white">What Vektrum does for funders:</strong>{' '}
+            Before any disbursement is authorized, Vektrum evaluates 10 server-side conditions simultaneously — milestone approved, contract signed, lien waiver on file, change orders cleared, and more. Only when all pass does Vektrum issue an authorization signal. Your selected rail then executes. You keep your payment process. You add release enforcement.
+          </p>
         </div>
       </section>
 
@@ -128,6 +160,72 @@ export default function FundersPage() {
               </li>
             ))}
           </ol>
+        </div>
+      </section>
+
+      {/* ─── Buyer Segments ────────────────────────────────────────────────── */}
+      <section className="bg-surface-0 py-16 sm:py-20 border-t border-white/[0.06]">
+        <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
+          <h2 className="font-display text-2xl font-bold tracking-[-0.025em] text-white sm:text-3xl text-center mb-4">
+            Built for every construction capital structure
+          </h2>
+          <p className="text-center text-[14px] text-white/55 mb-12 max-w-2xl mx-auto">
+            Vektrum works with your existing payment infrastructure — whether you run on Stripe Connect or your own institutional rail.
+          </p>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Private Lenders */}
+            <div className="rounded-2xl border border-white/[0.08] bg-surface-2 p-8">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-vektrum-blue/10">
+                  <CreditCard size={18} className="text-blue-300" />
+                </div>
+                <h3 className="text-[15px] font-semibold text-white">Private lenders &amp; direct deals</h3>
+              </div>
+              <p className="text-[13px] leading-relaxed text-white/65 mb-5">
+                Best for private lenders, fix-and-flip operators, construction bridge lenders, and direct lending funds who want automated disbursements without existing treasury infrastructure.
+              </p>
+              <ul className="space-y-2">
+                {[
+                  'Stripe Connect rail — automated payout to contractor after authorization',
+                  '1% governance fee per authorized release, no retainer',
+                  'Contractor Stripe onboarding in minutes',
+                  'Full draw review, gate enforcement, and audit trail',
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-2.5 text-[12px] text-white/65">
+                    <CheckCircle2 size={13} className="text-emerald-400 mt-0.5 flex-shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Institutional Rails */}
+            <div className="rounded-2xl border border-white/[0.08] bg-surface-2 p-8">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-vektrum-blue/10">
+                  <Building2 size={18} className="text-blue-300" />
+                </div>
+                <h3 className="text-[15px] font-semibold text-white">Institutional rails &amp; portfolio lenders</h3>
+              </div>
+              <p className="text-[13px] leading-relaxed text-white/65 mb-5">
+                Best for construction loan servicers, credit funds, banks, title companies, and institutional investors with licensed payment infrastructure who want release-enforcement without changing their payment process.
+              </p>
+              <ul className="space-y-2">
+                {[
+                  'External/manual rail — Vektrum authorizes, your rail executes',
+                  'No Stripe required — wire, ACH, title disbursement, or check',
+                  'Partner API for programmatic confirmation by title/escrow systems',
+                  'Annual retainer for portfolio onboarding and dedicated support',
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-2.5 text-[12px] text-white/65">
+                    <CheckCircle2 size={13} className="text-emerald-400 mt-0.5 flex-shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
       </section>
 

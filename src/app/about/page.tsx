@@ -43,9 +43,11 @@ export default function AboutPage() {
           </h2>
           <div className="space-y-4 text-[15px] leading-relaxed text-white/55">
             <p>
-              Construction is a $2.19 trillion annual industry in the United States. Yet
-              payment governance in the $500K&ndash;$25M project range is still managed
-              through spreadsheets, email threads, and manual bank transfers.
+              U.S. construction is a multi-trillion-dollar annual industry. Yet payment
+              governance in the $500K&ndash;$25M project range is still managed through
+              spreadsheets, email threads, and manual bank transfers — workflows that
+              Bank Director has noted offer no automated tracking, event monitoring, or
+              draw validations.
             </p>
             <p>
               A $15K dispute on a $9M project can freeze the entire deal. Contractors

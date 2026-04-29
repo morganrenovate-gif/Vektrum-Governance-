@@ -13,9 +13,20 @@ import {
 } from 'lucide-react'
 
 export const metadata = {
-  title: 'Fee Structure — Vektrum',
+  title: 'Fee Structure',
   description:
-    'A governance fee per verified disbursement. 1% when funds transfer. $0 until they do. Contractors are always free.',
+    'A governance fee per verified disbursement — 1% per authorized release. $0 until a release is authorized. Contractors are always free. Institutional retainer for portfolio plans.',
+  alternates: { canonical: 'https://vektrum.io/pricing' },
+  openGraph: {
+    title: 'Fee Structure — Vektrum',
+    description: '1% governance fee per authorized release. $0 until funds move. Contractors always free.',
+    url: 'https://vektrum.io/pricing',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+  },
+  twitter: {
+    title: 'Fee Structure — Vektrum',
+    description: '1% per authorized release. $0 until then. Contractors always free.',
+  },
 }
 
 // ─── Clarity Cell ─────────────────────────────────────────────────────────────

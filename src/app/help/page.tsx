@@ -12,9 +12,20 @@ import {
 } from 'lucide-react'
 
 export const metadata = {
-  title: 'Help — Vektrum',
+  title: 'Help & FAQ',
   description:
-    'Frequently asked questions about Vektrum construction payment governance. Learn how milestone payments, the release gate, disputes, and Stripe Connect work.',
+    'Frequently asked questions about Vektrum — conditional authorization infrastructure for construction disbursements. Learn how the release gate, AI draw review, dispute isolation, and payment rails work.',
+  alternates: { canonical: 'https://vektrum.io/help' },
+  openGraph: {
+    title: 'Help & FAQ — Vektrum',
+    description: 'Everything you need to know about Vektrum release gates, AI draw review, dispute isolation, and payment rails.',
+    url: 'https://vektrum.io/help',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+  },
+  twitter: {
+    title: 'Help & FAQ — Vektrum',
+    description: 'Release gate, AI draw review, dispute isolation, and payment rail questions answered.',
+  },
 }
 
 interface FaqItem {
@@ -132,9 +143,25 @@ const FAQ: FaqItem[] = [
   },
 ]
 
+const faqSchemaItems = [...FAQ, ...TRUST_FAQ].map((item) => ({
+  '@type': 'Question',
+  name: item.q,
+  acceptedAnswer: { '@type': 'Answer', text: item.a },
+}))
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqSchemaItems,
+}
+
 export default function HelpPage() {
   return (
     <div className="flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       {/* ─── Hero ──────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-[#0D1B2A] pt-20 pb-16 sm:pt-28 sm:pb-20">
         <div
@@ -162,12 +189,19 @@ export default function HelpPage() {
             Everything you need to know about Vektrum, milestone payments, and
             construction payment governance.
           </p>
+          <p className="mt-6 mx-auto max-w-2xl text-[14px] leading-relaxed text-white/50 text-left rounded-xl border border-white/[0.06] bg-surface-2 px-5 py-4">
+            <strong className="text-white/75">Quick answer:</strong>{' '}
+            Vektrum is conditional authorization infrastructure — not a bank, payment processor, or escrow company. It enforces 10 server-side conditions before any construction disbursement is authorized. Your selected payment rail executes. AI reviews draw packages and prepares a brief; a deterministic gate makes the pass/fail decision; the funder authorizes; the rail executes.
+          </p>
         </div>
       </section>
 
       {/* ─── FAQ ───────────────────────────────────────────────────────────── */}
       <section className="bg-[#0A1628] py-16 sm:py-20">
         <div className="max-w-3xl mx-auto px-6 sm:px-8 lg:px-12">
+          <h2 className="font-display text-xl font-bold tracking-[-0.02em] text-white mb-8">
+            General questions
+          </h2>
           <div className="space-y-4">
             {FAQ.map((item) => (
               <div

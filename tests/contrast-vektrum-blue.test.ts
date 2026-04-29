@@ -106,12 +106,33 @@ test('B1: page.tsx dark sections do not use text-vektrum-blue', () => {
     return parseInt(n, 10)
   })
 
-  // Light sections of page.tsx, identified by their <section bg-[#F8F9FB]>
-  // and <section bg-white> wrappers. These ranges must be updated if the
-  // page is restructured.
+  // Light sections of page.tsx, identified by their <section bg-white>
+  // and <section bg-[#F8F9FB]> wrappers. These ranges must be updated if
+  // the page is restructured. Each range starts at the opening <section>
+  // tag and ends at the closing </section> immediately before the next
+  // dark section's opening tag (currently bg-[#031226] / bg-[#0D1B2A]).
+  //
+  // Last verified by walking section boundaries:
+  //   582  bg-white                ┐
+  //   655  bg-[#F8F9FB]            ├─ first light run
+  //   766  bg-white                │  (3 sequential light sections)
+  //   838  </section>              ┘  → 841 bg-[#031226] (dark)
+  //
+  //   921  bg-[#F8F9FB]            ┐── second light run
+  //  1028  bg-white                │   (2 sequential light sections)
+  //  1101  </section>              ┘   → 1102 bg-[#031226] (dark)
+  //
+  // To re-derive after edits:
+  //   grep -n "<section className" src/app/page.tsx
+  //
+  // Previous ranges [538,723] and [804,984] were stale after Sprint-1
+  // additions (Release Workflow Spine section + metadata/schema block at
+  // the top of the file) shifted line numbers by ~44 lines. The
+  // text-vektrum-blue matches were never on a dark background — the
+  // ranges had simply drifted.
   const LIGHT_RANGES: Array<[number, number]> = [
-    [538, 723], // Role clarity / category difference (bg-[#F8F9FB] + bg-white)
-    [804, 984], // Every party protected / process (bg-[#F8F9FB] + bg-white)
+    [582, 838],   // First light run: Release workflow spine → How it works → Category difference
+    [921, 1101],  // Second light run: Role clarity → The process
   ]
 
   for (const lineNo of matches) {

@@ -9,9 +9,20 @@ import {
 } from 'lucide-react'
 
 export const metadata = {
-  title: 'For Contractors — Vektrum',
+  title: 'For Contractors',
   description:
-    'Get paid when you deliver — not 90 days later. Milestone-based payouts, dispute isolation, and immutable proof of approved work. Always free for contractors.',
+    'Milestone-based payouts, dispute isolation, and immutable proof of approved work. Get paid when your work is verified — not 90 days later. Always free for contractors.',
+  alternates: { canonical: 'https://vektrum.io/contractors' },
+  openGraph: {
+    title: 'For Contractors — Vektrum',
+    description: 'Get paid when you deliver. Milestone payouts, dispute isolation, proof of approval. Always free for contractors.',
+    url: 'https://vektrum.io/contractors',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+  },
+  twitter: {
+    title: 'For Contractors — Vektrum',
+    description: 'Milestone payouts. Dispute isolation. Proof of approved work. Always free.',
+  },
 }
 
 export default function ContractorsPage() {
@@ -58,6 +69,32 @@ export default function ContractorsPage() {
           <p className="mt-4 text-[12px] text-white/75">
             No subscription. No per-milestone charge. No onboarding fee.
           </p>
+        </div>
+      </section>
+
+      {/* ─── Quick answer + how you join ───────────────────────────────────── */}
+      <section className="bg-[#0D1B2A] pb-10 border-b border-white/[0.06]">
+        <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12">
+          <p className="text-[15px] leading-relaxed text-white/70 max-w-3xl mb-6">
+            <strong className="text-white">How you join Vektrum:</strong>{' '}
+            Your funder invites you to a deal via a secure invite link. You accept the invite, create a free account, and — if your deal runs on Stripe Connect — complete Stripe onboarding for direct deposit. If your funder uses their own institutional payment rail, no Stripe onboarding is required. There are no subscription fees, no per-milestone charges, and no onboarding costs for contractors.
+          </p>
+          {/* Referral CTA */}
+          <div className="rounded-xl border border-blue-500/20 bg-blue-500/[0.06] px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex-1">
+              <p className="text-[13px] font-semibold text-white mb-1">Working with a funder who isn&apos;t on Vektrum yet?</p>
+              <p className="text-[12px] text-white/65 leading-relaxed">
+                Send them this link and ask them to add you to your next project. Setup takes minutes. Contractors always join free.
+              </p>
+            </div>
+            <Link
+              href="/funders"
+              className="flex-shrink-0 inline-flex items-center justify-center gap-2 rounded-lg border border-white/[0.12] bg-white/[0.06] px-4 py-2 text-[12px] font-semibold text-white hover:bg-white/[0.1] transition-all"
+            >
+              Tell your funder about Vektrum
+              <ArrowRight size={13} />
+            </Link>
+          </div>
         </div>
       </section>
 

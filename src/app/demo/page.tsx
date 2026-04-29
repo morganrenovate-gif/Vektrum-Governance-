@@ -3,8 +3,20 @@ import { VektrumWordmark } from '@/components/ui/vektrum-logo'
 import { Shield, CheckCircle2, FileText, Brain, Banknote, Users, AlertTriangle, ArrowDown } from 'lucide-react'
 
 export const metadata = {
-  title: 'Vektrum — AI-assisted draw review, human-approved releases',
-  description: 'AI-assisted milestone draw review (multi-provider fallback), a 10-condition server-side release gate, and immutable audit trails for construction payment governance.',
+  title: 'How It Works',
+  description:
+    'See how Vektrum enforces construction draw releases: AI-assisted draw review, a deterministic 10-condition release gate, and immutable audit trail. AI informs; the gate decides; the funder authorizes.',
+  alternates: { canonical: 'https://vektrum.io/demo' },
+  openGraph: {
+    title: 'How Vektrum Works — Construction Payment Governance',
+    description: 'AI-assisted draw review. 10-condition gate. Immutable audit trail. AI informs; the gate decides; the funder authorizes.',
+    url: 'https://vektrum.io/demo',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+  },
+  twitter: {
+    title: 'How Vektrum Works',
+    description: 'AI draw review, 10-condition gate, immutable audit trail. AI informs; the gate decides.',
+  },
 }
 
 export default function DemoPage() {
@@ -60,18 +72,18 @@ export default function DemoPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {[
               {
-                stat: '$3.1B',
-                desc: 'lost annually to contractor fraud and payment disputes',
+                stat: '12%',
+                desc: 'of construction draw requests are denied — 355,890 draws across nearly 30,000 loans (FDIC, 2023)',
                 icon: AlertTriangle,
               },
               {
-                stat: '87%',
-                desc: 'of construction projects have payment timing conflicts',
+                stat: '$250K',
+                desc: 'median loss per occupational fraud case in construction (ACFE, 2024)',
                 icon: Users,
               },
               {
                 stat: 'Zero',
-                desc: 'industry-standard solution for milestone-based disbursement',
+                desc: 'industry-standard solution for enforcing milestone-level release conditions',
                 icon: Shield,
               },
             ].map((item) => (

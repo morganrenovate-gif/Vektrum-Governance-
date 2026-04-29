@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
@@ -16,6 +17,23 @@ import {
   CreditCard,
 } from 'lucide-react'
 
+export const metadata: Metadata = {
+  title: 'Vektrum — Construction Payment Governance',
+  description:
+    'Conditional authorization infrastructure for construction disbursements. A 10-condition release gate, AI-assisted draw review, and immutable audit trail. Workflow tools track. Vektrum enforces.',
+  alternates: { canonical: 'https://vektrum.io' },
+  openGraph: {
+    title: 'Vektrum — Construction Payment Governance',
+    description: 'Conditional authorization infrastructure for construction disbursements. 10-condition release gate. AI-assisted draw review. Immutable audit trail.',
+    url: 'https://vektrum.io',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+  },
+  twitter: {
+    title: 'Vektrum — Construction Payment Governance',
+    description: 'Workflow tools track. Vektrum enforces. 10-condition release gate for construction disbursements.',
+  },
+}
+
 export default async function HomePage() {
   const supabase = await createClient()
   const {
@@ -26,8 +44,34 @@ export default async function HomePage() {
     redirect('/dashboard')
   }
 
+  const softwareSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'Vektrum',
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web',
+    url: 'https://vektrum.io',
+    description:
+      'Conditional authorization infrastructure for construction disbursements. A 10-condition release gate enforces release conditions before any payment rail executes. AI-assisted draw review, immutable audit trail, and dispute isolation.',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+      description: 'Contractors always free. Funders pay a governance fee per authorized release.',
+    },
+    provider: {
+      '@type': 'Organization',
+      name: 'Vektrum',
+      url: 'https://vektrum.io',
+    },
+  }
+
   return (
     <div className="flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
+      />
 
       {/* ─── 1. Hero ──────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-[#0D1B2A]">
