@@ -15,6 +15,7 @@ import type { Deal, Profile, Milestone, LienWaiver, ChangeOrder, MilestoneDocume
 import { formatMoney } from "@/lib/utils";
 import { ArrowLeft, Info, FolderOpen, FileText, CheckCircle2, Clock, XCircle, AlertCircle, ShieldAlert, ShieldCheck, PenLine } from "lucide-react";
 import { SectionHeader, EmptyState } from "@/components/layout";
+import { DealReadinessBanner } from "@/components/deal/deal-readiness-banner";
 
 // ─── Release gate computation (server-side pre-check) ────────────────────────
 //
@@ -283,6 +284,53 @@ export default async function DealDetailPage({
     typedDeal.status === "completed" &&
     (typedDeal.retainage_held ?? 0) > 0;
 
+  // ── Release gate pre-computation (avoids double-computing in render loop) ──
+  const gateMap = new Map<string, ReleaseGateResult>();
+  for (const m of milestones) {
+    gateMap.set(m.id, computeReleaseGate(m, typedDeal, milestones));
+  }
+
+  // ── Deal-level readiness summary (funder view) ───────────────────────────
+  const releasedCount   = milestones.filter(m => m.status === "released").length;
+  const approvedCount   = milestones.filter(m => m.status === "approved").length;
+  const releasableCount = milestones.filter(m => gateMap.get(m.id)?.can_release).length;
+
+  // Collect de-duplicated top blockers across all non-released milestones
+  const seenBlockers = new Set<string>();
+  const topBlockers: string[] = [];
+  for (const m of milestones) {
+    if (m.status === "released") continue;
+    for (const b of gateMap.get(m.id)?.blockers ?? []) {
+      if (!seenBlockers.has(b)) { seenBlockers.add(b); topBlockers.push(b); }
+    }
+  }
+
+  // Derive the single most-important next action for the funder
+  function getNextAction(): string | null {
+    if (typedProfile.role !== "funder") return null;
+    if (!typedProfile.mfa_enrolled) return "Set up MFA to enable capital authorization actions.";
+    if (typedDeal.funded_amount < typedDeal.total_amount) {
+      return `Fund the deal — ${formatMoney(typedDeal.total_amount - typedDeal.funded_amount)} remaining to enable releases.`;
+    }
+    if (!contract || contract.status !== "signed") {
+      return "Upload and execute a signed contract to unlock milestone releases.";
+    }
+    if (releasableCount > 0) {
+      return `${releasableCount} milestone${releasableCount > 1 ? "s" : ""} ready — review and authorize release.`;
+    }
+    const pendingReview = milestones.filter(m => m.status === "pending_review").length;
+    if (pendingReview > 0) {
+      return `${pendingReview} milestone${pendingReview > 1 ? "s" : ""} awaiting review and approval.`;
+    }
+    if (releasedCount === milestones.length && milestones.length > 0) return null;
+    return "Waiting for contractor to submit milestones for review.";
+  }
+  const nextAction = getNextAction();
+
+  // ── Capital status label for funder header ───────────────────────────────
+  const isFullyFunded = typedDeal.funded_amount >= typedDeal.total_amount;
+  const isPartiallyFunded = typedDeal.funded_amount > 0 && !isFullyFunded;
+
   return (
     <div className="min-h-screen bg-surface-0">
     <div className="dash-page">
@@ -340,6 +388,29 @@ export default async function DealDetailPage({
               </span>
             )}
           </div>
+
+          {/* Capital authorization status — funder only */}
+          {typedProfile.role === "funder" && (
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
+              {isFullyFunded ? (
+                <span className="font-medium text-emerald-400">Funded</span>
+              ) : isPartiallyFunded ? (
+                <span className="font-medium text-amber-400">
+                  Partially funded — {formatMoney(typedDeal.total_amount - typedDeal.funded_amount)} remaining
+                </span>
+              ) : (
+                <span className="font-medium text-amber-400">Not yet funded</span>
+              )}
+              {releasableCount > 0 && (
+                <span className="text-emerald-400 font-medium">
+                  · {releasableCount} milestone{releasableCount !== 1 ? "s" : ""} ready to release
+                </span>
+              )}
+              {releasedCount === milestones.length && milestones.length > 0 && (
+                <span className="text-emerald-400 font-medium">· All milestones released</span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Fund deal (funder only) */}
@@ -353,6 +424,18 @@ export default async function DealDetailPage({
           />
         )}
       </div>
+
+      {/* ── Release Readiness Summary (funder only, when milestones exist) ── */}
+      {typedProfile.role === "funder" && milestones.length > 0 && (
+        <DealReadinessBanner
+          totalMilestones={milestones.length}
+          releasedMilestones={releasedCount}
+          approvedMilestones={approvedCount}
+          releasableMilestones={releasableCount}
+          topBlockers={topBlockers}
+          nextAction={nextAction}
+        />
+      )}
 
       {/* ── Frozen deal banner ── */}
       {typedDeal.status === "frozen" && (
@@ -502,7 +585,10 @@ export default async function DealDetailPage({
 
       {/* ── Milestones ── */}
       <section>
-        <SectionHeader label="Milestones" count={milestones.length > 0 ? milestones.length : undefined} />
+        <SectionHeader
+          label={typedProfile.role === "funder" ? "Milestone Review & Release" : "Milestones"}
+          count={milestones.length > 0 ? milestones.length : undefined}
+        />
 
         {milestones.length === 0 ? (
           <EmptyState
@@ -516,7 +602,7 @@ export default async function DealDetailPage({
         ) : (
           <div className="space-y-3">
             {milestones.map((milestone) => {
-              const gate = computeReleaseGate(milestone, typedDeal, milestones);
+              const gate = gateMap.get(milestone.id) ?? computeReleaseGate(milestone, typedDeal, milestones);
               const sequentialBlockers = computeSequentialBlockers(milestone, typedDeal, milestones);
               const latestBrief = briefMap.get(milestone.id) ?? null;
               const contractorName =
@@ -550,10 +636,16 @@ export default async function DealDetailPage({
         role={typedProfile.role}
      />
 
-                  {/* Release button — funder only, approved milestones */}
+                  {/* Release controls — funder only, unreleased milestones */}
                   {typedProfile.role === "funder" &&
                     milestone.status !== "released" && (
                       <div className="pl-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-[10px] font-semibold uppercase tracking-widest text-white/35">
+                            Release controls
+                          </span>
+                          <div className="flex-1 h-px bg-white/[0.05]" aria-hidden="true" />
+                        </div>
                         <ReleaseButton
                           milestoneId={milestone.id}
                           dealId={typedDeal.id}

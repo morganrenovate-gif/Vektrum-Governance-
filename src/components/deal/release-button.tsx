@@ -422,7 +422,10 @@ export function ReleaseButton({
         >
           <span className="flex items-center gap-1.5">
             <Lock size={12} aria-hidden="true" />
-            {gate.blockers.length} condition{gate.blockers.length !== 1 ? "s" : ""} not met
+            Next required actions
+            <span className="font-normal text-amber-400/65">
+              — {gate.blockers.length} condition{gate.blockers.length !== 1 ? "s" : ""} not met
+            </span>
           </span>
           {blockersOpen ? (
             <ChevronUp size={12} aria-hidden="true" />
@@ -437,7 +440,7 @@ export function ReleaseButton({
             "divide-y divide-amber-500/20 border-t border-amber-500/20",
             blockersOpen ? "block" : "hidden sm:block",
           )}
-          aria-label="Release blockers"
+          aria-label="Next required actions — release blockers"
         >
           {gate.blockers.map((blocker, i) => (
             <li

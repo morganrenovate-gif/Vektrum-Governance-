@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
-import { Shield, AlertTriangle, CheckCircle2, Info, Loader2, RefreshCw } from 'lucide-react'
+import { Shield, AlertTriangle, CheckCircle2, Info, Loader2, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react'
 
 interface DrawAssessment {
   assessment_id: string
@@ -55,6 +55,7 @@ export function DrawReviewAgent({
   const [loadErrorCode, setLoadErrorCode] = useState<string | null>(null)
 
   const [initialLoad, setInitialLoad] = useState(true)
+  const [findingsOpen, setFindingsOpen] = useState(false)
 
   // Show raw diagnostic codes in dev mode or to admins — never to regular users.
   const showDiagnostics = isDev || isAdmin
@@ -305,22 +306,44 @@ export function DrawReviewAgent({
         <p className="text-sm text-white/55">{assessment.reasoning}</p>
       </div>
 
-      {/* Findings — labeled "Brief Findings" with "AI Review Findings" as a
-          secondary subtitle to maintain gate-boundary clarity while surfacing
-          the Draw Control Brief framing. */}
+      {/* Findings — collapsed by default; toggle reveals full evidence list */}
       {assessment.findings.length > 0 && (
-        <div className="px-5 py-3">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/65 mb-0.5">Brief Findings</p>
-          <p className="text-[9px] uppercase tracking-widest text-white/35 mb-2">AI Review Findings — evidence extracted for release gate</p>
-          <ul className="space-y-1.5">
-            {assessment.findings.map((finding, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-white/55">
-                <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-white/55" aria-hidden="true" />
-                {finding}
-              </li>
-            ))}
-          </ul>
-        </div>
+        <>
+          <button
+            type="button"
+            onClick={() => setFindingsOpen(o => !o)}
+            className="w-full flex items-center justify-between px-5 py-2.5 border-t border-white/[0.05] text-left hover:bg-white/[0.02] transition-colors"
+            aria-expanded={findingsOpen}
+          >
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-white/65">
+                Brief Findings
+              </p>
+              <p className="text-[9px] uppercase tracking-widest text-white/35">
+                AI Review Findings — evidence extracted for release gate
+              </p>
+            </div>
+            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-blue-400 flex-shrink-0 ml-3 hover:text-blue-300 transition-colors">
+              {findingsOpen ? (
+                <><ChevronUp size={12} aria-hidden="true" /> Hide</>
+              ) : (
+                <><ChevronDown size={12} aria-hidden="true" /> View full brief ({assessment.findings.length})</>
+              )}
+            </span>
+          </button>
+          {findingsOpen && (
+            <div className="px-5 pb-3">
+              <ul className="space-y-1.5">
+                {assessment.findings.map((finding, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-white/55">
+                    <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-white/55" aria-hidden="true" />
+                    {finding}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </>
       )}
 
       {/* Error on "Fresh Review" attempt */}
