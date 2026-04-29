@@ -349,6 +349,13 @@ export default async function DealDetailPage({
   // Used to show the contract-required setup card and guide the SOV flow.
   const hasContract = !!contract && contract.status !== 'voided'
 
+  // ── Contractor workflow computed state ───────────────────────────────────
+  // Used by the Next Required Step card and Deal Setup Checklist.
+  // Advisory only — does not affect release gate.
+  const sovApproved = sovItems.some(i => i.status === 'approved')
+  const allMilestonesLinked =
+    milestones.length > 0 && milestones.every(m => milestoneSovLinkedIds.has(m.id))
+
   const milestonesTotal = milestones.reduce((s, m) => s + m.amount, 0);
   const remaining = Math.max(0, typedDeal.total_amount - milestonesTotal);
   const isDraftContractor =
@@ -489,6 +496,78 @@ export default async function DealDetailPage({
                 </span>
               )}
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Contractor: Next required step ── */}
+      {/* Surfaces a single, clear action so contractors know exactly what to
+          do next in the contract → SOV → milestones → draw workflow.
+          Advisory only — no gate change. Hidden for funders and admins. */}
+      {typedProfile.role === "contractor" && (() => {
+        let stepLabel: string
+        let stepDesc: string
+
+        if (!hasContract) {
+          stepLabel = 'Upload executed contract'
+          stepDesc  = 'Upload the signed contract PDF to begin setting up your Schedule of Values.'
+        } else if (sovItems.length === 0) {
+          stepLabel = 'Create Schedule of Values'
+          stepDesc  = 'Add line items from the approved contract to define your draw values.'
+        } else if (!sovApproved) {
+          stepLabel = 'Submit SOV for funder approval'
+          stepDesc  = 'Your Schedule of Values is drafted. Submit each line item so your funder can review and approve.'
+        } else if (milestones.length > 0 && !allMilestonesLinked) {
+          stepLabel = 'Link milestones to SOV'
+          stepDesc  = 'Connect each draw request to the corresponding approved SOV line item.'
+        } else {
+          stepLabel = 'Upload evidence and submit draw for review'
+          stepDesc  = 'Attach supporting documents to each milestone and submit for funder review.'
+        }
+
+        return (
+          <div className="rounded-xl border border-vektrum-blue/25 bg-vektrum-blue/[0.07] px-5 py-4 flex items-start gap-3">
+            <div className="mt-0.5 h-2 w-2 rounded-full bg-vektrum-blue flex-shrink-0" aria-hidden="true" />
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-blue-300/70 mb-1">
+                Next required step
+              </p>
+              <p className="text-[14px] font-semibold text-white">{stepLabel}</p>
+              <p className="mt-0.5 text-[12px] text-white/55 leading-relaxed">{stepDesc}</p>
+            </div>
+          </div>
+        )
+      })()}
+
+      {/* ── Contractor: Deal setup checklist ── */}
+      {/* Five-item progress tracker: funder, contract, SOV, SOV approval,
+          milestone SOV links. Helps contractors see overall deal readiness
+          at a glance. Advisory only. Hidden for funders and admins. */}
+      {typedProfile.role === "contractor" && (
+        <div className="rounded-xl border border-white/[0.08] bg-surface-2 shadow-card px-5 py-4 space-y-3">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">
+            Setup checklist
+          </p>
+          <div className="space-y-2">
+            {(
+              [
+                { label: 'Funder assigned',         done: !!typedDeal.funder_id },
+                { label: 'Contract uploaded',        done: hasContract },
+                { label: 'SOV created',              done: sovItems.length > 0 },
+                { label: 'SOV approved',             done: sovApproved },
+                { label: 'Milestones linked to SOV', done: allMilestonesLinked },
+              ] as { label: string; done: boolean }[]
+            ).map(({ label, done }) => (
+              <div key={label} className="flex items-center gap-2.5">
+                {done
+                  ? <CheckCircle2 size={13} className="text-emerald-400 flex-shrink-0" aria-hidden="true" />
+                  : <Clock        size={13} className="text-white/25 flex-shrink-0"     aria-hidden="true" />
+                }
+                <span className={`text-[13px] ${done ? 'text-white/70' : 'text-white/35'}`}>
+                  {label}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -688,7 +767,13 @@ export default async function DealDetailPage({
       {/* ── Milestones ── */}
       <section>
         <SectionHeader
-          label={typedProfile.role === "funder" ? "Milestone Review & Release" : "Milestones"}
+          label={
+            typedProfile.role === "funder"
+              ? "Milestone Review & Release"
+              : typedProfile.role === "contractor"
+              ? "Draw Requests / Milestones"
+              : "Milestones"
+          }
           count={milestones.length > 0 ? milestones.length : undefined}
         />
 
@@ -843,10 +928,18 @@ export default async function DealDetailPage({
         </section>
       )}
 
-      {/* ── Add milestone (contractor, draft deals) ── */}
+      {/* ── Add milestone manually (contractor, draft deals) ── */}
+      {/* De-prioritised: shown below all primary sections. Manual milestones
+          are a fallback for deals without a formal SOV. The preferred flow is
+          contract → SOV → linked draw requests. */}
       {isDraftContractor && (
         <section>
-          <SectionHeader label="Add Milestone" />
+          <SectionHeader label="Add Milestone Manually" />
+          <p className="text-[12px] text-white/35 -mt-2 mb-3 leading-relaxed">
+            Use manual milestones only when your contract does not include a formal SOV.
+            For contracts with a Schedule of Values, add SOV line items above and link
+            milestones to them instead.
+          </p>
           <Card>
             <CardHeader border>
               <CardTitle>New Milestone</CardTitle>
