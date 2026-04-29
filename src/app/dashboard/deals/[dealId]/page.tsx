@@ -18,6 +18,7 @@ import { ArrowLeft, Info, FolderOpen, FileText, CheckCircle2, Clock, XCircle, Al
 import { SectionHeader, EmptyState } from "@/components/layout";
 import { SovSection } from "@/components/deal/sov-section";
 import { DealReadinessBanner } from "@/components/deal/deal-readiness-banner";
+import { ContractUploadSection } from "@/components/deal/contract-upload-section";
 
 // ─── Release gate computation (server-side pre-check) ────────────────────────
 //
@@ -641,6 +642,14 @@ export default async function DealDetailPage({
             </span>
           </div>
         </div>
+      )}
+
+      {/* ── Contract upload section ── */}
+      {/* Anchor target for href="#contract" links in the setup card above and
+          in the SOV empty state. Visible to contractors and admins when no
+          active (non-voided) contract is on file. */}
+      {(typedProfile.role === "contractor" || typedProfile.role === "admin") && !hasContract && (
+        <ContractUploadSection dealId={typedDeal.id} />
       )}
 
       {/* ── Schedule of Values ── */}
