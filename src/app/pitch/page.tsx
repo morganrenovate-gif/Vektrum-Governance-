@@ -110,7 +110,7 @@ function CoverSlide() {
         <div className="inline-flex items-center gap-2 rounded-full border border-vektrum-blue/30 bg-vektrum-blue/[0.07] px-3.5 py-1.5 mb-11">
           <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
           <span className="text-[10px] font-black text-blue-300 tracking-[0.18em] uppercase">
-            Construction Finance Infrastructure
+            Conditional Authorization Infrastructure
           </span>
         </div>
 
@@ -119,16 +119,16 @@ function CoverSlide() {
         </p>
 
         <h1 className="text-[60px] font-black tracking-[-0.045em] text-white leading-[0.95] mb-8">
-          Release-control infrastructure
+          Conditional authorization infrastructure
           <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-br from-blue-300 via-blue-400 to-vektrum-blue">
-            for construction capital.
+            for construction disbursements.
           </span>
         </h1>
 
         <p className="text-[18px] text-white/62 leading-[1.6] max-w-[620px] mx-auto mb-12">
-          Money does not move unless all release conditions pass.
-          Vektrum governs authorization. Vektrum does not hold funds directly.
+          Enforce release conditions before capital moves.
+          Vektrum determines whether a disbursement is authorized — not whether it executes.
         </p>
 
         <div className="grid grid-cols-3 gap-4 max-w-[620px] mx-auto mb-14">
@@ -164,20 +164,20 @@ function ProblemSlide() {
   const cards = [
     {
       icon:    AlertTriangle,
-      title:   'Risk happens before money moves',
-      body:    'Draw approvals live in email threads, PDFs, and spreadsheets. Conditions are checked by memory. When a release is wrong, it is wrong before the wire leaves the bank.',
+      title:   'Releases happen before conditions are met',
+      body:    'Draw approvals live in email threads, PDFs, and spreadsheets. Conditions are checked by memory — not by enforcement. Premature and duplicate releases are routine.',
       accent:  { border: 'border-red-500/15', iconBg: 'bg-red-500/[0.07]', icon: 'text-red-400' },
     },
     {
       icon:    FileCheck,
-      title:   'Fragmented documentation',
-      body:    'Funders, contractors, inspectors, title, and attorneys all hold pieces of the record. No single authoritative source for "was this release allowed?".',
+      title:   'Missing lien waivers, unresolved change orders',
+      body:    'Conditional lien waivers, open change orders, and unsigned contracts routinely slip through release approvals. There is no enforcement layer that checks them before funds move.',
       accent:  { border: 'border-amber-500/15', iconBg: 'bg-amber-500/[0.07]', icon: 'text-amber-400' },
     },
     {
       icon:    Eye,
-      title:   'Consequences compound',
-      body:    'Bad releases create disputes, over-advancing, lien exposure, and payment uncertainty. Recovery is manual, expensive, and slow.',
+      title:   'Weak audit trails, unclear authority',
+      body:    'Who approved what, under what conditions, and on what evidence? There is no authoritative record. When a release is disputed, the answer is emails, memory, and PDFs.',
       accent:  { border: 'border-red-500/15', iconBg: 'bg-red-500/[0.07]', icon: 'text-red-400' },
     },
   ]
@@ -197,9 +197,9 @@ function ProblemSlide() {
         </h2>
 
         <p className="text-[15px] text-white/50 mb-12 max-w-[620px] leading-relaxed">
-          Construction finance depends on approval chains, email, spreadsheets, and
-          scanned PDFs. The moment money moves is the moment risk crystallises — and
-          there is no systems layer between approval and disbursement.
+          Draw releases are fragmented across contracts, SOVs, lien waivers, change orders,
+          evidence, and approvals. The moment money moves is the moment risk crystallises —
+          and there is no enforcement layer between approval and disbursement.
         </p>
 
         <div className="grid grid-cols-3 gap-5">
@@ -335,20 +335,23 @@ function SolutionSlide() {
             </h2>
 
             <p className="text-[15px] text-white/54 leading-relaxed mb-9 max-w-[460px]">
-              Vektrum determines whether construction funds are allowed to move.
-              Authorization is separated from execution — funds flow through Stripe
-              Connect or a partner-controlled external process. Vektrum never holds,
-              escrows, transmits, or forwards money.
+              Vektrum does not move money. It determines whether money is authorized
+              to move. From DocuSign contract execution through SOV, evidence, lien waivers,
+              and AI pre-review — then the 10-condition gate decides. Execution happens
+              through Stripe Connect or the partner's existing process. Vektrum never holds,
+              escrows, transmits, or forwards funds.
             </p>
 
             <div className="space-y-3.5">
               {[
+                'DocuSign contract execution — signed contract required before any release',
+                'Schedule of Values links contract value to individual draw milestones',
+                'Evidence and lien waiver attached to each draw request',
+                'AI Draw Control Brief pre-screens the draw package before the gate runs',
                 'Server-side 10-condition release gate — no UI path around it',
-                'AI-assisted draw review as a precondition, not the release authority',
-                'Stripe Connect automated rail + external/manual authorized rail',
-                'Append-only, hash-chained audit log with admin dual-logging',
-                'Hourly Stripe reconciliation with 1-hour SLA escalation',
-                'Funder-triggered release. Admin oversight. Admin cannot release.',
+                'Funder-triggered only. Admin oversight. Admin cannot release.',
+                'Stripe Connect automated rail + external/manual partner-controlled rail',
+                'Append-only, hash-chained audit log — every authorization recorded',
               ].map((item) => (
                 <div key={item} className="flex items-start gap-3">
                   <div className="flex-shrink-0 mt-[1px] w-5 h-5 rounded-full bg-vektrum-blue/10 flex items-center justify-center">
@@ -1151,11 +1154,15 @@ function BusinessModelSlide() {
 function TractionSlide() {
   const built = [
     'Production-grade v1 infrastructure — gate, rails, reconciliation',
+    'DocuSign contract execution (funder + contractor signing flow)',
+    'Schedule of Values with milestone-to-SOV linking',
+    'Evidence upload and lien waiver support per milestone',
+    'AI Draw Control Brief — pre-review precondition before gate runs',
     'Stripe Connect automated rail (end-to-end)',
     'External / manual execution rail with confirmation + SLA tracking',
+    'Notifications center — deal activity, release events, review alerts',
     'Hash-chained audit log with admin dual-logging',
-    'AI draw review with provider fallback chain',
-    'Interactive public demo (funder · contractor · admin personas)',
+    'Interactive public demo — Harbor Draw #3 guided story',
   ]
 
   const now = [
@@ -1338,14 +1345,16 @@ function ClosingSlide() {
         </h1>
 
         <p className="text-[17px] text-white/60 leading-[1.6] max-w-[560px] mx-auto mb-12">
-          Money does not move unless all release conditions pass. Vektrum governs
-          authorization. Vektrum does not hold funds directly.
+          We are looking for workflow validation and partner discovery with title,
+          escrow, lending, treasury, and construction-finance operators. The first
+          meeting maps your current draw-release process and identifies whether
+          Vektrum can sit before it as the release-control layer.
         </p>
 
-        <div className="grid grid-cols-3 gap-4 max-w-[680px] mx-auto mb-14">
+        <div className="grid grid-cols-3 gap-4 max-w-[680px] mx-auto mb-10">
           {[
-            { label: 'Pilot partners',    desc: 'Funders + construction lenders' },
-            { label: 'Integration',       desc: 'Existing treasury / escrow / Stripe' },
+            { label: 'Pilot partners',    desc: 'Title, escrow, lenders, treasury operators' },
+            { label: 'Partner discovery', desc: 'Map your draw process + identify fit' },
             { label: 'Investor conversations', desc: 'Seed / Series A discussions' },
           ].map((c) => (
             <div key={c.label} className="rounded-xl border border-white/[0.08] bg-white/[0.025] px-5 py-4 text-left">
@@ -1357,12 +1366,19 @@ function ClosingSlide() {
           ))}
         </div>
 
-        <div className="inline-flex flex-col items-center gap-2">
+        <div className="inline-flex flex-col items-center gap-2 mb-8">
           <p className="text-[13px] text-white/70 font-mono tracking-wider">
             operations@vektrum.io
           </p>
           <p className="text-[10px] text-white/22 tracking-[0.15em] uppercase">
             Confidential · {new Date().getFullYear()}
+          </p>
+        </div>
+
+        <div className="max-w-[680px] mx-auto rounded-xl border border-white/[0.07] bg-white/[0.025] px-5 py-3.5">
+          <p className="text-[10.5px] text-white/35 leading-relaxed text-center">
+            Vektrum is authorization infrastructure — not a bank, lender, escrow company, payment processor, or money transmitter.
+            Vektrum does not hold or custody funds; execution occurs through Stripe Connect or the partner's existing rail.
           </p>
         </div>
       </div>
@@ -1544,6 +1560,257 @@ function ApiArchitectureSlide() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// SLIDE — WORKFLOW SPINE
+// ─────────────────────────────────────────────────────────────────────────────
+
+function WorkflowSlide() {
+  const steps = [
+    { n: '01', label: 'Contract uploaded',         detail: 'Construction contract uploaded to the deal.',                    vektrum: false },
+    { n: '02', label: 'DocuSign executed',          detail: 'Both parties sign via DocuSign. Signed contract required before any release.',  vektrum: true  },
+    { n: '03', label: 'Schedule of Values',         detail: 'SOV created and approved, linking contract value to milestones.', vektrum: true  },
+    { n: '04', label: 'Milestone linked to SOV',    detail: 'Draw request tied to an approved SOV line item.',                vektrum: true  },
+    { n: '05', label: 'Evidence + lien waiver',     detail: 'Inspection reports, photos, draw request, and conditional lien waiver attached.', vektrum: true },
+    { n: '06', label: 'AI Draw Control Brief',      detail: 'AI pre-screens completeness and flags risk before the gate runs.', vektrum: true },
+    { n: '07', label: 'Release Readiness gate',     detail: 'All 10 conditions evaluated server-side. Block or pass — no bypass.', vektrum: true, core: true },
+    { n: '08', label: 'Funder authorizes',          detail: 'Funder-triggered only. Authorization signal recorded with proof.', vektrum: true  },
+    { n: '09', label: 'Execution rail',             detail: 'Stripe Connect automated or partner-controlled external rail executes.', vektrum: false },
+    { n: '10', label: 'Audit trail',                detail: 'Every action, actor, and proof permanently recorded in hash-chained log.', vektrum: true },
+  ]
+
+  return (
+    <div className="relative flex flex-col justify-center h-full px-20 py-14 overflow-hidden">
+      <DotGrid opacity={0.15} />
+      <Glow className="w-[500px] h-[400px] top-0 right-0 translate-x-1/3 -translate-y-1/4" />
+
+      <div className="relative z-10 max-w-[1000px] mx-auto w-full">
+        <Eyebrow>Release Workflow</Eyebrow>
+
+        <div className="grid grid-cols-[260px_1fr] gap-10 items-start">
+          <div>
+            <h2 className="text-[40px] font-black tracking-[-0.038em] text-white leading-[1.02] mb-4">
+              Contract to
+              <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-blue-500">
+                authorization.
+              </span>
+            </h2>
+            <p className="text-[13px] text-white/52 leading-relaxed mb-5">
+              Every draw follows the same governed path — from DocuSign contract
+              execution through evidence and AI pre-review to the authorization
+              signal that unlocks disbursement.
+            </p>
+            <div className="rounded-xl border border-white/[0.07] bg-white/[0.025] px-4 py-3">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-2 h-2 rounded-full bg-vektrum-blue flex-shrink-0" />
+                <p className="text-[10px] font-bold text-blue-300 uppercase tracking-wider">Vektrum layer</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-white/25 flex-shrink-0" />
+                <p className="text-[10px] text-white/40 uppercase tracking-wider">Partner / external</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+            {steps.map((s, i) => (
+              <div
+                key={s.n}
+                className={cn(
+                  'flex items-start gap-2.5 rounded-xl border px-3.5 py-2.5',
+                  s.core
+                    ? 'border-vektrum-blue/50 bg-vektrum-blue/[0.10] ring-1 ring-vektrum-blue/20'
+                    : s.vektrum
+                      ? 'border-vektrum-blue/20 bg-vektrum-blue/[0.04]'
+                      : 'border-white/[0.07] bg-white/[0.02]',
+                )}
+              >
+                <span className={cn('text-[9px] font-mono mt-0.5 flex-shrink-0', s.core ? 'text-blue-300' : s.vektrum ? 'text-blue-300/65' : 'text-white/30')}>
+                  {s.n}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <p className={cn('text-[11.5px] font-semibold leading-tight', s.core ? 'text-white' : 'text-white/85')}>{s.label}</p>
+                    {s.vektrum && !s.core && (
+                      <span className="text-[7px] font-black uppercase tracking-wider px-1 py-px rounded bg-vektrum-blue/15 text-blue-300 border border-vektrum-blue/20 flex-shrink-0">V</span>
+                    )}
+                    {s.core && (
+                      <span className="text-[7px] font-black uppercase tracking-wider px-1 py-px rounded bg-vektrum-blue/25 text-blue-200 border border-vektrum-blue/35 flex-shrink-0">Gate</span>
+                    )}
+                  </div>
+                  <p className="text-[10px] text-white/38 leading-snug mt-px">{s.detail}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SLIDE — HARBOR DEMO STORY
+// ─────────────────────────────────────────────────────────────────────────────
+
+function DemoStorySlide() {
+  const steps = [
+    { label: 'Contract executed',          detail: 'Harbor Logistics Agreement signed by both parties via DocuSign',    done: true  },
+    { label: 'SOV approved',               detail: '$9.1M contract value linked across 5 milestone SOV line items',     done: true  },
+    { label: 'Draw linked to SOV',         detail: 'Draw #3 — Structural Steel Erection — $2,180,000 tied to SOV item', done: true  },
+    { label: 'Evidence + lien waiver',     detail: 'Inspection report, conditional lien waiver, draw request, site photo attached', done: true },
+    { label: 'AI Draw Control Brief',      detail: 'Perplexity AI pre-review complete — risk score 91/100, no critical flags', done: true },
+    { label: 'Release Readiness verified', detail: 'All 10 gate conditions pass simultaneously on server-side evaluation', done: true  },
+    { label: 'Funder authorizes',          detail: 'Funder reviews Authorization Signal — clicks Authorize Release',    done: false },
+    { label: 'Audit trail',                detail: 'Every action recorded in hash-chained log — permanently',           done: false },
+  ]
+
+  return (
+    <div className="relative flex flex-col justify-center h-full px-20 py-14 overflow-hidden">
+      <DotGrid opacity={0.15} />
+      <Glow className="w-[560px] h-[440px] bottom-0 left-0 -translate-x-1/4 translate-y-1/4 bg-emerald-500/[0.07]" />
+
+      <div className="relative z-10 max-w-[1000px] mx-auto w-full">
+        <Eyebrow>Demo — Harbor Draw #3</Eyebrow>
+
+        <div className="grid grid-cols-[280px_1fr] gap-10 items-start">
+          <div>
+            <h2 className="text-[38px] font-black tracking-[-0.038em] text-white leading-[1.02] mb-4">
+              See it live.
+              <br />
+              <span className="text-white/38">Harbor Logistics.</span>
+            </h2>
+            <p className="text-[13px] text-white/52 leading-relaxed mb-5">
+              The interactive demo walks through a complete $2.18M draw release —
+              Contract → DocuSign → SOV → Evidence → AI Brief → Release Gate →
+              Funder Authorization — from three role perspectives.
+            </p>
+
+            <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/[0.04] px-4 py-3 mb-4">
+              <p className="text-[11px] font-semibold text-emerald-300 mb-1">Harbor Draw #3</p>
+              <p className="text-[11px] text-white/50 leading-snug">Structural Steel Erection · $2,180,000</p>
+              <p className="text-[11px] text-white/50 leading-snug mt-0.5">10/10 conditions verified · AI score 91/100</p>
+            </div>
+
+            <a
+              href="/demo-live/deal/harbor"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-vektrum-blue/40 bg-vektrum-blue/[0.10] text-blue-300 text-[12px] font-bold hover:bg-vektrum-blue/[0.18] hover:border-vektrum-blue/60 transition-all"
+            >
+              <ArrowRight size={13} />
+              Open Harbor Demo
+            </a>
+          </div>
+
+          <div className="space-y-1.5">
+            {steps.map((s) => (
+              <div
+                key={s.label}
+                className={cn(
+                  'flex items-start gap-3 rounded-xl border px-4 py-3',
+                  s.done
+                    ? 'border-emerald-500/20 bg-emerald-500/[0.04]'
+                    : 'border-vektrum-blue/25 bg-vektrum-blue/[0.06]',
+                )}
+              >
+                <span className={cn(
+                  'flex items-center justify-center w-4 h-4 rounded-full flex-shrink-0 mt-0.5',
+                  s.done ? 'bg-emerald-500/20' : 'bg-vektrum-blue/20',
+                )}>
+                  {s.done
+                    ? <CheckCircle2 size={9} className="text-emerald-400" />
+                    : <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+                  }
+                </span>
+                <div className="flex-1 min-w-0">
+                  <p className={cn('text-[12px] font-semibold leading-tight', s.done ? 'text-white/75' : 'text-white')}>
+                    {s.label}
+                  </p>
+                  <p className="text-[10.5px] text-white/40 leading-snug mt-px">{s.detail}</p>
+                </div>
+                {!s.done && (
+                  <span className="flex-shrink-0 px-2 py-0.5 rounded-full bg-blue-400/10 border border-blue-400/20">
+                    <span className="text-[8px] font-black text-blue-300 uppercase tracking-wider">Awaiting</span>
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SLIDE — WHAT VEKTRUM IS NOT
+// ─────────────────────────────────────────────────────────────────────────────
+
+function WhatIsNotSlide() {
+  const notList = [
+    { label: 'Not a bank',                 detail: 'Vektrum holds no deposit accounts and issues no credit.' },
+    { label: 'Not escrow',                 detail: 'Funds are held by Stripe, title, or the partner\'s treasury — not Vektrum.' },
+    { label: 'Not a lender',               detail: 'Vektrum does not originate, fund, or service loans.' },
+    { label: 'Not a money transmitter',    detail: 'Vektrum does not receive or forward funds on behalf of others.' },
+    { label: 'Not a payment processor',    detail: 'Stripe Connect or the partner rail processes execution — not Vektrum.' },
+    { label: 'Not AI payment approval',    detail: 'AI pre-screens the draw package. The deterministic gate decides.' },
+    { label: 'Not project management',     detail: 'Vektrum is not Procore. It is the enforcement layer that sits before disbursement.' },
+    { label: 'Not a title replacement',    detail: 'Existing title and escrow partners keep their custody and closing function.' },
+  ]
+
+  return (
+    <div className="relative flex flex-col justify-center h-full px-20 py-14 overflow-hidden">
+      <DotGrid opacity={0.15} />
+      <Glow className="w-[500px] h-[420px] top-1/2 right-0 translate-x-1/3 -translate-y-1/2" />
+
+      <div className="relative z-10 max-w-[980px] mx-auto w-full">
+        <Eyebrow>What Vektrum Is Not</Eyebrow>
+
+        <div className="grid grid-cols-[300px_1fr] gap-12 items-start">
+          <div>
+            <h2 className="text-[42px] font-black tracking-[-0.038em] text-white leading-[1.02] mb-5">
+              Category clarity.
+            </h2>
+            <p className="text-[13.5px] text-white/52 leading-relaxed mb-6">
+              Vektrum is release-control infrastructure — a new category that sits
+              between draw approval and payment execution. It does not compete with,
+              replace, or replicate any licensed financial function.
+            </p>
+            <div className="rounded-xl border border-vektrum-blue/25 bg-vektrum-blue/[0.05] px-4 py-4">
+              <p className="text-[12px] font-semibold text-blue-300 mb-2">What Vektrum is:</p>
+              <div className="space-y-1">
+                {[
+                  'Conditional authorization infrastructure',
+                  'Release-control layer',
+                  '10-condition enforcement gate',
+                  'Audit and evidence system',
+                  'Partner/API infrastructure',
+                ].map((x) => (
+                  <div key={x} className="flex items-center gap-2">
+                    <CheckCircle2 size={10} className="text-blue-400 flex-shrink-0" />
+                    <p className="text-[11px] text-white/60 leading-snug">{x}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            {notList.map((item) => (
+              <div key={item.label} className="rounded-xl border border-red-500/[0.12] bg-red-500/[0.04] px-4 py-3 flex items-start gap-2.5">
+                <XCircle size={12} className="text-red-400/60 flex-shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[12px] font-semibold text-white/80 leading-tight">{item.label}</p>
+                  <p className="text-[10.5px] text-white/40 leading-snug mt-0.5">{item.detail}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // SLIDE 7b — WHERE VEKTRUM PLUGS IN
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -1701,23 +1968,26 @@ function PlacementSlide() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const SLIDES = [
-  { id: 'cover',       label: 'Vektrum',           component: CoverSlide },
-  { id: 'problem',     label: 'Problem',            component: ProblemSlide },
-  { id: 'insight',     label: 'Insight',            component: InsightSlide },
-  { id: 'solution',    label: 'Solution',           component: SolutionSlide },
-  { id: 'gate',        label: 'Release Gate',       component: ReleaseGateSlide },
-  { id: 'ai',          label: 'AI Precondition',    component: AiPreconditionSlide },
-  { id: 'rails',       label: 'Execution Rails',    component: ExecutionRailsSlide },
-  { id: 'placement',   label: 'Where We Plug In',   component: PlacementSlide },
-  { id: 'api-arch',    label: 'API Architecture',   component: ApiArchitectureSlide },
-  { id: 'trust',       label: 'Trust · Audit',      component: TrustOpsSlide },
-  { id: 'roles',       label: 'Role Separation',    component: RolesSlide },
-  { id: 'market',      label: 'Market',             component: MarketSlide },
-  { id: 'competitive', label: 'Competitive',        component: CompetitiveSlide },
-  { id: 'model',       label: 'Business Model',     component: BusinessModelSlide },
-  { id: 'traction',    label: 'Traction',           component: TractionSlide },
-  { id: 'founders',    label: 'Founders',           component: FoundersSlide },
-  { id: 'closing',     label: 'Closing',            component: ClosingSlide },
+  { id: 'cover',        label: 'Vektrum',            component: CoverSlide },
+  { id: 'problem',      label: 'Problem',             component: ProblemSlide },
+  { id: 'insight',      label: 'Insight',             component: InsightSlide },
+  { id: 'workflow',     label: 'Release Workflow',    component: WorkflowSlide },
+  { id: 'solution',     label: 'Solution',            component: SolutionSlide },
+  { id: 'gate',         label: 'Release Gate',        component: ReleaseGateSlide },
+  { id: 'ai',           label: 'AI Precondition',     component: AiPreconditionSlide },
+  { id: 'demo',         label: 'Harbor Demo',         component: DemoStorySlide },
+  { id: 'rails',        label: 'Execution Rails',     component: ExecutionRailsSlide },
+  { id: 'placement',    label: 'Where We Plug In',    component: PlacementSlide },
+  { id: 'api-arch',     label: 'API Architecture',    component: ApiArchitectureSlide },
+  { id: 'trust',        label: 'Trust · Audit',       component: TrustOpsSlide },
+  { id: 'roles',        label: 'Role Separation',     component: RolesSlide },
+  { id: 'what-not',     label: 'What We Are Not',     component: WhatIsNotSlide },
+  { id: 'market',       label: 'Market',              component: MarketSlide },
+  { id: 'competitive',  label: 'Competitive',         component: CompetitiveSlide },
+  { id: 'model',        label: 'Business Model',      component: BusinessModelSlide },
+  { id: 'traction',     label: 'Traction',            component: TractionSlide },
+  { id: 'founders',     label: 'Founders',            component: FoundersSlide },
+  { id: 'closing',      label: 'Closing',             component: ClosingSlide },
 ] as const
 
 export default function PitchPage() {
