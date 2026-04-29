@@ -22,7 +22,7 @@
  * 13.  Upload API route logs contract_uploaded audit event
  * 14.  Upload API route returns 201 on success
  * 15.  ContractUploadSection component file exists
- * 16.  ContractUploadSection has id="contract" anchor (href="#contract" target)
+ * 16.  ContractUploadSection has id="contract-upload" (stable scroll + event target)
  * 17.  ContractUploadSection accepts PDF files only (accept attribute)
  * 18.  ContractUploadSection posts to /api/deals/[dealId]/contracts
  * 19.  ContractUploadSection calls router.refresh() on success
@@ -30,8 +30,8 @@
  * 21.  ContractUploadSection enforces 20 MB client-side size check
  * 22.  Deal page imports ContractUploadSection
  * 23.  Deal page renders ContractUploadSection for contractor/admin + !hasContract
- * 24.  Setup card Upload Contract link still uses href="#contract" (anchor scroll)
- * 25.  SOV section contractUploadHref prop still passes "#contract"
+ * 24.  Setup card Upload Contract CTA uses UploadContractTrigger (not dead anchor)
+ * 25.  SOV section Upload Contract CTA uses UploadContractTrigger (not dead anchor)
  * 26.  Import SOV from Contract remains disabled/coming soon (no live wiring)
  * 27.  Test file is wired into npm test in package.json
  * 28.  Contracts bucket migration file exists
@@ -39,6 +39,9 @@
  * 30.  Contracts bucket sets 20 MB file size limit
  * 31.  Contracts bucket allows only application/pdf
  * 32.  Contracts bucket migration uses ON CONFLICT DO NOTHING (idempotent)
+ * 33.  UploadContractTrigger component file exists
+ * 34.  UploadContractTrigger dispatches contract:open-picker event on click
+ * 35.  ContractUploadSection listens for contract:open-picker to open file picker
  *
  * Source-parse checks only — no live DB, no rendering, no env vars required.
  * Run:  npx tsx tests/contract-upload-flow.test.ts
@@ -86,6 +89,7 @@ function codeOnly(src: string): string {
 
 const UPLOAD_ROUTE  = 'src/app/api/deals/[dealId]/contracts/route.ts'
 const COMPONENT     = 'src/components/deal/contract-upload-section.tsx'
+const TRIGGER       = 'src/components/deal/upload-contract-trigger.tsx'
 const PAGE          = 'src/app/dashboard/deals/[dealId]/page.tsx'
 const SOV_SECTION   = 'src/components/deal/sov-section.tsx'
 const BUCKET_MIG    = 'supabase/migrations/20260429000002_contracts_bucket.sql'
@@ -244,11 +248,11 @@ await test('15. ContractUploadSection component file exists', () => {
   )
 })
 
-await test('16. ContractUploadSection has id="contract" anchor', () => {
+await test('16. ContractUploadSection has id="contract-upload" (stable scroll + event target)', () => {
   const src = read(COMPONENT)
   assert(
-    src.includes('id="contract"') || src.includes("id='contract'"),
-    `${COMPONENT} must have id="contract" so href="#contract" buttons scroll to it.`,
+    src.includes('id="contract-upload"') || src.includes("id='contract-upload'"),
+    `${COMPONENT} must have id="contract-upload" so UploadContractTrigger can scroll to it.`,
   )
 })
 
@@ -319,19 +323,29 @@ await test('23. Deal page renders ContractUploadSection for contractor/admin + !
   )
 })
 
-await test('24. Setup card Upload Contract link uses href="#contract" (anchor scroll)', () => {
+await test('24. Setup card Upload Contract CTA uses UploadContractTrigger (not dead anchor)', () => {
   const src = read(PAGE)
   assert(
-    src.includes('href="#contract"') || src.includes("href='#contract'"),
-    `${PAGE} setup card "Upload Contract" button must use href="#contract" to scroll to the upload section.`,
+    src.includes('UploadContractTrigger'),
+    `${PAGE} setup card "Upload Contract" must use <UploadContractTrigger>, not a dead <a href>.`,
+  )
+  // Must not use a dead anchor pointing to a non-existent target
+  assert(
+    !src.includes('href="#contract"') && !src.includes("href='#contract'"),
+    `${PAGE} must not use dead href="#contract" — use UploadContractTrigger instead.`,
   )
 })
 
-await test('25. SOV section contractUploadHref prop passes "#contract"', () => {
-  const src = read(PAGE)
+await test('25. SOV section Upload Contract CTA uses UploadContractTrigger (not dead anchor)', () => {
+  const src = read(SOV_SECTION)
   assert(
-    src.includes('contractUploadHref="#contract"') || src.includes("contractUploadHref='#contract'"),
-    `${PAGE} must pass contractUploadHref="#contract" to SovSection.`,
+    src.includes('UploadContractTrigger'),
+    `${SOV_SECTION} "Upload Contract" must use <UploadContractTrigger>, not a dead <a href>.`,
+  )
+  // Must not fall back to a dead href anchor
+  assert(
+    !src.includes('href={contractUploadHref}') && !src.includes('href="#contract"'),
+    `${SOV_SECTION} must not use a dead href anchor for the Upload Contract action.`,
   )
 })
 
@@ -406,6 +420,47 @@ await test('32. Contracts bucket migration uses ON CONFLICT DO NOTHING (idempote
   assert(
     sql.includes('ON CONFLICT') && sql.includes('DO NOTHING'),
     `${BUCKET_MIG} must use ON CONFLICT DO NOTHING so re-running the migration is safe.`,
+  )
+})
+
+// ── UploadContractTrigger component ──────────────────────────────────────────
+
+await test('33. UploadContractTrigger component file exists', () => {
+  assert(
+    fs.existsSync(path.resolve(ROOT, TRIGGER)),
+    `${TRIGGER} must exist. External Upload Contract CTAs need this shared trigger component.`,
+  )
+})
+
+await test('34. UploadContractTrigger dispatches contract:open-picker event on click', () => {
+  const src = read(TRIGGER)
+  assert(
+    src.includes('CONTRACT_PICKER_EVENT') || src.includes('contract:open-picker'),
+    `${TRIGGER} must define or reference the CONTRACT_PICKER_EVENT / 'contract:open-picker' string.`,
+  )
+  assert(
+    src.includes('dispatchEvent') || src.includes('CustomEvent'),
+    `${TRIGGER} must dispatch a CustomEvent so ContractUploadSection can intercept it.`,
+  )
+  assert(
+    src.includes('<button') || src.includes("'button'") || src.includes('"button"'),
+    `${TRIGGER} must render a real <button>, not a dead <a> anchor.`,
+  )
+})
+
+await test('35. ContractUploadSection listens for contract:open-picker to open file picker', () => {
+  const src = read(COMPONENT)
+  assert(
+    src.includes('CONTRACT_PICKER_EVENT') || src.includes('contract:open-picker'),
+    `${COMPONENT} must listen for CONTRACT_PICKER_EVENT / 'contract:open-picker'.`,
+  )
+  assert(
+    src.includes('addEventListener') && src.includes('removeEventListener'),
+    `${COMPONENT} must add and clean up the event listener via useEffect.`,
+  )
+  assert(
+    src.includes('inputRef.current') && (src.includes('.click()') || src.includes('?.click()')),
+    `${COMPONENT} must call inputRef.current?.click() when the event fires to open the file picker.`,
   )
 })
 

@@ -1,14 +1,15 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Upload, FileText, CheckCircle2, AlertCircle } from 'lucide-react'
+import { CONTRACT_PICKER_EVENT } from './upload-contract-trigger'
 
 // ─── ContractUploadSection ────────────────────────────────────────────────────
 //
 // Client component that renders a PDF upload form for the deal contract.
-// Anchored at id="contract" so "Upload Contract" buttons elsewhere on the
-// page can scroll here with href="#contract".
+// Mounted at id="contract-upload" so "Upload Contract" trigger buttons can
+// scroll here and dispatch CONTRACT_PICKER_EVENT to open the file picker.
 //
 // Props:
 //   dealId  — the deal to attach the contract to
@@ -32,6 +33,19 @@ export function ContractUploadSection({ dealId }: ContractUploadSectionProps) {
   const [uploadState, setUploadState] = useState<UploadState>('idle')
   const [errorMsg,    setErrorMsg]    = useState<string | null>(null)
   const [fileName,    setFileName]    = useState<string | null>(null)
+
+  // Listen for CONTRACT_PICKER_EVENT dispatched by UploadContractTrigger buttons
+  // elsewhere on the page (setup card, SOV empty state). When received, open
+  // the hidden file input — same as clicking "Select Contract PDF" directly.
+  useEffect(() => {
+    const handleOpen = () => {
+      if (uploadState !== 'uploading' && uploadState !== 'success') {
+        inputRef.current?.click()
+      }
+    }
+    window.addEventListener(CONTRACT_PICKER_EVENT, handleOpen)
+    return () => window.removeEventListener(CONTRACT_PICKER_EVENT, handleOpen)
+  }, [uploadState])
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -83,7 +97,7 @@ export function ContractUploadSection({ dealId }: ContractUploadSectionProps) {
 
   return (
     <section
-      id="contract"
+      id="contract-upload"
       aria-label="Upload contract"
       className="rounded-xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden"
     >

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { formatMoney } from '@/lib/utils'
 import type { SovLineItem, SovLineItemStatus } from '@/lib/types'
 import { AlertCircle, ChevronDown, ChevronRight, FileText, Plus, Upload } from 'lucide-react'
+import { UploadContractTrigger } from './upload-contract-trigger'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -31,11 +32,6 @@ interface SovSectionProps {
    * When false, the SOV section shows a contract-first advisory.
    */
   hasContract?:     boolean
-  /**
-   * Href for the contract upload page/section, used in the setup action.
-   * Defaults to the contracts section anchor on the current page.
-   */
-  contractUploadHref?: string
 }
 
 // ─── Status badge ─────────────────────────────────────────────────────────────
@@ -275,7 +271,6 @@ export function SovSection({
   viewerRole,
   dealStatus,
   hasContract = false,
-  contractUploadHref = '#contract',
 }: SovSectionProps) {
   const [items,    setItems]    = useState<SovLineItem[]>(initialItems)
   const [totals,   setTotals]   = useState<SovTotals>(initialTotals)
@@ -467,13 +462,10 @@ export function SovSection({
                     <Plus size={12} aria-hidden="true" />
                     Add SOV Manually
                   </button>
-                  <a
-                    href={contractUploadHref}
-                    className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-white/[0.10] text-[12px] text-white/55 hover:bg-white/[0.04] transition-colors"
-                  >
+                  <UploadContractTrigger className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-white/[0.10] text-[12px] text-white/55 hover:bg-white/[0.04] transition-colors">
                     <Upload size={12} aria-hidden="true" />
                     Upload Contract
-                  </a>
+                  </UploadContractTrigger>
                   <button
                     disabled
                     title="Contract extraction is not yet available"
