@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { HardHat, TrendingUp, DollarSign, CheckCircle2, Clock, ArrowRight, ArrowLeft, Sparkles, Loader2 } from 'lucide-react'
+import { HardHat, TrendingUp, DollarSign, CheckCircle2, Clock, ArrowRight, ArrowLeft, Sparkles, Loader2, List, Shield } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format'
 import { useDemoAutoReset } from '@/lib/demo-data/use-demo-auto-reset'
 import { riverside, harbor, getMilestoneSummary } from '@/lib/demo-data'
@@ -129,6 +129,33 @@ export default function DemoContractorPage() {
         />
       </div>
 
+      {/* ── Draw #3 Status Banner ─────────────────────────────────────────── */}
+      <section className="rounded-xl border border-vektrum-blue/20 bg-surface-2 overflow-hidden">
+        <div className="px-5 py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <div className="h-9 w-9 flex items-center justify-center rounded-xl bg-vektrum-blue/[0.12] border border-vektrum-blue/20 flex-shrink-0">
+              <Shield size={15} className="text-blue-400" aria-hidden="true" />
+            </div>
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-white/40 mb-0.5">Draw #3 Status</p>
+              <p className="text-[14px] font-semibold text-white">
+                Structural Steel Erection — {formatCurrency(2_180_000)}
+              </p>
+              <p className="text-[12px] text-blue-300/80 mt-0.5">
+                Approved — Awaiting Funder Authorization
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/demo-live/deal/harbor?from=contractor"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-white/[0.10] bg-surface-3 px-3 py-2 text-[12px] font-semibold text-white/65 whitespace-nowrap hover:text-white hover:border-white/[0.20] transition-all self-start sm:self-auto"
+          >
+            View Draw
+            <ArrowRight size={12} aria-hidden="true" />
+          </Link>
+        </div>
+      </section>
+
       {/* Draw Review Status */}
       <section
         id="draw-review"
@@ -193,6 +220,59 @@ export default function DemoContractorPage() {
               </div>
             </div>
           )}
+        </div>
+      </section>
+
+      {/* ── Guided Workflow — Harbor Logistics Center ──────────────────────── */}
+      <section className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden">
+        <div className="flex items-center gap-2.5 border-b border-white/[0.06] px-5 py-4">
+          <List size={14} className="text-blue-400 flex-shrink-0" aria-hidden="true" />
+          <p className="text-[13px] font-semibold text-white">Required Steps — Harbor Logistics Center</p>
+          <span className="ml-auto text-[11px] text-white/40">Draw #4 in progress</span>
+        </div>
+        <div className="p-5">
+          <ol className="relative border-l border-white/[0.08] ml-3 space-y-5">
+            {[
+              { label: 'Contract on file',           detail: 'Harbor_Logistics_Agreement.pdf — signed',       done: true  },
+              { label: 'Schedule of Values submitted', detail: '5 line items · $9,100,000 total contract value', done: true  },
+              { label: 'Draw request submitted',      detail: 'Draw #3 — Structural Steel Erection · $2,180,000', done: true  },
+              { label: 'Upload supporting documents', detail: 'Inspection report, lien waiver, and draw request for Building Envelope & Roofing', done: false },
+              { label: 'Request AI review',           detail: 'Vektrum runs a 10-condition check before funder authorization', done: false },
+            ].map((s, i) => (
+              <li key={i} className="ml-4">
+                <div className={`absolute -left-[9px] h-4 w-4 rounded-full border-2 flex items-center justify-center ${
+                  s.done
+                    ? 'border-emerald-500 bg-emerald-500/20'
+                    : i === 3 ? 'border-vektrum-blue bg-vektrum-blue/20' : 'border-white/20 bg-surface-3'
+                }`} style={{ top: `${i * 60 + 22}px` }}>
+                  {s.done && <CheckCircle2 size={10} className="text-emerald-400" />}
+                </div>
+                <div className={`rounded-lg px-3 py-2.5 ${
+                  !s.done && i === 3 ? 'border border-vektrum-blue/30 bg-vektrum-blue/[0.05]' : 'border border-white/[0.05] bg-white/[0.02]'
+                }`}>
+                  <p className={`text-[13px] font-medium ${s.done ? 'text-white/50 line-through' : i === 3 ? 'text-white' : 'text-white/55'}`}>
+                    {s.label}
+                    {!s.done && i === 3 && (
+                      <span className="ml-2 inline-flex items-center rounded-full bg-vektrum-blue/20 border border-vektrum-blue/30 px-2 py-0.5 text-[10px] font-semibold text-blue-300 no-underline" style={{ textDecoration: 'none' }}>
+                        Next step
+                      </span>
+                    )}
+                  </p>
+                  <p className="text-[11px] text-white/40 mt-0.5">{s.detail}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-5 pl-4">
+            <Link
+              href="/demo-live/deal/harbor?from=contractor"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-vektrum-blue px-4 py-2 text-[12px] font-semibold text-white hover:bg-vektrum-blue-hover transition-all hover:-translate-y-0.5"
+            >
+              <Sparkles size={12} aria-hidden="true" />
+              Go to Harbor Deal
+              <ArrowRight size={12} className="ml-0.5" aria-hidden="true" />
+            </Link>
+          </div>
         </div>
       </section>
 

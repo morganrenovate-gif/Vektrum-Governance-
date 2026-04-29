@@ -3,9 +3,19 @@
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { CheckCircle2, ChevronDown, ChevronUp, Brain, FileText, Sparkles } from 'lucide-react'
+import {
+  CheckCircle2, ChevronDown, ChevronUp, Brain, FileText, Sparkles,
+  Shield, List, Info, PenLine,
+} from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format'
-import { getFreshHarborDeal } from '@/lib/demo-data'
+import {
+  getFreshHarborDeal,
+  harborSovLineItems,
+  harborDrawBrief,
+  harborContract,
+  harborDraw3Evidence,
+  harborDealAuditTimeline,
+} from '@/lib/demo-data'
 import type { DemoMilestoneStatus } from '@/lib/demo-data'
 import { useDemoAutoReset } from '@/lib/demo-data/use-demo-auto-reset'
 import { ReleaseFundsModal } from '@/components/demo/ReleaseFundsModal'
@@ -20,28 +30,44 @@ const STATUS_CONFIG: Record<DemoMilestoneStatus, { label: string; badge: string;
   disputed:        { label: 'Disputed',          badge: 'bg-red-500/[0.12] text-red-400 border border-red-500/20',                border: 'border-l-4 border-red-500' },
 }
 
+// 10-condition release gate displayed in the Deal Control Center
+const GATE_CONDITIONS = [
+  'Milestone status approved',
+  'Protection status ready for release',
+  'Sufficient funding confirmed',
+  'Payout readiness verified',
+  'Contractor onboarding complete',
+  'No active duplicate release',
+  'No open change orders',
+  'Signed contract on file',
+  'Sequential prerequisites satisfied',
+  'Approved conditional lien waiver on file',
+]
+
+// 5-step workflow spine — where Draw #3 sits in the full deal lifecycle
+const WORKFLOW_STEPS = [
+  { label: 'Contract Executed', done: true  },
+  { label: 'SOV Approved',      done: true  },
+  { label: 'Draw Linked',       done: true  },
+  { label: 'Evidence Reviewed', done: true  },
+  { label: 'Authorize Release', done: false, active: true },
+]
+
 export default function HarborDealPage() {
   const searchParams = useSearchParams()
   const from = searchParams.get('from')
-  const backHref = from === 'contractor' ? '/demo-live/contractor' : from === 'admin' ? '/demo-live/admin' : '/demo-live/funder'
+  const backHref  = from === 'contractor' ? '/demo-live/contractor' : from === 'admin' ? '/demo-live/admin' : '/demo-live/funder'
   const backLabel = from === 'contractor' ? '← Back to contractor dashboard' : from === 'admin' ? '← Back to admin dashboard' : '← Back to funder dashboard'
 
   // Defensive: each component instance gets its own deep clone of the
-  // canonical Harbor deal so any future mutation cannot leak across mounts
-  // or back into the shared canonical export. Empty dep array — clones once
-  // per mount.
+  // canonical Harbor deal so any future mutation cannot leak across mounts.
   const deal = useMemo(() => getFreshHarborDeal(), [])
 
-  const [overrides, setOverrides] = useState<Record<string, DemoMilestoneStatus>>({})
+  const [overrides, setOverrides]         = useState<Record<string, DemoMilestoneStatus>>({})
   const [newlyReleased, setNewlyReleased] = useState<Set<string>>(new Set())
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({})
-  const [releaseModal, setReleaseModal] = useState(false)
-  // Submit-for-Review modal — null when closed, otherwise the milestone the
-  // contractor is submitting. Contractor-only flow.
-  const [submitModal, setSubmitModal] = useState<{ id: string; name: string; amount: number } | null>(null)
-  // Activity events appended in this session by demo actions (release
-  // authorization, contractor submission). Rendered alongside the canonical
-  // static activity entries below. Frontend-only state — no API/DB calls.
+  const [expanded, setExpanded]           = useState<Record<string, boolean>>({})
+  const [releaseModal, setReleaseModal]   = useState(false)
+  const [submitModal, setSubmitModal]     = useState<{ id: string; name: string; amount: number } | null>(null)
   const [releaseEvents, setReleaseEvents] = useState<Array<{ text: string; date: string }>>([])
 
   useDemoAutoReset(() => {
@@ -57,14 +83,9 @@ export default function HarborDealPage() {
     return overrides[id] ?? defaultStatus
   }
 
-  // Contractor "Submit for Review" target: the first in_progress milestone in
-  // canonical order. Only this milestone is contractor-submittable in the demo
-  // — later in_progress milestones are too early in the sequence. Computed
-  // from canonical data (not from overrides) so the target stays pinned even
-  // after the contractor submits and the milestone moves to ready_for_review.
+  // Contractor "Submit for Review" target: the first in_progress milestone.
   const submittableMilestoneId = deal.milestones.find((m) => m.status === 'in_progress')?.id ?? null
 
-  // Recompute released total whenever user releases a milestone in this session
   const totalReleased =
     deal.released +
     deal.milestones
@@ -73,12 +94,87 @@ export default function HarborDealPage() {
 
   const pct = deal.total > 0 ? Math.round((totalReleased / deal.total) * 100) : 0
 
+  // SOV map: milestone_id → sov description
+  const sovByMilestone = new Map(
+    harborSovLineItems
+      .filter((s) => s.milestone_id !== null)
+      .map((s) => [s.milestone_id!, s])
+  )
+
+  const ms3Released = newlyReleased.has('ms-hb-3') || overrides['ms-hb-3'] === 'released'
+
   return (
     <div className="min-h-screen bg-surface-0">
     <div className="page-container section space-y-8">
       <Link href={backHref} className="inline-flex items-center gap-1 text-[13px] text-white/55 hover:text-blue-300 transition-colors">
         {backLabel}
       </Link>
+
+      {/* ── Current Draw Hero ─────────────────────────────────────────────────── */}
+      <div className="rounded-xl border border-vektrum-blue/30 bg-vektrum-blue/[0.05] px-5 py-4">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-blue-400/70 mb-2">Current Draw</p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-[15px] font-semibold text-white">
+              Draw #3 · Structural Steel Erection · {formatCurrency(2_180_000)}
+            </p>
+            <p className="text-[12px] text-white/50 mt-1">
+              {ms3Released
+                ? 'Release authorized — funds sent to execution rail.'
+                : 'All 10 release conditions verified — awaiting funder authorization.'}
+            </p>
+          </div>
+          {!ms3Released && (
+            <span className="flex-shrink-0 inline-flex items-center rounded-full bg-emerald-500/[0.12] border border-emerald-500/20 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">
+              Release Ready
+            </span>
+          )}
+          {ms3Released && (
+            <span className="flex-shrink-0 inline-flex items-center rounded-full bg-vektrum-blue/[0.12] border border-vektrum-blue/30 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-blue-300">
+              Authorized
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* ── 5-Step Workflow Spine ─────────────────────────────────────────────── */}
+      <div className="rounded-xl border border-white/[0.06] bg-surface-2 px-5 py-4">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-white/35 mb-3">
+          Deal Progress — Harbor Logistics Center
+        </p>
+        <div className="flex items-start">
+          {WORKFLOW_STEPS.map((step, i, arr) => (
+            <div key={step.label} className="flex items-center flex-1 min-w-0">
+              <div className="flex flex-col items-center flex-1 min-w-0">
+                <div className={`h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${
+                  ms3Released && step.active
+                    ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-400'
+                    : step.done
+                    ? 'bg-emerald-500/20 border border-emerald-500/30 text-emerald-400'
+                    : step.active
+                    ? 'bg-vektrum-blue/20 border-2 border-vektrum-blue text-blue-300'
+                    : 'bg-white/[0.04] border border-white/20 text-white/30'
+                }`}>
+                  {(step.done || (ms3Released && step.active)) ? '✓' : i + 1}
+                </div>
+                <p className={`text-[10px] mt-1.5 text-center leading-tight px-1 ${
+                  ms3Released && step.active ? 'text-emerald-400 font-medium' :
+                  step.done ? 'text-white/45' :
+                  step.active ? 'text-blue-300 font-semibold' :
+                  'text-white/25'
+                }`}>
+                  {step.label}
+                </p>
+              </div>
+              {i < arr.length - 1 && (
+                <div className={`h-px w-4 flex-shrink-0 mx-0.5 -mt-4 ${
+                  step.done ? 'bg-emerald-500/30' : 'bg-white/[0.06]'
+                }`} aria-hidden="true" />
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -109,14 +205,183 @@ export default function HarborDealPage() {
         </div>
       </div>
 
+      {/* ── Deal Control Center — funder / admin view only ─────────────────── */}
+      {from !== 'contractor' && (
+        <section className="rounded-xl border border-vektrum-blue/20 bg-vektrum-blue/[0.05] overflow-hidden">
+          <div className="flex items-center gap-2.5 border-b border-white/[0.06] px-5 py-3.5">
+            <Shield size={14} className="text-blue-400 flex-shrink-0" aria-hidden="true" />
+            <p className="text-[13px] font-semibold text-white">Deal Control Center</p>
+            {!ms3Released && (
+              <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-emerald-500/[0.12] border border-emerald-500/20 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">
+                Release Ready
+              </span>
+            )}
+            {ms3Released && (
+              <span className="ml-auto inline-flex items-center rounded-full bg-vektrum-blue/[0.12] border border-vektrum-blue/30 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-blue-300">
+                Authorized
+              </span>
+            )}
+          </div>
+
+          <div className="px-5 py-4 space-y-4">
+            {/* Release Readiness — ms-hb-3 */}
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-white/40 mb-3">
+                Release Readiness — Structural Steel Erection · {formatCurrency(2_180_000)}
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1.5">
+                {GATE_CONDITIONS.map((condition, i) => (
+                  <div key={i} className="flex items-center gap-2 text-[12px] text-white/65">
+                    <CheckCircle2 size={13} className="text-emerald-400 flex-shrink-0" aria-hidden="true" />
+                    {condition}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Perplexity Draw Control Brief */}
+            <div className="rounded-lg border border-white/[0.08] bg-surface-3 p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Brain size={13} className="text-blue-400 flex-shrink-0" aria-hidden="true" />
+                <p className="text-[12px] font-semibold text-white">
+                  {harborDrawBrief.generated_by} Draw Control Brief
+                </p>
+                <span className="ml-auto text-[11px] text-white/40">{harborDrawBrief.generated_at}</span>
+              </div>
+              <p className="text-[12px] text-white/55 leading-relaxed mb-3">
+                {harborDrawBrief.summary}
+              </p>
+              <div className="space-y-1 mb-3">
+                {harborDrawBrief.findings.map((f, i) => (
+                  <p key={i} className="text-[11px] text-white/55 font-mono">{f}</p>
+                ))}
+              </div>
+              <div className="flex items-center gap-2 pt-2 border-t border-white/[0.06]">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-vektrum-blue/[0.12] border border-vektrum-blue/30 px-2.5 py-1 text-[11px] font-semibold text-blue-300">
+                  <Brain size={11} aria-hidden="true" />
+                  Score {harborDrawBrief.ai_score}/100 · Risk: {harborDrawBrief.risk_level}
+                </span>
+                <span className="text-[11px] text-white/50 flex-1">{harborDrawBrief.recommendation}</span>
+              </div>
+            </div>
+
+            {/* Contract & DocuSign status */}
+            <div className="rounded-lg border border-white/[0.08] bg-surface-3 p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <PenLine size={13} className="text-emerald-400 flex-shrink-0" aria-hidden="true" />
+                <p className="text-[12px] font-semibold text-white">
+                  Contract — {harborContract.document_name}
+                </p>
+                <span className="ml-auto text-[11px] text-emerald-400 font-medium">Fully Executed</span>
+              </div>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-[11px]">
+                <div>
+                  <span className="text-white/40">Funder signed:</span>
+                  <span className="text-white/65 ml-1.5">{harborContract.funder_signed_at}</span>
+                </div>
+                <div>
+                  <span className="text-white/40">Contractor signed:</span>
+                  <span className="text-white/65 ml-1.5">{harborContract.contractor_signed_at}</span>
+                </div>
+                <div>
+                  <span className="text-white/40">DocuSign envelope:</span>
+                  <span className="text-white/55 ml-1.5 font-mono">
+                    {harborContract.docusign_envelope_id?.slice(0, 20)}…
+                  </span>
+                </div>
+                <div>
+                  <span className="text-white/40">Contract value:</span>
+                  <span className="text-white/65 ml-1.5">{formatCurrency(harborContract.contract_value)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── Evidence Reviewed — Draw #3 ───────────────────────────────────── */}
+      <section>
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white/55">
+          Evidence — Draw #3 · Structural Steel Erection
+        </h2>
+        <div className="space-y-2">
+          {harborDraw3Evidence.map((doc) => {
+            const typeLabel: Record<typeof doc.type, string> = {
+              inspection_report: 'Inspection',
+              lien_waiver:       'Lien Waiver',
+              draw_request:      'Draw Request',
+              photo:             'Photo',
+            }
+            return (
+              <div key={doc.id} className="flex items-center gap-3 rounded-lg border border-white/[0.08] bg-surface-2 px-4 py-3">
+                <FileText size={14} className="text-white/55 flex-shrink-0" aria-hidden="true" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] text-white/70 truncate">{doc.name}</p>
+                  <p className="text-[11px] text-white/40 mt-0.5">Uploaded {doc.uploaded_at}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-semibold uppercase tracking-wide text-white/50 bg-white/[0.05] border border-white/[0.08] rounded px-2 py-0.5">
+                    {typeLabel[doc.type]}
+                  </span>
+                  <CheckCircle2 size={13} className="text-emerald-400 flex-shrink-0" aria-hidden="true" />
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </section>
+
+      {/* ── Contractor guided workflow ──────────────────────────────────────── */}
+      {from === 'contractor' && (
+        <section className="rounded-xl border border-white/[0.08] bg-surface-2 overflow-hidden">
+          <div className="flex items-center gap-2.5 border-b border-white/[0.06] px-5 py-3.5">
+            <List size={14} className="text-blue-400 flex-shrink-0" aria-hidden="true" />
+            <p className="text-[13px] font-semibold text-white">Your Progress — Harbor Logistics Center</p>
+          </div>
+          <div className="px-5 py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
+              {[
+                { step: 1, label: 'Contract',           done: true  },
+                { step: 2, label: 'Schedule of Values', done: true  },
+                { step: 3, label: 'Draw Request',       done: true  },
+                { step: 4, label: 'Evidence Docs',      done: true  },
+                { step: 5, label: 'AI Review',          done: false },
+              ].map((s, i, arr) => (
+                <div key={s.step} className="flex items-center gap-2 sm:gap-0 sm:flex-1">
+                  <div className={`flex items-center gap-2 flex-1 sm:flex-col sm:items-center sm:gap-1 ${
+                    !s.done ? 'text-blue-300' : 'text-white/50'
+                  }`}>
+                    <div className={`h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0 text-[11px] font-bold ${
+                      s.done
+                        ? 'bg-emerald-500/[0.15] border border-emerald-500/30 text-emerald-400'
+                        : 'bg-vektrum-blue/20 border border-vektrum-blue/40 text-blue-300'
+                    }`}>
+                      {s.done ? '✓' : s.step}
+                    </div>
+                    <span className="text-[11px] font-medium sm:text-center">{s.label}</span>
+                  </div>
+                  {i < arr.length - 1 && (
+                    <div className="hidden sm:block h-px flex-1 bg-white/[0.08] mx-1" aria-hidden="true" />
+                  )}
+                </div>
+              ))}
+            </div>
+            <p className="mt-3 text-[12px] text-white/40">
+              Next: Request AI review for <strong className="text-white/65">Building Envelope &amp; Roofing</strong> — upload supporting documents to proceed.
+            </p>
+          </div>
+        </section>
+      )}
+
       {/* Milestones */}
       <section>
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white/55">Milestones</h2>
         <div className="space-y-4">
           {deal.milestones.map((ms) => {
-            const status = getStatus(ms.id, ms.status)
-            const cfg = STATUS_CONFIG[status]
+            const status  = getStatus(ms.id, ms.status)
+            const cfg     = STATUS_CONFIG[status]
             const isExpanded = expanded[ms.id] ?? false
+            const sovItem = sovByMilestone.get(ms.id)
 
             return (
               <div key={ms.id} className={`rounded-xl border border-white/[0.08] bg-surface-2 shadow-sm overflow-hidden ${cfg.border}`}>
@@ -125,7 +390,19 @@ export default function HarborDealPage() {
                     {status === 'released' && <CheckCircle2 size={16} className="text-emerald-400 flex-shrink-0" />}
                     <div className="min-w-0">
                       <p className="text-[14px] font-semibold text-white truncate">{ms.name}</p>
-                      <p className="text-[12px] text-white/55 mt-0.5">{formatCurrency(ms.amount)}</p>
+                      <p className="text-[12px] text-white/55 mt-0.5">
+                        {formatCurrency(ms.amount)}
+                        {sovItem && (
+                          <span className="ml-2 text-[11px] text-blue-400/70">
+                            · SOV linked
+                          </span>
+                        )}
+                        {!sovItem && (ms.status === 'in_progress' || ms.status === 'not_started') && from !== 'contractor' && (
+                          <span className="ml-2 text-[11px] text-amber-400/70">
+                            · No SOV link
+                          </span>
+                        )}
+                      </p>
                     </div>
                   </div>
 
@@ -156,7 +433,6 @@ export default function HarborDealPage() {
                       </span>
                     )}
 
-                    {/* Contractor: submit the next in_progress milestone for review. */}
                     {status === 'in_progress' && from === 'contractor' && ms.id === submittableMilestoneId && (
                       <button
                         type="button"
@@ -167,14 +443,12 @@ export default function HarborDealPage() {
                       </button>
                     )}
 
-                    {/* All other in_progress cases: read-only pill */}
                     {status === 'in_progress' && !(from === 'contractor' && ms.id === submittableMilestoneId) && (
                       <span className="bg-white/[0.04] text-white/65 cursor-not-allowed px-4 py-2 rounded-lg text-sm">
                         In Progress
                       </span>
                     )}
 
-                    {/* Submitted by contractor — pending funder review (any viewer). */}
                     {status === 'ready_for_review' && (
                       <span className="bg-amber-500/[0.08] text-amber-400 border border-amber-500/20 cursor-not-allowed px-4 py-2 rounded-lg text-sm">
                         {from === 'contractor' ? 'Submitted — Awaiting Funder Review' : 'Awaiting Your Review'}
@@ -194,7 +468,7 @@ export default function HarborDealPage() {
                   </div>
                 </div>
 
-                <div className={`overflow-hidden transition-all duration-300 ${isExpanded ? 'max-h-96' : 'max-h-0'}`}>
+                <div className={`overflow-hidden transition-all duration-300 ${isExpanded ? 'max-h-[600px]' : 'max-h-0'}`}>
                   <div className="border-t border-white/[0.06] px-5 py-4 space-y-3">
                     {status === 'released' && ms.releasedAt && (
                       <p className="text-sm text-emerald-400 flex items-center gap-1.5">
@@ -203,7 +477,7 @@ export default function HarborDealPage() {
                     )}
                     {ms.documents.length > 0 && (
                       <div>
-                        <p className="text-xs font-semibold uppercase tracking-wide text-white/75 mb-1.5">Documents</p>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-white/75 mb-1.5">Supporting Documents</p>
                         <ul className="space-y-1">
                           {ms.documents.map((doc, i) => (
                             <li key={i} className="text-sm text-white/55 flex items-center gap-1.5">
@@ -213,9 +487,34 @@ export default function HarborDealPage() {
                         </ul>
                       </div>
                     )}
-                    {status === 'approved' && ms.aiScore && (
-                      <div className="rounded-lg bg-vektrum-blue/[0.08] border border-vektrum-blue/20 p-3">
-                        <p className="text-sm text-white/65 font-medium">AI Score: {ms.aiScore}/100 &middot; Risk: {ms.aiRisk} &middot; Recommendation: {ms.aiRecommendation}</p>
+                    {/* SOV link advisory for approved milestone */}
+                    {sovItem && status === 'approved' && (
+                      <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] px-3 py-2 flex items-center gap-2">
+                        <List size={12} className="text-blue-400 flex-shrink-0" aria-hidden="true" />
+                        <span className="text-[12px] text-white/55">
+                          SOV: {sovItem.description} — {formatCurrency(sovItem.total_amount)} allocated
+                        </span>
+                      </div>
+                    )}
+                    {/* Perplexity Draw Control Brief — ms-hb-3 only */}
+                    {ms.id === 'ms-hb-3' && status === 'approved' && (
+                      <div className="rounded-lg bg-vektrum-blue/[0.06] border border-vektrum-blue/20 p-3">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <Brain size={13} className="text-blue-400 flex-shrink-0" aria-hidden="true" />
+                          <p className="text-[12px] font-semibold text-white/80">
+                            {harborDrawBrief.generated_by} Draw Control Brief
+                          </p>
+                          <span className="ml-auto inline-flex items-center rounded-full bg-vektrum-blue/[0.12] border border-vektrum-blue/30 px-2 py-0.5 text-[10px] font-semibold text-blue-300">
+                            {harborDrawBrief.ai_score}/100 · {harborDrawBrief.risk_level} risk
+                          </span>
+                        </div>
+                        <p className="text-[12px] text-white/55 leading-relaxed mb-2">{harborDrawBrief.summary}</p>
+                        <div className="space-y-0.5">
+                          {harborDrawBrief.findings.map((f, i) => (
+                            <p key={i} className="text-[11px] text-white/50 font-mono">{f}</p>
+                          ))}
+                        </div>
+                        <p className="mt-2 text-[11px] text-blue-300/80 italic">{harborDrawBrief.recommendation}</p>
                       </div>
                     )}
                   </div>
@@ -225,6 +524,106 @@ export default function HarborDealPage() {
           })}
         </div>
       </section>
+
+      {/* ── Schedule of Values ─────────────────────────────────────────────── */}
+      <section>
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white/55">Schedule of Values</h2>
+        <div className="rounded-xl border border-white/[0.08] bg-surface-2 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-[12px]">
+              <thead>
+                <tr className="border-b border-white/[0.06]">
+                  <th className="text-left px-4 py-3 text-[10px] font-semibold uppercase tracking-wide text-white/40">Line Item</th>
+                  <th className="text-right px-4 py-3 text-[10px] font-semibold uppercase tracking-wide text-white/40">Contract Value</th>
+                  <th className="text-right px-4 py-3 text-[10px] font-semibold uppercase tracking-wide text-white/40">Drawn</th>
+                  <th className="text-right px-4 py-3 text-[10px] font-semibold uppercase tracking-wide text-white/40">Remaining</th>
+                  <th className="text-center px-4 py-3 text-[10px] font-semibold uppercase tracking-wide text-white/40">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/[0.04]">
+                {harborSovLineItems.map((item) => {
+                  const remaining = item.total_amount - item.drawn_amount
+                  const isUnlinked = item.milestone_id === null
+                  return (
+                    <tr key={item.id} className={isUnlinked ? 'bg-amber-500/[0.02]' : ''}>
+                      <td className="px-4 py-3 text-white/65 flex items-center gap-1.5">
+                        {item.description}
+                        {isUnlinked && (
+                          <span title="Not linked to a milestone" className="text-amber-400/70">
+                            <Info size={11} aria-label="No milestone link" />
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-right text-white/55 tabular-nums">{formatCurrency(item.total_amount)}</td>
+                      <td className="px-4 py-3 text-right text-emerald-400 tabular-nums">{formatCurrency(item.drawn_amount)}</td>
+                      <td className="px-4 py-3 text-right text-white/55 tabular-nums">{formatCurrency(remaining)}</td>
+                      <td className="px-4 py-3 text-center">
+                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                          item.status === 'complete'  ? 'bg-emerald-500/[0.10] text-emerald-400 border border-emerald-500/20' :
+                          item.status === 'approved'  ? 'bg-vektrum-blue/[0.12] text-blue-300 border border-vektrum-blue/30' :
+                          'bg-white/[0.04] text-white/40 border border-white/[0.06]'
+                        }`}>
+                          {item.status}
+                        </span>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+              <tfoot>
+                <tr className="border-t border-white/[0.08]">
+                  <td className="px-4 py-3 text-[11px] font-semibold text-white/50">Total</td>
+                  <td className="px-4 py-3 text-right text-[11px] font-semibold text-white/65 tabular-nums">
+                    {formatCurrency(harborSovLineItems.reduce((s, i) => s + i.total_amount, 0))}
+                  </td>
+                  <td className="px-4 py-3 text-right text-[11px] font-semibold text-emerald-400 tabular-nums">
+                    {formatCurrency(harborSovLineItems.reduce((s, i) => s + i.drawn_amount, 0))}
+                  </td>
+                  <td className="px-4 py-3 text-right text-[11px] font-semibold text-white/55 tabular-nums">
+                    {formatCurrency(harborSovLineItems.reduce((s, i) => s + (i.total_amount - i.drawn_amount), 0))}
+                  </td>
+                  <td />
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          {harborSovLineItems.some((i) => i.milestone_id === null) && (
+            <div className="px-4 py-2.5 border-t border-white/[0.06] flex items-center gap-1.5">
+              <Info size={11} className="text-amber-400/70 flex-shrink-0" aria-hidden="true" />
+              <p className="text-[11px] text-white/40">
+                One or more SOV line items are not linked to a milestone. Link them in the Milestones panel to enable draw-control tracking.
+              </p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ── Release Authorization CTA — funder / admin view ──────────────────── */}
+      {from !== 'contractor' && !ms3Released && (
+        <section className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.04] overflow-hidden">
+          <div className="px-5 py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-400/70 mb-1">
+                Authorize Release
+              </p>
+              <p className="text-[14px] font-semibold text-white">
+                Structural Steel Erection — {formatCurrency(2_180_000)}
+              </p>
+              <p className="text-[12px] text-white/50 mt-0.5">
+                10/10 conditions verified · Perplexity score 91/100 · AI Draw Review complete
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setReleaseModal(true)}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-5 py-2.5 text-[13px] font-semibold text-white transition-colors"
+            >
+              <CheckCircle2 size={14} aria-hidden="true" />
+              Authorize Release
+            </button>
+          </div>
+        </section>
+      )}
 
       {/* Documents */}
       <section>
@@ -247,19 +646,15 @@ export default function HarborDealPage() {
         </div>
       </section>
 
-      {/* Activity Timeline — canonical events first, then any in-session
-          events appended by the release / submit flows. The appended block
-          is what Demosmith and other watchers look for to confirm the
-          release was authorized. */}
+      {/* Activity Timeline — driven by harborDealAuditTimeline */}
       <section>
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white/55">Activity</h2>
         <div className="space-y-3">
           {[
-            { text: 'Deal created — Sarah Chen & Marcus Webb', date: 'October 25, 2025' },
-            { text: 'Site Preparation & Grading released — $320,000', date: '14 days ago' },
-            { text: 'Concrete Sub-grade & Foundations released — $1,840,000', date: '7 days ago' },
-            { text: 'AI Draw Review for Structural Steel Erection — score 91/100', date: '3 days ago' },
-            { text: 'Structural Steel Erection approved — awaiting release', date: '2 days ago' },
+            ...harborDealAuditTimeline.map((event) => ({
+              text: event.detail ?? event.action,
+              date: event.timestamp,
+            })),
             ...releaseEvents,
           ].map((event, i) => (
             <div key={i} className="flex items-start gap-3 text-sm">
@@ -273,6 +668,14 @@ export default function HarborDealPage() {
         </div>
       </section>
 
+      {/* Non-custody disclaimer */}
+      <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4 flex items-start gap-3">
+        <Info size={14} className="text-white/30 flex-shrink-0 mt-0.5" aria-hidden="true" />
+        <p className="text-[12px] text-white/35 leading-relaxed">
+          Vektrum authorizes release — it does not hold funds or act as escrow. Payment execution is handled by your selected rail: Stripe Connect or your institutional partner process. Funds remain in custody of your payment provider until release is authorized and the execution rail confirms.
+        </p>
+      </div>
+
       {/* Modals */}
       <ReleaseFundsModal
         open={releaseModal}
@@ -280,9 +683,6 @@ export default function HarborDealPage() {
         onConfirm={() => {
           setOverrides((prev) => ({ ...prev, 'ms-hb-3': 'released' }))
           setNewlyReleased((prev) => new Set([...prev, 'ms-hb-3']))
-          // Append a visible activity/audit-feed event so external watchers
-          // (Demosmith) can confirm the release was authorized. Frontend
-          // state only — no API or production audit_log call.
           setReleaseEvents((prev) => [
             ...prev,
             {
@@ -294,16 +694,12 @@ export default function HarborDealPage() {
         onClose={() => setReleaseModal(false)}
       />
 
-      {/* Contractor: Submit for Review modal — moves the milestone from
-          in_progress → ready_for_review in demo state. Frontend only. */}
       <DrawRequestModal
         open={submitModal !== null}
         milestone={submitModal ?? { id: '', name: '', amount: 0 }}
         onConfirm={() => {
           if (submitModal) {
             setOverrides((prev) => ({ ...prev, [submitModal.id]: 'ready_for_review' }))
-            // Activity-feed parity: contractor submission is also
-            // user-visible audit evidence.
             setReleaseEvents((prev) => [
               ...prev,
               {

@@ -387,3 +387,195 @@ export function getFreshWestsideDeal(): DemoDeal {
 export function getFreshHarborDisputeMilestones(): DisputeMilestone[] {
   return clone(harborDisputeMilestones)
 }
+
+// ── Demo Schedule of Values (Harbor) ────────────────────────────────────────
+
+export type DemoSovStatus = 'pending' | 'approved' | 'complete'
+
+export interface DemoSovLineItem {
+  id:           string
+  description:  string
+  total_amount: number
+  drawn_amount: number
+  status:       DemoSovStatus
+  /** milestone_id the SOV item is linked to; null = unlinked in this demo */
+  milestone_id: string | null
+}
+
+export const harborSovLineItems: DemoSovLineItem[] = [
+  {
+    id: 'sov-hb-1',
+    description:  'Site Preparation & Grading',
+    total_amount: 320_000,
+    drawn_amount: 320_000,
+    status:       'complete',
+    milestone_id: 'ms-hb-1',
+  },
+  {
+    id: 'sov-hb-2',
+    description:  'Concrete Sub-grade & Foundations',
+    total_amount: 1_840_000,
+    drawn_amount: 1_840_000,
+    status:       'complete',
+    milestone_id: 'ms-hb-2',
+  },
+  {
+    id: 'sov-hb-3',
+    description:  'Structural Steel Erection',
+    total_amount: 2_180_000,
+    drawn_amount: 0,
+    status:       'approved',
+    milestone_id: 'ms-hb-3',  // linked
+  },
+  {
+    id: 'sov-hb-4',
+    description:  'Building Envelope & Roofing',
+    total_amount: 2_640_000,
+    drawn_amount: 0,
+    status:       'pending',
+    milestone_id: null,        // unlinked — demo shows advisory
+  },
+  {
+    id: 'sov-hb-5',
+    description:  'MEP Systems & Commissioning',
+    total_amount: 2_120_000,
+    drawn_amount: 0,
+    status:       'pending',
+    milestone_id: 'ms-hb-5',
+  },
+]
+
+// ── Perplexity Draw Control Brief (Harbor ms-hb-3) ──────────────────────────
+
+export interface DemoDrawBrief {
+  generated_by:   string
+  generated_at:   string
+  milestone_id:   string
+  milestone_name: string
+  amount:         number
+  ai_score:       number
+  risk_level:     'low' | 'medium' | 'high'
+  summary:        string
+  findings:       string[]
+  recommendation: string
+}
+
+export const harborDrawBrief: DemoDrawBrief = {
+  generated_by:   'Perplexity Computer',
+  generated_at:   '3 days ago',
+  milestone_id:   'ms-hb-3',
+  milestone_name: 'Structural Steel Erection',
+  amount:         2_180_000,
+  ai_score:       91,
+  risk_level:     'low',
+  summary:
+    'Draw #3 for Structural Steel Erection has been independently reviewed. Steel ' +
+    'erection is 100% complete per inspection. All supporting documents are in order ' +
+    'and all 10 release-gate conditions are satisfied.',
+  findings: [
+    '✓ Inspection report confirms structural steel erection complete',
+    '✓ Conditional lien waiver on file — Webb Construction',
+    '✓ No open change orders on this milestone',
+    '✓ Sequential prerequisites satisfied — milestones 1 & 2 released',
+    '✓ Signed contract on file — Harbor_Logistics_Agreement.pdf',
+    '✓ SOV line item linked — $2,180,000 allocated',
+  ],
+  recommendation:
+    'All 10 release conditions verified. Funder authorization required to proceed.',
+}
+
+/** Returns a deep clone of the Harbor SOV line items. */
+export function getFreshHarborSovItems(): DemoSovLineItem[] {
+  return clone(harborSovLineItems)
+}
+
+// ── Contract (Harbor) ────────────────────────────────────────────────────────
+
+export interface DemoContract {
+  id:                   string
+  document_name:        string
+  status:               'signed' | 'pending_signatures' | 'funder_signed'
+  contractor_signed_at: string | null
+  funder_signed_at:     string | null
+  docusign_envelope_id: string | null
+  contract_value:       number
+}
+
+export const harborContract: DemoContract = {
+  id:                   'contract-harbor-001',
+  document_name:        'Harbor_Logistics_Agreement.pdf',
+  status:               'signed',
+  contractor_signed_at: 'October 25, 2025',
+  funder_signed_at:     'October 25, 2025',
+  docusign_envelope_id: 'ds-env-a4b2c8d1-harbor',
+  contract_value:       9_100_000,
+}
+
+// ── Evidence Documents (Harbor Draw #3) ─────────────────────────────────────
+
+export interface DemoEvidenceDoc {
+  id:           string
+  name:         string
+  type:         'inspection_report' | 'lien_waiver' | 'draw_request' | 'photo'
+  uploaded_at:  string
+  milestone_id: string
+}
+
+export const harborDraw3Evidence: DemoEvidenceDoc[] = [
+  {
+    id:           'ev-hb3-1',
+    name:         'Inspection Report — Steel Erection Complete',
+    type:         'inspection_report',
+    uploaded_at:  '5 days ago',
+    milestone_id: 'ms-hb-3',
+  },
+  {
+    id:           'ev-hb3-2',
+    name:         'Conditional Lien Waiver — Webb Construction',
+    type:         'lien_waiver',
+    uploaded_at:  '5 days ago',
+    milestone_id: 'ms-hb-3',
+  },
+  {
+    id:           'ev-hb3-3',
+    name:         'Draw Request #3 — $2,180,000',
+    type:         'draw_request',
+    uploaded_at:  '4 days ago',
+    milestone_id: 'ms-hb-3',
+  },
+  {
+    id:           'ev-hb3-4',
+    name:         'Site Photo — Steel Frame Erection Progress',
+    type:         'photo',
+    uploaded_at:  '4 days ago',
+    milestone_id: 'ms-hb-3',
+  },
+]
+
+// ── Audit Timeline (Harbor Deal) ─────────────────────────────────────────────
+
+export interface DemoAuditEvent {
+  id:        string
+  action:    string
+  actor:     string
+  timestamp: string
+  detail?:   string
+}
+
+export const harborDealAuditTimeline: DemoAuditEvent[] = [
+  { id: 'audit-1',  action: 'deal_created',          actor: 'Sarah Chen',          timestamp: 'October 25, 2025', detail: 'Deal created — $9,100,000 total contract value' },
+  { id: 'audit-2',  action: 'contract_uploaded',      actor: 'Marcus Webb',         timestamp: 'October 25, 2025', detail: 'Harbor_Logistics_Agreement.pdf uploaded' },
+  { id: 'audit-3',  action: 'docusign_envelope_sent', actor: 'Marcus Webb',         timestamp: 'October 25, 2025', detail: 'DocuSign envelope sent for signatures' },
+  { id: 'audit-4',  action: 'contract_funder_signed', actor: 'Sarah Chen',          timestamp: 'October 25, 2025', detail: 'Funder signature completed in DocuSign' },
+  { id: 'audit-5',  action: 'contract_signed',        actor: 'Marcus Webb',         timestamp: 'October 25, 2025', detail: 'Contract fully executed — both parties signed' },
+  { id: 'audit-6',  action: 'sov_submitted',          actor: 'Marcus Webb',         timestamp: 'October 28, 2025', detail: 'Schedule of Values submitted — 5 line items, $9,100,000' },
+  { id: 'audit-7',  action: 'sov_approved',           actor: 'Sarah Chen',          timestamp: 'October 29, 2025', detail: 'SOV approved — all 5 line items verified' },
+  { id: 'audit-8',  action: 'milestone_released',     actor: 'Sarah Chen',          timestamp: '14 days ago',      detail: 'Site Preparation & Grading released — $320,000' },
+  { id: 'audit-9',  action: 'milestone_released',     actor: 'Sarah Chen',          timestamp: '7 days ago',       detail: 'Concrete Sub-grade & Foundations released — $1,840,000' },
+  { id: 'audit-10', action: 'evidence_uploaded',      actor: 'Marcus Webb',         timestamp: '5 days ago',       detail: 'Draw #3 evidence uploaded — inspection report, lien waiver, draw request' },
+  { id: 'audit-11', action: 'draw_submitted',         actor: 'Marcus Webb',         timestamp: '4 days ago',       detail: 'Draw #3 submitted for review — $2,180,000' },
+  { id: 'audit-12', action: 'ai_review_completed',    actor: 'Perplexity Computer', timestamp: '3 days ago',       detail: 'AI Draw Review completed — score 91/100, risk: low' },
+  { id: 'audit-13', action: 'draw_brief_generated',   actor: 'Perplexity Computer', timestamp: '3 days ago',       detail: 'Draw Control Brief generated — all 10 release conditions verified' },
+  { id: 'audit-14', action: 'milestone_approved',     actor: 'System',              timestamp: '2 days ago',       detail: 'Structural Steel Erection approved — awaiting funder authorization' },
+  { id: 'audit-15', action: 'release_gate_verified',  actor: 'System',              timestamp: '2 days ago',       detail: 'Release gate verified — 10/10 conditions passed — funder authorization required' },
+]

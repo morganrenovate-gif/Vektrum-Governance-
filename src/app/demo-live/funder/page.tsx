@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Landmark, TrendingUp, DollarSign, AlertCircle, Lightbulb, ArrowRight, ArrowLeft, CheckCircle2, Clock, Zap } from 'lucide-react'
+import { Landmark, TrendingUp, DollarSign, AlertCircle, Brain, ArrowRight, ArrowLeft, CheckCircle2, Clock, Zap, Shield } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format'
 import { FundDealModal } from '@/components/demo/FundDealModal'
 import { DemoFunderTour } from '@/components/demo/DemoFunderTour'
@@ -47,9 +47,9 @@ const MOCK_DEALS = [
 ]
 
 const BRIEFING_INSIGHTS = [
-  'Milestone 3 on Riverside Mixed-Use is ready for AI review — $680,000 pending',
-  'Harbor Logistics Milestone 3 (Structural Steel) passed AI review with score 91 — ready to approve',
-  'Westside Medical Site Work released on time — project 20% complete',
+  'Harbor Logistics Center — Perplexity Draw Control Brief generated for Structural Steel Erection · score 91/100 · all 10 release conditions verified · ready for funder authorization',
+  'Riverside Mixed-Use — MEP Rough-In ($680,000) submitted for AI review · awaiting draw control brief',
+  'Westside Medical — Site Work released on time · project 20% complete · Building Envelope in progress',
 ]
 
 // ── Page ─────────────────────────────────────────────────────────────────────
@@ -109,15 +109,50 @@ export default function DemoFunderPage() {
 
       <FundDealModal open={fundModal} onConfirm={() => setFundModal(false)} onClose={() => setFundModal(false)} />
 
-      {/* Weekly Intelligence Briefing */}
+      {/* ── Harbor Draw #3 — Priority Authorization ──────────────────────── */}
+      <section className="rounded-xl border border-emerald-500/25 bg-emerald-500/[0.04] overflow-hidden">
+        <div className="px-5 py-4 border-b border-white/[0.06]">
+          <div className="flex items-start gap-3">
+            <div className="h-9 w-9 flex items-center justify-center rounded-xl bg-emerald-500/[0.12] border border-emerald-500/20 flex-shrink-0">
+              <Shield size={15} className="text-emerald-400" aria-hidden="true" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <span className="inline-flex items-center rounded-full bg-emerald-500/[0.12] border border-emerald-500/20 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400 mb-1.5">
+                Ready for Authorization
+              </span>
+              <p className="text-[15px] font-semibold text-white">
+                Harbor Draw #3 — {formatCurrency(2_180_000)}
+              </p>
+              <p className="text-[12px] text-white/50 mt-0.5">
+                Structural Steel Erection · 10/10 release conditions verified · Perplexity score 91/100
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="px-5 py-3 flex items-center justify-between gap-4">
+          <p className="text-[12px] text-white/40 leading-relaxed">
+            AI Draw Review complete. All release gate conditions satisfied. Funder authorization required to proceed.
+          </p>
+          <Link
+            href="/demo-live/deal/harbor?from=funder"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2 text-[12px] font-semibold text-white whitespace-nowrap transition-all hover:-translate-y-0.5 flex-shrink-0"
+          >
+            Review &amp; Authorize
+            <ArrowRight size={12} aria-hidden="true" />
+          </Link>
+        </div>
+      </section>
+
+      {/* Perplexity Draw Control Briefing */}
       <div
         className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden"
-        
+
       >
         <div className="border-l-4 border-vektrum-blue px-5 py-4 border-b border-white/[0.06]">
           <div className="flex items-center gap-2">
-            <Lightbulb size={15} className="text-blue-400" aria-hidden="true" />
-            <p className="text-[13px] font-semibold text-white">Weekly Intelligence Briefing</p>
+            <Brain size={15} className="text-blue-400" aria-hidden="true" />
+            <p className="text-[13px] font-semibold text-white">Perplexity Draw Control Briefing</p>
+            <span className="ml-auto text-[11px] text-white/40">Updated today</span>
           </div>
         </div>
         <ul className="px-5 py-4 space-y-3">
