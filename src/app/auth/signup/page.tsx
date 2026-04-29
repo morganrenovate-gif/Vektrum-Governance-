@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,17 +20,32 @@ const AUTH_TRUST = [
 
 export default function SignupPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // If an invite token is present, the user came from an invite link.
+  // We lock the role to 'funder' so their profile is created correctly
+  // and preserve the token through email confirmation so they return to the invite.
+  const inviteToken = searchParams.get("invite") ?? null;
+  const lockedAsFunder = !!inviteToken;
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     passwordConfirm: "",
     full_name: "",
     company_name: "",
-    role: "contractor" as UserRole,
+    role: (lockedAsFunder ? "funder" : "contractor") as UserRole,
   });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // If inviteToken changes (edge: client nav), sync role lock
+  useEffect(() => {
+    if (lockedAsFunder) {
+      setFormData((prev) => ({ ...prev, role: "funder" }));
+    }
+  }, [lockedAsFunder]);
 
   const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setFormData((prev) => ({ ...prev, [field]: e.target.value }));
@@ -65,7 +80,11 @@ export default function SignupPage() {
           company_name: formData.company_name.trim() || null,
           role: formData.role,
         },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        // If coming from an invite, preserve the token so the callback redirects
+        // back to /invite/[token] after email confirmation — not to onboarding.
+        emailRedirectTo: inviteToken
+          ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(`/invite/${inviteToken}`)}`
+          : `${window.location.origin}/auth/callback`,
       },
     });
 
@@ -159,11 +178,23 @@ export default function SignupPage() {
 
               {/* Visual role selection cards */}
               <div className="space-y-2">
-                <p className="text-sm font-medium text-white">
-                  I am a…{" "}
-                  <span className="text-red-400 text-xs" aria-hidden="true">*</span>
-                </p>
-                <div className="grid grid-cols-2 gap-2.5">
+                {lockedAsFunder ? (
+                  // Invite flow: role is locked to funder — show context banner instead of selector
+                  <div className="rounded-lg border border-vektrum-blue/25 bg-vektrum-blue/[0.07] px-3.5 py-2.5">
+                    <p className="text-[12px] font-semibold text-blue-300">
+                      You were invited as a Funder
+                    </p>
+                    <p className="text-[11px] text-white/55 mt-0.5">
+                      Your account will be created with the Funder role so you can accept this deal invite.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-sm font-medium text-white">
+                      I am a…{" "}
+                      <span className="text-red-400 text-xs" aria-hidden="true">*</span>
+                    </p>
+                    <div className="grid grid-cols-2 gap-2.5">
                   {(["contractor", "funder"] as UserRole[]).map((role) => {
                     const isSelected = formData.role === role;
                     const Icon = role === "contractor" ? Building2 : User;
@@ -206,6 +237,8 @@ export default function SignupPage() {
                     <CheckCircle2 size={11} aria-hidden="true" />
                     Contractors always join free — no subscription, no fees.
                   </p>
+                )}
+                  </>
                 )}
               </div>
 

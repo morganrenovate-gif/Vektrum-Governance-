@@ -54,11 +54,16 @@ export async function GET(request: NextRequest) {
           const profile = rawProfile as Pick<Profile, "role" | "stripe_account_id" | "full_name" | "company_name"> | null;
 
           if (profile && !profile.stripe_account_id) {
-            // Admins are never gated
-            if (profile.role === "contractor") {
-              redirectPath = "/dashboard/contractor/onboarding";
-            } else if (profile.role === "funder") {
-              redirectPath = "/dashboard/funder/onboarding";
+            // If next is an invite path, preserve it — the invite flow takes priority
+            // over Stripe onboarding. The user can complete onboarding after accepting.
+            const isInviteRedirect = next.startsWith("/invite/");
+            if (!isInviteRedirect) {
+              // Admins are never gated
+              if (profile.role === "contractor") {
+                redirectPath = "/dashboard/contractor/onboarding";
+              } else if (profile.role === "funder") {
+                redirectPath = "/dashboard/funder/onboarding";
+              }
             }
           }
 

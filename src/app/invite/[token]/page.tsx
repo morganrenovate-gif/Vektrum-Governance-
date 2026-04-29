@@ -14,9 +14,13 @@ import {
   Lock,
   BadgeCheck,
   FileCheck,
+  LogIn,
+  UserPlus,
+  LogOut,
 } from 'lucide-react'
 import { formatMoney } from '@/lib/utils'
 import { VektrumWordmark } from '@/components/ui/vektrum-logo'
+import { createClient } from '@/lib/supabase/client'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -53,7 +57,14 @@ type PageState =
     }
   | { phase: 'accepting' }
   | { phase: 'accepted'; dealId: string; dealTitle: string }
-  | { phase: 'error'; message: string }
+  | { phase: 'error'; message: string; reason?: string }
+
+// Auth state for CTA section — checked independently of invite preview fetch
+type AuthPhase =
+  | 'checking'          // haven't confirmed auth state yet
+  | 'unauthenticated'   // no session
+  | 'funder'            // authenticated, role = funder
+  | { kind: 'wrong_role'; role: string }  // authenticated but wrong role
 
 // ─── Trust signals shown on the invite page ───────────────────────────────────
 
@@ -86,9 +97,43 @@ export default function InviteAcceptPage() {
   const { token } = useParams<{ token: string }>()
   const router = useRouter()
   const [state, setState] = useState<PageState>({ phase: 'loading' })
+  const [authPhase, setAuthPhase] = useState<AuthPhase>('checking')
 
   // Store preview data to access after phase transition
   const [previewData, setPreviewData] = useState<InvitePreview | null>(null)
+
+  // ── Check auth state on mount ──────────────────────────────────────────────
+  // Run in parallel with fetchPreview — we need to know the auth state before
+  // the user clicks Accept so we can show the correct CTA immediately.
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          setAuthPhase('unauthenticated')
+          return
+        }
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single()
+        if (!profile) {
+          setAuthPhase('unauthenticated')
+          return
+        }
+        if (profile.role === 'funder') {
+          setAuthPhase('funder')
+        } else {
+          setAuthPhase({ kind: 'wrong_role', role: profile.role as string })
+        }
+      } catch {
+        setAuthPhase('unauthenticated')
+      }
+    }
+    checkAuth()
+  }, [])
 
   // ── Fetch invite preview ───────────────────────────────────────────────────
   const fetchPreview = useCallback(async () => {
@@ -166,12 +211,23 @@ export default function InviteAcceptPage() {
       const body = await res.json()
 
       if (res.status === 401) {
-        router.push(`/auth/login?next=/invite/${token}`)
+        // Session expired between auth check and click — re-check and update CTA
+        setAuthPhase('unauthenticated')
+        setState({ phase: 'preview', data: previewData! })
         return
       }
 
       if (res.status === 403) {
-        setState({ phase: 'error', message: body.error ?? 'You do not have permission to accept this invite.' })
+        // wrong_role: show sign-out guidance rather than a generic error
+        if (body.reason === 'wrong_role') {
+          setState({
+            phase: 'error',
+            message: body.error ?? 'You do not have permission to accept this invite.',
+            reason: 'wrong_role',
+          })
+        } else {
+          setState({ phase: 'error', message: body.error ?? 'You do not have permission to accept this invite.' })
+        }
         return
       }
 
@@ -214,10 +270,7 @@ export default function InviteAcceptPage() {
 
         {/* ── Loading ── */}
         {state.phase === 'loading' && (
-          <div
-            className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card p-10 text-center"
-            
-          >
+          <div className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card p-10 text-center">
             <Loader2 className="mx-auto mb-4 h-8 w-8 animate-spin text-blue-400" aria-hidden="true" />
             <p className="text-sm font-medium text-white">Loading your invite…</p>
             <p className="mt-1 text-xs text-white/75">Verifying invite token</p>
@@ -250,9 +303,7 @@ export default function InviteAcceptPage() {
           })()
 
           return (
-            <div
-              className="rounded-2xl border border-red-500/20 bg-surface-2 shadow-card p-8 text-center"
-            >
+            <div className="rounded-2xl border border-red-500/20 bg-surface-2 shadow-card p-8 text-center">
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10">
                 <AlertCircle className="h-6 w-6 text-red-400" aria-hidden="true" />
               </div>
@@ -270,30 +321,41 @@ export default function InviteAcceptPage() {
 
         {/* ── Error ── */}
         {state.phase === 'error' && (
-          <div
-            className="rounded-2xl border border-red-500/20 bg-surface-2 shadow-card p-8 text-center"
-            
-          >
+          <div className="rounded-2xl border border-red-500/20 bg-surface-2 shadow-card p-8 text-center">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10">
               <AlertCircle className="h-6 w-6 text-red-400" aria-hidden="true" />
             </div>
-            <h1 className="font-display text-lg font-bold text-white">Something went wrong</h1>
+            <h1 className="font-display text-lg font-bold text-white">
+              {state.reason === 'wrong_role' ? 'Wrong account type' : 'Something went wrong'}
+            </h1>
             <p className="mt-2 text-sm text-white/55">{state.message}</p>
-            <button
-              onClick={fetchPreview}
-              className="mt-6 inline-flex items-center gap-1.5 rounded-xl bg-vektrum-blue px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-vektrum-blue/30 hover:bg-vektrum-blue-hover transition-all"
-            >
-              Try again
-            </button>
+            {state.reason === 'wrong_role' ? (
+              <div className="mt-6 flex flex-col items-center gap-3">
+                <Link
+                  href="/auth/logout"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-white/[0.07] border border-white/[0.12] px-5 py-2.5 text-sm font-semibold text-white/80 hover:bg-white/[0.12] hover:text-white transition-all"
+                >
+                  <LogOut size={14} aria-hidden="true" />
+                  Sign out
+                </Link>
+                <p className="text-[11px] text-white/35">
+                  Sign out, then sign in with or create a funder account.
+                </p>
+              </div>
+            ) : (
+              <button
+                onClick={fetchPreview}
+                className="mt-6 inline-flex items-center gap-1.5 rounded-xl bg-vektrum-blue px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-vektrum-blue/30 hover:bg-vektrum-blue-hover transition-all"
+              >
+                Try again
+              </button>
+            )}
           </div>
         )}
 
         {/* ── Preview (main state) — #1 growth surface ── */}
         {state.phase === 'preview' && (
-          <div
-            className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden"
-            
-          >
+          <div className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden">
             {/* Top accent bar */}
             <div className="h-[3px] w-full bg-vektrum-blue" />
 
@@ -375,33 +437,87 @@ export default function InviteAcceptPage() {
               </div>
             </div>
 
-            {/* Accept CTA */}
+            {/* ── Accept CTA — conditional on auth state ── */}
             <div className="px-6 py-5">
-              <button
-                onClick={handleAccept}
-                className="group flex w-full items-center justify-center gap-2.5 min-h-[52px] rounded-xl bg-vektrum-blue px-6 py-3.5 text-[15px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 transition-all hover:bg-vektrum-blue-hover hover:shadow-xl hover:shadow-vektrum-blue/40 hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue active:scale-[0.99]"
-              >
-                <Shield size={16} aria-hidden="true" />
-                Accept &amp; Enter Deal Room
-                <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
-              </button>
-              <p className="mt-3 text-center text-[12px] text-white/65">
-                You must be signed in with a Funder account to accept.
-                {' '}
-                <Link href="/auth/signup" className="text-blue-300 hover:text-blue-200 hover:underline">
-                  Create a free account
-                </Link>
-              </p>
+
+              {/* Checking auth — small spinner so layout doesn't jump */}
+              {authPhase === 'checking' && (
+                <div className="flex items-center justify-center gap-2 min-h-[52px]">
+                  <Loader2 className="h-4 w-4 animate-spin text-blue-400" aria-hidden="true" />
+                  <span className="text-sm text-white/55">Checking your account…</span>
+                </div>
+              )}
+
+              {/* Unauthenticated — show signup + signin CTAs */}
+              {authPhase === 'unauthenticated' && (
+                <div className="space-y-3">
+                  <Link
+                    href={`/auth/signup?invite=${encodeURIComponent(token)}`}
+                    className="group flex w-full items-center justify-center gap-2.5 min-h-[52px] rounded-xl bg-vektrum-blue px-6 py-3.5 text-[15px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 transition-all hover:bg-vektrum-blue-hover hover:shadow-xl hover:shadow-vektrum-blue/40 hover:-translate-y-0.5"
+                    data-testid="invite-signup-cta"
+                  >
+                    <UserPlus size={16} aria-hidden="true" />
+                    Create funder account to accept
+                    <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                  </Link>
+                  <Link
+                    href={`/auth/login?next=${encodeURIComponent(`/invite/${token}`)}`}
+                    className="group flex w-full items-center justify-center gap-2.5 min-h-[44px] rounded-xl border border-white/[0.12] bg-white/[0.05] px-6 py-3 text-[14px] font-semibold text-white/75 transition-all hover:bg-white/[0.09] hover:text-white"
+                    data-testid="invite-signin-cta"
+                  >
+                    <LogIn size={15} aria-hidden="true" />
+                    Sign in with existing funder account
+                  </Link>
+                  <p className="text-center text-[11px] text-white/40 pt-1">
+                    Free for funders · No credit card required
+                  </p>
+                </div>
+              )}
+
+              {/* Authenticated as funder — show accept button */}
+              {authPhase === 'funder' && (
+                <div>
+                  <button
+                    onClick={handleAccept}
+                    className="group flex w-full items-center justify-center gap-2.5 min-h-[52px] rounded-xl bg-vektrum-blue px-6 py-3.5 text-[15px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 transition-all hover:bg-vektrum-blue-hover hover:shadow-xl hover:shadow-vektrum-blue/40 hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue active:scale-[0.99]"
+                    data-testid="invite-accept-btn"
+                  >
+                    <Shield size={16} aria-hidden="true" />
+                    Accept &amp; Enter Deal Room
+                    <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                  </button>
+                </div>
+              )}
+
+              {/* Authenticated with wrong role — show sign-out guidance */}
+              {typeof authPhase === 'object' && authPhase.kind === 'wrong_role' && (
+                <div className="space-y-3">
+                  <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.07] px-4 py-3 text-sm text-amber-300">
+                    <p className="font-semibold">
+                      You&rsquo;re signed in as a{' '}
+                      <span className="capitalize">{authPhase.role}</span>
+                    </p>
+                    <p className="mt-1 text-amber-300/75 text-[13px]">
+                      This invite is for a funder account. Sign out and sign in with or create a funder account to accept.
+                    </p>
+                  </div>
+                  <Link
+                    href="/auth/logout"
+                    className="group flex w-full items-center justify-center gap-2 min-h-[44px] rounded-xl border border-white/[0.12] bg-white/[0.05] px-6 py-3 text-[14px] font-semibold text-white/75 transition-all hover:bg-white/[0.09] hover:text-white"
+                    data-testid="invite-wrong-role-signout"
+                  >
+                    <LogOut size={14} aria-hidden="true" />
+                    Sign out
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         )}
 
         {/* ── Accepting (processing) ── */}
         {state.phase === 'accepting' && (
-          <div
-            className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card p-10 text-center"
-            
-          >
+          <div className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card p-10 text-center">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-vektrum-blue/10">
               <Loader2 className="h-6 w-6 animate-spin text-blue-400" aria-hidden="true" />
             </div>
@@ -412,10 +528,7 @@ export default function InviteAcceptPage() {
 
         {/* ── Accepted ── */}
         {state.phase === 'accepted' && (
-          <div
-            className="rounded-2xl border border-emerald-500/20 bg-surface-2 shadow-card overflow-hidden"
-            
-          >
+          <div className="rounded-2xl border border-emerald-500/20 bg-surface-2 shadow-card overflow-hidden">
             <div className="h-[3px] w-full bg-emerald-500" />
             <div className="p-8 text-center space-y-4">
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10">
