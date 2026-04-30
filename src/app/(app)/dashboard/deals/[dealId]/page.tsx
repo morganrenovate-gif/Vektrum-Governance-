@@ -586,15 +586,25 @@ export default async function DealDetailPage({
       {/* ── Contract status indicator ── */}
       {(() => {
         if (!contract) {
-          // No contract on file — warn funders who will need one before releases
-          return typedProfile.role === "funder" ? (
-            <div className="flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-5 py-3">
+          // No contract on file — show funder/admin an actionable warning with upload CTA.
+          // Contractors see the dedicated "Contract required" setup card below instead.
+          return (typedProfile.role === "funder" || typedProfile.role === "admin") ? (
+            <div className="flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-5 py-4">
               <AlertCircle size={16} className="flex-shrink-0 text-amber-400 mt-0.5" aria-hidden="true" />
-              <p className="text-[13px] leading-relaxed text-white/60">
-                <span className="font-semibold text-amber-400">No contract on file.</span>{" "}
-                A fully-signed contract is required before any milestone can be released.
-                The contractor must upload the contract PDF.
-              </p>
+              <div className="flex-1 min-w-0">
+                <p className="text-[13px] leading-relaxed text-white/60">
+                  <span className="font-semibold text-amber-400">No contract on file.</span>{" "}
+                  A fully signed contract or governing funding document is required before any
+                  milestone can be released. Upload the contract now, or request it from the
+                  contractor for funder verification.
+                </p>
+                <div className="mt-3">
+                  <UploadContractTrigger className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[12px] font-medium hover:bg-amber-500/15 transition-colors">
+                    <FileText size={12} aria-hidden="true" />
+                    Upload Contract
+                  </UploadContractTrigger>
+                </div>
+              </div>
             </div>
           ) : null;
         }
@@ -753,9 +763,11 @@ export default async function DealDetailPage({
 
       {/* ── Contract upload section ── */}
       {/* id="contract-upload" — scroll target + event target for UploadContractTrigger
-          buttons in the setup card above and in the SOV empty state. Visible to
-          contractors and admins when no active (non-voided) contract is on file. */}
-      {(typedProfile.role === "contractor" || typedProfile.role === "admin") && !hasContract && (
+          buttons in the setup card above, the funder warning banner, and the SOV
+          empty state. Visible to contractors, funders, and admins when no active
+          (non-voided) contract is on file. Funders may upload the governing contract
+          or funding agreement; contractor upload is preserved. */}
+      {(typedProfile.role === "contractor" || typedProfile.role === "funder" || typedProfile.role === "admin") && !hasContract && (
         <ContractUploadSection dealId={typedDeal.id} />
       )}
 
