@@ -107,8 +107,17 @@
  *  71. No placeholder URLs remain (#, example.com, TODO in href)
  *  72. Unverified sources marked with TODO(canonical-url) comments
  *
+ * Footer / nav visibility for /resources
+ *  73. Footer contains a link to /resources
+ *  74. Footer link uses the label "Resources"
+ *  75. Footer Help link uses label "Help / FAQ" and route /help
+ *  76. No /faq route is linked anywhere (route does not exist)
+ *  77. Mobile nav contains a link to /resources
+ *  78. Sitemap still includes /resources
+ *  79. Sitemap still includes /resources/construction-dispute-isolation
+ *
  * package.json
- *  73. Test wired into npm test
+ *  80. Test wired into npm test
  *
  * Run: npx tsx tests/seo-accessibility-audit.test.ts
  */
@@ -440,8 +449,59 @@ async function main() {
   const todoCount = (sourcesBlock.match(/TODO\(canonical-url\)/g) ?? []).length
   check(todoCount >= 4, `72. Unverified sources marked with TODO(canonical-url) comments (found ${todoCount})`)
 
+  // ── Footer / nav visibility for /resources ───────────────────────────────────
+  console.log('\nFooter / nav visibility for /resources')
+
+  // Isolate the <footer>...</footer> block in layout.tsx so we don't conflate
+  // header nav links with footer links.
+  const footerStart = layout.indexOf('<footer')
+  const footerEnd   = layout.indexOf('</footer>', footerStart)
+  const footerBlock = footerStart !== -1 ? layout.slice(footerStart, footerEnd) : ''
+
+  check(
+    footerBlock.includes('href="/resources"'),
+    '73. Footer contains a link to /resources',
+  )
+  // The footer Resources link should label as exactly "Resources"
+  const resourcesLinkRe = /href="\/resources"[^>]*>\s*Resources\s*</
+  check(
+    resourcesLinkRe.test(footerBlock),
+    '74. Footer link to /resources uses the label "Resources"',
+  )
+  // Help / FAQ label change with /help route preserved
+  const helpLinkRe = /href="\/help"[^>]*>\s*Help\s*\/\s*FAQ\s*</
+  check(
+    helpLinkRe.test(footerBlock),
+    '75. Footer Help link uses label "Help / FAQ" and route /help',
+  )
+  // No /faq route is linked anywhere — route does not exist in the app
+  const faqRouteHits = allSrcFiles.filter((f) => {
+    const c = fs.readFileSync(f, 'utf-8')
+    // Match href="/faq" or href="/faq/..." or push('/faq') etc., but not /faqs
+    return /href=["']\/faq(?:["'/])|push\(['"]\/faq(?:["'/])/.test(c)
+  })
+  check(
+    faqRouteHits.length === 0,
+    `76. No /faq route is linked anywhere (found in ${faqRouteHits.length} files)`,
+  )
+  // Mobile nav has /resources for logged-out users
+  check(
+    mobileNav.includes('href="/resources"'),
+    '77. Mobile nav contains a link to /resources',
+  )
+  // Sitemap entries preserved
+  check(
+    sitemap.includes('/resources') &&
+      !/^\s*\/\/.*\/resources/m.test(sitemap), // not commented out
+    '78. Sitemap still includes /resources',
+  )
+  check(
+    sitemap.includes('/resources/construction-dispute-isolation'),
+    '79. Sitemap still includes /resources/construction-dispute-isolation',
+  )
+
   // ── package.json ─────────────────────────────────────────────────────────────
-  check(pkg.includes('seo-accessibility-audit.test.ts'),               '73. Test wired into npm test')
+  check(pkg.includes('seo-accessibility-audit.test.ts'),               '80. Test wired into npm test')
 
   console.log('\n✓ All seo-accessibility-audit tests passed.\n')
 }

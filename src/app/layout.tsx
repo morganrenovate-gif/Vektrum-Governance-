@@ -314,8 +314,11 @@ export default async function RootLayout({
                   <Link href="/careers" className="text-[13px] text-white/75 hover:text-white focus-visible:text-white transition-colors rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue">
                     Careers
                   </Link>
+                  <Link href="/resources" className="text-[13px] text-white/75 hover:text-white focus-visible:text-white transition-colors rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue">
+                    Resources
+                  </Link>
                   <Link href="/help" className="text-[13px] text-white/75 hover:text-white focus-visible:text-white transition-colors rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue">
-                    Help
+                    Help / FAQ
                   </Link>
                 </div>
                 <div className="flex flex-col gap-3">
