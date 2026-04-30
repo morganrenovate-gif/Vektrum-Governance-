@@ -41,8 +41,9 @@ const ALLOWLIST: string[] = [
   'src/app/(marketing)/page.tsx',
   // Contact page is a light-themed form layout.
   'src/app/(marketing)/contact/page.tsx',
-  // Security page is mostly a light copy block; no dark sections.
-  'src/app/(marketing)/security/page.tsx',
+  // Security page was migrated from bg-vektrum-bg (light) to bg-surface-0
+  // (dark navy). All text-vektrum-blue instances replaced with text-blue-300/400.
+  // It is intentionally NOT on this allowlist — any reintroduction will fail A1.
 ]
 
 const results: { name: string; passed: boolean; error?: string }[] = []
