@@ -86,7 +86,7 @@ function codeOnly(src: string): string {
     .replace(/"(?:\\.|[^"\\])*"/g, '""')
 }
 
-const PAYMENTS_PAGE   = 'src/app/dashboard/contractor/payments/page.tsx'
+const PAYMENTS_PAGE   = 'src/app/(app)/dashboard/contractor/payments/page.tsx'
 const RETAINAGE_ROUTE = 'src/app/api/deals/[dealId]/retainage/release/route.ts'
 const GATE            = 'src/lib/engine/release-gate.ts'
 const STRIPE_WH       = 'src/app/api/stripe/webhook/route.ts'

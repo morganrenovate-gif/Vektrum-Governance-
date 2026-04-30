@@ -21,9 +21,9 @@ import path from 'path'
 // ── File paths ────────────────────────────────────────────────────────────────
 
 const ROOT          = path.resolve(process.cwd())
-const HARBOR_PAGE   = path.join(ROOT, 'src/app/demo-live/deal/harbor/page.tsx')
-const FUNDER_PAGE   = path.join(ROOT, 'src/app/demo-live/funder/page.tsx')
-const CONTRACTOR    = path.join(ROOT, 'src/app/demo-live/contractor/page.tsx')
+const HARBOR_PAGE   = path.join(ROOT, 'src/app/(marketing)/demo-live/deal/harbor/page.tsx')
+const FUNDER_PAGE   = path.join(ROOT, 'src/app/(marketing)/demo-live/funder/page.tsx')
+const CONTRACTOR    = path.join(ROOT, 'src/app/(marketing)/demo-live/contractor/page.tsx')
 const DEMO_DATA     = path.join(ROOT, 'src/lib/demo-data/index.ts')
 const RESET_ROUTE   = path.join(ROOT, 'src/app/api/demo/reset/route.ts')
 

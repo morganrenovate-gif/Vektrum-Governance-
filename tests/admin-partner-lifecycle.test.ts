@@ -77,7 +77,7 @@ function codeOnly(src: string): string {
     .replace(/`[^`\\]*(?:\\.[^`\\]*)*`/g, '')  // template literals
 }
 
-const PAGE      = 'src/app/dashboard/admin/partners/page.tsx'
+const PAGE      = 'src/app/(app)/dashboard/admin/partners/page.tsx'
 const LIST_ROUTE = 'src/app/api/admin/partners/route.ts'
 const PATCH_ROUTE = 'src/app/api/admin/partners/[partnerId]/route.ts'
 const PARTNER_AUTH = 'src/lib/auth/partner.ts'

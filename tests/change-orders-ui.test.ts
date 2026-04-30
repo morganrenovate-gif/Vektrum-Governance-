@@ -60,7 +60,7 @@ function codeOnly(src: string): string {
     .replace(/"(?:\\.|[^"\\])*"/g, '""')
 }
 
-const DEAL_PAGE    = 'src/app/dashboard/deals/[dealId]/page.tsx'
+const DEAL_PAGE    = 'src/app/(app)/dashboard/deals/[dealId]/page.tsx'
 const MILESTONE_CARD = 'src/components/deal/milestone-card.tsx'
 const CO_POST      = 'src/app/api/change-orders/route.ts'
 const CO_PATCH     = 'src/app/api/change-orders/[changeOrderId]/route.ts'

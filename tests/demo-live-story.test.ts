@@ -40,9 +40,9 @@ import fs   from 'fs'
 import path from 'path'
 
 const ROOT          = path.resolve(process.cwd())
-const HARBOR_PAGE   = 'src/app/demo-live/deal/harbor/page.tsx'
-const FUNDER_PAGE   = 'src/app/demo-live/funder/page.tsx'
-const CONTRACTOR    = 'src/app/demo-live/contractor/page.tsx'
+const HARBOR_PAGE   = 'src/app/(marketing)/demo-live/deal/harbor/page.tsx'
+const FUNDER_PAGE   = 'src/app/(marketing)/demo-live/funder/page.tsx'
+const CONTRACTOR    = 'src/app/(marketing)/demo-live/contractor/page.tsx'
 const DEMO_DATA     = 'src/lib/demo-data/index.ts'
 const PACKAGE_JSON  = 'package.json'
 

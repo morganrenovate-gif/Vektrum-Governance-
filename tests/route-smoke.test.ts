@@ -113,7 +113,7 @@ await test('ROUTE: /auth/logout handler redirects after sign-out', () => {
 // ── dashboard/page.tsx: /auth/logout link is now backed by a real route ───────
 
 await test('ROUTE: dashboard/page.tsx href="/auth/logout" is backed by a real route', () => {
-  const dashPage  = src('app', 'dashboard', 'page.tsx')
+  const dashPage  = src('app', '(app)', 'dashboard', 'page.tsx')
   const logoutRoute = src('app', 'auth', 'logout', 'route.ts')
 
   // Confirm the link still exists in dashboard (so we know it's covered)
@@ -133,7 +133,7 @@ await test('ROUTE: dashboard/page.tsx href="/auth/logout" is backed by a real ro
 // ── Admin user-detail route ───────────────────────────────────────────────────
 
 await test('ROUTE: /dashboard/admin/users/[userId]/page.tsx exists', () => {
-  const filePath = src('app', 'dashboard', 'admin', 'users', '[userId]', 'page.tsx')
+  const filePath = src('app', '(app)', 'dashboard', 'admin', 'users', '[userId]', 'page.tsx')
   assert(
     fileExists(filePath),
     `/dashboard/admin/users/[userId]/page.tsx does not exist. ` +
@@ -144,13 +144,13 @@ await test('ROUTE: /dashboard/admin/users/[userId]/page.tsx exists', () => {
 // ── Demo-live pages ───────────────────────────────────────────────────────────
 
 const demoPages: Array<[string, string]> = [
-  ['contractor', src('app', 'demo-live', 'contractor', 'page.tsx')],
-  ['funder',     src('app', 'demo-live', 'funder', 'page.tsx')],
-  ['admin',      src('app', 'demo-live', 'admin', 'page.tsx')],
-  ['deal/riverside', src('app', 'demo-live', 'deal', 'riverside', 'page.tsx')],
-  ['deal/harbor',    src('app', 'demo-live', 'deal', 'harbor', 'page.tsx')],
-  ['deal/westside',  src('app', 'demo-live', 'deal', 'westside', 'page.tsx')],
-  ['deal/harbor-dispute', src('app', 'demo-live', 'deal', 'harbor-dispute', 'page.tsx')],
+  ['contractor', src('app', '(marketing)', 'demo-live', 'contractor', 'page.tsx')],
+  ['funder',     src('app', '(marketing)', 'demo-live', 'funder', 'page.tsx')],
+  ['admin',      src('app', '(marketing)', 'demo-live', 'admin', 'page.tsx')],
+  ['deal/riverside', src('app', '(marketing)', 'demo-live', 'deal', 'riverside', 'page.tsx')],
+  ['deal/harbor',    src('app', '(marketing)', 'demo-live', 'deal', 'harbor', 'page.tsx')],
+  ['deal/westside',  src('app', '(marketing)', 'demo-live', 'deal', 'westside', 'page.tsx')],
+  ['deal/harbor-dispute', src('app', '(marketing)', 'demo-live', 'deal', 'harbor-dispute', 'page.tsx')],
 ]
 
 for (const [name, filePath] of demoPages) {

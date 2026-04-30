@@ -66,7 +66,7 @@ function collapse(s: string): string {
   return s.replace(/\s+/g, ' ')
 }
 
-const HELP_PAGE   = 'src/app/help/page.tsx'
+const HELP_PAGE   = 'src/app/(marketing)/help/page.tsx'
 const DEMO_SCRIPT = 'docs/demo/DEMO_SCRIPT.md'
 
 async function main() {

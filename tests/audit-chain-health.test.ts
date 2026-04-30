@@ -56,7 +56,7 @@ const RUNNER      = path.join(ROOT, 'src/lib/engine/audit-chain-health.ts')
 const CRON_ROUTE  = path.join(ROOT, 'src/app/api/cron/audit-chain-health/route.ts')
 const ADMIN_ROUTE = path.join(ROOT, 'src/app/api/admin/audit-chain-health/route.ts')
 const BADGE       = path.join(ROOT, 'src/components/admin/AuditChainHealthBadge.tsx')
-const ADMIN_PAGE  = path.join(ROOT, 'src/app/dashboard/admin/page.tsx')
+const ADMIN_PAGE  = path.join(ROOT, 'src/app/(app)/dashboard/admin/page.tsx')
 const VERCEL_JSON = path.join(ROOT, 'vercel.json')
 
 // ─── Tests ────────────────────────────────────────────────────────────────────

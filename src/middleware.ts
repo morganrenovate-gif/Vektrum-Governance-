@@ -99,20 +99,46 @@ function logBlockedAdminIp(
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // ── Homepage: redirect authed users to /dashboard, otherwise pass through ─
+  // This was previously done inside the homepage Server Component (which
+  // tainted the route as dynamic). Moving it to middleware lets the
+  // homepage be statically/ISR-cached for anonymous traffic.
+  //
+  // Cookie sniff first: only invoke updateSession (which calls getUser) when
+  // a Supabase session cookie is present. Anonymous visitors hit no
+  // Supabase round-trip and the cached HTML is served.
+  if (pathname === "/") {
+    const hasSessionCookie = request.cookies
+      .getAll()
+      .some((c) => c.name.startsWith("sb-") && c.name.endsWith("-auth-token"));
+    if (hasSessionCookie) {
+      const { user } = await updateSession(request);
+      if (user) {
+        return NextResponse.redirect(new URL("/dashboard", request.url));
+      }
+    }
+    return NextResponse.next();
+  }
+
   // ── Public paths — pass through without touching Supabase ─────────────────
   // Avoids an unnecessary getUser() round-trip on every public page load.
   // The auth/callback route handles its own session exchange.
+  //
+  // Note: /lenders is included for back-compat though next.config.ts
+  // 308-redirects it to /funders before this middleware fires.
   if (
     pathname.startsWith("/_next/") ||
     pathname.startsWith("/api/stripe/webhook") ||
     pathname.startsWith("/api/webhooks/") ||
     pathname.startsWith("/api/cron/") ||
     pathname.startsWith("/auth/") ||
-    pathname === "/" ||
     pathname === "/pricing" ||
     pathname.startsWith("/invite/") ||
     pathname.startsWith("/api/invites/") ||   // public: GET preview (no auth) + POST accept (route handles its own auth)
     pathname.startsWith("/favicon") ||
+    pathname === "/llms.txt" ||
+    pathname === "/robots.txt" ||
+    pathname === "/sitemap.xml" ||
     pathname === "/demo" ||
     pathname === "/demo-live" ||
     pathname.startsWith("/demo-live/") ||
@@ -122,6 +148,12 @@ export async function middleware(request: NextRequest) {
     pathname === "/about" ||
     pathname === "/help" ||
     pathname === "/careers" ||
+    pathname === "/founders" ||
+    pathname === "/partners" ||
+    pathname.startsWith("/partners/") ||
+    pathname === "/resources" ||
+    pathname.startsWith("/resources/") ||
+    pathname === "/pitch" ||
     pathname === "/terms" ||
     pathname === "/privacy" ||
     pathname === "/security" ||

@@ -161,7 +161,7 @@ test('B5: result label is derived from risk (not hardcoded)', () => {
 // ─── C. CALL-SITE CONSISTENCY ─────────────────────────────────────────────────
 
 test('C1: harbor-dispute passes aiScore from HVAC_MS (not hardcoded 34)', () => {
-  const src_ = src('src/app/demo-live/deal/harbor-dispute/page.tsx')
+  const src_ = src('src/app/(marketing)/demo-live/deal/harbor-dispute/page.tsx')
   // Must reference HVAC_MS.aiScore, not a literal number
   assert(
     src_.includes('HVAC_MS.aiScore'),
@@ -177,7 +177,7 @@ test('C1: harbor-dispute passes aiScore from HVAC_MS (not hardcoded 34)', () => 
 })
 
 test('C2: harbor-dispute passes aiRisk from HVAC_MS (not hardcoded "high")', () => {
-  const src_ = src('src/app/demo-live/deal/harbor-dispute/page.tsx')
+  const src_ = src('src/app/(marketing)/demo-live/deal/harbor-dispute/page.tsx')
   assert(
     src_.includes('HVAC_MS.aiRisk'),
     'harbor-dispute/page.tsx does not pass HVAC_MS.aiRisk to AiReviewModal',
@@ -185,7 +185,7 @@ test('C2: harbor-dispute passes aiRisk from HVAC_MS (not hardcoded "high")', () 
 })
 
 test('C3: harbor-dispute passes findings from HVAC_MS (not hardcoded array)', () => {
-  const src_ = src('src/app/demo-live/deal/harbor-dispute/page.tsx')
+  const src_ = src('src/app/(marketing)/demo-live/deal/harbor-dispute/page.tsx')
   assert(
     src_.includes('HVAC_MS.findings'),
     'harbor-dispute/page.tsx does not pass HVAC_MS.findings to AiReviewModal',
@@ -193,7 +193,7 @@ test('C3: harbor-dispute passes findings from HVAC_MS (not hardcoded array)', ()
 })
 
 test('C4: Riverside does not pass aiReview prop (uses 82/100 default)', () => {
-  const src_ = src('src/app/demo-live/deal/riverside/page.tsx')
+  const src_ = src('src/app/(marketing)/demo-live/deal/riverside/page.tsx')
   // The aiReview prop must not be present — Riverside simulates a new review
   const aiReviewIdx = src_.indexOf('aiReview=')
   assert(
@@ -203,7 +203,7 @@ test('C4: Riverside does not pass aiReview prop (uses 82/100 default)', () => {
 })
 
 test('C5: Westside does not pass aiReview prop (uses 82/100 default)', () => {
-  const src_ = src('src/app/demo-live/deal/westside/page.tsx')
+  const src_ = src('src/app/(marketing)/demo-live/deal/westside/page.tsx')
   const aiReviewIdx = src_.indexOf('aiReview=')
   assert(
     aiReviewIdx === -1,

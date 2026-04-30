@@ -57,7 +57,7 @@ function collapse(s: string): string {
   return s.replace(/\s+/g, ' ')
 }
 
-const PRICING_PAGE = 'src/app/pricing/page.tsx'
+const PRICING_PAGE = 'src/app/(marketing)/pricing/page.tsx'
 const ADR_FILE     = 'docs/adr/ADR-001-external-manual-rail-billing.md'
 
 async function main() {

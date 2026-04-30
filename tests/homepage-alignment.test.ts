@@ -40,7 +40,7 @@ import fs   from 'fs'
 import path from 'path'
 
 const ROOT         = path.resolve(process.cwd())
-const HOMEPAGE     = 'src/app/page.tsx'
+const HOMEPAGE     = 'src/app/(marketing)/page.tsx'
 const PACKAGE_JSON = 'package.json'
 
 function read(rel: string): string {

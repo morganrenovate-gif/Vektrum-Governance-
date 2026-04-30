@@ -126,7 +126,7 @@ test('B4: Harbor-dispute milestone 5 is "HVAC Equipment Procurement"', () => {
 // ─── C. GENERIC DEAL ROUTE ───────────────────────────────────────────────────
 
 test('C1: [id]/page.tsx imports from @/lib/demo-data', () => {
-  const file = src('src/app/demo-live/deal/[id]/page.tsx')
+  const file = src('src/app/(marketing)/demo-live/deal/[id]/page.tsx')
   assert(file.includes("from '@/lib/demo-data'"),
     '[id]/page.tsx does not import from @/lib/demo-data — may still be using stale duplicate')
   assert(file.includes('riverside') && file.includes('harbor') && file.includes('westside'),
@@ -134,13 +134,13 @@ test('C1: [id]/page.tsx imports from @/lib/demo-data', () => {
 })
 
 test('C2: [id]/page.tsx no longer contains stale 3_460_000 Harbor figure', () => {
-  const file = src('src/app/demo-live/deal/[id]/page.tsx')
+  const file = src('src/app/(marketing)/demo-live/deal/[id]/page.tsx')
   assert(!file.includes('3_460_000'),
     '[id]/page.tsx still contains the stale 3_460_000 literal — Harbor released should come from canonical data ($2,160,000)')
 })
 
 test('C3: [id]/page.tsx does not label MEP Systems as a disputed item', () => {
-  const file = src('src/app/demo-live/deal/[id]/page.tsx')
+  const file = src('src/app/(marketing)/demo-live/deal/[id]/page.tsx')
   // The old code listed milestone 5 of harbor-dispute as "MEP Systems & Commissioning"
   // with disputed status. The canonical disputed milestone is "HVAC Equipment Procurement".
   // Look for the specific stale combination.
@@ -152,7 +152,7 @@ test('C3: [id]/page.tsx does not label MEP Systems as a disputed item', () => {
 })
 
 test('C4: [id]/page.tsx no longer hardcodes Structural Steel as released', () => {
-  const file = src('src/app/demo-live/deal/[id]/page.tsx')
+  const file = src('src/app/(marketing)/demo-live/deal/[id]/page.tsx')
   // Old inline data: { title: 'Structural Steel Erection', ..., status: 'released', releasedAgo: '3 days ago' }
   // Look for the specific stale "released" + "Structural Steel" combination as a literal.
   const hasStaleSteel =
@@ -166,7 +166,7 @@ test('C4: [id]/page.tsx no longer hardcodes Structural Steel as released', () =>
 // ─── D. CONTRACTOR DASHBOARD ─────────────────────────────────────────────────
 
 test('D1: contractor/page.tsx imports riverside, harbor, getMilestoneSummary', () => {
-  const file = src('src/app/demo-live/contractor/page.tsx')
+  const file = src('src/app/(marketing)/demo-live/contractor/page.tsx')
   assert(file.includes("from '@/lib/demo-data'"),
     'contractor/page.tsx does not import from @/lib/demo-data')
   assert(file.includes('riverside') && file.includes('harbor'),
@@ -176,7 +176,7 @@ test('D1: contractor/page.tsx imports riverside, harbor, getMilestoneSummary', (
 })
 
 test('D2: contractor/page.tsx no longer hardcodes 3_940_000', () => {
-  const file = src('src/app/demo-live/contractor/page.tsx')
+  const file = src('src/app/(marketing)/demo-live/contractor/page.tsx')
   assert(!file.includes('3_940_000'),
     'contractor/page.tsx still contains the stale 3_940_000 total — must derive from canonical riverside + harbor')
 })
@@ -205,13 +205,13 @@ test('D5: contractor Harbor pct equals canonical', () => {
 // ─── E. FUNDER BRIEFING ──────────────────────────────────────────────────────
 
 test('E1: funder/page.tsx no longer references stale "Milestone 4 ... score 92"', () => {
-  const file = src('src/app/demo-live/funder/page.tsx')
+  const file = src('src/app/(marketing)/demo-live/funder/page.tsx')
   assert(!file.includes('Milestone 4 passed AI review with score 92'),
     'funder/page.tsx still has stale "Milestone 4 ... score 92" briefing — Building Envelope is in_progress')
 })
 
 test('E2: funder briefing references Structural Steel / score 91', () => {
-  const file = src('src/app/demo-live/funder/page.tsx')
+  const file = src('src/app/(marketing)/demo-live/funder/page.tsx')
   assert(file.includes('Structural Steel') && file.includes('91'),
     'funder/page.tsx briefing should reference "Structural Steel" and score 91 (the canonical ready milestone)')
 })
@@ -229,7 +229,7 @@ test('E3: canonical Structural Steel aiScore is 91 (briefing matches)', () => {
 // derived-from-canonical structure so it cannot drift again.
 
 test('F1: capital page imports canonical demo data', () => {
-  const file = src('src/app/demo-live/funder/capital/page.tsx')
+  const file = src('src/app/(marketing)/demo-live/funder/capital/page.tsx')
   assert(file.includes("from '@/lib/demo-data'"),
     'capital/page.tsx does not import from @/lib/demo-data — values may drift again')
   assert(file.includes('riverside') && file.includes('harbor') && file.includes('westside'),
@@ -239,7 +239,7 @@ test('F1: capital page imports canonical demo data', () => {
 test('F2: capital page no longer hardcodes 3_460_000 (stale Harbor released)', () => {
   // Ignore comment lines so the explanatory note that mentions the old value
   // by name does not trip this check — only flag actual code usage.
-  const file = src('src/app/demo-live/funder/capital/page.tsx')
+  const file = src('src/app/(marketing)/demo-live/funder/capital/page.tsx')
   const codeLines = file
     .split('\n')
     .filter((line) => {
@@ -252,7 +252,7 @@ test('F2: capital page no longer hardcodes 3_460_000 (stale Harbor released)', (
 })
 
 test('F3: capital page no longer lists Structural Steel as a hardcoded recent release', () => {
-  const file = src('src/app/demo-live/funder/capital/page.tsx')
+  const file = src('src/app/(marketing)/demo-live/funder/capital/page.tsx')
   // The old data had: { date: 'Apr 1, 2026', project: 'Harbor Logistics',
   //                     milestone: 'Structural Steel Erection', amount: 2_180_000 }
   // It must not appear as a literal entry — RECENT_RELEASES is now derived.
@@ -306,13 +306,13 @@ test('F8: capital page Structural Steel will not appear in recent releases (cano
 })
 
 test('F9: capital page no longer hardcodes stale 4_890_000 totalReleased', () => {
-  const file = src('src/app/demo-live/funder/capital/page.tsx')
+  const file = src('src/app/(marketing)/demo-live/funder/capital/page.tsx')
   assert(!file.includes('4_890_000'),
     'capital/page.tsx still contains the stale 4_890_000 totalReleased literal')
 })
 
 test('F10: capital page no longer hardcodes stale 11_360_000 heldPending', () => {
-  const file = src('src/app/demo-live/funder/capital/page.tsx')
+  const file = src('src/app/(marketing)/demo-live/funder/capital/page.tsx')
   assert(!file.includes('11_360_000'),
     'capital/page.tsx still contains the stale 11_360_000 heldPending literal')
 })

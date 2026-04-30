@@ -65,7 +65,7 @@ function read(p: string): string {
 const MIGRATION = 'supabase/migrations/20260428000001_milestone_documents_bucket.sql'
 const UPLOAD_RT = 'src/app/api/milestones/[milestoneId]/documents/upload/route.ts'
 const CARD      = 'src/components/deal/milestone-card.tsx'
-const DOCS_PAGE = 'src/app/dashboard/contractor/documents/page.tsx'
+const DOCS_PAGE = 'src/app/(app)/dashboard/contractor/documents/page.tsx'
 const PKG       = 'package.json'
 
 async function main() {

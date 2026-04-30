@@ -67,11 +67,11 @@ function codeOnly(src: string): string {
     .replace(/"(?:\\.|[^"\\])*"/g, '""')
 }
 
-const DEAL_PAGE       = 'src/app/dashboard/deals/[dealId]/page.tsx'
+const DEAL_PAGE       = 'src/app/(app)/dashboard/deals/[dealId]/page.tsx'
 const MILESTONE_CARD  = 'src/components/deal/milestone-card.tsx'
 const DOC_GET         = 'src/app/api/milestones/[milestoneId]/documents/route.ts'
 const DOC_UPLOAD      = 'src/app/api/milestones/[milestoneId]/documents/upload/route.ts'
-const CONTRACTOR_DOCS = 'src/app/dashboard/contractor/documents/page.tsx'
+const CONTRACTOR_DOCS = 'src/app/(app)/dashboard/contractor/documents/page.tsx'
 const TYPES           = 'src/lib/types.ts'
 const GATE            = 'src/lib/engine/release-gate.ts'
 const STRIPE_WH       = 'src/app/api/stripe/webhook/route.ts'
