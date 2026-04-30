@@ -5,17 +5,17 @@ import { Shield, CheckCircle2, FileText, Brain, Banknote, Users, AlertTriangle, 
 export const metadata = {
   title: 'How It Works',
   description:
-    'See how Vektrum enforces construction draw releases: AI-assisted draw review, a deterministic 10-condition release gate, and immutable audit trail. AI informs; the gate decides; the funder authorizes.',
+    'See how Vektrum enforces construction draw releases: AI-assisted draw review, a deterministic 10-condition release gate, and an append-only, hash-chained, tamper-evident audit trail. AI informs; the gate decides; the funder authorizes.',
   alternates: { canonical: 'https://vektrum.io/demo' },
   openGraph: {
     title: 'How Vektrum Works — Construction Payment Governance',
-    description: 'AI-assisted draw review. 10-condition gate. Immutable audit trail. AI informs; the gate decides; the funder authorizes.',
+    description: 'AI-assisted draw review. 10-condition gate. Append-only, tamper-evident audit trail. AI informs; the gate decides; the funder authorizes.',
     url: 'https://vektrum.io/demo',
     images: [{ url: '/og-image.png', width: 1200, height: 630 }],
   },
   twitter: {
     title: 'How Vektrum Works',
-    description: 'AI draw review, 10-condition gate, immutable audit trail. AI informs; the gate decides.',
+    description: 'AI draw review, 10-condition gate, append-only hash-chained tamper-evident audit trail. AI informs; the gate decides.',
   },
 }
 
@@ -38,9 +38,9 @@ export default function DemoPage() {
             Verified Before Release.
           </h1>
           <p className="mt-6 mx-auto max-w-2xl text-base sm:text-lg text-vektrum-canvas-text/70">
-            Built for the $2.19T U.S. construction disbursement market — AI-assisted
-            draw review, a 10-condition server-side release gate, and immutable
-            audit trails.
+            Built for the multi-trillion-dollar U.S. construction disbursement market —
+            an AI Draw Control Brief precondition, a 10-condition server-side release gate, and
+            an append-only, hash-chained, tamper-evident audit trail.
           </p>
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
@@ -64,41 +64,65 @@ export default function DemoPage() {
       <section className="bg-[#031226] py-16 sm:py-20">
         <div className="mx-auto max-w-5xl px-6">
           <h2 className="text-center font-display text-2xl sm:text-3xl font-bold text-white mb-4">
-            The Problem
+            Why release authorization needs structure
           </h2>
           <p className="text-center text-sm text-white/70 mb-10 max-w-xl mx-auto">
-            Construction payment governance is broken. The industry loses billions every year.
+            Construction draw governance is fragmented. Industry research describes the structural
+            patterns below — see source links beneath each card.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {[
               {
                 stat: '12%',
-                desc: 'of construction draw requests are denied — 355,890 draws across nearly 30,000 loans (FDIC, 2023)',
+                desc: 'of construction draw requests are denied — 355,890 draws across nearly 30,000 loans',
                 icon: AlertTriangle,
+                sourceLabel: 'FDIC, Bank Monitoring with On-Site Inspections (2022, updated 2023)',
+                sourceHref: '/resources/construction-dispute-isolation#source-1',
               },
               {
                 stat: '$250K',
-                desc: 'median loss per occupational fraud case in construction (ACFE, 2024)',
+                desc: 'median loss per occupational fraud case in construction',
                 icon: Users,
+                sourceLabel: 'ACFE, Occupational Fraud 2024: A Report to the Nations',
+                sourceHref: null,
               },
               {
                 stat: 'Fragmented',
                 desc: 'most draw workflows still rely on spreadsheets, email, and workflow tools rather than server-enforced release authorization',
                 icon: Shield,
+                sourceLabel: 'Bank Director, How Spreadsheets Add Risk to Construction Lending (2019)',
+                sourceHref: '/resources/construction-dispute-isolation#source-3',
               },
             ].map((item) => (
               <div
                 key={item.stat}
-                className="rounded-xl border border-white/[0.08] bg-surface-2 p-6 text-center shadow-sm"
+                className="rounded-xl border border-white/[0.08] bg-surface-2 p-6 text-center shadow-sm flex flex-col"
               >
                 <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-vektrum-blue/10">
-                  <item.icon size={18} className="text-blue-300" />
+                  <item.icon size={18} className="text-blue-300" aria-hidden="true" />
                 </div>
                 <p className="font-display text-3xl font-bold text-white">{item.stat}</p>
-                <p className="mt-2 text-sm text-white/70">{item.desc}</p>
+                <p className="mt-2 text-sm text-white/70 flex-1">{item.desc}</p>
+                <p className="mt-3 pt-3 border-t border-white/[0.06] text-[11px] text-white/45 leading-snug">
+                  {item.sourceHref ? (
+                    <Link href={item.sourceHref} className="hover:text-blue-300 transition-colors">
+                      Source: {item.sourceLabel} →
+                    </Link>
+                  ) : (
+                    <>Source: {item.sourceLabel}</>
+                  )}
+                </p>
               </div>
             ))}
           </div>
+          <p className="mt-6 text-center text-[11.5px] text-white/40 leading-relaxed max-w-2xl mx-auto">
+            Numbers describe industry context, not Vektrum performance. Vektrum does not claim to
+            prevent fraud, eliminate disputes, or guarantee compliance — see the{' '}
+            <Link href="/resources/construction-dispute-isolation#sources" className="text-blue-400 hover:text-blue-300 underline underline-offset-2">
+              full Sources section
+            </Link>
+            .
+          </p>
         </div>
       </section>
 
@@ -157,13 +181,21 @@ export default function DemoPage() {
       </section>
 
       {/* ── Section 4: AI Draw Review Integration ─────────────────────────── */}
-      <section id="ai-integration" className="bg-vektrum-canvas py-16 sm:py-20">
+      <section id="ai-integration" className="bg-vektrum-canvas py-16 sm:py-20 border-y-4 border-vektrum-blue/20">
         <div className="mx-auto max-w-5xl px-6">
+          <div className="flex justify-center mb-4">
+            <span className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/[0.08] px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-blue-300">
+              Required precondition before the gate
+            </span>
+          </div>
           <h2 className="text-center font-display text-2xl sm:text-3xl font-bold text-white mb-4">
-            AI pre-review before the gate
+            AI Draw Control Brief
           </h2>
           <p className="text-center text-sm text-vektrum-canvas-text/80 mb-3 max-w-2xl mx-auto">
-            Before release readiness is evaluated, an AI pre-review reads the submitted evidence and prepares a structured finding for the funder.
+            Before the 10-condition release gate evaluates a draw, the AI Draw Control Brief reads
+            the submitted evidence and prepares a structured finding for the funder. The brief is
+            a precondition — it is <strong className="text-white">separate from</strong> the
+            numbered server-side conditions enforced by the gate.
           </p>
           <p className="text-center text-[12px] text-vektrum-canvas-text/60 mb-12 max-w-2xl mx-auto italic">
             AI pre-review informs the gate. The deterministic gate and funder control release.
@@ -248,13 +280,23 @@ export default function DemoPage() {
       </section>
 
       {/* ── Section 5: The 10-Condition Release Gate ───────────────────────── */}
-      <section className="bg-[#0D1B2A] py-16 sm:py-20">
+      <section className="bg-[#0D1B2A] py-16 sm:py-20 border-t-4 border-vektrum-blue/30">
         <div className="mx-auto max-w-5xl px-6">
+          <div className="flex justify-center mb-4">
+            <span className="inline-flex items-center gap-2 rounded-full border border-vektrum-blue/30 bg-vektrum-blue/[0.08] px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-blue-300">
+              Deterministic — server-enforced
+            </span>
+          </div>
           <h2 className="text-center font-display text-2xl sm:text-3xl font-bold text-white mb-4">
-            The Release Gate
+            The 10-Condition Release Gate
           </h2>
-          <p className="text-center text-sm text-white/70 mb-10 max-w-xl mx-auto">
-            All required conditions must pass before a release is authorized.
+          <p className="text-center text-sm text-white/70 mb-2 max-w-xl mx-auto">
+            All <strong className="text-white">10 server-side conditions</strong> must pass before
+            a release is authorized.
+          </p>
+          <p className="text-center text-[12px] text-white/50 mb-10 max-w-xl mx-auto italic">
+            The AI Draw Control Brief above is a separate precondition — it is not one of the
+            10 numbered conditions.
           </p>
           <div className="mx-auto max-w-xl rounded-xl border border-white/[0.08] bg-surface-2 p-6 shadow-md">
             <ul className="space-y-3">

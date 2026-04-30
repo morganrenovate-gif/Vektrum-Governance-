@@ -482,16 +482,30 @@ export default function PricingPage() {
           </div>
 
           {/* CFO-readable bridge — clarifies retainer + per-release relationship */}
-          <div className="mb-10 mx-auto max-w-3xl rounded-2xl border border-white/[0.08] bg-surface-2 px-6 py-5">
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-blue-300 mb-2">How the retainer works</p>
+          <div className="mb-10 mx-auto max-w-3xl rounded-2xl border border-white/[0.08] bg-surface-2 px-6 py-5 space-y-3">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-blue-300">How the two fees work together</p>
             <p className="text-[13.5px] leading-relaxed text-white/70">
-              Institutional and Enterprise models combine a <strong className="text-white">lower per-release governance fee</strong> with a{' '}
-              <strong className="text-white">negotiated annual governance retainer</strong>. The retainer covers
-              portfolio governance, implementation, support, and operational review scope. The per-release
-              fee applies <strong className="text-white">only to verified disbursements</strong>. The retainer
-              is credited against per-release fees throughout the year — you do not pay twice for the same
-              release.
+              <strong className="text-white">The annual retainer is a platform/governance fee based on
+              active construction volume; the per-release fee applies only to authorized disbursements.
+              These are separate fee bases.</strong>
             </p>
+            <div className="grid gap-3 sm:grid-cols-2 pt-2 border-t border-white/[0.06]">
+              <div className="rounded-lg border border-white/[0.08] bg-surface-3 px-4 py-3">
+                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-blue-300 mb-1">Annual retainer</p>
+                <p className="text-[12.5px] leading-relaxed text-white/65">
+                  Platform / governance fee covering portfolio governance, implementation, support,
+                  and operational review scope. Sized by Active Construction Volume.
+                </p>
+              </div>
+              <div className="rounded-lg border border-white/[0.08] bg-surface-3 px-4 py-3">
+                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-400 mb-1">Per-release fee</p>
+                <p className="text-[12.5px] leading-relaxed text-white/65">
+                  Applies only to authorized disbursements. $0 until a release is authorized. The
+                  retainer is credited against per-release fees through the year, so you do not pay
+                  twice for the same release.
+                </p>
+              </div>
+            </div>
           </div>
 
           <div className="grid gap-6 lg:grid-cols-3">

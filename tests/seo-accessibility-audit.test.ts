@@ -116,6 +116,23 @@
  *  78. Sitemap still includes /resources
  *  79. Sitemap still includes /resources/construction-dispute-isolation
  *
+ * Precision-cleanup audit items
+ * 105. /demo-live has self-canonical (https://vektrum.io/demo-live)
+ * 106. /demo-live title not duplicated ("| Vektrum | Vektrum")
+ * 107. /demo-live description mentions release gate, AI Draw Control Brief, audit trail
+ * 108. /resources teaser CTA links to article slug, not "#"
+ * 109. Demo page labels AI as "Required precondition before the gate"
+ * 110. Demo page visually separates AI section from the 10-condition gate
+ * 111. Demo gate intro reaffirms "AI Draw Control Brief is a separate precondition"
+ * 112. Demo stats include visible source labels (FDIC, ACFE, Bank Director)
+ * 113. Demo page has no broad superlative "loses billions every year"
+ * 114. Partners page uses partners@vektrum.io
+ * 115. Partners page does NOT use partners@vektrum.com
+ * 116. Help page does not use buyer-facing "Perplexity Computer"
+ * 117. Help page uses "AI review engine" / "AI Draw Control Brief"
+ * 118. Buyer-facing pages do not use bare "immutable audit trail" / "immutable proof"
+ * 119. Pricing has fee-base separation language ("separate fee bases")
+ *
  * Cleanup-sprint audit items
  *  80. Self-canonicals on every public page (no page canonicals to homepage)
  *  81. /lenders no longer has a page (config-level redirect to /funders)
@@ -695,15 +712,132 @@ async function main() {
   check(ariaHiddenCount >= 30, `102. Decorative icons aria-hidden (found ${ariaHiddenCount} across public pages, ≥30 expected)`)
 
   // 103. Pricing CFO-readable enterprise bridge text
+  // Updated by precision-cleanup: heading is now "How the two fees work together"
+  // and the per-release language is "authorized disbursements" (matches
+  // "Annual retainer / Per-release fee" two-card layout).
   check(
-    pricing.includes('How the retainer works') &&
+    pricing.includes('How the two fees work together') &&
       pricing.includes('credited against per-release fees') &&
-      pricing.includes('only to verified disbursements'),
+      pricing.includes('only to authorized disbursements'),
     '103. Pricing has CFO-readable enterprise bridge text',
   )
 
+  // ── Precision-cleanup audit items ───────────────────────────────────────────
+  console.log('\nPrecision-cleanup audit items')
+
+  // 105–107: /demo-live metadata (lives in layout.tsx)
+  const demoLiveLayout = read('src/app/demo-live/layout.tsx')
+  check(
+    /canonical:\s*['"]https:\/\/vektrum\.io\/demo-live['"]/.test(demoLiveLayout),
+    '105. /demo-live has self-canonical https://vektrum.io/demo-live',
+  )
+  // No duplicated " | Vektrum | Vektrum" — title is explicit (not template)
+  // i.e. it should NOT be a bare "Demo — Vektrum" that would template to a duplicate.
+  check(
+    demoLiveLayout.includes('Interactive Construction Draw Demo | Vektrum') &&
+      !demoLiveLayout.includes("title: 'Demo — Vektrum'"),
+    '106. /demo-live title not duplicated and uses "Interactive Construction Draw Demo | Vektrum"',
+  )
+  check(
+    demoLiveLayout.includes('release gate') &&
+      demoLiveLayout.includes('AI Draw Control Brief') &&
+      demoLiveLayout.includes('audit trail'),
+    '107. /demo-live description mentions release gate, AI Draw Control Brief, and audit trail',
+  )
+
+  // 108: /resources teaser CTA links to article slug, not "#"
+  const resourcesPageContent = read('src/app/resources/page.tsx')
+  // Confirm the article Link wraps Read article and uses /resources/${article.slug}
+  check(
+    resourcesPageContent.includes('/resources/${article.slug}') &&
+      !/href=\{?["']#["']\}?[^>]*>\s*Read article/.test(resourcesPageContent),
+    '108. /resources teaser CTA links to article slug (not "#")',
+  )
+
+  // 109. Demo page labels AI as "Required precondition before the gate"
+  check(
+    demoPage.includes('Required precondition before the gate'),
+    '109. Demo page labels AI as "Required precondition before the gate"',
+  )
+
+  // 110. Demo page visually separates AI section from the gate (border-y-4 +
+  // border-t-4 wraps + AI Draw Control Brief heading)
+  check(
+    demoPage.includes('AI Draw Control Brief') &&
+      /border-y-4|border-t-4/.test(demoPage),
+    '110. Demo page visually separates AI section from the 10-condition gate',
+  )
+
+  // 111. Demo gate intro reaffirms "AI Draw Control Brief above is a separate precondition"
+  check(
+    demoPage.includes('separate precondition'),
+    '111. Demo gate intro reaffirms AI Draw Control Brief is a separate precondition',
+  )
+
+  // 112. Demo stats include visible source labels rendered as
+  // `Source: {item.sourceLabel}` where sourceLabel literals contain FDIC, ACFE,
+  // and Bank Director attribution.
+  check(
+    demoPage.includes('Source: ') &&
+      demoPage.includes("sourceLabel: 'FDIC") &&
+      demoPage.includes("sourceLabel: 'ACFE") &&
+      demoPage.includes("sourceLabel: 'Bank Director"),
+    '112. Demo stats include visible source labels (FDIC, ACFE, Bank Director)',
+  )
+
+  // 113. Demo page has no broad superlative
+  check(
+    !demoPage.includes('loses billions every year') &&
+      !demoPage.includes('Construction payment governance is broken'),
+    '113. Demo page has no broad superlative "loses billions every year"',
+  )
+
+  // 114, 115. Partner email
+  const partnersPage = read('src/app/partners/page.tsx')
+  check(partnersPage.includes('partners@vektrum.io'), '114. Partners page uses partners@vektrum.io')
+  check(!partnersPage.includes('partners@vektrum.com'), '115. Partners page does NOT use partners@vektrum.com')
+
+  // 116, 117. Help page AI vendor wording
+  check(
+    !helpPage.includes('Perplexity Computer'),
+    '116. Help page does not use buyer-facing "Perplexity Computer"',
+  )
+  check(
+    helpPage.includes('AI review engine') || helpPage.includes('AI Draw Control Brief'),
+    '117. Help page uses "AI review engine" / "AI Draw Control Brief"',
+  )
+
+  // 118. Buyer-facing pages do not use bare "immutable audit trail" / "immutable proof"
+  // We check the canonical buyer-facing pages: /, /funders, /contractors, /demo, /help, /about, /careers, /pricing
+  const buyerFacingPages = [
+    'src/app/page.tsx',
+    'src/app/funders/page.tsx',
+    'src/app/contractors/page.tsx',
+    'src/app/demo/page.tsx',
+    'src/app/help/page.tsx',
+    'src/app/about/page.tsx',
+    'src/app/careers/page.tsx',
+    'src/app/pricing/page.tsx',
+  ]
+  const immutableHits: string[] = []
+  for (const rel of buyerFacingPages) {
+    const c = read(rel)
+    if (/\bimmutable\s+(?:audit|proof|record)\b/i.test(c)) immutableHits.push(rel)
+  }
+  check(
+    immutableHits.length === 0,
+    `118. Buyer-facing pages do not use bare "immutable audit/proof/record" (found in ${immutableHits.length}: ${immutableHits.join(', ')})`,
+  )
+
+  // 119. Pricing fee-base separation language
+  check(
+    pricing.includes('separate fee bases') &&
+      pricing.includes('annual retainer is a platform/governance fee'),
+    '119. Pricing has fee-base separation language ("separate fee bases")',
+  )
+
   // ── package.json ─────────────────────────────────────────────────────────────
-  check(pkg.includes('seo-accessibility-audit.test.ts'),               '104. Test wired into npm test')
+  check(pkg.includes('seo-accessibility-audit.test.ts'),               '120. Test wired into npm test')
 
   console.log('\n✓ All seo-accessibility-audit tests passed.\n')
 }

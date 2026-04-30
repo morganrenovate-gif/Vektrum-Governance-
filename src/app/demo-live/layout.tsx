@@ -3,8 +3,24 @@ import { VektrumWordmark } from '@/components/ui/vektrum-logo'
 import { DemoResetButton } from '@/components/demo/DemoResetButton'
 
 export const metadata = {
-  title: 'Demo — Vektrum',
-  description: 'Interactive demo of the Vektrum construction payment governance platform.',
+  // Title is an explicit string so we don't get "Demo | Vektrum | Vektrum"
+  // when the root layout's title.template applies on top of "Demo — Vektrum".
+  title: 'Interactive Construction Draw Demo | Vektrum',
+  description:
+    'Walk through Vektrum end-to-end: the AI Draw Control Brief precondition, the 10-condition release gate, and the append-only, hash-chained audit trail. Funder, contractor, and admin views included.',
+  alternates: { canonical: 'https://vektrum.io/demo-live' },
+  openGraph: {
+    title: 'Interactive Construction Draw Demo — Vektrum',
+    description:
+      'AI Draw Control Brief precondition, 10-condition release gate, and append-only audit trail walkthrough.',
+    url: 'https://vektrum.io/demo-live',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+  },
+  twitter: {
+    title: 'Interactive Construction Draw Demo — Vektrum',
+    description:
+      'AI Draw Control Brief precondition, 10-condition release gate, audit trail walkthrough.',
+  },
 }
 
 export default function DemoLiveLayout({ children }: { children: React.ReactNode }) {

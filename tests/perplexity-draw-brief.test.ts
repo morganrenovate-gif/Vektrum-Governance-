@@ -199,17 +199,27 @@ await test('11. Funder tour step says the release workflow cannot proceed withou
 
 // ─── 12-14. Public FAQ / help page ───────────────────────────────────────────
 
-await test('12. Help page FAQ explains what Perplexity Computer does inside Vektrum', () => {
+await test('12. Help page FAQ explains the AI evidence-to-policy layer', () => {
+  // Per the precision-cleanup audit, public-facing copy now uses
+  // "Vektrum's AI review engine" / "AI Draw Control Brief" instead of the
+  // vendor name. Vendor naming is reserved for technical/developer surfaces
+  // (production widget at PROD_WIDGET, demo modal at DEMO_MODAL).
+  // This test still requires the FAQ to explain the AI precondition, just
+  // not by vendor name on a buyer-facing page.
   const src = read(HELP_PAGE)
   assert(
-    src.includes('Perplexity Computer') || src.includes('Perplexity'),
-    `${HELP_PAGE} must explain what Perplexity Computer does inside Vektrum in the FAQ. ` +
-    `This is the public-facing explanation of the evidence-to-policy layer.`,
+    src.includes('AI review engine') ||
+      src.includes('AI Draw Control Brief') ||
+      src.includes('Perplexity Computer') ||
+      src.includes('Perplexity'),
+    `${HELP_PAGE} must explain the AI evidence-to-policy layer in the FAQ. ` +
+    `Use "AI review engine" / "AI Draw Control Brief" on buyer-facing pages; ` +
+    `vendor naming is permitted on technical surfaces only.`,
   )
   assert(
     src.includes('evidence-to-policy') || src.includes('Draw Control Brief'),
     `${HELP_PAGE} must use "evidence-to-policy" or "Draw Control Brief" in the ` +
-    `Perplexity FAQ answer to explain the role clearly.`,
+    `AI FAQ answer to explain the role clearly.`,
   )
 })
 

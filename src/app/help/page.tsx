@@ -51,12 +51,12 @@ const TRUST_FAQ: FaqItem[] = [
     a: 'Only the deal funder — the authorized release party — can trigger a milestone release. Admins cannot release funds. Contractors cannot self-approve or self-release. Partners cannot bypass the gate. Every release is funder-triggered and enforced against the 10-condition gate.',
   },
   {
-    q: 'What does Perplexity Computer do inside Vektrum?',
-    a: 'Perplexity Computer is the evidence-to-policy engine inside Vektrum. It reads the draw package, extracts structured release facts (invoice amount, inspection report date, lien waiver status, retainage term, change order references, missing documents, conflicts), and prepares the Perplexity Draw Control Brief required before the release gate can evaluate a draw. Without a current brief, the governed release workflow cannot proceed. AI does not approve payments. The deterministic gate enforces policy and the funder authorizes release.',
+    q: 'What does the AI review engine do inside Vektrum?',
+    a: 'Vektrum\'s AI review engine is the evidence-to-policy layer inside Vektrum. It reads the draw package, extracts structured release facts (invoice amount, inspection report date, lien waiver status, retainage term, change order references, missing documents, conflicts), and prepares the AI Draw Control Brief required before the release gate can evaluate a draw. Without a current brief, the governed release workflow cannot proceed. AI does not approve payments. The deterministic gate enforces policy and the funder authorizes release.',
   },
   {
     q: 'Does AI approve releases?',
-    a: 'No. Perplexity Computer generates the Draw Control Brief — a structured summary of evidence, facts, and flags extracted from the draw package. This brief is a required precondition for the release gate, but it does not approve a release. The funder triggers release, and the deterministic 10-condition gate enforces whether release is allowed. AI informs; the gate decides; the funder authorizes; the selected rail executes.',
+    a: 'No. The AI review engine generates the AI Draw Control Brief — a structured summary of evidence, facts, and flags extracted from the draw package. This brief is a required precondition for the release gate, but it does not approve a release. The funder triggers release, and the deterministic 10-condition gate enforces whether release is allowed. AI informs; the gate decides; the funder authorizes; the selected rail executes.',
   },
   {
     q: 'How does Vektrum get paid on external/manual rails?',
@@ -107,7 +107,7 @@ const FAQ: FaqItem[] = [
   },
   {
     q: 'What is the 10-condition release gate?',
-    a: 'Before any milestone payment releases, 10 server-side conditions must all be true simultaneously: (1) milestone approved by the funder, (2) milestone cleared and eligible for release, (3) sufficient funded balance including the platform fee, (4) contractor payment account verified and active where required, (5) contractor onboarding complete, (6) no duplicate release on this milestone, (7) no pending change orders, (8) a fully-signed contract on file, (9) sequential-release ordering and explicit prerequisites satisfied (where required), and (10) an approved conditional lien waiver on file (where required). A Perplexity Draw Control Brief is also required before the gate evaluates — Perplexity Computer reads the draw package and prepares the structured brief as the evidence-to-policy layer.',
+    a: 'Before any milestone payment releases, 10 server-side conditions must all be true simultaneously: (1) milestone approved by the funder, (2) milestone cleared and eligible for release, (3) sufficient funded balance including the platform fee, (4) contractor payment account verified and active where required, (5) contractor onboarding complete, (6) no duplicate release on this milestone, (7) no pending change orders, (8) a fully-signed contract on file, (9) sequential-release ordering and explicit prerequisites satisfied (where required), and (10) an approved conditional lien waiver on file (where required). An AI Draw Control Brief is also required before the gate evaluates — Vektrum\'s AI review engine reads the draw package and prepares the structured brief as the evidence-to-policy layer.',
   },
   {
     q: 'Can contractors start a project and invite the funder?',
@@ -119,7 +119,7 @@ const FAQ: FaqItem[] = [
   },
   {
     q: 'What documents should contractors upload?',
-    a: 'Supporting evidence is the input to the Perplexity Draw Control Brief. Perplexity Computer reads the uploaded draw package and extracts structured facts — invoice amount, inspection report date, lien waiver status, retainage term, change order references. Missing evidence is flagged in the brief, which is required before the release gate evaluates the draw. Suggested evidence: invoice or pay application, inspection report or site visit summary, site photos, receipts or supplier invoices, and change order backup (if applicable). Upload requirements may vary by contract, funder review, and release-gate settings. Uploading evidence is not itself a gate condition, but missing evidence is surfaced in the brief and may cause a funder to withhold approval.',
+    a: 'Supporting evidence is the input to the AI Draw Control Brief. Vektrum\'s AI review engine reads the uploaded draw package and extracts structured facts — invoice amount, inspection report date, lien waiver status, retainage term, change order references. Missing evidence is flagged in the brief, which is required before the release gate evaluates the draw. Suggested evidence: invoice or pay application, inspection report or site visit summary, site photos, receipts or supplier invoices, and change order backup (if applicable). Upload requirements may vary by contract, funder review, and release-gate settings. Uploading evidence is not itself a gate condition, but missing evidence is surfaced in the brief and may cause a funder to withhold approval.',
   },
   {
     q: 'How does dispute isolation work?',
