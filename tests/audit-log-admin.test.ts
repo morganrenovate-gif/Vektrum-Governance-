@@ -56,8 +56,8 @@ function read(rel: string): string {
   return fs.readFileSync(path.resolve(ROOT, rel), 'utf-8')
 }
 
-const AUDIT_PAGE   = 'src/app/dashboard/audit/page.tsx'
-const ADMIN_PAGE   = 'src/app/dashboard/admin/page.tsx'
+const AUDIT_PAGE   = 'src/app/(app)/dashboard/audit/page.tsx'
+const ADMIN_PAGE   = 'src/app/(app)/dashboard/admin/page.tsx'
 const PKG          = 'package.json'
 
 async function main() {
