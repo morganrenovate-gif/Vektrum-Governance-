@@ -6,6 +6,17 @@ import { BOOK_CALL_URL, BOOK_CALL_EXTERNAL } from '@/lib/book-call'
 export const metadata: Metadata = {
   title: 'Contact Vektrum | operations@vektrum.io',
   description: 'Contact Vektrum for funder inquiries, partnership discussions, or platform support.',
+  alternates: { canonical: 'https://vektrum.io/contact' },
+  openGraph: {
+    title: 'Contact — Vektrum',
+    description: 'Funder inquiries, partnership discussions, or platform support.',
+    url: 'https://vektrum.io/contact',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+  },
+  twitter: {
+    title: 'Contact — Vektrum',
+    description: 'Funder inquiries, partnership discussions, or platform support.',
+  },
 }
 
 export default function ContactPage() {

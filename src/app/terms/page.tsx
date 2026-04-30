@@ -3,6 +3,13 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Terms of Service | Vektrum',
   description: 'Vektrum Terms of Service for the construction payment governance platform.',
+  alternates: { canonical: 'https://vektrum.io/terms' },
+  openGraph: {
+    title: 'Terms of Service — Vektrum',
+    description: 'Vektrum Terms of Service.',
+    url: 'https://vektrum.io/terms',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+  },
 }
 
 export default function TermsPage() {

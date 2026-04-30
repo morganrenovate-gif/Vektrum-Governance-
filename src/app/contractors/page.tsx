@@ -52,8 +52,9 @@ export default function ContractorsPage() {
             Get paid when you deliver.
           </h1>
           <p className="mt-4 mx-auto max-w-2xl text-[17px] leading-relaxed text-white/70">
-            No more 90-day net terms. No more chasing invoices. Once the funder
-            approves and all release conditions pass, funds deposit directly to your account.
+            No more 90-day net terms. No more chasing invoices. Once the funder approves and all
+            release conditions pass, Stripe Connect deals deposit directly to your account;
+            external-rail deals are executed by your funder&apos;s payment partner.
           </p>
 
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
@@ -62,7 +63,7 @@ export default function ContractorsPage() {
               className="group inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-7 py-3 text-[14px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 hover:bg-vektrum-blue-hover transition-all"
             >
               Join free
-              <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
+              <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
             </Link>
           </div>
 
@@ -92,7 +93,7 @@ export default function ContractorsPage() {
               className="flex-shrink-0 inline-flex items-center justify-center gap-2 rounded-lg border border-white/[0.12] bg-white/[0.06] px-4 py-2 text-[12px] font-semibold text-white hover:bg-white/[0.1] transition-all"
             >
               Tell your funder about Vektrum
-              <ArrowRight size={13} />
+              <ArrowRight size={13} aria-hidden="true" />
             </Link>
           </div>
         </div>
@@ -106,7 +107,7 @@ export default function ContractorsPage() {
               {
                 icon: Banknote,
                 title: 'Milestone payouts',
-                desc: 'Funds release per milestone — not at project close. Direct deposit via Stripe Connect.',
+                desc: 'Funds release per milestone — not at project close. Direct deposit via Stripe Connect on direct deals; institutional rail on partner deals.',
               },
               {
                 icon: Shield,
@@ -151,7 +152,7 @@ export default function ContractorsPage() {
               'For Stripe Connect deals, complete Stripe onboarding for direct deposit — takes minutes. For external/manual deals, payment is executed by the funder\'s institutional partner and Stripe onboarding is not required.',
               'Complete milestones and submit draw requests with supporting documentation.',
               'The funder reviews and approves. The 10-condition gate verifies everything server-side.',
-              'Funds deposit directly to your bank. Immutable audit trail confirms every release.',
+              'On Stripe Connect deals, funds deposit directly to your account; on external-rail deals, your funder\'s payment partner executes payment. Either way, the audit trail records every authorized release.',
             ].map((step, i) => (
               <li key={i} className="flex items-start gap-4">
                 <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-vektrum-blue text-[12px] font-bold text-white">
@@ -169,7 +170,7 @@ export default function ContractorsPage() {
         <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.08] p-8 sm:p-10">
             <div className="flex items-start gap-4">
-              <CheckCircle2 size={24} className="flex-shrink-0 text-emerald-400 mt-0.5" />
+              <CheckCircle2 size={24} className="flex-shrink-0 text-emerald-400 mt-0.5" aria-hidden="true" />
               <div>
                 <h3 className="text-lg font-bold text-white">Contractors always join free</h3>
                 <p className="mt-2 text-[14px] leading-relaxed text-white/55">
@@ -197,7 +198,7 @@ export default function ContractorsPage() {
               className="group inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-7 py-3 text-[14px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 hover:bg-vektrum-blue-hover transition-all"
             >
               Create your free account
-              <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
+              <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
             </Link>
           </div>
         </div>

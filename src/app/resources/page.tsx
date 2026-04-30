@@ -44,7 +44,7 @@ export default function ResourcesPage() {
 
         <div className="relative max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-surface-2 px-4 py-1.5 shadow-sm mb-8">
-            <BookOpen size={14} className="text-blue-300" />
+            <BookOpen size={14} className="text-blue-300" aria-hidden="true" />
             <span className="text-[12px] font-medium text-white/55 tracking-wide">
               Resources
             </span>
@@ -90,7 +90,7 @@ export default function ResourcesPage() {
                     </p>
                     <div className="mt-4 flex items-center gap-1.5 text-[12px] font-semibold text-blue-400 group-hover:text-blue-300 transition-colors">
                       Read article
-                      <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
+                      <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
                     </div>
                   </div>
                 </div>
@@ -100,7 +100,7 @@ export default function ResourcesPage() {
 
           {/* More coming soon */}
           <div className="mt-10 rounded-xl border border-white/[0.06] bg-surface-3 px-6 py-5 text-center">
-            <FileText size={18} className="text-white/30 mx-auto mb-2" />
+            <FileText size={18} className="text-white/30 mx-auto mb-2" aria-hidden="true" />
             <p className="text-[13px] text-white/40">More guides coming soon — release gate deep dives, lien waiver workflows, and institutional rail setup.</p>
           </div>
         </div>
@@ -118,7 +118,7 @@ export default function ResourcesPage() {
               className="group inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-6 py-2.5 text-[13px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 hover:bg-vektrum-blue-hover transition-all"
             >
               View live demo
-              <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
+              <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
             </Link>
             <Link
               href="/help"

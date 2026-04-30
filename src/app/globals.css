@@ -104,6 +104,36 @@
     border-radius: 4px;
   }
 
+  /*
+    Reduced-motion support — honors the OS-level
+    "Reduce motion" preference. Disables fade/slide entrance
+    animations and decorative pulses while preserving final
+    visual state (opacity 1, no offset).
+  */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-fade-in,
+    .animate-fade-in-delay,
+    .animate-fade-in-delay-2,
+    .animate-fade-in-delay-3,
+    .animate-slide-up,
+    .animate-slide-up-delay,
+    .animate-slide-up-delay-2,
+    .animate-pulse-slow {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
   ::selection {
     background-color: rgba(26, 58, 150, 0.15);
   }

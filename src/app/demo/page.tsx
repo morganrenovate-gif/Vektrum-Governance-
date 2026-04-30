@@ -48,7 +48,7 @@ export default function DemoPage() {
               className="inline-flex items-center gap-2 rounded-lg bg-vektrum-blue px-6 py-3 text-sm font-semibold text-white shadow-blue hover:bg-vektrum-blue-hover transition-colors"
             >
               See How It Works
-              <ArrowDown size={14} />
+              <ArrowDown size={14} aria-hidden="true" />
             </a>
             <a
               href="#ai-integration"
@@ -82,8 +82,8 @@ export default function DemoPage() {
                 icon: Users,
               },
               {
-                stat: 'Zero',
-                desc: 'industry-standard solution for enforcing milestone-level release conditions',
+                stat: 'Fragmented',
+                desc: 'most draw workflows still rely on spreadsheets, email, and workflow tools rather than server-enforced release authorization',
                 icon: Shield,
               },
             ].map((item) => (
@@ -133,14 +133,14 @@ export default function DemoPage() {
               },
               {
                 step: 4,
-                title: 'AI Reviews Draw',
-                desc: 'AI-assisted draw review analyzes documentation against milestone criteria and flags risks. AI informs the gate; the funder still approves.',
+                title: 'AI Pre-Review',
+                desc: 'AI pre-review analyzes documentation against milestone criteria and flags risks. AI informs the gate; the deterministic gate decides; the funder authorizes.',
                 icon: Brain,
               },
               {
                 step: 5,
-                title: 'Funds Released',
-                desc: '10-condition gate verifies ALL requirements. Funds disbursed.',
+                title: 'Release Authorized & Executed',
+                desc: 'The 10-condition gate verifies ALL requirements. The funder authorizes; the selected rail (Stripe Connect or institutional partner) executes payment.',
                 icon: Shield,
               },
             ].map((item) => (
@@ -160,22 +160,25 @@ export default function DemoPage() {
       <section id="ai-integration" className="bg-vektrum-canvas py-16 sm:py-20">
         <div className="mx-auto max-w-5xl px-6">
           <h2 className="text-center font-display text-2xl sm:text-3xl font-bold text-white mb-4">
-            AI-assisted draw review, with human final approval
+            AI pre-review before the gate
           </h2>
-          <p className="text-center text-sm text-vektrum-canvas-text/80 mb-12 max-w-2xl mx-auto">
-            Before any milestone payment releases, an AI-assisted draw review evaluates the evidence and issues a formal assessment. The funder still gives final approval.
+          <p className="text-center text-sm text-vektrum-canvas-text/80 mb-3 max-w-2xl mx-auto">
+            Before release readiness is evaluated, an AI pre-review reads the submitted evidence and prepares a structured finding for the funder.
+          </p>
+          <p className="text-center text-[12px] text-vektrum-canvas-text/60 mb-12 max-w-2xl mx-auto italic">
+            AI pre-review informs the gate. The deterministic gate and funder control release.
           </p>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
             {/* Left: Explanation */}
             <div className="space-y-6">
               {[
-                'Before any milestone payment releases, the AI draw review reads the submitted evidence against the deal context.',
-                'The review scores the draw request 0\u2013100, flags risk factors, and issues a formal recommendation: Approve, Hold, or Reject. A funder must still approve before funds move.',
-                'Every assessment is cryptographically logged to an immutable audit trail \u2014 permanent, tamper-evident, legally defensible.',
+                'Before the release gate evaluates a draw, the AI pre-review reads the submitted evidence against the deal context.',
+                'The pre-review scores completeness 0\u2013100, flags risk factors, and issues a structured pre-review finding: Ready, Hold, or Insufficient evidence. AI does not approve payment \u2014 the deterministic gate enforces conditions and the funder authorizes release.',
+                'Every assessment is cryptographically logged to an append-only audit trail \u2014 hash-chained and tamper-evident.',
               ].map((text, i) => (
                 <div key={i} className="flex items-start gap-3">
                   <div className="mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-vektrum-blue/20">
-                    <CheckCircle2 size={14} className="text-blue-300" />
+                    <CheckCircle2 size={14} className="text-blue-300" aria-hidden="true" />
                   </div>
                   <p className="text-sm text-vektrum-canvas-text leading-relaxed">{text}</p>
                 </div>
@@ -186,10 +189,10 @@ export default function DemoPage() {
             <div className="rounded-lg border border-white/10 bg-white/5 overflow-hidden">
               {/* Header */}
               <div className="px-5 py-3 border-b border-white/10 flex items-center gap-2">
-                <Shield size={16} className="text-blue-300" />
-                <span className="text-sm font-semibold text-white">AI Draw Review</span>
+                <Shield size={16} className="text-blue-300" aria-hidden="true" />
+                <span className="text-sm font-semibold text-white">AI Pre-Review</span>
                 <span className="inline-flex items-center gap-1 text-xs text-green-400">
-                  <CheckCircle2 size={12} />
+                  <CheckCircle2 size={12} aria-hidden="true" />
                   Reviewed
                 </span>
               </div>
@@ -197,7 +200,7 @@ export default function DemoPage() {
               {/* Score row */}
               <div className="px-5 py-3 flex flex-wrap items-center gap-4 border-b border-white/10">
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/75">Score</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/75">Completeness</p>
                   <p className="text-lg font-bold tabular-nums text-white">91/100</p>
                 </div>
                 <div>
@@ -207,9 +210,9 @@ export default function DemoPage() {
                   </span>
                 </div>
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/75">Recommendation</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/75">Pre-review finding</p>
                   <span className="inline-block rounded px-2 py-0.5 text-xs font-bold uppercase bg-emerald-500/15 text-emerald-400 border border-emerald-500/25">
-                    approve
+                    ready
                   </span>
                 </div>
               </div>
@@ -268,7 +271,7 @@ export default function DemoPage() {
                 'Approved conditional lien waiver on file where required',
               ].map((condition, i) => (
                 <li key={i} className="flex items-center gap-3">
-                  <CheckCircle2 size={16} className="text-emerald-400 flex-shrink-0" />
+                  <CheckCircle2 size={16} className="text-emerald-400 flex-shrink-0" aria-hidden="true" />
                   <span className="text-sm text-white">{condition}</span>
                 </li>
               ))}

@@ -8,6 +8,8 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // Hide the X-Powered-By: Next.js response header to reduce stack fingerprinting.
+  poweredByHeader: false,
   async headers() {
     return [
       {
@@ -27,19 +29,39 @@ const nextConfig: NextConfig = {
               "base-uri 'self'",
             ].join('; '),
           },
+          // ── Standard security headers ─────────────────────────────────────
+          // X-Frame-Options: clickjacking protection. SAMEORIGIN keeps any
+          // future first-party iframes (e.g. internal admin previews) working.
+          // Stripe / DocuSign / Supabase use CSP frame-src above, not iframes
+          // of vektrum.io itself.
+          { key: 'X-Frame-Options',        value: 'SAMEORIGIN' },
+          // MIME-type sniffing defense
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          // Strip Referer to origin on cross-origin nav (preserves analytics
+          // for first-party while limiting leakage to third-party endpoints).
+          { key: 'Referrer-Policy',        value: 'strict-origin-when-cross-origin' },
+          // Disable powerful APIs we do not use. Camera/mic/geolocation are
+          // not part of any Vektrum flow today.
+          { key: 'Permissions-Policy',     value: 'camera=(), microphone=(), geolocation=()' },
         ],
       },
     ]
   },
   async redirects() {
     return [
-      { source: '/for-lenders', destination: '/lenders', permanent: true },
-      { source: '/marketplace', destination: '/', permanent: true },
-      { source: '/utah', destination: '/', permanent: true },
-      { source: '/find-contractors', destination: '/contractors', permanent: true },
-      { source: '/for-contractors', destination: '/contractors', permanent: true },
+      // /lenders is a permanent alias of /funders. The /lenders/page.tsx
+      // route was removed so this config-level redirect (permanent: true →
+      // HTTP 308) takes effect for both /lenders and any pre-existing
+      // /for-lenders or /find-lenders inbound links. /lenders is also
+      // removed from sitemap.ts so only canonical /funders is indexed.
+      { source: '/lenders',             destination: '/funders',     permanent: true },
+      { source: '/for-lenders',         destination: '/funders',     permanent: true },
+      { source: '/find-lenders',        destination: '/funders',     permanent: true },
+      { source: '/marketplace',         destination: '/',            permanent: true },
+      { source: '/utah',                destination: '/',            permanent: true },
+      { source: '/find-contractors',    destination: '/contractors', permanent: true },
+      { source: '/for-contractors',     destination: '/contractors', permanent: true },
       { source: '/contractor-matching', destination: '/contractors', permanent: true },
-      { source: '/find-lenders', destination: '/lenders', permanent: true },
     ]
   },
 };

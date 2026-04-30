@@ -3,6 +3,13 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Privacy Policy | Vektrum',
   description: 'Vektrum Privacy Policy — how we collect, use, and protect your data.',
+  alternates: { canonical: 'https://vektrum.io/privacy' },
+  openGraph: {
+    title: 'Privacy Policy — Vektrum',
+    description: 'How Vektrum collects, uses, and protects your data.',
+    url: 'https://vektrum.io/privacy',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+  },
 }
 
 export default function PrivacyPage() {

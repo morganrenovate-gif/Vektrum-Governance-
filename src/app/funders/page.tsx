@@ -66,7 +66,7 @@ export default function FundersPage() {
               className="group inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-7 py-3 text-[14px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 hover:bg-vektrum-blue-hover transition-all"
             >
               Get started
-              <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
+              <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
             </Link>
             <Link
               href="/pricing"
@@ -83,7 +83,7 @@ export default function FundersPage() {
         <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12">
           {/* Non-custody trust strip */}
           <div className="rounded-xl border border-white/[0.08] bg-surface-2 px-5 py-4 mb-8 flex items-start gap-3">
-            <Shield size={15} className="text-blue-300 flex-shrink-0 mt-0.5" />
+            <Shield size={15} className="text-blue-300 flex-shrink-0 mt-0.5" aria-hidden="true" />
             <p className="text-[12px] leading-relaxed text-white/70">
               <span className="font-semibold text-white">Vektrum does not hold funds, act as escrow, or execute wires.</span>{' '}
               For Stripe Connect deals, funds are held in Stripe-managed accounts. For institutional deals, your existing bank, title company, escrow company, or treasury executes payment. Vektrum enforces release conditions and records authorization proof.
@@ -163,6 +163,48 @@ export default function FundersPage() {
         </div>
       </section>
 
+      {/* ─── AI pre-review before the gate ────────────────────────────────── */}
+      <section className="bg-surface-0 py-16 sm:py-20 border-t border-white/[0.06]">
+        <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="rounded-2xl border border-white/[0.08] bg-surface-2 px-7 py-8">
+            <div className="flex items-start gap-4">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-vektrum-blue/10">
+                <Shield size={19} className="text-blue-300" aria-hidden="true" />
+              </div>
+              <div>
+                <h2 className="font-display text-xl font-bold tracking-[-0.02em] text-white mb-2">
+                  AI pre-review before the gate
+                </h2>
+                <p className="text-[14px] leading-relaxed text-white/70 mb-3">
+                  AI checks completeness, conflicts, and risk before release readiness is evaluated.{' '}
+                  <strong className="text-white">AI does not approve payment.</strong> The
+                  deterministic gate enforces conditions, the funder authorizes release, and the
+                  selected rail executes.
+                </p>
+                <p className="text-[12.5px] leading-relaxed text-white/50">
+                  AI informs; the gate decides; the funder authorizes; the rail executes.
+                  See{' '}
+                  <Link
+                    href="/resources/construction-dispute-isolation"
+                    className="text-blue-400 hover:text-blue-300 underline underline-offset-2"
+                  >
+                    Why a $15K Construction Dispute Shouldn&apos;t Freeze a $9M Project
+                  </Link>
+                  {' '}for how condition-level isolation works in practice, or read the{' '}
+                  <Link
+                    href="/security"
+                    className="text-blue-400 hover:text-blue-300 underline underline-offset-2"
+                  >
+                    Security overview
+                  </Link>
+                  {' '}for audit-trail and access-control details.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ─── Buyer Segments ────────────────────────────────────────────────── */}
       <section className="bg-surface-0 py-16 sm:py-20 border-t border-white/[0.06]">
         <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
@@ -178,7 +220,7 @@ export default function FundersPage() {
             <div className="rounded-2xl border border-white/[0.08] bg-surface-2 p-8">
               <div className="flex items-center gap-3 mb-5">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-vektrum-blue/10">
-                  <CreditCard size={18} className="text-blue-300" />
+                  <CreditCard size={18} className="text-blue-300" aria-hidden="true" />
                 </div>
                 <h3 className="text-[15px] font-semibold text-white">Private lenders &amp; direct deals</h3>
               </div>
@@ -193,7 +235,7 @@ export default function FundersPage() {
                   'Full draw review, gate enforcement, and audit trail',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5 text-[12px] text-white/65">
-                    <CheckCircle2 size={13} className="text-emerald-400 mt-0.5 flex-shrink-0" />
+                    <CheckCircle2 size={13} className="text-emerald-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
                     {item}
                   </li>
                 ))}
@@ -204,7 +246,7 @@ export default function FundersPage() {
             <div className="rounded-2xl border border-white/[0.08] bg-surface-2 p-8">
               <div className="flex items-center gap-3 mb-5">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-vektrum-blue/10">
-                  <Building2 size={18} className="text-blue-300" />
+                  <Building2 size={18} className="text-blue-300" aria-hidden="true" />
                 </div>
                 <h3 className="text-[15px] font-semibold text-white">Institutional rails &amp; portfolio lenders</h3>
               </div>
@@ -219,7 +261,7 @@ export default function FundersPage() {
                   'Annual retainer for portfolio onboarding and dedicated support',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5 text-[12px] text-white/65">
-                    <CheckCircle2 size={13} className="text-emerald-400 mt-0.5 flex-shrink-0" />
+                    <CheckCircle2 size={13} className="text-emerald-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
                     {item}
                   </li>
                 ))}
@@ -244,7 +286,7 @@ export default function FundersPage() {
               className="group inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-7 py-3 text-[14px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 hover:bg-vektrum-blue-hover transition-all"
             >
               Create your account
-              <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
+              <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
             </Link>
             <Link
               href={BOOK_CALL_URL}

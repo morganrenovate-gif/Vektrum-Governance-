@@ -15,6 +15,9 @@ export const metadata: Metadata = {
   },
 }
 
+const PUBLISHED_DATE = '2026-04-29'
+const PUBLISHED_DATE_DISPLAY = 'April 29, 2026'
+
 const articleSchema = {
   '@context': 'https://schema.org',
   '@type': 'Article',
@@ -22,13 +25,26 @@ const articleSchema = {
   description:
     'Milestone isolation prevents a single disputed draw from freezing the entire project budget.',
   url: 'https://vektrum.io/resources/construction-dispute-isolation',
+  author: {
+    '@type': 'Organization',
+    name: 'Vektrum Research',
+    url: 'https://vektrum.io',
+  },
   publisher: {
     '@type': 'Organization',
     name: 'Vektrum',
     url: 'https://vektrum.io',
+    logo: {
+      '@type': 'ImageObject',
+      url: 'https://vektrum.io/og-image.png',
+    },
   },
-  datePublished: '2026-04-29',
-  dateModified: '2026-04-29',
+  datePublished: PUBLISHED_DATE,
+  dateModified: PUBLISHED_DATE,
+  mainEntityOfPage: {
+    '@type': 'WebPage',
+    '@id': 'https://vektrum.io/resources/construction-dispute-isolation',
+  },
 }
 
 export default function DisputeIsolationArticle() {
@@ -54,7 +70,7 @@ export default function DisputeIsolationArticle() {
             href="/resources"
             className="inline-flex items-center gap-1.5 text-[12px] text-white/50 hover:text-white/75 transition-colors mb-8"
           >
-            <ArrowLeft size={13} />
+            <ArrowLeft size={13} aria-hidden="true" />
             Resources
           </Link>
 
@@ -70,11 +86,18 @@ export default function DisputeIsolationArticle() {
             Why a $15K Construction Dispute Shouldn&apos;t Freeze a $9M Project
           </h1>
 
-          <p className="text-[16px] leading-relaxed text-white/60 max-w-2xl">
+          <p className="text-[16px] leading-relaxed text-white/60 max-w-2xl mb-6">
             When a single disputed milestone locks the entire project budget, funders lose leverage
             and contractors lose cash flow. Milestone-level isolation changes the economics of
             construction lending.
           </p>
+
+          {/* Byline + publication date */}
+          <div className="flex items-center gap-3 text-[12px] text-white/50">
+            <span className="font-semibold text-white/70">Vektrum Research</span>
+            <span aria-hidden="true">·</span>
+            <time dateTime={PUBLISHED_DATE}>{PUBLISHED_DATE_DISPLAY}</time>
+          </div>
         </div>
       </section>
 
@@ -114,7 +137,7 @@ export default function DisputeIsolationArticle() {
 
           {/* Callout */}
           <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-5 py-4 flex items-start gap-3">
-            <AlertTriangle size={15} className="text-amber-400 flex-shrink-0 mt-0.5" />
+            <AlertTriangle size={15} className="text-amber-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
             <p className="text-[13px] leading-relaxed text-white/70">
               <span className="font-semibold text-white">The freeze trap:</span>{' '}
               Freezing the entire project to resolve one disputed milestone shifts leverage away from the
@@ -186,7 +209,7 @@ export default function DisputeIsolationArticle() {
                     'Lender retains leverage over the specific item',
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2 text-[12px] text-white/60">
-                      <CheckCircle2 size={12} className="text-emerald-400 mt-0.5 flex-shrink-0" />
+                      <CheckCircle2 size={12} className="text-emerald-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
                       {item}
                     </li>
                   ))}
@@ -294,15 +317,15 @@ export default function DisputeIsolationArticle() {
 
           {/* Sources */}
           {/*
-            External-link policy:
-              - acquisition.gov/far/<section> URLs are canonical and stable; we
-                link FAR 52.232-5 and 52.232-27 directly.
-              - For FDIC, NLR/Allen Matkins, Bank Director, OCC, and AIA, the
-                research CSV contains publisher domain hints but no verified
-                article URLs. We leave those entries unlinked rather than
-                fabricate paths. Operators should confirm the canonical URL
-                from each publisher's site and convert the <span> wrapper to
-                an <a> tag with target="_blank" rel="noopener noreferrer".
+            INTERNAL: External-link policy.
+            FAR sections at acquisition.gov are canonical and stable; we link
+            them directly. For FDIC, NLR/Allen Matkins, Bank Director, OCC,
+            and AIA, the research CSV does not provide verified article URLs.
+            Per project policy, those entries are listed unlinked rather than
+            with fabricated paths. Operator action: confirm each canonical URL
+            and convert the <span> wrapper to an <a target="_blank"
+            rel="noopener noreferrer"> link. TODO(canonical-url) markers
+            below identify each pending entry.
           */}
           <section id="sources" className="rounded-xl border border-white/[0.08] bg-surface-2 px-6 py-6">
             <h2 className="text-[14px] font-bold tracking-[-0.01em] text-white mb-4">Sources</h2>
@@ -376,13 +399,12 @@ export default function DisputeIsolationArticle() {
             </ol>
             <p className="mt-5 text-[11px] text-white/40 leading-relaxed">
               <span className="font-semibold text-white/55">Editorial note:</span>{' '}
-              Specific dollar impacts of construction draw disputes vary by lender type, loan
-              structure, and geography. Claims in this article describe observed structural
-              patterns supported by the sources above. Vektrum does not claim to prevent fraud,
-              eliminate disputes, or guarantee compliance — it claims to enforce conditions
-              before authorization and to record what was decided and why. FAR sections link
-              directly to acquisition.gov; other source URLs are pending verification against
-              each publisher&apos;s canonical article path.
+              Sources are provided for reader verification. Vektrum uses these references to
+              explain industry context; they do not imply that Vektrum prevents fraud,
+              eliminates disputes, or guarantees compliance. Specific dollar impacts of
+              construction draw disputes vary by lender type, loan structure, and geography —
+              claims in this article describe observed structural patterns supported by the
+              sources above.
             </p>
           </section>
 
@@ -418,7 +440,7 @@ export default function DisputeIsolationArticle() {
               >
                 <p className="text-[12px] font-semibold text-white group-hover:text-blue-300 transition-colors mb-1 flex items-center gap-1">
                   {link.label}
-                  <ArrowRight size={11} className="transition-transform group-hover:translate-x-0.5" />
+                  <ArrowRight size={11} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
                 </p>
                 <p className="text-[11px] text-white/50 leading-snug">{link.desc}</p>
               </Link>

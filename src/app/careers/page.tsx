@@ -5,6 +5,17 @@ export const metadata = {
   title: 'Careers — Vektrum',
   description:
     'Join Vektrum and help build the future of construction payment governance. We are hiring engineers, designers, and domain experts.',
+  alternates: { canonical: 'https://vektrum.io/careers' },
+  openGraph: {
+    title: 'Careers — Vektrum',
+    description: 'Help build the governance layer for construction finance.',
+    url: 'https://vektrum.io/careers',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+  },
+  twitter: {
+    title: 'Careers — Vektrum',
+    description: 'Help build the governance layer for construction finance.',
+  },
 }
 
 export default function CareersPage() {
@@ -52,7 +63,7 @@ export default function CareersPage() {
                 className="group inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-6 py-2.5 text-[14px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 hover:bg-vektrum-blue-hover transition-all"
               >
                 Send your resume
-                <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
+                <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
               </Link>
             </div>
           </div>

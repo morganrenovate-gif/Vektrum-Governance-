@@ -16,7 +16,7 @@ export default function robots(): MetadataRoute.Robots {
           '/founders',
           '/funders',
           '/help',
-          '/lenders',
+          // '/lenders' is a permanent redirect to /funders — not included.
           '/partners',
           '/pricing',
           '/privacy',
