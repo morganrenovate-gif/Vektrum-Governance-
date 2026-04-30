@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Input, Textarea } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle, ArrowLeft, FileUp, ListOrdered, Lock, Building2 } from "lucide-react";
+import { AlertCircle, ArrowLeft, FileUp, ListOrdered, Lock, Building2, Users } from "lucide-react";
 import type { DealMetadata } from "@/lib/actions/analyze-contract";
 import { createClient } from "@/lib/supabase/client";
 
@@ -23,6 +23,8 @@ interface Partner {
   is_active: boolean;
 }
 
+type UserRole = "contractor" | "funder" | "admin" | null;
+
 export default function NewDealPage() {
   const router = useRouter();
   const [form, setForm] = useState({
@@ -36,22 +38,26 @@ export default function NewDealPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [serverError, setServerError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [userRole, setUserRole] = useState<UserRole>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [partners, setPartners] = useState<Partner[]>([]);
 
   useEffect(() => {
-    async function checkAdminAndFetchPartners() {
+    async function detectRole() {
       const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
       const { data: profile } = await supabase
         .from("profiles")
         .select("role")
         .eq("id", user.id)
         .single<{ role: string }>();
-      if (profile?.role === "admin") {
+      const role = profile?.role as UserRole;
+      setUserRole(role);
+      if (role === "admin") {
         setIsAdmin(true);
-        // Fetch partner list for the selector
         try {
           const res = await fetch("/api/admin/partners");
           if (res.ok) {
@@ -63,8 +69,10 @@ export default function NewDealPage() {
         }
       }
     }
-    checkAdminAndFetchPartners();
+    detectRole();
   }, []);
+
+  const isContractor = userRole === "contractor";
 
   const update =
     (field: string) =>
@@ -108,9 +116,7 @@ export default function NewDealPage() {
 
     try {
       const retainagePct =
-        form.retainage_percentage !== ""
-          ? parseFloat(form.retainage_percentage)
-          : 0;
+        form.retainage_percentage !== "" ? parseFloat(form.retainage_percentage) : 0;
 
       const res = await fetch("/api/deals", {
         method: "POST",
@@ -150,42 +156,117 @@ export default function NewDealPage() {
   return (
     <div className="min-h-screen bg-surface-0">
       <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-12 sm:py-16">
+        {/*
+         * Single ContractImportFlow instance.
+         * All page content lives in renderTrigger so openImport is accessible
+         * throughout. children is empty — ContractImportFlow renders both.
+         * When flow.stage === "review", MilestoneReviewScreen replaces everything.
+         */}
         <ContractImportFlow
           metadata={metadata}
           renderTrigger={(openImport) => (
-            <div className="hidden" />
-          )}
-        >
-          <div className="max-w-xl">
-            <Link
-              href="/dashboard"
-              className="mb-8 inline-flex items-center gap-1.5 text-sm text-white/50 hover:text-white/80 transition-colors"
-            >
-              <ArrowLeft size={14} aria-hidden="true" />
-              Back to dashboard
-            </Link>
+            <div className="max-w-xl">
+              <Link
+                href="/dashboard"
+                className="mb-8 inline-flex items-center gap-1.5 text-sm text-white/50 hover:text-white/80 transition-colors"
+              >
+                <ArrowLeft size={14} aria-hidden="true" />
+                Back to dashboard
+              </Link>
 
-            <div className="mb-8">
-              <div className="mb-3 flex items-center gap-3">
-                <div className="h-px w-5 bg-vektrum-blue" />
-                <p className="text-[11px] tracking-[0.12em] uppercase text-blue-300 font-semibold">
-                  New Deal
-                </p>
+              {/* ── Page heading (role-specific) ─────────────────────────────── */}
+              <div className="mb-8">
+                <div className="mb-3 flex items-center gap-3">
+                  <div className="h-px w-5 bg-vektrum-blue" />
+                  <p className="text-[11px] tracking-[0.12em] uppercase text-blue-300 font-semibold">
+                    {isContractor ? "New Deal" : "Governed Deal"}
+                  </p>
+                </div>
+                <h1 className="font-display text-[2rem] font-bold tracking-[-0.04em] text-white leading-[1.05]">
+                  {isContractor ? "Submit project information" : "Create governed deal"}
+                </h1>
               </div>
-              <h1 className="font-display text-[2rem] font-bold tracking-[-0.04em] text-white leading-[1.05]">
-                Create New Deal
-              </h1>
-            </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Deal Details</CardTitle>
-              </CardHeader>
-              <CardBody>
-                <ContractImportFlow
-                  metadata={metadata}
-                  renderTrigger={(openImport) => null}
-                >
+              {/* ── Funder / Admin: advisory + path cards ────────────────────── */}
+              {!isContractor && (
+                <div className="mb-6 rounded-xl border border-blue-500/20 bg-blue-500/[0.06] px-5 py-5">
+                  <p className="text-[13px] font-semibold text-blue-200 mb-1">
+                    Start from the contract
+                  </p>
+                  <p className="text-[12px] text-white/70 mb-4 leading-relaxed">
+                    The contract defines parties, value, retainage, milestone scope, and release
+                    conditions. Importing a signed contract sets the source of truth for all
+                    parties.
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* Recommended: Import from contract */}
+                    <button
+                      type="button"
+                      onClick={openImport}
+                      className="relative flex flex-col items-start gap-1.5 rounded-lg border border-blue-500/30 bg-blue-500/[0.08] px-4 py-3.5 text-left hover:bg-blue-500/[0.14] hover:border-blue-500/50 transition-all"
+                    >
+                      <span className="absolute top-2 right-2 rounded-full bg-blue-500/20 px-2 py-0.5 text-[10px] font-semibold text-blue-300 uppercase tracking-wide">
+                        Recommended
+                      </span>
+                      <FileUp size={16} className="text-blue-300" aria-hidden="true" />
+                      <span className="text-[13px] font-semibold text-white">
+                        Import from contract
+                      </span>
+                      <span className="text-[11px] text-white/60">
+                        Upload a signed contract — Vektrum extracts parties, value, and
+                        milestones.
+                      </span>
+                    </button>
+
+                    {/* Secondary: Manual entry */}
+                    <div className="flex flex-col items-start gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-4 py-3.5">
+                      <span className="text-[11px] font-semibold text-white/40 uppercase tracking-wide">
+                        Manual entry
+                      </span>
+                      <span className="text-[13px] font-semibold text-white">
+                        Enter details below
+                      </span>
+                      <span className="text-[11px] text-white/60">
+                        Fill in the form manually. Contract execution is still required before
+                        the release gate will authorize any disbursement.
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Contractor: invite funder guidance ───────────────────────── */}
+              {isContractor && (
+                <div className="mb-6 rounded-xl border border-amber-500/20 bg-amber-500/[0.05] px-5 py-5">
+                  <div className="flex items-start gap-3">
+                    <Users
+                      size={16}
+                      className="text-amber-400 flex-shrink-0 mt-0.5"
+                      aria-hidden="true"
+                    />
+                    <div>
+                      <p className="text-[13px] font-semibold text-amber-300 mb-1">
+                        Invite your funder to govern this deal
+                      </p>
+                      <p className="text-[12px] text-white/70 mb-2 leading-relaxed">
+                        Contractor submits project information. Funder verifies and authorizes
+                        release conditions. Vektrum enforces the gate. Your partner rail executes.
+                        You cannot authorize your own release.
+                      </p>
+                      <p className="text-[11px] text-white/50">
+                        This deal will be marked as draft pending funder verification.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Shared form ───────────────────────────────────────────────── */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>{isContractor ? "Project Details" : "Deal Details"}</CardTitle>
+                </CardHeader>
+                <CardBody>
                   <form onSubmit={handleSubmit} noValidate className="space-y-5">
                     <Input
                       label="Deal Title"
@@ -229,7 +310,6 @@ export default function NewDealPage() {
                     {/* Sequential release toggle */}
                     <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-4">
                       <label className="flex items-start gap-3 cursor-pointer select-none">
-                        {/* Custom toggle */}
                         <div className="relative flex-shrink-0 mt-0.5">
                           <input
                             type="checkbox"
@@ -247,7 +327,11 @@ export default function NewDealPage() {
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5 mb-0.5">
-                            <ListOrdered size={13} className="text-white/50 flex-shrink-0" aria-hidden="true" />
+                            <ListOrdered
+                              size={13}
+                              className="text-white/50 flex-shrink-0"
+                              aria-hidden="true"
+                            />
                             <span className="text-[13px] font-semibold text-white/85">
                               Require milestones to be released in order
                             </span>
@@ -259,7 +343,8 @@ export default function NewDealPage() {
                           </p>
                           {form.sequential_release_required && (
                             <p className="mt-1.5 text-[11px] font-medium text-blue-300">
-                              Sequential enforcement enabled — cannot be changed after first funding.
+                              Sequential enforcement enabled — cannot be changed after first
+                              funding.
                             </p>
                           )}
                         </div>
@@ -269,7 +354,11 @@ export default function NewDealPage() {
                     {/* Retainage percentage */}
                     <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-4 space-y-3">
                       <div className="flex items-center gap-1.5">
-                        <Lock size={13} className="text-white/50 flex-shrink-0" aria-hidden="true" />
+                        <Lock
+                          size={13}
+                          className="text-white/50 flex-shrink-0"
+                          aria-hidden="true"
+                        />
                         <span className="text-[13px] font-semibold text-white/85">
                           Contract Retainage Term
                         </span>
@@ -280,8 +369,8 @@ export default function NewDealPage() {
                       <p className="text-[12px] text-white/75 leading-relaxed">
                         Enter the retainage percentage shown in the contract, if any. The funder
                         will verify this before releases. Vektrum records retained amounts but does
-                        not hold funds. Contractors cannot release retainage.
-                        Leave blank or 0 for no retainage.
+                        not hold funds. Contractors cannot release retainage. Leave blank or 0 for
+                        no retainage.
                       </p>
                       <div className="flex items-center gap-3">
                         <div className="relative flex-1 max-w-[140px]">
@@ -305,7 +394,9 @@ export default function NewDealPage() {
                           </span>
                         </div>
                         {errors.retainage_percentage && (
-                          <p className="text-[12px] text-red-400">{errors.retainage_percentage}</p>
+                          <p className="text-[12px] text-red-400">
+                            {errors.retainage_percentage}
+                          </p>
                         )}
                       </div>
                       {form.retainage_percentage !== "" &&
@@ -313,7 +404,8 @@ export default function NewDealPage() {
                           <p className="text-[11px] font-medium text-amber-400/80">
                             {parseFloat(form.retainage_percentage).toFixed(
                               parseFloat(form.retainage_percentage) % 1 === 0 ? 0 : 2
-                            )}% withheld per milestone — cannot be changed after first funding.
+                            )}
+                            % withheld per milestone — cannot be changed after first funding.
                           </p>
                         )}
                     </div>
@@ -322,7 +414,11 @@ export default function NewDealPage() {
                     {isAdmin && (
                       <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-4 space-y-3">
                         <div className="flex items-center gap-1.5">
-                          <Building2 size={13} className="text-white/50 flex-shrink-0" aria-hidden="true" />
+                          <Building2
+                            size={13}
+                            className="text-white/50 flex-shrink-0"
+                            aria-hidden="true"
+                          />
                           <span className="text-[13px] font-semibold text-white/85">
                             Execution-rail partner
                           </span>
@@ -331,10 +427,11 @@ export default function NewDealPage() {
                           </span>
                         </div>
                         <p className="text-[12px] text-white/75 leading-relaxed">
-                          Assign an institutional execution-rail partner (escrow company, title company,
-                          or construction loan servicer) to this deal. When a release is authorized,
-                          Vektrum will fire a signed webhook to the partner&rsquo;s endpoint for execution.
-                          Leave as &ldquo;None&rdquo; to use Stripe Connect.
+                          Assign an institutional execution-rail partner (escrow company, title
+                          company, or construction loan servicer) to this deal. When a release is
+                          authorized, Vektrum will fire a signed webhook to the partner&rsquo;s
+                          endpoint for execution. Leave as &ldquo;None&rdquo; to use Stripe
+                          Connect.
                         </p>
                         <select
                           value={form.partner_id}
@@ -352,10 +449,20 @@ export default function NewDealPage() {
                         </select>
                         {form.partner_id && (
                           <p className="text-[11px] font-medium text-blue-300">
-                            External rail selected — Vektrum will issue authorization signals to this partner.
+                            External rail selected — Vektrum will issue authorization signals to
+                            this partner.
                           </p>
                         )}
                       </div>
+                    )}
+
+                    {/* Manual-path contract requirement note — funder / admin only */}
+                    {!isContractor && (
+                      <p className="text-[12px] text-white/60 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5 leading-relaxed">
+                        You can create the deal manually, but contract execution is required before
+                        release authorization. Without a signed contract on file, the release gate
+                        will block all disbursements.
+                      </p>
                     )}
 
                     {serverError && (
@@ -363,65 +470,68 @@ export default function NewDealPage() {
                         role="alert"
                         className="flex items-start gap-2 rounded-md bg-red-500/[0.08] border border-red-500/20 px-3 py-2.5 text-sm text-red-400"
                       >
-                        <AlertCircle size={15} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
+                        <AlertCircle
+                          size={15}
+                          className="mt-0.5 flex-shrink-0"
+                          aria-hidden="true"
+                        />
                         {serverError}
                       </div>
                     )}
 
-                    <div className="border-t border-white/10 pt-5">
-                      <ContractImportFlow
-                        metadata={metadata}
-                        renderTrigger={(openImport) => (
-                          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                            <div className="flex flex-col gap-3">
-                              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                                <Button
-                                  type="submit"
-                                  variant="primary"
-                                  size="lg"
-                                  loading={loading}
-                                >
-                                  {loading ? "Creating Deal…" : "Create Deal"}
-                                </Button>
+                    {/* Submit area */}
+                    <div className="border-t border-white/10 pt-5 space-y-3">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                        <Button
+                          type="submit"
+                          variant="primary"
+                          size="lg"
+                          loading={loading}
+                        >
+                          {loading
+                            ? isContractor
+                              ? "Submitting…"
+                              : "Saving…"
+                            : isContractor
+                            ? "Submit project information"
+                            : "Save deal details"}
+                        </Button>
+                        <Link href="/dashboard">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="lg"
+                            disabled={loading}
+                          >
+                            Cancel
+                          </Button>
+                        </Link>
+                      </div>
 
-                                <Link href="/dashboard">
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="lg"
-                                    disabled={loading}
-                                  >
-                                    Cancel
-                                  </Button>
-                                </Link>
-                              </div>
+                      {/* Funder / admin post-creation guidance */}
+                      {!isContractor && (
+                        <p className="text-[11px] text-white/55 leading-relaxed">
+                          Next: upload or send the contract for execution. Release authorization
+                          requires a signed contract on file before the gate will approve any
+                          disbursement.
+                        </p>
+                      )}
 
-                              <p className="text-xs text-white/70">
-                                After creating the deal, you&rsquo;ll be able to add milestones and
-                                invite the funder to verify terms and manage release authorization.
-                              </p>
-                            </div>
-
-                            <button
-                              type="button"
-                              onClick={openImport}
-                              disabled={loading}
-                              className="inline-flex items-center gap-2 rounded-xl border border-vektrum-blue/30 bg-vektrum-blue/[0.08] px-4 py-2 text-[13px] font-semibold text-blue-300 hover:bg-vektrum-blue/[0.14] hover:border-vektrum-blue/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <FileUp size={14} />
-                              Import from contract
-                            </button>
-                          </div>
-                        )}
-                      >
-                        <></>
-                      </ContractImportFlow>
+                      {/* Contractor post-creation guidance */}
+                      {isContractor && (
+                        <p className="text-[11px] text-white/55 leading-relaxed">
+                          After submitting, invite your funder to verify terms and manage release
+                          authorization. This deal is marked as draft pending funder verification.
+                        </p>
+                      )}
                     </div>
                   </form>
-                </ContractImportFlow>
-              </CardBody>
-            </Card>
-          </div>
+                </CardBody>
+              </Card>
+            </div>
+          )}
+        >
+          <></>
         </ContractImportFlow>
       </div>
     </div>
