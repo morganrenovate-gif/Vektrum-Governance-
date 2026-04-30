@@ -334,8 +334,6 @@ export default async function DashboardPage() {
       return bMax - aMax
     })
 
-    const funded = deals.filter((d) => d.funded_amount > 0)
-
     return (
       <>
         {/* Onboarding wizard */}
@@ -388,18 +386,18 @@ export default async function DashboardPage() {
               </section>
             )}
 
-            {/* Funded Deals */}
+            {/* All Projects — shows every deal where funder_id matches, regardless of funded_amount */}
             <section>
-              <SectionHeader label="Funded Deals" count={funded.length > 0 ? funded.length : undefined} />
-              {funded.length === 0 ? (
+              <SectionHeader label="All Projects" count={deals.length > 0 ? deals.length : undefined} />
+              {deals.length === 0 ? (
                 <EmptyState
                   icon={FolderOpen}
-                  title="No funded deals yet"
+                  title="No projects yet"
                   description="Deals will appear here once a contractor invites you to a project."
                 />
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {funded.map((deal) => (
+                  {deals.map((deal) => (
                     <DealCard key={deal.id} deal={deal} />
                   ))}
                 </div>
