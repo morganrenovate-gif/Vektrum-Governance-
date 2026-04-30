@@ -107,7 +107,7 @@ export default async function HomePage() {
                   className="group inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-8 py-3.5 text-[15px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 transition-all hover:bg-vektrum-blue-hover hover:shadow-xl hover:shadow-vektrum-blue/40 hover:-translate-y-0.5"
                 >
                   Start your first deal
-                  <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
+                  <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
                 </Link>
                 <Link
                   href={BOOK_CALL_URL}
@@ -187,7 +187,7 @@ export default async function HomePage() {
                         }`}>
                           {cond.pass
                             ? <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                            : <X size={8} className="text-red-400" />
+                            : <X size={8} className="text-red-400" aria-hidden="true" />
                           }
                         </div>
                         <div className="flex-1 min-w-0">
@@ -211,7 +211,7 @@ export default async function HomePage() {
 
                   {/* Blocked banner */}
                   <div className="mt-3 flex items-center gap-2.5 px-3.5 py-3 rounded-xl border border-red-500/25 bg-red-500/[0.08]">
-                    <X size={13} className="text-red-400 flex-shrink-0" />
+                    <X size={13} className="text-red-400 flex-shrink-0" aria-hidden="true" />
                     <div>
                       <p className="text-[12px] font-semibold text-red-400">Release blocked — 2 conditions unmet</p>
                       <p className="text-[10px] text-white/50 mt-0.5">All 10 conditions must pass before funds move.</p>
@@ -323,7 +323,13 @@ export default async function HomePage() {
                 <div className="mt-3 p-3.5 rounded-xl bg-emerald-500/[0.06] border border-emerald-500/15">
                   <p className="text-[13px] leading-relaxed text-white/55">
                     <strong className="text-emerald-400">99.83% of project value unaffected.</strong>{' '}
-                    The $15K dispute resolves in its own lane — no stoppage, no negotiation over the whole job.
+                    The $15K dispute resolves in its own lane — no stoppage, no negotiation over the whole job.{' '}
+                    <Link
+                      href="/resources/construction-dispute-isolation"
+                      className="text-blue-300 hover:text-blue-200 underline underline-offset-2"
+                    >
+                      Read why this matters →
+                    </Link>
                   </p>
                 </div>
               </div>
@@ -392,7 +398,7 @@ export default async function HomePage() {
                   'Self-service setup — no integration required',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
-                    <CheckCircle2 size={13} className="mt-0.5 flex-shrink-0 text-blue-300" />
+                    <CheckCircle2 size={13} className="mt-0.5 flex-shrink-0 text-blue-300" aria-hidden="true" />
                     <span className="text-[13px] leading-relaxed text-white/60">{item}</span>
                   </li>
                 ))}
@@ -420,7 +426,7 @@ export default async function HomePage() {
                   'API integration: confirm or fail via partner API endpoints',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
-                    <CheckCircle2 size={13} className="mt-0.5 flex-shrink-0 text-emerald-400" />
+                    <CheckCircle2 size={13} className="mt-0.5 flex-shrink-0 text-emerald-400" aria-hidden="true" />
                     <span className="text-[13px] leading-relaxed text-white/60">{item}</span>
                   </li>
                 ))}
@@ -454,7 +460,7 @@ export default async function HomePage() {
             <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.04] p-7 flex flex-col">
               <div className="flex items-center gap-3 mb-6">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/15 flex-shrink-0">
-                  <Building2 size={16} className="text-emerald-400" />
+                  <Building2 size={16} className="text-emerald-400" aria-hidden="true" />
                 </div>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-400 mb-0.5">Institutional · External rail</p>
@@ -507,7 +513,7 @@ export default async function HomePage() {
             <div className="rounded-2xl border border-vektrum-blue/20 bg-vektrum-blue/[0.04] p-7 flex flex-col">
               <div className="flex items-center gap-3 mb-6">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-vektrum-blue/15 flex-shrink-0">
-                  <CreditCard size={16} className="text-blue-300" />
+                  <CreditCard size={16} className="text-blue-300" aria-hidden="true" />
                 </div>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-blue-300 mb-0.5">Direct · Stripe Connect rail</p>
@@ -703,7 +709,7 @@ export default async function HomePage() {
               </ol>
 
               <div className="mt-5 flex items-start gap-3 px-4 py-3.5 rounded-xl bg-red-50 border border-red-100">
-                <AlertCircle size={14} className="text-red-500 flex-shrink-0 mt-0.5" />
+                <AlertCircle size={14} className="text-red-500 flex-shrink-0 mt-0.5" aria-hidden="true" />
                 <p className="text-[13px] text-red-700 font-medium leading-relaxed">
                   If any condition fails, the release is blocked until the underlying issue is resolved.
                 </p>
@@ -799,7 +805,7 @@ export default async function HomePage() {
                   'Nothing automatically blocks a bad release',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3">
-                    <X size={13} className="mt-[3px] flex-shrink-0 text-red-400/70" />
+                    <X size={13} className="mt-[3px] flex-shrink-0 text-red-400/70" aria-hidden="true" />
                     <span className="text-[13.5px] text-vektrum-muted">{item}</span>
                   </li>
                 ))}
@@ -826,7 +832,7 @@ export default async function HomePage() {
                   'Release blocked at condition failure — automatically, always',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3">
-                    <CheckCircle2 size={13} className="mt-[3px] flex-shrink-0 text-vektrum-blue" />
+                    <CheckCircle2 size={13} className="mt-[3px] flex-shrink-0 text-vektrum-blue" aria-hidden="true" />
                     <span className="text-[13.5px] text-vektrum-muted">{item}</span>
                   </li>
                 ))}
@@ -908,7 +914,7 @@ export default async function HomePage() {
                   {scenario.without}
                 </p>
                 <div className="flex items-start gap-2 pt-3 border-t border-white/[0.06]">
-                  <Shield size={11} className="text-blue-400 mt-0.5 flex-shrink-0" />
+                  <Shield size={11} className="text-blue-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
                   <p className="text-[11px] text-blue-200 leading-relaxed">{scenario.condition}</p>
                 </div>
               </div>
@@ -957,7 +963,7 @@ export default async function HomePage() {
                   'Institutional portfolios: external rail available',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
-                    <ArrowRight size={12} className="mt-0.5 flex-shrink-0 text-vektrum-blue" />
+                    <ArrowRight size={12} className="mt-0.5 flex-shrink-0 text-vektrum-blue" aria-hidden="true" />
                     <span className="text-[13px] leading-relaxed text-vektrum-muted">{item}</span>
                   </li>
                 ))}
@@ -985,7 +991,7 @@ export default async function HomePage() {
                   'Submit draw packages with documentation in-platform',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
-                    <ArrowRight size={12} className="mt-0.5 flex-shrink-0 text-vektrum-blue" />
+                    <ArrowRight size={12} className="mt-0.5 flex-shrink-0 text-vektrum-blue" aria-hidden="true" />
                     <span className="text-[13px] leading-relaxed text-vektrum-muted">{item}</span>
                   </li>
                 ))}
@@ -1013,7 +1019,7 @@ export default async function HomePage() {
                   'All privileged actions dual-logged with justification',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
-                    <ArrowRight size={12} className="mt-0.5 flex-shrink-0 text-vektrum-blue" />
+                    <ArrowRight size={12} className="mt-0.5 flex-shrink-0 text-vektrum-blue" aria-hidden="true" />
                     <span className="text-[13px] leading-relaxed text-vektrum-muted">{item}</span>
                   </li>
                 ))}
@@ -1216,7 +1222,7 @@ export default async function HomePage() {
               >
                 <p className="text-[13px] font-semibold text-white mb-1.5 group-hover:text-blue-300 transition-colors">
                   {r.role} view
-                  <ArrowRight size={12} className="inline-block ml-1.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <ArrowRight size={12} className="inline-block ml-1.5 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
                 </p>
                 <p className="text-[12px] text-white/50 leading-relaxed">{r.desc}</p>
               </Link>
@@ -1335,7 +1341,7 @@ export default async function HomePage() {
               className="group inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-7 py-3 text-[14px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 hover:bg-vektrum-blue-hover transition-all"
             >
               Create your account
-              <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
+              <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
             </Link>
             <Link
               href="/pricing"

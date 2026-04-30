@@ -6,6 +6,17 @@ export const metadata: Metadata = {
   title: 'Execution-Rail Partners | Vektrum',
   description:
     'Become a Vektrum Execution-Rail Partner. Title companies, escrow agents, and construction loan servicers integrate via webhook and partner API to execute authorized construction draw payments.',
+  alternates: { canonical: 'https://vektrum.io/partners' },
+  openGraph: {
+    title: 'Execution-Rail Partners — Vektrum',
+    description: 'Title companies, escrow agents, and loan servicers integrate via partner API to execute authorized construction draws.',
+    url: 'https://vektrum.io/partners',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+  },
+  twitter: {
+    title: 'Execution-Rail Partners — Vektrum',
+    description: 'Title companies, escrow agents, and loan servicers integrate via partner API.',
+  },
 }
 
 // ─── Code Block ───────────────────────────────────────────────────────────────
@@ -81,7 +92,7 @@ export default function PartnersPage() {
               className="group inline-flex min-h-[50px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-8 py-3 text-[14px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 hover:bg-vektrum-blue-hover transition-all"
             >
               Contact us to become a partner
-              <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
+              <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
             </a>
             <Link
               href="/partners/docs"
@@ -412,7 +423,7 @@ def verify_vektrum_signature(
               className="inline-flex items-center gap-2 text-[14px] font-semibold text-blue-300 hover:underline"
             >
               View full API reference
-              <ArrowRight size={14} />
+              <ArrowRight size={14} aria-hidden="true" />
             </Link>
           </div>
         </div>
@@ -438,17 +449,17 @@ def verify_vektrum_signature(
           <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] px-8 py-8 mb-8">
             <div className="grid gap-4 sm:grid-cols-3 text-center sm:text-left sm:divide-x sm:divide-white/[0.06]">
               <div className="sm:pr-6">
-                <FileText size={16} className="text-blue-300 mx-auto sm:mx-0 mb-2" />
+                <FileText size={16} className="text-blue-300 mx-auto sm:mx-0 mb-2" aria-hidden="true" />
                 <p className="text-[13px] font-semibold text-white mb-1">API key + secret</p>
                 <p className="text-[12px] text-white/50 leading-relaxed">Issued by Vektrum admin. Shown once, stored as SHA-256 hash. Rotatable on demand.</p>
               </div>
               <div className="sm:px-6">
-                <Zap size={16} className="text-blue-300 mx-auto sm:mx-0 mb-2" />
+                <Zap size={16} className="text-blue-300 mx-auto sm:mx-0 mb-2" aria-hidden="true" />
                 <p className="text-[13px] font-semibold text-white mb-1">Sandbox testing</p>
                 <p className="text-[12px] text-white/50 leading-relaxed">Test confirm and fail endpoints with sandbox releases before going live.</p>
               </div>
               <div className="sm:pl-6">
-                <Shield size={16} className="text-blue-300 mx-auto sm:mx-0 mb-2" />
+                <Shield size={16} className="text-blue-300 mx-auto sm:mx-0 mb-2" aria-hidden="true" />
                 <p className="text-[13px] font-semibold text-white mb-1">Audit trail</p>
                 <p className="text-[12px] text-white/50 leading-relaxed">Every confirm and fail call is logged in the hash-chained audit log.</p>
               </div>
@@ -460,7 +471,7 @@ def verify_vektrum_signature(
             className="group inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-10 py-3.5 text-[15px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 transition-all hover:bg-vektrum-blue-hover hover:shadow-xl hover:shadow-vektrum-blue/40 hover:-translate-y-0.5"
           >
             Contact partners@vektrum.com
-            <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
+            <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
           </a>
         </div>
       </section>

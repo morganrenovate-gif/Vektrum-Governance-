@@ -6,6 +6,17 @@ export const metadata = {
   title: 'About — Vektrum',
   description:
     'Vektrum is a construction payment governance platform. We protect milestone-based disbursements with server-enforced release gates and immutable audit trails.',
+  alternates: { canonical: 'https://vektrum.io/about' },
+  openGraph: {
+    title: 'About — Vektrum',
+    description: 'Construction payment governance — server-enforced release gates and immutable audit trails.',
+    url: 'https://vektrum.io/about',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+  },
+  twitter: {
+    title: 'About — Vektrum',
+    description: 'Construction payment governance — server-enforced release gates and immutable audit trails.',
+  },
 }
 
 export default function AboutPage() {
@@ -120,7 +131,7 @@ export default function AboutPage() {
               className="group inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-7 py-3 text-[14px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 hover:bg-vektrum-blue-hover transition-all"
             >
               Book a call
-              <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
+              <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
             </Link>
             <Link
               href="/auth/signup"

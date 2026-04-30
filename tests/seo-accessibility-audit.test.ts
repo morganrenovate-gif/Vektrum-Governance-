@@ -116,8 +116,34 @@
  *  78. Sitemap still includes /resources
  *  79. Sitemap still includes /resources/construction-dispute-isolation
  *
+ * Cleanup-sprint audit items
+ *  80. Self-canonicals on every public page (no page canonicals to homepage)
+ *  81. /lenders no longer has a page (config-level redirect to /funders)
+ *  82. /lenders is NOT in sitemap (avoid crawl waste)
+ *  83. /lenders is permanent: true in next.config redirects
+ *  84. Demo page does NOT contain "Recommendation: approve"
+ *  85. Demo page does NOT contain "Zero industry-standard solution"
+ *  86. Article does NOT contain visible "pending verification" or "pending source URL"
+ *  87. Article has byline "Vektrum Research"
+ *  88. Article has visible publication date
+ *  89. Article schema has author + datePublished + dateModified
+ *  90. Pricing has exactly one <h1>
+ *  91. Pricing plan name renders as <h3>, not <h1>
+ *  92. Mobile nav drawer ("mobile-nav-menu") rendered with `hidden` (always in DOM)
+ *  93. Mobile nav has aria-label="Main menu"
+ *  94. Mobile nav has Escape key handler
+ *  95. Reduced-motion CSS exists in globals.css
+ *  96. /funders includes "AI pre-review before the gate" section
+ *  97. /contractors hero distinguishes Stripe Connect vs external rail
+ *  98. Security page has separate "Webhook signing secret handling" section
+ *  99. Webhook secret note is OUT of "What Vektrum never stores" section
+ * 100. Security headers configured in next.config: X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
+ * 101. poweredByHeader: false in next.config
+ * 102. Decorative icons aria-hidden — at least 30 occurrences across public pages
+ * 103. Pricing has CFO-readable enterprise bridge text
+ *
  * package.json
- *  80. Test wired into npm test
+ * 104. Test wired into npm test
  *
  * Run: npx tsx tests/seo-accessibility-audit.test.ts
  */
@@ -500,8 +526,184 @@ async function main() {
     '79. Sitemap still includes /resources/construction-dispute-isolation',
   )
 
+  // ── Cleanup-sprint audit items ──────────────────────────────────────────────
+  console.log('\nCleanup-sprint audit items')
+
+  // 80. Self-canonicals — no page canonicals to homepage. Walk every public
+  // page metadata export and check the canonical, if present, points at its
+  // own path. Pages without a canonical are tolerated (root layout default).
+  const PUBLIC_PAGES_WITH_OWN_CANONICAL: Array<[string, string]> = [
+    ['src/app/page.tsx',                                                      'https://vektrum.io'],
+    ['src/app/funders/page.tsx',                                              'https://vektrum.io/funders'],
+    ['src/app/contractors/page.tsx',                                          'https://vektrum.io/contractors'],
+    ['src/app/pricing/page.tsx',                                              'https://vektrum.io/pricing'],
+    ['src/app/help/page.tsx',                                                 'https://vektrum.io/help'],
+    ['src/app/demo/page.tsx',                                                 'https://vektrum.io/demo'],
+    ['src/app/about/page.tsx',                                                'https://vektrum.io/about'],
+    ['src/app/careers/page.tsx',                                              'https://vektrum.io/careers'],
+    ['src/app/contact/page.tsx',                                              'https://vektrum.io/contact'],
+    ['src/app/founders/page.tsx',                                             'https://vektrum.io/founders'],
+    ['src/app/partners/page.tsx',                                             'https://vektrum.io/partners'],
+    ['src/app/security/page.tsx',                                             'https://vektrum.io/security'],
+    ['src/app/privacy/page.tsx',                                              'https://vektrum.io/privacy'],
+    ['src/app/terms/page.tsx',                                                'https://vektrum.io/terms'],
+    ['src/app/resources/page.tsx',                                            'https://vektrum.io/resources'],
+    ['src/app/resources/construction-dispute-isolation/page.tsx',             'https://vektrum.io/resources/construction-dispute-isolation'],
+  ]
+  const canonicalMisses: string[] = []
+  for (const [rel, expected] of PUBLIC_PAGES_WITH_OWN_CANONICAL) {
+    const src = read(rel)
+    // Find canonical: '<url>'
+    const m = src.match(/canonical:\s*['"]([^'"]+)['"]/)
+    if (!m) { canonicalMisses.push(`${rel}: MISSING canonical`); continue }
+    if (m[1] !== expected) canonicalMisses.push(`${rel}: canonical=${m[1]} expected=${expected}`)
+  }
+  check(canonicalMisses.length === 0, `80. Self-canonicals on every public page (failures: ${canonicalMisses.length}) ${canonicalMisses.join(' | ')}`)
+
+  // 81. /lenders page removed
+  check(!exists('src/app/lenders/page.tsx'), '81. /lenders page removed (config-level redirect handles route)')
+
+  // 82. /lenders not in sitemap (only as URL entry, comments allowed)
+  // Match a sitemap url field: `url: \`${baseUrl}/lenders\``
+  const lendersInSitemapAsUrl = /url:\s*`\$\{baseUrl\}\/lenders`/.test(sitemap)
+  check(!lendersInSitemapAsUrl, '82. /lenders is NOT in sitemap (no url entry)')
+
+  // 83. /lenders permanent redirect in next.config
+  const nextConfig = read('next.config.ts')
+  check(
+    /source:\s*['"]\/lenders['"][^}]*permanent:\s*true/.test(nextConfig.replace(/\s+/g, ' ')),
+    '83. /lenders → /funders is permanent: true in next.config redirects',
+  )
+
+  // 84. No "Recommendation: approve" on demo
+  check(!demoPage.includes('Recommendation') || !demoPage.includes('approve'),
+    '84. Demo page does NOT contain "Recommendation: approve"')
+  // Stricter: literal lowercase "approve" inside the AI card
+  check(!/Recommendation[\s\S]{0,60}approve/i.test(demoPage),
+    '84b. Demo "Recommendation: approve" pattern not present')
+
+  // 85. No "Zero industry-standard solution"
+  check(!demoPage.includes('Zero industry-standard'), '85. Demo page does NOT contain "Zero industry-standard solution"')
+
+  // 86. No visible pending-source language in article
+  check(
+    !articlePage.includes('pending verification') && !articlePage.includes('pending confirmation against'),
+    '86. Article has no visible "pending verification" public language',
+  )
+
+  // 87, 88. Byline + visible date
+  check(articlePage.includes('Vektrum Research'), '87. Article has byline "Vektrum Research"')
+  check(
+    articlePage.includes('PUBLISHED_DATE_DISPLAY') || articlePage.includes('April 29, 2026'),
+    '88. Article has visible publication date',
+  )
+
+  // 89. Article schema has author + dates
+  check(
+    articlePage.includes("author:") &&
+      articlePage.includes('datePublished:') &&
+      articlePage.includes('dateModified:'),
+    '89. Article schema has author + datePublished + dateModified',
+  )
+
+  // 90. Pricing has exactly one <h1>
+  const pricingH1Count = (pricing.match(/<h1\b/g) ?? []).length
+  check(pricingH1Count === 1, `90. Pricing has exactly one <h1> (found ${pricingH1Count})`)
+
+  // 91. Pricing plan name renders as <h3>
+  check(/<h3[^>]*>\s*\{name\}\s*<\/h3>/.test(pricing), '91. Pricing plan name renders as <h3> (not <p> or <h1>)')
+
+  // 92. Mobile drawer always rendered (hidden attribute)
+  check(
+    /id="mobile-nav-menu"[\s\S]{0,200}hidden=\{!open\}/.test(mobileNav),
+    '92. Mobile nav drawer rendered with `hidden` (always in DOM for aria-controls target)',
+  )
+
+  // 93. Mobile nav has aria-label="Main menu"
+  check(mobileNav.includes('aria-label="Main menu"'), '93. Mobile nav has aria-label="Main menu"')
+
+  // 94. Escape key handler
+  check(/Escape['"][\s\S]{0,80}setOpen\(false\)/.test(mobileNav), '94. Mobile nav has Escape key handler')
+
+  // 95. Reduced-motion CSS
+  const globalsCss = read('src/app/globals.css')
+  check(
+    /@media\s*\(prefers-reduced-motion:\s*reduce\)/.test(globalsCss) &&
+      globalsCss.includes('.animate-fade-in') &&
+      globalsCss.includes('animation: none'),
+    '95. Reduced-motion CSS exists in globals.css',
+  )
+
+  // 96. /funders AI pre-review section
+  check(
+    funders.includes('AI pre-review before the gate') &&
+      funders.includes('AI does not approve payment'),
+    '96. /funders includes "AI pre-review before the gate" section with non-overclaim',
+  )
+
+  // 97. /contractors rail distinction in hero
+  check(
+    contractors.includes('Stripe Connect deals deposit') &&
+      contractors.includes("external-rail deals are executed"),
+    '97. /contractors hero distinguishes Stripe Connect vs external rail',
+  )
+
+  // 98. Security webhook signing section
+  const securityPage = read('src/app/security/page.tsx')
+  check(
+    securityPage.includes('Webhook signing secret handling'),
+    '98. Security page has separate "Webhook signing secret handling" section',
+  )
+
+  // 99. Webhook note moved out of "never stores"
+  // The "What Vektrum never stores" block must NOT include the webhook secret entry.
+  const neverStoresStart = securityPage.indexOf('What Vektrum never stores')
+  const webhookHandlingStart = securityPage.indexOf('Webhook signing secret handling')
+  const neverStoresBlock = neverStoresStart !== -1 && webhookHandlingStart !== -1
+    ? securityPage.slice(neverStoresStart, webhookHandlingStart)
+    : ''
+  check(
+    !neverStoresBlock.includes('Webhook signing secrets after issuance'),
+    '99. Webhook secret note is OUT of "What Vektrum never stores" section',
+  )
+
+  // 100. Security headers in next.config
+  const requiredHeaders = ['X-Frame-Options', 'X-Content-Type-Options', 'Referrer-Policy', 'Permissions-Policy']
+  const missingHeaders = requiredHeaders.filter((h) => !nextConfig.includes(h))
+  check(missingHeaders.length === 0, `100. Security headers in next.config (missing: ${missingHeaders.join(', ') || 'none'})`)
+
+  // 101. poweredByHeader false
+  check(/poweredByHeader:\s*false/.test(nextConfig), '101. poweredByHeader: false in next.config')
+
+  // 102. Decorative icons aria-hidden — count across public pages
+  const PUBLIC_PAGES_WITH_ICONS = [
+    'src/app/page.tsx',
+    'src/app/funders/page.tsx',
+    'src/app/contractors/page.tsx',
+    'src/app/help/page.tsx',
+    'src/app/pricing/page.tsx',
+    'src/app/demo/page.tsx',
+    'src/app/resources/page.tsx',
+    'src/app/resources/construction-dispute-isolation/page.tsx',
+    'src/app/partners/page.tsx',
+  ]
+  let ariaHiddenCount = 0
+  for (const rel of PUBLIC_PAGES_WITH_ICONS) {
+    const c = read(rel)
+    ariaHiddenCount += (c.match(/aria-hidden="true"/g) ?? []).length
+  }
+  check(ariaHiddenCount >= 30, `102. Decorative icons aria-hidden (found ${ariaHiddenCount} across public pages, ≥30 expected)`)
+
+  // 103. Pricing CFO-readable enterprise bridge text
+  check(
+    pricing.includes('How the retainer works') &&
+      pricing.includes('credited against per-release fees') &&
+      pricing.includes('only to verified disbursements'),
+    '103. Pricing has CFO-readable enterprise bridge text',
+  )
+
   // ── package.json ─────────────────────────────────────────────────────────────
-  check(pkg.includes('seo-accessibility-audit.test.ts'),               '80. Test wired into npm test')
+  check(pkg.includes('seo-accessibility-audit.test.ts'),               '104. Test wired into npm test')
 
   console.log('\n✓ All seo-accessibility-audit tests passed.\n')
 }

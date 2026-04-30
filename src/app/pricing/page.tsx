@@ -108,9 +108,9 @@ function EngagementCard({
 
       {/* Rate — the number that dominates */}
       <div className="mb-6 pb-6 border-b border-white/[0.08]">
-        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/75 mb-4">
+        <h3 className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/75 mb-4">
           {name}
-        </p>
+        </h3>
         <div className="flex items-baseline gap-2">
           <span
             className={[
@@ -161,8 +161,7 @@ function EngagementCard({
           <li key={f} className="flex items-start gap-2.5">
             <CheckCircle2
               size={13}
-              className="mt-[1px] flex-shrink-0 text-emerald-400/80"
-            />
+              className="mt-[1px] flex-shrink-0 text-emerald-400/80" aria-hidden="true" />
             <span className="text-[12px] leading-relaxed text-white/65">{f}</span>
           </li>
         ))}
@@ -179,7 +178,7 @@ function EngagementCard({
         ].join(' ')}
       >
         {cta}
-        <ArrowRight size={13} />
+        <ArrowRight size={13} aria-hidden="true" />
       </Link>
     </div>
   )
@@ -294,6 +293,12 @@ export default function PricingPage() {
                 Controlled disbursement infrastructure.
               </span>
             </h2>
+            <p className="mt-3 text-[13px] text-white/55 max-w-2xl mx-auto">
+              For details on access control, audit-log design, and webhook signing, see the{' '}
+              <Link href="/security" className="text-blue-400 hover:text-blue-300 underline underline-offset-2">Security overview</Link>
+              . For workflow questions, see the{' '}
+              <Link href="/help" className="text-blue-400 hover:text-blue-300 underline underline-offset-2">Help / FAQ</Link>.
+            </p>
           </div>
 
           <div className="grid gap-5 sm:grid-cols-3">
@@ -435,8 +440,7 @@ export default function PricingPage() {
                       <div key={item} className="flex items-start gap-2.5">
                         <CheckCircle2
                           size={13}
-                          className="mt-0.5 flex-shrink-0 text-emerald-400"
-                        />
+                          className="mt-0.5 flex-shrink-0 text-emerald-400" aria-hidden="true" />
                         <span className="text-[12px] text-white/55 leading-snug">
                           {item}
                         </span>
@@ -474,6 +478,19 @@ export default function PricingPage() {
               Every model uses the same logic: a governance fee charged per verified
               disbursement. Institutional and Enterprise models add an annual retainer
               in exchange for a lower per-release rate.
+            </p>
+          </div>
+
+          {/* CFO-readable bridge — clarifies retainer + per-release relationship */}
+          <div className="mb-10 mx-auto max-w-3xl rounded-2xl border border-white/[0.08] bg-surface-2 px-6 py-5">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-blue-300 mb-2">How the retainer works</p>
+            <p className="text-[13.5px] leading-relaxed text-white/70">
+              Institutional and Enterprise models combine a <strong className="text-white">lower per-release governance fee</strong> with a{' '}
+              <strong className="text-white">negotiated annual governance retainer</strong>. The retainer covers
+              portfolio governance, implementation, support, and operational review scope. The per-release
+              fee applies <strong className="text-white">only to verified disbursements</strong>. The retainer
+              is credited against per-release fees throughout the year — you do not pay twice for the same
+              release.
             </p>
           </div>
 
@@ -711,8 +728,7 @@ export default function PricingPage() {
                   <li key={item.label} className="flex items-start gap-3">
                     <X
                       size={14}
-                      className="mt-0.5 text-red-400/70 flex-shrink-0"
-                    />
+                      className="mt-0.5 text-red-400/70 flex-shrink-0" aria-hidden="true" />
                     <div>
                       <p className="text-[13px] font-semibold text-white/75">
                         {item.label}
@@ -765,8 +781,7 @@ export default function PricingPage() {
                   <li key={item.label} className="flex items-start gap-3">
                     <CheckCircle2
                       size={14}
-                      className="mt-0.5 text-emerald-400 flex-shrink-0"
-                    />
+                      className="mt-0.5 text-emerald-400 flex-shrink-0" aria-hidden="true" />
                     <div>
                       <p className="text-[13px] font-semibold text-white/75">
                         {item.label}
@@ -1003,8 +1018,7 @@ export default function PricingPage() {
               Start a Standalone project
               <ArrowRight
                 size={15}
-                className="transition-transform group-hover:translate-x-0.5"
-              />
+                className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
             </Link>
             <Link
               href={BOOK_CALL_URL}

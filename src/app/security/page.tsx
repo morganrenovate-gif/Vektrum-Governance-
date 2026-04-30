@@ -5,6 +5,17 @@ export const metadata: Metadata = {
   title: 'Security | Vektrum',
   description:
     'Vektrum security architecture: what we store, what we never store, API key security, webhook signing, access control, and audit log design.',
+  alternates: { canonical: 'https://vektrum.io/security' },
+  openGraph: {
+    title: 'Security — Vektrum',
+    description: 'API key security, webhook signing, access control, and audit log design.',
+    url: 'https://vektrum.io/security',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+  },
+  twitter: {
+    title: 'Security — Vektrum',
+    description: 'API key security, webhook signing, access control, audit log design.',
+  },
 }
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
@@ -114,19 +125,62 @@ export default function SecurityPage() {
                   title: 'Full API keys after issuance',
                   desc: 'Partner API keys are shown once at issuance (vkp_<64-hex-chars>). After you close the issuance dialog, the plaintext key cannot be recovered from Vektrum. Only the SHA-256 hash is retained.',
                 },
-                {
-                  title: 'Webhook signing secrets after issuance (note)',
-                  desc: 'Webhook signing secrets are stored in the partners table in plaintext so that Vektrum can sign outbound webhooks on each delivery. Partners receive their secret once. Rotation is available on demand via the admin dashboard.',
-                },
               ].map((item) => (
                 <div key={item.title} className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-2 h-2 rounded-full bg-red-400/70 mt-2" />
+                  <div className="flex-shrink-0 w-2 h-2 rounded-full bg-red-400/70 mt-2" aria-hidden="true" />
                   <div>
                     <p className="text-[14px] font-semibold text-white mb-0.5">{item.title}</p>
                     <p className="text-[13px] leading-relaxed text-white/55">{item.desc}</p>
                   </div>
                 </div>
               ))}
+            </div>
+          </section>
+
+          {/* ── Webhook signing secret handling ────────────────────────────── */}
+          <section>
+            <SectionHeading>Webhook signing secret handling</SectionHeading>
+            <div className="rounded-2xl border border-amber-500/20 bg-amber-500/[0.04] p-6 space-y-4">
+              <p className="text-[13.5px] leading-relaxed text-white/70">
+                Outbound partner webhook signing requires a retrievable signing secret — the
+                signature for each delivery is computed at request time, so the secret
+                cannot be one-way hashed. This is different from API keys, which are
+                hashed at rest and shown once at issuance.
+              </p>
+              <ul className="space-y-2.5 text-[13px] leading-relaxed text-white/65 list-disc list-outside ml-5">
+                <li>
+                  <span className="font-semibold text-white">Server-side only.</span>{' '}
+                  Webhook signing secrets are never sent to client code. They are read by the
+                  signer process running on the server and are not exposed in any
+                  browser-visible response.
+                </li>
+                <li>
+                  <span className="font-semibold text-white">Restricted access.</span>{' '}
+                  The secret is stored in the partners table with row-level security. Only
+                  the partner&apos;s administrative session and Vektrum&apos;s server-side
+                  signer process can read it; no public or contractor session can.
+                </li>
+                <li>
+                  <span className="font-semibold text-white">Issuance.</span>{' '}
+                  Partners receive their secret once at creation. They can request rotation
+                  on demand via the admin dashboard.
+                </li>
+                <li>
+                  <span className="font-semibold text-white">HMAC-SHA256 signing.</span>{' '}
+                  Every outbound webhook is signed with HMAC-SHA256 over the request body and
+                  delivery timestamp. Verified deliveries reject signatures older than 5 minutes.
+                </li>
+              </ul>
+              <div className="mt-4 rounded-lg border border-white/[0.08] bg-surface-3 px-4 py-3">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/65 mb-1">Roadmap</p>
+                <p className="text-[12.5px] leading-relaxed text-white/65">
+                  Encrypted-at-rest secret storage backed by a KMS (e.g. AWS KMS, GCP KMS)
+                  is on the security roadmap. Today the secret is protected by row-level
+                  security and database-level access controls; future releases will add
+                  envelope encryption with a managed key service. We do not currently claim
+                  KMS-backed storage.
+                </p>
+              </div>
             </div>
           </section>
 

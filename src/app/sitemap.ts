@@ -24,12 +24,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.9,
     },
-    {
-      url: `${baseUrl}/lenders`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.9,
-    },
+    // /lenders intentionally omitted — it is a permanent (308) redirect to
+    // /funders via next.config.ts. Including it would waste crawl budget and
+    // confuse signal between the two URLs.
     {
       url: `${baseUrl}/partners`,
       lastModified: now,

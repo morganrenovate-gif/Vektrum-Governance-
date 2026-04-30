@@ -37,6 +37,16 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
     }
   }, [open])
 
+  // Close on Escape — keyboard accessibility for the drawer
+  useEffect(() => {
+    if (!open) return
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('keydown', handleKey)
+    return () => document.removeEventListener('keydown', handleKey)
+  }, [open])
+
   async function handleSignOut() {
     setSigningOut(true)
     const supabase = createClient()
@@ -70,19 +80,28 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
         {open ? <X size={20} /> : <Menu size={20} />}
       </button>
 
-      {/* Overlay + drawer */}
+      {/* Backdrop — only when open */}
       {open && (
-        <>
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 z-40 bg-vektrum-canvas/80 backdrop-blur-sm sm:hidden"
-            onClick={() => setOpen(false)}
-            aria-hidden="true"
-          />
+        <div
+          className="fixed inset-0 z-40 bg-vektrum-canvas/80 backdrop-blur-sm sm:hidden"
+          onClick={() => setOpen(false)}
+          aria-hidden="true"
+        />
+      )}
 
-          {/* Drawer */}
-          <div id="mobile-nav-menu" className="fixed inset-x-0 top-[65px] z-50 sm:hidden border-b border-white/[0.08] bg-surface-2 shadow-xl">
-            <nav className="flex flex-col px-4 py-4 gap-1" aria-label="Mobile navigation">
+      {/*
+        Drawer — always rendered in the DOM so the `aria-controls`
+        target exists in server-rendered HTML at load. We hide it via
+        the `hidden` attribute when closed (so AT correctly reports
+        collapsed state) instead of conditionally rendering.
+      */}
+      <div
+        id="mobile-nav-menu"
+        hidden={!open}
+        className="fixed inset-x-0 top-[65px] z-50 sm:hidden border-b border-white/[0.08] bg-surface-2 shadow-xl"
+      >
+        {open && (
+          <nav className="flex flex-col px-4 py-4 gap-1" aria-label="Main menu">
 
               {isLoggedIn ? (
                 // ── Logged-in drawer ────────────────────────────────────────
@@ -261,9 +280,8 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
                 </>
               )}
             </nav>
-          </div>
-        </>
-      )}
+        )}
+      </div>
     </>
   )
 }

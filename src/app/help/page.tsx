@@ -123,7 +123,7 @@ const FAQ: FaqItem[] = [
   },
   {
     q: 'How does dispute isolation work?',
-    a: 'Each milestone is an independent financial unit. If a dispute is raised on one milestone, only that milestone is locked. All other milestones in the deal continue to flow normally — a single disputed draw does not freeze the project.',
+    a: 'Each milestone is an independent financial unit. If a dispute is raised on one milestone, only that milestone is locked. All other milestones in the deal continue to flow normally — a single disputed draw does not freeze the project. For the full case for milestone-level isolation, see "Why a $15K Construction Dispute Shouldn\'t Freeze a $9M Project" at /resources/construction-dispute-isolation.',
   },
   {
     q: 'What happens when there is a dispute or change order?',
@@ -176,7 +176,7 @@ export default function HelpPage() {
 
         <div className="relative max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-surface-2 px-4 py-1.5 shadow-sm mb-8">
-            <HelpCircle size={14} className="text-blue-300" />
+            <HelpCircle size={14} className="text-blue-300" aria-hidden="true" />
             <span className="text-[12px] font-medium text-white/55 tracking-wide">
               Help center
             </span>
@@ -257,7 +257,7 @@ export default function HelpPage() {
               className="group inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-7 py-3 text-[14px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 hover:bg-vektrum-blue-hover transition-all"
             >
               Book a call
-              <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
+              <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
             </Link>
             <Link
               href="/demo-live"

@@ -5,6 +5,17 @@ export const metadata: Metadata = {
   title: 'Founders — Vektrum',
   description:
     'Meet the team behind Vektrum. Three operators from construction finance who built the platform they wished existed.',
+  alternates: { canonical: 'https://vektrum.io/founders' },
+  openGraph: {
+    title: 'Founders — Vektrum',
+    description: 'Three operators from construction finance who built the platform they wished existed.',
+    url: 'https://vektrum.io/founders',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+  },
+  twitter: {
+    title: 'Founders — Vektrum',
+    description: 'Three operators from construction finance who built the platform they wished existed.',
+  },
 }
 
 const founders = [
