@@ -18,7 +18,10 @@ export const dynamic = 'force-dynamic'
 //   - Active non-voided contract exists for the deal with no envelope_id yet
 //   - Both contractor and funder are assigned to the deal
 //
-// Auth: contractor or admin (funder signs but does not initiate)
+// Auth: contractor, funder, or admin
+//   Funders are authorized to initiate signing in funder-led workflows where
+//   the funder uploads the governing contract. Funder identity is verified:
+//   the authenticated user must match deal.funder_id.
 //
 // Does NOT create a fake or internal signature — all signing happens in DocuSign.
 
@@ -37,9 +40,9 @@ export async function POST(
 
   const { user, profile } = authContext
 
-  if (profile.role !== 'contractor' && profile.role !== 'admin') {
+  if (profile.role !== 'contractor' && profile.role !== 'admin' && profile.role !== 'funder') {
     return NextResponse.json(
-      { error: 'Only the contractor or an admin can send the contract for signing.' },
+      { error: 'Only the funder, contractor, or admin can send the contract for signing.' },
       { status: 403 },
     )
   }
@@ -66,6 +69,15 @@ export async function POST(
   if (profile.role === 'contractor' && deal.contractor_id !== user.id) {
     return NextResponse.json(
       { error: 'You are not the contractor on this deal.' },
+      { status: 403 },
+    )
+  }
+
+  // Funder identity check: the authenticated funder must be assigned to this deal.
+  // Prevents an unrelated funder from sending envelopes on deals they do not own.
+  if (profile.role === 'funder' && deal.funder_id !== user.id) {
+    return NextResponse.json(
+      { error: 'You are not the funder on this deal.' },
       { status: 403 },
     )
   }

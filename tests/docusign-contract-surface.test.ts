@@ -12,7 +12,7 @@
  *  6.  "Contract executed" (signed) state is handled by server-rendered section
  *  7.  send-envelope route file exists
  *  8.  send-envelope route uses existing DocuSign createEnvelope (not fake)
- *  9.  send-envelope route rejects admins/funders from sending (contractor/admin only)
+ *  9.  send-envelope route allows contractor, funder, and admin to send
  * 10.  send-envelope route downloads PDF from storage before calling DocuSign
  * 11.  send-envelope route saves envelope_id back to contracts table
  * 12.  send-envelope route audit-logs docusign_envelope_sent
@@ -29,6 +29,11 @@
  * 23.  DocuSign webhook route is unchanged
  * 24.  Contract upload route (ContractUploadSection) is unchanged
  * 25.  package.json wires this test file into npm test
+ * 26.  send-envelope API includes funder in allowed roles + funder_id identity check
+ * 27.  send-envelope API rejects unrelated funder (funder_id !== user.id guard present)
+ * 28.  UI showSendEnvelope includes isFunder (all three roles can send)
+ * 29.  UI no longer says "The contractor will send the contract for signatures"
+ * 30.  UI shows "Contract uploaded — signatures not sent" when no envelope exists
  *
  * Run: npx tsx tests/docusign-contract-surface.test.ts
  */
@@ -132,11 +137,12 @@ async function main() {
     '8b. send-envelope imports from DocuSign engine module',
   )
 
-  // ── 9. Role check — contractor or admin only ──────────────────────────────────
+  // ── 9. Role check — contractor, funder, or admin ──────────────────────────────
   check(
     sendEnv.includes("profile.role !== 'contractor'") &&
-    sendEnv.includes("profile.role !== 'admin'"),
-    '9. send-envelope rejects non-contractor/admin roles (funder cannot initiate)',
+    sendEnv.includes("profile.role !== 'admin'") &&
+    sendEnv.includes("profile.role !== 'funder'"),
+    '9. send-envelope allows contractor, funder, and admin (all three in role check)',
   )
 
   // ── 10. Downloads PDF from storage ────────────────────────────────────────────
@@ -273,6 +279,54 @@ async function main() {
   check(
     pkg.includes('docusign-contract-surface.test.ts'),
     '25. This test file is wired into npm test in package.json',
+  )
+
+  // ── 26. send-envelope API allows funder + funder_id identity check ────────────
+  check(
+    sendEnv.includes("profile.role !== 'funder'"),
+    '26. send-envelope role check includes funder in allowed roles',
+  )
+  check(
+    sendEnv.includes("role === 'funder'") && sendEnv.includes('funder_id') && sendEnv.includes('user.id'),
+    '26b. send-envelope has funder identity check (funder_id === user.id)',
+  )
+
+  // ── 27. send-envelope rejects unrelated funder ────────────────────────────────
+  // The funder identity check must gate on funder_id !== user.id to prevent a
+  // different funder from sending envelopes on a deal they are not assigned to.
+  check(
+    sendEnv.includes('funder_id !== user.id'),
+    '27. send-envelope rejects unrelated funder (funder_id !== user.id guard present)',
+  )
+
+  // ── 28. UI showSendEnvelope includes isFunder ─────────────────────────────────
+  check(
+    section.includes('isFunder') && section.includes('showSendEnvelope'),
+    '28. ContractSigningSection defines isFunder and showSendEnvelope',
+  )
+  check(
+    section.includes('isContractor || isAdmin || isFunder') ||
+    section.includes('isFunder || isContractor || isAdmin') ||
+    section.includes('isAdmin || isFunder') ||
+    (section.includes('showSendEnvelope') && section.includes('isFunder')),
+    '28b. showSendEnvelope includes isFunder so funder sees the send button',
+  )
+
+  // ── 29. UI no longer says "The contractor will send the contract" ─────────────
+  check(
+    !section.includes('The contractor will send the contract for signatures'),
+    '29. ContractSigningSection no longer tells funders the contractor will send the contract',
+  )
+
+  // ── 30. UI shows "Contract uploaded — signatures not sent" state ──────────────
+  check(
+    section.includes('Contract uploaded') && section.includes('signatures not sent'),
+    '30. ContractSigningSection shows "Contract uploaded — signatures not sent" when no envelope',
+  )
+  check(
+    section.includes('no signature request has been sent yet') ||
+    section.includes('signature request has been sent'),
+    '30b. ContractSigningSection explains that no signature request has been sent yet',
   )
 
   console.log('\n✓ All docusign-contract-surface tests passed.\n')

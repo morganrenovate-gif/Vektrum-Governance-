@@ -57,7 +57,9 @@ export function ContractSigningSection({
   const waitingOnContractor = isFunder     && funderDone && !contractorDone
 
   // Primary action visibility
-  const showSendEnvelope = !localEnvelopeId && (isContractor || isAdmin)
+  // Funders are authorized to initiate signing in funder-led workflows where
+  // the funder uploads the governing contract or funding document.
+  const showSendEnvelope = !localEnvelopeId && (isContractor || isAdmin || isFunder)
   const showOpenDocuSign = !!localEnvelopeId && (funderTurn || contractorTurn)
 
   // ── Actions ─────────────────────────────────────────────────────────────────
@@ -156,9 +158,17 @@ export function ContractSigningSection({
             </span>
           </div>
         ) : (
-          <div className="flex items-center gap-1.5 text-[11px] text-amber-400/60">
-            <AlertCircle size={11} aria-hidden="true" />
-            <span>No DocuSign envelope — signature request not yet sent</span>
+          <div className="rounded-lg border border-amber-500/20 bg-amber-500/[0.05] px-3 py-2.5 space-y-1">
+            <div className="flex items-center gap-1.5">
+              <AlertCircle size={11} className="text-amber-400/80 flex-shrink-0" aria-hidden="true" />
+              <span className="text-[11px] font-semibold text-amber-400/80">
+                Contract uploaded — signatures not sent
+              </span>
+            </div>
+            <p className="text-[11px] text-white/40 leading-relaxed">
+              This contract has been added to the deal, but no signature request has been sent yet.
+              Milestone releases remain blocked until the required parties complete signing.
+            </p>
           </div>
         )}
 
@@ -176,7 +186,7 @@ export function ContractSigningSection({
         {/* Primary actions */}
         <div className="flex flex-col gap-2.5">
 
-          {/* Contractor / admin: send envelope when none exists */}
+          {/* Funder / contractor / admin: send envelope when none exists */}
           {showSendEnvelope && (
             <button
               type="button"
@@ -222,13 +232,6 @@ export function ContractSigningSection({
               <Clock size={13} className="text-amber-400/70 flex-shrink-0" aria-hidden="true" />
               You have signed. Waiting for the contractor to sign.
             </div>
-          )}
-
-          {/* Funder: no envelope yet — contractor initiates */}
-          {!localEnvelopeId && isFunder && (
-            <p className="text-[12px] text-white/40">
-              The contractor will send the contract for signatures.
-            </p>
           )}
 
           {/* Admin: read-only view */}
