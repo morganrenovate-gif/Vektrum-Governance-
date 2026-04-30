@@ -216,12 +216,18 @@ await test('CTA: no public booking CTA renders as a dead onClick={() => {}} butt
 
 // ── 5. Header (layout.tsx) and mobile nav both wire to BOOK_CALL_URL ─────────
 
-await test('CTA: header (app/layout.tsx) wires to BOOK_CALL_URL', () => {
-  const src = read(rel('src/app/layout.tsx'))
+await test('CTA: marketing header + shared footer wire to BOOK_CALL_URL', () => {
+  // After the route-group split, the desktop "Book a call" CTA lives in
+  // (marketing)/layout.tsx; the footer lives in components/nav/site-footer.tsx.
+  const marketing = read(rel('src/app/(marketing)/layout.tsx'))
+  const footer    = read(rel('src/components/nav/site-footer.tsx'))
   assert(
-    src.includes('href={BOOK_CALL_URL}') && /Book a call/.test(src),
-    'src/app/layout.tsx must render a "Book a call" CTA bound to BOOK_CALL_URL ' +
-    '(both desktop header and footer).',
+    marketing.includes('href={BOOK_CALL_URL}') && /Book a call/.test(marketing),
+    '(marketing)/layout.tsx must render a "Book a call" CTA bound to BOOK_CALL_URL.',
+  )
+  assert(
+    footer.includes('href={BOOK_CALL_URL}') && /Book a call/.test(footer),
+    'components/nav/site-footer.tsx must render a "Book a call" CTA bound to BOOK_CALL_URL.',
   )
 })
 

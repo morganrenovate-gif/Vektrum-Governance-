@@ -73,7 +73,7 @@ function codeOnly(src: string): string {
 
 const DEMO_LOG      = 'src/components/demo/DemoActivityLog.tsx'
 const LOG_HOOK      = 'src/lib/demo-data/use-demo-activity-log.ts'
-const HARBOR_PAGE   = 'src/app/demo-live/deal/harbor-dispute/page.tsx'
+const HARBOR_PAGE   = 'src/app/(marketing)/demo-live/deal/harbor-dispute/page.tsx'
 const AI_MODAL      = 'src/components/demo/AiReviewModal.tsx'
 const RESOLVE_MODAL = 'src/components/demo/ResolveDisputeModal.tsx'
 

@@ -86,9 +86,12 @@ const MARK_READ_ROUTE  = 'src/app/api/notifications/mark-read/route.ts'
 const TYPES            = 'src/lib/types.ts'
 const MIGRATION        = 'supabase/migrations/20260429000003_notifications_read_at.sql'
 const BELL             = 'src/components/nav/notification-bell.tsx'
-const NOTIF_PAGE       = 'src/app/dashboard/notifications/page.tsx'
+const NOTIF_PAGE       = 'src/app/(app)/dashboard/notifications/page.tsx'
 const MARK_ALL_BTN     = 'src/components/notifications/mark-all-read-button.tsx'
-const LAYOUT           = 'src/app/layout.tsx'
+// After the marketing-cache-architecture refactor, the auth-aware nav
+// (including NotificationBell) lives in src/app/(app)/layout.tsx. The root
+// layout is a thin shell with no auth UI.
+const LAYOUT           = 'src/app/(app)/layout.tsx'
 const GATE             = 'src/lib/engine/release-gate.ts'
 const STRIPE_ROUTE     = 'src/app/api/stripe/webhooks/route.ts'
 const PACKAGE_JSON     = 'package.json'

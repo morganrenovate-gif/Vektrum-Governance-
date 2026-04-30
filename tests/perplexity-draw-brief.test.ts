@@ -67,7 +67,7 @@ function read(p: string): string {
 const DEMO_MODAL    = 'src/components/demo/AiReviewModal.tsx'
 const PROD_WIDGET   = 'src/components/ai/draw-review-agent.tsx'
 const FUNDER_TOUR   = 'src/components/demo/DemoFunderTour.tsx'
-const HELP_PAGE     = 'src/app/help/page.tsx'
+const HELP_PAGE     = 'src/app/(marketing)/help/page.tsx'
 const RELEASE_GATE  = 'src/lib/engine/release-gate.ts'
 const PKG           = 'package.json'
 

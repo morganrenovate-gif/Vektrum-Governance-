@@ -39,7 +39,9 @@
  *
  * Accessibility
  *  25. Root layout has skip link with href="#main-content"
- *  26. Root layout main element has id="main-content"
+ *  26. Marketing/app layouts own <main id="main-content">
+ *      (after route-group split, main lives in (marketing)/layout.tsx and (app)/layout.tsx;
+ *      the root layout still owns the skip-link with href="#main-content")
  *  27. Mobile nav button has aria-controls
  *  28. Mobile nav drawer has id="mobile-nav-menu"
  *
@@ -189,17 +191,17 @@ async function main() {
 
   const layout      = read('src/app/layout.tsx')
   const mobileNav   = read('src/components/nav/mobile-nav.tsx')
-  const homepage    = read('src/app/page.tsx')
-  const funders     = read('src/app/funders/page.tsx')
-  const contractors = read('src/app/contractors/page.tsx')
-  const pricing     = read('src/app/pricing/page.tsx')
-  const helpPage    = read('src/app/help/page.tsx')
-  const demoPage    = read('src/app/demo/page.tsx')
+  const homepage    = read('src/app/(marketing)/page.tsx')
+  const funders     = read('src/app/(marketing)/funders/page.tsx')
+  const contractors = read('src/app/(marketing)/contractors/page.tsx')
+  const pricing     = read('src/app/(marketing)/pricing/page.tsx')
+  const helpPage    = read('src/app/(marketing)/help/page.tsx')
+  const demoPage    = read('src/app/(marketing)/demo/page.tsx')
   const sitemap     = read('src/app/sitemap.ts')
   const pkg         = read('package.json')
   const llmsRoute   = read('src/app/llms.txt/route.ts')
-  const resourcesPage  = read('src/app/resources/page.tsx')
-  const articlePage    = read('src/app/resources/construction-dispute-isolation/page.tsx')
+  const resourcesPage  = read('src/app/(marketing)/resources/page.tsx')
+  const articlePage    = read('src/app/(marketing)/resources/construction-dispute-isolation/page.tsx')
 
   // ── Metadata presence ────────────────────────────────────────────────────────
   console.log('Metadata presence')
@@ -253,7 +255,15 @@ async function main() {
   console.log('\nAccessibility')
 
   check(layout.includes('href="#main-content"'),                       '25. Root layout has skip link targeting #main-content')
-  check(layout.includes('id="main-content"'),                          '26. Root layout main element has id="main-content"')
+  // After the route-group refactor, <main id="main-content"> moved out of
+  // the root layout into the (marketing) and (app) group layouts. The
+  // skip-link target lives in whichever group layout wraps the page.
+  const marketingLayout = read('src/app/(marketing)/layout.tsx')
+  const appLayout       = read('src/app/(app)/layout.tsx')
+  check(
+    marketingLayout.includes('id="main-content"') && appLayout.includes('id="main-content"'),
+    '26. Both (marketing) and (app) layouts own <main id="main-content">',
+  )
   check(mobileNav.includes('aria-controls'),                           '27. Mobile nav button has aria-controls')
   check(mobileNav.includes('id="mobile-nav-menu"'),                    '28. Mobile nav drawer has id="mobile-nav-menu"')
 
@@ -279,8 +289,8 @@ async function main() {
   // ── /resources ───────────────────────────────────────────────────────────────
   console.log('\n/resources')
 
-  check(exists('src/app/resources/page.tsx'),                          '34. /resources page exists')
-  check(exists('src/app/resources/construction-dispute-isolation/page.tsx'), '35. First article page exists')
+  check(exists('src/app/(marketing)/resources/page.tsx'),                          '34. /resources page exists')
+  check(exists('src/app/(marketing)/resources/construction-dispute-isolation/page.tsx'), '35. First article page exists')
   check(
     articlePage.includes('/funders') && articlePage.includes('/help'),
     '36. Article links to /funders and /help internally',
@@ -397,8 +407,8 @@ async function main() {
   )
 
   // 62. About/Careers softened
-  const aboutPage = read('src/app/about/page.tsx')
-  const careersPage = read('src/app/careers/page.tsx')
+  const aboutPage = read('src/app/(marketing)/about/page.tsx')
+  const careersPage = read('src/app/(marketing)/careers/page.tsx')
   check(
     !aboutPage.includes('$2.19 trillion') && !careersPage.includes('$2.19 trillion'),
     '62. About/Careers do not assert exact $2.19T figure (softened)',
@@ -497,9 +507,12 @@ async function main() {
 
   // Isolate the <footer>...</footer> block in layout.tsx so we don't conflate
   // header nav links with footer links.
-  const footerStart = layout.indexOf('<footer')
-  const footerEnd   = layout.indexOf('</footer>', footerStart)
-  const footerBlock = footerStart !== -1 ? layout.slice(footerStart, footerEnd) : ''
+  // Footer moved out of root layout into the shared SiteFooter component
+  // during the route-group refactor. Read it from there.
+  const siteFooter  = read('src/components/nav/site-footer.tsx')
+  const footerStart = siteFooter.indexOf('<footer')
+  const footerEnd   = siteFooter.indexOf('</footer>', footerStart)
+  const footerBlock = footerStart !== -1 ? siteFooter.slice(footerStart, footerEnd) : ''
 
   check(
     footerBlock.includes('href="/resources"'),
@@ -550,22 +563,22 @@ async function main() {
   // page metadata export and check the canonical, if present, points at its
   // own path. Pages without a canonical are tolerated (root layout default).
   const PUBLIC_PAGES_WITH_OWN_CANONICAL: Array<[string, string]> = [
-    ['src/app/page.tsx',                                                      'https://vektrum.io'],
-    ['src/app/funders/page.tsx',                                              'https://vektrum.io/funders'],
-    ['src/app/contractors/page.tsx',                                          'https://vektrum.io/contractors'],
-    ['src/app/pricing/page.tsx',                                              'https://vektrum.io/pricing'],
-    ['src/app/help/page.tsx',                                                 'https://vektrum.io/help'],
-    ['src/app/demo/page.tsx',                                                 'https://vektrum.io/demo'],
-    ['src/app/about/page.tsx',                                                'https://vektrum.io/about'],
-    ['src/app/careers/page.tsx',                                              'https://vektrum.io/careers'],
-    ['src/app/contact/page.tsx',                                              'https://vektrum.io/contact'],
-    ['src/app/founders/page.tsx',                                             'https://vektrum.io/founders'],
-    ['src/app/partners/page.tsx',                                             'https://vektrum.io/partners'],
-    ['src/app/security/page.tsx',                                             'https://vektrum.io/security'],
-    ['src/app/privacy/page.tsx',                                              'https://vektrum.io/privacy'],
-    ['src/app/terms/page.tsx',                                                'https://vektrum.io/terms'],
-    ['src/app/resources/page.tsx',                                            'https://vektrum.io/resources'],
-    ['src/app/resources/construction-dispute-isolation/page.tsx',             'https://vektrum.io/resources/construction-dispute-isolation'],
+    ['src/app/(marketing)/page.tsx',                                                      'https://vektrum.io'],
+    ['src/app/(marketing)/funders/page.tsx',                                              'https://vektrum.io/funders'],
+    ['src/app/(marketing)/contractors/page.tsx',                                          'https://vektrum.io/contractors'],
+    ['src/app/(marketing)/pricing/page.tsx',                                              'https://vektrum.io/pricing'],
+    ['src/app/(marketing)/help/page.tsx',                                                 'https://vektrum.io/help'],
+    ['src/app/(marketing)/demo/page.tsx',                                                 'https://vektrum.io/demo'],
+    ['src/app/(marketing)/about/page.tsx',                                                'https://vektrum.io/about'],
+    ['src/app/(marketing)/careers/page.tsx',                                              'https://vektrum.io/careers'],
+    ['src/app/(marketing)/contact/page.tsx',                                              'https://vektrum.io/contact'],
+    ['src/app/(marketing)/founders/page.tsx',                                             'https://vektrum.io/founders'],
+    ['src/app/(marketing)/partners/page.tsx',                                             'https://vektrum.io/partners'],
+    ['src/app/(marketing)/security/page.tsx',                                             'https://vektrum.io/security'],
+    ['src/app/(marketing)/privacy/page.tsx',                                              'https://vektrum.io/privacy'],
+    ['src/app/(marketing)/terms/page.tsx',                                                'https://vektrum.io/terms'],
+    ['src/app/(marketing)/resources/page.tsx',                                            'https://vektrum.io/resources'],
+    ['src/app/(marketing)/resources/construction-dispute-isolation/page.tsx',             'https://vektrum.io/resources/construction-dispute-isolation'],
   ]
   const canonicalMisses: string[] = []
   for (const [rel, expected] of PUBLIC_PAGES_WITH_OWN_CANONICAL) {
@@ -666,7 +679,7 @@ async function main() {
   )
 
   // 98. Security webhook signing section
-  const securityPage = read('src/app/security/page.tsx')
+  const securityPage = read('src/app/(marketing)/security/page.tsx')
   check(
     securityPage.includes('Webhook signing secret handling'),
     '98. Security page has separate "Webhook signing secret handling" section',
@@ -694,15 +707,15 @@ async function main() {
 
   // 102. Decorative icons aria-hidden — count across public pages
   const PUBLIC_PAGES_WITH_ICONS = [
-    'src/app/page.tsx',
-    'src/app/funders/page.tsx',
-    'src/app/contractors/page.tsx',
-    'src/app/help/page.tsx',
-    'src/app/pricing/page.tsx',
-    'src/app/demo/page.tsx',
-    'src/app/resources/page.tsx',
-    'src/app/resources/construction-dispute-isolation/page.tsx',
-    'src/app/partners/page.tsx',
+    'src/app/(marketing)/page.tsx',
+    'src/app/(marketing)/funders/page.tsx',
+    'src/app/(marketing)/contractors/page.tsx',
+    'src/app/(marketing)/help/page.tsx',
+    'src/app/(marketing)/pricing/page.tsx',
+    'src/app/(marketing)/demo/page.tsx',
+    'src/app/(marketing)/resources/page.tsx',
+    'src/app/(marketing)/resources/construction-dispute-isolation/page.tsx',
+    'src/app/(marketing)/partners/page.tsx',
   ]
   let ariaHiddenCount = 0
   for (const rel of PUBLIC_PAGES_WITH_ICONS) {
@@ -726,7 +739,7 @@ async function main() {
   console.log('\nPrecision-cleanup audit items')
 
   // 105–107: /demo-live metadata (lives in layout.tsx)
-  const demoLiveLayout = read('src/app/demo-live/layout.tsx')
+  const demoLiveLayout = read('src/app/(marketing)/demo-live/layout.tsx')
   check(
     /canonical:\s*['"]https:\/\/vektrum\.io\/demo-live['"]/.test(demoLiveLayout),
     '105. /demo-live has self-canonical https://vektrum.io/demo-live',
@@ -746,7 +759,7 @@ async function main() {
   )
 
   // 108: /resources teaser CTA links to article slug, not "#"
-  const resourcesPageContent = read('src/app/resources/page.tsx')
+  const resourcesPageContent = read('src/app/(marketing)/resources/page.tsx')
   // Confirm the article Link wraps Read article and uses /resources/${article.slug}
   check(
     resourcesPageContent.includes('/resources/${article.slug}') &&
@@ -793,7 +806,7 @@ async function main() {
   )
 
   // 114, 115. Partner email
-  const partnersPage = read('src/app/partners/page.tsx')
+  const partnersPage = read('src/app/(marketing)/partners/page.tsx')
   check(partnersPage.includes('partners@vektrum.io'), '114. Partners page uses partners@vektrum.io')
   check(!partnersPage.includes('partners@vektrum.com'), '115. Partners page does NOT use partners@vektrum.com')
 
@@ -810,14 +823,14 @@ async function main() {
   // 118. Buyer-facing pages do not use bare "immutable audit trail" / "immutable proof"
   // We check the canonical buyer-facing pages: /, /funders, /contractors, /demo, /help, /about, /careers, /pricing
   const buyerFacingPages = [
-    'src/app/page.tsx',
-    'src/app/funders/page.tsx',
-    'src/app/contractors/page.tsx',
-    'src/app/demo/page.tsx',
-    'src/app/help/page.tsx',
-    'src/app/about/page.tsx',
-    'src/app/careers/page.tsx',
-    'src/app/pricing/page.tsx',
+    'src/app/(marketing)/page.tsx',
+    'src/app/(marketing)/funders/page.tsx',
+    'src/app/(marketing)/contractors/page.tsx',
+    'src/app/(marketing)/demo/page.tsx',
+    'src/app/(marketing)/help/page.tsx',
+    'src/app/(marketing)/about/page.tsx',
+    'src/app/(marketing)/careers/page.tsx',
+    'src/app/(marketing)/pricing/page.tsx',
   ]
   const immutableHits: string[] = []
   for (const rel of buyerFacingPages) {

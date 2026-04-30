@@ -64,8 +64,8 @@ function read(p: string): string {
 }
 
 const FUND_ROUTE  = 'src/app/api/deals/[dealId]/fund/route.ts'
-const FUND_BTN    = 'src/app/dashboard/deals/[dealId]/fund-deal-button.tsx'
-const DEAL_PAGE   = 'src/app/dashboard/deals/[dealId]/page.tsx'
+const FUND_BTN    = 'src/app/(app)/dashboard/deals/[dealId]/fund-deal-button.tsx'
+const DEAL_PAGE   = 'src/app/(app)/dashboard/deals/[dealId]/page.tsx'
 const MFA_ENROLL  = 'src/app/auth/mfa/enroll/page.tsx'
 const PKG         = 'package.json'
 

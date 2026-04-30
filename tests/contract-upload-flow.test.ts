@@ -90,7 +90,7 @@ function codeOnly(src: string): string {
 const UPLOAD_ROUTE  = 'src/app/api/deals/[dealId]/contracts/route.ts'
 const COMPONENT     = 'src/components/deal/contract-upload-section.tsx'
 const TRIGGER       = 'src/components/deal/upload-contract-trigger.tsx'
-const PAGE          = 'src/app/dashboard/deals/[dealId]/page.tsx'
+const PAGE          = 'src/app/(app)/dashboard/deals/[dealId]/page.tsx'
 const SOV_SECTION   = 'src/components/deal/sov-section.tsx'
 const BUCKET_MIG    = 'supabase/migrations/20260429000002_contracts_bucket.sql'
 const PACKAGE_JSON  = 'package.json'

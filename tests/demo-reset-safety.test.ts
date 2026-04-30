@@ -583,14 +583,14 @@ await test('HOOK: useDemoAutoReset calls onReset on mount for clean initial stat
 // the reset chrome.
 
 const INTERACTIVE_DEMO_PAGES = [
-  'src/app/demo-live/funder/page.tsx',
-  'src/app/demo-live/contractor/page.tsx',
-  'src/app/demo-live/audit/page.tsx',
-  'src/app/demo-live/deal/harbor/page.tsx',
-  'src/app/demo-live/deal/riverside/page.tsx',
-  'src/app/demo-live/deal/westside/page.tsx',
-  'src/app/demo-live/deal/harbor-dispute/page.tsx',
-  'src/app/demo-live/deal/[id]/demo-milestone-list.tsx',
+  'src/app/(marketing)/demo-live/funder/page.tsx',
+  'src/app/(marketing)/demo-live/contractor/page.tsx',
+  'src/app/(marketing)/demo-live/audit/page.tsx',
+  'src/app/(marketing)/demo-live/deal/harbor/page.tsx',
+  'src/app/(marketing)/demo-live/deal/riverside/page.tsx',
+  'src/app/(marketing)/demo-live/deal/westside/page.tsx',
+  'src/app/(marketing)/demo-live/deal/harbor-dispute/page.tsx',
+  'src/app/(marketing)/demo-live/deal/[id]/demo-milestone-list.tsx',
 ]
 
 for (const rel of INTERACTIVE_DEMO_PAGES) {
@@ -614,10 +614,10 @@ for (const rel of INTERACTIVE_DEMO_PAGES) {
 // useDemoAutoReset is caught.
 
 const SERVER_RENDERED_DEMO_PAGES = [
-  'src/app/demo-live/page.tsx',
-  'src/app/demo-live/admin/page.tsx',
-  'src/app/demo-live/funder/capital/page.tsx',
-  'src/app/demo-live/deal/[id]/page.tsx',
+  'src/app/(marketing)/demo-live/page.tsx',
+  'src/app/(marketing)/demo-live/admin/page.tsx',
+  'src/app/(marketing)/demo-live/funder/capital/page.tsx',
+  'src/app/(marketing)/demo-live/deal/[id]/page.tsx',
 ]
 
 for (const rel of SERVER_RENDERED_DEMO_PAGES) {

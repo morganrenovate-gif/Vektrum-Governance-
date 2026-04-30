@@ -58,8 +58,8 @@ function read(p: string): string {
 }
 
 const BANNER      = 'src/components/deal/deal-readiness-banner.tsx'
-const PAGE        = 'src/app/dashboard/deals/[dealId]/page.tsx'
-const FUND_BTN    = 'src/app/dashboard/deals/[dealId]/fund-deal-button.tsx'
+const PAGE        = 'src/app/(app)/dashboard/deals/[dealId]/page.tsx'
+const FUND_BTN    = 'src/app/(app)/dashboard/deals/[dealId]/fund-deal-button.tsx'
 const DRAW_AGENT  = 'src/components/ai/draw-review-agent.tsx'
 const REL_BTN     = 'src/components/deal/release-button.tsx'
 const GATE        = 'src/lib/engine/release-gate.ts'

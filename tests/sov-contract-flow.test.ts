@@ -63,7 +63,7 @@ function codeOnly(src: string): string {
 
 // ─── File paths ───────────────────────────────────────────────────────────────
 
-const PAGE            = 'src/app/dashboard/deals/[dealId]/page.tsx'
+const PAGE            = 'src/app/(app)/dashboard/deals/[dealId]/page.tsx'
 const SOV_SECTION     = 'src/components/deal/sov-section.tsx'
 const SOV_ROUTE       = 'src/app/api/deals/[dealId]/sov/route.ts'
 const RELEASE_GATE    = 'src/lib/engine/release-gate.ts'

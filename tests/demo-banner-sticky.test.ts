@@ -49,9 +49,9 @@ function read(p: string): string {
   return fs.readFileSync(path.resolve(ROOT, p), 'utf-8')
 }
 
-const DEMO_LAYOUT       = 'src/app/demo-live/layout.tsx'
+const DEMO_LAYOUT       = 'src/app/(marketing)/demo-live/layout.tsx'
 const ROOT_LAYOUT       = 'src/app/layout.tsx'
-const DASHBOARD_LAYOUT  = 'src/app/dashboard/layout.tsx'
+const DASHBOARD_LAYOUT  = 'src/app/(app)/dashboard/layout.tsx'
 
 async function main() {
 
@@ -152,7 +152,7 @@ await test('10. Production dashboard layout does not contain the demo banner', (
   const src = read(DASHBOARD_LAYOUT)
   assert(
     !src.includes('Demo Mode'),
-    'src/app/dashboard/layout.tsx contains "Demo Mode" — demo banner must not appear in production dashboard.',
+    'src/app/(app)/dashboard/layout.tsx contains "Demo Mode" — demo banner must not appear in production dashboard.',
   )
 })
 

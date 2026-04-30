@@ -72,7 +72,7 @@ function collapse(s: string): string {
 }
 
 const TOUR_COMPONENT = 'src/components/demo/DemoFunderTour.tsx'
-const FUNDER_PAGE    = 'src/app/demo-live/funder/page.tsx'
+const FUNDER_PAGE    = 'src/app/(marketing)/demo-live/funder/page.tsx'
 
 async function main() {
 

@@ -483,12 +483,12 @@ await test('36. Accept route assignment error response includes reason: assignme
 })
 
 await test('37. Funder dashboard queries deals where funder_id = user.id', () => {
-  const src = read('src/app/dashboard/page.tsx')
+  const src = read('src/app/(app)/dashboard/page.tsx')
   assert(
     src.includes('funder_id') &&
     (src.includes("eq('funder_id'") || src.includes('.eq("funder_id"') ||
      src.includes("query.eq('funder_id")),
-    `src/app/dashboard/page.tsx funder query must use .eq('funder_id', userId) ` +
+    `src/app/(app)/dashboard/page.tsx funder query must use .eq('funder_id', userId) ` +
     `so a newly assigned funder can see their deal after acceptance. ` +
     `Without this, funder_id = user.id has no UI effect.`,
   )

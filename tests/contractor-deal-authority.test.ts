@@ -49,8 +49,8 @@ function read(p: string): string {
   return fs.readFileSync(path.resolve(ROOT, p), 'utf-8')
 }
 
-const NEW_DEAL_PAGE  = 'src/app/dashboard/deals/new/page.tsx'
-const DEAL_PAGE      = 'src/app/dashboard/deals/[dealId]/page.tsx'
+const NEW_DEAL_PAGE  = 'src/app/(app)/dashboard/deals/new/page.tsx'
+const DEAL_PAGE      = 'src/app/(app)/dashboard/deals/[dealId]/page.tsx'
 
 async function main() {
 

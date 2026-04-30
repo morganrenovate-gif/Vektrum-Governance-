@@ -46,7 +46,7 @@ function read(p: string): string { return fs.readFileSync(p, 'utf-8') }
 
 const ROUTE      = path.join(ROOT, 'src/app/api/admin/ops/external-releases/route.ts')
 const PANEL      = path.join(ROOT, 'src/components/admin/ExternalReleasesPanel.tsx')
-const ADMIN_PAGE = path.join(ROOT, 'src/app/dashboard/admin/page.tsx')
+const ADMIN_PAGE = path.join(ROOT, 'src/app/(app)/dashboard/admin/page.tsx')
 const MIDDLEWARE = path.join(ROOT, 'src/middleware.ts')
 
 // Strip JS/TS comments + string literals so safety regexes only see executable code.

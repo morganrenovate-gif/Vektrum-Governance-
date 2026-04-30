@@ -51,7 +51,7 @@ function src(rel: string) {
   return readFileSync(path.resolve(ROOT, rel), 'utf-8')
 }
 
-const HARBOR_PAGE = src('src/app/demo-live/deal/harbor/page.tsx')
+const HARBOR_PAGE = src('src/app/(marketing)/demo-live/deal/harbor/page.tsx')
 
 const results: { name: string; passed: boolean; error?: string }[] = []
 

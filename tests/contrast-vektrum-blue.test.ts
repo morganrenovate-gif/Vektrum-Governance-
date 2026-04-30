@@ -38,11 +38,11 @@ const ALLOWLIST: string[] = [
   // because dark blue on white reads correctly. The dark sections were
   // migrated to text-blue-300; a separate test (D1 below) pins zero matches
   // inside their line ranges.
-  'src/app/page.tsx',
+  'src/app/(marketing)/page.tsx',
   // Contact page is a light-themed form layout.
-  'src/app/contact/page.tsx',
+  'src/app/(marketing)/contact/page.tsx',
   // Security page is mostly a light copy block; no dark sections.
-  'src/app/security/page.tsx',
+  'src/app/(marketing)/security/page.tsx',
 ]
 
 const results: { name: string; passed: boolean; error?: string }[] = []
@@ -96,7 +96,7 @@ test('B1: page.tsx dark sections do not use text-vektrum-blue', () => {
   // We extract the line numbers of every text-vektrum-blue match and assert
   // they all fall inside the documented light ranges.
   const out = execSync(
-    'grep -n "text-vektrum-blue" src/app/page.tsx || true',
+    'grep -n "text-vektrum-blue" "src/app/(marketing)/page.tsx" || true',
     { cwd: ROOT, encoding: 'utf-8' },
   ).trim()
   if (!out) return // no matches at all is also fine
@@ -123,7 +123,7 @@ test('B1: page.tsx dark sections do not use text-vektrum-blue', () => {
   //  1101  </section>              ┘   → 1102 bg-[#031226] (dark)
   //
   // To re-derive after edits:
-  //   grep -n "<section className" src/app/page.tsx
+  //   grep -n "<section className" src/app/(marketing)/page.tsx
   //
   // Previous ranges [538,723] and [804,984] were stale after Sprint-1
   // additions (Release Workflow Spine section + metadata/schema block at
@@ -153,7 +153,7 @@ test('C1: "Condition" rows under the "gate stops this" cards use text-blue-200/3
   // text inside the dark "The gate stops this." cards. Pin the readable
   // class so a future revert can't re-introduce text-vektrum-blue on this
   // exact element.
-  const homepage = execSync('cat src/app/page.tsx', { cwd: ROOT, encoding: 'utf-8' })
+  const homepage = execSync('cat "src/app/(marketing)/page.tsx"', { cwd: ROOT, encoding: 'utf-8' })
   // Find the section block by its heading.
   const sectionIdx = homepage.indexOf('The gate stops this.')
   assert(sectionIdx !== -1, 'Could not locate the "gate stops this" section in homepage')
@@ -180,7 +180,7 @@ test('D1: every allowlisted file actually still contains text-vektrum-blue', () 
   // allowlist becomes stale. Fail so the next contributor cleans it up.
   for (const rel of ALLOWLIST) {
     const out = execSync(
-      `grep -c "text-vektrum-blue" ${rel} || true`,
+      `grep -c "text-vektrum-blue" "${rel}" || true`,
       { cwd: ROOT, encoding: 'utf-8' },
     ).trim()
     const count = parseInt(out, 10) || 0

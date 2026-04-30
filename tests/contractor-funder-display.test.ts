@@ -74,8 +74,8 @@ function codeOnly(src: string): string {
 
 // ─── File paths ───────────────────────────────────────────────────────────────
 
-const DEAL_DETAIL   = 'src/app/dashboard/deals/[dealId]/page.tsx'
-const DASHBOARD     = 'src/app/dashboard/page.tsx'
+const DEAL_DETAIL   = 'src/app/(app)/dashboard/deals/[dealId]/page.tsx'
+const DASHBOARD     = 'src/app/(app)/dashboard/page.tsx'
 const DEAL_CARD     = 'src/components/deal/deal-card.tsx'
 const INVITE_ACCEPT = 'src/app/api/invites/[token]/accept/route.ts'
 const RELEASE_ROUTE = 'src/app/api/milestones/[milestoneId]/release/route.ts'

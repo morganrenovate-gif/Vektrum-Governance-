@@ -78,7 +78,7 @@ function codeOnly(src: string): string {
 
 // ─── File paths ───────────────────────────────────────────────────────────────
 
-const PAGE         = 'src/app/dashboard/deals/[dealId]/page.tsx'
+const PAGE         = 'src/app/(app)/dashboard/deals/[dealId]/page.tsx'
 const GATE         = 'src/lib/engine/release-gate.ts'
 const STRIPE_ROUTE = 'src/app/api/stripe/webhooks/route.ts'
 const PACKAGE_JSON = 'package.json'

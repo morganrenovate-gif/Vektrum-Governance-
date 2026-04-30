@@ -72,7 +72,7 @@ function codeOnly(src: string): string {
 }
 
 const MODAL        = 'src/components/demo/ResolveDisputeModal.tsx'
-const HARBOR_PAGE  = 'src/app/demo-live/deal/harbor-dispute/page.tsx'
+const HARBOR_PAGE  = 'src/app/(marketing)/demo-live/deal/harbor-dispute/page.tsx'
 
 async function main() {
 

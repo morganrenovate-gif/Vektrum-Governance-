@@ -69,10 +69,10 @@ function src(rel: string) {
 }
 
 const HOOK             = src('src/lib/demo-data/use-demo-auto-reset.ts')
-const HARBOR_PAGE      = src('src/app/demo-live/deal/harbor/page.tsx')
-const RIVERSIDE_PAGE   = src('src/app/demo-live/deal/riverside/page.tsx')
-const WESTSIDE_PAGE    = src('src/app/demo-live/deal/westside/page.tsx')
-const DISPUTE_PAGE     = src('src/app/demo-live/deal/harbor-dispute/page.tsx')
+const HARBOR_PAGE      = src('src/app/(marketing)/demo-live/deal/harbor/page.tsx')
+const RIVERSIDE_PAGE   = src('src/app/(marketing)/demo-live/deal/riverside/page.tsx')
+const WESTSIDE_PAGE    = src('src/app/(marketing)/demo-live/deal/westside/page.tsx')
+const DISPUTE_PAGE     = src('src/app/(marketing)/demo-live/deal/harbor-dispute/page.tsx')
 
 const results: { name: string; passed: boolean; error?: string }[] = []
 
