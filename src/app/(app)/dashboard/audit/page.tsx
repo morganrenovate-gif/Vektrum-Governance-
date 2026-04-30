@@ -66,17 +66,31 @@ const CATEGORY_ACTIONS: Record<string, string[]> = {
     "dispute_resolved_write_off",
   ],
   ai: ["ai_draw_review"],
+  // System / cron events — actor_id is null; actor_role is 'system'.
+  // These are written by scheduled jobs and background services, not human actors.
+  system: [
+    "cron_reconcile_started",
+    "cron_reconcile_completed",
+    "cron_reconcile_failed",
+    "manual_reconciliation_run",
+    "audit_chain_verification_started",
+    "audit_chain_verification_passed",
+    "audit_chain_verification_broken",
+    "audit_chain_verification_failed",
+    "audit_log_exported",
+  ],
 };
 
 const CATEGORY_TABS: { key: string; label: string }[] = [
-  { key: "all",              label: "All"           },
-  { key: "user_activity",    label: "Users"         },
-  { key: "deal_lifecycle",   label: "Deals"         },
-  { key: "milestone_activity", label: "Milestones"  },
-  { key: "payments",         label: "Payments"      },
-  { key: "admin",            label: "Admin"         },
-  { key: "disputes",         label: "Disputes"      },
-  { key: "ai",               label: "AI"            },
+  { key: "all",               label: "All"        },
+  { key: "user_activity",     label: "Users"      },
+  { key: "deal_lifecycle",    label: "Deals"      },
+  { key: "milestone_activity", label: "Milestones" },
+  { key: "payments",          label: "Payments"   },
+  { key: "admin",             label: "Admin"      },
+  { key: "disputes",          label: "Disputes"   },
+  { key: "ai",                label: "AI"         },
+  { key: "system",            label: "System"     },
 ];
 
 // ─── Human-readable action labels ────────────────────────────────────────────
@@ -119,6 +133,16 @@ const ACTION_LABELS: Record<string, string> = {
   dispute_resolved_release:            "Dispute Resolved (Release)",
   dispute_resolved_write_off:          "Dispute Resolved (Write-off)",
   ai_draw_review:                      "AI Draw Review",
+  // System / cron events
+  cron_reconcile_started:              "Reconciliation Started",
+  cron_reconcile_completed:            "Reconciliation Completed",
+  cron_reconcile_failed:               "Reconciliation Failed",
+  manual_reconciliation_run:           "Manual Reconciliation",
+  audit_chain_verification_started:    "Audit Chain Check Started",
+  audit_chain_verification_passed:     "Audit Chain Verified",
+  audit_chain_verification_broken:     "Audit Chain Broken",
+  audit_chain_verification_failed:     "Audit Chain Check Failed",
+  audit_log_exported:                  "Audit Log Exported",
 };
 
 // ─── Badge variant ────────────────────────────────────────────────────────────
@@ -242,13 +266,25 @@ export default async function AuditLogPage({
   let query = queryClient
     .from("audit_log")
     .select(
-      // Fetch all compliance fields + profile joins for display
+      // All compliance columns are fetched here.
+      //
+      // actor:profiles!audit_log_actor_id_fkey — valid FK (actor_id references
+      //   profiles(id)); used as a fallback for pre-migration 016 rows that do
+      //   not yet have actor_name denormalized. Nullable FK → LEFT JOIN; null
+      //   actor_id rows (system/cron events) resolve to null for the join columns.
+      //
+      // entity_profile join INTENTIONALLY OMITTED: entity_id is a polymorphic
+      //   UUID (deals, milestones, releases, cron runs, etc.) and has no FK
+      //   constraint to profiles. Specifying an explicit FK hint for a non-existent
+      //   constraint causes PostgREST to return a 400 error, making the entire
+      //   page return null data and show "No audit events" for all users.
+      //   The AuditRow component uses optional chaining on entity_profile so the
+      //   removal is backwards-compatible.
       `id, event_sequence, entity_type, entity_id, action,
        actor_id, actor_role, actor_name, actor_email,
        system_source, session_id, ip_address,
        old_values, new_values, metadata, created_at,
-       actor:profiles!audit_log_actor_id_fkey(full_name, role),
-       entity_profile:profiles!audit_log_entity_id_fkey(full_name, role)`,
+       actor:profiles!audit_log_actor_id_fkey(full_name, role)`,
       { count: "exact" },
     )
     // Order by event_sequence DESC — monotonic, resolves same-ms ties
@@ -278,18 +314,24 @@ export default async function AuditLogPage({
 
   query = query.range(from, to);
 
-  const { data: logs, count } = await query;
+  const { data: logs, count, error: queryError } = await query;
   const totalPages = count ? Math.ceil(count / PAGE_SIZE) : 1;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const entries    = (logs ?? []) as unknown as AuditLog[];
+  // Surface PostgREST query errors server-side for observability.
+  // Previously, errors were silently swallowed here (data = null → empty state).
+  if (queryError) {
+    console.error('[audit-log] query error:', queryError.message, queryError.details ?? '')
+  }
 
   const currentParams: Record<string, string | undefined> = { category, role, action, search };
   const hasFilters = !!((category && category !== "all") || role || action || search);
 
-  // Non-admins cannot filter by role (their results are already scoped)
+  // Non-admins cannot filter by role or view system/cron events by tab.
+  // Admin-only tabs: "admin" (privileged actions) and "system" (cron events).
   const visibleTabs = isAdmin
     ? CATEGORY_TABS
-    : CATEGORY_TABS.filter((t) => t.key !== "admin");
+    : CATEGORY_TABS.filter((t) => t.key !== "admin" && t.key !== "system");
 
   return (
     <div className="min-h-screen bg-surface-0">

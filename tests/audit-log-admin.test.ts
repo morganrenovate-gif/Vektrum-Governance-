@@ -21,10 +21,15 @@
  *  4.  Admin dashboard "View full audit log" link targets /dashboard/audit.
  *  5.  Admin dashboard "Recent Audit Activity" uses the admin Supabase client.
  *  6.  "All" category tab applies no action filter (cron events not hidden).
- *  7.  cron_reconcile_completed is absent from all CATEGORY_ACTIONS lists.
+ *  7.  cron_reconcile_completed IS in the "system" CATEGORY_ACTIONS list.
  *  8.  No role filter is applied for admin (non-admin scoping does not leak).
  *  9.  Audit page has export const dynamic = "force-dynamic".
  * 10.  Test wired into npm test in package.json.
+ * 11.  SELECT does not contain the non-existent entity_profile FK join.
+ * 12.  SELECT retains the valid actor FK join (audit_log_actor_id_fkey exists).
+ * 13.  CATEGORY_ACTIONS includes a "system" key with cron_reconcile_completed.
+ * 14.  CATEGORY_TABS has a System tab visible to admins.
+ * 15.  Query errors are logged (not silently swallowed as empty state).
  *
  * Run:  npx tsx tests/audit-log-admin.test.ts
  */
@@ -165,18 +170,20 @@ await test('6. "All" category applies no action-in filter (cron events visible)'
   )
 })
 
-// ─── 7. cron_reconcile_completed absent from CATEGORY_ACTIONS ────────────────
+// ─── 7. cron_reconcile_completed is in the system CATEGORY_ACTIONS ───────────
 
-await test('7. cron_reconcile_completed is not in any CATEGORY_ACTIONS list', () => {
+await test('7. cron_reconcile_completed is in the system CATEGORY_ACTIONS list', () => {
   const src = read(AUDIT_PAGE)
-  // This action is a system/cron event — it should not be listed under any
-  // specific category. If it were, selecting that category would show it but
-  // "All" would NOT hide it (correct), so this check is belt-and-suspenders.
+  // cron_reconcile_completed is a system event that should appear in the
+  // dedicated "System" category tab (visible to admins only) so it is
+  // easily discoverable without having to search by name.
+  // It also appears in "All" because "All" applies no category filter.
   assert(
-    !src.includes('"cron_reconcile_completed"') &&
-    !src.includes("'cron_reconcile_completed'"),
-    `${AUDIT_PAGE}: cron_reconcile_completed must not appear in CATEGORY_ACTIONS. ` +
-    `It is a system event that belongs in the "All" view, not a named category.`,
+    src.includes('"cron_reconcile_completed"') ||
+    src.includes("'cron_reconcile_completed'"),
+    `${AUDIT_PAGE}: cron_reconcile_completed must appear in CATEGORY_ACTIONS under ` +
+    `the "system" key so admins can filter to it via the System tab. ` +
+    `It will also appear in "All" — no exclusion needed.`,
   )
 })
 
@@ -213,11 +220,73 @@ await test('10. Test file is wired into npm test in package.json', () => {
   )
 })
 
+// ─── 11-15. FK join, System category, error logging ──────────────────────────
+
+await test('11. Audit page SELECT does not contain the non-existent entity_profile FK join', () => {
+  const src = read(AUDIT_PAGE)
+  // entity_id has no FK constraint in the schema — it is a polymorphic UUID.
+  // Using "!audit_log_entity_id_fkey" in the select makes PostgREST return a
+  // 400 error, causing data = null → empty state on every load.
+  assert(
+    !src.includes('audit_log_entity_id_fkey'),
+    `${AUDIT_PAGE}: must NOT contain "audit_log_entity_id_fkey". ` +
+    `entity_id has no FK constraint (it is polymorphic — references deals, milestones, ` +
+    `cron runs, etc.). PostgREST returns an error for unknown FK names, ` +
+    `causing the entire query to fail silently and show "No audit events".`,
+  )
+})
+
+await test('12. Audit page SELECT retains the valid actor FK join', () => {
+  const src = read(AUDIT_PAGE)
+  // actor_id does have a FK to profiles (auto-named audit_log_actor_id_fkey).
+  // This join is a valid fallback for pre-migration-016 rows.
+  assert(
+    src.includes('audit_log_actor_id_fkey'),
+    `${AUDIT_PAGE}: must retain actor:profiles!audit_log_actor_id_fkey ` +
+    `as a fallback join for rows that predate the actor_name denormalization.`,
+  )
+})
+
+await test('13. Audit page has a "system" category in CATEGORY_ACTIONS', () => {
+  const src = read(AUDIT_PAGE)
+  assert(
+    src.includes('system:') || src.includes('"system"') || src.includes("'system'"),
+    `${AUDIT_PAGE}: CATEGORY_ACTIONS must include a "system" key covering ` +
+    `cron_reconcile_completed and other cron/background events so admins can ` +
+    `filter to system events without searching.`,
+  )
+  assert(
+    src.includes('cron_reconcile_completed'),
+    `${AUDIT_PAGE}: "cron_reconcile_completed" must appear in the system ` +
+    `CATEGORY_ACTIONS list — this is the action that was invisible in the "All" tab ` +
+    `because the broken FK join prevented any rows from loading.`,
+  )
+})
+
+await test('14. CATEGORY_TABS has a System tab visible to admins', () => {
+  const src = read(AUDIT_PAGE)
+  assert(
+    src.includes('{ key: "system"') || src.includes("{ key: 'system'"),
+    `${AUDIT_PAGE}: CATEGORY_TABS must include a { key: "system" ... } entry ` +
+    `so admins have a dedicated tab for cron/background events.`,
+  )
+})
+
+await test('15. Audit page logs PostgREST errors instead of silently returning empty state', () => {
+  const src = read(AUDIT_PAGE)
+  assert(
+    src.includes('queryError') || src.includes('error:') && src.includes('console.error'),
+    `${AUDIT_PAGE}: must destructure the error from the Supabase query and log it. ` +
+    `Previously, PostgREST errors were silently swallowed (data = null → entries = [] → ` +
+    `"No audit events") with no indication of the actual failure.`,
+  )
+})
+
 // ─── Results ──────────────────────────────────────────────────────────────────
 
   console.log('')
   console.log('════════════════════════════════════════════════════════════════════════')
-  console.log('  VEKTRUM — Audit Log Admin Bug Regression Tests')
+  console.log('  VEKTRUM — Audit Log Admin Bug Regression Tests (15 checks)')
   console.log('════════════════════════════════════════════════════════════════════════')
   for (const r of results) {
     if (r.passed) console.log(`  ✓  ${r.name}`)
