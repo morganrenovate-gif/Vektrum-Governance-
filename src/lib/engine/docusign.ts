@@ -78,6 +78,37 @@ export interface GetSigningUrlInput {
 
 let _tokenCache: { token: string; expiresAtMs: number } | null = null
 
+// ─── Startup Environment Validation ──────────────────────────────────────────
+// Called once before the first token fetch. Logs ALL missing var names (never
+// values) so Vercel Function logs clearly show the misconfiguration.
+
+const REQUIRED_DOCUSIGN_VARS = [
+  'DOCUSIGN_INTEGRATION_KEY',
+  'DOCUSIGN_USER_ID',
+  'DOCUSIGN_OAUTH_HOST',
+  'DOCUSIGN_PRIVATE_KEY',
+  'DOCUSIGN_ACCOUNT_ID',
+  'DOCUSIGN_BASE_PATH',
+] as const
+
+function logDocuSignEnvStatus(): void {
+  const missing = REQUIRED_DOCUSIGN_VARS.filter((k) => !process.env[k])
+  const present = REQUIRED_DOCUSIGN_VARS.filter((k) =>  !!process.env[k])
+  if (missing.length > 0) {
+    console.error(
+      '[DocuSign] ❌ Missing required env vars:',
+      missing.join(', '),
+      '— envelope creation will fail.',
+    )
+  }
+  if (present.length > 0) {
+    console.info(
+      '[DocuSign] ✓ Env vars present:',
+      present.join(', '),
+    )
+  }
+}
+
 // ─── JWT Helpers ──────────────────────────────────────────────────────────────
 
 function base64url(input: Buffer | string): string {
@@ -125,6 +156,10 @@ async function getAccessToken(): Promise<string> {
   if (_tokenCache && Date.now() < _tokenCache.expiresAtMs - 60_000) {
     return _tokenCache.token
   }
+
+  // Log env status on every fresh token fetch (cache miss) so Vercel logs
+  // show exactly which vars are missing without exposing secret values.
+  logDocuSignEnvStatus()
 
   const oauthHost = requiredEnv('DOCUSIGN_OAUTH_HOST')
   const jwt       = buildJwt()
@@ -446,6 +481,9 @@ function buildSigner(signer: DocuSignSigner, recipientId: string) {
 function requiredEnv(key: string): string {
   const val = process.env[key]
   if (!val) {
+    // Log the missing name only — never the value — so Vercel Function logs
+    // show the misconfiguration clearly without leaking secrets.
+    console.error(`[DocuSign] requiredEnv: "${key}" is not set.`)
     throw new DocuSignError(
       `Missing required environment variable: ${key}. ` +
       'See src/lib/engine/docusign.ts for the full list of required DocuSign env vars.',
