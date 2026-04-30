@@ -227,6 +227,13 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
                     Demo
                   </Link>
                   <Link
+                    href="/resources"
+                    className="flex items-center min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-white/55 hover:text-white hover:bg-surface-3 transition-all"
+                    onClick={() => setOpen(false)}
+                  >
+                    Resources
+                  </Link>
+                  <Link
                     href="/auth/login"
                     className="flex items-center min-h-[48px] rounded-xl px-4 text-[15px] font-medium text-white/55 hover:text-white hover:bg-surface-3 transition-all"
                     onClick={() => setOpen(false)}
