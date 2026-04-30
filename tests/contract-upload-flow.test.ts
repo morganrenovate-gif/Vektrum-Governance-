@@ -10,7 +10,7 @@
  *  1.  Upload API route file exists
  *  2.  Upload API route exports POST
  *  3.  Upload API route calls getAuthUser (auth cannot be bypassed)
- *  4.  Upload API route enforces contractor or admin role (funders blocked)
+ *  4.  Upload API route allows contractor, funder, and admin to upload
  *  5.  Upload API route calls requireDealAccess (deal isolation)
  *  6.  Upload API route checks contractor ownership for contractor role
  *  7.  Upload API route validates PDF-only (rejects other MIME types)
@@ -29,7 +29,7 @@
  * 20.  ContractUploadSection handles error state (sets error message)
  * 21.  ContractUploadSection enforces 20 MB client-side size check
  * 22.  Deal page imports ContractUploadSection
- * 23.  Deal page renders ContractUploadSection for contractor/admin + !hasContract
+ * 23.  Deal page renders ContractUploadSection for contractor/funder/admin + !hasContract
  * 24.  Setup card Upload Contract CTA uses UploadContractTrigger (not dead anchor)
  * 25.  SOV section Upload Contract CTA uses UploadContractTrigger (not dead anchor)
  * 26.  Import SOV from Contract remains disabled/coming soon (no live wiring)
@@ -42,6 +42,11 @@
  * 33.  UploadContractTrigger component file exists
  * 34.  UploadContractTrigger dispatches contract:open-picker event on click
  * 35.  ContractUploadSection listens for contract:open-picker to open file picker
+ * 36.  No-contract warning does not say "contractor must upload the contract PDF".
+ * 37.  No-contract warning includes UploadContractTrigger CTA for funder/admin.
+ * 38.  Upload API route includes funder identity check (funder_id === user.id).
+ * 39.  Deal page renders ContractUploadSection when role is funder and no contract.
+ * 40.  Release gate signed-contract condition is not weakened (upload ≠ signed).
  *
  * Source-parse checks only — no live DB, no rendering, no env vars required.
  * Run:  npx tsx tests/contract-upload-flow.test.ts
@@ -121,15 +126,28 @@ await test('3. Upload API route calls getAuthUser', () => {
   )
 })
 
-await test('4. Upload API route blocks funders (contractor/admin only)', () => {
+await test('4. Upload API route allows contractor, funder, and admin to upload', () => {
   const src = read(UPLOAD_ROUTE)
+  // The role check must include all three allowed roles
   assert(
     src.includes("role !== 'contractor'") || src.includes('role !== "contractor"'),
-    `${UPLOAD_ROUTE} must check that only contractors/admins can upload.`,
+    `${UPLOAD_ROUTE} must include contractor in the role check.`,
   )
   assert(
     src.includes("role !== 'admin'") || src.includes('role !== "admin"'),
-    `${UPLOAD_ROUTE} must check that only contractors/admins can upload.`,
+    `${UPLOAD_ROUTE} must include admin in the role check.`,
+  )
+  assert(
+    src.includes("role !== 'funder'") || src.includes('role !== "funder"'),
+    `${UPLOAD_ROUTE} must include funder in the role check. ` +
+    `Funders are deal participants in funder-led workflows and must be able to upload ` +
+    `the governing contract or funding agreement.`,
+  )
+  // Funder identity check: funder must be the deal's own funder
+  assert(
+    src.includes('funder_id') && src.includes('user.id'),
+    `${UPLOAD_ROUTE} must verify funder_id === user.id for funder uploads, ` +
+    `preventing a funder from uploading to a deal they are not assigned to.`,
   )
 })
 
@@ -310,7 +328,7 @@ await test('22. Deal page imports ContractUploadSection', () => {
   )
 })
 
-await test('23. Deal page renders ContractUploadSection for contractor/admin + !hasContract', () => {
+await test('23. Deal page renders ContractUploadSection for contractor/funder/admin + !hasContract', () => {
   const src = read(PAGE)
   const code = codeOnly(src)
   assert(
@@ -320,6 +338,14 @@ await test('23. Deal page renders ContractUploadSection for contractor/admin + !
   assert(
     code.includes('hasContract'),
     `${PAGE} ContractUploadSection must be conditional on !hasContract.`,
+  )
+  // Funder must be in the render condition
+  const uploadSectionIdx = src.indexOf('ContractUploadSection dealId')
+  const surroundingContext = src.slice(Math.max(0, uploadSectionIdx - 300), uploadSectionIdx + 50)
+  assert(
+    surroundingContext.includes('"funder"') || surroundingContext.includes("'funder'"),
+    `${PAGE} ContractUploadSection render condition must include the funder role. ` +
+    `Funders in funder-led workflows must be able to upload the governing contract.`,
   )
 })
 
@@ -461,6 +487,91 @@ await test('35. ContractUploadSection listens for contract:open-picker to open f
   assert(
     src.includes('inputRef.current') && (src.includes('.click()') || src.includes('?.click()')),
     `${COMPONENT} must call inputRef.current?.click() when the event fires to open the file picker.`,
+  )
+})
+
+// ─── 36–40. Funder contract upload fix ───────────────────────────────────────
+// Regression guard: funders must be able to upload contracts on the deal page.
+// Previously the warning said "The contractor must upload" and the upload section
+// was hidden from funders. These checks pin the corrected behaviour.
+
+await test('36. No-contract warning does not say "contractor must upload" or "contractor must upload the contract PDF"', () => {
+  const lower = read(PAGE).toLowerCase()
+  assert(
+    !lower.includes('the contractor must upload the contract pdf') &&
+    !lower.includes('contractor must upload the contract'),
+    `${PAGE}: the no-contract warning must not say "The contractor must upload the ` +
+    `contract PDF". Funders may upload the governing contract in funder-led workflows.`,
+  )
+})
+
+await test('37. No-contract warning includes upload CTA for funder/admin (UploadContractTrigger in warning block)', () => {
+  const src = read(PAGE)
+  // The funder warning block must contain UploadContractTrigger so funders can act immediately
+  const noContractIdx = src.indexOf('No contract on file')
+  assert(
+    noContractIdx !== -1,
+    `${PAGE}: must contain "No contract on file" warning text.`,
+  )
+  // Within 1500 chars of the warning there must be an UploadContractTrigger CTA
+  // (comment + JSX + paragraph text puts the trigger ~945 chars from the first match)
+  const nearWarning = src.slice(noContractIdx, noContractIdx + 1500)
+  assert(
+    nearWarning.includes('UploadContractTrigger'),
+    `${PAGE}: "No contract on file" warning must include an <UploadContractTrigger> ` +
+    `so funders/admins have an immediate upload path, not just an advisory message.`,
+  )
+})
+
+await test('38. Upload API route includes funder identity check (funder_id match)', () => {
+  const src = read(UPLOAD_ROUTE)
+  assert(
+    src.includes("role === 'funder'") || src.includes('role === "funder"'),
+    `${UPLOAD_ROUTE} must have a funder-specific identity check branch.`,
+  )
+  assert(
+    src.includes('funder_id') && src.includes('user.id'),
+    `${UPLOAD_ROUTE} must verify funder_id === user.id so a funder can only upload ` +
+    `for deals they are assigned to.`,
+  )
+})
+
+await test('39. Deal page renders ContractUploadSection when role is funder and no contract', () => {
+  const src = read(PAGE)
+  // The render condition must include "funder" near ContractUploadSection
+  const sectionIdx = src.indexOf('<ContractUploadSection dealId')
+  assert(
+    sectionIdx !== -1,
+    `${PAGE}: <ContractUploadSection dealId=...> must be present.`,
+  )
+  // Look back up to 300 chars for the role condition wrapping it
+  const renderGate = src.slice(Math.max(0, sectionIdx - 300), sectionIdx)
+  assert(
+    renderGate.includes('"funder"') || renderGate.includes("'funder'"),
+    `${PAGE}: the render condition for <ContractUploadSection> must include the ` +
+    `funder role so funders can upload when no contract is on file.`,
+  )
+})
+
+await test('40. Release gate signed-contract condition is not weakened by this change', () => {
+  // The contract upload change must not touch release gate logic.
+  // Pin: the release-gate test file still exists and the API upload route
+  // does NOT skip the pending_signatures status on insert (contract must still
+  // go through signing before it is considered "signed").
+  const uploadSrc = read(UPLOAD_ROUTE)
+  assert(
+    uploadSrc.includes("status:              'pending_signatures'") ||
+    uploadSrc.includes("status: 'pending_signatures'") ||
+    uploadSrc.includes('pending_signatures'),
+    `${UPLOAD_ROUTE}: uploaded contracts must still be created with ` +
+    `status = 'pending_signatures', not 'signed'. The release gate requires a ` +
+    `fully signed contract; upload alone does not satisfy the condition.`,
+  )
+  // The contract_uploaded action must not mark the contract as signed
+  assert(
+    !uploadSrc.includes("status: 'signed'") && !uploadSrc.includes("status:              'signed'"),
+    `${UPLOAD_ROUTE}: must NOT insert a contract with status = 'signed'. ` +
+    `Signing happens through the separate DocuSign / sign flow after upload.`,
   )
 })
 

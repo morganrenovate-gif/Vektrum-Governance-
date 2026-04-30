@@ -9,13 +9,14 @@ export const dynamic = 'force-dynamic'
 
 // ─── POST /api/deals/[dealId]/contracts ────────────────────────────────────────
 //
-// Contractor or admin uploads a contract PDF for a deal.
+// Contractor, funder, or admin uploads a contract PDF for a deal.
 // Creates a new contract record with status = 'pending_signatures'.
 //
 // Rules:
 //   - Authenticated, deal-participant access required
-//   - Contractor or admin only (funders cannot upload)
-//   - Contractors may only upload for their own deal
+//   - Contractor, funder, or admin only
+//   - Contractors may only upload for their own deal (contractor_id match)
+//   - Funders may only upload for their own deal (funder_id match)
 //   - PDF only, max 20 MB
 //   - One non-voided contract per deal (partial unique index enforces this;
 //     we check first and return 409 to give a clear error message)
@@ -42,9 +43,9 @@ export async function POST(
 
   const { user, profile } = authContext
 
-  // ── 2. Role check (contractor or admin only) ───────────────────────────────
-  if (profile.role !== 'contractor' && profile.role !== 'admin') {
-    return errorResponse(403, 'Only contractors and admins may upload a contract.')
+  // ── 2. Role check (contractor, funder, or admin) ─────────────────────────
+  if (profile.role !== 'contractor' && profile.role !== 'admin' && profile.role !== 'funder') {
+    return errorResponse(403, 'Only deal participants (contractor, funder, or admin) may upload a contract.')
   }
 
   // ── 3. Deal access check ───────────────────────────────────────────────────
@@ -57,7 +58,7 @@ export async function POST(
 
   const adminClient = createSupabaseAdminClient()
 
-  // ── 4. Contractor-specific: must be the deal's own contractor ─────────────
+  // ── 4. Identity check — each role may only upload for their own deal ────────
   if (profile.role === 'contractor') {
     const { data: deal } = await adminClient
       .from('deals')
@@ -67,6 +68,18 @@ export async function POST(
 
     if (!deal || deal.contractor_id !== user.id) {
       return errorResponse(403, 'You are not the contractor for this deal.')
+    }
+  }
+
+  if (profile.role === 'funder') {
+    const { data: deal } = await adminClient
+      .from('deals')
+      .select('funder_id')
+      .eq('id', dealId)
+      .single()
+
+    if (!deal || deal.funder_id !== user.id) {
+      return errorResponse(403, 'You are not the funder for this deal.')
     }
   }
 

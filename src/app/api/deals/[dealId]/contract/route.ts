@@ -126,9 +126,9 @@ export async function POST(
 
   const { user, profile } = authContext
 
-  if (profile.role !== 'contractor' && profile.role !== 'admin') {
+  if (profile.role !== 'contractor' && profile.role !== 'admin' && profile.role !== 'funder') {
     return NextResponse.json(
-      { error: 'Only the contractor can upload a contract. Funders sign but do not upload.' },
+      { error: 'Only deal participants (contractor, funder, or admin) may upload a contract.' },
       { status: 403 },
     )
   }
@@ -156,10 +156,17 @@ export async function POST(
     )
   }
 
-  // Only the contractor who owns the deal may upload
+  // Only the deal's own contractor or funder may upload (admins are not identity-checked)
   if (profile.role === 'contractor' && deal.contractor_id !== user.id) {
     return NextResponse.json(
       { error: 'You are not the contractor on this deal.' },
+      { status: 403 },
+    )
+  }
+
+  if (profile.role === 'funder' && deal.funder_id !== user.id) {
+    return NextResponse.json(
+      { error: 'You are not the funder on this deal.' },
       { status: 403 },
     )
   }
