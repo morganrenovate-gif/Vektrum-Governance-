@@ -32,7 +32,7 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
 
 function Pill({ children, color = 'blue' }: { children: React.ReactNode; color?: 'blue' | 'emerald' | 'red' | 'amber' }) {
   const colors = {
-    blue:    'bg-vektrum-blue/10 text-vektrum-blue border-vektrum-blue/20',
+    blue:    'bg-blue-500/10 text-blue-300 border-blue-500/20',
     emerald: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
     red:     'bg-red-500/10 text-red-400 border-red-500/20',
     amber:   'bg-amber-500/10 text-amber-400 border-amber-500/20',
@@ -46,7 +46,7 @@ function Pill({ children, color = 'blue' }: { children: React.ReactNode; color?:
 
 export default function SecurityPage() {
   return (
-    <div className="bg-vektrum-bg">
+    <div className="bg-surface-0">
       <div className="mx-auto max-w-3xl px-6 sm:px-8 py-16 sm:py-20">
 
         {/* Page header */}
@@ -100,8 +100,8 @@ export default function SecurityPage() {
                 },
               ].map((item) => (
                 <div key={item.title} className="flex items-start gap-4">
-                  <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-vektrum-blue/10">
-                    <item.icon size={16} className="text-vektrum-blue" />
+                  <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-blue-500/10">
+                    <item.icon size={16} className="text-blue-400" />
                   </div>
                   <div>
                     <p className="text-[14px] font-semibold text-white mb-1">{item.title}</p>
@@ -230,7 +230,7 @@ export default function SecurityPage() {
           <section>
             <SectionHeading>Webhook security</SectionHeading>
             <div className="rounded-2xl border border-white/[0.08] bg-surface-2 p-6 space-y-4">
-              <div className="rounded-xl border border-vektrum-blue/15 bg-vektrum-blue/[0.04] px-4 py-3">
+              <div className="rounded-xl border border-blue-500/15 bg-blue-500/[0.04] px-4 py-3">
                 <p className="text-[12.5px] font-mono text-white/70 leading-relaxed">
                   X-Vektrum-Signature: t=&lt;unix_ts&gt;,sha256=HMAC-SHA256(&lt;ts&gt;.&lt;body&gt;, secret)
                 </p>
@@ -328,8 +328,8 @@ export default function SecurityPage() {
                   },
                 ].map((item) => (
                   <div key={item.title} className="flex items-start gap-3">
-                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-vektrum-blue/10">
-                      <item.icon size={14} className="text-vektrum-blue" />
+                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-blue-500/10">
+                      <item.icon size={14} className="text-blue-400" />
                     </div>
                     <div>
                       <p className="text-[13.5px] font-semibold text-white mb-1">{item.title}</p>
@@ -359,7 +359,7 @@ export default function SecurityPage() {
                   'Atomic balance reservation prevents concurrent over-authorization',
                 ].map((item) => (
                   <div key={item} className="flex items-start gap-2.5">
-                    <div className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-vektrum-blue/60 mt-1.5" />
+                    <div className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-blue-400/60 mt-1.5" />
                     <span className="text-[12.5px] text-white/60 leading-snug">{item}</span>
                   </div>
                 ))}
@@ -372,7 +372,7 @@ export default function SecurityPage() {
         <p className="mt-14 text-[14px] leading-relaxed text-white/55">
           For security inquiries, vendor due diligence packages, or penetration test scope
           discussions, contact{' '}
-          <a href="mailto:operations@vektrum.io" className="text-vektrum-blue hover:underline">
+          <a href="mailto:operations@vektrum.io" className="text-blue-300 hover:text-blue-200 hover:underline">
             operations@vektrum.io
           </a>
           .
