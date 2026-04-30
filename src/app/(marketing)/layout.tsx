@@ -27,6 +27,7 @@ import { BOOK_CALL_URL, BOOK_CALL_EXTERNAL } from '@/lib/book-call'
 import { MobileNav } from '@/components/nav/mobile-nav'
 import { VektrumWordmark } from '@/components/ui/vektrum-logo'
 import { SiteFooter } from '@/components/nav/site-footer'
+import { EngagementCta } from '@/components/marketing/engagement-cta'
 
 export default function MarketingLayout({
   children,
@@ -117,6 +118,9 @@ export default function MarketingLayout({
       <main id="main-content" className="flex-1">{children}</main>
 
       <SiteFooter />
+
+      {/* Post-engagement sticky CTA — appears only after scroll/time trigger */}
+      <EngagementCta />
     </>
   )
 }
