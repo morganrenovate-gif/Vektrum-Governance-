@@ -3,8 +3,9 @@ import { createClient } from '@/lib/supabase/server'
 
 /**
  * Server layout guard for /dashboard/deals/new.
- * Only contractors can create deals. Funders and admins are redirected.
+ * Funders, admins, and contractors may access this page.
  * Contractors must have Stripe connected before creating deals.
+ * Funders and admins do not require Stripe onboarding to create a governed deal.
  */
 export default async function NewDealLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -19,12 +20,14 @@ export default async function NewDealLayout({ children }: { children: React.Reac
     .eq('id', user.id)
     .single()
 
-  if (!profile || profile.role !== 'contractor') {
+  const ALLOWED_ROLES = ['contractor', 'funder', 'admin']
+  if (!profile || !ALLOWED_ROLES.includes(profile.role)) {
     redirect('/dashboard')
   }
 
-  // Gate: contractor must connect Stripe before creating deals
-  if (!profile.stripe_account_id) {
+  // Gate: contractors must connect Stripe before creating deals.
+  // Funders and admins are not required to have Stripe connected.
+  if (profile.role === 'contractor' && !profile.stripe_account_id) {
     redirect('/dashboard/contractor/onboarding')
   }
 
