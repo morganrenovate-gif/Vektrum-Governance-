@@ -14,7 +14,7 @@ import {
 export const metadata = {
   title: 'For Funders & Capital Partners',
   description:
-    'Conditional authorization infrastructure for construction lenders. 10-condition release gate, AI-assisted draw review, and immutable audit trail. Vektrum enforces your release conditions — your payment rail executes.',
+    'Conditional authorization infrastructure for construction lenders. 10-condition release gate, AI-assisted draw review, and an append-only, hash-chained, tamper-evident audit trail. Vektrum enforces your release conditions — your payment rail executes.',
   alternates: { canonical: 'https://vektrum.io/funders' },
   openGraph: {
     title: 'For Funders & Capital Partners — Vektrum',
@@ -114,7 +114,7 @@ export default function FundersPage() {
               },
               {
                 icon: FileText,
-                title: 'Immutable audit trail',
+                title: 'Append-only, tamper-evident audit trail',
                 desc: 'Every approval, release, and status change recorded in an append-only, hash-chained log with timestamp and actor.',
               },
               {

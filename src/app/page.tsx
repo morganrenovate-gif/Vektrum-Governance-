@@ -20,11 +20,11 @@ import {
 export const metadata: Metadata = {
   title: 'Vektrum — Construction Payment Governance',
   description:
-    'Conditional authorization infrastructure for construction disbursements. A 10-condition release gate, AI-assisted draw review, and immutable audit trail. Workflow tools track. Vektrum enforces.',
+    'Conditional authorization infrastructure for construction disbursements. A 10-condition release gate, AI-assisted draw review, and an append-only, hash-chained, tamper-evident audit trail. Workflow tools track. Vektrum enforces.',
   alternates: { canonical: 'https://vektrum.io' },
   openGraph: {
     title: 'Vektrum — Construction Payment Governance',
-    description: 'Conditional authorization infrastructure for construction disbursements. 10-condition release gate. AI-assisted draw review. Immutable audit trail.',
+    description: 'Conditional authorization infrastructure for construction disbursements. 10-condition release gate. AI-assisted draw review. Append-only, tamper-evident audit trail.',
     url: 'https://vektrum.io',
     images: [{ url: '/og-image.png', width: 1200, height: 630 }],
   },
@@ -52,7 +52,7 @@ export default async function HomePage() {
     operatingSystem: 'Web',
     url: 'https://vektrum.io',
     description:
-      'Conditional authorization infrastructure for construction disbursements. A 10-condition release gate enforces release conditions before any payment rail executes. AI-assisted draw review, immutable audit trail, and dispute isolation.',
+      'Conditional authorization infrastructure for construction disbursements. A 10-condition release gate enforces release conditions before any payment rail executes. AI-assisted draw review, append-only hash-chained tamper-evident audit trail, and dispute isolation.',
     offers: {
       '@type': 'Offer',
       price: '0',
@@ -979,7 +979,7 @@ export default async function HomePage() {
                 Get paid when you deliver.
               </h3>
               <p className="text-[14px] leading-relaxed text-vektrum-muted mb-6">
-                Milestone-based payouts. Immutable proof of approval. Disputes affect
+                Milestone-based payouts. Tamper-evident proof of approval. Disputes affect
                 only the disputed milestone — not the whole job.
               </p>
               <ul className="flex flex-col gap-3 mt-auto">
@@ -987,7 +987,7 @@ export default async function HomePage() {
                   'Receive full gross milestone amount — no fee deducted',
                   'Always free to join and participate',
                   'Disputes isolate one milestone, not the project',
-                  'Immutable record that work was approved',
+                  'Tamper-evident record that work was approved',
                   'Submit draw packages with documentation in-platform',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5">

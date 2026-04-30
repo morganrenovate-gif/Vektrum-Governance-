@@ -88,7 +88,7 @@ export default function PartnersPage() {
 
           <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
             <a
-              href="mailto:partners@vektrum.com"
+              href="mailto:partners@vektrum.io"
               className="group inline-flex min-h-[50px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-8 py-3 text-[14px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 hover:bg-vektrum-blue-hover transition-all"
             >
               Contact us to become a partner
@@ -467,10 +467,10 @@ def verify_vektrum_signature(
           </div>
 
           <a
-            href="mailto:partners@vektrum.com"
+            href="mailto:partners@vektrum.io"
             className="group inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-10 py-3.5 text-[15px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 transition-all hover:bg-vektrum-blue-hover hover:shadow-xl hover:shadow-vektrum-blue/40 hover:-translate-y-0.5"
           >
-            Contact partners@vektrum.com
+            Contact partners@vektrum.io
             <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
           </a>
         </div>

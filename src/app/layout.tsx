@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     template: "%s | Vektrum",
   },
   description:
-    "Conditional authorization infrastructure for construction disbursements. A 10-condition release gate, AI-assisted draw review, and immutable audit trail. Funds release only when all conditions are verified.",
+    "Conditional authorization infrastructure for construction disbursements. A 10-condition release gate, AI-assisted draw review, and an append-only, hash-chained, tamper-evident audit trail. Funds release only when all conditions are verified.",
   openGraph: {
     type: 'website',
     siteName: 'Vektrum',
@@ -106,7 +106,7 @@ export default async function RootLayout({
         "name": "Vektrum",
         "url": "https://vektrum.io",
         "logo": "https://vektrum.io/logo.png",
-        "description": "Vektrum is a construction disbursement governance platform providing authorization infrastructure for construction draw releases — 10-condition release gate, AI-assisted draw review preconditions, and immutable audit trails for funders and contractors.",
+        "description": "Vektrum is a construction disbursement governance platform providing authorization infrastructure for construction draw releases — 10-condition release gate, AI-assisted draw review preconditions, and append-only, hash-chained, tamper-evident audit trails for funders and contractors.",
         "contactPoint": {
           "@type": "ContactPoint",
           "email": "operations@vektrum.io",

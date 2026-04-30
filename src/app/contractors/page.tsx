@@ -11,7 +11,7 @@ import {
 export const metadata = {
   title: 'For Contractors',
   description:
-    'Milestone-based payouts, dispute isolation, and immutable proof of approved work. Get paid when your work is verified — not 90 days later. Always free for contractors.',
+    'Milestone-based payouts, dispute isolation, and tamper-evident proof of approved work. Get paid when your work is verified — not 90 days later. Always free for contractors.',
   alternates: { canonical: 'https://vektrum.io/contractors' },
   openGraph: {
     title: 'For Contractors — Vektrum',
@@ -117,7 +117,7 @@ export default function ContractorsPage() {
               {
                 icon: FileText,
                 title: 'Proof of approval',
-                desc: 'Immutable record that your work was reviewed and approved. Permanent and tamper-evident.',
+                desc: 'Append-only, hash-chained, tamper-evident record that your work was reviewed and approved.',
               },
               {
                 icon: Clock,

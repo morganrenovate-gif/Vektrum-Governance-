@@ -5,17 +5,17 @@ import { BOOK_CALL_URL, BOOK_CALL_EXTERNAL } from '@/lib/book-call'
 export const metadata = {
   title: 'About — Vektrum',
   description:
-    'Vektrum is a construction payment governance platform. We protect milestone-based disbursements with server-enforced release gates and immutable audit trails.',
+    'Vektrum is a construction payment governance platform. We protect milestone-based disbursements with server-enforced release gates and append-only, hash-chained, tamper-evident audit trails.',
   alternates: { canonical: 'https://vektrum.io/about' },
   openGraph: {
     title: 'About — Vektrum',
-    description: 'Construction payment governance — server-enforced release gates and immutable audit trails.',
+    description: 'Construction payment governance — server-enforced release gates and append-only, tamper-evident audit trails.',
     url: 'https://vektrum.io/about',
     images: [{ url: '/og-image.png', width: 1200, height: 630 }],
   },
   twitter: {
     title: 'About — Vektrum',
-    description: 'Construction payment governance — server-enforced release gates and immutable audit trails.',
+    description: 'Construction payment governance — server-enforced release gates and append-only, tamper-evident audit trails.',
   },
 }
 
@@ -69,7 +69,7 @@ export default function AboutPage() {
             <p>
               Vektrum fills that gap. We built a platform where every milestone is an
               independent financial unit, every release passes 10 server-side conditions,
-              and every action is recorded in an immutable audit trail.
+              and every action is recorded in an append-only, hash-chained, tamper-evident audit trail.
             </p>
           </div>
         </div>
