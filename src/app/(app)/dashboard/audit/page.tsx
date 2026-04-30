@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createSupabaseAdminClient } from "@/lib/supabase/server";
 import { Badge } from "@/components/ui/badge";
 import { AuditTimestamp } from "@/components/ui/local-time";
 import type { AuditLog } from "@/lib/types";
@@ -233,7 +233,13 @@ export default async function AuditLogPage({
   const from = (page - 1) * PAGE_SIZE;
   const to   = from + PAGE_SIZE - 1;
 
-  let query = supabase
+  // Admins use the service-role client so RLS on audit_log does not hide rows.
+  // Identity is already verified above via the user-session client — switching
+  // here is safe and does not grant admins any write access.
+  // Non-admins continue to use the scoped user-session client.
+  const queryClient = isAdmin ? createSupabaseAdminClient() : supabase;
+
+  let query = queryClient
     .from("audit_log")
     .select(
       // Fetch all compliance fields + profile joins for display
