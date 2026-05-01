@@ -20,6 +20,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Instrument_Sans, JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { MetaPixelScript } from "@/components/analytics/MetaPixelScript";
+import { MetaPixelPageView } from "@/components/analytics/MetaPixelPageView";
 import "./globals.css";
 
 const inter = Inter({
@@ -155,6 +157,9 @@ export default function RootLayout({
         */}
         {children}
         <Analytics />
+        {/* Meta Pixel — fires only when NEXT_PUBLIC_META_PIXEL_ID is set */}
+        <MetaPixelScript />
+        <MetaPixelPageView />
       </body>
     </html>
   );

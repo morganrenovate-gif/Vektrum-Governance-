@@ -30,6 +30,7 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { X } from 'lucide-react'
 import { BOOK_CALL_URL, BOOK_CALL_EXTERNAL } from '@/lib/book-call'
+import { trackMetaEvent } from '@/lib/meta-pixel'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -236,7 +237,7 @@ export function EngagementCta() {
           {...(BOOK_CALL_EXTERNAL
             ? { target: '_blank', rel: 'noopener noreferrer' }
             : {})}
-          onClick={() => lazyTrack('sticky_cta_book_click')}
+          onClick={() => { lazyTrack('sticky_cta_book_click'); trackMetaEvent('Lead') }}
           className="flex-1 rounded-lg border border-white/[0.18] bg-white/[0.06] px-3 py-2 text-center text-[12px] font-medium text-white/90 hover:bg-white/[0.12] hover:text-white hover:border-white/[0.28] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-all"
         >
           {bookLabel}

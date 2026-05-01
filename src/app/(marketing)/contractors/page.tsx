@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { MetaViewContent } from '@/components/analytics/MetaViewContent'
 import {
   ArrowRight,
   CheckCircle2,
@@ -32,6 +33,7 @@ export const metadata = {
 export default function ContractorsPage() {
   return (
     <div className="flex flex-col">
+      <MetaViewContent contentName="Contractors" />
       {/* ─── Hero ──────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-[#0D1B2A] pt-20 pb-16 sm:pt-28 sm:pb-20">
         <div
