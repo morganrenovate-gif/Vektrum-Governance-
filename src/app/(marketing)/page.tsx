@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { BOOK_CALL_URL, BOOK_CALL_EXTERNAL } from '@/lib/book-call'
 import {
   Shield,
   GitBranch,
@@ -86,32 +85,39 @@ export default function HomePage() {
                 </p>
               </div>
 
-              <h1 className="animate-fade-in font-display text-center lg:text-left text-[2.5rem] font-bold tracking-[-0.04em] text-white sm:text-5xl lg:text-[3.5rem] lg:leading-[1.1] leading-[1.08]">
-                The conditional authorization<br />
-                layer for construction<br />
-                <em className="not-italic text-white/70">draws.</em>
+              <h1 className="animate-fade-in font-display text-center lg:text-left text-[2.5rem] font-bold tracking-[-0.04em] text-white sm:text-5xl lg:text-[3.25rem] lg:leading-[1.08] leading-[1.08] text-balance">
+                Stop releasing draws on incomplete evidence.
               </h1>
 
-              <p className="animate-fade-in-delay mx-auto lg:mx-0 mt-6 max-w-lg text-center lg:text-left text-[17px] leading-relaxed text-white/70">
-                Vektrum is the conditional authorization layer for construction draws. Enforce
-                your conditions. Issue the signal. Your licensed partner executes.
+              <p className="animate-fade-in-delay mx-auto lg:mx-0 mt-4 max-w-lg text-center lg:text-left text-[18px] font-semibold text-white/85">
+                Workflow tools track. Vektrum enforces.
               </p>
 
-              <div className="animate-fade-in-delay-3 mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-3">
-                <Link
-                  href="/auth/signup"
-                  className="group inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-8 py-3.5 text-[15px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 transition-all hover:bg-vektrum-blue-hover hover:shadow-xl hover:shadow-vektrum-blue/40 hover:-translate-y-0.5"
-                >
-                  Start your first deal
-                  <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
-                </Link>
-                <Link
-                  href={BOOK_CALL_URL}
-                  {...(BOOK_CALL_EXTERNAL ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                  className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/[0.07] px-7 py-3 text-[14px] font-semibold text-white/80 hover:bg-white/[0.12] hover:text-white transition-all"
-                >
-                  Book a call
-                </Link>
+              <p className="animate-fade-in-delay mx-auto lg:mx-0 mt-5 max-w-xl text-center lg:text-left text-[15px] leading-relaxed text-white/65">
+                Vektrum helps construction lenders, title/escrow partners, builders, developers,
+                and construction finance teams verify draw-release conditions before release
+                authorization.
+              </p>
+
+              <div className="animate-fade-in-delay-3 mt-8 flex flex-col items-center lg:items-start gap-3">
+                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3">
+                  <Link
+                    href="/design-partners#apply"
+                    className="group inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-7 py-3.5 text-[15px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 transition-all hover:bg-vektrum-blue-hover hover:shadow-xl hover:shadow-vektrum-blue/40 hover:-translate-y-0.5"
+                  >
+                    Apply to become a design partner
+                    <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                  </Link>
+                  <Link
+                    href="/demo-live"
+                    className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/[0.07] px-7 py-3 text-[14px] font-semibold text-white/85 hover:bg-white/[0.12] hover:text-white transition-all"
+                  >
+                    Review the live demo
+                  </Link>
+                </div>
+                <p className="text-[12px] text-white/50">
+                  Limited first cohort. 30-minute workflow review. No obligation.
+                </p>
               </div>
 
               {/* Proof stats */}

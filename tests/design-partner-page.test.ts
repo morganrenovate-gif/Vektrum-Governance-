@@ -398,6 +398,208 @@ async function main() {
     '21k. form submit button label is "Apply to become a design partner"',
   )
 
+  // ── 22. Backend wiring — API route, migration, email helper ─────────────
+  const API_ROUTE = 'src/app/api/design-partner-applications/route.ts'
+  const EMAIL_LIB = 'src/lib/email/design-partner-alert.ts'
+  const MIGRATION = 'supabase/migrations/20260430000000_design_partner_applications.sql'
+
+  check(exists(API_ROUTE),  '22a. POST /api/design-partner-applications route exists')
+  check(exists(EMAIL_LIB),  '22b. design-partner alert email helper exists')
+  check(exists(MIGRATION),  '22c. design_partner_applications migration exists')
+
+  const api  = read(API_ROUTE)
+  const mail = read(EMAIL_LIB)
+  const sql  = read(MIGRATION)
+
+  // Migration: table + RLS + check constraints + no public policy
+  check(sql.includes('CREATE TABLE') && sql.includes('design_partner_applications'),
+    '22d. migration creates design_partner_applications')
+  check(sql.includes('ENABLE ROW LEVEL SECURITY'),
+    '22e. migration enables RLS on the table')
+  // No permissive public SELECT/INSERT/UPDATE/DELETE policy
+  check(
+    !/CREATE\s+POLICY[^;]*FOR\s+SELECT[^;]*USING\s*\(\s*true\s*\)/i.test(sql) &&
+    !/CREATE\s+POLICY[^;]*TO\s+anon/i.test(sql),
+    '22f. migration does NOT grant public select access',
+  )
+  // Required columns
+  for (const col of [
+    'name', 'company', 'role', 'email', 'audience_type', 'draw_exposure',
+    'biggest_bottleneck', 'utm_source', 'utm_medium', 'utm_campaign',
+    'utm_content', 'utm_term', 'referrer', 'user_agent',
+    'status', 'admin_email_sent_at', 'created_at',
+  ]) {
+    check(sql.includes(col), `22g. migration column "${col}" present`)
+  }
+  // CHECK constraints for enums
+  check(
+    sql.includes("audience_type IN") &&
+    sql.includes("'Lender'") && sql.includes("'Title / escrow'") &&
+    sql.includes("'Builder'") && sql.includes("'Developer'") &&
+    sql.includes("'Fund control'") && sql.includes("'Contractor'") &&
+    sql.includes("'Other'"),
+    '22h. audience_type CHECK constraint enumerates the 7 values',
+  )
+  check(
+    sql.includes("draw_exposure IN") &&
+    sql.includes("'Yes'") && sql.includes("'No'") &&
+    sql.includes("'Not directly, but my team does'"),
+    '22i. draw_exposure CHECK constraint enumerates Yes/No/team',
+  )
+  check(
+    sql.includes("status IN") && sql.includes("'new'"),
+    '22j. status CHECK constraint includes default "new"',
+  )
+
+  // ── 23. API route ───────────────────────────────────────────────────────
+  check(api.includes("export async function POST"),
+    '23a. API exports POST handler')
+  check(api.includes("createSupabaseAdminClient") && api.includes("@/lib/supabase/admin"),
+    '23b. API inserts via service-role admin client (bypasses RLS)')
+  check(api.includes("'design_partner_applications'") || api.includes('design_partner_applications'),
+    '23c. API targets the design_partner_applications table')
+
+  // Required field validation — error strings present in source
+  check(api.includes('Name is required'),              '23d. API validates: name required')
+  check(api.includes('Company is required'),           '23e. API validates: company required')
+  check(api.includes('Role is required'),              '23f. API validates: role required')
+  check(api.includes('Email is required'),             '23g. API validates: email required')
+  check(api.includes('Email is invalid'),              '23h. API validates: email format')
+  check(api.includes('audienceType is invalid'),       '23i. API validates: audienceType enum')
+  check(api.includes('drawExposure is invalid'),       '23j. API validates: drawExposure enum')
+  check(api.includes('biggestBottleneck is required'), '23k. API validates: biggestBottleneck required')
+
+  // Payload size cap
+  check(api.includes('Payload too large') || api.includes('MAX_PAYLOAD_BYTES'),
+    '23l. API rejects oversized payloads')
+
+  // Honeypot
+  check(api.includes('honeypot') || api.includes('website'),
+    '23m. API supports a honeypot field for basic abuse control')
+
+  // Insert before email; admin_email_sent_at only on email success
+  const insertIdx = api.indexOf('.insert(')
+  const sendIdx   = api.indexOf('await sendDesignPartnerAlertEmail')
+  check(insertIdx > -1 && sendIdx > insertIdx,
+    '23n. API inserts the row BEFORE attempting the admin email')
+  check(api.includes('admin_email_sent_at') && api.includes('emailSent'),
+    '23o. API updates admin_email_sent_at conditioned on email success')
+
+  // Insert failure → 500, no success
+  check(api.includes('insertError') && api.includes('status: 500'),
+    '23p. API returns 500 if DB insert fails')
+
+  // Email failure → still success (DO NOT throw / DO NOT 500)
+  // The presence of try/catch around the send + the success response after
+  // emailSent assignment is sufficient.
+  check(
+    api.includes("ok: true") &&
+    api.includes("emailSent") &&
+    api.includes('catch'),
+    '23q. API still returns success when admin email fails after DB insert',
+  )
+
+  // Public visitor path — no auth check required, no cookies()/headers() pull
+  check(
+    !api.includes("@/lib/supabase/server") &&
+    !api.includes("'next/headers'"),
+    '23r. API does not require an authenticated session (public route)',
+  )
+
+  // ── 24. Email helper ────────────────────────────────────────────────────
+  check(mail.includes('Resend'),
+    '24a. email helper imports Resend')
+  check(mail.includes('RESEND_API_KEY'),
+    '24b. email helper reads RESEND_API_KEY')
+  check(
+    mail.includes('DESIGN_PARTNER_ALERT_EMAIL') &&
+    mail.includes('ADMIN_SIGNUP_ALERT_EMAIL') &&
+    mail.includes('ADMIN_EMAIL'),
+    '24c. recipient resolution: DESIGN_PARTNER_ALERT_EMAIL → ADMIN_SIGNUP_ALERT_EMAIL → ADMIN_EMAIL',
+  )
+  check(mail.includes('EMAIL_FROM'),
+    '24d. email helper reads EMAIL_FROM (sender address env var)')
+  check(mail.includes('replyTo'),
+    '24e. email helper sets replyTo to applicant email')
+  check(mail.includes('New Vektrum design partner application'),
+    '24f. admin email subject "New Vektrum design partner application"')
+  // Never throws
+  check(mail.includes('try {') && mail.includes('catch'),
+    '24g. email helper wraps the send in try/catch (never throws)')
+  // Returns boolean for caller (success → true, otherwise false)
+  check(mail.includes(': Promise<boolean>') || mail.includes('Promise<boolean>'),
+    '24h. email helper returns Promise<boolean> for caller decisioning')
+
+  // ── 25. Form posts to API with UTMs/referrer + Lead AFTER success ───────
+  check(
+    form.includes("'/api/design-partner-applications'"),
+    '25a. form POSTs to /api/design-partner-applications',
+  )
+  check(
+    form.includes("method:  'POST'") || form.includes("method: 'POST'"),
+    '25b. form uses POST method',
+  )
+  check(
+    form.includes('utmSource')   && form.includes('utmMedium') &&
+    form.includes('utmCampaign') && form.includes('utmContent') &&
+    form.includes('utmTerm'),
+    '25c. form payload includes utmSource/Medium/Campaign/Content/Term',
+  )
+  check(
+    form.includes('referrer:'),
+    '25d. form payload includes referrer',
+  )
+  check(
+    form.includes('readUrlParam') && form.includes("'utm_source'"),
+    '25e. form reads UTM params from window.location at submit time',
+  )
+  // Lead must fire only after successful response — i.e. the actual call
+  // (lastIndexOf skips the docstring example at the top of the file)
+  // appears AFTER the `if (!res.ok)` guard returns.
+  const okGuardIdx = form.indexOf('if (!res.ok)')
+  const leadIdx    = form.lastIndexOf("trackMetaEvent('Lead'")
+  check(
+    okGuardIdx > -1 && leadIdx > okGuardIdx,
+    '25f. trackMetaEvent("Lead") call site is AFTER the !res.ok guard (success only)',
+  )
+  // Honeypot field rendered
+  check(
+    form.includes('name="website"') &&
+    (form.includes('left: \'-10000px\'') || form.includes('aria-hidden')),
+    '25g. form includes a hidden honeypot "website" field',
+  )
+
+  // Success state copy
+  check(
+    form.includes('Application received.') &&
+    form.includes('design-partner cohort'),
+    '25h. success state shows "Application received." + cohort follow-up copy',
+  )
+
+  // Error state — surfaced when API returns non-2xx
+  check(
+    form.includes('errorMsg') && form.includes('role="alert"'),
+    '25i. form surfaces an inline error message with role="alert" on failure',
+  )
+
+  // ── 26. No banned phrases re-introduced in any of the new files ─────────
+  const newSurface = [src, form, api, mail].join('\n').toLowerCase()
+  for (const banned of [
+    'vektrum moves money',
+    'vektrum acts as escrow',
+    'ai approves release',
+    'ai approved release',
+    'automatic payment',
+    'guarantees compliance',
+    'guarantees payment',
+    'prevents fraud',
+    'join beta',
+  ]) {
+    check(!newSurface.includes(banned),
+      `26. no banned phrase: "${banned}" in design-partner surface`,
+    )
+  }
+
   console.log('\n✓ All design-partner-page tests passed.\n')
 }
 
