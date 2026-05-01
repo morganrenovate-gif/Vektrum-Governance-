@@ -349,6 +349,14 @@ export default async function DashboardPage() {
             <PageHeader
               eyebrow="Funder Dashboard"
               title={`Welcome back, ${profile.full_name?.split(' ')[0] ?? 'there'}`}
+              action={
+                <Link href="/dashboard/deals/new">
+                  <Button variant="primary" size="md">
+                    <Plus size={15} aria-hidden="true" />
+                    Create governed deal
+                  </Button>
+                </Link>
+              }
             />
 
             {/* Weekly briefing card */}
@@ -392,9 +400,9 @@ export default async function DashboardPage() {
               {deals.length === 0 ? (
                 <EmptyState
                   icon={FolderOpen}
-                  title="No projects yet"
-                  description="Create a governed deal to fund a construction project. Vektrum enforces release conditions before any funds are authorized."
-                  action={{ label: "Create Governed Deal", href: "/dashboard/deals/new" }}
+                  title="No governed deals yet"
+                  description="Create your first governed deal from a contract, funding agreement, or draw schedule. Vektrum will help organize parties, release conditions, SOV/milestones, retainage, and audit evidence before funds are authorized."
+                  action={{ label: "Create governed deal", href: "/dashboard/deals/new" }}
                 />
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
