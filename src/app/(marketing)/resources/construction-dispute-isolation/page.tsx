@@ -378,6 +378,7 @@ export default function DisputeIsolationArticle() {
                   className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
                 >
                   <em>FAR 52.232-5 Payments under Fixed-Price Construction Contracts</em>
+                  <span className="sr-only"> (opens in a new tab)</span>
                 </a>{' '}
                 (May 2014) and{' '}
                 <a
@@ -387,6 +388,7 @@ export default function DisputeIsolationArticle() {
                   className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
                 >
                   <em>FAR 52.232-27 Prompt Payment for Construction Contracts</em>
+                  <span className="sr-only"> (opens in a new tab)</span>
                 </a>{' '}
                 (January 2017). Require itemized substantiation in each progress payment request
                 and connect 14-day payment timing to absence of disagreement over quantity,

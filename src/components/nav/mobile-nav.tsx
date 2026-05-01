@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { Menu, X, LogOut, Settings, FileText, Shield, Briefcase, FileBox, DollarSign, HelpCircle, ArrowRight } from 'lucide-react'
@@ -20,10 +20,26 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
   const pathname = usePathname()
   const router = useRouter()
 
+  // Hold a ref to the hamburger button so we can return focus when the drawer
+  // closes via Escape, backdrop click, or route change. Required for keyboard
+  // and screen-reader users — focus must not be left in a hidden region.
+  const triggerRef = useRef<HTMLButtonElement | null>(null)
+  // Tracks whether the drawer was just closed so we know whether to restore
+  // focus. Avoids stealing focus on the initial server render.
+  const wasOpen = useRef(false)
+
   // Close on route change
   useEffect(() => {
     setOpen(false)
   }, [pathname])
+
+  // Restore focus to the trigger when the drawer transitions from open → closed.
+  useEffect(() => {
+    if (wasOpen.current && !open) {
+      triggerRef.current?.focus()
+    }
+    wasOpen.current = open
+  }, [open])
 
   // Prevent body scroll when open
   useEffect(() => {
@@ -71,13 +87,16 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
     <>
       {/* Hamburger button — visible only on mobile */}
       <button
+        ref={triggerRef}
+        type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex sm:hidden items-center justify-center w-9 h-9 rounded-lg text-white/55 hover:text-white hover:bg-surface-3 transition-colors"
+        className="flex sm:hidden items-center justify-center w-9 h-9 rounded-lg text-white/55 hover:text-white hover:bg-surface-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue transition-colors"
         aria-label={open ? 'Close menu' : 'Open menu'}
         aria-expanded={open}
         aria-controls="mobile-nav-menu"
+        aria-haspopup="menu"
       >
-        {open ? <X size={20} /> : <Menu size={20} />}
+        {open ? <X size={20} aria-hidden="true" /> : <Menu size={20} aria-hidden="true" />}
       </button>
 
       {/* Backdrop — only when open */}
@@ -267,7 +286,10 @@ export function MobileNav({ isLoggedIn = false, userName, userEmail, userRole }:
                       onClick={() => setOpen(false)}
                     >
                       Book a call
-                      <ArrowRight size={15} />
+                      {BOOK_CALL_EXTERNAL && (
+                        <span className="sr-only">(opens in a new tab)</span>
+                      )}
+                      <ArrowRight size={15} aria-hidden="true" />
                     </Link>
                     <Link
                       href="/auth/signup"

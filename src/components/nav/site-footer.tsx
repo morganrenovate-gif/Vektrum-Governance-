@@ -49,6 +49,9 @@ export function SiteFooter() {
                 className="text-[13px] text-white/75 hover:text-white focus-visible:text-white transition-colors rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue"
               >
                 Book a call
+                {BOOK_CALL_EXTERNAL && (
+                  <span className="sr-only"> (opens in a new tab)</span>
+                )}
               </Link>
             </div>
             <div className="flex flex-col gap-3">
