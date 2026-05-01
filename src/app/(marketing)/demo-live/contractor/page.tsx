@@ -2,15 +2,20 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { HardHat, TrendingUp, DollarSign, CheckCircle2, Clock, ArrowRight, ArrowLeft, Sparkles, Loader2, List, Shield } from 'lucide-react'
+import {
+  HardHat, CheckCircle2, ArrowRight, ArrowLeft, Sparkles, Loader2,
+  List, Shield, AlertTriangle, Lock, Upload, FileWarning,
+} from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format'
 import { useDemoAutoReset } from '@/lib/demo-data/use-demo-auto-reset'
+import { DemoActivityLog } from '@/components/demo/DemoActivityLog'
+import type { DemoActivityEntry } from '@/lib/demo-data/use-demo-activity-log'
 import { riverside, harbor, getMilestoneSummary } from '@/lib/demo-data'
 
 // ── Mock data ────────────────────────────────────────────────────────────────
 //
 // Derived from the canonical demo data so dashboard tiles stay in sync with
-// the deal pages.  Previously had stale hardcoded values (totalReleased
+// the deal pages. Previously had stale hardcoded values (totalReleased
 // $3,940,000 with a comment referencing Harbor's old $3.46M figure, and
 // Harbor pct=38 / milestonesCompleted=4 which counted Structural Steel as
 // released when it now starts as 'approved').
@@ -41,37 +46,108 @@ const MOCK_DEALS = [
   },
 ]
 
+// ── Demo-start activity seed ──────────────────────────────────────────────────
+//
+// Pre-populated entries representing the state when a visitor arrives.
+// On demo reset, activityEntries reverts to this array so every session
+// starts from the same canonical scenario.
+
+const SEED_ENTRIES: DemoActivityEntry[] = [
+  {
+    id:        'seed-4',
+    timestamp: 'Demo start',
+    actor:     'System',
+    role:      'system',
+    action:    'Release gate blocked',
+    detail:    'Building Envelope & Roofing — lien waiver missing, change order unresolved',
+  },
+  {
+    id:        'seed-3',
+    timestamp: 'Demo start',
+    actor:     'System',
+    role:      'system',
+    action:    'AI pre-review not current',
+    detail:    'Building Envelope & Roofing requires AI pre-review before release gate can proceed',
+  },
+  {
+    id:        'seed-2',
+    timestamp: 'Demo start',
+    actor:     'System',
+    role:      'system',
+    action:    'Funder authorization pending',
+    detail:    'Structural Steel Erection — approved by gate, awaiting funder authorization',
+  },
+  {
+    id:        'seed-1',
+    timestamp: 'Demo start',
+    actor:     'Marcus Webb',
+    role:      'contractor',
+    action:    'Draw #3 submitted for review',
+    detail:    'Structural Steel Erection — $2,180,000',
+  },
+]
+
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export default function DemoContractorPage() {
   // ── Demo state ────────────────────────────────────────────────────────────
   //
-  // reviewSubmitted tracks whether the contractor has clicked "Request Review"
+  // reviewSubmitted tracks whether the contractor has clicked "Request AI review"
   // for the pending MEP Rough-In draw. Resets to false on demo reset so the
   // button returns to its original state for the next demo visitor.
-  const [reviewSubmitted, setReviewSubmitted] = useState(false)
-  const [submitting, setSubmitting] = useState(false)
+  const [reviewSubmitted, setReviewSubmitted]   = useState(false)
+  const [submitting, setSubmitting]             = useState(false)
+  const [activityEntries, setActivityEntries]   = useState<DemoActivityEntry[]>(SEED_ENTRIES)
 
   useDemoAutoReset(() => {
     setReviewSubmitted(false)
     setSubmitting(false)
+    setActivityEntries(SEED_ENTRIES)
   })
+
+  function nowTime(): string {
+    return new Date().toLocaleTimeString('en-US', {
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true,
+    })
+  }
 
   function handleRequestReview() {
     if (submitting || reviewSubmitted) return
     setSubmitting(true)
-    // Simulate submission delay, then mark as submitted
+
+    // Log: AI pre-review requested
+    setActivityEntries((prev) => [
+      {
+        id:        `act-req-${Date.now()}`,
+        timestamp: nowTime(),
+        actor:     'Marcus Webb',
+        role:      'contractor',
+        action:    'AI pre-review requested',
+        detail:    'MEP Rough-In — Riverside Mixed-Use Development · $680,000',
+      },
+      ...prev,
+    ])
+
+    // Simulate AI review latency, then log completion
     setTimeout(() => {
       setSubmitting(false)
       setReviewSubmitted(true)
+      setActivityEntries((prev) => [
+        {
+          id:        `act-done-${Date.now()}`,
+          timestamp: nowTime(),
+          actor:     'Perplexity Computer',
+          role:      'system',
+          action:    'AI pre-review completed — funder authorization still required',
+          detail:    'MEP Rough-In — review passed · funder authorization controls release',
+        },
+        ...prev,
+      ])
     }, 900)
   }
 
-  const totalDeals = MOCK_DEALS.length
-  const totalFunded = MOCK_DEALS.reduce((s, d) => s + d.total, 0)
-  // Derived from canonical demo data — Riverside.released + Harbor.released.
-  // Harbor's canonical released is $2,160,000 (ms-hb-3 starts approved, not
-  // released), giving a contractor portfolio total of $2,640,000.
+  const totalDeals    = MOCK_DEALS.length
+  const totalFunded   = MOCK_DEALS.reduce((s, d) => s + d.total, 0)
   const totalReleased = riverside.released + harbor.released
   const pendingReview = reviewSubmitted ? 0 : 1
 
@@ -156,6 +232,88 @@ export default function DemoContractorPage() {
         </div>
       </section>
 
+      {/* ── Release Blocked — Building Envelope & Roofing ────────────────── */}
+      {/*
+        Demo scene: ms-hb-4 is in_progress with no documents — it cannot be
+        released. This card teaches the core Vektrum value: releases are blocked
+        when conditions are missing, the gate is deterministic, and the funder
+        authorizes only after all conditions are satisfied.
+        No production release logic is involved — this is static demo copy only.
+      */}
+      <section
+        className="rounded-2xl border border-amber-500/30 bg-amber-500/[0.04] overflow-hidden"
+        aria-label="Release blocked — missing conditions"
+      >
+        <div className="flex items-center gap-3 border-b border-amber-500/20 px-5 py-4">
+          <div className="h-8 w-8 flex items-center justify-center rounded-lg bg-amber-500/[0.12] flex-shrink-0">
+            <AlertTriangle size={15} className="text-amber-400" aria-hidden="true" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[13px] font-semibold text-amber-300">Release blocked</p>
+            <p className="text-[11px] text-white/55 mt-0.5">
+              Building Envelope &amp; Roofing cannot be released yet because required release conditions are missing.
+            </p>
+          </div>
+          <Link
+            href="/demo-live/deal/harbor?from=contractor"
+            className="ml-2 inline-flex items-center gap-1 rounded-lg border border-amber-500/20 bg-amber-500/[0.08] px-2.5 py-1.5 text-[11px] font-semibold text-amber-300 whitespace-nowrap hover:bg-amber-500/[0.14] transition-colors flex-shrink-0"
+          >
+            View deal
+            <ArrowRight size={11} aria-hidden="true" />
+          </Link>
+        </div>
+
+        <div className="px-5 py-4 space-y-4">
+          {/* Missing conditions list */}
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/40 mb-2.5">
+              Missing release conditions
+            </p>
+            <ul className="space-y-2">
+              {[
+                { icon: FileWarning, label: 'Lien waiver missing',          detail: 'Conditional lien waiver required before release gate can proceed' },
+                { icon: AlertTriangle, label: 'Open change order unresolved', detail: 'Change order CO-007 must be resolved or closed by funder' },
+                { icon: Sparkles,   label: 'AI pre-review not current',     detail: 'No current AI pre-review on file for this draw request' },
+                { icon: Lock,       label: 'Funder authorization required',  detail: 'Release gate authorized only by explicit funder action' },
+              ].map(({ icon: Icon, label, detail }) => (
+                <li key={label} className="flex items-start gap-2.5">
+                  <Icon size={13} className="text-amber-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
+                  <div>
+                    <p className="text-[12px] font-semibold text-amber-200/90">{label}</p>
+                    <p className="text-[11px] text-white/40 mt-0.5">{detail}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Actions */}
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <Link
+              href="/demo-live/deal/harbor?from=contractor"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500/[0.14] border border-amber-500/25 px-3 py-1.5 text-[11px] font-semibold text-amber-300 hover:bg-amber-500/[0.22] transition-colors"
+            >
+              <Upload size={11} aria-hidden="true" />
+              Upload lien waiver
+            </Link>
+            <Link
+              href="/demo-live/deal/harbor?from=contractor"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500/[0.14] border border-amber-500/25 px-3 py-1.5 text-[11px] font-semibold text-amber-300 hover:bg-amber-500/[0.22] transition-colors"
+            >
+              <AlertTriangle size={11} aria-hidden="true" />
+              Resolve change order
+            </Link>
+            <Link
+              href="#draw-review"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500/[0.14] border border-amber-500/25 px-3 py-1.5 text-[11px] font-semibold text-amber-300 hover:bg-amber-500/[0.22] transition-colors"
+            >
+              <Sparkles size={11} aria-hidden="true" />
+              Request AI review
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Draw Review Status */}
       <section
         id="draw-review"
@@ -167,16 +325,12 @@ export default function DemoContractorPage() {
         <div className="p-5">
           {reviewSubmitted ? (
             /* ── Submitted state ─────────────────────────────────────────── */
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-[13px] font-medium text-white/80">MEP Rough-In &mdash; Riverside Mixed-Use Development</p>
-                <p className="text-[12px] text-white/75 mt-0.5">Amount: {formatCurrency(680_000)}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/[0.08] border border-emerald-500/20 px-3 py-1 text-[12px] font-semibold text-emerald-400">
-                  <CheckCircle2 size={13} aria-hidden="true" />
-                  Review Submitted
-                </span>
+            <div className="flex flex-col gap-3">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-[13px] font-medium text-white/80">MEP Rough-In &mdash; Riverside Mixed-Use Development</p>
+                  <p className="text-[12px] text-white/75 mt-0.5">Amount: {formatCurrency(680_000)}</p>
+                </div>
                 <Link
                   href="/demo-live/deal/riverside?from=contractor"
                   className="group inline-flex items-center gap-1.5 rounded-xl border border-white/[0.10] bg-surface-3 px-3 py-2 text-[12px] font-semibold text-white/65 whitespace-nowrap hover:text-white hover:border-white/[0.20] transition-all"
@@ -184,9 +338,23 @@ export default function DemoContractorPage() {
                   View Deal <ArrowRight size={12} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
                 </Link>
               </div>
+              {/* AI review result — framed as pre-review, not approval */}
+              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.05] px-4 py-3">
+                <div className="flex items-start gap-2.5">
+                  <CheckCircle2 size={14} className="text-emerald-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
+                  <div>
+                    <p className="text-[12px] font-semibold text-emerald-300">
+                      AI pre-review complete — funder authorization still required.
+                    </p>
+                    <p className="text-[11px] text-white/50 mt-1 leading-relaxed">
+                      The deterministic release gate and funder authorization still control release. AI review is a precondition, not an approval.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           ) : (
-            /* ── Default state — Request Review button ───────────────────── */
+            /* ── Default state — Request AI review button ─────────────────── */
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-[13px] font-medium text-white/80">MEP Rough-In &mdash; Riverside Mixed-Use Development</p>
@@ -207,7 +375,7 @@ export default function DemoContractorPage() {
                   ) : (
                     <>
                       <Sparkles size={12} aria-hidden="true" />
-                      Request Review
+                      Request AI review
                     </>
                   )}
                 </button>
@@ -220,6 +388,72 @@ export default function DemoContractorPage() {
               </div>
             </div>
           )}
+        </div>
+      </section>
+
+      {/* ── Milestone Status Overview ─────────────────────────────────────── */}
+      {/*
+        Three milestone states that teach the Vektrum release model:
+          Released       — all conditions met, funder authorized, funds moved via rail.
+          AI-review-ready — gate passed, awaiting funder authorization.
+          Blocked        — one or more conditions missing; gate will not pass.
+      */}
+      <section className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden">
+        <div className="flex items-center gap-2.5 border-b border-white/[0.06] px-5 py-4">
+          <Shield size={14} className="text-blue-400 flex-shrink-0" aria-hidden="true" />
+          <p className="text-[13px] font-semibold text-white">Milestone Status — Harbor Logistics Center</p>
+          <span className="ml-auto text-[11px] text-white/40">Release gate state</span>
+        </div>
+        <div className="divide-y divide-white/[0.04]">
+          {[
+            {
+              name:   'Site Preparation & Grading',
+              amount: 320_000,
+              state:  'released' as const,
+              detail: 'All 10 conditions met · funder authorized · released via rail',
+              badge:  'bg-emerald-500/[0.12] text-emerald-400 border border-emerald-500/20',
+              label:  'Released',
+              icon:   CheckCircle2,
+              iconColor: 'text-emerald-400',
+            },
+            {
+              name:   'Structural Steel Erection',
+              amount: 2_180_000,
+              state:  'approved' as const,
+              detail: 'AI pre-review complete · release gate passed · awaiting funder authorization',
+              badge:  'bg-vektrum-blue/20 text-blue-300 border border-vektrum-blue/40',
+              label:  'Gate passed — funder auth required',
+              icon:   Shield,
+              iconColor: 'text-blue-400',
+            },
+            {
+              name:   'Building Envelope & Roofing',
+              amount: 2_640_000,
+              state:  'blocked' as const,
+              detail: 'Lien waiver missing · change order unresolved · AI pre-review not current',
+              badge:  'bg-amber-500/[0.12] text-amber-400 border border-amber-500/20',
+              label:  'Release blocked',
+              icon:   AlertTriangle,
+              iconColor: 'text-amber-400',
+            },
+          ].map((ms) => {
+            const Icon = ms.icon
+            return (
+              <div key={ms.name} className="flex items-center gap-4 px-5 py-3.5">
+                <Icon size={14} className={`${ms.iconColor} flex-shrink-0`} aria-hidden="true" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[12px] font-semibold text-white/85 truncate">{ms.name}</p>
+                  <p className="text-[11px] text-white/40 mt-0.5">{ms.detail}</p>
+                </div>
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  <span className="text-[11px] text-white/50 tabular-nums">{formatCurrency(ms.amount)}</span>
+                  <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold border ${ms.badge}`}>
+                    {ms.label}
+                  </span>
+                </div>
+              </div>
+            )
+          })}
         </div>
       </section>
 
@@ -307,6 +541,18 @@ export default function DemoContractorPage() {
           ))}
         </div>
       </section>
+
+      {/* ── Demo Activity Log ─────────────────────────────────────────────── */}
+      <DemoActivityLog entries={activityEntries} />
+
+      {/* ── Rail-neutral disclaimer ───────────────────────────────────────── */}
+      <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4">
+        <p className="text-[11px] text-white/40 leading-relaxed text-center">
+          Vektrum authorizes releases only after all conditions are satisfied.
+          It does not hold funds or act as escrow. Payment execution is handled by the selected rail —
+          Stripe Connect, title, escrow, bank wire, or your institution&rsquo;s existing process.
+        </p>
+      </div>
     </div>
     </div>
   )
