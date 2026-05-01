@@ -93,8 +93,8 @@ export default function ResourcesPage() {
                       {article.description}
                     </p>
                     <div className="mt-4 flex items-center gap-1.5 text-[12px] font-semibold text-blue-400 group-hover:text-blue-300 transition-colors">
-                      Read article
-                      <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                      <span className="truncate">Read: {article.title}</span>
+                      <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5 flex-shrink-0" aria-hidden="true" />
                     </div>
                   </div>
                 </div>

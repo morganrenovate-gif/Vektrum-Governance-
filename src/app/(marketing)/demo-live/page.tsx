@@ -1,5 +1,31 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Landmark, HardHat, Shield, ArrowRight } from 'lucide-react'
+
+// ISR: public marketing surface — no per-user data, safe to cache.
+export const revalidate = 3600
+
+// Self-canonical so /demo-live is not duplicated by search engines via any
+// campaign UTM/redirect path. Title is set explicitly with a single " | Vektrum"
+// suffix to avoid the "Demo — Vektrum | Vektrum" double-suffix pattern.
+export const metadata: Metadata = {
+  title: 'Interactive Construction Draw Demo | Vektrum',
+  description:
+    'Walk through Vektrum’s release gate as a funder, contractor, or admin. See how draw conditions are verified before release authorization, and how the audit trail captures the decision.',
+  alternates: { canonical: 'https://vektrum.io/demo-live' },
+  openGraph: {
+    title: 'Interactive Construction Draw Demo | Vektrum',
+    description:
+      'Walk through Vektrum’s release gate as a funder, contractor, or admin — see how draw conditions are verified before release authorization.',
+    url: 'https://vektrum.io/demo-live',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+  },
+  twitter: {
+    title: 'Interactive Construction Draw Demo | Vektrum',
+    description:
+      'Walk through Vektrum’s release gate — funder, contractor, and admin views over the same draw.',
+  },
+}
 
 const roles = [
   {
