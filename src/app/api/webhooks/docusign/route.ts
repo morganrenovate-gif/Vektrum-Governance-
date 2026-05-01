@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/server'
 import { logAudit } from '@/lib/engine/audit'
+import { notifyContractorTurnToSign } from '@/lib/engine/docusign-notify'
 import {
   verifyWebhookSignature,
   isHmacBypassAllowed,
@@ -217,6 +218,30 @@ export async function POST(request: NextRequest) {
         signed_at:     signedAt,
       },
     })
+
+    // ── Notify contractor that it is their turn to sign ──────────────────────
+    //
+    // Triggered only when the funder has just signed and the contractor has
+    // not yet signed. Idempotent at the helper level — sees the existing
+    // `contract_signing_turn` notification and skips re-creation.
+    //
+    // Fire-and-forget: notification failures must not flip the webhook to a
+    // non-200 response (DocuSign would retry indefinitely).
+    if (isFunderSigner && !contract.contractor_signed_at) {
+      try {
+        await notifyContractorTurnToSign({
+          dealId:      contract.deal_id,
+          contractId:  contract.id,
+          envelopeId,
+          source:      'webhook',
+        })
+      } catch (err) {
+        console.error(
+          '[docusign-webhook] notifyContractorTurnToSign failed (non-fatal):',
+          err instanceof Error ? err.message : err,
+        )
+      }
+    }
 
     return NextResponse.json({ received: true }, { status: 200 })
   }

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   PenLine, Send, ExternalLink, CheckCircle2, Clock,
-  AlertCircle, Loader2,
+  AlertCircle, Loader2, RefreshCcw,
 } from 'lucide-react'
 import type { ContractStatus } from '@/lib/types'
 
@@ -38,6 +38,8 @@ export function ContractSigningSection({
   const router = useRouter()
 
   const [loading, setLoading]               = useState(false)
+  const [refreshing, setRefreshing]         = useState(false)
+  const [refreshNote, setRefreshNote]       = useState<string | null>(null)
   const [error,   setError]                 = useState<string | null>(null)
   // Optimistic state: once the user sends the envelope in this session,
   // show the new envelope ID without waiting for a full page reload.
@@ -80,6 +82,41 @@ export function ContractSigningSection({
       setError('Network error. Please check your connection and try again.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleRefreshSigningStatus() {
+    if (refreshing) return
+    setRefreshing(true)
+    setRefreshNote(null)
+    setError(null)
+    try {
+      const res = await fetch(
+        `/api/deals/${dealId}/contract/refresh-signing-status`,
+        { method: 'POST' },
+      )
+      const data = await res.json() as {
+        ok?:                  boolean
+        status?:              string
+        funder_signed_at?:    string | null
+        contractor_signed_at?: string | null
+        envelope_status?:     string
+        error?:               string
+      }
+      if (!res.ok || !data.ok) {
+        setError(data.error ?? 'Could not refresh signing status. Please try again.')
+        return
+      }
+      setRefreshNote(
+        `Signing status refreshed from DocuSign (envelope: ${data.envelope_status ?? 'unknown'}).`,
+      )
+      // Pull the new server-rendered values into the page so SignerRow
+      // and turn-detection logic update immediately.
+      router.refresh()
+    } catch {
+      setError('Network error. Please check your connection and try again.')
+    } finally {
+      setRefreshing(false)
     }
   }
 
@@ -202,6 +239,14 @@ export function ContractSigningSection({
             </button>
           )}
 
+          {/* Contractor: explicit "your turn" cue when funder has just signed */}
+          {contractorTurn && (
+            <div className="flex items-center gap-2 text-[12.5px] font-semibold text-emerald-300">
+              <CheckCircle2 size={13} className="text-emerald-400 flex-shrink-0" aria-hidden="true" />
+              It&rsquo;s your turn to sign.
+            </div>
+          )}
+
           {/* Funder / contractor: open DocuSign when it is their turn */}
           {showOpenDocuSign && (
             <button
@@ -239,6 +284,33 @@ export function ContractSigningSection({
             <p className="text-[12px] text-white/35">
               Admins do not sign contracts. Both parties sign directly in DocuSign.
             </p>
+          )}
+
+          {/*
+            Refresh signing status — manual fallback for envelopes that were
+            created before envelope-level eventNotification was configured, or
+            when a webhook delivery has been lost. Available to every party
+            once the envelope exists and the contract is not yet fully signed
+            or voided.
+          */}
+          {localEnvelopeId && (!funderDone || !contractorDone) ? (
+            <button
+              type="button"
+              onClick={handleRefreshSigningStatus}
+              disabled={refreshing}
+              className="inline-flex items-center gap-1.5 self-start rounded-md border border-white/[0.10] bg-white/[0.04] px-2.5 py-1.5 text-[11px] font-medium text-white/65 hover:text-white hover:bg-white/[0.08] hover:border-white/[0.18] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              aria-label="Refresh signing status from DocuSign"
+            >
+              {refreshing
+                ? <Loader2  size={11} className="animate-spin" aria-hidden="true" />
+                : <RefreshCcw size={11} aria-hidden="true" />
+              }
+              {refreshing ? 'Refreshing…' : 'Refresh signing status'}
+            </button>
+          ) : null}
+
+          {refreshNote && (
+            <p className="text-[11px] text-white/55" role="status">{refreshNote}</p>
           )}
         </div>
 

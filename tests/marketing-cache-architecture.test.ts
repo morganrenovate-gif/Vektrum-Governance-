@@ -221,6 +221,8 @@ async function main() {
     'src/app/(marketing)/contact/page.tsx',
     'src/app/(marketing)/contractors/page.tsx',
     'src/app/(marketing)/demo/page.tsx',
+    'src/app/(marketing)/demo-booked/page.tsx',
+    'src/app/(marketing)/design-partners/page.tsx',
     'src/app/(marketing)/founders/page.tsx',
     'src/app/(marketing)/funders/page.tsx',
     'src/app/(marketing)/help/page.tsx',
