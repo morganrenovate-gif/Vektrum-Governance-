@@ -43,6 +43,19 @@ const MOCK_DEALS = [
   },
 ]
 
+// ── AI review step labels ────────────────────────────────────────────────────
+//
+// Displayed sequentially in the in-progress review panel. Pure UI copy — no
+// connection to the production AI review or release gate.
+
+const AI_REVIEW_STEPS = [
+  'Reading draw request',
+  'Comparing against SOV',
+  'Checking lien waiver status',
+  'Checking open change orders',
+  'Preparing review summary',
+]
+
 // ── Demo-start activity seed ──────────────────────────────────────────────────
 //
 // Pre-populated entries representing the state when a visitor arrives.
@@ -99,6 +112,8 @@ export default function DemoContractorPage() {
   // can NEVER clear — it always requires explicit funder action.
   const [lienWaiverUploaded, setLienWaiverUploaded]   = useState(false)
   const [changeOrderResolved, setChangeOrderResolved] = useState(false)
+  const [blockedAiReviewRunning, setBlockedAiReviewRunning] = useState(false)
+  const [blockedAiReviewStep, setBlockedAiReviewStep]       = useState(0)
   const [blockedAiReviewDone, setBlockedAiReviewDone] = useState(false)
 
   const [activityEntries, setActivityEntries]   = useState<DemoActivityEntry[]>(SEED_ENTRIES)
@@ -112,6 +127,8 @@ export default function DemoContractorPage() {
     setSubmitting(false)
     setLienWaiverUploaded(false)
     setChangeOrderResolved(false)
+    setBlockedAiReviewRunning(false)
+    setBlockedAiReviewStep(0)
     setBlockedAiReviewDone(false)
     setActivityEntries(SEED_ENTRIES)
   })
@@ -179,16 +196,40 @@ export default function DemoContractorPage() {
   }
 
   function handleBlockedAiReview() {
-    if (blockedAiReviewDone) return
-    setBlockedAiReviewDone(true)
+    if (blockedAiReviewRunning || blockedAiReviewDone) return
+
+    // Immediate feedback — log the request, start the in-progress phase.
+    // No production logic — all React state only.
+    setBlockedAiReviewRunning(true)
+    setBlockedAiReviewStep(0)
     setActivityEntries((prev) => [{
-      id:        `act-bar-${Date.now()}`,
+      id:        `act-bar-req-${Date.now()}`,
       timestamp: nowTime(),
-      actor:     'Perplexity Computer',
-      role:      'system',
-      action:    'AI pre-review completed — deterministic release gate and funder authorization still control release',
-      detail:    'Building Envelope & Roofing — review passed · funder authorization required',
+      actor:     'Marcus Webb',
+      role:      'contractor',
+      action:    'AI pre-review requested',
+      detail:    'Building Envelope & Roofing — Vektrum checking draw package',
     }, ...prev])
+
+    // Advance through checklist steps every 700 ms.
+    const STEP_MS = 700
+    AI_REVIEW_STEPS.forEach((_, i) => {
+      setTimeout(() => setBlockedAiReviewStep(i + 1), (i + 1) * STEP_MS)
+    })
+
+    // After all steps, mark complete and log the result.
+    setTimeout(() => {
+      setBlockedAiReviewRunning(false)
+      setBlockedAiReviewDone(true)
+      setActivityEntries((prev) => [{
+        id:        `act-bar-${Date.now()}`,
+        timestamp: nowTime(),
+        actor:     'Perplexity Computer',
+        role:      'system',
+        action:    'AI pre-review completed — deterministic release gate and funder authorization still control release',
+        detail:    'Building Envelope & Roofing — review passed · funder authorization required',
+      }, ...prev])
+    }, (AI_REVIEW_STEPS.length + 1) * STEP_MS)
   }
 
   const totalDeals    = MOCK_DEALS.length
@@ -223,10 +264,10 @@ export default function DemoContractorPage() {
     {
       key:    'ai_review',
       icon:   Sparkles,
-      label:  'AI pre-review not current',
+      label:  blockedAiReviewRunning ? 'AI pre-review in progress…' : 'AI pre-review not current',
       detail: 'No current AI pre-review on file for this draw request',
       done:   blockedAiReviewDone,
-      doneLabel: 'AI pre-review complete',
+      doneLabel: 'AI review complete',
     },
     {
       key:    'funder_auth',
@@ -454,7 +495,16 @@ export default function DemoContractorPage() {
                 </span>
               )}
 
-              {!blockedAiReviewDone ? (
+              {blockedAiReviewRunning ? (
+                <button
+                  type="button"
+                  disabled
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-blue-500/[0.14] border border-blue-500/25 px-3 py-1.5 text-[11px] font-semibold text-blue-300 cursor-not-allowed opacity-80"
+                >
+                  <Loader2 size={11} className="animate-spin" aria-hidden="true" />
+                  AI review running…
+                </button>
+              ) : !blockedAiReviewDone ? (
                 <button
                   type="button"
                   onClick={handleBlockedAiReview}
@@ -469,6 +519,64 @@ export default function DemoContractorPage() {
                   AI review complete
                 </span>
               )}
+            </div>
+          )}
+
+          {/* ── AI review in-progress panel ──────────────────────────────── */}
+          {blockedAiReviewRunning && (
+            <div className="rounded-xl border border-blue-500/25 bg-blue-500/[0.05] px-4 py-3">
+              <div className="flex items-start gap-2.5 mb-3">
+                <Loader2 size={13} className="text-blue-400 animate-spin mt-0.5 flex-shrink-0" aria-hidden="true" />
+                <div>
+                  <p className="text-[12px] font-semibold text-blue-300">AI pre-review in progress</p>
+                  <p className="text-[11px] text-white/50 mt-0.5 leading-relaxed">
+                    Vektrum is checking the draw package against the contract, SOV, supporting
+                    documents, lien waiver status, and open change orders.
+                  </p>
+                </div>
+              </div>
+              <ul className="space-y-1.5 ml-5">
+                {AI_REVIEW_STEPS.map((step, i) => (
+                  <li key={step} className="flex items-center gap-2">
+                    {blockedAiReviewStep > i ? (
+                      <CheckCircle2 size={11} className="text-emerald-400 flex-shrink-0" aria-hidden="true" />
+                    ) : blockedAiReviewStep === i ? (
+                      <Loader2 size={11} className="text-blue-400 animate-spin flex-shrink-0" aria-hidden="true" />
+                    ) : (
+                      <div className="h-[11px] w-[11px] rounded-full border border-white/20 flex-shrink-0" />
+                    )}
+                    <span className={`text-[11px] ${
+                      blockedAiReviewStep > i ? 'text-emerald-300' :
+                      blockedAiReviewStep === i ? 'text-white/80' : 'text-white/35'
+                    }`}>
+                      {step}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* ── AI review completed panel ─────────────────────────────────── */}
+          {blockedAiReviewDone && !contractorConditionsDone && (
+            <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.05] px-4 py-3">
+              <div className="flex items-start gap-2.5">
+                <CheckCircle2 size={13} className="text-emerald-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
+                <div>
+                  <p className="text-[12px] font-semibold text-emerald-300">
+                    AI pre-review complete — funder authorization still required.
+                  </p>
+                  <div className="mt-1.5 space-y-0.5">
+                    <p className="text-[11px] text-white/50">Draw: Building Envelope &amp; Roofing</p>
+                    <p className="text-[11px] text-white/50">Result: Review complete</p>
+                  </div>
+                  <ul className="mt-2 space-y-1">
+                    <li className="text-[11px] text-white/45">&middot; Draw package appears ready for funder review.</li>
+                    <li className="text-[11px] text-white/45">&middot; AI review is a precondition only — it does not grant release authority.</li>
+                    <li className="text-[11px] text-white/45">&middot; The deterministic release gate and funder authorization still control release.</li>
+                  </ul>
+                </div>
+              </div>
             </div>
           )}
         </div>
