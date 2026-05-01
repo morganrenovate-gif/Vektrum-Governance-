@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { BOOK_CALL_URL, BOOK_CALL_EXTERNAL } from '@/lib/book-call'
+import { MetaViewContent } from '@/components/analytics/MetaViewContent'
 import {
   ArrowRight,
   Shield,
@@ -206,6 +207,7 @@ function ConstantRow({ label, value }: { label: string; value: string }) {
 export default function PricingPage() {
   return (
     <div className="flex flex-col">
+      <MetaViewContent contentName="Pricing" />
 
       {/* ─── 1. Hero ──────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-[#0D1B2A] pt-20 pb-16 sm:pt-28 sm:pb-20">

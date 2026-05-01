@@ -10,6 +10,7 @@ import { AlertCircle, CheckCircle2, Shield, Building2, User, Lock, FileCheck } f
 import { VektrumWordmark } from "@/components/ui/vektrum-logo";
 import { cn } from "@/lib/utils";
 import type { UserRole } from "@/lib/types";
+import { trackMetaEvent } from "@/lib/meta-pixel";
 
 const AUTH_TRUST = [
   { icon: Lock, title: "10-condition release gate", desc: "Payments move only with your explicit approval." },
@@ -94,6 +95,7 @@ export default function SignupPage() {
       return;
     }
 
+    trackMetaEvent('CompleteRegistration')
     setSuccess(true);
     setLoading(false);
   };

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { VektrumWordmark } from '@/components/ui/vektrum-logo'
 import { Shield, CheckCircle2, FileText, Brain, Banknote, Users, AlertTriangle, ArrowDown } from 'lucide-react'
+import { MetaViewContent } from '@/components/analytics/MetaViewContent'
 
 // ISR: re-render at most every hour. Public marketing — no per-user data.
 export const revalidate = 3600
@@ -26,6 +27,7 @@ export const metadata = {
 export default function DemoPage() {
   return (
     <main className="min-h-screen bg-vektrum-bg">
+      <MetaViewContent contentName="Demo" />
       {/* ── Section 1: Hero ───────────────────────────────────────────────── */}
       <section className="relative bg-vektrum-canvas overflow-hidden">
         <div className="mx-auto max-w-5xl px-6 py-20 sm:py-28 text-center">
