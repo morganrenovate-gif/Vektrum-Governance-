@@ -15,11 +15,30 @@
  *   order, Request AI review) were <Link> elements pointing to the harbor deal
  *   page — they had no onClick handlers and changed no demo state.
  *
+ * Root cause of the AI review animation fix:
+ *   Clicking "Request AI review" in the blocked card instantly set
+ *   blockedAiReviewDone=true with no intermediate state, no visible panel,
+ *   and no step-by-step checklist — no user feedback.
+ *
+ * After the animation fix:
+ *   - Click → button immediately becomes disabled "AI review running…"
+ *   - "AI pre-review in progress" panel appears with a 5-step animated checklist.
+ *   - Steps advance every 700 ms: Reading draw request → Comparing against SOV →
+ *     Checking lien waiver status → Checking open change orders →
+ *     Preparing review summary.
+ *   - On completion: panel switches to emerald "AI pre-review complete — funder
+ *     authorization still required." with draw details and safe copy notes.
+ *   - Activity feed: "AI pre-review requested" first, then "AI pre-review
+ *     completed — deterministic release gate and funder authorization still
+ *     control release."
+ *   - blockedAiReviewRunning and blockedAiReviewStep are new state; both reset
+ *     to false/0 on demo reset.
+ *
  * After the fix:
  *   - Each button has an onClick handler that updates React state.
  *   - Upload lien waiver → sets lienWaiverUploaded, adds activity entry.
  *   - Resolve change order → sets changeOrderResolved, adds activity entry.
- *   - Request AI review (blocked card) → sets blockedAiReviewDone, adds entry.
+ *   - Request AI review (blocked card) → animated review sequence, then done.
  *   - When all three are done, contractorConditionsDone=true, card switches to
  *     "Awaiting funder authorization" — funder auth always remains required.
  *   - Contractor never sees "Authorize release", "Release funds", etc.
@@ -74,6 +93,18 @@
  * 44.  Required Steps workflow is preserved.
  * 45.  "10-condition check" language is preserved.
  * 46.  This test is wired into npm test in package.json.
+ * ── AI review animation checks ──
+ * 47.  blockedAiReviewRunning state exists.
+ * 48.  blockedAiReviewStep state exists.
+ * 49.  "AI review running…" disabled button label exists.
+ * 50.  "AI pre-review in progress" panel title exists.
+ * 51.  All 5 review step labels exist in source.
+ * 52.  "AI pre-review complete — funder authorization still required" in
+ *       completed panel (blocked card).
+ * 53.  "AI pre-review requested" activity entry exists.
+ * 54.  "Draw package appears ready for funder review" copy in completed panel.
+ * 55.  Demo reset clears blockedAiReviewRunning (setBlockedAiReviewRunning(false)).
+ * 56.  Demo reset clears blockedAiReviewStep (setBlockedAiReviewStep(0)).
  *
  * Run: npx tsx tests/demo-contractor-blocked-release.test.ts
  */
@@ -250,6 +281,44 @@ async function main() {
   check(
     pkg.includes('demo-contractor-blocked-release.test.ts'),
     '46. This test is wired into npm test in package.json',
+  )
+
+  // ── 47–56. AI review animation checks ────────────────────────────────────
+  check(src.includes('blockedAiReviewRunning'), '47. blockedAiReviewRunning state exists')
+  check(src.includes('blockedAiReviewStep'),    '48. blockedAiReviewStep state exists')
+  check(
+    src.includes('AI review running'),
+    '49. "AI review running…" disabled button label exists',
+  )
+  check(
+    src.includes('AI pre-review in progress'),
+    '50. "AI pre-review in progress" panel title exists',
+  )
+  // All 5 step labels
+  check(src.includes('Reading draw request'),      '51a. Review step "Reading draw request" exists')
+  check(src.includes('Comparing against SOV'),     '51b. Review step "Comparing against SOV" exists')
+  check(src.includes('Checking lien waiver status'), '51c. Review step "Checking lien waiver status" exists')
+  check(src.includes('Checking open change orders'), '51d. Review step "Checking open change orders" exists')
+  check(src.includes('Preparing review summary'),  '51e. Review step "Preparing review summary" exists')
+  check(
+    src.includes('AI pre-review complete — funder authorization still required'),
+    '52. Completed panel: "AI pre-review complete — funder authorization still required"',
+  )
+  check(
+    src.includes('AI pre-review requested'),
+    '53. Activity entry "AI pre-review requested" exists',
+  )
+  check(
+    src.includes('Draw package appears ready for funder review'),
+    '54. Completed panel: "Draw package appears ready for funder review"',
+  )
+  check(
+    src.includes('setBlockedAiReviewRunning(false)'),
+    '55. Demo reset clears blockedAiReviewRunning',
+  )
+  check(
+    src.includes('setBlockedAiReviewStep(0)'),
+    '56. Demo reset clears blockedAiReviewStep',
   )
 
   console.log('\n✓ All demo-contractor-blocked-release tests passed.\n')
