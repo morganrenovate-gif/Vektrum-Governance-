@@ -197,7 +197,7 @@ export default async function DashboardPage() {
 
               if (!profile.stripe_account_id) {
                 actionTitle = 'Connect your Stripe account'
-                actionDescription = 'Connect your Stripe account to receive payments.'
+                actionDescription = 'Connect your Stripe account so milestone releases can be authorized and executed.'
                 actionCTA = 'Complete Setup'
                 actionHref = '/dashboard/contractor/onboarding'
                 accentColor = 'border-vektrum-amber'
@@ -293,7 +293,7 @@ export default async function DashboardPage() {
                 <EmptyState
                   icon={FolderOpen}
                   title="No deals yet"
-                  description="Create your first deal to start tracking milestones and receiving payments."
+                  description="Create a deal or ask your funder to invite you. Vektrum enforces release conditions — funders authorize, the gate decides."
                   action={{ label: "Create Deal", href: "/dashboard/deals/new" }}
                 />
               ) : (
@@ -393,7 +393,8 @@ export default async function DashboardPage() {
                 <EmptyState
                   icon={FolderOpen}
                   title="No projects yet"
-                  description="Deals will appear here once a contractor invites you to a project."
+                  description="Create a governed deal to fund a construction project. Vektrum enforces release conditions before any funds are authorized."
+                  action={{ label: "Create Governed Deal", href: "/dashboard/deals/new" }}
                 />
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -414,4 +415,34 @@ export default async function DashboardPage() {
   if (profile.role === 'admin') {
     redirect('/dashboard/admin')
   }
+
+  // ── Unknown / unexpected role ─────────────────────────────────────────────────
+  // profile.role is not contractor, funder, or admin. This can happen when a user
+  // signed up via a path that set an unexpected role value, or if the DB trigger
+  // failed to assign a role. Do not silently fall through to any role-specific view —
+  // show an explicit prompt so the user can contact support or sign out and retry.
+  console.error(
+    `[dashboard] User ${profile.id ?? 'unknown'} has unrecognised role — ` +
+    'rendering unknown-role fallback. Expected: contractor | funder | admin.',
+  )
+  return (
+    <div className="min-h-screen bg-surface-0 flex items-center justify-center px-4">
+      <div className="rounded-xl border border-white/[0.08] bg-surface-2 shadow-card px-8 py-7 max-w-sm w-full space-y-4">
+        <div className="notice-error">
+          <span>
+            Your account role could not be determined. Please sign out and sign back
+            in, or contact support if the issue persists.
+          </span>
+        </div>
+        <div className="flex gap-3">
+          <a
+            href="/auth/logout"
+            className="inline-flex items-center justify-center min-h-[36px] px-4 rounded-xl border border-white/[0.12] text-sm text-white/60 hover:bg-white/[0.06] transition-colors"
+          >
+            Sign out
+          </a>
+        </div>
+      </div>
+    </div>
+  )
 }

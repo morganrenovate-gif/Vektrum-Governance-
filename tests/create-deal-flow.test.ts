@@ -71,26 +71,32 @@ function exists(rel: string): boolean {
 }
 
 const NEW_DEAL_PAGE = 'src/app/(app)/dashboard/deals/new/page.tsx'
+const NEW_DEAL_FORM = 'src/app/(app)/dashboard/deals/new/new-deal-form.tsx'
 const PKG           = 'package.json'
 
 async function main() {
 
-// ─── 1. Page exists ───────────────────────────────────────────────────────────
+// ─── 1. Page + form exist ─────────────────────────────────────────────────────
 
 await test('1. New deal page exists at the correct (app) route path', () => {
   assert(
     exists(NEW_DEAL_PAGE),
     `${NEW_DEAL_PAGE} must exist. The create deal page lives inside the (app) route group.`,
   )
+  // After the role-flash refactor, content lives in new-deal-form.tsx.
+  assert(
+    exists(NEW_DEAL_FORM),
+    `${NEW_DEAL_FORM} must exist. Content moved here to allow server-rendered role prop.`,
+  )
 })
 
 // ─── 2. Heading updated to "Create governed deal" ────────────────────────────
 
 await test('2. Page heading is "Create governed deal"', () => {
-  const src = read(NEW_DEAL_PAGE)
+  const src = read(NEW_DEAL_FORM)
   assert(
     src.includes('Create governed deal'),
-    `${NEW_DEAL_PAGE}: h1 heading must be "Create governed deal". ` +
+    `${NEW_DEAL_FORM}: h1 heading must be "Create governed deal". ` +
     `This sets the correct frame: this is a governance action, not a generic project form.`,
   )
 })
@@ -98,10 +104,10 @@ await test('2. Page heading is "Create governed deal"', () => {
 // ─── 3. Advisory copy: "Start from the contract" ─────────────────────────────
 
 await test('3. Page contains "Start from the contract" advisory copy', () => {
-  const src = read(NEW_DEAL_PAGE)
+  const src = read(NEW_DEAL_FORM)
   assert(
     src.includes('Start from the contract'),
-    `${NEW_DEAL_PAGE}: must include the advisory copy "Start from the contract". ` +
+    `${NEW_DEAL_FORM}: must include the advisory copy "Start from the contract". ` +
     `This teaches users that the contract is the source of truth for parties, value, ` +
     `milestones, and release conditions.`,
   )
@@ -110,10 +116,10 @@ await test('3. Page contains "Start from the contract" advisory copy', () => {
 // ─── 4. Import from contract action present ───────────────────────────────────
 
 await test('4. "Import from contract" action is present on the page', () => {
-  const src = read(NEW_DEAL_PAGE)
+  const src = read(NEW_DEAL_FORM)
   assert(
     src.includes('Import from contract'),
-    `${NEW_DEAL_PAGE}: must include an "Import from contract" action. ` +
+    `${NEW_DEAL_FORM}: must include an "Import from contract" action. ` +
     `This is the primary recommended path and must not be removed.`,
   )
 })
@@ -121,10 +127,10 @@ await test('4. "Import from contract" action is present on the page', () => {
 // ─── 5. "Recommended" label visible ──────────────────────────────────────────
 
 await test('5. "Recommended" label appears near the import path', () => {
-  const src = read(NEW_DEAL_PAGE)
+  const src = read(NEW_DEAL_FORM)
   assert(
     src.includes('Recommended') || src.includes('recommended'),
-    `${NEW_DEAL_PAGE}: must label the import path as "Recommended" so users ` +
+    `${NEW_DEAL_FORM}: must label the import path as "Recommended" so users ` +
     `understand it is the preferred way to create a governed deal.`,
   )
 })
@@ -132,20 +138,20 @@ await test('5. "Recommended" label appears near the import path', () => {
 // ─── 6. Import appears before manual submit ───────────────────────────────────
 
 await test('6. "Import from contract" appears before the manual submit button in source order', () => {
-  const src = read(NEW_DEAL_PAGE)
+  const src = read(NEW_DEAL_FORM)
   const importIdx  = src.indexOf('Import from contract')
   const submitIdx  = src.indexOf('type="submit"')
   assert(
     importIdx !== -1,
-    `${NEW_DEAL_PAGE}: "Import from contract" text not found.`,
+    `${NEW_DEAL_FORM}: "Import from contract" text not found.`,
   )
   assert(
     submitIdx !== -1,
-    `${NEW_DEAL_PAGE}: submit button not found.`,
+    `${NEW_DEAL_FORM}: submit button not found.`,
   )
   assert(
     importIdx < submitIdx,
-    `${NEW_DEAL_PAGE}: "Import from contract" (line position ${importIdx}) must appear ` +
+    `${NEW_DEAL_FORM}: "Import from contract" (line position ${importIdx}) must appear ` +
     `before the manual submit button (position ${submitIdx}) in source order. ` +
     `The recommended path must be above the form, not buried below it.`,
   )
@@ -154,7 +160,7 @@ await test('6. "Import from contract" appears before the manual submit button in
 // ─── 7. Manual path explains contract execution requirement ───────────────────
 
 await test('7. Manual path includes a note about contract execution requirement before release', () => {
-  const src = read(NEW_DEAL_PAGE)
+  const src = read(NEW_DEAL_FORM)
   const hasContractRequired =
     src.includes('contract execution') ||
     src.includes('contract is required') ||
@@ -162,7 +168,7 @@ await test('7. Manual path includes a note about contract execution requirement 
     src.includes('upload') && src.includes('contract') && src.includes('release')
   assert(
     hasContractRequired,
-    `${NEW_DEAL_PAGE}: must explain that a signed contract/contract execution is ` +
+    `${NEW_DEAL_FORM}: must explain that a signed contract/contract execution is ` +
     `required before release authorization. Without this, users creating deals manually ` +
     `do not understand that the gate will block releases until a contract is on file.`,
   )
@@ -171,13 +177,13 @@ await test('7. Manual path includes a note about contract execution requirement 
 // ─── 8. Submit button uses manual-path label ─────────────────────────────────
 
 await test('8. Submit button uses "Save deal details" or equivalent manual-path label', () => {
-  const src = read(NEW_DEAL_PAGE)
+  const src = read(NEW_DEAL_FORM)
   assert(
     src.includes('Save deal details') ||
     src.includes('Create manual deal') ||
     src.includes('Save details') ||
     src.includes('Continue with manual setup'),
-    `${NEW_DEAL_PAGE}: the manual form submit button must use a label that clarifies ` +
+    `${NEW_DEAL_FORM}: the manual form submit button must use a label that clarifies ` +
     `this is the manual path (e.g. "Save deal details", "Create manual deal"). ` +
     `A generic "Create Deal" label obscures that the contract path is preferred.`,
   )
@@ -186,10 +192,10 @@ await test('8. Submit button uses "Save deal details" or equivalent manual-path 
 // ─── 9. Post-creation next-step note ─────────────────────────────────────────
 
 await test('9. Post-creation note about uploading or sending the contract is present', () => {
-  const src = read(NEW_DEAL_PAGE)
+  const src = read(NEW_DEAL_FORM)
   assert(
     src.includes('upload') || src.includes('Upload') || src.includes('send the contract'),
-    `${NEW_DEAL_PAGE}: must include a note about what comes next after manual deal creation ` +
+    `${NEW_DEAL_FORM}: must include a note about what comes next after manual deal creation ` +
     `(upload or send the contract for execution). Without this, users don't know why ` +
     `the release gate will be blocked.`,
   )
@@ -198,10 +204,10 @@ await test('9. Post-creation note about uploading or sending the contract is pre
 // ─── 10. ContractImportFlow still imported ───────────────────────────────────
 
 await test('10. ContractImportFlow is still imported (not removed)', () => {
-  const src = read(NEW_DEAL_PAGE)
+  const src = read(NEW_DEAL_FORM)
   assert(
     src.includes('ContractImportFlow'),
-    `${NEW_DEAL_PAGE}: ContractImportFlow must still be imported and used. ` +
+    `${NEW_DEAL_FORM}: ContractImportFlow must still be imported and used. ` +
     `The import path is the recommended workflow — it must not be removed.`,
   )
 })
@@ -209,32 +215,32 @@ await test('10. ContractImportFlow is still imported (not removed)', () => {
 // ─── 11. All original form fields still present ───────────────────────────────
 
 await test('11. All original form fields still present (title, description, total_amount, retainage)', () => {
-  const src = read(NEW_DEAL_PAGE)
+  const src = read(NEW_DEAL_FORM)
   assert(
     src.includes('form.title') || src.includes('"title"'),
-    `${NEW_DEAL_PAGE}: Deal Title field must still be present.`,
+    `${NEW_DEAL_FORM}: Deal Title field must still be present.`,
   )
   assert(
     src.includes('form.description') || src.includes('"description"'),
-    `${NEW_DEAL_PAGE}: Description field must still be present.`,
+    `${NEW_DEAL_FORM}: Description field must still be present.`,
   )
   assert(
     src.includes('total_amount'),
-    `${NEW_DEAL_PAGE}: Total Contract Amount field must still be present.`,
+    `${NEW_DEAL_FORM}: Total Contract Amount field must still be present.`,
   )
   assert(
     src.includes('retainage_percentage'),
-    `${NEW_DEAL_PAGE}: Retainage Percentage field must still be present.`,
+    `${NEW_DEAL_FORM}: Retainage Percentage field must still be present.`,
   )
 })
 
 // ─── 12. Deal creation still POSTs to /api/deals ─────────────────────────────
 
 await test('12. Deal creation still POSTs to /api/deals (release gate logic unchanged)', () => {
-  const src = read(NEW_DEAL_PAGE)
+  const src = read(NEW_DEAL_FORM)
   assert(
     src.includes('"/api/deals"') || src.includes("'/api/deals'"),
-    `${NEW_DEAL_PAGE}: form submission must still POST to "/api/deals". ` +
+    `${NEW_DEAL_FORM}: form submission must still POST to "/api/deals". ` +
     `The release gate, deal creation logic, and API contract must not be changed.`,
   )
 })
@@ -242,13 +248,13 @@ await test('12. Deal creation still POSTs to /api/deals (release gate logic unch
 // ─── 13. No payment/fund-movement claims ─────────────────────────────────────
 
 await test('13. No fund-movement or payment-execution claims on the page', () => {
-  const lower = read(NEW_DEAL_PAGE).toLowerCase()
+  const lower = read(NEW_DEAL_FORM).toLowerCase()
   assert(
     !lower.includes('vektrum moves money') &&
     !lower.includes('moves funds') &&
     !lower.includes('automated payment') &&
     !lower.includes('vektrum transfers'),
-    `${NEW_DEAL_PAGE}: must not contain fund-movement claims. ` +
+    `${NEW_DEAL_FORM}: must not contain fund-movement claims. ` +
     `Vektrum is authorization infrastructure; the customer rail executes.`,
   )
 })
@@ -256,12 +262,12 @@ await test('13. No fund-movement or payment-execution claims on the page', () =>
 // ─── 14. No "AI approves" claims ─────────────────────────────────────────────
 
 await test('14. No "AI approves" or "automated payments" claims on the page', () => {
-  const lower = read(NEW_DEAL_PAGE).toLowerCase()
+  const lower = read(NEW_DEAL_FORM).toLowerCase()
   assert(
     !lower.includes('ai approves') &&
     !lower.includes('ai-powered payment') &&
     !lower.includes('ai payment approval'),
-    `${NEW_DEAL_PAGE}: must not claim AI approves releases or payments. ` +
+    `${NEW_DEAL_FORM}: must not claim AI approves releases or payments. ` +
     `AI informs; the gate decides; the funder authorizes.`,
   )
 })
@@ -279,10 +285,10 @@ await test('15. Test file is wired into npm test in package.json', () => {
 // ─── 16. Contractor path heading ─────────────────────────────────────────────
 
 await test('16. Contractor path heading is "Submit project information"', () => {
-  const src = read(NEW_DEAL_PAGE)
+  const src = read(NEW_DEAL_FORM)
   assert(
     src.includes('Submit project information'),
-    `${NEW_DEAL_PAGE}: must include "Submit project information" for the contractor path. ` +
+    `${NEW_DEAL_FORM}: must include "Submit project information" for the contractor path. ` +
     `Contractors submit project data; funders verify and authorize. ` +
     `The page must not imply contractors can govern their own release conditions.`,
   )
@@ -291,10 +297,10 @@ await test('16. Contractor path heading is "Submit project information"', () => 
 // ─── 17. Contractor guidance: "Invite your funder" ───────────────────────────
 
 await test('17. Contractor path includes "Invite your funder" guidance', () => {
-  const src = read(NEW_DEAL_PAGE)
+  const src = read(NEW_DEAL_FORM)
   assert(
     src.includes('Invite your funder') || src.includes('invite your funder'),
-    `${NEW_DEAL_PAGE}: must include "Invite your funder" guidance for the contractor path. ` +
+    `${NEW_DEAL_FORM}: must include "Invite your funder" guidance for the contractor path. ` +
     `Contractors must understand they need a funder to verify terms and authorize releases.`,
   )
 })
@@ -302,10 +308,10 @@ await test('17. Contractor path includes "Invite your funder" guidance', () => {
 // ─── 18. Contractor deal marked draft / pending funder verification ───────────
 
 await test('18. Contractor-created deal is marked as draft pending funder verification', () => {
-  const src = read(NEW_DEAL_PAGE)
+  const src = read(NEW_DEAL_FORM)
   assert(
     src.includes('draft') || src.includes('pending funder verification'),
-    `${NEW_DEAL_PAGE}: must state that contractor-created deals are draft / pending ` +
+    `${NEW_DEAL_FORM}: must state that contractor-created deals are draft / pending ` +
     `funder verification. Without this, contractors may not understand why the release ` +
     `gate blocks them until the funder has authorized.`,
   )
@@ -314,12 +320,12 @@ await test('18. Contractor-created deal is marked as draft pending funder verifi
 // ─── 19. No text implying contractor controls release ────────────────────────
 
 await test('19. Page does not imply contractor controls or authorizes release conditions', () => {
-  const lower = read(NEW_DEAL_PAGE).toLowerCase()
+  const lower = read(NEW_DEAL_FORM).toLowerCase()
   assert(
     !lower.includes('contractor authorizes') &&
     !lower.includes('contractor controls release') &&
     !lower.includes('contractor can release'),
-    `${NEW_DEAL_PAGE}: must not imply contractors authorize or control release conditions. ` +
+    `${NEW_DEAL_FORM}: must not imply contractors authorize or control release conditions. ` +
     `Contractors submit; funders verify and authorize; Vektrum enforces the gate.`,
   )
 })
@@ -327,10 +333,10 @@ await test('19. Page does not imply contractor controls or authorizes release co
 // ─── 20. "Funder verifies" / "funder authorizes" copy present ─────────────────
 
 await test('20. Page includes "funder verifies" or "funder authorizes" role-clarity copy', () => {
-  const lower = read(NEW_DEAL_PAGE).toLowerCase()
+  const lower = read(NEW_DEAL_FORM).toLowerCase()
   assert(
     lower.includes('funder verifies') || lower.includes('funder authorizes'),
-    `${NEW_DEAL_PAGE}: must include copy clarifying that the funder verifies and/or ` +
+    `${NEW_DEAL_FORM}: must include copy clarifying that the funder verifies and/or ` +
     `authorizes releases. This educates all roles on the hierarchy: ` +
     `contractor submits, funder authorizes, Vektrum enforces, rail executes.`,
   )

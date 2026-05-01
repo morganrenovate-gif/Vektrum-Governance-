@@ -50,6 +50,7 @@ function read(p: string): string {
 }
 
 const NEW_DEAL_PAGE  = 'src/app/(app)/dashboard/deals/new/page.tsx'
+const NEW_DEAL_FORM  = 'src/app/(app)/dashboard/deals/new/new-deal-form.tsx'
 const DEAL_PAGE      = 'src/app/(app)/dashboard/deals/[dealId]/page.tsx'
 
 async function main() {
@@ -57,61 +58,61 @@ async function main() {
 // ─── 1. Retainage heading ─────────────────────────────────────────────────────
 
 await test('1. Retainage heading is "Contract Retainage Term"', () => {
-  const src = read(NEW_DEAL_PAGE)
+  const src = read(NEW_DEAL_FORM)
   assert(
     src.includes('Contract Retainage Term'),
-    `${NEW_DEAL_PAGE} retainage heading should be "Contract Retainage Term", not "Retainage Withholding".`,
+    `${NEW_DEAL_FORM} retainage heading should be "Contract Retainage Term", not "Retainage Withholding".`,
   )
   assert(
     !src.includes('Retainage Withholding'),
-    `${NEW_DEAL_PAGE} still contains "Retainage Withholding" — replace with "Contract Retainage Term".`,
+    `${NEW_DEAL_FORM} still contains "Retainage Withholding" — replace with "Contract Retainage Term".`,
   )
 })
 
 // ─── 2. Funder verifies retainage ────────────────────────────────────────────
 
 await test('2. Retainage copy says funder will verify', () => {
-  const src = read(NEW_DEAL_PAGE)
+  const src = read(NEW_DEAL_FORM)
   // JSX source wraps across lines; collapse whitespace before matching
   const collapsed = src.replace(/\s+/g, ' ')
   assert(
     collapsed.toLowerCase().includes('funder will verify'),
-    `${NEW_DEAL_PAGE} retainage description must say the funder will verify before releases.`,
+    `${NEW_DEAL_FORM} retainage description must say the funder will verify before releases.`,
   )
 })
 
 // ─── 3. Vektrum records but does not hold funds ───────────────────────────────
 
 await test('3. Retainage copy says Vektrum does not hold funds', () => {
-  const src = read(NEW_DEAL_PAGE)
+  const src = read(NEW_DEAL_FORM)
   const collapsed = src.replace(/\s+/g, ' ')
   assert(
     collapsed.includes('does not hold funds'),
-    `${NEW_DEAL_PAGE} retainage description must say Vektrum does not hold funds.`,
+    `${NEW_DEAL_FORM} retainage description must say Vektrum does not hold funds.`,
   )
 })
 
 // ─── 4. Contractors cannot release retainage ─────────────────────────────────
 
 await test('4. Retainage copy says "Contractors cannot release retainage"', () => {
-  const src = read(NEW_DEAL_PAGE)
+  const src = read(NEW_DEAL_FORM)
   assert(
     src.includes('Contractors cannot release retainage'),
-    `${NEW_DEAL_PAGE} retainage section must explicitly say "Contractors cannot release retainage".`,
+    `${NEW_DEAL_FORM} retainage section must explicitly say "Contractors cannot release retainage".`,
   )
 })
 
 // ─── 5. Post-submit helper text ───────────────────────────────────────────────
 
 await test('5. Post-submit helper text mentions "verify terms" and "release authorization"', () => {
-  const src = read(NEW_DEAL_PAGE)
+  const src = read(NEW_DEAL_FORM)
   assert(
     src.includes('verify terms') || src.toLowerCase().includes('verify terms'),
-    `${NEW_DEAL_PAGE} post-submit helper text must mention funder "verify terms".`,
+    `${NEW_DEAL_FORM} post-submit helper text must mention funder "verify terms".`,
   )
   assert(
     src.includes('release authorization') || src.toLowerCase().includes('release authorization'),
-    `${NEW_DEAL_PAGE} post-submit helper text must mention "release authorization".`,
+    `${NEW_DEAL_FORM} post-submit helper text must mention "release authorization".`,
   )
 })
 
@@ -130,7 +131,7 @@ await test('6. Invite funder panel says funder manages "release authorization"',
 // ─── 7. No fund-holding / escrow / wire claims ────────────────────────────────
 
 await test('7. No copy implies Vektrum holds funds, acts as escrow, or moves wires', () => {
-  const newSrc  = read(NEW_DEAL_PAGE)
+  const newSrc  = read(NEW_DEAL_FORM)
   const dealSrc = read(DEAL_PAGE)
 
   const combined = newSrc + '\n' + dealSrc
@@ -154,7 +155,7 @@ await test('7. No copy implies Vektrum holds funds, acts as escrow, or moves wir
 // ─── 8. No AI-approves-payments claim ────────────────────────────────────────
 
 await test('8. No copy implies AI approves payments or releases', () => {
-  const newSrc  = read(NEW_DEAL_PAGE)
+  const newSrc  = read(NEW_DEAL_FORM)
   const dealSrc = read(DEAL_PAGE)
 
   const combined = newSrc + '\n' + dealSrc
