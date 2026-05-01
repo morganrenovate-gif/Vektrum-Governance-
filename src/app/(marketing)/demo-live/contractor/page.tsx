@@ -15,10 +15,7 @@ import { riverside, harbor, getMilestoneSummary } from '@/lib/demo-data'
 // ── Mock data ────────────────────────────────────────────────────────────────
 //
 // Derived from the canonical demo data so dashboard tiles stay in sync with
-// the deal pages. Previously had stale hardcoded values (totalReleased
-// $3,940,000 with a comment referencing Harbor's old $3.46M figure, and
-// Harbor pct=38 / milestonesCompleted=4 which counted Structural Steel as
-// released when it now starts as 'approved').
+// the deal pages.
 
 const RIVERSIDE_SUMMARY = getMilestoneSummary(riverside)
 const HARBOR_SUMMARY    = getMilestoneSummary(harbor)
@@ -92,16 +89,30 @@ const SEED_ENTRIES: DemoActivityEntry[] = [
 export default function DemoContractorPage() {
   // ── Demo state ────────────────────────────────────────────────────────────
   //
-  // reviewSubmitted tracks whether the contractor has clicked "Request AI review"
-  // for the pending MEP Rough-In draw. Resets to false on demo reset so the
-  // button returns to its original state for the next demo visitor.
+  // Riverside MEP Rough-In AI review (Draw Review Status section).
   const [reviewSubmitted, setReviewSubmitted]   = useState(false)
   const [submitting, setSubmitting]             = useState(false)
+
+  // Blocked-release conditions for Building Envelope & Roofing (ms-hb-4).
+  // These are the three conditions the contractor can resolve themselves.
+  // "Funder authorization required" is a 4th condition that the contractor
+  // can NEVER clear — it always requires explicit funder action.
+  const [lienWaiverUploaded, setLienWaiverUploaded]   = useState(false)
+  const [changeOrderResolved, setChangeOrderResolved] = useState(false)
+  const [blockedAiReviewDone, setBlockedAiReviewDone] = useState(false)
+
   const [activityEntries, setActivityEntries]   = useState<DemoActivityEntry[]>(SEED_ENTRIES)
+
+  // All three contractor-side conditions satisfied — but funder auth is still
+  // required. The blocked card switches to "Awaiting funder authorization" state.
+  const contractorConditionsDone = lienWaiverUploaded && changeOrderResolved && blockedAiReviewDone
 
   useDemoAutoReset(() => {
     setReviewSubmitted(false)
     setSubmitting(false)
+    setLienWaiverUploaded(false)
+    setChangeOrderResolved(false)
+    setBlockedAiReviewDone(false)
     setActivityEntries(SEED_ENTRIES)
   })
 
@@ -111,45 +122,123 @@ export default function DemoContractorPage() {
     })
   }
 
+  // ── Handlers ──────────────────────────────────────────────────────────────
+  //
+  // None of these touch production release gate logic, Stripe, DB, or auth.
+  // All changes are React useState only — no API calls.
+
   function handleRequestReview() {
     if (submitting || reviewSubmitted) return
     setSubmitting(true)
-
-    // Log: AI pre-review requested
-    setActivityEntries((prev) => [
-      {
-        id:        `act-req-${Date.now()}`,
-        timestamp: nowTime(),
-        actor:     'Marcus Webb',
-        role:      'contractor',
-        action:    'AI pre-review requested',
-        detail:    'MEP Rough-In — Riverside Mixed-Use Development · $680,000',
-      },
-      ...prev,
-    ])
-
-    // Simulate AI review latency, then log completion
+    setActivityEntries((prev) => [{
+      id:        `act-req-${Date.now()}`,
+      timestamp: nowTime(),
+      actor:     'Marcus Webb',
+      role:      'contractor',
+      action:    'AI pre-review requested',
+      detail:    'MEP Rough-In — Riverside Mixed-Use Development · $680,000',
+    }, ...prev])
     setTimeout(() => {
       setSubmitting(false)
       setReviewSubmitted(true)
-      setActivityEntries((prev) => [
-        {
-          id:        `act-done-${Date.now()}`,
-          timestamp: nowTime(),
-          actor:     'Perplexity Computer',
-          role:      'system',
-          action:    'AI pre-review completed — funder authorization still required',
-          detail:    'MEP Rough-In — review passed · funder authorization controls release',
-        },
-        ...prev,
-      ])
+      setActivityEntries((prev) => [{
+        id:        `act-done-${Date.now()}`,
+        timestamp: nowTime(),
+        actor:     'Perplexity Computer',
+        role:      'system',
+        action:    'AI pre-review completed — funder authorization still required',
+        detail:    'MEP Rough-In — review passed · funder authorization controls release',
+      }, ...prev])
     }, 900)
+  }
+
+  function handleUploadLienWaiver() {
+    if (lienWaiverUploaded) return
+    setLienWaiverUploaded(true)
+    setActivityEntries((prev) => [{
+      id:        `act-lien-${Date.now()}`,
+      timestamp: nowTime(),
+      actor:     'Marcus Webb',
+      role:      'contractor',
+      action:    'Conditional lien waiver uploaded',
+      detail:    'Building Envelope & Roofing — release condition satisfied',
+    }, ...prev])
+  }
+
+  function handleResolveChangeOrder() {
+    if (changeOrderResolved) return
+    setChangeOrderResolved(true)
+    setActivityEntries((prev) => [{
+      id:        `act-co-${Date.now()}`,
+      timestamp: nowTime(),
+      actor:     'Marcus Webb',
+      role:      'contractor',
+      action:    'Change order CO-007 resolved',
+      detail:    'Building Envelope & Roofing — release condition satisfied',
+    }, ...prev])
+  }
+
+  function handleBlockedAiReview() {
+    if (blockedAiReviewDone) return
+    setBlockedAiReviewDone(true)
+    setActivityEntries((prev) => [{
+      id:        `act-bar-${Date.now()}`,
+      timestamp: nowTime(),
+      actor:     'Perplexity Computer',
+      role:      'system',
+      action:    'AI pre-review completed — deterministic release gate and funder authorization still control release',
+      detail:    'Building Envelope & Roofing — review passed · funder authorization required',
+    }, ...prev])
   }
 
   const totalDeals    = MOCK_DEALS.length
   const totalFunded   = MOCK_DEALS.reduce((s, d) => s + d.total, 0)
   const totalReleased = riverside.released + harbor.released
   const pendingReview = reviewSubmitted ? 0 : 1
+
+  // ── Missing conditions list (dynamic) ─────────────────────────────────────
+  //
+  // Each condition has a `done` flag driven by the contractor's actions above.
+  // "Funder authorization required" is hardcoded done:false — contractors can
+  // never clear it. This is the core Vektrum teaching moment: the gate is
+  // deterministic and the funder authorizes; the contractor cannot self-release.
+
+  const MISSING_CONDITIONS = [
+    {
+      key:    'lien_waiver',
+      icon:   FileWarning,
+      label:  'Lien waiver missing',
+      detail: 'Conditional lien waiver required before release gate can proceed',
+      done:   lienWaiverUploaded,
+      doneLabel: 'Lien waiver uploaded',
+    },
+    {
+      key:    'change_order',
+      icon:   AlertTriangle,
+      label:  'Open change order unresolved',
+      detail: 'Change order CO-007 must be resolved or closed by funder',
+      done:   changeOrderResolved,
+      doneLabel: 'Change order resolved',
+    },
+    {
+      key:    'ai_review',
+      icon:   Sparkles,
+      label:  'AI pre-review not current',
+      detail: 'No current AI pre-review on file for this draw request',
+      done:   blockedAiReviewDone,
+      doneLabel: 'AI pre-review complete',
+    },
+    {
+      key:    'funder_auth',
+      icon:   Lock,
+      label:  'Funder authorization required',
+      detail: 'Release gate authorized only by explicit funder action',
+      done:   false, // Contractor can never clear this — always required
+      doneLabel: '',
+    },
+  ]
+
+  const remainingCount = MISSING_CONDITIONS.filter((c) => !c.done).length
 
   return (
     <div className="min-h-screen bg-surface-0">
@@ -232,31 +321,71 @@ export default function DemoContractorPage() {
         </div>
       </section>
 
-      {/* ── Release Blocked — Building Envelope & Roofing ────────────────── */}
+      {/* ── Release Blocked / Awaiting Funder Auth — Building Envelope ───── */}
       {/*
-        Demo scene: ms-hb-4 is in_progress with no documents — it cannot be
-        released. This card teaches the core Vektrum value: releases are blocked
-        when conditions are missing, the gate is deterministic, and the funder
-        authorizes only after all conditions are satisfied.
-        No production release logic is involved — this is static demo copy only.
+        Demo scene: ms-hb-4 (Building Envelope & Roofing) is in_progress with
+        missing conditions. This card teaches the core Vektrum value: releases are
+        blocked when conditions are missing, the gate is deterministic, and the
+        funder authorizes only after all conditions are satisfied.
+
+        State machine (demo only — no production logic):
+          contractorConditionsDone=false → amber "Release blocked" card
+            with interactive action buttons that each clear their condition.
+          contractorConditionsDone=true  → blue "Awaiting funder authorization"
+            card, showing all conditions met but funder auth still required.
+
+        Contractor never sees funder-only actions such as disbursement controls —
+        those exist only in the funder view.
       */}
       <section
-        className="rounded-2xl border border-amber-500/30 bg-amber-500/[0.04] overflow-hidden"
-        aria-label="Release blocked — missing conditions"
+        className={`rounded-2xl overflow-hidden border ${
+          contractorConditionsDone
+            ? 'border-vektrum-blue/30 bg-vektrum-blue/[0.04]'
+            : 'border-amber-500/30 bg-amber-500/[0.04]'
+        }`}
+        aria-label={contractorConditionsDone ? 'Awaiting funder authorization' : 'Release blocked — missing conditions'}
       >
-        <div className="flex items-center gap-3 border-b border-amber-500/20 px-5 py-4">
-          <div className="h-8 w-8 flex items-center justify-center rounded-lg bg-amber-500/[0.12] flex-shrink-0">
-            <AlertTriangle size={15} className="text-amber-400" aria-hidden="true" />
+        {/* Card header */}
+        <div className={`flex items-center gap-3 border-b px-5 py-4 ${
+          contractorConditionsDone ? 'border-vektrum-blue/20' : 'border-amber-500/20'
+        }`}>
+          <div className={`h-8 w-8 flex items-center justify-center rounded-lg flex-shrink-0 ${
+            contractorConditionsDone ? 'bg-vektrum-blue/[0.12]' : 'bg-amber-500/[0.12]'
+          }`}>
+            {contractorConditionsDone
+              ? <Shield size={15} className="text-blue-400" aria-hidden="true" />
+              : <AlertTriangle size={15} className="text-amber-400" aria-hidden="true" />
+            }
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-semibold text-amber-300">Release blocked</p>
-            <p className="text-[11px] text-white/55 mt-0.5">
-              Building Envelope &amp; Roofing cannot be released yet because required release conditions are missing.
-            </p>
+            {contractorConditionsDone ? (
+              <>
+                <p className="text-[13px] font-semibold text-blue-300">Awaiting funder authorization</p>
+                <p className="text-[11px] text-white/55 mt-0.5">
+                  All contractor-side release conditions are complete. Release still requires explicit funder authorization.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-[13px] font-semibold text-amber-300">Release blocked</p>
+                <p className="text-[11px] text-white/55 mt-0.5">
+                  Building Envelope &amp; Roofing cannot be released yet because required release conditions are missing.
+                  {remainingCount > 0 && (
+                    <span className="ml-1 font-semibold text-amber-400">
+                      {remainingCount} condition{remainingCount !== 1 ? 's' : ''} remaining.
+                    </span>
+                  )}
+                </p>
+              </>
+            )}
           </div>
           <Link
             href="/demo-live/deal/harbor?from=contractor"
-            className="ml-2 inline-flex items-center gap-1 rounded-lg border border-amber-500/20 bg-amber-500/[0.08] px-2.5 py-1.5 text-[11px] font-semibold text-amber-300 whitespace-nowrap hover:bg-amber-500/[0.14] transition-colors flex-shrink-0"
+            className={`ml-2 inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-[11px] font-semibold whitespace-nowrap transition-colors flex-shrink-0 ${
+              contractorConditionsDone
+                ? 'border-vektrum-blue/20 bg-vektrum-blue/[0.08] text-blue-300 hover:bg-vektrum-blue/[0.14]'
+                : 'border-amber-500/20 bg-amber-500/[0.08] text-amber-300 hover:bg-amber-500/[0.14]'
+            }`}
           >
             View deal
             <ArrowRight size={11} aria-hidden="true" />
@@ -264,53 +393,84 @@ export default function DemoContractorPage() {
         </div>
 
         <div className="px-5 py-4 space-y-4">
-          {/* Missing conditions list */}
+          {/* Conditions list — dynamic based on state */}
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/40 mb-2.5">
-              Missing release conditions
+              {contractorConditionsDone ? 'Release conditions' : 'Missing release conditions'}
             </p>
             <ul className="space-y-2">
-              {[
-                { icon: FileWarning, label: 'Lien waiver missing',          detail: 'Conditional lien waiver required before release gate can proceed' },
-                { icon: AlertTriangle, label: 'Open change order unresolved', detail: 'Change order CO-007 must be resolved or closed by funder' },
-                { icon: Sparkles,   label: 'AI pre-review not current',     detail: 'No current AI pre-review on file for this draw request' },
-                { icon: Lock,       label: 'Funder authorization required',  detail: 'Release gate authorized only by explicit funder action' },
-              ].map(({ icon: Icon, label, detail }) => (
-                <li key={label} className="flex items-start gap-2.5">
-                  <Icon size={13} className="text-amber-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
+              {MISSING_CONDITIONS.map(({ key, icon: Icon, label, detail, done, doneLabel }) => (
+                <li key={key} className="flex items-start gap-2.5">
+                  {done ? (
+                    <CheckCircle2 size={13} className="text-emerald-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
+                  ) : (
+                    <Icon size={13} className={`mt-0.5 flex-shrink-0 ${key === 'funder_auth' ? 'text-white/40' : 'text-amber-400'}`} aria-hidden="true" />
+                  )}
                   <div>
-                    <p className="text-[12px] font-semibold text-amber-200/90">{label}</p>
-                    <p className="text-[11px] text-white/40 mt-0.5">{detail}</p>
+                    <p className={`text-[12px] font-semibold ${
+                      done ? 'text-emerald-300 line-through opacity-60' : key === 'funder_auth' ? 'text-white/55' : 'text-amber-200/90'
+                    }`}>
+                      {done ? doneLabel : label}
+                    </p>
+                    <p className="text-[11px] text-white/40 mt-0.5">{done ? 'Release condition satisfied' : detail}</p>
                   </div>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Actions */}
-          <div className="flex flex-wrap items-center gap-2 pt-1">
-            <Link
-              href="/demo-live/deal/harbor?from=contractor"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500/[0.14] border border-amber-500/25 px-3 py-1.5 text-[11px] font-semibold text-amber-300 hover:bg-amber-500/[0.22] transition-colors"
-            >
-              <Upload size={11} aria-hidden="true" />
-              Upload lien waiver
-            </Link>
-            <Link
-              href="/demo-live/deal/harbor?from=contractor"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500/[0.14] border border-amber-500/25 px-3 py-1.5 text-[11px] font-semibold text-amber-300 hover:bg-amber-500/[0.22] transition-colors"
-            >
-              <AlertTriangle size={11} aria-hidden="true" />
-              Resolve change order
-            </Link>
-            <Link
-              href="#draw-review"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500/[0.14] border border-amber-500/25 px-3 py-1.5 text-[11px] font-semibold text-amber-300 hover:bg-amber-500/[0.22] transition-colors"
-            >
-              <Sparkles size={11} aria-hidden="true" />
-              Request AI review
-            </Link>
-          </div>
+          {/* Action buttons — hidden once all contractor conditions are met */}
+          {!contractorConditionsDone && (
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              {!lienWaiverUploaded ? (
+                <button
+                  type="button"
+                  onClick={handleUploadLienWaiver}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500/[0.14] border border-amber-500/25 px-3 py-1.5 text-[11px] font-semibold text-amber-300 hover:bg-amber-500/[0.22] active:scale-95 transition-all"
+                >
+                  <Upload size={11} aria-hidden="true" />
+                  Upload lien waiver
+                </button>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/[0.10] border border-emerald-500/20 px-3 py-1.5 text-[11px] font-semibold text-emerald-400">
+                  <CheckCircle2 size={11} aria-hidden="true" />
+                  Lien waiver uploaded
+                </span>
+              )}
+
+              {!changeOrderResolved ? (
+                <button
+                  type="button"
+                  onClick={handleResolveChangeOrder}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500/[0.14] border border-amber-500/25 px-3 py-1.5 text-[11px] font-semibold text-amber-300 hover:bg-amber-500/[0.22] active:scale-95 transition-all"
+                >
+                  <AlertTriangle size={11} aria-hidden="true" />
+                  Resolve change order
+                </button>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/[0.10] border border-emerald-500/20 px-3 py-1.5 text-[11px] font-semibold text-emerald-400">
+                  <CheckCircle2 size={11} aria-hidden="true" />
+                  Change order resolved
+                </span>
+              )}
+
+              {!blockedAiReviewDone ? (
+                <button
+                  type="button"
+                  onClick={handleBlockedAiReview}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500/[0.14] border border-amber-500/25 px-3 py-1.5 text-[11px] font-semibold text-amber-300 hover:bg-amber-500/[0.22] active:scale-95 transition-all"
+                >
+                  <Sparkles size={11} aria-hidden="true" />
+                  Request AI review
+                </button>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/[0.10] border border-emerald-500/20 px-3 py-1.5 text-[11px] font-semibold text-emerald-400">
+                  <CheckCircle2 size={11} aria-hidden="true" />
+                  AI review complete
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </section>
 
@@ -397,6 +557,7 @@ export default function DemoContractorPage() {
           Released       — all conditions met, funder authorized, funds moved via rail.
           AI-review-ready — gate passed, awaiting funder authorization.
           Blocked        — one or more conditions missing; gate will not pass.
+        The Building Envelope row updates dynamically as the contractor resolves conditions.
       */}
       <section className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden">
         <div className="flex items-center gap-2.5 border-b border-white/[0.06] px-5 py-4">
@@ -405,55 +566,64 @@ export default function DemoContractorPage() {
           <span className="ml-auto text-[11px] text-white/40">Release gate state</span>
         </div>
         <div className="divide-y divide-white/[0.04]">
-          {[
-            {
-              name:   'Site Preparation & Grading',
-              amount: 320_000,
-              state:  'released' as const,
-              detail: 'All 10 conditions met · funder authorized · released via rail',
-              badge:  'bg-emerald-500/[0.12] text-emerald-400 border border-emerald-500/20',
-              label:  'Released',
-              icon:   CheckCircle2,
-              iconColor: 'text-emerald-400',
-            },
-            {
-              name:   'Structural Steel Erection',
-              amount: 2_180_000,
-              state:  'approved' as const,
-              detail: 'AI pre-review complete · release gate passed · awaiting funder authorization',
-              badge:  'bg-vektrum-blue/20 text-blue-300 border border-vektrum-blue/40',
-              label:  'Gate passed — funder auth required',
-              icon:   Shield,
-              iconColor: 'text-blue-400',
-            },
-            {
-              name:   'Building Envelope & Roofing',
-              amount: 2_640_000,
-              state:  'blocked' as const,
-              detail: 'Lien waiver missing · change order unresolved · AI pre-review not current',
-              badge:  'bg-amber-500/[0.12] text-amber-400 border border-amber-500/20',
-              label:  'Release blocked',
-              icon:   AlertTriangle,
-              iconColor: 'text-amber-400',
-            },
-          ].map((ms) => {
-            const Icon = ms.icon
-            return (
-              <div key={ms.name} className="flex items-center gap-4 px-5 py-3.5">
-                <Icon size={14} className={`${ms.iconColor} flex-shrink-0`} aria-hidden="true" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-[12px] font-semibold text-white/85 truncate">{ms.name}</p>
-                  <p className="text-[11px] text-white/40 mt-0.5">{ms.detail}</p>
-                </div>
-                <div className="flex items-center gap-3 flex-shrink-0">
-                  <span className="text-[11px] text-white/50 tabular-nums">{formatCurrency(ms.amount)}</span>
-                  <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold border ${ms.badge}`}>
-                    {ms.label}
-                  </span>
-                </div>
-              </div>
-            )
-          })}
+          {/* Row 1: Released milestone */}
+          <div className="flex items-center gap-4 px-5 py-3.5">
+            <CheckCircle2 size={14} className="text-emerald-400 flex-shrink-0" aria-hidden="true" />
+            <div className="flex-1 min-w-0">
+              <p className="text-[12px] font-semibold text-white/85 truncate">Site Preparation &amp; Grading</p>
+              <p className="text-[11px] text-white/40 mt-0.5">All 10 conditions met · funder authorized · released via rail</p>
+            </div>
+            <div className="flex items-center gap-3 flex-shrink-0">
+              <span className="text-[11px] text-white/50 tabular-nums">{formatCurrency(320_000)}</span>
+              <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold border bg-emerald-500/[0.12] text-emerald-400 border-emerald-500/20">
+                Released
+              </span>
+            </div>
+          </div>
+
+          {/* Row 2: Gate passed, awaiting funder */}
+          <div className="flex items-center gap-4 px-5 py-3.5">
+            <Shield size={14} className="text-blue-400 flex-shrink-0" aria-hidden="true" />
+            <div className="flex-1 min-w-0">
+              <p className="text-[12px] font-semibold text-white/85 truncate">Structural Steel Erection</p>
+              <p className="text-[11px] text-white/40 mt-0.5">AI pre-review complete · release gate passed · awaiting funder authorization</p>
+            </div>
+            <div className="flex items-center gap-3 flex-shrink-0">
+              <span className="text-[11px] text-white/50 tabular-nums">{formatCurrency(2_180_000)}</span>
+              <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold border bg-vektrum-blue/20 text-blue-300 border-vektrum-blue/40">
+                Gate passed — funder auth required
+              </span>
+            </div>
+          </div>
+
+          {/* Row 3: Building Envelope — dynamic based on contractor actions */}
+          <div className="flex items-center gap-4 px-5 py-3.5">
+            {contractorConditionsDone
+              ? <Shield size={14} className="text-blue-400 flex-shrink-0" aria-hidden="true" />
+              : <AlertTriangle size={14} className="text-amber-400 flex-shrink-0" aria-hidden="true" />
+            }
+            <div className="flex-1 min-w-0">
+              <p className="text-[12px] font-semibold text-white/85 truncate">Building Envelope &amp; Roofing</p>
+              <p className="text-[11px] text-white/40 mt-0.5">
+                {contractorConditionsDone
+                  ? 'All contractor conditions met · awaiting funder authorization'
+                  : `Lien waiver${lienWaiverUploaded ? ' ✓' : ' missing'} · change order${changeOrderResolved ? ' ✓' : ' unresolved'} · AI pre-review${blockedAiReviewDone ? ' ✓' : ' not current'}`
+                }
+              </p>
+            </div>
+            <div className="flex items-center gap-3 flex-shrink-0">
+              <span className="text-[11px] text-white/50 tabular-nums">{formatCurrency(2_640_000)}</span>
+              {contractorConditionsDone ? (
+                <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold border bg-vektrum-blue/20 text-blue-300 border-vektrum-blue/40">
+                  Awaiting funder auth
+                </span>
+              ) : (
+                <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold border bg-amber-500/[0.12] text-amber-400 border-amber-500/20">
+                  Release blocked
+                </span>
+              )}
+            </div>
+          </div>
         </div>
       </section>
 
