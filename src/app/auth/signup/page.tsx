@@ -187,6 +187,13 @@ export default function SignupPage() {
                     <p className="text-[11px] text-white/55 mt-0.5">
                       Your account will be created with the Funder role so you can accept this deal invite.
                     </p>
+                    <p className="text-[11px] text-white/40 mt-1.5">
+                      Not a funder?{' '}
+                      <a href="/auth/signup" className="text-white/60 underline hover:text-white/80">
+                        Sign up here
+                      </a>{' '}
+                      without the invite link.
+                    </p>
                   </div>
                 ) : (
                   <>
