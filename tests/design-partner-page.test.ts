@@ -308,6 +308,96 @@ async function main() {
     '20. design-partner-page.test.ts wired into npm test',
   )
 
+  // ── 21. Strict CTA wiring ──────────────────────────────────────────────
+  //
+  // The page must surface a visible, styled "Apply to become a design partner"
+  // button (a) above the fold in the hero, (b) wrapping the form section with
+  // id="apply", and (c) again in the final CTA section. Both buttons must be
+  // visibly styled (bg-vektrum-blue), have a 48px minimum tap target, and link
+  // to #apply.
+
+  // Form section uses id="apply"
+  check(
+    /id="apply"/.test(src),
+    '21a. form section wrapper has id="apply"',
+  )
+
+  // The href="#apply" anchor is used at least twice (hero + final CTA)
+  const anchorCount = (src.match(/href="#apply"/g) || []).length
+  check(
+    anchorCount >= 2,
+    `21b. href="#apply" appears >=2 times (hero + final CTA) — found ${anchorCount}`,
+  )
+
+  // Each href="#apply" Link must wrap the CTA text in the same JSX block.
+  // Capture the entire <Link …>…</Link> for each #apply anchor.
+  const linkBlocks = src.match(/<Link[^>]*href="#apply"[^>]*>[\s\S]*?<\/Link>/g) || []
+  check(
+    linkBlocks.length >= 2,
+    `21c. found >=2 <Link href="#apply">…</Link> blocks — found ${linkBlocks.length}`,
+  )
+
+  // Every #apply Link must contain the CTA text inside the JSX block
+  const allHaveCtaText = linkBlocks.every((b) =>
+    b.includes('Apply to become a design partner'),
+  )
+  check(
+    allHaveCtaText,
+    '21d. every <Link href="#apply"> wraps the text "Apply to become a design partner"',
+  )
+
+  // Every #apply Link must use the primary button style (bg-vektrum-blue)
+  // and NOT be styled as plain text
+  const allStyledAsButton = linkBlocks.every((b) =>
+    b.includes('bg-vektrum-blue') && b.includes('rounded-xl'),
+  )
+  check(
+    allStyledAsButton,
+    '21e. every #apply CTA Link is styled as a button (bg-vektrum-blue, rounded-xl)',
+  )
+
+  // Mobile tap target: min-h-[48px] on every #apply CTA Link
+  const allHave48pxTap = linkBlocks.every((b) => b.includes('min-h-[48px]'))
+  check(
+    allHave48pxTap,
+    '21f. every #apply CTA Link has min-h-[48px] tap target (mobile-tappable)',
+  )
+
+  // Hero CTA must appear before the form section (above the fold check —
+  // hero CTA text appears earlier in the source than id="apply").
+  const firstCtaIdx = src.indexOf('Apply to become a design partner')
+  const formSectionIdx = src.indexOf('id="apply"')
+  check(
+    firstCtaIdx > -1 && formSectionIdx > -1 && firstCtaIdx < formSectionIdx,
+    '21g. hero CTA appears in source before the form section (above-the-fold)',
+  )
+
+  // Hero CTA text must be inside a <Link> block, not a plain <p> or <span>
+  const heroLinkIdx = src.indexOf('<Link\n              href="#apply"')
+  check(
+    heroLinkIdx > -1 && heroLinkIdx < formSectionIdx,
+    '21h. hero CTA is a <Link href="#apply"> element (not plain text)',
+  )
+
+  // Final CTA must appear AFTER the form section
+  const lastCtaIdx = src.lastIndexOf('Apply to become a design partner')
+  check(
+    lastCtaIdx > formSectionIdx,
+    '21i. final CTA appears in source after the form section',
+  )
+
+  // CTA must not be "Join beta" (re-asserted explicitly per fix spec)
+  check(
+    !lower.includes('join beta'),
+    '21j. CTA is NOT "Join beta" (verified again per fix spec)',
+  )
+
+  // Form submit button is also labelled with the same CTA text (consistency)
+  check(
+    form.includes('Apply to become a design partner'),
+    '21k. form submit button label is "Apply to become a design partner"',
+  )
+
   console.log('\n✓ All design-partner-page tests passed.\n')
 }
 
