@@ -1534,6 +1534,168 @@ export async function notifyDisputeResolved(ctx: {
   }
 }
 
+// ─── 16. notifyAdminNewSignup ─────────────────────────────────────────────────
+/**
+ * Sends an admin alert email when a new user signs up.
+ *
+ * Recipient: ADMIN_SIGNUP_ALERT_EMAIL env var (comma-separated list).
+ *            Falls back to ADMIN_EMAIL if ADMIN_SIGNUP_ALERT_EMAIL is not set.
+ *
+ * Idempotent: checks for an existing 'admin_signup_alert' notification row for
+ * this userId before creating/sending — safe to call from a webhook that retries.
+ *
+ * Fire-and-forget: all errors are caught and logged. Never throws.
+ * Non-blocking: signup succeeds even if email delivery fails.
+ *
+ * Wire: call after logAuthEvent in the auth webhook INSERT handler.
+ * Do NOT send to the new user; this is an internal admin alert only.
+ */
+export async function notifyAdminNewSignup(ctx: {
+  userId:    string
+  userEmail: string | null
+  /** Values read from auth.users.raw_user_meta_data at signup time */
+  meta?: {
+    full_name?:    string
+    company_name?: string
+    role?:         string
+    invite_token?: string
+    utm_source?:   string
+    utm_campaign?: string
+    utm_content?:  string
+  }
+  createdAt?: string | null
+}): Promise<void> {
+  try {
+    const admin       = createSupabaseAdminClient()
+    const appUrl      = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.vektrum.io'
+    const alertEmails = getSignupAlertEmails()
+
+    if (alertEmails.length === 0) {
+      console.warn('[notify] notifyAdminNewSignup: no alert recipients configured (set ADMIN_SIGNUP_ALERT_EMAIL or ADMIN_EMAIL)')
+      return
+    }
+
+    // ── Idempotency check ─────────────────────────────────────────────────────
+    // Webhook can fire multiple times — skip if alert already sent for this user.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: existing } = await (admin as any)
+      .from('notifications')
+      .select('id')
+      .eq('entity_type', 'profile')
+      .eq('entity_id', ctx.userId)
+      .eq('notification_type', 'admin_signup_alert')
+      .limit(1)
+      .maybeSingle()
+
+    if (existing) {
+      console.info('[notify] notifyAdminNewSignup: alert already sent for', ctx.userId)
+      return
+    }
+
+    // ── Resolve profile (best-effort — DB trigger may not have run yet) ───────
+    let profileRole    = ctx.meta?.role         ?? null
+    let profileName    = ctx.meta?.full_name    ?? null
+    let profileCompany = ctx.meta?.company_name ?? null
+
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: profile } = await (admin as any)
+        .from('profiles')
+        .select('full_name, company_name, role')
+        .eq('id', ctx.userId)
+        .maybeSingle()
+
+      if (profile) {
+        profileRole    = profile.role         ?? profileRole
+        profileName    = profile.full_name    ?? profileName
+        profileCompany = profile.company_name ?? profileCompany
+      }
+    } catch {
+      // Profile may not exist yet if DB trigger is slow — continue with meta values
+    }
+
+    // ── Build content ─────────────────────────────────────────────────────────
+    const displayName = profileName ?? ctx.userEmail ?? ctx.userId
+    const roleLabel   = profileRole ?? 'unknown'
+    const signupAt    = ctx.createdAt
+      ? new Date(ctx.createdAt).toLocaleString('en-US', {
+          timeZone: 'UTC', dateStyle: 'medium', timeStyle: 'short',
+        }) + ' UTC'
+      : new Date().toLocaleString('en-US', {
+          timeZone: 'UTC', dateStyle: 'medium', timeStyle: 'short',
+        }) + ' UTC'
+
+    const subject     = `New Vektrum signup — ${displayName}`
+    const bodySummary = `${displayName} signed up as ${roleLabel}.${profileCompany ? ` Company: ${profileCompany}.` : ''} Review in the admin dashboard.`
+    const ctaUrl      = `${appUrl}/dashboard/admin/users/${ctx.userId}`
+
+    const details: Array<{ label: string; value: string }> = [
+      { label: 'Name',      value: displayName },
+      { label: 'Email',     value: ctx.userEmail ?? '—' },
+      { label: 'Role',      value: roleLabel },
+    ]
+    if (profileCompany)         details.push({ label: 'Company',      value: profileCompany })
+    details.push(               { label: 'Signed up',  value: signupAt })
+    if (ctx.meta?.invite_token) details.push({ label: 'Source',       value: 'Invite link' })
+    if (ctx.meta?.utm_source)   details.push({ label: 'UTM source',   value: ctx.meta.utm_source })
+    if (ctx.meta?.utm_campaign) details.push({ label: 'UTM campaign', value: ctx.meta.utm_campaign })
+    if (ctx.meta?.utm_content)  details.push({ label: 'UTM content',  value: ctx.meta.utm_content })
+
+    const html = renderVektrumEmail({
+      badge:    'New Signup',
+      headline: 'New user signed up',
+      summary:  bodySummary,
+      details,
+      ctaLabel: 'View in admin dashboard',
+      ctaUrl,
+    })
+
+    // ── Send to each alert recipient ──────────────────────────────────────────
+    for (const adminEmail of alertEmails) {
+      const notificationId = await createNotification({
+        recipient_email:   adminEmail,
+        entity_type:       'profile',
+        entity_id:         ctx.userId,
+        notification_type: 'admin_signup_alert',
+        channel:           'email',
+        subject,
+        body_summary:      bodySummary,
+      })
+      if (!notificationId) continue
+
+      await sendEmailNotification(notificationId, adminEmail, subject, html)
+    }
+
+    // ── Audit ─────────────────────────────────────────────────────────────────
+    await logAudit({
+      entity_type:   'profile',
+      entity_id:     ctx.userId,
+      action:        'admin_signup_alert_sent',
+      actor_id:      ctx.userId,
+      actor_email:   ctx.userEmail,
+      actor_role:    profileRole ?? 'unknown',
+      system_source: 'lib/engine/notify',
+      metadata: {
+        notification_type: 'admin_signup_alert',
+        recipient_count:   alertEmails.length,
+        role:              profileRole,
+        company:           profileCompany,
+      },
+    })
+
+  } catch (err) {
+    console.error('[notify] notifyAdminNewSignup unexpected error:', err)
+  }
+}
+
+// ─── Admin signup alert email list ────────────────────────────────────────────
+// Reads ADMIN_SIGNUP_ALERT_EMAIL (preferred) or falls back to ADMIN_EMAIL.
+// Never throws — returns [] when neither var is set.
+function getSignupAlertEmails(): string[] {
+  const raw = process.env.ADMIN_SIGNUP_ALERT_EMAIL || process.env.ADMIN_EMAIL || ''
+  return raw.split(',').map((e) => e.trim()).filter(Boolean)
+}
+
 // ─── Internal utility ─────────────────────────────────────────────────────────
 
 function escapeHtml(str: string): string {
