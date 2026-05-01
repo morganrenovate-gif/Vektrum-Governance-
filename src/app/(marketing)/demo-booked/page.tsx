@@ -1,6 +1,11 @@
 import type { Metadata } from 'next'
 import { DemoBookedClient } from './demo-booked-client'
 
+// ISR: this page is purely a thank-you screen — no auth, no cookies, no
+// per-request data. Declaring `revalidate` makes the static/cacheable status
+// explicit and is enforced by tests/marketing-cache-architecture.test.ts.
+export const revalidate = 3600
+
 export const metadata: Metadata = {
   title: 'Demo Scheduled',
   description: 'Your Vektrum walkthrough is confirmed. We look forward to showing you governed construction disbursements.',
