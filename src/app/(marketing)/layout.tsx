@@ -96,6 +96,9 @@ export default function MarketingLayout({
                 className="group ml-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-vektrum-blue px-4 py-2 text-[13px] font-semibold text-white hover:bg-vektrum-blue-hover transition-all shadow-md shadow-vektrum-blue/20"
               >
                 Book a call
+                {BOOK_CALL_EXTERNAL && (
+                  <span className="sr-only">(opens in a new tab)</span>
+                )}
                 <ArrowRight
                   size={14}
                   className="transition-transform group-hover:translate-x-0.5"
