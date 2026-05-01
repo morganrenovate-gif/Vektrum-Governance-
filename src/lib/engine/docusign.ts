@@ -14,6 +14,17 @@
 //                               or  "https://na3.docusign.net/restapi" (production)
 //   DOCUSIGN_OAUTH_HOST       — "account-d.docusign.com" (sandbox)
 //                               or "account.docusign.com" (production)
+//   DOCUSIGN_WEBHOOK_SECRET   — HMAC-SHA256 key for inbound webhook verification;
+//                               also embedded in per-envelope eventNotification so
+//                               DocuSign signs each delivery with the same key.
+//                               Must match the value registered in DocuSign Connect
+//                               if account-level Connect is also configured.
+//
+// Webhook URL (envelope-level, resolved at runtime):
+//   NEXT_PUBLIC_APP_URL        — primary (e.g. "https://vektrum.io")
+//   APP_URL                    — server-only fallback
+//   VERCEL_URL                 — automatic Vercel deployment URL (last resort)
+//   At least one must be set; createEnvelope() will throw if none is present.
 //
 // Setup:
 //   1. Create an application in DocuSign Developer portal.
@@ -21,10 +32,9 @@
 //      base64-encoded, into DOCUSIGN_PRIVATE_KEY.
 //   3. Grant consent: visit the consent URL once per environment
 //      https://{DOCUSIGN_OAUTH_HOST}/oauth/auth?response_type=code&scope=signature%20impersonation&client_id={INTEGRATION_KEY}&redirect_uri=https://YOUR_APP/auth/docusign/callback
-//   4. Configure DocuSign Connect (webhook) pointing to:
-//      POST {APP_URL}/api/webhooks/docusign
-//      Trigger events: envelope-completed, recipient-completed
-//      HMAC key: set DOCUSIGN_WEBHOOK_SECRET and register the same value in Connect.
+//   4. Envelope-level webhooks are configured automatically on each createEnvelope()
+//      call via eventNotification — no account-level DocuSign Connect setup needed.
+//      Account-level Connect can coexist but is no longer required.
 // =============================================================================
 
 import crypto from 'crypto'
@@ -49,6 +59,8 @@ export interface DocuSignSigner {
 export interface CreateEnvelopeInput {
   /** Deal UUID — used as the envelope subject and metadata */
   dealId:       string
+  /** Contract UUID — stored as vektrum_contract_id custom field for webhook correlation */
+  contractId:   string
   /** Subject line shown in DocuSign (for audit trail, not visible in embedded flow) */
   subject:      string
   /** PDF file contents — the unsigned contract document */
@@ -223,6 +235,100 @@ async function dsRequest<T>(
   return res.json() as Promise<T>
 }
 
+// ─── Webhook Helpers ──────────────────────────────────────────────────────────
+
+/**
+ * Resolves the absolute URL for the DocuSign webhook endpoint.
+ *
+ * Resolution order (first non-empty value wins):
+ *   1. NEXT_PUBLIC_APP_URL — canonical public URL (preferred)
+ *   2. APP_URL             — server-only equivalent
+ *   3. VERCEL_URL          — auto-set by Vercel for each deployment (no https:// prefix)
+ *
+ * Throws DocuSignError if none are set — envelope creation will fail rather
+ * than silently create an envelope with no working webhook.
+ */
+function buildWebhookUrl(): string {
+  const appUrl =
+    process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.APP_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined)
+
+  if (!appUrl) {
+    throw new DocuSignError(
+      'Cannot determine webhook URL for DocuSign eventNotification. ' +
+      'Set NEXT_PUBLIC_APP_URL or APP_URL in your environment. ' +
+      '(VERCEL_URL is used as a last resort on Vercel deployments.)',
+    )
+  }
+
+  return `${appUrl.replace(/\/$/, '')}/api/webhooks/docusign`
+}
+
+/**
+ * Builds the eventNotification block injected into every DocuSign envelope.
+ *
+ * This configures per-envelope webhook delivery so Vektrum receives signing
+ * events without requiring account-level DocuSign Connect configuration.
+ *
+ * HMAC:
+ *   When DOCUSIGN_WEBHOOK_SECRET is set, the same key is embedded in
+ *   hmacKeys so DocuSign signs each delivery with X-DocuSign-Signature-1.
+ *   The inbound verifyWebhookSignature() function verifies that header using
+ *   the same secret — no change to inbound verification logic is required.
+ *
+ *   If DOCUSIGN_WEBHOOK_SECRET is not set, HMAC is omitted and a warning is
+ *   logged. The inbound webhook route will reject unsigned deliveries with 500
+ *   (missing secret, no bypass). Set the secret in all deployed environments.
+ */
+function buildEventNotification(webhookUrl: string): Record<string, unknown> {
+  const webhookSecret = process.env.DOCUSIGN_WEBHOOK_SECRET
+
+  if (!webhookSecret) {
+    // Log the missing var name only — never a value. Warn rather than throw so
+    // the envelope is still created (signing proceeds); the webhook just won't
+    // be delivered with HMAC and the inbound route will 500 on receipt.
+    console.warn(
+      '[DocuSign] DOCUSIGN_WEBHOOK_SECRET is not set. ' +
+      'Envelope-level webhook events will not include HMAC signatures. ' +
+      'The inbound /api/webhooks/docusign route will reject unsigned deliveries. ' +
+      'Set DOCUSIGN_WEBHOOK_SECRET in all deployed environments.',
+    )
+  }
+
+  const notification: Record<string, unknown> = {
+    url:                  webhookUrl,
+    loggingEnabled:       'false',
+    requireAcknowledgment: 'true',
+    // Documents are large and not needed in webhooks — we download the final
+    // signed PDF separately on envelope-completed via downloadSignedDocument().
+    includeDocuments:     'false',
+    // Document fields (customFields like vektrum_deal_id) ARE needed so the
+    // webhook handler can correlate the event to the correct deal.
+    includeDocumentFields: 'true',
+    includeEnvelopeVoidReason: 'true',
+    includeTimeZone:      'true',
+    envelopeEvents: [
+      { envelopeEventStatusCode: 'completed' },
+      { envelopeEventStatusCode: 'declined'  },
+      { envelopeEventStatusCode: 'voided'    },
+    ],
+    recipientEvents: [
+      { recipientEventStatusCode: 'Completed'      },
+      { recipientEventStatusCode: 'Declined'        },
+      { recipientEventStatusCode: 'DeliveryFailed'  },
+    ],
+  }
+
+  if (webhookSecret) {
+    // hmacKeys embeds the raw secret value server-side; it is never logged here.
+    notification.includeHMAC = 'true'
+    notification.hmacKeys    = [webhookSecret]
+  }
+
+  return notification
+}
+
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 /**
@@ -236,7 +342,16 @@ async function dsRequest<T>(
  * Contractor's signing session becomes available only after the funder signs.
  */
 export async function createEnvelope(input: CreateEnvelopeInput): Promise<CreateEnvelopeResult> {
-  const { dealId, subject, pdfBuffer, fileName, funder, contractor } = input
+  const { dealId, contractId, subject, pdfBuffer, fileName, funder, contractor } = input
+
+  const webhookUrl         = buildWebhookUrl()
+  const eventNotification  = buildEventNotification(webhookUrl)
+
+  console.info(
+    `[DocuSign] createEnvelope — eventNotification configured. ` +
+    `Webhook URL: ${webhookUrl}. ` +
+    `HMAC enabled: ${!!process.env.DOCUSIGN_WEBHOOK_SECRET}.`,
+  )
 
   const envelope = {
     emailSubject: subject,
@@ -244,10 +359,10 @@ export async function createEnvelope(input: CreateEnvelopeInput): Promise<Create
 
     documents: [
       {
-        documentId:   '1',
-        name:         fileName,
+        documentId:     '1',
+        name:           fileName,
         documentBase64: pdfBuffer.toString('base64'),
-        fileExtension: 'pdf',
+        fileExtension:  'pdf',
       },
     ],
 
@@ -260,10 +375,13 @@ export async function createEnvelope(input: CreateEnvelopeInput): Promise<Create
 
     customFields: {
       textCustomFields: [
-        { name: 'vektrum_deal_id',   value: dealId,   show: 'false', required: 'false' },
-        { name: 'vektrum_platform',  value: 'vektrum', show: 'false', required: 'false' },
+        { name: 'vektrum_deal_id',     value: dealId,     show: 'false', required: 'false' },
+        { name: 'vektrum_contract_id', value: contractId, show: 'false', required: 'false' },
+        { name: 'vektrum_platform',    value: 'vektrum',  show: 'false', required: 'false' },
       ],
     },
+
+    eventNotification,
   }
 
   const result = await dsRequest<{ envelopeId: string; status: string }>(

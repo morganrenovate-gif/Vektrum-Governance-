@@ -198,6 +198,7 @@ export async function POST(
   try {
     const envelope = await createEnvelope({
       dealId,
+      contractId: contract.id,
       subject:    `Contract for signature — ${deal.title}`,
       pdfBuffer,
       fileName:   contract.document_name ?? 'contract.pdf',
