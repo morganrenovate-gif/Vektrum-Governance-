@@ -3,18 +3,21 @@
 /**
  * DesignPartnerApplyForm — qualifying application form for the design-partner cohort.
  *
- * Pure client component. No DB writes, no API call, no auth, no cookies.
- * On submit:
- *   1. Fires trackMetaEvent('Lead', { content_name: 'Design Partner Application' })
- *      so Meta Ads can attribute the conversion. Single fire — guarded by a ref
- *      so React StrictMode / accidental double clicks cannot double-count.
- *   2. Shows a thank-you state with a UTM-tagged Cal.com fit-call booking link.
+ * Submission flow:
+ *   1. Validate locally (HTML5 required attrs catch the obvious cases).
+ *   2. Capture UTM params from the URL + document.referrer at submit time.
+ *   3. POST JSON to /api/design-partner-applications.
+ *      - 200 → fire trackMetaEvent('Lead', { content_name: 'Design Partner Application' })
+ *               EXACTLY ONCE, then show the success state.
+ *      - 4xx/5xx → stay on the form, surface the error message.
+ *   4. The API stores the row + emails the admin. Do not fire the conversion
+ *      event before the API confirms success.
  *
- * No production release/payment/auth/SOV/RLS logic is touched.
+ * No production release/payment/auth/SOV/RLS logic is touched here.
  */
 
 import { useRef, useState } from 'react'
-import { ArrowRight, CheckCircle2, Loader2 } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Loader2, AlertTriangle } from 'lucide-react'
 import { trackMetaEvent } from '@/lib/meta-pixel'
 import { BOOK_CALL_URL, BOOK_CALL_EXTERNAL } from '@/lib/book-call'
 
@@ -40,27 +43,84 @@ function withUtm(url: string): string {
   return url.includes('?') ? `${url}&${utm}` : `${url}?${utm}`
 }
 
+/** Read a UTM-style query param at submit time (client-only). */
+function readUrlParam(name: string): string | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const v = new URL(window.location.href).searchParams.get(name)
+    return v && v.trim() ? v.trim() : null
+  } catch {
+    return null
+  }
+}
+
+function readReferrer(): string | null {
+  if (typeof document === 'undefined') return null
+  const r = (document.referrer || '').trim()
+  return r ? r : null
+}
+
 export function DesignPartnerApplyForm() {
   const fired = useRef(false)
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted]   = useState(false)
+  const [errorMsg, setErrorMsg]     = useState<string | null>(null)
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (submitting || submitted) return
+
+    setErrorMsg(null)
     setSubmitting(true)
 
-    // Fire the conversion event exactly once per session.
-    if (!fired.current) {
-      fired.current = true
-      trackMetaEvent('Lead', { content_name: 'Design Partner Application' })
+    const fd = new FormData(e.currentTarget)
+    const payload = {
+      name:              String(fd.get('name')              ?? '').trim(),
+      company:           String(fd.get('company')           ?? '').trim(),
+      role:              String(fd.get('title')             ?? '').trim(),
+      email:             String(fd.get('email')             ?? '').trim(),
+      audienceType:      String(fd.get('audience')          ?? '').trim(),
+      drawExposure:      String(fd.get('draw_exposure')     ?? '').trim(),
+      biggestBottleneck: String(fd.get('bottleneck')        ?? '').trim(),
+      website:           String(fd.get('website')           ?? ''), // honeypot
+      utmSource:         readUrlParam('utm_source'),
+      utmMedium:         readUrlParam('utm_medium'),
+      utmCampaign:       readUrlParam('utm_campaign'),
+      utmContent:        readUrlParam('utm_content'),
+      utmTerm:           readUrlParam('utm_term'),
+      referrer:          readReferrer(),
     }
 
-    // Demo-only — no API. Show thank-you state immediately.
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/design-partner-applications', {
+        method:  'POST',
+        headers: { 'content-type': 'application/json' },
+        body:    JSON.stringify(payload),
+      })
+
+      if (!res.ok) {
+        let msg = 'Something went wrong. Please try again.'
+        try {
+          const data = await res.json() as { error?: string }
+          if (data?.error) msg = data.error
+        } catch { /* ignore parse errors */ }
+        setErrorMsg(msg)
+        setSubmitting(false)
+        return
+      }
+
+      // Success — fire the conversion event exactly once.
+      if (!fired.current) {
+        fired.current = true
+        trackMetaEvent('Lead', { content_name: 'Design Partner Application' })
+      }
+
       setSubmitting(false)
       setSubmitted(true)
-    }, 250)
+    } catch {
+      setErrorMsg('Network error. Please try again.')
+      setSubmitting(false)
+    }
   }
 
   if (submitted) {
@@ -71,8 +131,8 @@ export function DesignPartnerApplyForm() {
           <div>
             <p className="text-[16px] font-semibold text-white">Application received.</p>
             <p className="mt-1.5 text-[13px] text-white/70 leading-relaxed">
-              Qualified applicants will be invited to a 30-minute design-partner fit call.
-              You can also grab a slot directly:
+              We&rsquo;ll review your workflow and follow up if there is a fit for the first
+              design-partner cohort. You can also grab a slot directly:
             </p>
             <div className="mt-4">
               <a
@@ -95,6 +155,7 @@ export function DesignPartnerApplyForm() {
       onSubmit={handleSubmit}
       className="rounded-2xl border border-white/[0.08] bg-surface-2 p-6 sm:p-8 space-y-5"
       aria-label="Design partner application form"
+      noValidate={false}
     >
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Name" required>
@@ -177,6 +238,24 @@ export function DesignPartnerApplyForm() {
           placeholder="One sentence is fine."
         />
       </Field>
+
+      {/*
+        Honeypot — visually hidden but reachable by bots that fill every field.
+        A real visitor will never type into this; the API rejects any non-empty value.
+      */}
+      <div aria-hidden="true" style={{ position: 'absolute', left: '-10000px', width: '1px', height: '1px', overflow: 'hidden' }}>
+        <label>
+          Website
+          <input name="website" type="text" tabIndex={-1} autoComplete="off" defaultValue="" />
+        </label>
+      </div>
+
+      {errorMsg && (
+        <div className="flex items-start gap-2 rounded-lg border border-red-500/25 bg-red-500/[0.06] px-3 py-2.5">
+          <AlertTriangle size={14} className="text-red-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
+          <p className="text-[12px] text-red-200" role="alert">{errorMsg}</p>
+        </div>
+      )}
 
       <button
         type="submit"
