@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { logAudit } from '@/lib/engine/audit'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
+import { notifyAdminNewSignup } from '@/lib/engine/notify'
 
 export const dynamic = 'force-dynamic'
 
@@ -129,6 +130,24 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           is_sso_user:  record.is_sso_user ?? false,
         },
         note: 'New auth.users row created',
+      })
+
+      // Admin signup alert — fire-and-forget, idempotent, never blocks signup.
+      // Sends one email per ADMIN_SIGNUP_ALERT_EMAIL recipient.
+      // Idempotency is enforced inside notifyAdminNewSignup via notifications table.
+      await notifyAdminNewSignup({
+        userId,
+        userEmail: record.email ?? null,
+        meta: {
+          full_name:    record.raw_user_meta_data?.full_name    as string | undefined,
+          company_name: record.raw_user_meta_data?.company_name as string | undefined,
+          role:         record.raw_user_meta_data?.role         as string | undefined,
+          invite_token: record.raw_user_meta_data?.invite_token as string | undefined,
+          utm_source:   record.raw_user_meta_data?.utm_source   as string | undefined,
+          utm_campaign: record.raw_user_meta_data?.utm_campaign as string | undefined,
+          utm_content:  record.raw_user_meta_data?.utm_content  as string | undefined,
+        },
+        createdAt: record.created_at,
       })
     } else if (type === 'UPDATE' && old_record) {
       // ── Sign-in: last_sign_in_at changed ─────────────────────────────────
