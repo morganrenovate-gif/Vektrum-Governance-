@@ -10,8 +10,16 @@ import {
   Zap,
   X,
   AlertCircle,
+  AlertTriangle,
   Building2,
   CreditCard,
+  Users,
+  Hammer,
+  ListChecks,
+  Sparkles,
+  Workflow,
+  ClipboardCheck,
+  FileWarning,
 } from 'lucide-react'
 
 export const metadata: Metadata = {
@@ -224,6 +232,266 @@ export default function HomePage() {
             </div>
 
           </div>
+        </div>
+      </section>
+
+      {/* ─── 1a. Trust boundary strip ─────────────────────────────────────────── */}
+      {/*
+        Sits immediately under the hero so a skeptical buyer reads the boundary
+        before they read the proof. Three plain-language statements about
+        verification → authorization → execution.
+      */}
+      <section
+        className="bg-[#0A1322] border-t border-white/[0.06] py-10"
+        aria-label="Trust boundary"
+      >
+        <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
+          <p className="text-[13px] sm:text-[14px] leading-relaxed text-white/70 max-w-4xl mx-auto text-center">
+            Vektrum does not hold funds, act as escrow, originate loans, provide legal advice,
+            or execute payment. Vektrum records release readiness and authorization evidence.
+            The selected payment rail executes disbursement.
+          </p>
+
+          <div className="mt-8 grid gap-3 sm:grid-cols-3">
+            <TrustBoundaryCard
+              icon={ListChecks}
+              title="Vektrum verifies readiness"
+              body="Required release conditions are mapped, evaluated, and recorded with evidence."
+            />
+            <TrustBoundaryCard
+              icon={CheckCircle2}
+              title="Authorized party approves"
+              body="The funder, lender, or designated authority issues release authorization."
+            />
+            <TrustBoundaryCard
+              icon={Workflow}
+              title="Selected rail executes"
+              body="Stripe Connect, bank, title, escrow, treasury, or loan servicer disburses funds."
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ─── 1b. Problem / Pain ───────────────────────────────────────────────── */}
+      <section
+        className="bg-[#0D1B2A] border-t border-white/[0.06] py-16 sm:py-20"
+        aria-label="The problem"
+      >
+        <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
+          <h2 className="font-display text-3xl sm:text-[2.25rem] font-bold tracking-[-0.025em] text-white leading-[1.15] text-balance">
+            The draw process is still held together by email, PDFs, spreadsheets, and trust.
+          </h2>
+          <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-white/65">
+            A draw should not move just because the paperwork looks close enough. Missing
+            lien waivers, unresolved change orders, buried inspection evidence, unclear
+            approvals, and incomplete audit trails all create release risk.
+          </p>
+
+          <ul className="mt-8 grid gap-3 sm:grid-cols-2">
+            {[
+              'Missing lien waivers delay releases.',
+              'Inspection evidence gets buried in email.',
+              'Change orders create approval confusion.',
+              'Teams cannot quickly see which condition blocked the draw.',
+              'Disputes are harder to isolate when evidence is scattered.',
+            ].map((p) => (
+              <li
+                key={p}
+                className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-surface-2 px-4 py-3"
+              >
+                <AlertTriangle size={16} className="text-amber-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
+                <span className="text-[14px] text-white/80 leading-relaxed">{p}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* ─── 1c. How Vektrum works ────────────────────────────────────────────── */}
+      <section
+        className="bg-[#0A1322] border-t border-white/[0.06] py-16 sm:py-20"
+        aria-label="How Vektrum works"
+      >
+        <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="mb-10">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-px w-5 bg-vektrum-blue" />
+              <p className="text-[11px] tracking-[0.12em] uppercase text-blue-300 font-semibold">How it works</p>
+            </div>
+            <h2 className="font-display text-3xl sm:text-[2.25rem] font-bold tracking-[-0.025em] text-white leading-[1.15]">
+              How Vektrum works
+            </h2>
+          </div>
+
+          <ol className="grid gap-4 lg:grid-cols-2">
+            <HowItWorksStep
+              n={1}
+              title="Map required conditions."
+              body="Contract terms, SOVs, lien waivers, inspections, change orders, funding coverage, and approvals are organized around the draw."
+            />
+            <HowItWorksStep
+              n={2}
+              title="Collect draw evidence."
+              body="Contractors and project teams submit documents, photos, waivers, inspection evidence, and supporting records."
+            />
+            <HowItWorksStep
+              n={3}
+              title="Evaluate release readiness."
+              body="Vektrum checks whether required conditions are complete and flags missing or blocked items."
+            />
+            <HowItWorksStep
+              n={4}
+              title="Record authorization evidence."
+              body="The authorized party reviews readiness and authorizes release when requirements are satisfied."
+            />
+            <HowItWorksStep
+              n={5}
+              title="The selected rail executes."
+              body="Stripe Connect, a bank, title company, escrow partner, treasury team, loan servicer, or another external/manual rail performs the disbursement."
+              wide
+            />
+          </ol>
+
+          {/* Workflow strip */}
+          <div className="mt-8 rounded-2xl border border-white/[0.08] bg-surface-2 px-5 py-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/45 mb-3">
+              Workflow
+            </p>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-2 text-[12px] text-white/75">
+              <WorkflowStep label="Contract / SOV" />
+              <ArrowRight size={12} className="text-white/35" aria-hidden="true" />
+              <WorkflowStep label="Draw Request" />
+              <ArrowRight size={12} className="text-white/35" aria-hidden="true" />
+              <WorkflowStep label="Evidence" />
+              <ArrowRight size={12} className="text-white/35" aria-hidden="true" />
+              <WorkflowStep label="Release Gate" />
+              <ArrowRight size={12} className="text-white/35" aria-hidden="true" />
+              <WorkflowStep label="Authorization" />
+              <ArrowRight size={12} className="text-white/35" aria-hidden="true" />
+              <WorkflowStep label="Selected Rail" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── 1d. Who it's for / persona cards ─────────────────────────────────── */}
+      <section
+        className="bg-[#0D1B2A] border-t border-white/[0.06] py-16 sm:py-20"
+        aria-label="Who Vektrum is for"
+      >
+        <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
+          <h2 className="font-display text-3xl sm:text-[2.25rem] font-bold tracking-[-0.025em] text-white leading-[1.15]">
+            Built for teams that touch construction draws.
+          </h2>
+
+          <div className="mt-8 grid gap-4 sm:grid-cols-2">
+            <PersonaCard
+              icon={CreditCard}
+              title="Construction lenders and private funders"
+              body="Verify release readiness before authorizing a draw. Keep contract, SOV, evidence, approval, and audit context in one governed workflow."
+            />
+            <PersonaCard
+              icon={Building2}
+              title="Title, escrow, and fund-control partners"
+              body="Support draw administration with clearer evidence, condition status, and authorization records before the selected rail executes."
+            />
+            <PersonaCard
+              icon={Hammer}
+              title="Builders and contractors"
+              body="See what is missing, what is approved, and what is still blocking release readiness."
+            />
+            <PersonaCard
+              icon={Users}
+              title="Developers and owner reps"
+              body="Track release conditions, disputes, approvals, and project-level draw readiness without relying on scattered communication."
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ─── 1e. AI pre-review boundary ───────────────────────────────────────── */}
+      {/*
+        Explicit two-panel boundary visual to prevent buyers from thinking AI
+        approves payment. Panel A = AI precondition. Panel B = the deterministic
+        10-condition gate. The rest of the page (existing section 4) walks the
+        gate in detail; this section is the headline boundary statement.
+      */}
+      <section
+        className="bg-[#0A1322] border-t border-white/[0.06] py-16 sm:py-20"
+        aria-label="AI pre-review boundary"
+      >
+        <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
+          <h2 className="font-display text-3xl sm:text-[2.25rem] font-bold tracking-[-0.025em] text-white leading-[1.15] text-balance">
+            AI pre-review supports the workflow. It does not authorize release.
+          </h2>
+          <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-white/65">
+            Vektrum&rsquo;s AI review engine can help summarize draw packages and identify
+            missing evidence. The deterministic release gate and authorized party still
+            control release authorization.
+          </p>
+
+          <div className="mt-10 grid gap-5 lg:grid-cols-2">
+            {/* Panel A — AI precondition */}
+            <div className="rounded-2xl border border-blue-400/20 bg-blue-500/[0.04] p-6">
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-300 mb-3">
+                Panel A · Required precondition before the gate
+              </p>
+              <div className="flex items-start gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/15 flex-shrink-0">
+                  <Sparkles size={16} className="text-blue-300" aria-hidden="true" />
+                </div>
+                <div>
+                  <p className="text-[15px] font-semibold text-white">AI draw pre-review current</p>
+                  <p className="mt-1.5 text-[13px] text-white/65 leading-relaxed">
+                    Summarizes the draw package and identifies missing evidence. Stale or
+                    unavailable AI pre-review blocks the release until refreshed. AI
+                    informs — it does not decide.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Panel B — the 10 server-side conditions */}
+            <div className="rounded-2xl border border-vektrum-blue/30 bg-vektrum-blue/[0.06] p-6">
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-200 mb-3">
+                Panel B · The 10 server-side conditions
+              </p>
+              <div className="flex items-start gap-3 mb-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-vektrum-blue/20 flex-shrink-0">
+                  <Shield size={16} className="text-blue-200" aria-hidden="true" />
+                </div>
+                <div>
+                  <p className="text-[15px] font-semibold text-white">Deterministic release gate</p>
+                  <p className="mt-1.5 text-[13px] text-white/65 leading-relaxed">
+                    Independent server-side conditions evaluated for every release. All
+                    must pass before release authorization can proceed.
+                  </p>
+                </div>
+              </div>
+              <ul className="mt-3 grid grid-cols-1 gap-1.5 text-[12px] text-white/70">
+                {[
+                  'Documentation failure',
+                  'Funding coverage failure',
+                  'Change order failure',
+                  'Lien waiver failure',
+                  'Sequential release failure',
+                ].map((theme) => (
+                  <li key={theme} className="flex items-center gap-2">
+                    <FileWarning size={11} className="text-amber-300 flex-shrink-0" aria-hidden="true" />
+                    <span>{theme}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3 text-[11px] text-white/45">
+                Themes shown — see the canonical 10-condition list further down the page.
+              </p>
+            </div>
+          </div>
+
+          <p className="mt-8 text-[12px] text-white/55 text-center">
+            <ClipboardCheck size={11} className="inline-block mr-1.5 -mt-0.5" aria-hidden="true" />
+            AI pre-review is not condition #11. It runs separately, before the gate evaluates.
+          </p>
         </div>
       </section>
 
@@ -1234,58 +1502,84 @@ export default function HomePage() {
       </section>
 
       {/* ─── 10b. Trust FAQ ──────────────────────────────────────────────────────── */}
-      <section className="bg-surface-2 py-16 sm:py-20 border-t border-white/[0.06]">
-        <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
+      {/*
+        Native <details>/<summary> elements give us keyboard support, screen-reader
+        semantics, and per-question disclosure without any JS — and serialise to
+        static HTML for ISR. The spec's 6 boundary questions are first; useful
+        existing questions on admin release authority and platform durability
+        round out the list.
+      */}
+      <section
+        id="faq"
+        className="bg-surface-2 py-16 sm:py-20 border-t border-white/[0.06]"
+        aria-label="Frequently asked questions"
+      >
+        <div className="max-w-3xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center mb-10">
             <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/65 mb-3">
               Trust &amp; Compliance
             </p>
             <h2 className="font-display text-2xl font-bold tracking-[-0.025em] text-white sm:text-3xl">
-              Common questions from institutional buyers
+              Frequently asked questions
             </h2>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
+
+          <div className="space-y-2">
             {[
               {
-                q: 'Is Vektrum a payment processor?',
-                a: 'No. Vektrum is a conditional authorization and audit layer. Payment execution happens through Stripe Connect or the customer\'s existing title, escrow, treasury, or banking process.',
+                q: 'Does Vektrum move money?',
+                a: 'No. Vektrum does not hold funds or execute disbursements. It records release readiness and authorization evidence. The selected rail executes payment.',
               },
               {
-                q: 'Does Vektrum hold funds?',
-                a: 'No. Vektrum does not hold funds in its own bank account or act as escrow. For Stripe Connect releases, funds are held in Stripe-managed accounts. For external/manual releases, payment is executed outside Vektrum by the funder, title company, escrow company, or treasury process.',
-              },
-              {
-                q: 'Does every customer need to use Stripe?',
-                a: 'No. Stripe Connect is available for automated execution. Institutional customers can use external/manual execution through their existing payment process.',
-              },
-              {
-                q: 'Does Vektrum replace title or escrow companies?',
-                a: 'No. Vektrum can give title and escrow teams a release authorization and audit layer before they execute disbursements.',
+                q: 'Is Vektrum escrow?',
+                a: 'No. Vektrum is not an escrow company, bank, lender, money transmitter, title company, or legal reviewer.',
               },
               {
                 q: 'Does AI approve releases?',
-                a: 'No. AI-assisted review flags missing documents, conflicts, and risk signals. The funder triggers release, and the deterministic release gate enforces whether release is allowed.',
+                a: 'No. AI pre-review can help summarize draw packages and identify missing evidence. The deterministic gate and authorized party control release authorization.',
+              },
+              {
+                q: 'What happens if an AI review is unavailable or stale?',
+                a: 'Release readiness should not proceed on stale review. The workflow should require a current review or mark the AI pre-review condition as unavailable until refreshed.',
+              },
+              {
+                q: 'What payment rails can Vektrum support?',
+                a: 'Stripe Connect, bank processes, title/escrow partners, treasury teams, loan servicers, or other external/manual rails. The customer’s selected rail executes disbursement.',
+              },
+              {
+                q: 'Does Vektrum guarantee compliance or prevent fraud?',
+                a: 'No. Vektrum helps structure evidence, authorization, and audit readiness. It does not guarantee compliance, prevent fraud, or replace legal/title review.',
               },
               {
                 q: 'Can admins release funds?',
                 a: 'No. Admins cannot trigger milestone releases. Privileged admin actions require AAL2 MFA, justification, and audit logging.',
               },
               {
-                q: 'What happens if a condition fails?',
-                a: 'The release is blocked until the issue is resolved. The system records the failed gate evaluation for audit visibility.',
-              },
-              {
                 q: 'What happens if Vektrum shuts down?',
                 a: 'Payment execution remains with Stripe Connect or the customer-controlled payment process. Customers can export deal and audit records at any time.',
               },
             ].map((item) => (
-              <div
+              <details
                 key={item.q}
-                className="rounded-xl border border-white/[0.07] bg-surface-3 px-5 py-5"
+                className="group rounded-xl border border-white/[0.07] bg-surface-3 open:bg-surface-2 transition-colors"
               >
-                <p className="text-[13.5px] font-semibold text-white mb-1.5">{item.q}</p>
-                <p className="text-[12.5px] leading-relaxed text-white/50">{item.a}</p>
-              </div>
+                <summary className="flex items-center justify-between gap-4 cursor-pointer list-none px-5 py-4 text-[13.5px] font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vektrum-blue rounded-xl">
+                  <span>{item.q}</span>
+                  <svg
+                    className="h-4 w-4 flex-shrink-0 text-white/45 transition-transform duration-200 group-open:rotate-180"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    aria-hidden="true"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 8l4 4 4-4" />
+                  </svg>
+                </summary>
+                <div className="px-5 pb-4 text-[12.5px] leading-relaxed text-white/65">
+                  {item.a}
+                </div>
+              </details>
             ))}
           </div>
         </div>
@@ -1356,6 +1650,74 @@ export default function HomePage() {
         </div>
       </section>
 
+    </div>
+  )
+}
+
+// ── Inline helper components for the new structured sections ─────────────────
+
+function TrustBoundaryCard({
+  icon: Icon, title, body,
+}: {
+  icon: React.ComponentType<{ size?: number; className?: string; 'aria-hidden'?: boolean }>
+  title: string
+  body: string
+}) {
+  return (
+    <div className="rounded-xl border border-white/[0.08] bg-surface-2 px-5 py-4">
+      <div className="flex items-center gap-2.5 mb-2">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-vektrum-blue/[0.12]">
+          <Icon size={14} className="text-blue-300" aria-hidden="true" />
+        </div>
+        <p className="text-[13px] font-semibold text-white">{title}</p>
+      </div>
+      <p className="text-[12px] text-white/55 leading-relaxed">{body}</p>
+    </div>
+  )
+}
+
+function HowItWorksStep({
+  n, title, body, wide = false,
+}: { n: number; title: string; body: string; wide?: boolean }) {
+  return (
+    <li
+      className={`rounded-2xl border border-white/[0.08] bg-surface-2 p-5 ${wide ? 'lg:col-span-2' : ''}`}
+    >
+      <div className="flex items-start gap-3">
+        <span className="flex-shrink-0 inline-flex h-7 w-7 items-center justify-center rounded-full bg-vektrum-blue/[0.18] text-[12px] font-bold text-blue-200 tabular-nums">
+          {n}
+        </span>
+        <div>
+          <p className="text-[15px] font-semibold text-white">{title}</p>
+          <p className="mt-1.5 text-[13px] text-white/65 leading-relaxed">{body}</p>
+        </div>
+      </div>
+    </li>
+  )
+}
+
+function WorkflowStep({ label }: { label: string }) {
+  return (
+    <span className="rounded-md bg-surface-3 px-2.5 py-1.5 font-medium">{label}</span>
+  )
+}
+
+function PersonaCard({
+  icon: Icon, title, body,
+}: {
+  icon: React.ComponentType<{ size?: number; className?: string; 'aria-hidden'?: boolean }>
+  title: string
+  body: string
+}) {
+  return (
+    <div className="rounded-2xl border border-white/[0.08] bg-surface-2 p-6">
+      <div className="flex items-center gap-3 mb-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-vektrum-blue/[0.12]">
+          <Icon size={16} className="text-blue-300" aria-hidden="true" />
+        </div>
+        <p className="text-[15px] font-semibold text-white leading-tight">{title}</p>
+      </div>
+      <p className="text-[13px] text-white/65 leading-relaxed">{body}</p>
     </div>
   )
 }

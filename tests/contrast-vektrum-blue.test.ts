@@ -114,26 +114,25 @@ test('B1: page.tsx dark sections do not use text-vektrum-blue', () => {
   // dark section's opening tag (currently bg-[#031226] / bg-[#0D1B2A]).
   //
   // Last verified by walking section boundaries:
-  //   582  bg-white                ┐
-  //   655  bg-[#F8F9FB]            ├─ first light run
-  //   766  bg-white                │  (3 sequential light sections)
-  //   838  </section>              ┘  → 841 bg-[#031226] (dark)
+  //   858  bg-white                ┐
+  //   931  bg-[#F8F9FB]            ├─ first light run
+  //  1042  bg-white                │  (3 sequential light sections)
+  //  1114  </section>              ┘  → 1117 bg-[#031226] (dark)
   //
-  //   921  bg-[#F8F9FB]            ┐── second light run
-  //  1028  bg-white                │   (2 sequential light sections)
-  //  1101  </section>              ┘   → 1102 bg-[#031226] (dark)
+  //  1197  bg-[#F8F9FB]            ┐── second light run
+  //  1304  bg-white                │   (2 sequential light sections)
+  //  1375  </section>              ┘   → 1378 bg-[#031226] (dark)
   //
   // To re-derive after edits:
   //   grep -n "<section className" src/app/(marketing)/page.tsx
   //
-  // Previous ranges [538,723] and [804,984] were stale after Sprint-1
-  // additions (Release Workflow Spine section + metadata/schema block at
-  // the top of the file) shifted line numbers by ~44 lines. The
-  // text-vektrum-blue matches were never on a dark background — the
-  // ranges had simply drifted.
+  // Ranges previously sat at [582,838] and [921,1101] before the structure
+  // pass added 5 sections (trust strip, problem, how-it-works, personas,
+  // AI/gate boundary) above the existing first light run, shifting line
+  // numbers down by ~270.
   const LIGHT_RANGES: Array<[number, number]> = [
-    [582, 838],   // First light run: Release workflow spine → How it works → Category difference
-    [921, 1101],  // Second light run: Role clarity → The process
+    [858, 1114],  // First light run: Release workflow spine → How it works → Category difference
+    [1197, 1375], // Second light run: Role clarity → The process
   ]
 
   for (const lineNo of matches) {
