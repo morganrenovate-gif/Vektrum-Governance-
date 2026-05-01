@@ -180,7 +180,7 @@ export function NewDealForm({ role }: NewDealFormProps) {
                 <div className="mb-3 flex items-center gap-3">
                   <div className="h-px w-5 bg-vektrum-blue" />
                   <p className="text-[11px] tracking-[0.12em] uppercase text-blue-300 font-semibold">
-                    {isContractor ? "New Deal" : "Governed Deal"}
+                    {isContractor ? "Project Submission" : "Governed Deal"}
                   </p>
                 </div>
                 <h1 className="font-display text-[2rem] font-bold tracking-[-0.04em] text-white leading-[1.05]">
@@ -247,15 +247,17 @@ export function NewDealForm({ role }: NewDealFormProps) {
                     />
                     <div>
                       <p className="text-[13px] font-semibold text-amber-300 mb-1">
-                        Invite your funder to govern this deal
+                        Submit project information for funder review
                       </p>
                       <p className="text-[12px] text-white/70 mb-2 leading-relaxed">
-                        Contractor submits project information. Funder verifies and authorizes
-                        release conditions. Vektrum enforces the gate. Your partner rail executes.
-                        You cannot authorize your own release.
+                        You can provide the project details, proposed contract value, and
+                        supporting information. Your funder must verify the governing terms,
+                        approve release conditions, and authorize any release before funds move.
+                        Vektrum enforces the release gate. The funder&rsquo;s selected payment
+                        rail executes.
                       </p>
                       <p className="text-[11px] text-white/50">
-                        This deal will be marked as draft pending funder verification.
+                        This project will remain a draft until a funder verifies the deal.
                       </p>
                     </div>
                   </div>
@@ -270,14 +272,18 @@ export function NewDealForm({ role }: NewDealFormProps) {
                 <CardBody>
                   <form onSubmit={handleSubmit} noValidate className="space-y-5">
                     <Input
-                      label="Deal Title"
+                      label={isContractor ? "Project Name" : "Deal Title"}
                       placeholder="e.g. Riverside Apartments — Foundation Phase"
                       value={form.title}
                       onChange={update("title")}
                       error={errors.title}
                       required
                       maxLength={120}
-                      helperText="A clear, project-specific name visible to all parties."
+                      helperText={
+                        isContractor
+                          ? "A clear project-specific name visible to the funder."
+                          : "A clear, project-specific name visible to all parties."
+                      }
                     />
 
                     <Textarea
@@ -286,12 +292,16 @@ export function NewDealForm({ role }: NewDealFormProps) {
                       value={form.description}
                       onChange={update("description")}
                       rows={4}
-                      helperText="Optional. Visible to the funder when reviewing this deal."
+                      helperText={
+                        isContractor
+                          ? "Optional. Visible to the funder during review."
+                          : "Optional. Visible to the funder when reviewing this deal."
+                      }
                     />
 
                     <Input
                       type="number"
-                      label="Total Contract Amount (USD)"
+                      label={isContractor ? "Proposed Contract Amount (USD)" : "Total Contract Amount (USD)"}
                       placeholder="250000"
                       value={form.total_amount}
                       onChange={update("total_amount")}
@@ -299,7 +309,11 @@ export function NewDealForm({ role }: NewDealFormProps) {
                       required
                       min={100}
                       step={0.01}
-                      helperText="The full value of the contract. Milestones must sum to this amount."
+                      helperText={
+                        isContractor
+                          ? "Enter the expected contract value. The funder will verify this against the governing contract, funding agreement, or draw schedule."
+                          : "The full value of the contract. Milestones must sum to this amount."
+                      }
                       onBlur={(e) => {
                         const formatted = formatCurrency(e.target.value);
                         if (formatted) {
@@ -334,13 +348,15 @@ export function NewDealForm({ role }: NewDealFormProps) {
                               aria-hidden="true"
                             />
                             <span className="text-[13px] font-semibold text-white/85">
-                              Require milestones to be released in order
+                              {isContractor
+                                ? "Suggested milestone sequence"
+                                : "Require milestones to be released in order"}
                             </span>
                           </div>
                           <p className="text-[12px] text-white/75 leading-relaxed">
-                            Milestone N cannot be released until milestone N−1 is confirmed
-                            released. Recommended for institutional lenders who require sequential
-                            disbursement.
+                            {isContractor
+                              ? "You can suggest a sequential release structure. The funder must verify and approve release controls before authorization."
+                              : "Milestone N cannot be released until milestone N−1 is confirmed released. Recommended for institutional lenders who require sequential disbursement."}
                           </p>
                           {form.sequential_release_required && (
                             <p className="mt-1.5 text-[11px] font-medium text-blue-300">
@@ -361,7 +377,7 @@ export function NewDealForm({ role }: NewDealFormProps) {
                           aria-hidden="true"
                         />
                         <span className="text-[13px] font-semibold text-white/85">
-                          Contract Retainage Term
+                          {isContractor ? "Proposed Retainage Term" : "Contract Retainage Term"}
                         </span>
                         <span className="ml-auto text-[11px] text-white/65">
                           Optional — default 0%
