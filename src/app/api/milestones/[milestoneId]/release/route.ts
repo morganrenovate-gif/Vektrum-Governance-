@@ -68,6 +68,27 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return err as NextResponse
   }
 
+  // ── Rail Guard — funder must have selected a disbursement rail ──────────────
+  // Vektrum records authorization readiness; the selected rail executes
+  // disbursement after required release conditions and authorization are
+  // complete. A funder who has not chosen any rail (or explicitly chose
+  // "not_configured") cannot trigger release execution. This is an entry-point
+  // precondition only — it does NOT modify the deterministic release gate
+  // (validateRelease) or the Stripe transfer/payment execution logic below.
+  if (
+    !profile.disbursement_rail
+    || profile.disbursement_rail === 'not_configured'
+  ) {
+    return NextResponse.json(
+      {
+        error:
+          'Disbursement rail not configured. Choose Stripe Connect or an external rail before releasing milestone funds.',
+        code: 'rail_not_configured',
+      },
+      { status: 400 },
+    )
+  }
+
   // ── Rate limit — financial writes ──────────────────────────────────────────
   // 5 release attempts per 60 s per user (configurable via RATE_LIMIT_FINANCIAL_WRITE_MAX).
   // Blocks burst-submission and amplified gate-query load. Enforced AFTER auth

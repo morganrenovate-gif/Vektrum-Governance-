@@ -22,6 +22,8 @@ import { ContractUploadSection } from "@/components/deal/contract-upload-section
 import { ContractSigningSection } from "@/components/deal/contract-signing-section";
 import { GenerateReleaseRulesButton } from "@/components/deal/generate-release-rules-button";
 import { ReleaseRulesReviewCard } from "@/components/deal/release-rules-review-card";
+import { ReleaseRulesNextStepCard } from "@/components/deal/release-rules-next-step-card";
+import { DealSetupProgress } from "@/components/deal/deal-setup-progress";
 import { UploadContractTrigger } from "@/components/deal/upload-contract-trigger";
 
 // ─── Release gate computation (server-side pre-check) ────────────────────────
@@ -454,6 +456,8 @@ export default async function DealDetailPage({
   const sovApproved = sovItems.some(i => i.status === 'approved')
   const allMilestonesLinked =
     milestones.length > 0 && milestones.every(m => milestoneSovLinkedIds.has(m.id))
+  // Advisory indicator only — the authoritative gate runs server-side per release.
+  const releaseGateActive = sovApproved && allMilestonesLinked && contractFullySigned
 
   const milestonesTotal = milestones.reduce((s, m) => s + m.amount, 0);
   const remaining = Math.max(0, typedDeal.total_amount - milestonesTotal);
@@ -565,6 +569,7 @@ export default async function DealDetailPage({
                 stripeConnected={!!typedProfile.stripe_account_id}
                 mfaEnrolled={!!typedProfile.mfa_enrolled}
                 mfaSetupUrl={mfaSetupUrl}
+                disbursementRail={typedProfile.disbursement_rail ?? null}
               />
             )}
           </div>
@@ -824,6 +829,22 @@ export default async function DealDetailPage({
         </CardBody>
       </Card>
 
+      {/* ── Deal setup progress strip ── */}
+      {/* Visible to all roles — gives a shared view of where the deal stands in
+          the contract → release rules → SOV → release gate sequence.
+          Advisory only; the deterministic release gate controls actual release. */}
+      {hasContract && (
+        <DealSetupProgress
+          contractFullySigned={contractFullySigned}
+          hasReleaseRulesDraft={hasReleaseRulesDraft}
+          releaseRulesAccepted={releaseRulesAccepted}
+          hasSovItems={sovItems.length > 0}
+          sovApproved={sovApproved}
+          allMilestonesLinked={allMilestonesLinked}
+          releaseGateActive={releaseGateActive}
+        />
+      )}
+
       {/* ── Contract required setup card ── */}
       {/* Shown to contractors before a contract is on file to guide the
           contract → SOV → milestone setup sequence. Advisory only — no
@@ -1005,6 +1026,17 @@ export default async function DealDetailPage({
         />
       )}
 
+      {/* ── Release-rules post-approval next-step card ─────────────────────── */}
+      {/* Shown after release rules are accepted. Guides funder/admin to create
+          the SOV, and shows contractors a read-only waiting state. Hidden once
+          SOV is approved (the release gate banner takes over from there). */}
+      <ReleaseRulesNextStepCard
+        releaseRulesAccepted={releaseRulesAccepted}
+        hasSovItems={sovItems.length > 0}
+        sovApproved={sovApproved}
+        viewerRole={typedProfile.role as 'funder' | 'contractor' | 'admin'}
+      />
+
       {/* ── Schedule of Values ── */}
       {/* id="sov" is the scroll anchor target for the "Enter SOV manually"
           CTA in the contract-fully-executed card above. */}
@@ -1018,6 +1050,7 @@ export default async function DealDetailPage({
         viewerRole={typedProfile.role as 'contractor' | 'funder' | 'admin'}
         dealStatus={typedDeal.status}
         hasContract={hasContract}
+        releaseRulesAccepted={releaseRulesAccepted}
       />
 
       {/* ── Deal Readiness Banner (funder only) ── */}

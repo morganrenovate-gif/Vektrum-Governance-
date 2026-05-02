@@ -180,7 +180,7 @@ export function ReleaseRulesReviewCard({
           draft.status === 'accepted'   ? 'bg-emerald-500/[0.10] text-emerald-400 border-emerald-500/30' :
                                           'bg-white/[0.06] text-white/45 border-white/[0.10]'
         }`}>
-          {draft.status}
+          {draft.status === 'accepted' ? 'Draft accepted' : draft.status}
         </span>
       </div>
 

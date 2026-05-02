@@ -66,6 +66,15 @@ export interface Profile {
   role: UserRole;
   stripe_account_id: string | null;
   stripe_payouts_enabled: boolean;
+  /**
+   * Funder-selected disbursement execution rail. Captures intent, not authority —
+   * the deterministic release gate still enforces all 10 conditions server-side.
+   * 'stripe'         — Stripe Connect (contractor receives via Stripe).
+   * 'external_rail'  — lender/title/escrow/fund-control/loan-servicer/other approved partner.
+   * 'not_configured' — funder picked "Set up later" during onboarding.
+   * null             — never made a choice (pre-migration funders / non-funders).
+   */
+  disbursement_rail: 'stripe' | 'external_rail' | 'not_configured' | null;
   onboarding_complete: boolean;
   /** Billing plan tier. Determines billing_rate_bps written to a deal at funding time. */
   subscription_tier: 'standalone' | 'institutional' | 'enterprise';
