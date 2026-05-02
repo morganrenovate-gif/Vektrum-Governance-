@@ -170,7 +170,7 @@ export default async function DashboardPage() {
                   <Link href="/dashboard/deals/new">
                     <Button variant="primary" size="md">
                       <Plus size={15} aria-hidden="true" />
-                      Create New Deal
+                      Submit project information
                     </Button>
                   </Link>
                 ) : (
@@ -203,9 +203,9 @@ export default async function DashboardPage() {
                 accentColor = 'border-vektrum-amber'
                 dotColor = 'bg-vektrum-amber'
               } else if (deals.length === 0) {
-                actionTitle = 'Create your first deal'
-                actionDescription = 'Create your first deal to get started.'
-                actionCTA = 'Create Deal'
+                actionTitle = 'Submit your first project'
+                actionDescription = 'You’ll see projects here when a funder invites you, or you can submit project information for funder review.'
+                actionCTA = 'Submit project information'
                 actionHref = '/dashboard/deals/new'
               } else if (allMilestones.some((m) => m.status === 'ready_for_review')) {
                 actionTitle = 'Draw ready to submit'
@@ -292,9 +292,9 @@ export default async function DashboardPage() {
               {deals.length === 0 ? (
                 <EmptyState
                   icon={FolderOpen}
-                  title="No deals yet"
-                  description="Create a deal or ask your funder to invite you. Vektrum enforces release conditions — funders authorize, the gate decides."
-                  action={{ label: "Create Deal", href: "/dashboard/deals/new" }}
+                  title="No projects yet"
+                  description="You’ll see projects here when a funder invites you, or you can submit project information for funder review. Vektrum enforces release conditions — funders authorize, the gate decides."
+                  action={{ label: "Submit project information", href: "/dashboard/deals/new" }}
                 />
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -401,7 +401,7 @@ export default async function DashboardPage() {
                 <EmptyState
                   icon={FolderOpen}
                   title="No governed deals yet"
-                  description="Create your first governed deal from a contract, funding agreement, or draw schedule. Vektrum will help organize parties, release conditions, SOV/milestones, retainage, and audit evidence before funds are authorized."
+                  description="Create your first governed deal from a contract, funding agreement, or draw schedule. Vektrum helps organize parties, release conditions, SOV/milestones, retainage, and audit evidence before release authorization."
                   action={{ label: "Create governed deal", href: "/dashboard/deals/new" }}
                 />
               ) : (
@@ -427,22 +427,39 @@ export default async function DashboardPage() {
   // ── Unknown / unexpected role ─────────────────────────────────────────────────
   // profile.role is not contractor, funder, or admin. This can happen when a user
   // signed up via a path that set an unexpected role value, or if the DB trigger
-  // failed to assign a role. Do not silently fall through to any role-specific view —
-  // show an explicit prompt so the user can contact support or sign out and retry.
+  // failed to assign a role. Do NOT silently fall through to any role-specific
+  // view (the design-pass spec is explicit: "Do not silently default to funder").
+  // Show a complete-profile prompt with a safe CTA to /dashboard/settings, where
+  // the user can correct their role or contact support.
   console.error(
     `[dashboard] User ${profile.id ?? 'unknown'} has unrecognised role — ` +
-    'rendering unknown-role fallback. Expected: contractor | funder | admin.',
+    'rendering complete-profile fallback. Expected: contractor | funder | admin.',
   )
   return (
     <div className="min-h-screen bg-surface-0 flex items-center justify-center px-4">
-      <div className="rounded-xl border border-white/[0.08] bg-surface-2 shadow-card px-8 py-7 max-w-sm w-full space-y-4">
-        <div className="notice-error">
-          <span>
-            Your account role could not be determined. Please sign out and sign back
-            in, or contact support if the issue persists.
-          </span>
+      <div
+        role="alert"
+        aria-live="polite"
+        className="rounded-xl border border-white/[0.08] bg-surface-2 shadow-card px-8 py-7 max-w-md w-full space-y-4"
+      >
+        <div>
+          <p className="text-[15px] font-semibold text-white">
+            Complete your profile to continue.
+          </p>
+          <p className="mt-2 text-[13px] text-white/65 leading-relaxed">
+            We could not determine your account role. Visit your profile to set
+            your role, or sign out and sign back in. Contact support if the issue
+            persists.
+          </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/dashboard/settings"
+            className="inline-flex items-center justify-center min-h-[36px] px-4 rounded-xl bg-vektrum-blue text-sm font-semibold text-white hover:bg-vektrum-blue-hover transition-colors"
+          >
+            Complete profile
+            <ArrowRight size={13} className="ml-1.5" aria-hidden="true" />
+          </Link>
           <a
             href="/auth/logout"
             className="inline-flex items-center justify-center min-h-[36px] px-4 rounded-xl border border-white/[0.12] text-sm text-white/60 hover:bg-white/[0.06] transition-colors"
