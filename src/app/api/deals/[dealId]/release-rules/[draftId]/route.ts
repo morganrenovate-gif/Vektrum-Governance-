@@ -151,7 +151,7 @@ export async function PATCH(
     return internalError('Could not record the draft review action.', updateErr?.message)
   }
 
-  // ── 5. Audit ──────────────────────────────────────────────────────────
+  // ── 5. Audit (status transition) ──────────────────────────────────────
   const lineItemCount =
     Array.isArray(draft.payload?.sov_line_items)
       ? draft.payload.sov_line_items.length
@@ -177,10 +177,125 @@ export async function PATCH(
     },
   })
 
+  // ── 6. Materialise SOV draft rows on approve ──────────────────────────
+  //
+  // Hard guarantees:
+  //   - Inserts only into sov_line_items, only with status='draft'.
+  //   - Never marks SOV approved (status='approved' requires the existing
+  //     manual-approval workflow).
+  //   - Idempotent — checks for existing rows with this draft as
+  //     source_draft_id before inserting (covers retry, double-submit,
+  //     and replay scenarios).
+  //   - Failure here is non-fatal to the response: the draft has already
+  //     transitioned to 'accepted' and the audit row is in. Funder/admin
+  //     can use "Enter manually" to retry SOV creation.
+  //   - Never touches milestones, deals.funded_amount, deals.released_amount,
+  //     contracts, or anything Stripe-related.
+  let sovRowsCreated = 0
+  let sovTotalAmount = 0
+  if (action === 'approve' && lineItemCount > 0) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: existingFromDraft } = await (admin as any)
+        .from('sov_line_items')
+        .select('id')
+        .eq('deal_id', dealId)
+        .eq('source_draft_id', draft.id)
+        .limit(1)
+        .maybeSingle()
+
+      if (existingFromDraft) {
+        console.info('[release-rules/approve] SOV rows already materialised for this draft — skipping', {
+          deal_id:  dealId,
+          draft_id: draft.id,
+        })
+      } else {
+        // Build SOV insert rows from the accepted payload. Every row goes in
+        // as status='draft'. revised_value / balance_to_finish are
+        // app-maintained derivatives (see migration); we initialise them
+        // consistently with manual entry.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const items = draft.payload.sov_line_items as Array<any>
+        const rows = items.map((item, idx) => {
+          const scheduledValue =
+            typeof item.amount === 'number' && Number.isFinite(item.amount) && item.amount >= 0
+              ? item.amount
+              : 0
+          sovTotalAmount += scheduledValue
+          // Truncate description to a sane length to stay below any
+          // future column-width constraint while preserving the source.
+          const baseDescription =
+            typeof item.description === 'string' && item.description.trim()
+              ? item.description.trim()
+              : item.name
+          return {
+            deal_id:                dealId,
+            item_number:            String(idx + 1),
+            description:            String(baseDescription).slice(0, 1000),
+            scheduled_value:        scheduledValue,
+            approved_change_orders: 0,
+            revised_value:          scheduledValue,
+            previous_released:      0,
+            current_requested:      0,
+            retainage_amount:       0,
+            balance_to_finish:      scheduledValue,
+            percent_complete:       0,
+            status:                 'draft',
+            sort_order:             idx,
+            created_by:             user.id,
+            source_draft_id:        draft.id,
+          }
+        })
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: inserted, error: insertErr } = await (admin as any)
+          .from('sov_line_items')
+          .insert(rows)
+          .select('id')
+
+        if (insertErr) {
+          console.error('[release-rules/approve] sov_line_items insert failed', {
+            deal_id:  dealId,
+            draft_id: draft.id,
+            error:    insertErr.message?.slice(0, 200),
+          })
+        } else {
+          sovRowsCreated = inserted?.length ?? 0
+          // Audit the materialisation as a separate event so the chain
+          // shows two distinct facts: the funder accepted the draft, AND
+          // a draft SOV was materialised from it.
+          await logAudit({
+            entity_type:   'contract',
+            entity_id:     draft.contract_id,
+            action:        'sov_draft_created_from_release_rules',
+            actor_id:      user.id,
+            actor_role:    profile.role,
+            system_source: 'api/deals/release-rules/draft',
+            metadata: {
+              deal_id:        dealId,
+              draft_id:       draft.id,
+              line_item_count: sovRowsCreated,
+              total_amount:    sovTotalAmount,
+              warnings_count:  warningsCount,
+            },
+          })
+        }
+      }
+    } catch (err) {
+      console.error('[release-rules/approve] unexpected error materialising SOV', {
+        deal_id:  dealId,
+        draft_id: draft.id,
+        error:    err instanceof Error ? err.message.slice(0, 200) : String(err),
+      })
+    }
+  }
+
   return NextResponse.json({
-    ok:           true,
-    draft_id:     updated.id,
-    status:       updated.status,
-    reviewed_at:  updated.reviewed_at,
+    ok:                 true,
+    draft_id:           updated.id,
+    status:             updated.status,
+    reviewed_at:        updated.reviewed_at,
+    sov_rows_created:   sovRowsCreated,
+    sov_total_amount:   sovTotalAmount,
   })
 }
