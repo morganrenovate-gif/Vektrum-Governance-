@@ -127,10 +127,14 @@ async function main() {
     /\.update\(\s*\{[\s\S]*?status:\s*newStatus[\s\S]*?reviewer_notes:[\s\S]*?reviewed_by:[\s\S]*?reviewed_at:/.test(routeCode),
     '  1l. update writes status + reviewer_notes + reviewed_by + reviewed_at',
   )
-  // Verify no inserts into sov_line_items / milestones / deals
+  // The release-rules-to-sov pass intentionally extended the approve path
+  // to materialise sov_line_items rows with status='draft' and
+  // source_draft_id=draft.id. The hard invariant remains that NO row is
+  // ever inserted with status='approved' — that requires the existing
+  // manual-approval workflow. We pin the safer invariant here.
   check(
-    !/from\(\s*['"]sov_line_items['"]\s*\)[\s\S]{0,200}\.insert/.test(routeCode),
-    '  1m. route does NOT insert into sov_line_items',
+    !/status:\s*['"]approved['"]/.test(routeCode),
+    "  1m. route NEVER inserts sov_line_items with status='approved'",
   )
   check(
     !/from\(\s*['"]milestones['"]\s*\)[\s\S]{0,200}\.insert/.test(routeCode) &&
