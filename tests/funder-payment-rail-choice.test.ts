@@ -272,8 +272,8 @@ check(
   'FundDealButton primary CTA reads "Record funding commitment"',
 )
 check(
-  absent(fundBtn, 'Fund This Deal'),
-  'FundDealButton no longer says "Fund This Deal"',
+  !/>\s*Fund This Deal/.test(fundBtn) && !/Fund This Deal\s*—/.test(fundBtn),
+  'FundDealButton no longer says "Fund This Deal" as a user-facing label',
 )
 
 // Deal page wires the prop through

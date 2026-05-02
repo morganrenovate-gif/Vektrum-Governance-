@@ -180,6 +180,13 @@ export function ReleaseRulesReviewCard({
           draft.status === 'accepted'   ? 'bg-emerald-500/[0.10] text-emerald-400 border-emerald-500/30' :
                                           'bg-white/[0.06] text-white/45 border-white/[0.10]'
         }`}>
+          {/*
+            Status pill copy. The bare "accepted" label was confusing because
+            users equated it with release authorization. We now say "Draft
+            accepted" so the meaning is unambiguous: the funder has accepted
+            the draft for SOV setup, but release readiness still depends on
+            SOV approval + release-gate conditions + funder authorization.
+          */}
           {draft.status === 'accepted' ? 'Draft accepted' : draft.status}
         </span>
       </div>

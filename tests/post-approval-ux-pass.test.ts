@@ -86,33 +86,29 @@ check(
   'NextStepCard returns null when conditions not met',
 )
 check(
-  contains(nextStep, "Draft accepted"),
-  'NextStepCard variant A header reads "Draft accepted"',
+  contains(nextStep, "Create Schedule of Values"),
+  'NextStepCard variant 1 header reads "Create Schedule of Values"',
 )
 check(
   contains(nextStep, "Create SOV from accepted draft"),
-  'NextStepCard variant A shows funder CTA to create SOV from draft',
+  'NextStepCard variant 1 shows funder CTA to create SOV from draft',
 )
 check(
   contains(nextStep, "Enter SOV manually"),
-  'NextStepCard variant A shows manual entry fallback CTA',
+  'NextStepCard variant 1 shows manual entry fallback CTA',
 )
 check(
-  contains(nextStep, "SOV pending approval"),
-  'NextStepCard variant B surfaces SOV-pending-approval state',
+  contains(nextStep, "SOV draft pending approval"),
+  'NextStepCard variant 2 surfaces SOV-draft-pending-approval state',
 )
 check(
-  contains(nextStep, "Review and approve SOV"),
-  'NextStepCard variant B shows funder approve-SOV CTA',
+  contains(nextStep, "Review SOV draft"),
+  'NextStepCard variant 2 shows funder review-SOV CTA',
 )
-// Contractor read-only paths
+// Funder/admin gating: card hides for non-funder/admin viewers
 check(
-  contains(nextStep, "Waiting for SOV setup"),
-  'NextStepCard shows contractor read-only "Waiting for SOV setup" copy',
-)
-check(
-  contains(nextStep, "Your funder is reviewing"),
-  'NextStepCard shows contractor read-only waiting copy for variant B',
+  contains(nextStep, "viewerRole !== 'funder' && viewerRole !== 'admin'"),
+  'NextStepCard hides for non-funder/admin viewers',
 )
 // Safety guardrail language
 check(
@@ -122,6 +118,14 @@ check(
 check(
   contains(nextStep, "release gate"),
   'NextStepCard references the deterministic release gate',
+)
+check(
+  contains(nextStep, "Draft rules must be reviewed and approved before they control release"),
+  'NextStepCard pins approval-required guardrail copy',
+)
+check(
+  contains(nextStep, "selected rail executes disbursement"),
+  'NextStepCard pins selected-rail-executes-disbursement guardrail',
 )
 
 console.log('\n── DealSetupProgress component ──────────────────────────────────────────')
@@ -155,11 +159,12 @@ check(
   'DealSetupProgress accepts releaseGateActive prop',
 )
 
-// 7 steps present
+// 7 steps present (origin/main labels — "Release rules accepted" matches the
+// Draft-accepted pill in the review card; the strip is purely informational).
 const EXPECTED_STEPS = [
   'Contract signed',
   'Release rules drafted',
-  'Release rules approved',
+  'Release rules accepted',
   'SOV created',
   'SOV approved',
   'Milestones linked',
@@ -169,13 +174,19 @@ for (const step of EXPECTED_STEPS) {
   check(contains(setupProg, step), `DealSetupProgress includes step: "${step}"`)
 }
 
+// Semantic ordered list with aria-current="step" for the active step
 check(
-  contains(setupProg, "role=\"progressbar\""),
-  'DealSetupProgress has accessible progressbar role',
+  contains(setupProg, 'aria-current={isActive ? \'step\' : undefined}')
+    || contains(setupProg, 'aria-current="step"'),
+  'DealSetupProgress marks the active step with aria-current="step"',
 )
 check(
-  contains(setupProg, "Deal setup progress"),
+  contains(setupProg, 'Deal setup progress'),
   'DealSetupProgress renders "Deal setup progress" heading',
+)
+check(
+  contains(setupProg, 'Setup progress is informational'),
+  'DealSetupProgress includes the informational-only footer',
 )
 
 console.log('\n── Fund-deal button label ───────────────────────────────────────────────')
@@ -184,9 +195,12 @@ check(
   contains(fundBtn, "Record funding commitment"),
   'FundDealButton label is "Record funding commitment"',
 )
+// "Fund This Deal" must not appear as a user-facing label. The merged file
+// keeps a single explanatory comment ("Renaming away from \"Fund This Deal\"
+// prevents users from thinking…") which is fine; assert on JSX usage instead.
 check(
-  absent(fundBtn, "Fund This Deal"),
-  'FundDealButton no longer uses "Fund This Deal" label',
+  !/>\s*Fund This Deal/.test(fundBtn) && !/Fund This Deal\s*—/.test(fundBtn),
+  'FundDealButton no longer uses "Fund This Deal" as a user-facing label',
 )
 
 console.log('\n── SOV section empty-state softening ────────────────────────────────────')
