@@ -349,13 +349,15 @@ export async function generateDraftReleaseRules(
     }
   }
 
-  // Pull the assistant's JSON content.
-  let raw: string
+  // Pull the assistant's JSON content. Perplexity's chat-completions
+  // response shape can return the model output in several places depending
+  // on the model + structured-output mode:
+  //   - choices[0].message.content   (string OR pre-parsed object/array)
+  //   - choices[0].message.parsed    (some structured-output deployments)
+  // We accept either and let parseStructuredModelJson normalise downstream.
+  let providerBody: unknown
   try {
-    const json = (await response.json()) as {
-      choices?: Array<{ message?: { content?: string } }>
-    }
-    raw = json.choices?.[0]?.message?.content ?? ''
+    providerBody = await response.json()
   } catch (err) {
     console.error('[release-rules] perplexity body parse failed:', String(err).slice(0, 200))
     return {
@@ -367,21 +369,43 @@ export async function generateDraftReleaseRules(
     }
   }
 
-  let parsed: unknown
-  try {
-    parsed = JSON.parse(raw)
-  } catch {
-    console.error('[release-rules] model returned non-JSON content (first 200 chars):', raw.slice(0, 200))
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const choice = (providerBody as any)?.choices?.[0] ?? null
+  const messageContent: unknown = choice?.message?.content
+  const messageParsed:  unknown = choice?.message?.parsed
+  // Prefer .parsed when the provider has already validated against the schema.
+  const candidate: unknown =
+    messageParsed !== undefined && messageParsed !== null
+      ? messageParsed
+      : messageContent
+
+  const parseResult = parseStructuredModelJson(candidate)
+  if (!parseResult.ok) {
+    // Safe diagnostics — content type + length + boundary chars + the
+    // first 200 chars (truncated). We log neither the API key, the prompt,
+    // nor the contract text. The response_format shape is included so
+    // ops can rule out request-side regressions in one log line.
+    const preview = previewContent(candidate)
+    console.error('[release-rules] model output could not be parsed', {
+      content_type:                preview.contentType,
+      content_length:              preview.length,
+      starts_with:                 preview.startsWith,
+      ends_with:                   preview.endsWith,
+      first_200_chars:             preview.first200,
+      parse_failure_reason:        parseResult.reason,
+      response_format_type:        responseFormat.type,
+      response_format_schema_name: responseFormat.json_schema.name,
+    })
     return {
       ok:     false,
       reason: 'invalid_json',
       error:
-        'Could not generate draft release rules right now. ' +
+        'Could not parse the draft release rules returned by the AI service. ' +
         'Enter release rules manually or try again.',
     }
   }
 
-  const validation = validateDraft(parsed, input.contractTotal ?? null)
+  const validation = validateDraft(parseResult.value, input.contractTotal ?? null)
   if (!validation.ok) {
     return { ok: false, reason: 'invalid_json', error: validation.error }
   }
@@ -563,4 +587,153 @@ function truncateForPrompt(text: string): string {
   const MAX = 60_000
   if (text.length <= MAX) return text
   return text.slice(0, MAX) + '\n\n[…contract truncated…]'
+}
+
+// ─── Structured-output parsing helper ────────────────────────────────────
+//
+// Perplexity's chat-completions response can hand us the structured payload
+// in three different shapes depending on the model + structured-output mode:
+//
+//   1. choices[0].message.parsed    — already a parsed object/array
+//   2. choices[0].message.content   — already a parsed object/array
+//   3. choices[0].message.content   — a JSON string, sometimes wrapped in
+//                                     ```json ... ``` markdown fences,
+//                                     sometimes with leading/trailing
+//                                     explanatory text the model added
+//
+// parseStructuredModelJson normalises all three into a JS value (object or
+// array) without losing the strict downstream validation. The validator
+// (validateDraft) is the canonical schema gate — this helper only handles
+// the surface-level "did we receive JSON at all" question.
+//
+// Exported for the dedicated test in
+// tests/perplexity-structured-output-parser.test.ts.
+
+export type ParseStructuredOk  = { ok: true;  value: Record<string, unknown> }
+export type ParseStructuredErr = {
+  ok:     false
+  reason:
+    | 'empty'
+    | 'unparseable'
+    | 'unsupported_type'
+    | 'top_level_not_object'
+}
+
+export function parseStructuredModelJson(
+  content: unknown,
+): ParseStructuredOk | ParseStructuredErr {
+  // Case A — null / undefined.
+  if (content === null || content === undefined) {
+    return { ok: false, reason: 'unsupported_type' }
+  }
+
+  // Case B — already-parsed plain objects or arrays. JSON.parse on these
+  // would convert to "[object Object]" and throw; pass them through to
+  // the object-shape gate below.
+  if (typeof content === 'object') {
+    return enforceTopLevelObject(content)
+  }
+
+  // Case C — anything that isn't a string at this point can't be parsed.
+  if (typeof content !== 'string') {
+    return { ok: false, reason: 'unsupported_type' }
+  }
+
+  let s = content.trim()
+  if (!s) return { ok: false, reason: 'empty' }
+
+  // Case D — strip markdown code fences ONLY when the entire content is
+  // fenced. Patterns we accept:
+  //   ```json\n{...}\n```
+  //   ```\n{...}\n```
+  // We never strip fences that the model used as inline code blocks inside
+  // the JSON itself.
+  const fenceMatch = s.match(/^```(?:json|JSON)?\s*\n?([\s\S]*?)\n?```$/)
+  if (fenceMatch) {
+    s = fenceMatch[1].trim()
+    if (!s) return { ok: false, reason: 'empty' }
+  }
+
+  // Direct parse — happiest path. Per spec: if the first non-whitespace
+  // character is `{` and the last is `}`, attempt JSON.parse directly
+  // before falling back to recovery.
+  try {
+    return enforceTopLevelObject(JSON.parse(s))
+  } catch {
+    /* fall through to bracket-extraction recovery */
+  }
+
+  // Recovery — model occasionally adds prose before/after the JSON body.
+  // Slice from the first `{` to the matching last `}` and re-parse.
+  // Top-level arrays are rejected up-front, so we anchor only on `{` here.
+  const firstIdx = s.indexOf('{')
+  const lastIdx  = s.lastIndexOf('}')
+  if (firstIdx >= 0 && lastIdx > firstIdx) {
+    const sliced = s.slice(firstIdx, lastIdx + 1)
+    try {
+      return enforceTopLevelObject(JSON.parse(sliced))
+    } catch {
+      /* fall through */
+    }
+  }
+
+  return { ok: false, reason: 'unparseable' }
+}
+
+/**
+ * Reject top-level arrays / primitives. Release rules are always an object
+ * — a draft array would slip past validateDraft as malformed.
+ */
+function enforceTopLevelObject(
+  value: unknown,
+): ParseStructuredOk | ParseStructuredErr {
+  if (
+    value === null ||
+    typeof value !== 'object' ||
+    Array.isArray(value)
+  ) {
+    return { ok: false, reason: 'top_level_not_object' }
+  }
+  return { ok: true, value: value as Record<string, unknown> }
+}
+
+interface ContentPreview {
+  contentType: 'string' | 'object' | 'array' | 'null' | 'undefined' | 'other'
+  length:      number | null
+  startsWith:  string | null
+  endsWith:    string | null
+  first200:    string | null
+}
+
+/**
+ * Builds a safe-to-log preview of whatever we received from the model.
+ * Used only on the failure path so ops can diagnose without the full
+ * payload (and definitely without the prompt or contract text).
+ *
+ *   - `length`      — full content length (chars or stringified bytes).
+ *   - `startsWith`  — first 5 non-whitespace chars (catches missing `{`,
+ *                     stray prose, fence-only output).
+ *   - `endsWith`    — last 5 non-whitespace chars (catches truncated
+ *                     `},...` mid-stream).
+ *   - `first200`    — first 200 chars verbatim. Truncated to keep the log
+ *                     payload bounded and to never leak more than what
+ *                     is needed to reproduce the parse failure.
+ */
+function previewContent(content: unknown): ContentPreview {
+  function fromString(s: string, contentType: ContentPreview['contentType']): ContentPreview {
+    const trimmed = s.trim()
+    return {
+      contentType,
+      length:      s.length,
+      startsWith:  trimmed.slice(0, 5)  || null,
+      endsWith:    trimmed.slice(-5)    || null,
+      first200:    s.slice(0, 200),
+    }
+  }
+  if (content === null)      return { contentType: 'null',      length: null, startsWith: null, endsWith: null, first200: null }
+  if (content === undefined) return { contentType: 'undefined', length: null, startsWith: null, endsWith: null, first200: null }
+  if (Array.isArray(content)) return fromString(JSON.stringify(content), 'array')
+  if (typeof content === 'object') return fromString(JSON.stringify(content), 'object')
+  if (typeof content === 'string') return fromString(content, 'string')
+  return { contentType: 'other', length: null, startsWith: null, endsWith: null, first200: null }
 }
