@@ -864,9 +864,9 @@ export default async function DealDetailPage({
                     Create release rules
                   </p>
                   <p className="text-[12px] text-white/55 leading-relaxed">
-                    Use the signed contract as the source of truth for draft SOV line
-                    items, retainage, milestone scope, evidence requirements, and
-                    release conditions.
+                    Use the contract document as the source of truth for draft SOV
+                    line items, retainage, milestone scope, evidence requirements,
+                    and release conditions.
                   </p>
                 </div>
 
