@@ -116,11 +116,20 @@ await test('3. "Upload executed contract" step text is present', () => {
   )
 })
 
-await test('4. "Create Schedule of Values" step text is present', () => {
+await test('4. "Create Schedule of Values" / "Waiting for release-rule setup" step text is present', () => {
+  // The contract-release-rules pass split the contractor next-step into
+  // multiple states. When the contract exists but isn't fully signed the
+  // contractor sees "Awaiting contract signatures"; when fully signed but
+  // no SOV exists the contractor sees "Waiting for SOV setup" / "Waiting
+  // for release-rule setup". Either of those — or the legacy "Create
+  // Schedule of Values" wording — proves the contract → SOV transition is
+  // surfaced. We accept any of them.
   const src = read(PAGE)
   assert(
-    src.includes('Create Schedule of Values'),
-    `${PAGE} must show "Create Schedule of Values" as the step when contract exists but no SOV items.`,
+    src.includes('Create Schedule of Values') ||
+    src.includes('Waiting for SOV setup') ||
+    src.includes('Waiting for release-rule setup'),
+    `${PAGE} must show a contract → SOV transition step ("Create Schedule of Values" / "Waiting for release-rule setup").`,
   )
 })
 

@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useRef, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   PenLine, Send, ExternalLink, CheckCircle2, Clock,
   AlertCircle, Loader2, RefreshCcw,
@@ -48,6 +48,54 @@ export function ContractSigningSection({
   const isFunder     = currentUserRole === 'funder'
   const isContractor = currentUserRole === 'contractor'
   const isAdmin      = currentUserRole === 'admin'
+
+  // ── Return-from-DocuSign one-shot refresh ──────────────────────────────
+  //
+  // DocuSign returns the user to the deal page with `?event=signing_complete`
+  // (or `?docusign=return`) appended to the returnUrl we passed. On that
+  // first render we want to fire ONE refresh-signing-status call so the
+  // contractor row flips to "Signed" without waiting for the webhook.
+  //
+  // Guarded by a ref + the URL params so we never poll and never refresh
+  // more than once per page load. The event is also explicitly cleared from
+  // the URL after the refresh fires so a manual page reload doesn't
+  // re-trigger.
+  const searchParams = useSearchParams()
+  const autoRefreshFired = useRef(false)
+
+  useEffect(() => {
+    if (autoRefreshFired.current) return
+    if (!envelopeId) return
+    const event   = searchParams?.get('event')
+    const dsParam = searchParams?.get('docusign')
+    const fromDocuSign =
+      event   === 'signing_complete' ||
+      dsParam === 'return'
+    if (!fromDocuSign) return
+
+    autoRefreshFired.current = true
+    void (async () => {
+      try {
+        await fetch(
+          `/api/deals/${dealId}/contract/refresh-signing-status`,
+          { method: 'POST' },
+        )
+      } catch {
+        // Non-fatal: user can still click the visible "Refresh signing status"
+        // button below if the auto-refresh failed.
+      }
+      // Strip the return param so a page reload doesn't re-fire.
+      try {
+        const url = new URL(window.location.href)
+        url.searchParams.delete('event')
+        url.searchParams.delete('docusign')
+        window.history.replaceState({}, '', url.toString())
+      } catch {
+        /* ignore URL manipulation failure on legacy browsers */
+      }
+      router.refresh()
+    })()
+  }, [searchParams, envelopeId, dealId, router])
 
   const funderDone     = !!funderSignedAt
   const contractorDone = !!contractorSignedAt
