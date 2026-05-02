@@ -14,12 +14,13 @@ import { FundDealButton } from "./fund-deal-button";
 import { ReleaseRetainageButton } from "./release-retainage-button";
 import type { Deal, Profile, Milestone, LienWaiver, ChangeOrder, MilestoneDocument, ReleaseGateResult, ContractStatus } from "@/lib/types";
 import { formatMoney } from "@/lib/utils";
-import { ArrowLeft, Info, FolderOpen, FileText, CheckCircle2, Clock, XCircle, AlertCircle, ShieldAlert, ShieldCheck, PenLine } from "lucide-react";
+import { ArrowLeft, ArrowRight, Info, FolderOpen, FileText, CheckCircle2, Clock, XCircle, AlertCircle, ShieldAlert, ShieldCheck, PenLine } from "lucide-react";
 import { SectionHeader, EmptyState } from "@/components/layout";
 import { SovSection } from "@/components/deal/sov-section";
 import { DealReadinessBanner } from "@/components/deal/deal-readiness-banner";
 import { ContractUploadSection } from "@/components/deal/contract-upload-section";
 import { ContractSigningSection } from "@/components/deal/contract-signing-section";
+import { GenerateReleaseRulesButton } from "@/components/deal/generate-release-rules-button";
 import { UploadContractTrigger } from "@/components/deal/upload-contract-trigger";
 
 // ─── Release gate computation (server-side pre-check) ────────────────────────
@@ -367,6 +368,46 @@ export default async function DealDetailPage({
   // Used to show the contract-required setup card and guide the SOV flow.
   const hasContract = !!contract && contract.status !== 'voided'
 
+  // True only when BOTH parties have completed signing in DocuSign. The
+  // separate intermediate statuses (funder_signed / contractor_signed) and
+  // the contract.status === 'signed' flag are all derived from these two
+  // timestamps; we read them directly so the checklist + CTAs cannot get
+  // out of sync with the underlying ground truth.
+  const contractFullySigned =
+    !!contract?.funder_signed_at && !!contract?.contractor_signed_at
+
+  // True when the funder/admin can begin SOV setup directly from a signed
+  // contract — the trigger for the post-signing CTA card below.
+  const canCreateSovFromContract =
+    contractFullySigned && sovItems.length === 0
+
+  // Existing draft release-rules record (if any). The card below switches to
+  // a "Draft generated — review required" state when this is non-null. Only
+  // fetched when the contract row exists; otherwise no draft can exist.
+  let activeReleaseRulesDraft:
+    | { id: string; status: 'draft' | 'reviewed'; created_at: string; warnings_count: number }
+    | null = null
+  if (contract?.id) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: draftRow } = await (supabase as any)
+      .from('contract_release_rule_drafts')
+      .select('id, status, created_at, warnings')
+      .eq('contract_id', contract.id)
+      .in('status', ['draft', 'reviewed'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (draftRow) {
+      activeReleaseRulesDraft = {
+        id:             draftRow.id,
+        status:         draftRow.status,
+        created_at:     draftRow.created_at,
+        warnings_count: Array.isArray(draftRow.warnings) ? draftRow.warnings.length : 0,
+      }
+    }
+  }
+  const hasReleaseRulesDraft = !!activeReleaseRulesDraft
+
   // ── Contractor workflow computed state ───────────────────────────────────
   // Used by the Next Required Step card and Deal Setup Checklist.
   // Advisory only — does not affect release gate.
@@ -529,9 +570,12 @@ export default async function DealDetailPage({
         if (!hasContract) {
           stepLabel = 'Upload executed contract'
           stepDesc  = 'Upload the signed contract PDF to begin setting up your Schedule of Values.'
+        } else if (!contractFullySigned) {
+          stepLabel = 'Awaiting contract signatures'
+          stepDesc  = 'Both parties must complete signing in DocuSign before the Schedule of Values can be set up.'
         } else if (sovItems.length === 0) {
-          stepLabel = 'Create Schedule of Values'
-          stepDesc  = 'Add line items from the approved contract to define your draw values.'
+          stepLabel = 'Waiting for SOV setup'
+          stepDesc  = 'The contract is fully executed. The funder must create or approve the Schedule of Values before milestone releases can proceed.'
         } else if (!sovApproved) {
           stepLabel = 'Submit SOV for funder approval'
           stepDesc  = 'Your Schedule of Values is drafted. Submit each line item so your funder can review and approve.'
@@ -571,6 +615,8 @@ export default async function DealDetailPage({
               [
                 { label: 'Funder assigned',         done: !!typedDeal.funder_id },
                 { label: 'Contract uploaded',        done: hasContract },
+                { label: 'Contract fully signed',    done: contractFullySigned },
+                { label: 'Release rules drafted',    done: hasReleaseRulesDraft || sovItems.length > 0 },
                 { label: 'SOV created',              done: sovItems.length > 0 },
                 { label: 'SOV approved',             done: sovApproved },
                 { label: 'Milestones linked to SOV', done: allMilestonesLinked },
@@ -778,7 +824,127 @@ export default async function DealDetailPage({
         <ContractUploadSection dealId={typedDeal.id} role={typedProfile.role as 'contractor' | 'funder' | 'admin'} />
       )}
 
+      {/* ── Contract fully executed → next step: SOV ─────────────────────── */}
+      {/*
+        Shown only when both DocuSign timestamps exist and SOV has not been
+        created yet. Drives the post-signing UX:
+          - funder/admin: "Generate SOV from signed contract" (placeholder
+            until the AI extraction backend ships) + "Enter SOV manually"
+            anchor link to the SOV section below.
+          - contractor: read-only "Waiting for SOV setup" copy — contractors
+            do not author the governing SOV in the funder-led flow.
+
+        This block intentionally avoids any AI-approval or autonomous-release
+        wording. SOV creation is advisory; the deterministic release gate
+        and funder authorization still control release.
+      */}
+      {canCreateSovFromContract && (
+        <section
+          aria-label="Contract fully executed — next step Schedule of Values"
+          className="rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.04] overflow-hidden"
+        >
+          <div className="border-b border-emerald-500/15 px-5 py-3.5 flex items-center gap-2.5">
+            <CheckCircle2 size={14} className="text-emerald-400 flex-shrink-0" aria-hidden="true" />
+            <p className="text-[12px] font-semibold text-emerald-300">Contract fully executed</p>
+            <span className="ml-auto text-[10px] uppercase tracking-[0.12em] text-emerald-300/70 font-semibold">
+              Next required step
+            </span>
+          </div>
+
+          <div className="px-5 py-5 space-y-4">
+            <p className="text-[13px] text-white/75 leading-relaxed">
+              Both parties have completed signing. Use the signed contract to create
+              the Schedule of Values before milestone releases can proceed.
+            </p>
+
+            {(typedProfile.role === 'funder' || typedProfile.role === 'admin') ? (
+              <>
+                <div>
+                  <p className="text-[14px] font-semibold text-white mb-1">
+                    Create release rules
+                  </p>
+                  <p className="text-[12px] text-white/55 leading-relaxed">
+                    Use the signed contract as the source of truth for draft SOV line
+                    items, retainage, milestone scope, evidence requirements, and
+                    release conditions.
+                  </p>
+                </div>
+
+                {hasReleaseRulesDraft ? (
+                  // Draft already exists — show review-required state instead
+                  // of letting the funder regenerate over the top of it.
+                  <div className="rounded-lg border border-blue-500/25 bg-blue-500/[0.06] px-4 py-3.5 max-w-2xl">
+                    <p className="text-[13px] font-semibold text-blue-200">
+                      Draft release rules generated. Review required before release setup can continue.
+                    </p>
+                    <p className="mt-1 text-[12px] text-white/65 leading-relaxed">
+                      The draft is not approved and does not control release readiness.
+                      The deterministic release gate and funder authorization still control release.
+                      {activeReleaseRulesDraft && activeReleaseRulesDraft.warnings_count > 0 && (
+                        <>
+                          {' '}
+                          <span className="text-amber-300">
+                            {activeReleaseRulesDraft.warnings_count} warning{activeReleaseRulesDraft.warnings_count === 1 ? '' : 's'} flagged.
+                          </span>
+                        </>
+                      )}
+                    </p>
+                    <div className="mt-3">
+                      <Link
+                        href="#sov"
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-vektrum-blue px-3.5 py-2 text-[12px] font-semibold text-white hover:bg-vektrum-blue-hover transition-colors"
+                      >
+                        Continue to SOV review
+                        <ArrowRight size={12} aria-hidden="true" />
+                      </Link>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                    {/*
+                      Real generate-from-contract CTA. Calls the
+                      generate-from-contract API which extracts text from the
+                      signed PDF and asks Perplexity for a draft. Stored as
+                      status='draft' — never approved automatically.
+                    */}
+                    <GenerateReleaseRulesButton dealId={typedDeal.id} />
+
+                    <Link
+                      href="#sov"
+                      className="inline-flex items-center gap-1.5 self-start rounded-lg border border-white/[0.10] bg-surface-3 px-4 py-2.5 text-[13px] font-semibold text-white/75 hover:text-white hover:bg-white/[0.06] hover:border-white/[0.18] transition-colors"
+                    >
+                      Enter manually
+                      <ArrowRight size={13} aria-hidden="true" />
+                    </Link>
+                  </div>
+                )}
+
+                <p className="text-[11px] text-white/45 leading-relaxed">
+                  Draft rules must be reviewed and approved before they control
+                  release readiness. The deterministic release gate and funder
+                  authorization still control release.
+                </p>
+              </>
+            ) : (
+              // Contractor view — read-only waiting state
+              <div className="space-y-2">
+                <p className="text-[14px] font-semibold text-white">
+                  Waiting for release-rule setup
+                </p>
+                <p className="text-[12px] text-white/65 leading-relaxed">
+                  The contract is fully executed. The funder must create or approve the
+                  SOV and release rules before milestone releases can proceed.
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
       {/* ── Schedule of Values ── */}
+      {/* id="sov" is the scroll anchor target for the "Enter SOV manually"
+          CTA in the contract-fully-executed card above. */}
+      <div id="sov" className="scroll-mt-20" />
       <SovSection
         dealId={typedDeal.id}
         dealAmount={typedDeal.total_amount}
