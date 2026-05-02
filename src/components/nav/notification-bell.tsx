@@ -25,6 +25,9 @@ function typeLabel(notification_type: string): string {
     dispute_opened:                       'Dispute opened',
     dispute_resolved:                     'Dispute resolved',
     external_payment_confirmation_required: 'External payment',
+    contract_envelope_sent:               'Contract sent for signature',
+    contract_signing_turn:                'Contract signing',
+    contract_fully_executed:              'Contract executed',
   }
   return map[notification_type] ?? notification_type.replace(/_/g, ' ')
 }

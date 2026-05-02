@@ -29,7 +29,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createSupabaseAdminClient } from '@/lib/supabase/server'
 import { getAuthUser, requireDealAccess } from '@/lib/auth/middleware'
 import { getEnvelopeStatus, DocuSignError } from '@/lib/engine/docusign'
-import { notifyContractorTurnToSign } from '@/lib/engine/docusign-notify'
+import {
+  notifyContractorTurnToSign,
+  notifyContractFullyExecuted,
+} from '@/lib/engine/docusign-notify'
 import { logAudit } from '@/lib/engine/audit'
 import { internalError, notFoundError } from '@/lib/errors'
 
@@ -222,6 +225,27 @@ export async function POST(
     } catch (err) {
       console.error(
         '[refresh-signing-status] notifyContractorTurnToSign failed (non-fatal):',
+        err instanceof Error ? err.message : err,
+      )
+    }
+  }
+
+  // ── 7. Notify both parties if the contract is now fully executed ─────────
+  // Idempotent at the helper level — skips if a `contract_fully_executed`
+  // notification already exists for this contract. Covers the case where
+  // an envelope predated webhook eventNotification and the user manually
+  // refreshed status to discover both signatures were already complete.
+  if (newFunderSignedAt && newContractorSignedAt) {
+    try {
+      await notifyContractFullyExecuted({
+        dealId,
+        contractId:  contract.id,
+        envelopeId:  contract.docusign_envelope_id,
+        source:      'refresh',
+      })
+    } catch (err) {
+      console.error(
+        '[refresh-signing-status] notifyContractFullyExecuted failed (non-fatal):',
         err instanceof Error ? err.message : err,
       )
     }

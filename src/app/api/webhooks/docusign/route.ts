@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/server'
 import { logAudit } from '@/lib/engine/audit'
-import { notifyContractorTurnToSign } from '@/lib/engine/docusign-notify'
+import {
+  notifyContractorTurnToSign,
+  notifyContractFullyExecuted,
+} from '@/lib/engine/docusign-notify'
 import {
   verifyWebhookSignature,
   isHmacBypassAllowed,
@@ -320,6 +323,25 @@ export async function POST(request: NextRequest) {
         signed_storage_path: signedStoragePath,
       },
     })
+
+    // ── Notify both parties — fully-executed event ────────────────────────────
+    // Idempotent at the helper level (skips if a contract_fully_executed row
+    // already exists for this contract). Wrapped in try/catch so notification
+    // failures cannot turn the webhook into a non-200 response (which would
+    // make DocuSign retry indefinitely).
+    try {
+      await notifyContractFullyExecuted({
+        dealId:      contract.deal_id,
+        contractId:  contract.id,
+        envelopeId,
+        source:      'webhook',
+      })
+    } catch (err) {
+      console.error(
+        '[docusign-webhook] notifyContractFullyExecuted failed (non-fatal):',
+        err instanceof Error ? err.message : err,
+      )
+    }
 
     return NextResponse.json({ received: true }, { status: 200 })
   }
