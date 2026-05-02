@@ -4,6 +4,7 @@ import { getAuthUser, requireDealAccess } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
 import { createEnvelope, DocuSignError } from '@/lib/engine/docusign'
 import { resolveSignerIdentity } from '@/lib/engine/docusign-signer-identity'
+import { notifyContractEnvelopeSent } from '@/lib/engine/docusign-notify'
 import { internalError, notFoundError } from '@/lib/errors'
 
 export const dynamic = 'force-dynamic'
@@ -261,6 +262,23 @@ export async function POST(
       envelope_id: envelopeId,
     },
   })
+
+  // ── Notify both parties — fire-and-forget, never blocks the response ───────
+  // Idempotent: createTwoPartyContractNotification skips if a row already
+  // exists for (contract, contract_envelope_sent).
+  try {
+    await notifyContractEnvelopeSent({
+      dealId,
+      contractId: contract.id,
+      envelopeId,
+      source:     'webhook', // tagged here as webhook-equivalent (server-driven)
+    })
+  } catch (err) {
+    console.error(
+      '[send-envelope] notifyContractEnvelopeSent failed (non-fatal):',
+      err instanceof Error ? err.message : err,
+    )
+  }
 
   return NextResponse.json({
     contract_id: contract.id,
