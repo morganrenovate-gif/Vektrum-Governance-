@@ -448,7 +448,22 @@ export default async function AdminDashboardPage() {
       {/* ── Section: Admin Navigation ────────────────────────────────────── */}
       <section>
         <SectionHeader label="Admin Tools" />
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Link
+            href="/dashboard/admin/design-partner-applications"
+            className="group rounded-xl border border-white/[0.08] bg-surface-2 shadow-card px-5 py-5 hover:border-vektrum-blue/30 hover:bg-surface-3 transition-all"
+          >
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-vektrum-blue/10 border border-vektrum-blue/20">
+                <FileText size={15} className="text-blue-400" aria-hidden="true" />
+              </div>
+            </div>
+            <p className="text-[13px] font-semibold text-white mb-1">Design partner applications</p>
+            <p className="text-[12px] text-white/55 leading-relaxed">
+              Review leads from the public design-partner form, including UTM attribution and admin alert status.
+            </p>
+          </Link>
+
           <Link
             href="/dashboard/admin/partners"
             className="group rounded-xl border border-white/[0.08] bg-surface-2 shadow-card px-5 py-5 hover:border-vektrum-blue/30 hover:bg-surface-3 transition-all"
