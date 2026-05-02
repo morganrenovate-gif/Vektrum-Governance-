@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createSupabaseAdminClient } from '@/lib/supabase/server'
 import { getAuthUser, requireDealAccess } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
-import { createEnvelope, DocuSignError, type DocuSignSigner } from '@/lib/engine/docusign'
+import { createEnvelope, DocuSignError } from '@/lib/engine/docusign'
+import { resolveSignerIdentity } from '@/lib/engine/docusign-signer-identity'
 import { internalError, notFoundError } from '@/lib/errors'
 
 export const dynamic = 'force-dynamic'
@@ -154,44 +155,37 @@ export async function POST(
 
   const pdfBuffer = Buffer.from(await pdfBlob.arrayBuffer())
 
-  // ── Fetch signer details ────────────────────────────────────────────────────
-  const [contractorAuthUser, funderAuthUser] = await Promise.all([
-    admin.auth.admin.getUserById(deal.contractor_id),
-    admin.auth.admin.getUserById(deal.funder_id),
+  // ── Resolve signer identities (admin-client, RLS-bypass) ─────────────────
+  //
+  // Both signers must resolve through resolveSignerIdentity so the envelope
+  // we create is byte-identical (name + email + clientUserId) to what
+  // /contract/sign will later send to DocuSign for the recipient view.
+  // Reading profiles via the session client previously failed under RLS
+  // when the calling party tried to read the OTHER party's row, silently
+  // dropping a real name to the role fallback and producing a recipient
+  // identity the contractor's later sign request could not match.
+  const [funderResult, contractorResult] = await Promise.all([
+    resolveSignerIdentity({ userId: deal.funder_id,     role: 'funder'     }),
+    resolveSignerIdentity({ userId: deal.contractor_id, role: 'contractor' }),
   ])
 
-  if (contractorAuthUser.error || !contractorAuthUser.data.user?.email) {
-    return internalError('Could not retrieve contractor email for DocuSign envelope.')
+  if (!funderResult.ok) {
+    console.error('[send-envelope] funder identity resolution failed:', {
+      deal_id: dealId,
+      missing: funderResult.missing,
+    })
+    return internalError(funderResult.error)
   }
-  if (funderAuthUser.error || !funderAuthUser.data.user?.email) {
-    return internalError('Could not retrieve funder email for DocuSign envelope.')
-  }
-
-  const { data: contractorProfile } = await supabase
-    .from('profiles')
-    .select('full_name, company_name')
-    .eq('id', deal.contractor_id)
-    .single()
-
-  const { data: funderProfile } = await supabase
-    .from('profiles')
-    .select('full_name, company_name')
-    .eq('id', deal.funder_id)
-    .single()
-
-  const funderSigner: DocuSignSigner = {
-    name:         funderProfile?.full_name ?? funderProfile?.company_name ?? 'Funder',
-    email:        funderAuthUser.data.user.email,
-    clientUserId: deal.funder_id,
-    routingOrder: 1,
+  if (!contractorResult.ok) {
+    console.error('[send-envelope] contractor identity resolution failed:', {
+      deal_id: dealId,
+      missing: contractorResult.missing,
+    })
+    return internalError(contractorResult.error)
   }
 
-  const contractorSigner: DocuSignSigner = {
-    name:         contractorProfile?.full_name ?? contractorProfile?.company_name ?? 'Contractor',
-    email:        contractorAuthUser.data.user.email,
-    clientUserId: deal.contractor_id,
-    routingOrder: 2,
-  }
+  const funderSigner     = funderResult.signer
+  const contractorSigner = contractorResult.signer
 
   // ── Create DocuSign Envelope ────────────────────────────────────────────────
   let envelopeId: string
