@@ -246,10 +246,13 @@ async function main() {
     form.includes('Import from contract'),
     '  5b. primary path "Import from contract"',
   )
+  // Manual-entry secondary path. The label was tightened during the
+  // contract/funder setup pass from "Enter details below" → "Enter deal
+  // details manually" to match the spec.
   check(
     form.includes('Manual entry') &&
-    form.includes('Enter details below'),
-    '  5c. secondary path "Manual entry" / "Enter details below"',
+    (form.includes('Enter deal details manually') || form.includes('Enter details below')),
+    '  5c. secondary path "Manual entry" / "Enter deal details manually"',
   )
   check(
     form.includes('source of truth'),

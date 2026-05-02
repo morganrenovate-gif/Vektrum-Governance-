@@ -176,15 +176,21 @@ await test('7. Manual path includes a note about contract execution requirement 
 
 // ─── 8. Submit button uses manual-path label ─────────────────────────────────
 
-await test('8. Submit button uses "Save deal details" or equivalent manual-path label', () => {
+await test('8. Submit button uses "Create governed deal" or equivalent manual-path label', () => {
   const src = read(NEW_DEAL_FORM)
+  // The manual-form submit button label was tightened during the
+  // contract/funder setup polish pass to "Create governed deal" (the same
+  // wording as the page heading and the funder PageHeader CTA), which is
+  // clearer to funders than the prior "Save deal details" placeholder. We
+  // accept the older variants too so this test pins the broader intent.
   assert(
+    src.includes('Create governed deal') ||
     src.includes('Save deal details') ||
     src.includes('Create manual deal') ||
     src.includes('Save details') ||
     src.includes('Continue with manual setup'),
-    `${NEW_DEAL_FORM}: the manual form submit button must use a label that clarifies ` +
-    `this is the manual path (e.g. "Save deal details", "Create manual deal"). ` +
+    `${NEW_DEAL_FORM}: the manual form submit button must use a clear funder ` +
+    `label (e.g. "Create governed deal", "Save deal details", "Create manual deal"). ` +
     `A generic "Create Deal" label obscures that the contract path is preferred.`,
   )
 })
