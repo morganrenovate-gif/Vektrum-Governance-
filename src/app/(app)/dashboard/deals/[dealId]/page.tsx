@@ -21,6 +21,7 @@ import { DealReadinessBanner } from "@/components/deal/deal-readiness-banner";
 import { ContractUploadSection } from "@/components/deal/contract-upload-section";
 import { ContractSigningSection } from "@/components/deal/contract-signing-section";
 import { GenerateReleaseRulesButton } from "@/components/deal/generate-release-rules-button";
+import { ReleaseRulesReviewCard } from "@/components/deal/release-rules-review-card";
 import { UploadContractTrigger } from "@/components/deal/upload-contract-trigger";
 
 // ─── Release gate computation (server-side pre-check) ────────────────────────
@@ -381,32 +382,71 @@ export default async function DealDetailPage({
   const canCreateSovFromContract =
     contractFullySigned && sovItems.length === 0
 
-  // Existing draft release-rules record (if any). The card below switches to
-  // a "Draft generated — review required" state when this is non-null. Only
-  // fetched when the contract row exists; otherwise no draft can exist.
-  let activeReleaseRulesDraft:
-    | { id: string; status: 'draft' | 'reviewed'; created_at: string; warnings_count: number }
+  // Latest release-rules draft for this contract — fetched whether active
+  // (draft/reviewed) or terminal (accepted/discarded) so the review card
+  // can render the post-review state too. The active partial-unique-index
+  // guarantees at most one (draft|reviewed) row per contract; for accepted
+  // we just show the most recent.
+  let latestReleaseRulesDraft:
+    | {
+        id:             string
+        status:         'draft' | 'reviewed' | 'accepted' | 'discarded'
+        created_at:     string
+        warnings_count: number
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        payload:        any
+        document_source: 'signed' | 'original' | null
+      }
     | null = null
   if (contract?.id) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: draftRow } = await (supabase as any)
       .from('contract_release_rule_drafts')
-      .select('id, status, created_at, warnings')
+      .select('id, status, created_at, warnings, payload')
       .eq('contract_id', contract.id)
-      .in('status', ['draft', 'reviewed'])
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle()
     if (draftRow) {
-      activeReleaseRulesDraft = {
-        id:             draftRow.id,
-        status:         draftRow.status,
-        created_at:     draftRow.created_at,
-        warnings_count: Array.isArray(draftRow.warnings) ? draftRow.warnings.length : 0,
+      // The extraction diagnostic isn't persisted on the draft row (we don't
+      // want to bloat jsonb with internal log fields) — but the source_text
+      // markers on individual fields will tell reviewers which document the
+      // model read. Default to 'signed' as the most common case; the
+      // `signed_storage_path` presence is the best server-side proxy.
+      const documentSource: 'signed' | 'original' | null =
+        contract.signed_storage_path
+          ? 'signed'
+          : contract.storage_path
+            ? 'original'
+            : null
+
+      latestReleaseRulesDraft = {
+        id:              draftRow.id,
+        status:          draftRow.status,
+        created_at:      draftRow.created_at,
+        warnings_count:  Array.isArray(draftRow.warnings) ? draftRow.warnings.length : 0,
+        payload:         draftRow.payload,
+        document_source: documentSource,
       }
     }
   }
-  const hasReleaseRulesDraft = !!activeReleaseRulesDraft
+  const hasReleaseRulesDraft =
+    !!latestReleaseRulesDraft &&
+    (latestReleaseRulesDraft.status === 'draft' || latestReleaseRulesDraft.status === 'reviewed')
+  const releaseRulesAccepted =
+    !!latestReleaseRulesDraft && latestReleaseRulesDraft.status === 'accepted'
+
+  // Backwards-compatibility alias for the existing fully-executed card —
+  // it still references `activeReleaseRulesDraft` for the warnings count.
+  const activeReleaseRulesDraft =
+    hasReleaseRulesDraft && latestReleaseRulesDraft
+      ? {
+          id:             latestReleaseRulesDraft.id,
+          status:         latestReleaseRulesDraft.status as 'draft' | 'reviewed',
+          created_at:     latestReleaseRulesDraft.created_at,
+          warnings_count: latestReleaseRulesDraft.warnings_count,
+        }
+      : null
 
   // ── Contractor workflow computed state ───────────────────────────────────
   // Used by the Next Required Step card and Deal Setup Checklist.
@@ -613,13 +653,14 @@ export default async function DealDetailPage({
           <div className="space-y-2">
             {(
               [
-                { label: 'Funder assigned',         done: !!typedDeal.funder_id },
-                { label: 'Contract uploaded',        done: hasContract },
-                { label: 'Contract fully signed',    done: contractFullySigned },
-                { label: 'Release rules drafted',    done: hasReleaseRulesDraft || sovItems.length > 0 },
-                { label: 'SOV created',              done: sovItems.length > 0 },
-                { label: 'SOV approved',             done: sovApproved },
-                { label: 'Milestones linked to SOV', done: allMilestonesLinked },
+                { label: 'Funder assigned',           done: !!typedDeal.funder_id },
+                { label: 'Contract uploaded',          done: hasContract },
+                { label: 'Contract fully signed',      done: contractFullySigned },
+                { label: 'Release rules drafted',      done: hasReleaseRulesDraft || releaseRulesAccepted || sovItems.length > 0 },
+                { label: 'Release rules approved',     done: releaseRulesAccepted || sovApproved },
+                { label: 'SOV created',                done: sovItems.length > 0 },
+                { label: 'SOV approved',               done: sovApproved },
+                { label: 'Milestones linked to SOV',   done: allMilestonesLinked },
               ] as { label: string; done: boolean }[]
             ).map(({ label, done }) => (
               <div key={label} className="flex items-center gap-2.5">
@@ -939,6 +980,29 @@ export default async function DealDetailPage({
             )}
           </div>
         </section>
+      )}
+
+      {/* ── Release-rules draft review ───────────────────────────────────── */}
+      {/*
+        Renders whenever a draft exists. Funder/admin sees Approve/Edit
+        manually/Discard actions; contractor sees the read-only
+        "Release rules under review" copy. The card also renders accepted
+        and discarded drafts so the post-review state is visible in
+        history (with the action row hidden once terminal).
+      */}
+      {latestReleaseRulesDraft && (
+        <ReleaseRulesReviewCard
+          dealId={typedDeal.id}
+          draft={{
+            id:              latestReleaseRulesDraft.id,
+            status:          latestReleaseRulesDraft.status,
+            payload:         latestReleaseRulesDraft.payload,
+            warnings_count:  latestReleaseRulesDraft.warnings_count,
+            created_at:      latestReleaseRulesDraft.created_at,
+            document_source: latestReleaseRulesDraft.document_source,
+          }}
+          viewerRole={typedProfile.role as 'funder' | 'contractor' | 'admin'}
+        />
       )}
 
       {/* ── Schedule of Values ── */}
