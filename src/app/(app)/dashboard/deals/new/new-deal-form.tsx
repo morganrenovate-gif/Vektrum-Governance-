@@ -184,7 +184,7 @@ export function NewDealForm({ role }: NewDealFormProps) {
                   </p>
                 </div>
                 <h1 className="font-display text-[2rem] font-bold tracking-[-0.04em] text-white leading-[1.05]">
-                  {isContractor ? "Submit project information" : "Create governed deal"}
+                  {isContractor ? "Submit project for funder review" : "Create governed deal"}
                 </h1>
               </div>
 
@@ -192,12 +192,12 @@ export function NewDealForm({ role }: NewDealFormProps) {
               {!isContractor && (
                 <div className="mb-6 rounded-xl border border-blue-500/20 bg-blue-500/[0.06] px-5 py-5">
                   <p className="text-[13px] font-semibold text-blue-200 mb-1">
-                    Start from the contract
+                    Start from the contract or funding documents
                   </p>
                   <p className="text-[12px] text-white/70 mb-4 leading-relaxed">
-                    The contract defines parties, value, retainage, milestone scope, and release
-                    conditions. Importing a signed contract sets the source of truth for all
-                    parties.
+                    The governing documents define parties, value, retainage, milestone scope,
+                    and release conditions. Importing a signed contract or funding agreement
+                    sets the source of truth for all parties.
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {/* Recommended: Import from contract */}
@@ -211,25 +211,25 @@ export function NewDealForm({ role }: NewDealFormProps) {
                       </span>
                       <FileUp size={16} className="text-blue-300" aria-hidden="true" />
                       <span className="text-[13px] font-semibold text-white">
-                        Import from contract
+                        Import from contract or funding documents
                       </span>
                       <span className="text-[11px] text-white/60">
-                        Upload a signed contract — Vektrum extracts parties, value, and
-                        milestones.
+                        Upload a signed contract or funding agreement — Vektrum extracts parties,
+                        value, and milestones.
                       </span>
                     </button>
 
-                    {/* Secondary: Manual entry */}
+                    {/* Secondary: Enter deal details manually */}
                     <div className="flex flex-col items-start gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-4 py-3.5">
                       <span className="text-[11px] font-semibold text-white/40 uppercase tracking-wide">
                         Manual entry
                       </span>
                       <span className="text-[13px] font-semibold text-white">
-                        Enter details below
+                        Enter deal details manually
                       </span>
                       <span className="text-[11px] text-white/60">
-                        Fill in the form manually. Contract execution is still required before
-                        the release gate will authorize any disbursement.
+                        Manual entry still requires verified governing documents before release
+                        authorization.
                       </span>
                     </div>
                   </div>
@@ -511,7 +511,7 @@ export function NewDealForm({ role }: NewDealFormProps) {
                               : "Saving…"
                             : isContractor
                             ? "Submit project information"
-                            : "Save deal details"}
+                            : "Create governed deal"}
                         </Button>
                         <Link href="/dashboard">
                           <Button

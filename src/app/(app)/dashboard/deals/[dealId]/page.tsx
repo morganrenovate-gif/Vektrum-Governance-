@@ -768,7 +768,7 @@ export default async function DealDetailPage({
           (non-voided) contract is on file. Funders may upload the governing contract
           or funding agreement; contractor upload is preserved. */}
       {(typedProfile.role === "contractor" || typedProfile.role === "funder" || typedProfile.role === "admin") && !hasContract && (
-        <ContractUploadSection dealId={typedDeal.id} />
+        <ContractUploadSection dealId={typedDeal.id} role={typedProfile.role as 'contractor' | 'funder' | 'admin'} />
       )}
 
       {/* ── Schedule of Values ── */}

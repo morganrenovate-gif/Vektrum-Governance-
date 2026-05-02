@@ -176,9 +176,13 @@ async function main() {
     funderBlock.includes('Recommended'),
     '15. Funder block still contains "Recommended" label',
   )
+  // Manual-entry option label was renamed during the contract/funder setup
+  // polish pass to match the spec ("Enter deal details manually"). Either
+  // phrasing satisfies the intent: a clearly-labeled secondary manual path.
   check(
+    funderBlock.includes('Enter deal details manually') ||
     funderBlock.includes('Enter details below'),
-    '16. Funder block still contains "Enter details below" option',
+    '16. Funder block contains a manual-entry secondary path label',
   )
 
   // ── 17. No forbidden AI/payment claims ───────────────────────────────────

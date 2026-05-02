@@ -13,20 +13,52 @@ import { CONTRACT_PICKER_EVENT } from './upload-contract-trigger'
 //
 // Props:
 //   dealId  — the deal to attach the contract to
+//   role    — viewer's profile role (drives the description copy below);
+//             optional, defaults to neutral admin/contractor copy.
 //
-// Access: rendered only when !hasContract && role === 'contractor' | 'admin'.
+// Access: rendered when !hasContract && role ∈ { 'contractor', 'funder', 'admin' }.
 // The parent (deal page) controls the render condition; this component does
-// not re-check role — it trusts the caller.
+// not re-check role — it trusts the caller. Funders may upload the governing
+// contract or funding agreement; contractor and admin uploads are preserved.
+
+type ContractUploadRole = 'contractor' | 'funder' | 'admin'
 
 interface ContractUploadSectionProps {
   dealId: string
+  role?:  ContractUploadRole
 }
 
 type UploadState = 'idle' | 'uploading' | 'success' | 'error'
 
 const MAX_FILE_BYTES = 20 * 1024 * 1024   // 20 MB
 
-export function ContractUploadSection({ dealId }: ContractUploadSectionProps) {
+/**
+ * Returns the description copy that explains who the upload is for. Funder
+ * copy emphasises governing documents establishing the source of truth;
+ * contractor copy emphasises supporting documents for funder verification;
+ * admin copy is neutral.
+ */
+function descriptionFor(role?: ContractUploadRole): string {
+  if (role === 'funder') {
+    return (
+      'Upload the signed or governing contract / funding documents to establish ' +
+      'the source of truth before release authorization. PDF only · max 20 MB.'
+    )
+  }
+  if (role === 'contractor') {
+    return (
+      'Upload supporting contract documents for funder verification. The funder ' +
+      'must verify governing terms before releases can proceed. PDF only · max 20 MB.'
+    )
+  }
+  // admin / unspecified — neutral, role-agnostic
+  return (
+    'Upload the executed contract PDF. Once uploaded, both parties will need to ' +
+    'sign via DocuSign before milestone releases are authorized. PDF only · max 20 MB.'
+  )
+}
+
+export function ContractUploadSection({ dealId, role }: ContractUploadSectionProps) {
   const router    = useRouter()
   const inputRef  = useRef<HTMLInputElement>(null)
 
@@ -110,10 +142,9 @@ export function ContractUploadSection({ dealId }: ContractUploadSectionProps) {
       </div>
 
       <div className="px-5 py-5 space-y-4">
-        {/* Description */}
+        {/* Description — role-aware. See descriptionFor() above. */}
         <p className="text-[13px] text-white/65 leading-relaxed">
-          Upload the executed contract PDF. Once uploaded, both parties will need to sign
-          via DocuSign before milestone releases are authorized. PDF only · max 20 MB.
+          {descriptionFor(role)}
         </p>
 
         {/* Success state */}
