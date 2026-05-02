@@ -152,33 +152,49 @@ async function main() {
   )
 
   // ── 3. Sign route diagnostic logging on failure ────────────────────────
+  //
+  // Anchor on the [sign] getSigningUrl failed log — there is now a second
+  // [sign] getEnvelopeRecipients failed catch block that pre-dates the
+  // recipient-view call, so the bare `catch (err)` regex matches the wrong
+  // block. The recipient-view fix replaced "signer_email_present" with the
+  // more specific "selected_email_present" (sourced from the actual
+  // envelope recipient, not local profile data).
   console.log('\n3. Safe diagnostic logging on getSigningUrl failure')
-  // Pull the catch block surrounding the getSigningUrl call.
   const sigCatch = sign.match(
-    /catch\s*\(\s*err[\s\S]*?docusign_error[\s\S]*?\}\s*\)/,
+    /\[sign\]\s+getSigningUrl\s+failed[\s\S]*?docusign_error[\s\S]*?\}\s*\)/,
   )
-  check(!!sigCatch, '  3a. catch block around getSigningUrl emits a diagnostic log')
+  check(!!sigCatch, '  3a. [sign] getSigningUrl failed log block emits diagnostics')
 
-  // Required diagnostic fields
-  for (const field of [
+  // Required diagnostic fields. Accept either signer_email_present OR
+  // selected_email_present so this test plays nice with either spelling
+  // — the recipient-view-fix pass uses selected_*.
+  const requiredFields = [
     'deal_id',
     'contract_id',
     'envelope_id_prefix',
     'role',
     'has_funder_signed',
     'has_contractor_signed',
-    'signer_email_present',
     'docusign_error',
-  ]) {
+  ]
+  for (const field of requiredFields) {
     check(
       sigCatch && sigCatch[0].includes(field),
       `  3b. diagnostic log includes "${field}"`,
     )
   }
+  check(
+    sigCatch !== null && (
+      sigCatch[0].includes('signer_email_present') ||
+      sigCatch[0].includes('selected_email_present')
+    ),
+    '  3b. diagnostic log includes "signer_email_present" or "selected_email_present"',
+  )
 
   // Must NOT log the raw email value (only the presence boolean) and must
-  // never reference DocuSign secrets. Boolean form `!!signer.email` is fine
-  // since it never reaches the log as a string.
+  // never reference DocuSign secrets. Boolean form `!!signer.email` /
+  // `!!matchedRecipient.email` is fine since it never reaches the log as
+  // a string.
   check(
     sigCatch !== null &&
     !/signer_email\s*:\s*signer\.email/.test(sigCatch[0]) &&

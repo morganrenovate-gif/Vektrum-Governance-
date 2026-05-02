@@ -83,6 +83,34 @@ export interface GetSigningUrlInput {
   signer:      DocuSignSigner
   /** URL to redirect to after signing (or declining). Your app's deal page. */
   returnUrl:   string
+  /**
+   * Optional DocuSign recipientId from the envelope's stored recipient
+   * record (see getEnvelopeRecipients). When present, included in the
+   * recipient-view request body so DocuSign matches the envelope recipient
+   * by recipientId in addition to (email + userName + clientUserId).
+   * Strongly recommended — eliminates the UNKNOWN_ENVELOPE_RECIPIENT class
+   * of failures caused by case-folded emails or stale display names.
+   */
+  recipientId?: string
+}
+
+/**
+ * Shape of the signers array DocuSign returns from
+ *   GET /v2.1/accounts/{accountId}/envelopes/{envelopeId}/recipients
+ *
+ * Pass these values verbatim to getSigningUrl — they are the only identity
+ * values DocuSign will accept for the recipient view.
+ */
+export interface DocuSignEnvelopeRecipient {
+  recipientId:    string
+  routingOrder:   string
+  email:          string
+  name:           string
+  /** Embedded signing identifier. May be null if the recipient is remote. */
+  clientUserId?:  string
+  /** 'created' | 'sent' | 'delivered' | 'completed' | 'declined' | … */
+  status:         string
+  signedDateTime?: string
 }
 
 // ─── Token Cache ─────────────────────────────────────────────────────────────
@@ -411,15 +439,19 @@ export async function createEnvelope(input: CreateEnvelopeInput): Promise<Create
  *   - viewing_complete — viewer only (no action taken)
  */
 export async function getSigningUrl(input: GetSigningUrlInput): Promise<string> {
-  const { envelopeId, signer, returnUrl } = input
+  const { envelopeId, signer, returnUrl, recipientId } = input
 
-  const body = {
+  // recipientId is the canonical disambiguator — when DocuSign sees it in the
+  // request body, it matches the recipient by id and silently tolerates
+  // surface-level email/name normalisation drift (case-folding, trim, etc).
+  const body: Record<string, unknown> = {
     clientUserId:  signer.clientUserId,
     email:         signer.email,
     userName:      signer.name,
     returnUrl,
     authenticationMethod: 'none',
   }
+  if (recipientId) body.recipientId = recipientId
 
   const result = await dsRequest<{ url: string }>(
     'POST',
@@ -428,6 +460,28 @@ export async function getSigningUrl(input: GetSigningUrlInput): Promise<string> 
   )
 
   return result.url
+}
+
+/**
+ * Fetches the envelope's stored recipients from DocuSign.
+ *
+ *   GET /v2.1/accounts/{accountId}/envelopes/{envelopeId}/recipients
+ *
+ * Use this BEFORE calling getSigningUrl so the recipient-view request can
+ * pass DocuSign's own recipientId/email/name/clientUserId values verbatim.
+ * This sidesteps the entire UNKNOWN_ENVELOPE_RECIPIENT failure mode
+ * (mismatch on case-folded email, trimmed name, or stale profile).
+ *
+ * Returns only the signers array — agents/CCs/intermediaries are out of
+ * scope for the embedded contract-signing flow.
+ */
+export async function getEnvelopeRecipients(
+  envelopeId: string,
+): Promise<{ signers: DocuSignEnvelopeRecipient[] }> {
+  return dsRequest<{ signers: DocuSignEnvelopeRecipient[] }>(
+    'GET',
+    `/envelopes/${envelopeId}/recipients`,
+  )
 }
 
 /**
