@@ -22,6 +22,8 @@ import { ContractUploadSection } from "@/components/deal/contract-upload-section
 import { ContractSigningSection } from "@/components/deal/contract-signing-section";
 import { GenerateReleaseRulesButton } from "@/components/deal/generate-release-rules-button";
 import { ReleaseRulesReviewCard } from "@/components/deal/release-rules-review-card";
+import { ReleaseRulesNextStepCard } from "@/components/deal/release-rules-next-step-card";
+import { DealSetupProgress } from "@/components/deal/deal-setup-progress";
 import { UploadContractTrigger } from "@/components/deal/upload-contract-trigger";
 
 // ─── Release gate computation (server-side pre-check) ────────────────────────
