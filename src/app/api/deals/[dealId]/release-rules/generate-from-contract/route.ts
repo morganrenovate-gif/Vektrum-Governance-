@@ -155,15 +155,38 @@ export async function POST(
     .single()
 
   // ── 4. Extract contract text ──────────────────────────────────────────
+  // The extractor returns structured diagnostics (no file bytes, no signed
+  // URLs, no secrets) so an extraction failure can be reproduced without
+  // pulling the actual PDF off disk. We log the same diagnostics on success
+  // and failure for ops symmetry.
   const extraction = await extractSignedContractText(contract)
   if (!extraction.ok) {
     console.warn('[release-rules] extraction failed', {
-      deal_id:     dealId,
-      contract_id: contract.id,
-      reason:      extraction.reason,
+      deal_id:        dealId,
+      contract_id:    contract.id,
+      contract_status: contract.status,
+      reason:         extraction.reason,
+      diagnostics:    extraction.diagnostics,
     })
-    return NextResponse.json({ error: extraction.error }, { status: 422 })
+    // Failure-reason → HTTP status. Most extraction problems are not the
+    // user's fault and shouldn't 5xx; we treat them as 422 (unprocessable
+    // file) except for missing storage path which is a 409 (precondition).
+    const status = extraction.reason === 'no_storage_path' ? 409 : 422
+    return NextResponse.json(
+      {
+        error:        extraction.error,
+        reason:       extraction.reason,
+        diagnostics:  extraction.diagnostics,
+      },
+      { status },
+    )
   }
+  // Success diagnostic — surfaces fall-back-from-signed cases for ops review.
+  console.info('[release-rules] extraction ok', {
+    deal_id:     dealId,
+    contract_id: contract.id,
+    diagnostics: extraction.diagnostics,
+  })
 
   // ── 5. Call Perplexity ────────────────────────────────────────────────
   const result = await generateDraftReleaseRules({

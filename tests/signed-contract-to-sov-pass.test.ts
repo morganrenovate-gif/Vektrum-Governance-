@@ -123,9 +123,14 @@ async function main() {
     deal.includes('Create release rules'),
     '  2e. funder/admin: heading "Create release rules" (or legacy "Create Schedule of Values")',
   )
+  // The body wraps across multiple lines in JSX so we collapse whitespace
+  // before the substring match. Accept any of the wordings the
+  // contract-release-rules pass uses.
+  const dealForBody = deal.replace(/\s+/g, ' ')
   check(
-    deal.includes('source of truth for line items') ||
-    deal.includes('source of truth for draft SOV line'),
+    dealForBody.includes('source of truth for line items') ||
+    dealForBody.includes('source of truth for draft SOV line items') ||
+    dealForBody.includes('contract document as the source of truth'),
     '  2f. funder/admin: body uses "source of truth"',
   )
   check(
