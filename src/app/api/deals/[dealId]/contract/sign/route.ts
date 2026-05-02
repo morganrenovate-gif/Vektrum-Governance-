@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getAuthUser, requireDealAccess, requireMFA } from '@/lib/auth/middleware'
-import { getSigningUrl, DocuSignError, type DocuSignSigner } from '@/lib/engine/docusign'
+import { getSigningUrl, DocuSignError } from '@/lib/engine/docusign'
+import { resolveSignerIdentity } from '@/lib/engine/docusign-signer-identity'
 import { logAudit } from '@/lib/engine/audit'
 import { internalError, notFoundError } from '@/lib/errors'
 
@@ -165,20 +166,25 @@ export async function POST(
     )
   }
 
-  // ── Build signer for RecipientView ─────────────────────────────────────────
-  const admin = (await import('@/lib/supabase/server')).createSupabaseAdminClient()
-
-  const authUser = await admin.auth.admin.getUserById(user.id)
-  if (authUser.error || !authUser.data.user?.email) {
-    return internalError('Could not retrieve your email address for the signing session.')
+  // ── Resolve signer identity via the shared resolver ─────────────────────
+  //
+  // CRITICAL: must use the same resolver that send-envelope/route.ts uses to
+  // create the envelope so the recipient-view request matches DocuSign's
+  // stored embedded recipient on (name + email + clientUserId). Mismatch on
+  // any of those values returns USER_LACKS_PERMISSIONS from DocuSign and
+  // breaks the signing button.
+  const signerRole: 'funder' | 'contractor' = isFunder ? 'funder' : 'contractor'
+  const identity = await resolveSignerIdentity({ userId: user.id, role: signerRole })
+  if (!identity.ok) {
+    console.error('[sign] signer identity resolution failed:', {
+      deal_id:     dealId,
+      contract_id: contract.id,
+      role:        signerRole,
+      missing:     identity.missing,
+    })
+    return internalError(identity.error)
   }
-
-  const signer: DocuSignSigner = {
-    name:         profile.full_name ?? profile.company_name ?? 'Signer',
-    email:        authUser.data.user.email,
-    clientUserId: user.id,
-    routingOrder: isFunder ? 1 : 2,
-  }
+  const signer = identity.signer
 
   // ── Get DocuSign RecipientView URL ──────────────────────────────────────────
   let signingUrl: string
@@ -190,9 +196,22 @@ export async function POST(
     })
   } catch (err) {
     const message = err instanceof DocuSignError ? err.message : String(err)
+    // Safe diagnostic logging — surfaces the small set of fields ops needs to
+    // reproduce a recipient-view failure without leaking secrets, full
+    // envelope IDs, signer emails, or DocuSign response bodies.
+    const envelopeId = contract.docusign_envelope_id
+    console.error('[sign] getSigningUrl failed', {
+      deal_id:                dealId,
+      contract_id:            contract.id,
+      envelope_id_prefix:     envelopeId.slice(0, 8),
+      role:                   signerRole,
+      has_funder_signed:      !!contract.funder_signed_at,
+      has_contractor_signed:  !!contract.contractor_signed_at,
+      signer_email_present:   !!signer.email,
+      docusign_error:         message.slice(0, 200),
+    })
     return internalError(
-      'Failed to generate the signing URL. Please try again. ' +
-        'If this problem persists, contact support.',
+      'Failed to generate the signing URL. Please refresh signing status and try again.',
       message,
     )
   }
