@@ -31,6 +31,133 @@ const SYSTEM_PROMPT =
   'authorize payment, or move funds. Return only JSON matching the schema. ' +
   'If unclear, use nulls, warnings, and review_required=true.'
 
+// ─── Perplexity structured-output JSON Schema ────────────────────────────
+//
+// Sonar's structured-output mode rejects `{ type: 'json_object' }` and
+// requires `{ type: 'json_schema', json_schema: { name, schema } }`. The
+// 400 returned by the bare `json_object` shape is:
+//   "ResponseFormatJSONSchema -> json_schema: Field required"
+//
+// Schema below mirrors the DraftReleaseRules TypeScript shape but uses
+// nullable variants per JSON Schema 2020-12 (the spec Sonar follows).
+// We keep `additionalProperties: false` on every object so the model
+// cannot smuggle extra keys past the validator.
+
+const PERPLEXITY_SCHEMA_NAME = 'contract_release_rules'
+
+const FIELD_EXTRACTION_BOOL_SCHEMA = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    value:       { type: ['boolean', 'null'] },
+    source_text: { type: ['string',  'null'] },
+    confidence:  { type: 'number', minimum: 0, maximum: 1 },
+  },
+  required: ['value', 'source_text', 'confidence'],
+} as const
+
+const FIELD_EXTRACTION_TRUE_SCHEMA = {
+  // funder_authorization_required — product invariant. The model is told
+  // that value must be `true`; we also overwrite locally in validateDraft.
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    value:       { const: true },
+    source_text: { type: ['string', 'null'] },
+    confidence:  { type: 'number', minimum: 0, maximum: 1 },
+  },
+  required: ['value', 'source_text', 'confidence'],
+} as const
+
+const RELEASE_RULES_JSON_SCHEMA = {
+  type: 'object',
+  additionalProperties: false,
+  required: [
+    'project_name',
+    'contract_total',
+    'currency',
+    'retainage',
+    'sov_line_items',
+    'release_conditions',
+    'evidence_requirements',
+    'warnings',
+    'assumptions',
+  ],
+  properties: {
+    project_name:   { type: ['string', 'null'] },
+    contract_total: { type: ['number', 'null'], minimum: 0 },
+    currency:       { type: 'string', enum: ['USD'] },
+    retainage: {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        percentage:  { type: ['number', 'null'], minimum: 0, maximum: 100 },
+        source_text: { type: ['string', 'null'] },
+        confidence:  { type: 'number', minimum: 0, maximum: 1 },
+      },
+      required: ['percentage', 'source_text', 'confidence'],
+    },
+    sov_line_items: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          name:            { type: 'string' },
+          description:     { type: ['string', 'null'] },
+          amount:          { type: ['number', 'null'], minimum: 0 },
+          source_text:     { type: ['string', 'null'] },
+          confidence:      { type: 'number', minimum: 0, maximum: 1 },
+          review_required: { type: 'boolean' },
+        },
+        required: [
+          'name', 'description', 'amount',
+          'source_text', 'confidence', 'review_required',
+        ],
+      },
+    },
+    release_conditions: {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        sequential_release_required:    FIELD_EXTRACTION_BOOL_SCHEMA,
+        lien_waiver_required:           FIELD_EXTRACTION_BOOL_SCHEMA,
+        inspection_required:            FIELD_EXTRACTION_BOOL_SCHEMA,
+        change_order_approval_required: FIELD_EXTRACTION_BOOL_SCHEMA,
+        funder_authorization_required:  FIELD_EXTRACTION_TRUE_SCHEMA,
+      },
+      required: [
+        'sequential_release_required',
+        'lien_waiver_required',
+        'inspection_required',
+        'change_order_approval_required',
+        'funder_authorization_required',
+      ],
+    },
+    evidence_requirements: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          condition:         { type: 'string' },
+          required_document: { type: 'string' },
+          applies_to:        { type: ['string', 'null'] },
+          source_text:       { type: ['string', 'null'] },
+          confidence:        { type: 'number', minimum: 0, maximum: 1 },
+          review_required:   { type: 'boolean' },
+        },
+        required: [
+          'condition', 'required_document', 'applies_to',
+          'source_text', 'confidence', 'review_required',
+        ],
+      },
+    },
+    warnings:    { type: 'array', items: { type: 'string' } },
+    assumptions: { type: 'array', items: { type: 'string' } },
+  },
+} as const
+
 // ─── Output schema ───────────────────────────────────────────────────────
 
 export interface FieldExtraction<T> {
@@ -155,6 +282,19 @@ export async function generateDraftReleaseRules(
     }\n\n` +
     `Contract text:\n"""\n${truncateForPrompt(text)}\n"""`
 
+  // Sonar's structured-output API requires:
+  //   response_format: { type: 'json_schema',
+  //                      json_schema: { name, schema } }
+  // The previous { type: 'json_object' } shape was rejected with
+  //   "ResponseFormatJSONSchema -> json_schema: Field required"
+  const responseFormat = {
+    type: 'json_schema',
+    json_schema: {
+      name:   PERPLEXITY_SCHEMA_NAME,
+      schema: RELEASE_RULES_JSON_SCHEMA,
+    },
+  } as const
+
   let response: Response
   try {
     response = await fetch('https://api.perplexity.ai/chat/completions', {
@@ -169,29 +309,43 @@ export async function generateDraftReleaseRules(
           { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user',   content: userMessage   },
         ],
-        // Force JSON-only output. response_format is honored by recent
-        // Perplexity Sonar models; we still validate the shape ourselves.
-        response_format: { type: 'json_object' },
+        response_format: responseFormat,
         temperature: 0,
       }),
     })
   } catch (err) {
-    console.error('[release-rules] perplexity fetch failed:', String(err))
-    return { ok: false, reason: 'upstream', error: 'AI service unreachable.' }
+    // Network / DNS / abort. Upstream code did not run.
+    console.error('[release-rules] perplexity fetch failed:', String(err).slice(0, 200))
+    return {
+      ok:     false,
+      reason: 'upstream',
+      error:
+        'Could not generate draft release rules right now. ' +
+        'Enter release rules manually or try again.',
+    }
   }
 
   if (!response.ok) {
     const body = await response.text().catch(() => '')
-    // Truncate the upstream body for safe logging — never log the API key.
-    console.error(
-      '[release-rules] perplexity non-2xx:',
-      response.status,
-      body.slice(0, 400),
-    )
+    // Safe diagnostics — never log the API key or the raw prompt / contract.
+    // Surfaces the response_format shape so a future regression to the
+    // wrong shape is immediately visible in Vercel logs.
+    console.error('[release-rules] perplexity non-2xx', {
+      status:                       response.status,
+      model,
+      response_format_type:         responseFormat.type,
+      response_format_has_json_schema: !!responseFormat.json_schema,
+      response_format_schema_name:  responseFormat.json_schema.name,
+      // Body truncated to 400 chars. We do NOT include the prompt, contract
+      // text, or API key in this log line.
+      upstream_body_excerpt:        body.slice(0, 400),
+    })
     return {
       ok:     false,
       reason: 'upstream',
-      error:  `AI service returned ${response.status}.`,
+      error:
+        'Could not generate draft release rules right now. ' +
+        'Enter release rules manually or try again.',
     }
   }
 
@@ -203,8 +357,14 @@ export async function generateDraftReleaseRules(
     }
     raw = json.choices?.[0]?.message?.content ?? ''
   } catch (err) {
-    console.error('[release-rules] perplexity body parse failed:', String(err))
-    return { ok: false, reason: 'invalid_json', error: 'AI service returned an unparseable body.' }
+    console.error('[release-rules] perplexity body parse failed:', String(err).slice(0, 200))
+    return {
+      ok:     false,
+      reason: 'invalid_json',
+      error:
+        'Could not generate draft release rules right now. ' +
+        'Enter release rules manually or try again.',
+    }
   }
 
   let parsed: unknown
@@ -212,7 +372,13 @@ export async function generateDraftReleaseRules(
     parsed = JSON.parse(raw)
   } catch {
     console.error('[release-rules] model returned non-JSON content (first 200 chars):', raw.slice(0, 200))
-    return { ok: false, reason: 'invalid_json', error: 'AI service returned non-JSON content.' }
+    return {
+      ok:     false,
+      reason: 'invalid_json',
+      error:
+        'Could not generate draft release rules right now. ' +
+        'Enter release rules manually or try again.',
+    }
   }
 
   const validation = validateDraft(parsed, input.contractTotal ?? null)
