@@ -6,28 +6,34 @@ import { cn } from '@/lib/utils'
 import { ProfileTab } from './profile-tab'
 import { SecurityTab } from './security-tab'
 import { StripeTab } from './stripe-tab'
+import { DisbursementRailTab } from './disbursement-rail-tab'
 import { ComingSoonTab } from './coming-soon-tab'
-import { Bell, User, CreditCard, Shield, AlertTriangle } from 'lucide-react'
+import { Bell, User, CreditCard, Shield, AlertTriangle, Wallet } from 'lucide-react'
 
 interface SettingsShellProps {
   profile: Profile
   userEmail: string
 }
 
-type TabId = 'profile' | 'notifications' | 'stripe' | 'security' | 'danger'
+type TabId = 'profile' | 'notifications' | 'stripe' | 'disbursement' | 'security' | 'danger'
 
 interface Tab {
   id: TabId
   label: string
   icon: React.ElementType
-  hideForAdmin?: boolean
+  /** Hide this tab unless the profile.role matches one of these roles. */
+  visibleForRoles?: Array<Profile['role']>
   comingSoon?: boolean
 }
 
+// Funders see "Disbursement" (the rail picker — Stripe / external / not configured).
+// Contractors see "Stripe Connect" (their existing payouts tab — unchanged).
+// Admins see neither.
 const TABS: Tab[] = [
   { id: 'profile',       label: 'Profile',        icon: User },
-  { id: 'notifications', label: 'Notifications',  icon: Bell,         comingSoon: true },
-  { id: 'stripe',        label: 'Stripe Connect', icon: CreditCard,   hideForAdmin: true },
+  { id: 'notifications', label: 'Notifications',  icon: Bell,    comingSoon: true },
+  { id: 'disbursement',  label: 'Disbursement',   icon: Wallet,        visibleForRoles: ['funder'] },
+  { id: 'stripe',        label: 'Stripe Connect', icon: CreditCard,    visibleForRoles: ['contractor'] },
   { id: 'security',      label: 'Security',       icon: Shield },
   { id: 'danger',        label: 'Danger Zone',    icon: AlertTriangle },
 ]
@@ -36,7 +42,7 @@ export function SettingsShell({ profile, userEmail }: SettingsShellProps) {
   const [activeTab, setActiveTab] = useState<TabId>('profile')
 
   const visibleTabs = TABS.filter((tab) => {
-    if (tab.hideForAdmin && profile.role === 'admin') return false
+    if (tab.visibleForRoles && !tab.visibleForRoles.includes(profile.role)) return false
     if (tab.comingSoon) return false
     return true
   })
@@ -99,6 +105,9 @@ export function SettingsShell({ profile, userEmail }: SettingsShellProps) {
             )}
             {activeTab === 'stripe' && (
               <StripeTab profile={profile} />
+            )}
+            {activeTab === 'disbursement' && (
+              <DisbursementRailTab profile={profile} />
             )}
             {activeTab === 'security' && (
               <SecurityTab />
