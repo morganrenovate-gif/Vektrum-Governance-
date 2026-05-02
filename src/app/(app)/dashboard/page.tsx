@@ -5,7 +5,7 @@ import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { DealCard } from '@/components/deal/deal-card'
 import { Button } from '@/components/ui/button'
 import type { Deal, Profile } from '@/lib/types'
-import { Plus, FolderOpen, AlertCircle, ArrowRight } from 'lucide-react'
+import { Plus, FolderOpen, AlertCircle, ArrowRight, CheckCircle2 } from 'lucide-react'
 // Shared layout primitives
 import { PageHeader, SectionHeader, StatBlock, MetricStrip, EmptyState } from '@/components/layout'
 import { DrawReviewPanel } from '@/components/dashboard/draw-review-panel'
@@ -106,11 +106,23 @@ export default async function DashboardPage() {
 
   const { profile, deals } = await getProfileAndDeals(user.id)
 
-  // First-login redirect: contractors and funders without Stripe go to onboarding
-  // Admins are never gated
-  if (profile && !profile.stripe_account_id) {
-    if (profile.role === 'contractor') redirect('/dashboard/contractor/onboarding')
-    if (profile.role === 'funder') redirect('/dashboard/funder/onboarding')
+  // First-login redirects.
+  // Admins are never gated.
+  // Contractors must connect Stripe before they reach the dashboard
+  // (contractors receive released funds via Stripe Connect — the only
+  // execution path implemented today).
+  // Funders are routed to onboarding only until they have made a
+  // disbursement-rail choice (Stripe / external / set up later). Once
+  // any rail is selected, they can use the dashboard freely. Release
+  // execution still requires a configured rail — that gate is enforced
+  // server-side by the deterministic release gate.
+  if (profile) {
+    if (profile.role === 'contractor' && !profile.stripe_account_id) {
+      redirect('/dashboard/contractor/onboarding')
+    }
+    if (profile.role === 'funder' && !profile.disbursement_rail) {
+      redirect('/dashboard/funder/onboarding')
+    }
   }
 
   if (!profile) {
@@ -358,6 +370,53 @@ export default async function DashboardPage() {
                 </Link>
               }
             />
+
+            {/* ── Disbursement rail status ─────────────────────────────────
+                Surfaces the funder's selected rail so the rest of the
+                dashboard does not silently assume Stripe. Vektrum records
+                authorization readiness; disbursement is executed through
+                the selected rail. */}
+            {profile.disbursement_rail === 'external_rail' && (
+              <div className="flex items-start gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.06] px-5 py-3">
+                <CheckCircle2 size={16} className="text-emerald-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
+                <div>
+                  <p className="text-[13px] font-semibold text-emerald-300">
+                    Disbursement rail: External / partner rail
+                  </p>
+                  <p className="mt-0.5 text-[12px] text-white/65 leading-relaxed">
+                    Vektrum records authorization readiness. Disbursement is executed through the selected external rail.
+                  </p>
+                </div>
+              </div>
+            )}
+            {profile.disbursement_rail === 'not_configured' && (
+              <div className="flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-5 py-3">
+                <AlertCircle size={16} className="text-amber-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
+                <div className="flex-1">
+                  <p className="text-[13px] font-semibold text-amber-400">
+                    Payment rail not configured
+                  </p>
+                  <p className="mt-0.5 text-[12px] text-white/65 leading-relaxed">
+                    You can set up Stripe or select an external rail before release execution.
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <Link
+                      href="/dashboard/funder/onboarding"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500/15 text-amber-400 border border-amber-500/30 px-3 py-1.5 text-[12px] font-semibold hover:bg-amber-500/25 transition-colors"
+                    >
+                      Choose rail
+                      <ArrowRight size={12} aria-hidden="true" />
+                    </Link>
+                    <Link
+                      href="/dashboard/settings"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.10] px-3 py-1.5 text-[12px] font-semibold text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors"
+                    >
+                      Manage in Settings
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Weekly briefing card */}
             <IntelBriefing />

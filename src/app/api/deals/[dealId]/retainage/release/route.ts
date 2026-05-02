@@ -60,6 +60,23 @@ export async function POST(
     return err as NextResponse
   }
 
+  // ── Rail Guard — funder must have selected a disbursement rail ──────────────
+  // Mirrors the precondition on /api/milestones/[id]/release. Vektrum records
+  // authorization readiness; the selected rail executes disbursement after
+  // required release conditions and authorization are complete.
+  // Admins are exempt from this check (admin code paths do not initiate
+  // releases on behalf of a funder; the role gate above already restricts
+  // this route to funder | admin).
+  if (
+    profile.role === 'funder'
+    && (!profile.disbursement_rail || profile.disbursement_rail === 'not_configured')
+  ) {
+    return errorResponse(
+      400,
+      'Disbursement rail not configured. Choose Stripe Connect or an external rail before releasing retainage.',
+    )
+  }
+
   // ── Deal Access Check ────────────────────────────────────────────────────────
   try {
     await requireDealAccess(supabase, dealId, user.id, profile.role)

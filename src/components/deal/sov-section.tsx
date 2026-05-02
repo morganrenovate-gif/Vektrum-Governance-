@@ -31,7 +31,9 @@ interface SovSectionProps {
    * True when the deal has at least one non-voided contract on file.
    * When false, the SOV section shows a contract-first advisory.
    */
-  hasContract?:     boolean
+  hasContract?:          boolean
+  /** When true, soften the empty-state copy to reflect that accepted release rules are the source */
+  releaseRulesAccepted?: boolean
 }
 
 // ─── Status badge ─────────────────────────────────────────────────────────────
@@ -271,6 +273,7 @@ export function SovSection({
   viewerRole,
   dealStatus,
   hasContract = false,
+  releaseRulesAccepted = false,
 }: SovSectionProps) {
   const [items,    setItems]    = useState<SovLineItem[]>(initialItems)
   const [totals,   setTotals]   = useState<SovTotals>(initialTotals)
@@ -445,10 +448,15 @@ export function SovSection({
             <div className="space-y-4">
               <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-5 text-center space-y-2">
                 <FileText size={20} className="mx-auto text-white/25" aria-hidden="true" />
-                <p className="text-[13px] text-white/60 font-medium">No Schedule of Values has been created yet.</p>
+                <p className="text-[13px] text-white/60 font-medium">
+                  {releaseRulesAccepted
+                    ? 'Draft release rules accepted — SOV setup in progress.'
+                    : 'No Schedule of Values has been created yet.'}
+                </p>
                 <p className="text-[12px] text-white/35 max-w-sm mx-auto leading-relaxed">
-                  Add line items from the approved contract or import from the contract document.
-                  Each line item represents a cost category in the executed contract.
+                  {releaseRulesAccepted
+                    ? 'Add line items below to begin SOV setup. Accepted release rules provide the draft structure; each line item represents a cost category from the executed contract.'
+                    : 'Add line items from the approved contract or import from the contract document. Each line item represents a cost category in the executed contract.'}
                 </p>
               </div>
 

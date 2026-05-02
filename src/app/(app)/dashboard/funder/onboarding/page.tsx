@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import type { Profile } from '@/lib/types'
-import { StripeOnboardingWizard } from '@/components/onboarding/stripe-onboarding-wizard'
+import { FunderRailChoiceWizard } from '@/components/onboarding/funder-rail-choice-wizard'
 
 export const metadata = {
   title: 'Funder Setup — Vektrum',
@@ -27,14 +27,16 @@ export default async function FunderOnboardingPage() {
   // Only funders should access this page
   if (profile.role !== 'funder') redirect('/dashboard')
 
-  // If Stripe is already connected, redirect to dashboard
-  if (profile.stripe_account_id) redirect('/dashboard')
+  // If the funder has already chosen a rail (Stripe, external, or
+  // explicitly "not_configured"), do not loop them back into onboarding —
+  // they can revisit it from Settings.
+  if (profile.disbursement_rail) redirect('/dashboard')
 
   return (
-    <StripeOnboardingWizard
-      role="funder"
-      stripeConnected={!!profile.stripe_account_id}
+    <FunderRailChoiceWizard
       fullName={profile.full_name}
+      stripeConnected={!!profile.stripe_account_id}
+      currentRail={profile.disbursement_rail}
     />
   )
 }

@@ -97,7 +97,7 @@ export function StripeOnboardingWizard({
                   <p className="mt-2 text-[14px] leading-relaxed text-white/55">
                     {isContractor
                       ? 'Before you can create deals, we need to set up your payment account. This takes about 2 minutes.'
-                      : 'Before you can fund deals, we need to connect your payment account. This takes about 2 minutes.'}
+                      : 'Choose how disbursement execution will be handled for your deals. You can connect Stripe, use an external rail, or finish payment setup later.'}
                   </p>
                 </div>
                 <ul className="space-y-2.5">
@@ -110,7 +110,7 @@ export function StripeOnboardingWizard({
                     : [
                         '10-condition release gate — every check runs server-side',
                         'Full audit trail — immutable, timestamped, actor-logged',
-                        'Stripe holds capital in Stripe-managed accounts until every release condition is met',
+                        'Your selected rail executes disbursement after required release conditions and authorization are complete.',
                       ]
                   ).map((item) => (
                     <li key={item} className="flex items-start gap-2.5">
