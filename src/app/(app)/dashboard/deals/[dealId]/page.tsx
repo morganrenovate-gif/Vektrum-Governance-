@@ -150,11 +150,18 @@ export default async function DealDetailPage({
   // if the profiles_select policy hasn't been migrated yet (profiles_select_own
   // only allows reading own profile). When funder_id is set but the join is
   // null, fetch the profile via the admin client (server-side only, safe).
+  //
+  // NOTE: profiles has no `email` column — email lives in auth.users only.
+  // Selecting `email` here previously caused PostgREST to return
+  //   "column profiles.email does not exist"
+  // and the entire fallback failed. We select only the columns that exist;
+  // any code that needs the funder email must resolve it via the auth-admin
+  // API or via DocuSign's recipient record (see /contract/sign route).
   if ((deal as any).funder_id && !(deal as any).funder) {
     const adminClient = createSupabaseAdminClient()
     const { data: fp, error: fpErr } = await adminClient
       .from('profiles')
-      .select('id, full_name, company_name, email, role')
+      .select('id, full_name, company_name, role')
       .eq('id', (deal as any).funder_id)
       .single()
     if (fp) {

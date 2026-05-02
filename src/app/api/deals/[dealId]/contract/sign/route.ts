@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getAuthUser, requireDealAccess, requireMFA } from '@/lib/auth/middleware'
-import { getSigningUrl, DocuSignError } from '@/lib/engine/docusign'
+import {
+  getSigningUrl,
+  getEnvelopeRecipients,
+  DocuSignError,
+  type DocuSignEnvelopeRecipient,
+  type DocuSignSigner,
+} from '@/lib/engine/docusign'
 import { resolveSignerIdentity } from '@/lib/engine/docusign-signer-identity'
 import { logAudit } from '@/lib/engine/audit'
 import { internalError, notFoundError } from '@/lib/errors'
@@ -166,49 +172,120 @@ export async function POST(
     )
   }
 
-  // ── Resolve signer identity via the shared resolver ─────────────────────
+  // ── Resolve signer identity from DocuSign's own envelope recipient ──────
   //
-  // CRITICAL: must use the same resolver that send-envelope/route.ts uses to
-  // create the envelope so the recipient-view request matches DocuSign's
-  // stored embedded recipient on (name + email + clientUserId). Mismatch on
-  // any of those values returns USER_LACKS_PERMISSIONS from DocuSign and
-  // breaks the signing button.
+  // CRITICAL: Recipient-view identity must match the envelope's STORED
+  // recipient byte-for-byte (email, userName, clientUserId, recipientId).
+  // The earlier attempt to reconstruct identity from local profiles + auth
+  // emails sometimes drifted (case-folded email, stale name, missing profile)
+  // and DocuSign returned UNKNOWN_ENVELOPE_RECIPIENT.
+  //
+  // The robust fix: fetch the envelope's recipients from DocuSign and pass
+  // those exact values back. resolveSignerIdentity is kept as a deterministic
+  // fallback for the rare envelopes where DocuSign omits clientUserId.
   const signerRole: 'funder' | 'contractor' = isFunder ? 'funder' : 'contractor'
-  const identity = await resolveSignerIdentity({ userId: user.id, role: signerRole })
-  if (!identity.ok) {
-    console.error('[sign] signer identity resolution failed:', {
-      deal_id:     dealId,
-      contract_id: contract.id,
-      role:        signerRole,
-      missing:     identity.missing,
+  const targetRoutingOrder = isFunder ? '1' : '2'
+  const envelopeId = contract.docusign_envelope_id
+
+  let recipients: DocuSignEnvelopeRecipient[]
+  try {
+    const result = await getEnvelopeRecipients(envelopeId)
+    recipients = result.signers ?? []
+  } catch (err) {
+    const message = err instanceof DocuSignError ? err.message : String(err)
+    console.error('[sign] getEnvelopeRecipients failed', {
+      deal_id:            dealId,
+      contract_id:        contract.id,
+      envelope_id_prefix: envelopeId.slice(0, 8),
+      role:               signerRole,
+      docusign_error:     message.slice(0, 200),
     })
-    return internalError(identity.error)
+    return internalError(
+      'Could not load the DocuSign envelope recipients. Please refresh signing status and try again.',
+      message,
+    )
   }
-  const signer = identity.signer
+
+  // Select the recipient. DocuSign returns routingOrder + recipientId as
+  // strings ("1" / "2"). Match either: most envelopes have both aligned, but
+  // we accept either field as the disambiguator.
+  const matchedRecipient =
+    recipients.find((r) => String(r.routingOrder) === targetRoutingOrder) ??
+    recipients.find((r) => String(r.recipientId)  === targetRoutingOrder)
+
+  if (!matchedRecipient) {
+    console.error('[sign] no matching envelope recipient', {
+      deal_id:                  dealId,
+      contract_id:              contract.id,
+      envelope_id_prefix:       envelopeId.slice(0, 8),
+      role:                     signerRole,
+      target_routing_order:     targetRoutingOrder,
+      signer_count:             recipients.length,
+      signers_summary:          recipients.map((r) => ({
+        recipientId:    r.recipientId,
+        routingOrder:   r.routingOrder,
+        status:         r.status,
+        has_email:      !!r.email,
+        has_clientUserId: !!r.clientUserId,
+      })),
+    })
+    return internalError(
+      'No matching DocuSign recipient found for your role. Please refresh signing status and try again.',
+    )
+  }
+
+  // Build the signer payload from the envelope's stored values. clientUserId
+  // is the only field DocuSign sometimes omits — fall back to the
+  // deterministic convention used by createEnvelope (deal.<role>_id, which
+  // requireDealAccess already proved equal to user.id for the signing role).
+  let clientUserId = matchedRecipient.clientUserId
+  if (!clientUserId) {
+    const fallback = await resolveSignerIdentity({ userId: user.id, role: signerRole })
+    if (fallback.ok) clientUserId = fallback.signer.clientUserId
+    else clientUserId = user.id
+  }
+
+  const signer: DocuSignSigner = {
+    name:         matchedRecipient.name,
+    email:        matchedRecipient.email,
+    clientUserId,
+    routingOrder: Number(matchedRecipient.routingOrder),
+  }
 
   // ── Get DocuSign RecipientView URL ──────────────────────────────────────────
   let signingUrl: string
   try {
     signingUrl = await getSigningUrl({
-      envelopeId: contract.docusign_envelope_id,
+      envelopeId,
       signer,
       returnUrl,
+      recipientId: matchedRecipient.recipientId,
     })
   } catch (err) {
     const message = err instanceof DocuSignError ? err.message : String(err)
-    // Safe diagnostic logging — surfaces the small set of fields ops needs to
-    // reproduce a recipient-view failure without leaking secrets, full
-    // envelope IDs, signer emails, or DocuSign response bodies.
-    const envelopeId = contract.docusign_envelope_id
+    // Safe diagnostic logging — surfaces the fields ops needs to reproduce a
+    // recipient-view failure without leaking emails, secrets, full envelope
+    // IDs, or raw DocuSign response bodies.
     console.error('[sign] getSigningUrl failed', {
-      deal_id:                dealId,
-      contract_id:            contract.id,
-      envelope_id_prefix:     envelopeId.slice(0, 8),
-      role:                   signerRole,
-      has_funder_signed:      !!contract.funder_signed_at,
-      has_contractor_signed:  !!contract.contractor_signed_at,
-      signer_email_present:   !!signer.email,
-      docusign_error:         message.slice(0, 200),
+      deal_id:                       dealId,
+      contract_id:                   contract.id,
+      envelope_id_prefix:            envelopeId.slice(0, 8),
+      role:                          signerRole,
+      has_funder_signed:             !!contract.funder_signed_at,
+      has_contractor_signed:         !!contract.contractor_signed_at,
+      selected_recipient_id:         matchedRecipient.recipientId,
+      selected_routing_order:        matchedRecipient.routingOrder,
+      selected_email_present:        !!matchedRecipient.email,
+      selected_client_user_id_present: !!matchedRecipient.clientUserId,
+      signer_count:                  recipients.length,
+      signers_summary:               recipients.map((r) => ({
+        recipientId:      r.recipientId,
+        routingOrder:     r.routingOrder,
+        status:           r.status,
+        has_email:        !!r.email,
+        has_clientUserId: !!r.clientUserId,
+      })),
+      docusign_error:                message.slice(0, 200),
     })
     return internalError(
       'Failed to generate the signing URL. Please refresh signing status and try again.',
