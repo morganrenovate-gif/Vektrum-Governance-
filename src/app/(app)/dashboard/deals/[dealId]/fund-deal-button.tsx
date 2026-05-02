@@ -95,6 +95,13 @@ export function FundDealButton({ dealId, remaining, stripeConnected, mfaEnrolled
 
   return (
     <div className="flex flex-col items-start gap-2 sm:items-end">
+      {/*
+        Label: "Record funding commitment" — this button records a funder
+        commitment by updating deals.funded_amount. It does NOT execute a
+        Stripe transfer or move funds. Disbursement happens at milestone
+        release time via the funder's selected rail. Renaming away from
+        "Fund This Deal" prevents users from thinking the click moves money.
+      */}
       <Button
         variant="success"
         size="lg"
@@ -102,8 +109,12 @@ export function FundDealButton({ dealId, remaining, stripeConnected, mfaEnrolled
         onClick={handleFund}
         className="sm:w-auto"
       >
-        Fund This Deal — {formatMoney(remaining)}
+        Record funding commitment — {formatMoney(remaining)}
       </Button>
+      <p className="text-[10px] text-white/45 max-w-[18rem] sm:text-right leading-snug">
+        Records a funding commitment on this deal. Disbursement happens at
+        milestone release via the selected rail.
+      </p>
       {error && (
         <div className="flex items-start gap-1.5 text-xs text-red-400">
           <AlertCircle size={12} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
