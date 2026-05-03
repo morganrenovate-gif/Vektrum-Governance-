@@ -144,7 +144,7 @@ export default function RiversideDealPage() {
                         Release Funds
                       </button>
                     )}
-                    {status === 'ready_for_review' && (
+                    {status === 'ready_for_review' && from === 'contractor' && (
                       <>
                         <button
                           type="button"
@@ -169,6 +169,14 @@ export default function RiversideDealPage() {
                           <Paperclip size={16} />
                         </button>
                       </>
+                    )}
+                    {status === 'ready_for_review' && from !== 'contractor' && (
+                      // Funder/admin view: the contractor has submitted a draw
+                      // request; the funder reviews it before it can move to
+                      // 'approved'. No contractor-side controls render here.
+                      <span className="text-[12px] text-amber-300/80 font-medium">
+                        Awaiting your review
+                      </span>
                     )}
                     {status === 'in_progress' && (
                       <span className="bg-white/[0.04] text-white/65 cursor-not-allowed px-4 py-2 rounded-lg text-sm">

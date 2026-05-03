@@ -2,13 +2,16 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Landmark, TrendingUp, DollarSign, AlertCircle, Brain, ArrowRight, ArrowLeft, CheckCircle2, Clock, Zap, Shield } from 'lucide-react'
+import {
+  TrendingUp, DollarSign, AlertCircle, ArrowRight, ArrowLeft,
+  CheckCircle2, FileText, Activity, ListChecks, ShieldCheck,
+} from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format'
 import { FundDealModal } from '@/components/demo/FundDealModal'
 import { DemoFunderTour } from '@/components/demo/DemoFunderTour'
 import { useDemoAutoReset } from '@/lib/demo-data/use-demo-auto-reset'
 
-// ── Mock data ────────────────────────────────────────────────────────────────
+// ─── Mock data ────────────────────────────────────────────────────────────────
 
 const MOCK_DEALS = [
   {
@@ -46,13 +49,70 @@ const MOCK_DEALS = [
   },
 ]
 
-const BRIEFING_INSIGHTS = [
-  'Harbor Logistics Center — Perplexity Draw Control Brief generated for Structural Steel Erection · score 91/100 · all 10 release conditions verified · ready for funder authorization',
-  'Riverside Mixed-Use — MEP Rough-In ($680,000) submitted for AI review · awaiting draw control brief',
-  'Westside Medical — Site Work released on time · project 20% complete · Building Envelope in progress',
-]
+// Recent control activity. Wording is operational/institutional, not chatbot-y.
+const CONTROL_ACTIVITY = [
+  {
+    deal:   'Harbor Logistics Center',
+    line:   'Structural Steel Erection — Draw 3',
+    detail: 'All 10 release conditions verified. No blocking exceptions identified. Ready for funder authorization.',
+    state:  'ready',
+    when:   'Today · 9:14 AM',
+  },
+  {
+    deal:   'Riverside Mixed-Use Development',
+    line:   'MEP Rough-In — Draw 2',
+    detail: 'Submitted for control review. Awaiting evidence reconciliation against schedule of values.',
+    state:  'in_review',
+    when:   'Today · 7:42 AM',
+  },
+  {
+    deal:   'Westside Medical Office Campus',
+    line:   'Site Work — Draw 1',
+    detail: 'Released on schedule. Building Envelope advancing into next milestone window.',
+    state:  'released',
+    when:   'Yesterday · 4:08 PM',
+  },
+] as const
 
-// ── Page ─────────────────────────────────────────────────────────────────────
+// Items requiring funder action. Each has a clear next step + aging timestamp.
+const ACTION_ITEMS = [
+  {
+    id:        'riverside-mep',
+    deal:      'Riverside Mixed-Use Development',
+    line:      'MEP Rough-In — Draw 2',
+    amount:    680_000,
+    aging:     'Submitted 18 hours ago',
+    nextStep:  'Review draw package and authorize release',
+    cta:       'Review draw',
+    href:      '/demo-live/deal/riverside?from=funder',
+    severity:  'review' as const,
+  },
+  {
+    id:        'harbor-hvac',
+    deal:      'Harbor Logistics Center',
+    line:      'HVAC Equipment Procurement — Draw 4',
+    amount:    487_000,
+    aging:     'Exception flagged 2 days ago',
+    nextStep:  'Review held line item; verified balance remains releasable',
+    cta:       'View dispute',
+    href:      '/demo-live/deal/harbor-dispute?from=funder',
+    severity:  'exception' as const,
+  },
+] as const
+
+// Partial-dispute featured scenario — concrete numbers visible above the click.
+const DISPUTE = {
+  deal:           'Harbor Logistics Center',
+  line:           'HVAC Equipment Procurement — Draw 4',
+  requested:      487_000,
+  held:           78_000,
+  eligible:      409_000,
+  reasonForHold: 'Invoice support mismatch on a single equipment line item',
+  actionOwner:   'Contractor to provide vendor confirmation; funder review on receipt',
+  href:          '/demo-live/deal/harbor-dispute?from=funder',
+} as const
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function DemoFunderPage() {
   const [fundModal, setFundModal] = useState(false)
@@ -61,282 +121,590 @@ export default function DemoFunderPage() {
     setFundModal(false)
   })
 
-  const totalDeals = MOCK_DEALS.length
+  const totalDeals      = MOCK_DEALS.length
   const capitalDeployed = MOCK_DEALS.reduce((s, d) => s + d.funded, 0)
-  const totalReleased = MOCK_DEALS.reduce((s, d) => s + d.released, 0)
+  const totalReleased   = MOCK_DEALS.reduce((s, d) => s + d.released, 0)
+  const actionCount     = ACTION_ITEMS.length
 
   return (
     <div className="min-h-screen bg-surface-0">
-    <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-12 sm:py-16 space-y-8">
-      {/* Back link */}
-      <Link
-        href="/demo-live"
-        className="inline-flex items-center gap-1.5 text-sm text-white/65 hover:text-white transition-colors"
-      >
-        <ArrowLeft size={14} aria-hidden="true" />
-        Back to role selector
-      </Link>
+      <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-10 sm:py-14 space-y-10">
 
-      {/* Demo info banner */}
-      <div className="rounded-xl border border-vektrum-blue/20 bg-vektrum-blue/10 px-5 py-4">
-        <p className="text-[13px] text-blue-200 leading-relaxed">
-          You&apos;re viewing the Funder dashboard as <strong>Sarah Chen</strong>. In the live app, this connects to your real portfolio.
+        {/* Back to role selector */}
+        <Link
+          href="/demo-live"
+          className="inline-flex items-center gap-1.5 text-[13px] text-white/60 hover:text-white transition-colors"
+        >
+          <ArrowLeft size={14} aria-hidden="true" />
+          Back to role selector
+        </Link>
+
+        {/* Demo info banner — makes the simulated nature explicit */}
+        <div
+          role="note"
+          aria-label="Demo mode"
+          className="rounded-xl border border-white/[0.10] bg-white/[0.02] px-5 py-4 flex flex-wrap items-center gap-x-4 gap-y-2"
+        >
+          <span className="inline-flex items-center rounded-full bg-white/[0.06] border border-white/[0.10] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.10em] text-white/65">
+            Demo mode
+          </span>
+          <p className="text-[13px] text-white/65 leading-relaxed flex-1 min-w-[260px]">
+            Viewing the funder dashboard as <strong className="text-white">Sarah Chen</strong>. All
+            data is simulated. In the live app this connects to your real portfolio and
+            release-control records.
+          </p>
+        </div>
+
+        {/* Guided walkthrough — renders only when ?tour=1 is present */}
+        <DemoFunderTour />
+
+        {/* Header — restrained, no decorative dot */}
+        <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="space-y-1.5">
+            <p className="text-[11px] tracking-[0.14em] uppercase text-white/45 font-semibold">
+              Funder dashboard
+            </p>
+            <h1 className="font-display text-[2.25rem] font-bold tracking-[-0.04em] text-white leading-[1.05]">
+              Welcome back, Sarah
+            </h1>
+            <p className="text-[13px] text-white/55 leading-relaxed max-w-xl">
+              Three active facilities, {actionCount} item{actionCount === 1 ? '' : 's'} requiring
+              your action. Release controls are reviewed before items reach this view.
+            </p>
+          </div>
+          <button
+            onClick={() => setFundModal(true)}
+            className="group inline-flex min-h-[40px] items-center justify-center gap-2 self-start rounded-xl bg-vektrum-blue px-5 py-2.5 text-[13px] font-semibold text-white shadow-md shadow-vektrum-blue/20 transition-all hover:bg-vektrum-blue-hover hover:shadow-lg hover:shadow-vektrum-blue/30"
+          >
+            Fund a new deal
+            <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
+          </button>
+        </header>
+
+        <FundDealModal open={fundModal} onConfirm={() => setFundModal(false)} onClose={() => setFundModal(false)} />
+
+        {/* ── Guided demo strip — 4 steps ──────────────────────────────────── */}
+        <GuidedStrip />
+
+        {/* ── Decision area — hero + adjacent control summary ──────────────── */}
+        <section
+          aria-label="Decision-ready draw"
+          className="grid gap-4 lg:grid-cols-5"
+        >
+          {/* Hero decision panel (3/5) */}
+          <article className="lg:col-span-3 rounded-2xl border border-emerald-500/25 bg-emerald-500/[0.04] overflow-hidden">
+            <div className="px-6 pt-5 pb-4 border-b border-white/[0.06] space-y-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-300">
+                  Decision-ready draw
+                </p>
+                <span aria-hidden="true" className="text-white/15">·</span>
+                <p className="text-[11px] text-white/45">Updated today · 9:14 AM</p>
+              </div>
+              <div className="flex items-start justify-between gap-4 flex-wrap">
+                <div>
+                  <h2 className="text-[18px] font-semibold text-white leading-tight">
+                    Harbor Logistics Center — Draw 3
+                  </h2>
+                  <p className="mt-1 text-[12px] text-white/55">Structural Steel Erection</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-display text-[1.625rem] font-bold tabular-nums text-white leading-none">
+                    {formatCurrency(2_180_000)}
+                  </p>
+                  <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-emerald-500/[0.12] border border-emerald-500/25 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-300">
+                    <CheckCircle2 size={10} aria-hidden="true" />
+                    Ready for authorization
+                  </span>
+                </div>
+              </div>
+              <p className="text-[13px] text-white/75 leading-relaxed">
+                Release controls satisfied for Structural Steel Erection. No blocking exceptions
+                identified in the current draw package.
+              </p>
+            </div>
+
+            <ul className="px-6 py-4 space-y-2.5 border-b border-white/[0.06]">
+              {[
+                '10 of 10 release conditions satisfied',
+                'Supporting draw documents reviewed and matched to the schedule of values',
+                'No exception requiring manual hold',
+              ].map((line) => (
+                <li key={line} className="flex items-start gap-2.5 text-[13px] text-white/70 leading-relaxed">
+                  <CheckCircle2 size={13} className="text-emerald-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
+                  <span>{line}</span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="px-6 py-4 flex flex-wrap items-center justify-between gap-3">
+              <p className="text-[11px] text-white/40 leading-relaxed max-w-md">
+                Funder authorization is required to proceed. Vektrum records authorization;
+                disbursement is executed through the selected rail.
+              </p>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <Link
+                  href="/demo-live/deal/harbor?from=funder#control-basis"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-white/[0.10] px-3.5 py-2 text-[12px] font-semibold text-white/75 hover:text-white hover:bg-white/[0.04] transition-colors"
+                >
+                  Inspect control basis
+                </Link>
+                <Link
+                  href="/demo-live/deal/harbor?from=funder"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 px-4 py-2 text-[12px] font-semibold text-white transition-colors"
+                >
+                  Review and authorize
+                  <ArrowRight size={12} aria-hidden="true" />
+                </Link>
+              </div>
+            </div>
+          </article>
+
+          {/* Release control summary (2/5) */}
+          <ReleaseControlSummary />
+        </section>
+
+        {/* ── Items requiring funder action ────────────────────────────────── */}
+        <section id="action-queue" aria-label="Items requiring funder action">
+          <SectionHeader
+            label="Items requiring funder action"
+            count={actionCount}
+            tone="amber"
+          />
+          <div className="grid gap-3 sm:grid-cols-2">
+            {ACTION_ITEMS.map((item) => (
+              <ActionCard key={item.id} item={item} />
+            ))}
+          </div>
+        </section>
+
+        {/* ── Featured scenario: partial release under active dispute ──────── */}
+        <section aria-label="Partial release under active dispute">
+          <SectionHeader label="Partial release under active dispute" />
+          <DisputeScenarioCard />
+        </section>
+
+        {/* ── Recent control activity (renamed from Perplexity briefing) ──── */}
+        <section aria-label="Recent control activity">
+          <SectionHeader label="Recent control activity" />
+          <div className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden">
+            <div className="px-5 py-3 border-b border-white/[0.06] flex items-center gap-2.5">
+              <Activity size={13} className="text-white/55" aria-hidden="true" />
+              <p className="text-[11px] font-semibold uppercase tracking-[0.10em] text-white/55">
+                Control log · last 24 hours
+              </p>
+              <span className="ml-auto text-[11px] text-white/35">3 entries</span>
+            </div>
+            <ol className="divide-y divide-white/[0.05]">
+              {CONTROL_ACTIVITY.map((entry, i) => (
+                <li key={i} className="px-5 py-3.5 flex items-start gap-3">
+                  <ActivityDot state={entry.state} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-[13px] font-semibold text-white">{entry.deal}</p>
+                      <span aria-hidden="true" className="text-white/15">·</span>
+                      <p className="text-[12px] text-white/55">{entry.line}</p>
+                    </div>
+                    <p className="mt-1 text-[12px] text-white/55 leading-relaxed">{entry.detail}</p>
+                  </div>
+                  <span className="text-[11px] text-white/35 tabular-nums whitespace-nowrap flex-shrink-0">
+                    {entry.when}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        {/* ── Portfolio analytics — moved below action area ────────────────── */}
+        <section aria-label="Portfolio analytics">
+          <SectionHeader label="Portfolio analytics" />
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <AnalyticsTile
+              label="Active facilities"
+              value={String(totalDeals)}
+              icon={TrendingUp}
+              href="#active-facilities"
+            />
+            <AnalyticsTile
+              label="Capital deployed"
+              value={formatCurrency(capitalDeployed)}
+              icon={DollarSign}
+              href="/demo-live/funder/capital"
+            />
+            <AnalyticsTile
+              label="Released to date"
+              value={formatCurrency(totalReleased)}
+              icon={CheckCircle2}
+              href="#active-portfolio"
+            />
+          </div>
+        </section>
+
+        {/* ── Active portfolio (renamed from Portfolio Overview) ───────────── */}
+        <section id="active-portfolio" aria-label="Active portfolio">
+          <SectionHeader label="Active portfolio" />
+          <div className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden">
+            <div className="hidden sm:grid grid-cols-12 gap-3 px-5 py-2.5 border-b border-white/[0.06] text-[10px] font-semibold uppercase tracking-[0.10em] text-white/45">
+              <span className="col-span-5">Facility</span>
+              <span className="col-span-2">Status</span>
+              <span className="col-span-2 text-right">Total</span>
+              <span className="col-span-3 text-right">Released</span>
+            </div>
+            <div className="divide-y divide-white/[0.05]">
+              {MOCK_DEALS.map((deal) => {
+                const pct = deal.total > 0 ? Math.round((deal.released / deal.total) * 100) : 0
+                return (
+                  <Link
+                    key={deal.id}
+                    href={`/demo-live/deal/${deal.id}?from=funder`}
+                    className="grid sm:grid-cols-12 gap-y-1 gap-x-3 items-center px-5 py-3.5 hover:bg-white/[0.03] transition-colors"
+                  >
+                    <span className="sm:col-span-5 text-[13px] font-medium text-white/85">
+                      {deal.title}
+                      <span className="block text-[11px] text-white/40 mt-0.5">
+                        {deal.contractor} · {deal.contractorCompany}
+                      </span>
+                    </span>
+                    <span className="sm:col-span-2">
+                      <span className="inline-flex items-center rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">
+                        Active
+                      </span>
+                    </span>
+                    <span className="sm:col-span-2 text-[12px] text-white/70 tabular-nums sm:text-right">
+                      {formatCurrency(deal.total)}
+                    </span>
+                    <span className="sm:col-span-3 sm:text-right">
+                      <span className="inline-flex sm:justify-end items-center gap-2.5 w-full">
+                        <span className="flex-1 sm:max-w-[80px] h-1 rounded-full bg-white/[0.08] overflow-hidden">
+                          <span className="block h-full rounded-full bg-emerald-500" style={{ width: `${pct}%` }} />
+                        </span>
+                        <span className="text-[12px] text-white/55 tabular-nums whitespace-nowrap">
+                          {pct}%
+                        </span>
+                      </span>
+                    </span>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Active facilities (renamed from Funded Deals) ────────────────── */}
+        <section id="active-facilities" aria-label="Active facilities">
+          <SectionHeader label="Active facilities" />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {MOCK_DEALS.map((deal) => (
+              <DealCard key={deal.id} deal={deal} />
+            ))}
+          </div>
+        </section>
+
+        {/* ── Authorization-infrastructure footer note ─────────────────────── */}
+        <footer className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4">
+          <p className="text-[11px] text-white/45 leading-relaxed">
+            Vektrum is authorization infrastructure for construction draw governance. Vektrum does
+            not hold funds, act as a bank or custodian, or move money. Funds are held by Stripe or
+            the funding partner; the selected rail executes disbursement after release controls
+            are satisfied and explicit funder authorization is recorded.
+          </p>
+        </footer>
+
+      </div>
+    </div>
+  )
+}
+
+// ─── Components ───────────────────────────────────────────────────────────────
+
+function GuidedStrip() {
+  const steps = [
+    { n: 1, label: 'Review the control brief' },
+    { n: 2, label: 'Inspect evidence and exceptions' },
+    { n: 3, label: 'Authorize or escalate' },
+    { n: 4, label: 'Track release and audit trail' },
+  ]
+  return (
+    <section
+      aria-label="How this demo works"
+      className="rounded-xl border border-white/[0.07] bg-surface-2/40 px-5 py-3.5"
+    >
+      <div className="flex items-center gap-2 mb-2.5">
+        <ListChecks size={12} className="text-white/55" aria-hidden="true" />
+        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/55">
+          How this demo works
+        </p>
+      </div>
+      <ol className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 sm:flex-wrap">
+        {steps.map((step, i) => (
+          <li key={step.n} className="flex items-center gap-2 text-[12px] text-white/65">
+            <span className="inline-flex items-center justify-center h-5 w-5 rounded-full border border-white/[0.14] bg-white/[0.04] text-[10px] font-semibold tabular-nums text-white/65 flex-shrink-0">
+              {step.n}
+            </span>
+            <span>{step.label}</span>
+            {i < steps.length - 1 && (
+              <span aria-hidden="true" className="hidden sm:inline text-white/15 ml-1">→</span>
+            )}
+          </li>
+        ))}
+      </ol>
+    </section>
+  )
+}
+
+function ReleaseControlSummary() {
+  const fields: Array<{ label: string; value: string; tone?: 'ok' }> = [
+    { label: 'Control status',          value: '10 / 10 conditions passed', tone: 'ok' },
+    { label: 'Manual review required',  value: 'No',                        tone: 'ok' },
+    { label: 'Last updated',            value: 'Today · 9:14 AM' },
+  ]
+  return (
+    <aside
+      aria-label="Release control summary"
+      className="lg:col-span-2 rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden flex flex-col"
+    >
+      <div className="px-5 py-3.5 border-b border-white/[0.06] flex items-center gap-2">
+        <ShieldCheck size={13} className="text-white/55" aria-hidden="true" />
+        <p className="text-[11px] font-semibold uppercase tracking-[0.10em] text-white/55">
+          Release control summary
         </p>
       </div>
 
-      {/* Guided walkthrough — renders only when ?tour=1 is present */}
-      <DemoFunderTour />
+      <dl className="px-5 py-4 space-y-3">
+        {fields.map((f) => (
+          <div key={f.label} className="flex items-baseline justify-between gap-3">
+            <dt className="text-[11px] text-white/45 uppercase tracking-[0.08em]">{f.label}</dt>
+            <dd className={`text-[12px] font-semibold tabular-nums ${
+              f.tone === 'ok' ? 'text-emerald-300' : 'text-white/80'
+            }`}>
+              {f.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
 
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="px-5 pb-4 border-t border-white/[0.05] pt-3 space-y-3">
         <div>
-          <div className="mb-3 flex items-center gap-3">
-            <div className="h-px w-5 bg-vektrum-blue" />
-            <p className="text-[11px] tracking-[0.12em] uppercase text-blue-300 font-semibold">Funder Dashboard</p>
-          </div>
-          <h1 className="font-display text-[2.25rem] font-bold tracking-[-0.04em] text-white leading-[1.05]">
-            Welcome back, Sarah
-          </h1>
-        </div>
-        <button
-          onClick={() => setFundModal(true)}
-          className="group inline-flex min-h-[44px] items-center justify-center gap-2 self-start rounded-xl bg-vektrum-blue px-5 py-2.5 text-[14px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 transition-all hover:bg-vektrum-blue-hover hover:shadow-xl hover:shadow-vektrum-blue/40 hover:-translate-y-0.5"
-        >
-          Fund New Deal
-          <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
-        </button>
-      </div>
-
-      <FundDealModal open={fundModal} onConfirm={() => setFundModal(false)} onClose={() => setFundModal(false)} />
-
-      {/* ── Harbor Draw #3 — Priority Authorization ──────────────────────── */}
-      <section className="rounded-xl border border-emerald-500/25 bg-emerald-500/[0.04] overflow-hidden">
-        <div className="px-5 py-4 border-b border-white/[0.06]">
-          <div className="flex items-start gap-3">
-            <div className="h-9 w-9 flex items-center justify-center rounded-xl bg-emerald-500/[0.12] border border-emerald-500/20 flex-shrink-0">
-              <Shield size={15} className="text-emerald-400" aria-hidden="true" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <span className="inline-flex items-center rounded-full bg-emerald-500/[0.12] border border-emerald-500/20 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400 mb-1.5">
-                Ready for Authorization
-              </span>
-              <p className="text-[15px] font-semibold text-white">
-                Harbor Draw #3 — {formatCurrency(2_180_000)}
-              </p>
-              <p className="text-[12px] text-white/50 mt-0.5">
-                Structural Steel Erection · 10/10 release conditions verified · Perplexity score 91/100
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="px-5 py-3 flex items-center justify-between gap-4">
-          <p className="text-[12px] text-white/40 leading-relaxed">
-            AI Draw Review complete. All release gate conditions satisfied. Funder authorization required to proceed.
+          <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-white/45 mb-1.5">
+            Evidence reviewed
           </p>
-          <Link
-            href="/demo-live/deal/harbor?from=funder"
-            className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2 text-[12px] font-semibold text-white whitespace-nowrap transition-all hover:-translate-y-0.5 flex-shrink-0"
-          >
-            Review &amp; Authorize
-            <ArrowRight size={12} aria-hidden="true" />
-          </Link>
+          <ul className="space-y-1">
+            {['Draw request', 'Schedule of values', 'Invoices', 'Lien waivers', 'Site verification'].map((e) => (
+              <li key={e} className="flex items-center gap-2 text-[12px] text-white/70">
+                <FileText size={11} className="text-white/35 flex-shrink-0" aria-hidden="true" />
+                {e}
+              </li>
+            ))}
+          </ul>
         </div>
-      </section>
 
-      {/* Perplexity Draw Control Briefing */}
-      <div
-        className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden"
-
-      >
-        <div className="border-l-4 border-vektrum-blue px-5 py-4 border-b border-white/[0.06]">
-          <div className="flex items-center gap-2">
-            <Brain size={15} className="text-blue-400" aria-hidden="true" />
-            <p className="text-[13px] font-semibold text-white">Perplexity Draw Control Briefing</p>
-            <span className="ml-auto text-[11px] text-white/40">Updated today</span>
-          </div>
-        </div>
-        <ul className="px-5 py-4 space-y-3">
-          {BRIEFING_INSIGHTS.map((insight, i) => (
-            <li key={i} className="flex items-start gap-2.5 text-[13px] text-white/55 leading-relaxed">
-              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-vektrum-blue flex-shrink-0" />
-              {insight}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Capital Summary */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatTile label="Total Deals" value={totalDeals} icon={TrendingUp} href="#funded-deals" />
-        <MoneyTile label="Capital Deployed" amount={capitalDeployed} icon={DollarSign} href="/demo-live/funder/capital" />
-        <MoneyTile label="Total Released" amount={totalReleased} icon={CheckCircle2} href="#portfolio-overview" />
-        <Link href="/demo-live/deal/harbor-dispute?from=funder">
-          <div
-            className="rounded-2xl border border-vektrum-amber/30 bg-surface-2 shadow-card px-5 py-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-vektrum-amber/50 cursor-pointer"
-            
-          >
-            <div className="flex items-start justify-between gap-3 mb-2">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/75">Action Queue</p>
-              <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08]">
-                <AlertCircle size={13} className="text-amber-400" aria-hidden="true" />
-              </div>
-            </div>
-            <p className="font-display text-4xl font-bold tabular-nums leading-none text-amber-400">1</p>
-          </div>
-        </Link>
-      </div>
-
-      {/* Portfolio Overview */}
-      <div
-        id="portfolio-overview"
-        className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden"
-        
-      >
-        <div className="px-5 py-4 border-b border-white/[0.06]">
-          <p className="text-[13px] font-semibold text-white">Portfolio Overview</p>
-        </div>
-        <div className="p-5 space-y-2">
-          {MOCK_DEALS.map((deal) => {
-            const pct = deal.total > 0 ? Math.round((deal.released / deal.total) * 100) : 0
-            return (
-              <Link key={deal.id} href={`/demo-live/deal/${deal.id}?from=funder`} className="flex items-center gap-4 hover:bg-white/[0.03] rounded-xl px-3 py-2 -mx-3 transition-colors">
-                <span className="text-[13px] font-medium text-white/70 hover:text-white transition-colors flex-1 min-w-0 truncate">
-                  {deal.title}
-                </span>
-                <span className="inline-flex items-center rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400 flex-shrink-0">
-                  Active
-                </span>
-                <span className="text-[12px] text-white/50 tabular-nums flex-shrink-0">{formatCurrency(deal.total)}</span>
-                <div className="w-24 h-1.5 rounded-full bg-white/[0.08] flex-shrink-0 overflow-hidden">
-                  <div className="h-full rounded-full bg-emerald-500" style={{ width: `${pct}%` }} />
-                </div>
-                <span className="text-[12px] text-white/50 tabular-nums w-20 text-right flex-shrink-0">{pct}% released</span>
-              </Link>
-            )
-          })}
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-white/45 mb-1.5">
+            Blocking conditions checked
+          </p>
+          <ul className="space-y-1">
+            {[
+              'Duplicate billing',
+              'Incomplete waiver coverage',
+              'Unsupported percent complete',
+              'Unresolved prior exception',
+            ].map((b) => (
+              <li key={b} className="flex items-center gap-2 text-[12px] text-white/55">
+                <CheckCircle2 size={11} className="text-emerald-400/80 flex-shrink-0" aria-hidden="true" />
+                {b}
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
+    </aside>
+  )
+}
 
-      {/* Action Queue */}
-      <section id="action-queue">
-        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-amber-400">
-          Action Required
-        </h2>
-        <div className="space-y-3">
-          <div
-            className="rounded-2xl border border-vektrum-amber/25 bg-surface-2 shadow-card p-4 flex items-center justify-between"
-            
-          >
-            <div>
-              <p className="font-semibold text-white">Riverside Mixed-Use Development</p>
-              <p className="text-sm text-white/50 mt-0.5">MEP Rough-In — {formatCurrency(680_000)} · Ready for Review</p>
-            </div>
-            <Link
-              href="/demo-live/deal/riverside?from=funder"
-              className="group inline-flex items-center gap-1.5 bg-vektrum-blue text-white px-4 py-2 rounded-xl text-sm font-semibold ml-4 whitespace-nowrap hover:bg-vektrum-blue-hover transition-all hover:-translate-y-0.5"
-            >
-              Review Draw
-              <ArrowRight size={12} className="transition-transform group-hover:translate-x-0.5" />
-            </Link>
-          </div>
-          <div
-            className="rounded-2xl border border-red-500/20 bg-surface-2 shadow-card p-4 flex items-center justify-between"
-            
-          >
-            <div>
-              <p className="font-semibold text-white">Harbor Logistics Center</p>
-              <p className="text-sm text-red-400 mt-0.5">HVAC Equipment Procurement — {formatCurrency(487_000)} · Dispute Active</p>
-            </div>
-            <Link
-              href="/demo-live/deal/harbor-dispute?from=funder"
-              className="group inline-flex items-center gap-1.5 bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-semibold ml-4 whitespace-nowrap hover:bg-red-500 transition-all hover:-translate-y-0.5"
-            >
-              View Dispute
-              <ArrowRight size={12} className="transition-transform group-hover:translate-x-0.5" />
-            </Link>
-          </div>
+function ActionCard({ item }: { item: typeof ACTION_ITEMS[number] }) {
+  const isException = item.severity === 'exception'
+  const tones = isException
+    ? {
+        border:   'border-red-500/25',
+        eyebrow:  'text-red-400',
+        eyebrowText: 'Exception · review held',
+        cta:      'bg-white/[0.06] hover:bg-white/[0.10] border border-red-500/30 text-red-300',
+        dot:      'bg-red-400',
+      }
+    : {
+        border:   'border-amber-500/25',
+        eyebrow:  'text-amber-300',
+        eyebrowText: 'Ready for review',
+        cta:      'bg-vektrum-blue hover:bg-vektrum-blue-hover text-white',
+        dot:      'bg-amber-400',
+      }
+  return (
+    <article className={`rounded-2xl border ${tones.border} bg-surface-2 shadow-card overflow-hidden flex flex-col`}>
+      <div className="px-5 pt-4 pb-3 space-y-2">
+        <div className="flex items-center gap-2">
+          <span className={`inline-block h-1.5 w-1.5 rounded-full ${tones.dot} flex-shrink-0`} aria-hidden="true" />
+          <p className={`text-[10px] font-semibold uppercase tracking-[0.12em] ${tones.eyebrow}`}>
+            {tones.eyebrowText}
+          </p>
+          <span aria-hidden="true" className="text-white/15">·</span>
+          <p className="text-[11px] text-white/45">{item.aging}</p>
         </div>
-      </section>
-
-      {/* Funded Deals */}
-      <section id="funded-deals">
-        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/55">
-          Funded Deals
-        </h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {MOCK_DEALS.map((deal) => (
-            <DealCard key={deal.id} deal={deal} />
-          ))}
-        </div>
-      </section>
-
-      {/* Featured Scenario */}
-      <section>
-        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/55">
-          Featured Scenario
-        </h2>
+        <h3 className="text-[14px] font-semibold text-white leading-tight">{item.deal}</h3>
+        <p className="text-[12px] text-white/55">{item.line}</p>
+        <p className="font-display text-[1.25rem] font-bold tabular-nums text-white leading-none mt-1">
+          {formatCurrency(item.amount)}
+        </p>
+      </div>
+      <div className="px-5 py-3 border-t border-white/[0.06] bg-white/[0.02] flex items-center justify-between gap-3">
+        <p className="text-[11px] text-white/55 leading-snug flex-1">{item.nextStep}</p>
         <Link
-          href="/demo-live/deal/harbor-dispute?from=funder"
-          className="group block rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/[0.14]"
-          
+          href={item.href}
+          className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-[12px] font-semibold whitespace-nowrap transition-colors flex-shrink-0 ${tones.cta}`}
         >
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08] flex-shrink-0">
-              <Zap size={16} className="text-red-400" aria-hidden="true" />
-            </div>
-            <div>
-              <p className="text-[14px] font-semibold text-white group-hover:text-blue-300 transition-colors">
-                Partial Dispute Scenario
-              </p>
-              <p className="mt-1 text-[13px] text-white/65 leading-relaxed">
-                See how Vektrum handles a flagged line item while keeping 84% of project funds flowing.
-              </p>
-              <span className="mt-2 inline-flex items-center gap-1 text-[12px] font-semibold text-blue-300">
-                View Scenario
-                <ArrowRight size={12} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
-              </span>
-            </div>
-          </div>
+          {item.cta}
+          <ArrowRight size={11} aria-hidden="true" />
         </Link>
-      </section>
-    </div>
+      </div>
+    </article>
+  )
+}
+
+function DisputeScenarioCard() {
+  const releasablePct = Math.round((DISPUTE.eligible / DISPUTE.requested) * 100)
+  return (
+    <article className="rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card overflow-hidden">
+      <div className="px-6 pt-5 pb-4 border-b border-white/[0.06] space-y-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-amber-300">
+            Partial release scenario
+          </p>
+          <span aria-hidden="true" className="text-white/15">·</span>
+          <p className="text-[11px] text-white/45">{DISPUTE.deal}</p>
+        </div>
+        <h3 className="text-[16px] font-semibold text-white">{DISPUTE.line}</h3>
+        <p className="text-[13px] text-white/65 leading-relaxed max-w-2xl">
+          A disputed equipment line is held for review while the verified balance remains
+          eligible for release. Partial release reduces unnecessary project delay without
+          weakening control discipline.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-white/[0.06]">
+        <DisputeMetric
+          label="Requested"
+          value={formatCurrency(DISPUTE.requested)}
+          tone="neutral"
+        />
+        <DisputeMetric
+          label="Held for review"
+          value={formatCurrency(DISPUTE.held)}
+          tone="hold"
+          sublabel={`${100 - releasablePct}% of draw`}
+        />
+        <DisputeMetric
+          label="Eligible for release"
+          value={formatCurrency(DISPUTE.eligible)}
+          tone="ok"
+          sublabel={`${releasablePct}% of draw`}
+        />
+      </div>
+
+      <div className="px-6 py-4 border-t border-white/[0.06] grid gap-3 sm:grid-cols-2">
+        <DisputeRow label="Reason for hold" value={DISPUTE.reasonForHold} />
+        <DisputeRow label="Action owner"    value={DISPUTE.actionOwner} />
+      </div>
+
+      <div className="px-6 py-4 border-t border-white/[0.06] flex items-center justify-between gap-3 flex-wrap">
+        <p className="text-[11px] text-white/40 leading-relaxed max-w-md">
+          Held lines remain blocked until resolved. The release gate continues to enforce all
+          conditions on the eligible balance before disbursement.
+        </p>
+        <Link
+          href={DISPUTE.href}
+          className="inline-flex items-center gap-1.5 rounded-xl bg-vektrum-blue hover:bg-vektrum-blue-hover px-4 py-2 text-[12px] font-semibold text-white transition-colors"
+        >
+          Review dispute workflow
+          <ArrowRight size={12} aria-hidden="true" />
+        </Link>
+      </div>
+    </article>
+  )
+}
+
+function DisputeMetric({ label, value, sublabel, tone }: {
+  label:    string
+  value:    string
+  sublabel?: string
+  tone:     'neutral' | 'ok' | 'hold'
+}) {
+  const valueColor =
+    tone === 'ok'   ? 'text-emerald-300' :
+    tone === 'hold' ? 'text-amber-300'   :
+                      'text-white'
+  return (
+    <div className="px-6 py-4">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-white/45 mb-1.5">{label}</p>
+      <p className={`font-display text-[1.375rem] font-bold tabular-nums leading-none ${valueColor}`}>{value}</p>
+      {sublabel && (
+        <p className="mt-1 text-[11px] text-white/45 tabular-nums">{sublabel}</p>
+      )}
     </div>
   )
 }
 
-// ── Inline components ────────────────────────────────────────────────────────
-
-function StatTile({ label, value, icon: Icon, href }: { label: string; value: string | number; icon: React.ElementType; href?: string }) {
-  const inner = (
-    <div
-      className={`rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card px-5 py-5 transition-all duration-300 ${href ? 'hover:-translate-y-0.5 hover:border-white/[0.14] cursor-pointer' : ''}`}
-      
-    >
-      <div className="flex items-start justify-between gap-3 mb-2">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/75">{label}</p>
-        <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08]">
-          <Icon size={13} className="text-blue-400" aria-hidden="true" />
-        </div>
-      </div>
-      <p className="font-display text-4xl font-bold tabular-nums leading-none text-white">{value}</p>
+function DisputeRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-white/45 mb-1">{label}</p>
+      <p className="text-[12px] text-white/75 leading-relaxed">{value}</p>
     </div>
   )
-  return href ? <Link href={href}>{inner}</Link> : inner
 }
 
-function MoneyTile({ label, amount, icon: Icon, href }: { label: string; amount: number; icon: React.ElementType; href?: string }) {
+function ActivityDot({ state }: { state: 'ready' | 'in_review' | 'released' }) {
+  const cls =
+    state === 'ready'     ? 'bg-emerald-400 ring-2 ring-emerald-400/15' :
+    state === 'in_review' ? 'bg-amber-400'   :
+                            'bg-white/30'
+  return (
+    <span className={`mt-1.5 h-2 w-2 rounded-full flex-shrink-0 ${cls}`} aria-hidden="true" />
+  )
+}
+
+function SectionHeader({ label, count, tone }: {
+  label: string
+  count?: number
+  tone?:  'amber' | 'default'
+}) {
+  const labelColor = tone === 'amber' ? 'text-amber-300' : 'text-white/65'
+  return (
+    <div className="mb-3 flex items-center gap-2">
+      <h2 className={`text-[11px] font-semibold uppercase tracking-[0.12em] ${labelColor}`}>
+        {label}
+      </h2>
+      {typeof count === 'number' && count > 0 && (
+        <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-white/[0.06] border border-white/[0.10] text-[10px] font-semibold tabular-nums text-white/70">
+          {count}
+        </span>
+      )}
+    </div>
+  )
+}
+
+function AnalyticsTile({ label, value, icon: Icon, href }: {
+  label: string
+  value: string
+  icon:  React.ElementType
+  href?: string
+}) {
   const inner = (
-    <div
-      className={`rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card px-5 py-5 transition-all duration-300 ${href ? 'hover:-translate-y-0.5 hover:border-white/[0.14] cursor-pointer' : ''}`}
-      
-    >
-      <div className="flex items-start justify-between gap-3 mb-2">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/75">{label}</p>
-        <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08]">
-          <Icon size={13} className="text-blue-400" aria-hidden="true" />
-        </div>
+    <div className={`rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card px-5 py-4 ${href ? 'hover:border-white/[0.16] transition-colors cursor-pointer' : ''}`}>
+      <div className="flex items-center justify-between gap-3 mb-2">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/55">{label}</p>
+        <Icon size={13} className="text-white/35" aria-hidden="true" />
       </div>
-      <p className="font-display text-2xl font-bold tabular-nums leading-none text-white">{formatCurrency(amount)}</p>
+      <p className="font-display text-[1.625rem] font-bold tabular-nums leading-none text-white">{value}</p>
     </div>
   )
   return href ? <Link href={href}>{inner}</Link> : inner
@@ -347,26 +715,25 @@ function DealCard({ deal }: { deal: typeof MOCK_DEALS[number] }) {
   return (
     <Link
       href={`/demo-live/deal/${deal.id}?from=funder`}
-      className="group rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card p-5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.14]"
-
+      className="group rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card p-5 flex flex-col transition-all duration-300 hover:border-white/[0.16]"
     >
       <div className="flex items-center justify-between mb-3">
         <span className="inline-flex items-center rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">
           {deal.status}
         </span>
-        <span className="text-[11px] text-white/75">{deal.milestoneCount} milestones</span>
+        <span className="text-[11px] text-white/55">{deal.milestoneCount} milestones</span>
       </div>
-      <p className="text-[14px] font-semibold text-white/80 group-hover:text-white transition-colors leading-snug">{deal.title}</p>
-      <p className="mt-1 text-[12px] text-white/50">{deal.contractor} &middot; {deal.contractorCompany}</p>
+      <p className="text-[14px] font-semibold text-white/85 group-hover:text-white transition-colors leading-snug">{deal.title}</p>
+      <p className="mt-1 text-[12px] text-white/45">{deal.contractor} &middot; {deal.contractorCompany}</p>
       <div className="mt-4 flex items-center gap-3">
-        <div className="flex-1 h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
+        <div className="flex-1 h-1 rounded-full bg-white/[0.08] overflow-hidden">
           <div className="h-full rounded-full bg-emerald-500" style={{ width: `${pct}%` }} />
         </div>
-        <span className="text-[11px] text-white/50 tabular-nums">{pct}%</span>
+        <span className="text-[11px] text-white/55 tabular-nums">{pct}%</span>
       </div>
       <div className="mt-3 flex items-center justify-between text-[12px]">
-        <span className="text-white/50">Total: {formatCurrency(deal.total)}</span>
-        <span className="text-emerald-400 font-medium">Released: {formatCurrency(deal.released)}</span>
+        <span className="text-white/45">Total: {formatCurrency(deal.total)}</span>
+        <span className="text-emerald-300 font-medium">Released: {formatCurrency(deal.released)}</span>
       </div>
     </Link>
   )
