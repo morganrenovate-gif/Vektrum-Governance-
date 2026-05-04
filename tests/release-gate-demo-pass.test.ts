@@ -73,15 +73,20 @@ async function main() {
   const pkg          = read(PACKAGE_JSON)
 
   // ── 1. Contractor blocked-release card has 4 conditions ────────────────
+  // The institutional refactor renamed two condition labels but the
+  // semantics are unchanged. Accept either historical or new copy.
   console.log('1. Contractor blocked-release card — 4 conditions')
-  for (const label of [
-    'Lien waiver missing',
-    'Open change order unresolved',
-    'AI pre-review not current',
-    'Funder authorization required',
-  ]) {
-    check(contractor.includes(label),
-      `  1a. condition "${label}" listed in MISSING_CONDITIONS`)
+  const expectedConditions: Array<[string, string[]]> = [
+    ['Lien waiver missing',           ['Lien waiver missing']],
+    ['Open change order unresolved',  ['Open change order unresolved']],
+    ['Control review not current',    ['Control review not current', 'AI pre-review not current']],
+    ['Funder-authorization required', ['Funder authorization required', 'Authorization pending after conditions clear']],
+  ]
+  for (const [label, alternatives] of expectedConditions) {
+    check(
+      alternatives.some((alt) => contractor.includes(alt)),
+      `  1a. condition "${label}" listed in MISSING_CONDITIONS`,
+    )
   }
   // Funder authorization is hardcoded done: false — contractor can NEVER
   // mark it complete. The line literally says `done:   false`.
@@ -90,24 +95,25 @@ async function main() {
     '  1b. Funder authorization condition is hardcoded done: false (contractor cannot clear)',
   )
 
-  // ── 2. AI review state machine has all visible states ──────────────────
-  console.log('\n2. AI review state machine')
+  // ── 2. Control review state machine has all visible states ─────────────
+  console.log('\n2. Control review state machine')
   check(
-    contractor.includes('Awaiting AI Review'),
-    '  2a. "Awaiting AI Review" state visible',
+    contractor.includes('Awaiting AI Review') || contractor.includes('Under control review'),
+    '  2a. "Under control review" state visible',
   )
   check(
-    contractor.includes('AI pre-review in progress'),
-    '  2b. "AI pre-review in progress" state visible',
+    contractor.includes('AI pre-review in progress') || contractor.includes('Control review in progress'),
+    '  2b. "Control review in progress" state visible',
   )
   check(
     contractor.includes('AI pre-review complete') ||
-    contractor.includes('AI review complete'),
-    '  2c. "AI pre-review complete" state visible',
+    contractor.includes('AI review complete') ||
+    contractor.includes('Control review complete'),
+    '  2c. "Control review complete" state visible',
   )
   check(
-    contractor.includes('AI review running'),
-    '  2d. "AI review running…" disabled-button label',
+    contractor.includes('AI review running') || contractor.includes('Control review running'),
+    '  2d. "Control review running…" disabled-button label',
   )
   // 5-step checklist
   for (const step of [
@@ -166,18 +172,23 @@ async function main() {
   )
 
   // ── 5. Funder demo authorizes release ──────────────────────────────────
+  // The institutional refactor uses sentence-case "Ready for authorization"
+  // and renamed the CTA to "Review and authorize". Accept either.
   console.log('\n5. Funder demo authorizes release')
   check(
-    funder.includes('Ready for Authorization'),
-    '  5a. funder demo shows "Ready for Authorization" badge',
+    /Ready for [Aa]uthorization/.test(funder),
+    '  5a. funder demo shows a "Ready for authorization" badge',
   )
   check(
-    funder.includes('Funder authorization required'),
-    '  5b. funder demo says "Funder authorization required"',
+    funder.includes('Funder authorization required')
+      || funder.includes('Funder authorization is required to proceed'),
+    '  5b. funder demo asserts that funder authorization is required',
   )
   check(
-    funder.includes('Review &amp; Authorize') || funder.includes('Review & Authorize'),
-    '  5c. funder demo exposes a "Review & Authorize" CTA',
+    funder.includes('Review &amp; Authorize')
+      || funder.includes('Review & Authorize')
+      || funder.includes('Review and authorize'),
+    '  5c. funder demo exposes a "Review and authorize" CTA',
   )
   // Funder demo links to the deal page where the actual authorize action lives
   check(
@@ -234,10 +245,12 @@ async function main() {
 
   // ── 8. Rail-neutral disclaimer on contractor demo ──────────────────────
   // The contractor demo footer must remind viewers that Vektrum does not hold
-  // funds or act as escrow — re-pinned here so this can't regress.
+  // funds or act as escrow — re-pinned here so this can't regress. JSX often
+  // wraps long strings across lines; collapse whitespace before matching.
   console.log('\n8. Rail-neutral disclaimer on contractor demo')
+  const contractorFlat = contractor.replace(/\s+/g, ' ')
   check(
-    contractor.includes('does not hold funds') &&
+    contractorFlat.includes('does not hold funds') &&
     (contractor.includes('escrow') || contractor.includes('selected rail')),
     '  8a. contractor demo includes "does not hold funds" + rail/escrow framing',
   )

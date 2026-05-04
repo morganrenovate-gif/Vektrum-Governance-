@@ -113,10 +113,21 @@ async function main() {
   )
 
   // ── 19–21: Funder Page ──────────────────────────────────────────────────────
-  console.log('\nFunder page — Harbor Draw #3 hero')
+  // The institutional refactor reworded the hero. Accept either the
+  // historical short form "Harbor Draw #3" or the new long form
+  // "Harbor Logistics Center — Draw 3", and the new "Ready for
+  // authorization" (lowercase) badge copy.
+  console.log('\nFunder page — Harbor draw hero')
 
-  check(funder.includes('Harbor Draw #3'),              '19. Funder page has "Harbor Draw #3" hero action')
-  check(funder.includes('Ready for Authorization'),     '20. Funder page has "Ready for Authorization" badge')
+  check(
+    funder.includes('Harbor Draw #3') ||
+    (funder.includes('Harbor Logistics Center') && funder.includes('Draw 3')),
+    '19. Funder page references the Harbor Draw 3 hero',
+  )
+  check(
+    funder.includes('Ready for Authorization') || funder.includes('Ready for authorization'),
+    '20. Funder page has a "Ready for authorization" badge',
+  )
   check(
     funder.includes('/demo-live/deal/harbor?from=funder') ||
     funder.includes('/demo-live/deal/harbor'),
@@ -124,17 +135,28 @@ async function main() {
   )
 
   // ── 22–24: Contractor Page ──────────────────────────────────────────────────
-  console.log('\nContractor page — Draw #3 status banner')
+  // The contractor refactor replaced the standalone "Draw #3 Status" banner
+  // with the "Most important draw" hero. Accept either label, and the new
+  // status vocabulary ("Waiting on funder approval" / "Waiting on funder").
+  console.log('\nContractor page — Harbor draw banner')
 
-  check(contractor.includes('Draw #3 Status'),              '22. Contractor page has "Draw #3 Status" banner')
   check(
-    contractor.includes('Awaiting Funder Authorization') || contractor.includes('Awaiting Funder Release'),
-    '23. Contractor page shows awaiting-funder-authorization status',
+    contractor.includes('Draw #3 Status')
+      || contractor.includes('Most important draw')
+      || (contractor.includes('Structural Steel Erection') && contractor.includes('Harbor Logistics Center')),
+    '22. Contractor page surfaces the Harbor Draw 3 milestone',
+  )
+  check(
+    contractor.includes('Awaiting Funder Authorization')
+      || contractor.includes('Awaiting Funder Release')
+      || contractor.includes('Waiting on funder approval')
+      || contractor.includes('Waiting on funder'),
+    '23. Contractor page shows the awaiting-funder status',
   )
   check(
     contractor.includes('/demo-live/deal/harbor?from=contractor') ||
     contractor.includes('/demo-live/deal/harbor'),
-    '24. Contractor Draw #3 banner links to harbor deal page',
+    '24. Contractor Harbor banner links to harbor deal page',
   )
 
   // ── 25: package.json ─────────────────────────────────────────────────────────

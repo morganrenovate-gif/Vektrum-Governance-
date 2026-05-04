@@ -341,10 +341,17 @@ function buildEventNotification(webhookUrl: string): Record<string, unknown> {
       { envelopeEventStatusCode: 'declined'  },
       { envelopeEventStatusCode: 'voided'    },
     ],
+    // recipientEventStatusCode valid values per DocuSign:
+    //   Sent | Delivered | Completed | Declined | AuthenticationFailed | AutoResponded
+    // 'DeliveryFailed' is NOT valid at the recipient level — the platform
+    // rejected envelope creation with INVALID_REQUEST_PARAMETER.
+    // For embedded (clientUserId) signing we don't send emails, so the
+    // closest equivalent of "couldn't reach the recipient" is
+    // AuthenticationFailed (recipient failed identity verification).
     recipientEvents: [
-      { recipientEventStatusCode: 'Completed'      },
-      { recipientEventStatusCode: 'Declined'        },
-      { recipientEventStatusCode: 'DeliveryFailed'  },
+      { recipientEventStatusCode: 'Completed'             },
+      { recipientEventStatusCode: 'Declined'              },
+      { recipientEventStatusCode: 'AuthenticationFailed'  },
     ],
   }
 

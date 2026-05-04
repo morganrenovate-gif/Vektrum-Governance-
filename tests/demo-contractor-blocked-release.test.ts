@@ -174,7 +174,12 @@ async function main() {
   // ── 13–15. Success state labels ───────────────────────────────────────────
   check(src.includes('Lien waiver uploaded'),  '13. "Lien waiver uploaded" success state copy exists')
   check(src.includes('Change order resolved'), '14. "Change order resolved" success state copy exists')
-  check(src.includes('AI review complete'),    '15. "AI review complete" success state copy exists')
+  // Institutional refactor renamed the AI-startup wording to "control review".
+  // Accept either historical or new copy so the test remains useful.
+  check(
+    src.includes('AI review complete') || src.includes('Control review complete'),
+    '15. "Control review complete" success state copy exists',
+  )
 
   // ── 16–18. Activity entry content ────────────────────────────────────────
   check(
@@ -228,14 +233,23 @@ async function main() {
   )
 
   // ── 29–30. Core blocked-release UI ────────────────────────────────────────
-  check(src.includes('Request AI review'), '29. Contractor page contains "Request AI review" button label')
+  check(
+    src.includes('Request AI review') || src.includes('Request control review'),
+    '29. Contractor page contains "Request control review" button label',
+  )
   check(src.includes('Release blocked'),   '30. Contractor page contains "Release blocked" heading')
 
   // ── 31–34. Missing conditions in source ───────────────────────────────────
   check(src.includes('Lien waiver missing'),          '31. Blocked card lists "Lien waiver missing" condition')
   check(src.includes('Open change order unresolved'), '32. Blocked card lists "Open change order unresolved" condition')
-  check(src.includes('AI pre-review not current'),    '33. Blocked card lists "AI pre-review not current" condition')
-  check(src.includes('Funder authorization required'),'34. Blocked card lists "Funder authorization required" condition')
+  check(
+    src.includes('AI pre-review not current') || src.includes('Control review not current'),
+    '33. Blocked card lists "Control review not current" condition',
+  )
+  check(
+    src.includes('Funder authorization required') || src.includes('Authorization pending after conditions clear'),
+    '34. Blocked card lists the funder-authorization-required condition',
+  )
 
   // ── 35. Funder auth still required after AI review ────────────────────────
   check(
@@ -258,24 +272,42 @@ async function main() {
   check(src.includes('DemoActivityLog'),               '40. Page renders DemoActivityLog component')
 
   // ── 41–45. Existing strings preserved ────────────────────────────────────
-  check(src.includes('Draw #3 Status'), '41. "Draw #3 Status" banner is preserved')
+  // The institutional refactor folded the standalone "Draw #3 Status" banner
+  // into the new "Most important draw" hero. Accept either surface.
   check(
-    src.includes('Awaiting Funder Authorization') || src.includes('Awaiting Funder Release'),
-    '42. "Awaiting Funder Authorization" status text is preserved',
+    src.includes('Draw #3 Status')
+      || (src.includes('Most important draw') && src.includes('Structural Steel Erection')),
+    '41. The Harbor Draw 3 status surface is preserved',
+  )
+  check(
+    src.includes('Awaiting Funder Authorization')
+      || src.includes('Awaiting Funder Release')
+      || src.includes('Waiting on funder approval')
+      || src.includes('Waiting on funder')
+      || src.includes('awaiting funder authorization'),
+    '42. The awaiting-funder status text is preserved',
   )
   check(
     src.includes('/demo-live/deal/harbor?from=contractor') || src.includes('/demo-live/deal/harbor'),
     '43. Harbor deal link is preserved',
   )
+  // The institutional refactor renamed "Required Steps" → "Release-readiness
+  // checklist" with three explicit groups (Completed prerequisites / Outstanding
+  // / After that). Accept either label and SOV with case-insensitive match.
   check(
-    src.includes('Required Steps') &&
+    (src.includes('Required Steps') || src.includes('Release-readiness checklist')) &&
     src.includes('Contract on file') &&
-    src.includes('Schedule of Values submitted') &&
+    /Schedule of [Vv]alues submitted/.test(src) &&
     src.includes('Draw request submitted') &&
     src.includes('Upload supporting documents'),
-    '44. Required Steps workflow is preserved with all steps',
+    '44. Release-readiness checklist preserves the full set of steps',
   )
-  check(src.includes('10-condition check'), '45. "10-condition check" language is preserved')
+  // "10-condition check" callout was removed in favor of the institutional
+  // "How releases move" guided strip. Either is acceptable.
+  check(
+    src.includes('10-condition check') || src.includes('How releases move'),
+    '45. Release-flow guidance language is preserved',
+  )
 
   // ── 46. Test wired ────────────────────────────────────────────────────────
   check(
@@ -287,12 +319,12 @@ async function main() {
   check(src.includes('blockedAiReviewRunning'), '47. blockedAiReviewRunning state exists')
   check(src.includes('blockedAiReviewStep'),    '48. blockedAiReviewStep state exists')
   check(
-    src.includes('AI review running'),
-    '49. "AI review running…" disabled button label exists',
+    src.includes('AI review running') || src.includes('Control review running'),
+    '49. "Control review running…" disabled button label exists',
   )
   check(
-    src.includes('AI pre-review in progress'),
-    '50. "AI pre-review in progress" panel title exists',
+    src.includes('AI pre-review in progress') || src.includes('Control review in progress'),
+    '50. "Control review in progress" panel title exists',
   )
   // All 5 step labels
   check(src.includes('Reading draw request'),      '51a. Review step "Reading draw request" exists')
@@ -301,12 +333,13 @@ async function main() {
   check(src.includes('Checking open change orders'), '51d. Review step "Checking open change orders" exists')
   check(src.includes('Preparing review summary'),  '51e. Review step "Preparing review summary" exists')
   check(
-    src.includes('AI pre-review complete — funder authorization still required'),
-    '52. Completed panel: "AI pre-review complete — funder authorization still required"',
+    src.includes('AI pre-review complete — funder authorization still required')
+      || src.includes('Control review complete — funder authorization still required'),
+    '52. Completed panel: control review complete — funder authorization still required',
   )
   check(
-    src.includes('AI pre-review requested'),
-    '53. Activity entry "AI pre-review requested" exists',
+    src.includes('AI pre-review requested') || src.includes('Control review requested'),
+    '53. Activity entry "Control review requested" exists',
   )
   check(
     src.includes('Draw package appears ready for funder review'),

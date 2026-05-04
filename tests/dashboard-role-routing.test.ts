@@ -75,14 +75,16 @@ async function main() {
   const afterAdminBlock  = adminStart > -1 ? page.slice(adminStart) : ''
 
   // ── 2. Contractor view has correct heading ────────────────────────────────────
+  // Match case-insensitively — the institutional refactor uses sentence case
+  // ("Contractor dashboard").
   check(
-    contractorBlock.includes('Contractor Dashboard'),
+    /Contractor Dashboard/i.test(contractorBlock),
     '2. Contractor view eyebrow/heading says "Contractor Dashboard"',
   )
 
   // ── 3. Funder view has correct heading ────────────────────────────────────────
   check(
-    funderBlock.includes('Funder Dashboard'),
+    /Funder Dashboard/i.test(funderBlock),
     '3. Funder view eyebrow/heading says "Funder Dashboard"',
   )
 

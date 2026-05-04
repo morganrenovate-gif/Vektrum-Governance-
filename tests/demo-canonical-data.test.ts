@@ -210,10 +210,22 @@ test('E1: funder/page.tsx no longer references stale "Milestone 4 ... score 92"'
     'funder/page.tsx still has stale "Milestone 4 ... score 92" briefing — Building Envelope is in_progress')
 })
 
-test('E2: funder briefing references Structural Steel / score 91', () => {
+test('E2: funder page references the canonical Structural Steel ready milestone', () => {
   const file = src('src/app/(marketing)/demo-live/funder/page.tsx')
-  assert(file.includes('Structural Steel') && file.includes('91'),
-    'funder/page.tsx briefing should reference "Structural Steel" and score 91 (the canonical ready milestone)')
+  // The institutional refactor replaced "Perplexity score 91/100" with
+  // operational copy. Pin the new equivalent: the ready milestone is named
+  // explicitly and its readiness state is described in non-AI-score terms.
+  assert(
+    file.includes('Structural Steel'),
+    'funder/page.tsx should still reference the canonical ready milestone "Structural Steel"',
+  )
+  assert(
+    file.includes('Ready for authorization')
+      || file.includes('Release controls satisfied')
+      || file.includes('10 of 10 release conditions satisfied'),
+    'funder/page.tsx should describe Structural Steel readiness in operational terms ' +
+    '(e.g. "Ready for authorization" / "Release controls satisfied" / "10 of 10 release conditions satisfied")',
+  )
 })
 
 test('E3: canonical Structural Steel aiScore is 91 (briefing matches)', () => {

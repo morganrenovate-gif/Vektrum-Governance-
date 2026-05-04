@@ -70,9 +70,10 @@ function sliceBranches(src: string): {
   unknownBlock:    string
 } {
   // Anchor on the role-specific PageHeader eyebrows that exist only inside the
-  // render branches.
-  const contractorIdx = src.indexOf('Contractor Dashboard')
-  const funderIdx     = src.indexOf('Funder Dashboard')
+  // render branches. Match case-insensitively — the institutional refactor uses
+  // sentence case ("Contractor dashboard").
+  const contractorIdx = src.search(/Contractor Dashboard/i)
+  const funderIdx     = src.search(/Funder Dashboard/i)
   const adminIdx      = src.indexOf("if (profile.role === 'admin')")
 
   if (contractorIdx === -1 || funderIdx === -1 || adminIdx === -1) {

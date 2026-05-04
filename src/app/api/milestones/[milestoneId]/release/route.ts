@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createSupabaseAdminClient } from '@/lib/supabase/server'
 import { getAuthUser, requireDealAccess, requireMFA, requireRole } from '@/lib/auth/middleware'
-import { logAudit } from '@/lib/engine/audit'
+import { logAudit, sha256OfCanonicalJson } from '@/lib/engine/audit'
 import { validateRelease, checkAiPrecondition } from '@/lib/engine/release-gate'
 import { calculateFee, calculateRetainage, toStripeCents } from '@/lib/engine/billing'
 import { createTransactionReceipt, markReceiptEmailSent } from '@/lib/engine/receipts'
@@ -435,6 +435,23 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     stripeTransferId = transfer.id
 
+    // ── Bind the Stripe transfer object into the audit chain (Tier A) ───────
+    // SHA-256 of the canonical-form Stripe transfer payload. Threaded into the
+    // success-path funds_released audit event below so the chain commits to
+    // the exact rail confirmation that proves this release was executed.
+    // Patent candidate #4 — rail_confirmation_hash binding.
+    const railConfirmationHash = await sha256OfCanonicalJson({
+      id:              transfer.id,
+      object:          transfer.object,
+      amount:          transfer.amount,
+      currency:        transfer.currency,
+      destination:     transfer.destination,
+      transfer_group:  transfer.transfer_group,
+      created:         transfer.created,
+      livemode:        transfer.livemode,
+      metadata:        transfer.metadata,
+    })
+
     // ── STEP 4: Insert Immutable Release Record ─────────────────────────────
     const { error: releaseInsertError } = await supabase
       .from('releases')
@@ -736,6 +753,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         idempotency_key:      idempotencyKey,
         released_by_role:     profile.role,
       },
+      rail_confirmation_hash: railConfirmationHash,
     })
 
     // ── STEP 7.5: Notify contractor that release was authorized ───────────
