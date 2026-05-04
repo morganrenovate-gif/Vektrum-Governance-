@@ -1073,8 +1073,8 @@ function WaitingOnFunderCard({ count, amount }: { count: number; amount: number 
           </p>
         </div>
         <p className="text-[11px] text-white/40 leading-relaxed">
-          Funders authorize releases after the deterministic gate clears. Vektrum does not move
-          money; the selected rail executes disbursement after authorization is recorded.
+          Funder authorization is recorded after the deterministic gate clears. Vektrum does not
+          move money; the selected rail executes disbursement after authorization is recorded.
         </p>
       </div>
     </aside>

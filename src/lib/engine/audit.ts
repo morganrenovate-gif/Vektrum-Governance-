@@ -55,6 +55,93 @@ export interface AuditParams {
    * Null for system/trigger events.
    */
   ip_address?: string | null
+
+  // ── External-evidence binding hashes (migration 20260504000000) ──────────
+  //
+  // Tier A of the patent-readiness work (memo candidate #4). Each of these is
+  // a SHA-256 hex digest of an external artifact tied to this audit event.
+  // When set, the BEFORE INSERT trigger includes them in row_hash so the
+  // audit row cryptographically commits to the artifact. They remain optional
+  // — callers populate only the hashes they have evidence for.
+
+  /**
+   * SHA-256 hex digest of the canonical evidence-graph snapshot that governed
+   * the release decision recorded by this event. Populated by callers that
+   * snapshot the graph at decision time. Leave unset until evidence-graph
+   * support ships (memo candidate #2).
+   */
+  graph_snapshot_hash?: string | null
+
+  /**
+   * SHA-256 hex digest of the rail-scoped authorization token issued for this
+   * event (memo candidate #1). Leave unset until token issuance ships.
+   */
+  token_hash?: string | null
+
+  /**
+   * SHA-256 hex digest of the canonical webhook payload delivered to a partner
+   * or rail (DocuSign, partner API, Stripe webhook delivery). Pass when the
+   * audit event records a webhook send.
+   */
+  webhook_delivery_hash?: string | null
+
+  /**
+   * SHA-256 hex digest of the canonical acknowledgement payload received from
+   * a partner for the webhook tied to this event. Pass when the audit event
+   * records receipt of a partner ack (e.g. /api/partner/releases/[id]/confirm).
+   */
+  partner_ack_hash?: string | null
+
+  /**
+   * SHA-256 hex digest of the canonical rail-level confirmation payload
+   * (Stripe transfer object, external rail confirmation receipt). Pass when
+   * the audit event records final rail-side execution proof.
+   */
+  rail_confirmation_hash?: string | null
+}
+
+// ─── External-evidence hash helper ─────────────────────────────────────────
+//
+// Tier A producers compute SHA-256 hex digests of canonical JSON payloads.
+// This helper centralises the canonical-form choice so callers don't ship
+// inconsistent serialisations (e.g. different key ordering would produce
+// different hashes for semantically identical payloads).
+
+/**
+ * Computes the SHA-256 hex digest of a canonical JSON serialisation of `payload`.
+ *
+ * Canonicalisation: keys sorted lexicographically at every depth so two
+ * semantically-equal objects produce the same hash regardless of insertion
+ * order. Arrays preserve order (positional semantics matter for amount vectors
+ * and webhook event lists).
+ *
+ * Use this for graph_snapshot_hash, token_hash, webhook_delivery_hash,
+ * partner_ack_hash, rail_confirmation_hash — keep the canonicalisation
+ * identical on both sides of any comparison.
+ */
+export async function sha256OfCanonicalJson(payload: unknown): Promise<string> {
+  const canonical = canonicalJsonStringify(payload)
+  // Use the runtime's WebCrypto so this works in both Next.js server routes
+  // and edge functions without pulling in node:crypto.
+  const bytes = new TextEncoder().encode(canonical)
+  const digest = await crypto.subtle.digest('SHA-256', bytes)
+  return Array.from(new Uint8Array(digest))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('')
+}
+
+function canonicalJsonStringify(value: unknown): string {
+  if (value === null || typeof value !== 'object') {
+    return JSON.stringify(value)
+  }
+  if (Array.isArray(value)) {
+    return '[' + value.map(canonicalJsonStringify).join(',') + ']'
+  }
+  const obj = value as Record<string, unknown>
+  const keys = Object.keys(obj).sort()
+  return '{' + keys
+    .map(k => JSON.stringify(k) + ':' + canonicalJsonStringify(obj[k]))
+    .join(',') + '}'
 }
 
 // ─── Logger ───────────────────────────────────────────────────────────────────
@@ -130,8 +217,17 @@ export async function logAudit(params: AuditParams): Promise<void> {
       old_values:    params.old_values   ?? null,
       new_values:    params.new_values   ?? null,
       metadata:      params.metadata     ?? null,
-      // created_at and event_sequence are intentionally omitted —
-      // PostgreSQL assigns them server-side to prevent clock manipulation.
+      // External-evidence binding hashes (migration 20260504000000).
+      // Trigger compute_audit_hash() includes any non-null value in row_hash so
+      // the audit row cryptographically commits to the external artifact.
+      graph_snapshot_hash:    params.graph_snapshot_hash    ?? null,
+      token_hash:             params.token_hash             ?? null,
+      webhook_delivery_hash:  params.webhook_delivery_hash  ?? null,
+      partner_ack_hash:       params.partner_ack_hash       ?? null,
+      rail_confirmation_hash: params.rail_confirmation_hash ?? null,
+      // created_at, event_sequence, and hash_schema_version are intentionally
+      // omitted — PostgreSQL / the trigger assigns them server-side to prevent
+      // clock manipulation and hash-version spoofing.
     })
 
     if (error) {
@@ -526,6 +622,16 @@ export async function logAdminAudit(params: AdminAuditParams): Promise<void> {
       metadata:                params.metadata     ?? null,
       admin_justification:     params.admin_justification,
       authorization_reference: params.authorization_reference ?? null,
+      // External-evidence bindings — same Tier A surface as audit_log.
+      // Note: admin_audit_log does not currently have these columns; the
+      // primary audit binding lives on audit_log via the logAudit call above.
+      // If/when admin_audit_log gains the same columns, the existing fields
+      // will already be threaded through this object literal — uncomment then.
+      // graph_snapshot_hash:    params.graph_snapshot_hash    ?? null,
+      // token_hash:             params.token_hash             ?? null,
+      // webhook_delivery_hash:  params.webhook_delivery_hash  ?? null,
+      // partner_ack_hash:       params.partner_ack_hash       ?? null,
+      // rail_confirmation_hash: params.rail_confirmation_hash ?? null,
       // reviewed_by / reviewed_at are always NULL at insert time
       // created_at and event_sequence assigned by DB
     })

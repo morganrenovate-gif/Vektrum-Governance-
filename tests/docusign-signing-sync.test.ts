@@ -81,16 +81,22 @@ async function main() {
         ds.includes('VERCEL_URL'),
     '  1d. webhook URL resolution uses NEXT_PUBLIC_APP_URL → APP_URL → VERCEL_URL')
 
-  // Required event types
+  // Required event types. DocuSign rejects 'DeliveryFailed' at the recipient
+  // level with INVALID_REQUEST_PARAMETER — use 'AuthenticationFailed' instead.
   for (const ev of [
-    'completed', 'declined', 'voided',         // envelopeEvents
-    'Completed', 'Declined', 'DeliveryFailed', // recipientEvents
+    'completed', 'declined', 'voided',                 // envelopeEvents
+    'Completed', 'Declined', 'AuthenticationFailed',   // recipientEvents
   ]) {
     check(
       ds.includes(`'${ev}'`) || ds.includes(`"${ev}"`),
       `  1e. eventNotification covers "${ev}"`,
     )
   }
+  check(
+    !ds.includes("recipientEventStatusCode: 'DeliveryFailed'") &&
+    !ds.includes('recipientEventStatusCode: "DeliveryFailed"'),
+    '  1f. eventNotification no longer ships invalid value DeliveryFailed',
+  )
   check(
     ds.includes("includeDocuments:") && ds.includes("'false'"),
     '  1f. includeDocuments: "false" (no documents in webhook payload)',

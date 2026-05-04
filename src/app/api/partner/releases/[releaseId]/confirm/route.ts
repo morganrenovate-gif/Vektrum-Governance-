@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createHash } from 'node:crypto'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { requirePartnerAuth } from '@/lib/auth/partner'
 import { logAudit } from '@/lib/engine/audit'
@@ -73,10 +74,22 @@ export async function POST(
     }
   }
 
-  // ── Parse body ─────────────────────────────────────────────────────────────
+  // ── Read raw body (for ack hash) and parse ─────────────────────────────────
+  // Read the exact bytes of the partner ack payload first so we can compute a
+  // deterministic SHA-256 of what arrived over the wire. Threaded into every
+  // audit event below via partner_ack_hash so the chain commits to the exact
+  // partner acknowledgement bytes (Tier A — patent candidate #4).
+  let rawBody: Buffer
+  try {
+    rawBody = Buffer.from(await request.arrayBuffer())
+  } catch {
+    return validationError(['Request body could not be read.'])
+  }
+  const partnerAckHash = createHash('sha256').update(rawBody).digest('hex')
+
   let body: PartnerConfirmBody
   try {
-    body = (await request.json()) as PartnerConfirmBody
+    body = JSON.parse(rawBody.toString('utf-8')) as PartnerConfirmBody
   } catch {
     return validationError(['Request body must be valid JSON.'])
   }
@@ -261,6 +274,7 @@ export async function POST(
         deal_id:        r.deal_id,
         error:          confirmError.message,
       },
+      partner_ack_hash: partnerAckHash,
     })
     return internalError('The release could not be marked confirmed. Please try again.', confirmError.message)
   }
@@ -302,6 +316,7 @@ export async function POST(
         release_id:   r.id,
         note:         'Release confirmed but billing_records insert failed — requires reconciliation.',
       },
+      partner_ack_hash: partnerAckHash,
     })
   }
 
@@ -324,6 +339,7 @@ export async function POST(
         error:      ledgerError.message,
         note:       'Release confirmed but ledger increment failed — requires reconciliation.',
       },
+      partner_ack_hash: partnerAckHash,
     })
   }
 
@@ -344,6 +360,7 @@ export async function POST(
           release_id: r.id,
           error:      retainageError.message,
         },
+        partner_ack_hash: partnerAckHash,
       })
     }
   }
@@ -381,6 +398,7 @@ export async function POST(
       ledger_updated:       !ledgerError,
       proof_attached:       !!proofDocumentId,
     },
+    partner_ack_hash: partnerAckHash,
   })
 
   return NextResponse.json({

@@ -124,9 +124,18 @@ async function main() {
     '9. recipientEvents includes Declined',
   )
   check(
-    ds.includes("recipientEventStatusCode: 'DeliveryFailed'") ||
-    ds.includes('recipientEventStatusCode: "DeliveryFailed"'),
-    '10. recipientEvents includes DeliveryFailed',
+    ds.includes("recipientEventStatusCode: 'AuthenticationFailed'") ||
+    ds.includes('recipientEventStatusCode: "AuthenticationFailed"'),
+    '10. recipientEvents includes AuthenticationFailed',
+  )
+  // Regression guard — the DocuSign API rejects 'DeliveryFailed' at the
+  // recipient level with INVALID_REQUEST_PARAMETER. Make sure we never
+  // ship that value again. The string can still appear in a comment
+  // documenting the historical bug — only quoted-string usage counts.
+  check(
+    !ds.includes("recipientEventStatusCode: 'DeliveryFailed'") &&
+    !ds.includes('recipientEventStatusCode: "DeliveryFailed"'),
+    '10b. recipientEvents does NOT include the invalid value DeliveryFailed',
   )
 
   // ── 11. requireAcknowledgment set ─────────────────────────────────────────────

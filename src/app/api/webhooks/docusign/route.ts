@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createHash } from 'node:crypto'
 import { createSupabaseAdminClient } from '@/lib/supabase/server'
 import { logAudit } from '@/lib/engine/audit'
 import {
@@ -60,6 +61,13 @@ export async function POST(request: NextRequest) {
   // ── Read raw body for HMAC verification ─────────────────────────────────────
   // Must read the raw bytes before any parsing — HMAC is over the exact bytes.
   const rawBody = Buffer.from(await request.arrayBuffer())
+
+  // ── Bind the inbound webhook payload into the audit chain (Tier A) ──────────
+  // SHA-256 of the exact bytes received. Threaded into every audit event below
+  // via webhook_delivery_hash so the chain commits to "this audit row was
+  // produced from THIS webhook payload." Combined with downstream rail
+  // confirmations, the chain becomes verifiable end-to-end.
+  const webhookDeliveryHash = createHash('sha256').update(rawBody).digest('hex')
 
   // ── Verify webhook signature ─────────────────────────────────────────────────
   //
@@ -220,6 +228,7 @@ export async function POST(request: NextRequest) {
         routing_order: signer.routingOrder,
         signed_at:     signedAt,
       },
+      webhook_delivery_hash: webhookDeliveryHash,
     })
 
     // ── Notify contractor that it is their turn to sign ──────────────────────
@@ -322,6 +331,7 @@ export async function POST(request: NextRequest) {
         completed_at:        completedAt,
         signed_storage_path: signedStoragePath,
       },
+      webhook_delivery_hash: webhookDeliveryHash,
     })
 
     // ── Notify both parties — fully-executed event ────────────────────────────
@@ -385,13 +395,14 @@ export async function POST(request: NextRequest) {
         voided_at:   voidedAt,
         reason:      voidReason,
       },
+      webhook_delivery_hash: webhookDeliveryHash,
     })
 
     // ── Deal freeze check ──────────────────────────────────────────────────────
     // If any milestones on this deal have already been released, a void-after-
     // funding is a governance incident. Freeze the deal so no further releases
     // occur until an admin reviews and unfreezes with documented justification.
-    await freezeDealIfReleasesExist(admin, contract.deal_id, contract.id, envelopeId, voidReason)
+    await freezeDealIfReleasesExist(admin, contract.deal_id, contract.id, envelopeId, voidReason, webhookDeliveryHash)
 
     return NextResponse.json({ received: true }, { status: 200 })
   }
@@ -444,6 +455,7 @@ export async function POST(request: NextRequest) {
         routing_order:  decliner?.routingOrder ?? null,
         reason:         declineReason,
       },
+      webhook_delivery_hash: webhookDeliveryHash,
     })
 
     // Notify both parties — TODO: implement when transactional email is wired up.
@@ -456,7 +468,7 @@ export async function POST(request: NextRequest) {
 
     // Run freeze check (unlikely to be needed for a pre-signing decline,
     // but run defensively in case a re-signing decline occurs post-release).
-    await freezeDealIfReleasesExist(admin, contract.deal_id, contract.id, envelopeId, declineReason)
+    await freezeDealIfReleasesExist(admin, contract.deal_id, contract.id, envelopeId, declineReason, webhookDeliveryHash)
 
     return NextResponse.json({ received: true }, { status: 200 })
   }
@@ -476,10 +488,11 @@ export async function POST(request: NextRequest) {
 
 async function freezeDealIfReleasesExist(
   admin: ReturnType<typeof createSupabaseAdminClient>,
-  dealId:     string,
-  contractId: string,
-  envelopeId: string,
-  reason:     string,
+  dealId:               string,
+  contractId:           string,
+  envelopeId:           string,
+  reason:               string,
+  webhookDeliveryHash:  string,
 ): Promise<void> {
   try {
     // ── 1. Check for any released milestones on this deal ──────────────────────
@@ -549,6 +562,7 @@ async function freezeDealIfReleasesExist(
         released_count:   releasedMilestones.length,
       },
       system_source: 'api/webhooks/docusign',
+      webhook_delivery_hash: webhookDeliveryHash,
     })
 
     console.warn(

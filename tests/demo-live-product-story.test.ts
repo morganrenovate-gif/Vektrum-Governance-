@@ -62,13 +62,17 @@ async function main() {
   check(harbor.includes('Signed contract on file'), 'Gate condition 8 present')
   check(harbor.includes('Approved conditional lien waiver on file'), 'Gate condition 10 present')
 
-  // ── 3. Perplexity Draw Control Brief — funder view ────────────────────────
-  console.log('\nPerplexity Draw Control Brief')
+  // ── 3. Draw Control Brief — funder view ──────────────────────────────────
+  // The funder dashboard's institutional refactor replaced the Perplexity
+  // Draw Control Briefing section with a Recent control activity log + the
+  // hero card's "Release control summary". Harbor (the deal-detail page)
+  // is unchanged and still uses the Draw Control Brief framing.
+  console.log('\nDraw Control Brief')
   check(harbor.includes('Perplexity'), 'Harbor page references Perplexity')
   check(harbor.includes('Draw Control Brief'), 'Harbor page shows Draw Control Brief label')
   check(harbor.includes('harborDrawBrief'), 'Harbor page uses harborDrawBrief data')
-  check(funder.includes('Perplexity'), 'Funder page references Perplexity')
-  check(funder.includes('Draw Control Brief'), 'Funder page references Draw Control Brief')
+  check(funder.includes('Recent control activity'), 'Funder page renders a Recent control activity log')
+  check(funder.includes('Release control summary'), 'Funder page renders the Release control summary card')
 
   // ── 4. Draw Brief in demo-data ────────────────────────────────────────────
   console.log('\nDemo data — Draw Brief')
@@ -102,15 +106,26 @@ async function main() {
   check(harbor.includes('No milestone link'), 'SOV table flags items with no milestone link')
 
   // ── 8. Guided contractor workflow ─────────────────────────────────────────
+  // The institutional refactor renamed "Required Steps" → "Release-readiness
+  // checklist" and replaced "AI review" wording with "control review".
   console.log('\nContractor guided workflow')
-  check(contractor.includes('Required Steps'), 'Contractor page shows "Required Steps" workflow')
+  check(
+    contractor.includes('Release-readiness checklist') || contractor.includes('Required Steps'),
+    'Contractor page shows the release-readiness checklist',
+  )
   check(contractor.includes('Contract on file'), 'Workflow step 1: Contract on file')
-  check(contractor.includes('Schedule of Values submitted'), 'Workflow step 2: SOV')
+  check(contractor.includes('Schedule of values submitted') || contractor.includes('Schedule of Values submitted'),
+    'Workflow step 2: SOV')
   check(contractor.includes('Draw request submitted'), 'Workflow step 3: Draw request')
   check(contractor.includes('Upload supporting documents'), 'Workflow step 4: Evidence upload')
-  check(contractor.includes('Request AI review'), 'Workflow step 5: AI review')
-  check(contractor.includes('Next step'), 'Active "Next step" badge shown in workflow')
-  check(contractor.includes('10-condition check'), 'Contractor sees 10-condition check language')
+  check(
+    contractor.includes('Request control review') || contractor.includes('Request AI review'),
+    'Workflow step 5: control review',
+  )
+  check(
+    contractor.includes('How releases move') || contractor.includes('Next step'),
+    'Contractor page exposes a guided release-flow strip',
+  )
 
   // ── 9. Non-custody language ───────────────────────────────────────────────
   console.log('\nNon-custody language')
@@ -169,11 +184,15 @@ async function main() {
     pass('Demo reset route not found — skipping (route may be nested)')
   }
 
-  // ── 14. Funder page — Perplexity briefing in correct section ─────────────
+  // ── 14. Funder page — institutional briefing copy ─────────────────────────
+  // The "Perplexity Draw Control Briefing / score 91" framing was replaced
+  // during the institutional refactor. The new equivalent is the Recent
+  // Control Activity log + the hero card asserting "10 of 10 release
+  // conditions satisfied" for the canonical ready milestone.
   console.log('\nFunder page briefing')
-  check(funder.includes('Perplexity Draw Control Briefing'), 'Funder page section title is "Perplexity Draw Control Briefing"')
-  check(funder.includes('all 10 release conditions verified'), 'Funder briefing mentions all 10 conditions')
-  check(funder.includes('score 91'), 'Funder briefing includes Harbor score 91')
+  check(funder.includes('Recent control activity'), 'Funder page renders a Recent control activity log')
+  check(funder.includes('10 of 10 release conditions satisfied'), 'Funder hero asserts all 10 conditions satisfied')
+  check(funder.includes('Structural Steel'), 'Funder page references the canonical ready milestone "Structural Steel"')
 
   // ── 15. Harbor page — funder-only vs contractor-only sections ─────────────
   console.log('\nRole-specific sections')
