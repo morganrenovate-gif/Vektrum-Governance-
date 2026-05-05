@@ -59,6 +59,23 @@
 
 
 -- =============================================================================
+-- PART 0 — pgcrypto availability (defensive)
+-- =============================================================================
+-- Supabase installs pgcrypto in the `extensions` schema, not `public`. All
+-- digest() calls below are schema-qualified as `extensions.digest(...)` so
+-- they resolve regardless of session search_path.
+--
+-- This migration's CREATE OR REPLACE FUNCTION calls REPLACE the bodies of
+-- compute_audit_hash() and verify_audit_chain() previously installed by
+-- 20260429000001_pgcrypto_schema_fix.sql. Without the qualifier here, every
+-- audit-writing path would regress to SQLSTATE 42883 ("function digest(text,
+-- unknown) does not exist") — observed in production as the DocuSign envelope
+-- save failing after envelope creation.
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;
+
+
+-- =============================================================================
 -- PART 1 — ADD COLUMNS
 -- =============================================================================
 
@@ -145,7 +162,7 @@ BEGIN
     || '|' || COALESCE(NEW.rail_confirmation_hash, 'NULL');
 
   NEW.hash_schema_version := 2;
-  NEW.row_hash := encode(digest(v_input, 'sha256'), 'hex');
+  NEW.row_hash := encode(extensions.digest(v_input, 'sha256'), 'hex');
 
   -- ── chain_hash unchanged ────────────────────────────────────────────────────
   -- SHA-256(row_hash || previous chain_hash). Anchors to '' for the genesis row.
@@ -159,7 +176,7 @@ BEGIN
   LIMIT  1;
 
   NEW.chain_hash := encode(
-    digest(NEW.row_hash || COALESCE(v_prev_chain, ''), 'sha256'),
+    extensions.digest(NEW.row_hash || COALESCE(v_prev_chain, ''), 'sha256'),
     'hex'
   );
 
@@ -272,12 +289,12 @@ BEGIN
         || '|' || COALESCE(r.metadata::text,  'NULL');
     END IF;
 
-    v_computed_row_hash := encode(digest(v_input, 'sha256'), 'hex');
+    v_computed_row_hash := encode(extensions.digest(v_input, 'sha256'), 'hex');
 
     -- chain_hash check — unchanged from v1: SHA-256(computed_row_hash || prev_stored_chain).
     -- Uses STORED previous chain_hash so each row is independently assessable.
     v_expected_chain := encode(
-      digest(v_computed_row_hash || COALESCE(v_prev_chain_hash, ''), 'sha256'),
+      extensions.digest(v_computed_row_hash || COALESCE(v_prev_chain_hash, ''), 'sha256'),
       'hex'
     );
 

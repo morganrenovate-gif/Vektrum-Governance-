@@ -96,8 +96,25 @@ check(
 // chain_hash logic must remain SHA-256(row_hash || prev_chain) so the chain is
 // continuous across the v1 → v2 boundary.
 check(
-  /digest\(NEW\.row_hash\s*\|\|\s*COALESCE\(v_prev_chain,\s*''\),\s*'sha256'\)/.test(migration),
+  /extensions\.digest\(NEW\.row_hash\s*\|\|\s*COALESCE\(v_prev_chain,\s*''\),\s*'sha256'\)/.test(migration),
   'chain_hash logic unchanged: SHA-256(row_hash || prev_chain) anchored to empty string',
+)
+// Regression guard — Supabase installs pgcrypto in `extensions`, not `public`.
+// Bare digest() calls fail with SQLSTATE 42883 ("function digest(text, unknown)
+// does not exist") in production. Every digest call must be schema-qualified.
+// Strip SQL line comments before counting so prose references don't false-fail.
+const sqlOnly = migration
+  .split('\n')
+  .filter(line => !line.trim().startsWith('--'))
+  .join('\n')
+const bareDigestCount = (sqlOnly.match(/(?<!extensions\.)digest\(/g) ?? []).length
+check(
+  bareDigestCount === 0,
+  `Migration uses extensions.digest(...) for every digest call (no bare digest — found ${bareDigestCount})`,
+)
+check(
+  /CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions/.test(migration),
+  'Migration defensively re-asserts pgcrypto in the extensions schema',
 )
 
 console.log('\n── 3. verify_audit_chain dispatches on hash_schema_version ──────────────')
