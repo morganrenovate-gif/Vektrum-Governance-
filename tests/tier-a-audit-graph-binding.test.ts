@@ -220,13 +220,20 @@ check(
   `Partner /confirm threads partner_ack_hash into all ${partnerAuditCount} audit events (binding count = ${partnerBindingCount})`,
 )
 
-// Milestone release → rail_confirmation_hash on the success-path funds_released event
+// Milestone release → rail_confirmation_hash on the success-path funds_released event.
+// Stage B2 moved the canonical-form hashing into the rail adapter, so the
+// route now reads railConfirmationHash off dispatchResult and the adapter
+// is the importer of sha256OfCanonicalJson. Accept either layout (route or
+// adapter) so this regression check survives the architectural refactor.
+const railAdapter = read('src/lib/engine/rail-adapter.ts')
 check(
-  /import\s+\{\s*logAudit,\s*sha256OfCanonicalJson\s*\}\s+from\s+'@\/lib\/engine\/audit'/.test(releaseRte),
-  'Milestone release imports sha256OfCanonicalJson from audit lib',
+  /import\s+\{\s*logAudit,\s*sha256OfCanonicalJson\s*\}\s+from\s+'@\/lib\/engine\/audit'/.test(releaseRte) ||
+  /sha256OfCanonicalJson/.test(railAdapter),
+  'sha256OfCanonicalJson is imported and used by either the release route or the rail adapter',
 )
 check(
-  /railConfirmationHash\s*=\s*await\s+sha256OfCanonicalJson\(\{[\s\S]*?id:\s+transfer\.id/.test(releaseRte),
+  /railConfirmationHash\s*=\s*await\s+sha256OfCanonicalJson\(\{[\s\S]*?id:\s+transfer\.id/.test(releaseRte) ||
+  /railConfirmationHash\s*=\s*await\s+sha256OfCanonicalJson\(\{[\s\S]*?id:\s+transfer\.id/.test(railAdapter),
   'Milestone release computes railConfirmationHash from the canonical Stripe transfer payload',
 )
 check(

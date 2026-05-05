@@ -428,6 +428,80 @@ export interface Release {
   released_at: string;
   released_by: string;
   created_at: string;
+  /**
+   * Stage B1: link to the rail-scoped authorization token row that authorised
+   * this release. UNIQUE — one release per token. NULL on releases written
+   * before migration 20260504000001 ships.
+   */
+  authorization_token_id?: string | null;
+}
+
+// ─── Authorization Tokens ────────────────────────────────────────────────────
+//
+// Stage B1 of the patent-readiness work (memo candidate #1: rail-agnostic
+// signed authorization token). Append-only; status is the only mutable
+// column post-INSERT, plus the lifecycle metadata fields below.
+
+export type AuthorizationTokenStatus =
+  | 'issued'
+  | 'delivered'
+  | 'confirmed'
+  | 'failed'
+  | 'expired'
+  | 'revoked'
+
+export type AuthorizationTokenRailScope = 'stripe' | 'external_rail'
+
+export interface AuthorizationTokenAmountVectorEntry {
+  milestone_id:      string
+  /** Set when Tier C (per-line release) ships. NULL on Stage B1 single-line vectors. */
+  sov_line_item_id?: string | null
+  amount:            number
+}
+
+export interface AuthorizationToken {
+  id:               string;
+  jti:              string;
+  idempotency_key:  string;
+  sequence_index:   number;
+
+  /** TEMPORARY MAPPING: equals deals.id until Tier C ships draw_requests. */
+  draw_request_id:  string;
+  milestone_id:     string;
+  payee_id:         string;
+  funder_id:        string;
+
+  rail_scope:       AuthorizationTokenRailScope;
+  payee_scope:      string;
+
+  amount_vector:    AuthorizationTokenAmountVectorEntry[];
+  total_amount:     number;
+  currency:         string;
+
+  policy_version:   string;
+  policy_hash:      string;
+  /** NULL until Tier D evidence-graph ontology ships. */
+  graph_commitment: string | null;
+
+  token_hash:       string;
+  nonce:            string;
+  signature_alg:    string;
+  signature:        string | null;
+
+  not_before:       string;
+  expires_at:       string;
+
+  status:           AuthorizationTokenStatus;
+  confirmed_at:     string | null;
+  failed_at:        string | null;
+  failure_reason:   string | null;
+  revoked_at:       string | null;
+  revoked_reason:   string | null;
+  expired_at:       string | null;
+
+  issued_by:        string;
+  created_at:       string;
+  updated_at:       string;
 }
 
 // ─── Billing ──────────────────────────────────────────────────────────────────

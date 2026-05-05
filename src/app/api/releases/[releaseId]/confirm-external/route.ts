@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createHash } from 'node:crypto'
 import { createClient, createSupabaseAdminClient } from '@/lib/supabase/server'
 import {
   getAuthUser,
@@ -96,10 +97,21 @@ export async function POST(
     }
   }
 
-  // ── Parse body ─────────────────────────────────────────────────────────────
+  // ── Read raw body (for ack hash) and parse ─────────────────────────────────
+  // Hash the exact bytes of the inbound confirmation body. Threaded into every
+  // audit event below via partner_ack_hash so the chain commits to the exact
+  // confirmation bytes. Mirrors the partner /confirm route's pattern.
+  let rawBody: Buffer
+  try {
+    rawBody = Buffer.from(await request.arrayBuffer())
+  } catch {
+    return validationError(['Request body could not be read.'])
+  }
+  const partnerAckHash = createHash('sha256').update(rawBody).digest('hex')
+
   let body: ConfirmExternalBody
   try {
-    body = (await request.json()) as ConfirmExternalBody
+    body = JSON.parse(rawBody.toString('utf-8')) as ConfirmExternalBody
   } catch {
     return validationError(['Request body must be valid JSON.'])
   }
@@ -163,7 +175,7 @@ export async function POST(
     .from('releases')
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .select(
-      'id, milestone_id, deal_id, amount, stripe_transfer_id, released_by, execution_rail, execution_status, external_payment_reference, external_executed_at, external_executed_by' as any,
+      'id, milestone_id, deal_id, amount, stripe_transfer_id, released_by, execution_rail, execution_status, external_payment_reference, external_executed_at, external_executed_by, authorization_token_id' as any,
     )
     .eq('id', releaseId)
     .single()
@@ -366,6 +378,7 @@ export async function POST(
         deal_id:         r.deal_id,
         milestone_id:    r.milestone_id,
       },
+      partner_ack_hash: partnerAckHash,
     })
     return internalError(
       'The release could not be marked as confirmed. Please try again.',
@@ -423,6 +436,7 @@ export async function POST(
         note:
           'Release is confirmed but billing_records insert failed — requires reconciliation.',
       },
+      partner_ack_hash: partnerAckHash,
     })
     // Intentionally do NOT return early. Confirmation is already persisted;
     // the ledger must be updated to remain consistent with the release state.
@@ -457,6 +471,7 @@ export async function POST(
         note:
           'Release confirmed but deal financials increment failed — requires reconciliation.',
       },
+      partner_ack_hash: partnerAckHash,
     })
   }
 
@@ -485,7 +500,46 @@ export async function POST(
           note:
             'Release confirmed but retainage increment failed — reserved_amount has orphaned retainage; requires reconciliation.',
         },
+        partner_ack_hash: partnerAckHash,
       })
+    }
+  }
+
+  // ── Look up the authorization token to bind into the audit chain (B3.2) ───
+  // The token row was written at /api/milestones/{id}/release time. Its
+  // token_hash + jti are bound to the success audit so verify_audit_chain
+  // proves authorization → confirmation continuity. Token status flips
+  // 'delivered' → 'confirmed' once the rail confirmation lands.
+  let tokenHashForAudit: string | null = null
+  let tokenJtiForAudit:  string | null = null
+  if (r.authorization_token_id) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: tokenRow } = await (adminClient as any)
+      .from('authorization_tokens')
+      .select('id, jti, token_hash, status, expires_at')
+      .eq('id', r.authorization_token_id)
+      .maybeSingle()
+    if (tokenRow) {
+      tokenHashForAudit = tokenRow.token_hash
+      tokenJtiForAudit  = tokenRow.jti
+
+      // Flip token status to 'confirmed' on settlement. Non-fatal — only
+      // affects the partial unique index's freedom to permit re-issue.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error: tokenStatusErr } = await (adminClient as any)
+        .from('authorization_tokens')
+        .update({
+          status:       'confirmed',
+          confirmed_at: new Date().toISOString(),
+        })
+        .eq('id', tokenRow.id)
+        .in('status', ['issued', 'delivered'])
+      if (tokenStatusErr) {
+        console.error(
+          '[confirm-external] authorization_token confirm-status update failed (non-fatal):',
+          tokenStatusErr.message,
+        )
+      }
     }
   }
 
@@ -508,24 +562,31 @@ export async function POST(
       proof_of_payment_document_id: proofDocumentId,
     },
     metadata: {
-      deal_id:              r.deal_id,
-      milestone_id:         r.milestone_id,
-      contractor_id:        deal.contractor_id,
-      funder_id:            deal.funder_id,
-      gross_amount:         fee.grossAmount,
-      fee_amount:           fee.feeAmount,
-      retainage_amount:     retainage.retainageAmount,
-      retainage_percentage: retainage.retainagePercentage,
-      net_to_contractor:    netToContractor,
-      billing_rate_bps:     fee.billingRateBps,
-      total_debit:          fee.totalDebit,
-      execution_rail:       'external_manual',
-      confirmed_by_role:    profile.role,
-      billing_committed:    !billingInsertError,
-      ledger_updated:       !dealUpdateError,
-      proof_attached:       !!proofDocumentId,
-      admin_override:       isAdmin,
+      deal_id:                r.deal_id,
+      milestone_id:           r.milestone_id,
+      contractor_id:          deal.contractor_id,
+      funder_id:              deal.funder_id,
+      gross_amount:           fee.grossAmount,
+      fee_amount:             fee.feeAmount,
+      retainage_amount:       retainage.retainageAmount,
+      retainage_percentage:   retainage.retainagePercentage,
+      net_to_contractor:      netToContractor,
+      billing_rate_bps:       fee.billingRateBps,
+      total_debit:            fee.totalDebit,
+      execution_rail:         'external_manual',
+      confirmed_by_role:      profile.role,
+      billing_committed:      !billingInsertError,
+      ledger_updated:         !dealUpdateError,
+      proof_attached:         !!proofDocumentId,
+      admin_override:         isAdmin,
+      authorization_token_id: r.authorization_token_id ?? null,
+      token_jti:              tokenJtiForAudit,
     },
+    // Tier A: bind both the inbound confirmation bytes and the authorization
+    // token into the audit chain. partner_ack_hash captures the funder/partner
+    // ack body; token_hash binds the chain to the issued authorization token.
+    partner_ack_hash: partnerAckHash,
+    token_hash:       tokenHashForAudit,
   })
 
   // ── STEP 5b: Admin dual-write (if admin confirmed) ─────────────────────────

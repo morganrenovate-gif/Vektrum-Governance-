@@ -1,13 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createSupabaseAdminClient } from '@/lib/supabase/server'
 import { getAuthUser, requireDealAccess, requireMFA, requireRole } from '@/lib/auth/middleware'
-import { logAudit, sha256OfCanonicalJson } from '@/lib/engine/audit'
+import { logAudit } from '@/lib/engine/audit'
 import { validateRelease, checkAiPrecondition } from '@/lib/engine/release-gate'
 import { calculateFee, calculateRetainage, toStripeCents } from '@/lib/engine/billing'
+import {
+  issueAuthorizationToken,
+  AuthorizationTokenConflictError,
+} from '@/lib/engine/authorization-token'
+import {
+  getRailAdapter,
+  type RailScope,
+} from '@/lib/engine/rail-adapter'
 import { createTransactionReceipt, markReceiptEmailSent } from '@/lib/engine/receipts'
 import { notifyTransactionReceipt } from '@/lib/engine/notifications'
 import { notifyReleaseAuthorized, notifyReleaseBlocked } from '@/lib/engine/notify'
-import { stripe } from '@/lib/stripe'
 import { internalError, notFoundError, validationError } from '@/lib/errors'
 import { POLICIES, checkRateLimit, rateLimitResponse, logRateLimitViolation } from '@/lib/engine/rate-limit'
 
@@ -172,6 +179,19 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
   }
 
+  // ── Derive the rail scope for this release ──────────────────────────────────
+  // The funder's `disbursement_rail` ('stripe' | 'external_rail') determines
+  // both the rail the authorization token is scoped to AND the rail adapter
+  // we dispatch through. The legacy `execution_rail` enum on releases
+  // ('stripe_connect' | 'external_manual') is the storage representation;
+  // we map between them here so audit metadata + downstream queries keep
+  // their existing values.
+  const railScope: RailScope = profile.disbursement_rail === 'external_rail'
+    ? 'external_rail'
+    : 'stripe'
+  const executionRail: 'stripe_connect' | 'external_manual' =
+    railScope === 'external_rail' ? 'external_manual' : 'stripe_connect'
+
   // ── STEP 0: AI Draw Review Precondition ─────────────────────────────────────
   const aiCheck = await checkAiPrecondition(milestoneId, supabase)
   if (!aiCheck.passed) {
@@ -186,7 +206,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       new_values:  null,
       metadata: {
         deal_id:        milestone.deal_id,
-        execution_rail: 'stripe_connect',
+        execution_rail: executionRail,
         blocked_by:     'ai_precondition',
         reason:         aiCheck.reason,
       },
@@ -211,7 +231,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       new_values:  null,
       metadata: {
         deal_id:          milestone.deal_id,
-        execution_rail:   'stripe_connect',
+        execution_rail:   executionRail,
         override_warning: aiCheck.warning,
         actor_role:       profile.role,
       },
@@ -221,7 +241,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   // ── STEP 1: Run Release Gate (all 10 conditions + role check) ──────────────
   // AI precondition (STEP 0 above) has already been checked. This is the
   // 10-condition server-side release gate defined in src/lib/engine/release-gate.ts.
-  const releaseValidation = await validateRelease(supabase, milestoneId, profile)
+  // Pass `executionRail` so Condition 4 (contractor Stripe payouts) is skipped
+  // on the external-rail path — the gate is already rail-aware.
+  const releaseValidation = await validateRelease(supabase, milestoneId, profile, { executionRail })
 
   if (!releaseValidation.allowed) {
     // Fire-and-forget: the block is already decided. Audit failure must not
@@ -237,7 +259,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       new_values:  null,
       metadata: {
         deal_id:           milestone.deal_id,
-        execution_rail:    'stripe_connect',
+        execution_rail:    executionRail,
         blocked_by:        'release_gate',
         failed_conditions: releaseValidation.errors,
       },
@@ -255,18 +277,29 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
 
   // ── Fetch Contractor's Stripe Account + Display Name ────────────────────────
+  // The display name is required for receipts on every rail. The Stripe account
+  // is required only for the Stripe rail — external-rail releases settle off-
+  // platform via /confirm-external or /partner/releases/{id}/confirm and the
+  // contractor's Stripe account is irrelevant to authorization.
   const { data: contractorProfile, error: contractorError } = await supabase
     .from('profiles')
     .select('stripe_account_id, full_name, company_name')
     .eq('id', deal.contractor_id)
     .single()
 
-  if (contractorError || !contractorProfile?.stripe_account_id) {
+  if (contractorError || !contractorProfile) {
     return internalError(
-      'Could not retrieve the contractor\'s Stripe account ID. ' +
-        'Ensure the contractor has completed Stripe Connect onboarding. ' +
+      'Could not retrieve the contractor profile for this release. ' +
         'Contact support if this problem persists.',
       contractorError?.message,
+    )
+  }
+
+  if (railScope === 'stripe' && !contractorProfile.stripe_account_id) {
+    return internalError(
+      'The Stripe rail was selected for this release, but the contractor has no Stripe Connect account on file. ' +
+        'Either ask the contractor to complete Stripe Connect onboarding, or switch the funder\'s ' +
+        'disbursement rail to external_rail in Settings.',
     )
   }
 
@@ -398,70 +431,328 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   // free the reservation and restore the deal's available balance.
   const reservationMade = true  // reservation succeeded; used in catch block to decide whether to cancel
 
+  // ── STEP 2.5: Issue Authorization Token (Stage B1) ──────────────────────────
+  // The token is the durable on-platform artifact for this release decision.
+  // Written before any Stripe call so a Stripe failure cannot leave the system
+  // in a state where money moved without a recorded authorization.
+  // Idempotent: same idempotency_key + same milestone returns the existing
+  // active token instead of inserting a duplicate.
+  let authorizationToken
+  try {
+    authorizationToken = await issueAuthorizationToken({
+      milestoneId,
+      dealId:          milestone.deal_id,
+      payeeId:         deal.contractor_id,
+      funderId:        user.id,
+      // Map funder profile rail → token rail_scope. Stage B1 always reaches here
+      // on the Stripe path (B3 will widen this to include external_rail).
+      railScope:       profile.disbursement_rail === 'external_rail' ? 'external_rail' : 'stripe',
+      netToContractor,
+      grossAmount:     fee.grossAmount,
+      idempotencyKey,
+      issuedBy:        user.id,
+    })
+  } catch (issueErr) {
+    // Free the reservation we just acquired — money has not moved.
+    try {
+      await supabase.rpc('cancel_release_reservation', {
+        p_deal_id: milestone.deal_id,
+        p_gross:   fee.grossAmount,
+        p_fee:     fee.feeAmount,
+      })
+    } catch (cancelErr) {
+      console.error('[release] cancel_release_reservation after issue failure:', cancelErr)
+    }
+
+    const isConflict = issueErr instanceof AuthorizationTokenConflictError
+
+    await logAudit({
+      entity_type: 'milestone',
+      entity_id:   milestoneId,
+      action:      'release_authorization_issue_failed',
+      actor_id:    user.id,
+      old_values:  null,
+      new_values:  null,
+      metadata: {
+        deal_id:        milestone.deal_id,
+        execution_rail: executionRail,
+        is_conflict:    isConflict,
+        error:          issueErr instanceof Error ? issueErr.message : String(issueErr),
+      },
+    })
+
+    if (isConflict) {
+      return NextResponse.json(
+        {
+          error:
+            'An active authorization token already exists for this milestone. ' +
+            'Wait for the previous authorization to confirm, fail, or expire before retrying.',
+          code: 'AUTHORIZATION_TOKEN_CONFLICT',
+        },
+        { status: 409 },
+      )
+    }
+
+    return internalError(
+      'The release authorization token could not be issued. Please try again.',
+      issueErr instanceof Error ? issueErr.message : String(issueErr),
+    )
+  }
+
   // ── STEPS 3–7: Wrapped in a Single Try/Catch ────────────────────────────────
-  // If Stripe fails → cancel reservation, no DB writes occur.
-  // If DB writes fail after Stripe succeeds → return 500 with Stripe transfer ID
-  // so that support can reconcile the partial state.
+  // If rail dispatch fails → cancel reservation, no DB writes occur.
+  // If post-dispatch DB writes fail after the rail executed (Stripe rail) →
+  // return 500 with Stripe transfer ID so that support can reconcile.
+  // For external_rail, the rail "dispatch" is a no-op and post-dispatch DB
+  // writes happen against execution_status='pending' — settlement is deferred
+  // to /api/releases/{id}/confirm-external or /api/partner/releases/{id}/confirm.
 
   let stripeTransferId: string | null = null
 
   try {
-    // ── STEP 3: Stripe Transfer ─────────────────────────────────────────────
-    // Transfer = net_to_contractor (gross - retainage). Retainage is withheld
-    // in the deal's retainage_held balance — the contractor receives it later
-    // when the funder releases it via POST .../retainage/release.
-    const transfer = await stripe.transfers.create(
-      {
-        amount: amountInCents,
-        currency: 'usd',
-        destination: contractorProfile.stripe_account_id,
-        transfer_group: milestone.deal_id,
-        metadata: {
-          milestone_id:        milestoneId,
-          deal_id:             milestone.deal_id,
-          contractor_id:       deal.contractor_id,
-          vektrum_action:      'milestone_release',
-          idempotency_key:     idempotencyKey,
-          gross_amount:        milestone.amount.toFixed(2),
-          retainage_amount:    retainage.retainageAmount.toFixed(2),
-          net_to_contractor:   netToContractor.toFixed(2),
-        },
-        description: `Vektrum milestone release — ${milestone.title}`,
+    // ── STEP 3: Rail dispatch (B2 + B3) ──────────────────────────────────────
+    // The rail adapter is the single point of egress to a payment rail.
+    //   stripe        → calls stripe.transfers.create(...) and returns the
+    //                   Stripe transfer object's canonical hash as
+    //                   railConfirmationHash. result.executed === true.
+    //   external_rail → no rail-side call. result.executed === false; the
+    //                   funder/partner executes off-platform and confirms
+    //                   via /api/releases/{id}/confirm-external (user-session)
+    //                   or /api/partner/releases/{id}/confirm (partner-API key).
+    const adapter        = getRailAdapter(railScope)
+    const dispatchResult = await adapter.dispatch({
+      rail:           railScope,
+      token: {
+        id:        authorizationToken.id,
+        jti:       authorizationToken.jti,
+        tokenHash: authorizationToken.tokenHash,
       },
-      {
-        idempotencyKey,
+      milestone: {
+        id:     milestoneId,
+        dealId: milestone.deal_id,
+        title:  milestone.title,
       },
-    )
-
-    stripeTransferId = transfer.id
-
-    // ── Bind the Stripe transfer object into the audit chain (Tier A) ───────
-    // SHA-256 of the canonical-form Stripe transfer payload. Threaded into the
-    // success-path funds_released audit event below so the chain commits to
-    // the exact rail confirmation that proves this release was executed.
-    // Patent candidate #4 — rail_confirmation_hash binding.
-    const railConfirmationHash = await sha256OfCanonicalJson({
-      id:              transfer.id,
-      object:          transfer.object,
-      amount:          transfer.amount,
-      currency:        transfer.currency,
-      destination:     transfer.destination,
-      transfer_group:  transfer.transfer_group,
-      created:         transfer.created,
-      livemode:        transfer.livemode,
-      metadata:        transfer.metadata,
+      contractor: {
+        id:              deal.contractor_id,
+        stripeAccountId: contractorProfile.stripe_account_id ?? null,
+      },
+      amounts: {
+        amountInCents,
+        grossAmount:     fee.grossAmount,
+        feeAmount:       fee.feeAmount,
+        retainageAmount: retainage.retainageAmount,
+        netToContractor,
+      },
+      idempotencyKey,
     })
 
+    stripeTransferId = dispatchResult.stripeTransferId
+    const railConfirmationHash = dispatchResult.railConfirmationHash
+
+    // ── External-rail authorize-only branch (B3) ───────────────────────────
+    // dispatch.executed === false means the rail did not execute disbursement
+    // synchronously — settlement is deferred to /api/releases/{id}/confirm-external
+    // (user-session) or /api/partner/releases/{id}/confirm (partner-API key).
+    //
+    // What we do here:
+    //   - Insert the release row with execution_rail='external_manual',
+    //     execution_status='pending', stripe_transfer_id=null.
+    //   - Flip milestone status approved → released (authorization is the state
+    //     transition; matches the Stripe success path's semantics).
+    //   - Flip the token status from 'issued' to 'delivered' so the partial
+    //     unique index still blocks a parallel re-authorization, but the token
+    //     is now visible to the off-platform partner that will confirm.
+    //   - Audit `release_authorization_recorded` (distinct from `funds_released`
+    //     so forensic queries can tell authorized-and-executed apart from
+    //     authorized-pending-rail).
+    //
+    // What we DO NOT do:
+    //   - Insert billing_records (happens at confirm time).
+    //   - Call increment_deal_financials / increment_deal_retainage (settlement
+    //     of the reservation to released_amount + fees_collected + retainage_held
+    //     is the confirm route's job).
+    //   - Generate or email a receipt (no rail confirmation to receipt against).
+    //
+    // The reservation acquired earlier STAYS in deals.reserved_amount until
+    // one of: confirm route lands → settled, reject route lands → cancel,
+    // token expires → /api/releases/{id}/expire-if-stale → cancel.
+    if (!dispatchResult.executed) {
+      const adminClient = createSupabaseAdminClient()
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: insertedRelease, error: releaseInsertError } = await (adminClient as any)
+        .from('releases')
+        .insert({
+          milestone_id:           milestoneId,
+          deal_id:                milestone.deal_id,
+          amount:                 milestone.amount,
+          stripe_transfer_id:     null,
+          idempotency_key:        idempotencyKey,
+          released_by:            user.id,
+          authorization_token_id: authorizationToken.id,
+          execution_rail:         'external_manual',
+          execution_status:       'pending',
+        })
+        .select('id')
+        .single()
+
+      if (releaseInsertError || !insertedRelease) {
+        // No rail-side execution happened — safe to bubble into the catch
+        // which will cancel the reservation and mark the token failed.
+        throw new Error(
+          `External-rail release row insert failed: ${releaseInsertError?.message ?? 'no row returned'}`,
+        )
+      }
+
+      // Flip milestone approved → released. Authorization is the state transition.
+      const { data: milestoneRows, error: milestoneUpdateError } = await supabase
+        .from('milestones')
+        .update({
+          status:            'released',
+          protection_status: 'released',
+          retainage_amount:  retainage.retainageAmount,
+          updated_at:        new Date().toISOString(),
+        })
+        .eq('id', milestoneId)
+        .eq('status', 'approved')
+        .select('id')
+
+      if (milestoneUpdateError) {
+        throw new Error(
+          `External-rail milestone status update failed: ${milestoneUpdateError.message}`,
+        )
+      }
+      if (!milestoneRows || milestoneRows.length === 0) {
+        // Concurrent release authorized this milestone first.
+        return NextResponse.json(
+          {
+            error:
+              'This milestone has already been authorized by a concurrent request. ' +
+              'No duplicate authorization was recorded.',
+            code: 'CONCURRENT_AUTHORIZATION',
+          },
+          { status: 409 },
+        )
+      }
+
+      // Token: issued → delivered. Non-fatal if it fails — the audit chain
+      // remains correct because the success audit binds token_hash either way.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error: tokenStatusError } = await (adminClient as any)
+        .from('authorization_tokens')
+        .update({ status: 'delivered' })
+        .eq('id', authorizationToken.id)
+        .in('status', ['issued'])
+      if (tokenStatusError) {
+        console.error(
+          '[release] external-rail token delivered update failed (non-fatal):',
+          tokenStatusError.message,
+        )
+      }
+
+      const releasedAt = new Date().toISOString()
+
+      await logAudit({
+        entity_type: 'milestone',
+        entity_id:   milestoneId,
+        action:      'release_authorization_recorded',
+        actor_id:    user.id,
+        old_values: {
+          status:            milestone.status,
+          protection_status: milestone.protection_status,
+        },
+        new_values: {
+          status:            'released',
+          protection_status: 'released',
+          execution_status:  'pending',
+          retainage_amount:  retainage.retainageAmount,
+        },
+        metadata: {
+          deal_id:                milestone.deal_id,
+          contractor_id:          deal.contractor_id,
+          gross_amount:           fee.grossAmount,
+          fee_amount:             fee.feeAmount,
+          retainage_amount:       retainage.retainageAmount,
+          retainage_percentage:   retainage.retainagePercentage,
+          net_to_contractor:      netToContractor,
+          billing_rate_bps:       fee.billingRateBps,
+          total_debit:            fee.totalDebit,
+          execution_rail:         executionRail,
+          idempotency_key:        idempotencyKey,
+          released_by_role:       profile.role,
+          authorization_token_id: authorizationToken.id,
+          token_jti:              authorizationToken.jti,
+          rail_executed:          false,
+          settlement_pending:     true,
+        },
+        token_hash: authorizationToken.tokenHash,
+        // No rail_confirmation_hash — rail has not executed yet.
+        // /confirm-external will write its own audit row binding both
+        // partner_ack_hash and rail_confirmation_hash when settlement lands.
+      })
+
+      // Fire-and-forget — must not block or fail the release response.
+      void notifyReleaseAuthorized({
+        releaseId:   insertedRelease.id,
+        milestoneId: milestoneId,
+        dealId:      milestone.deal_id,
+        funderId:    user.id,
+        amount:      fee.grossAmount,
+      })
+
+      return NextResponse.json({
+        success: true,
+        release: {
+          milestone_id:            milestoneId,
+          deal_id:                 milestone.deal_id,
+          stripe_transfer_id:      null,
+          idempotency_key:         idempotencyKey,
+          released_by:             user.id,
+          released_at:             releasedAt,
+          authorization_token_id:  authorizationToken.id,
+          authorization_token_jti: authorizationToken.jti,
+          execution_status:        'pending',
+          execution_rail:          'external_manual',
+          // No receipt yet — generated when /confirm-external lands.
+          receipt: null,
+          billing: {
+            gross_amount:         fee.grossAmount,
+            fee_amount:           fee.feeAmount,
+            retainage_amount:     retainage.retainageAmount,
+            retainage_percentage: retainage.retainagePercentage,
+            net_to_contractor:    netToContractor,
+            billing_rate_bps:     fee.billingRateBps,
+            rate_label:           fee.rateLabel,
+            total_debit:          fee.totalDebit,
+          },
+        },
+      })
+    }
+
+    // ── Stripe-rail success path (dispatch.executed === true) ──────────────
+    // We are past the external-rail early-return; assert the transfer id
+    // narrows to string for downstream consumers (receipts, notifications).
+    if (!stripeTransferId) {
+      throw new Error(
+        'Internal invariant: dispatchResult.executed=true but stripeTransferId is null. ' +
+        'This indicates a bug in the rail adapter — the stripe adapter must always return a transfer id when executed=true.',
+      )
+    }
+
     // ── STEP 4: Insert Immutable Release Record ─────────────────────────────
+    // authorization_token_id binds this release row to the token written at
+    // STEP 2.5. UNIQUE constraint enforces "at most one release per token"
+    // (memo claim 4: a token cannot settle twice).
     const { error: releaseInsertError } = await supabase
       .from('releases')
       .insert({
-        milestone_id: milestoneId,
-        deal_id: milestone.deal_id,
-        amount: milestone.amount,
-        stripe_transfer_id: stripeTransferId,
-        idempotency_key: idempotencyKey,
-        released_by: user.id,
+        milestone_id:           milestoneId,
+        deal_id:                milestone.deal_id,
+        amount:                 milestone.amount,
+        stripe_transfer_id:     stripeTransferId,
+        idempotency_key:        idempotencyKey,
+        released_by:            user.id,
+        authorization_token_id: authorizationToken.id,
       })
 
     if (releaseInsertError) {
@@ -739,22 +1030,50 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         retainage_amount:  retainage.retainageAmount,
       },
       metadata: {
-        deal_id:              milestone.deal_id,
-        contractor_id:        deal.contractor_id,
-        gross_amount:         fee.grossAmount,
-        fee_amount:           fee.feeAmount,
-        retainage_amount:     retainage.retainageAmount,
-        retainage_percentage: retainage.retainagePercentage,
-        net_to_contractor:    netToContractor,
-        billing_rate_bps:     fee.billingRateBps,
-        total_debit:          fee.totalDebit,
-        amount_in_cents:      amountInCents,
-        stripe_transfer_id:   stripeTransferId,
-        idempotency_key:      idempotencyKey,
-        released_by_role:     profile.role,
+        deal_id:                milestone.deal_id,
+        contractor_id:          deal.contractor_id,
+        gross_amount:           fee.grossAmount,
+        fee_amount:             fee.feeAmount,
+        retainage_amount:       retainage.retainageAmount,
+        retainage_percentage:   retainage.retainagePercentage,
+        net_to_contractor:      netToContractor,
+        billing_rate_bps:       fee.billingRateBps,
+        total_debit:            fee.totalDebit,
+        amount_in_cents:        amountInCents,
+        stripe_transfer_id:     stripeTransferId,
+        idempotency_key:        idempotencyKey,
+        released_by_role:       profile.role,
+        authorization_token_id: authorizationToken.id,
+        token_jti:              authorizationToken.jti,
       },
+      // Tier A: bind both the token and the rail confirmation into the chain.
+      token_hash:             authorizationToken.tokenHash,
       rail_confirmation_hash: railConfirmationHash,
     })
+
+    // ── STEP 7.1: Mark token confirmed ─────────────────────────────────────
+    // Stripe rail is synchronous: by the time the success audit row is written,
+    // the rail has executed and we have a transfer id. Flip the token from
+    // 'issued' → 'confirmed' so the partial unique index frees up for any
+    // future re-authorization. Non-fatal — failure here only affects the
+    // ability to re-issue; money has already moved and is fully recorded.
+    {
+      const adminForToken = createSupabaseAdminClient()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error: tokenStatusError } = await (adminForToken as any)
+        .from('authorization_tokens')
+        .update({
+          status:       'confirmed',
+          confirmed_at: new Date().toISOString(),
+        })
+        .eq('id', authorizationToken.id)
+      if (tokenStatusError) {
+        console.error(
+          '[release] authorization_token status confirm failed (non-fatal):',
+          tokenStatusError.message,
+        )
+      }
+    }
 
     // ── STEP 7.5: Notify contractor that release was authorized ───────────
     // Fire-and-forget — must not block or fail the release response.
@@ -835,12 +1154,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json({
       success: true,
       release: {
-        milestone_id:       milestoneId,
-        deal_id:            milestone.deal_id,
-        stripe_transfer_id: stripeTransferId,
-        idempotency_key:    idempotencyKey,
-        released_by:        user.id,
-        released_at:        releasedAt,
+        milestone_id:           milestoneId,
+        deal_id:                milestone.deal_id,
+        stripe_transfer_id:     stripeTransferId,
+        idempotency_key:        idempotencyKey,
+        released_by:            user.id,
+        released_at:            releasedAt,
+        // Stage B1 additive fields — backward-compatible.
+        authorization_token_id: authorizationToken.id,
+        authorization_token_jti: authorizationToken.jti,
+        execution_status:       'confirmed',
         receipt: receipt ? {
           id:             receipt.id,
           receipt_number: receipt.receipt_number,
@@ -883,6 +1206,26 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       }
     }
 
+    // Mark the authorization token as failed so the partial unique index
+    // unblocks for any re-authorization. Non-fatal — best-effort.
+    if (authorizationToken) {
+      try {
+        const adminForToken = createSupabaseAdminClient()
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (adminForToken as any)
+          .from('authorization_tokens')
+          .update({
+            status:         'failed',
+            failed_at:      new Date().toISOString(),
+            failure_reason: message,
+          })
+          .eq('id', authorizationToken.id)
+          .in('status', ['issued', 'delivered'])
+      } catch (tokenErr) {
+        console.error('[release] authorization_token status failure update failed:', tokenErr)
+      }
+    }
+
     // Log the failure with as much context as possible
     await logAudit({
       entity_type: 'milestone',
@@ -892,15 +1235,17 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       old_values: null,
       new_values: null,
       metadata: {
-        error:                message,
-        stripe_transfer_id:   stripeTransferId,
-        idempotency_key:      idempotencyKey,
-        gross_amount:         fee.grossAmount,
-        retainage_amount:     retainage.retainageAmount,
-        net_to_contractor:    netToContractor,
-        reservation_made:     reservationMade,
-        reservation_cancelled: !stripeTransferId && reservationMade,
+        error:                  message,
+        stripe_transfer_id:     stripeTransferId,
+        idempotency_key:        idempotencyKey,
+        gross_amount:           fee.grossAmount,
+        retainage_amount:       retainage.retainageAmount,
+        net_to_contractor:      netToContractor,
+        reservation_made:       reservationMade,
+        reservation_cancelled:  !stripeTransferId && reservationMade,
+        authorization_token_id: authorizationToken?.id ?? null,
       },
+      token_hash: authorizationToken?.tokenHash ?? null,
     })
 
     if (stripeTransferId) {
