@@ -96,8 +96,25 @@ check(
 // chain_hash logic must remain SHA-256(row_hash || prev_chain) so the chain is
 // continuous across the v1 → v2 boundary.
 check(
-  /digest\(NEW\.row_hash\s*\|\|\s*COALESCE\(v_prev_chain,\s*''\),\s*'sha256'\)/.test(migration),
+  /extensions\.digest\(NEW\.row_hash\s*\|\|\s*COALESCE\(v_prev_chain,\s*''\),\s*'sha256'\)/.test(migration),
   'chain_hash logic unchanged: SHA-256(row_hash || prev_chain) anchored to empty string',
+)
+// Regression guard — Supabase installs pgcrypto in `extensions`, not `public`.
+// Bare digest() calls fail with SQLSTATE 42883 ("function digest(text, unknown)
+// does not exist") in production. Every digest call must be schema-qualified.
+// Strip SQL line comments before counting so prose references don't false-fail.
+const sqlOnly = migration
+  .split('\n')
+  .filter(line => !line.trim().startsWith('--'))
+  .join('\n')
+const bareDigestCount = (sqlOnly.match(/(?<!extensions\.)digest\(/g) ?? []).length
+check(
+  bareDigestCount === 0,
+  `Migration uses extensions.digest(...) for every digest call (no bare digest — found ${bareDigestCount})`,
+)
+check(
+  /CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions/.test(migration),
+  'Migration defensively re-asserts pgcrypto in the extensions schema',
 )
 
 console.log('\n── 3. verify_audit_chain dispatches on hash_schema_version ──────────────')
@@ -203,13 +220,20 @@ check(
   `Partner /confirm threads partner_ack_hash into all ${partnerAuditCount} audit events (binding count = ${partnerBindingCount})`,
 )
 
-// Milestone release → rail_confirmation_hash on the success-path funds_released event
+// Milestone release → rail_confirmation_hash on the success-path funds_released event.
+// Stage B2 moved the canonical-form hashing into the rail adapter, so the
+// route now reads railConfirmationHash off dispatchResult and the adapter
+// is the importer of sha256OfCanonicalJson. Accept either layout (route or
+// adapter) so this regression check survives the architectural refactor.
+const railAdapter = read('src/lib/engine/rail-adapter.ts')
 check(
-  /import\s+\{\s*logAudit,\s*sha256OfCanonicalJson\s*\}\s+from\s+'@\/lib\/engine\/audit'/.test(releaseRte),
-  'Milestone release imports sha256OfCanonicalJson from audit lib',
+  /import\s+\{\s*logAudit,\s*sha256OfCanonicalJson\s*\}\s+from\s+'@\/lib\/engine\/audit'/.test(releaseRte) ||
+  /sha256OfCanonicalJson/.test(railAdapter),
+  'sha256OfCanonicalJson is imported and used by either the release route or the rail adapter',
 )
 check(
-  /railConfirmationHash\s*=\s*await\s+sha256OfCanonicalJson\(\{[\s\S]*?id:\s+transfer\.id/.test(releaseRte),
+  /railConfirmationHash\s*=\s*await\s+sha256OfCanonicalJson\(\{[\s\S]*?id:\s+transfer\.id/.test(releaseRte) ||
+  /railConfirmationHash\s*=\s*await\s+sha256OfCanonicalJson\(\{[\s\S]*?id:\s+transfer\.id/.test(railAdapter),
   'Milestone release computes railConfirmationHash from the canonical Stripe transfer payload',
 )
 check(

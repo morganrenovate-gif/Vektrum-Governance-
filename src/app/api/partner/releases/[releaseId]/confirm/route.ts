@@ -144,7 +144,7 @@ export async function POST(
   const { data: release, error: releaseError } = await (admin as any)
     .from('releases')
     .select(
-      'id, milestone_id, deal_id, amount, execution_rail, execution_status, external_payment_reference, external_executed_at, external_executed_by',
+      'id, milestone_id, deal_id, amount, execution_rail, execution_status, external_payment_reference, external_executed_at, external_executed_by, authorization_token_id',
     )
     .eq('id', releaseId)
     .single()
@@ -365,6 +365,39 @@ export async function POST(
     }
   }
 
+  // ── Look up the authorization token to bind into the audit chain (B3.2) ───
+  // Same pattern as /confirm-external. Token status flips 'delivered'/'issued'
+  // → 'confirmed' on settlement.
+  let tokenHashForAudit: string | null = null
+  let tokenJtiForAudit:  string | null = null
+  if (r.authorization_token_id) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: tokenRow } = await (admin as any)
+      .from('authorization_tokens')
+      .select('id, jti, token_hash, status')
+      .eq('id', r.authorization_token_id)
+      .maybeSingle()
+    if (tokenRow) {
+      tokenHashForAudit = tokenRow.token_hash
+      tokenJtiForAudit  = tokenRow.jti
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error: tokenStatusErr } = await (admin as any)
+        .from('authorization_tokens')
+        .update({
+          status:       'confirmed',
+          confirmed_at: new Date().toISOString(),
+        })
+        .eq('id', tokenRow.id)
+        .in('status', ['issued', 'delivered'])
+      if (tokenStatusErr) {
+        console.error(
+          '[partner-confirm] authorization_token confirm-status update failed (non-fatal):',
+          tokenStatusErr.message,
+        )
+      }
+    }
+  }
+
   // ── STEP 5: Audit log ──────────────────────────────────────────────────────
   await logAudit({
     entity_type:   'release',
@@ -381,24 +414,27 @@ export async function POST(
       proof_of_payment_document_id: proofDocumentId,
     },
     metadata: {
-      partner_id:           partnerCtx.partnerId,
-      partner_name:         partnerCtx.partnerName,
-      deal_id:              r.deal_id,
-      milestone_id:         r.milestone_id,
-      contractor_id:        d.contractor_id,
-      funder_id:            d.funder_id,
-      gross_amount:         fee.grossAmount,
-      fee_amount:           fee.feeAmount,
-      retainage_amount:     retainage.retainageAmount,
-      net_to_contractor:    netToContractor,
-      billing_rate_bps:     fee.billingRateBps,
-      total_debit:          fee.totalDebit,
-      execution_rail:       'external_manual',
-      billing_committed:    !billingError,
-      ledger_updated:       !ledgerError,
-      proof_attached:       !!proofDocumentId,
+      partner_id:             partnerCtx.partnerId,
+      partner_name:           partnerCtx.partnerName,
+      deal_id:                r.deal_id,
+      milestone_id:           r.milestone_id,
+      contractor_id:          d.contractor_id,
+      funder_id:              d.funder_id,
+      gross_amount:           fee.grossAmount,
+      fee_amount:             fee.feeAmount,
+      retainage_amount:       retainage.retainageAmount,
+      net_to_contractor:      netToContractor,
+      billing_rate_bps:       fee.billingRateBps,
+      total_debit:            fee.totalDebit,
+      execution_rail:         'external_manual',
+      billing_committed:      !billingError,
+      ledger_updated:         !ledgerError,
+      proof_attached:         !!proofDocumentId,
+      authorization_token_id: r.authorization_token_id ?? null,
+      token_jti:              tokenJtiForAudit,
     },
     partner_ack_hash: partnerAckHash,
+    token_hash:       tokenHashForAudit,
   })
 
   return NextResponse.json({
