@@ -318,7 +318,10 @@ function funder(): Profile {
     stripe_account_id:     null,
     stripe_payouts_enabled: false,
     onboarding_complete:   true,
-    subscription_tier:     'standalone',    // required field on Profile
+    subscription_tier:     'standalone',
+    disbursement_rail:     'stripe',
+    mfa_enrolled:          true,
+    mfa_enrolled_at:       null,
     created_at:            new Date().toISOString(),
     updated_at:            new Date().toISOString(),
   }
