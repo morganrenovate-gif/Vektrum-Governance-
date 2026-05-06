@@ -2108,16 +2108,17 @@ export default function PitchPage() {
       </div>
 
       {/* Export PDF button */}
-      <button
+      <a
         data-pitch-nav
-        onClick={() => window.print()}
-        aria-label="Export as PDF"
-        title="Export all slides as PDF"
-        className="fixed bottom-7 left-7 z-50 flex items-center gap-1.5 px-3 h-8 rounded-full border border-white/[0.10] bg-white/[0.04] text-white/40 hover:text-white/75 hover:bg-white/[0.08] hover:border-white/[0.18] transition-all select-none"
+        href="/vektrum-pitch.pdf"
+        download="vektrum-pitch.pdf"
+        aria-label="Download pitch deck PDF"
+        title="Download pitch deck as PDF"
+        className="fixed bottom-7 left-7 z-50 flex items-center gap-1.5 px-3 h-8 rounded-full border border-white/[0.10] bg-white/[0.04] text-white/40 hover:text-white/75 hover:bg-white/[0.08] hover:border-white/[0.18] transition-all select-none no-underline"
       >
         <Printer size={12} />
         <span className="text-[10px] font-medium tracking-wide">PDF</span>
-      </button>
+      </a>
     </div>
   )
 }
