@@ -3,6 +3,7 @@ import { createSupabaseAdminClient } from '@/lib/supabase/server'
 import { getAuthUser, requireDealAccess } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
 import { errorResponse, internalError, notFoundError } from '@/lib/errors'
+import { notifyLienWaiverRequested } from '@/lib/engine/notify'
 import type { LienWaiverType } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
@@ -164,6 +165,14 @@ export async function POST(
       deal_id:       dealId,
       milestone_title: milestone.title,
     },
+  })
+
+  // Fire-and-forget — notify contractor that a lien waiver has been requested
+  void notifyLienWaiverRequested({
+    waiverId:    waiver.id,
+    milestoneId: milestoneId,
+    dealId:      dealId,
+    funderId:    user.id,
   })
 
   return NextResponse.json({ lien_waiver: waiver }, { status: 201 })

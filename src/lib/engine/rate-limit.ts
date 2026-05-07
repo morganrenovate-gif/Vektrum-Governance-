@@ -147,6 +147,13 @@ export interface RateLimitResult {
 
 // ─── Core function ────────────────────────────────────────────────────────────
 
+// Policies that protect financial writes. A DB outage must not silently drop
+// the rate-limit guard on these endpoints — they fail-closed instead of open.
+const FAIL_CLOSED_POLICIES: ReadonlySet<string> = new Set([
+  'financial_write',
+  'admin_write',
+])
+
 /**
  * Atomically checks and increments a rate limit bucket.
  *
@@ -155,13 +162,20 @@ export interface RateLimitResult {
  *   `partner:{partnerId}:{policyName}`  — partner API key holder
  *   `ip:{ip}:{policyName}`              — IP-keyed (cron, unauthenticated)
  *
- * Fail-open: on any DB error, returns `allowed: true` and logs to console.
- * The request proceeds; auth and validation guards are unaffected.
+ * Failure behaviour depends on the policy:
+ *   - financial_write / admin_write: fail-CLOSED (allowed: false) — a DB
+ *     outage must not silently disable the guard on financial writes.
+ *   - All other policies: fail-open (allowed: true) — rate limiting is
+ *     best-effort; auth and validation guards are the primary controls.
  */
 export async function checkRateLimit(
   key:    string,
   policy: RateLimitPolicy,
 ): Promise<RateLimitResult> {
+  // Determine the policy name by matching against POLICIES for fail-closed logic.
+  const policyName = Object.entries(POLICIES).find(([, p]) => p === policy)?.[0] ?? ''
+  const isFailClosed = FAIL_CLOSED_POLICIES.has(policyName)
+
   try {
     const admin = createSupabaseAdminClient()
 
@@ -172,6 +186,10 @@ export async function checkRateLimit(
     })
 
     if (error) {
+      if (isFailClosed) {
+        console.error('[rate-limit] check_rate_limit RPC error — fail-CLOSED (financial/admin):', error.message, { key })
+        return _failClosed(policy)
+      }
       console.error('[rate-limit] check_rate_limit RPC error — fail-open:', error.message, { key })
       return _failOpen(policy)
     }
@@ -179,6 +197,10 @@ export async function checkRateLimit(
     // RPC returns a single-row TABLE result; Supabase JS wraps it as an array.
     const row = Array.isArray(data) ? data[0] : data
     if (!row) {
+      if (isFailClosed) {
+        console.error('[rate-limit] check_rate_limit returned no row — fail-CLOSED (financial/admin)', { key })
+        return _failClosed(policy)
+      }
       console.error('[rate-limit] check_rate_limit returned no row — fail-open', { key })
       return _failOpen(policy)
     }
@@ -190,6 +212,10 @@ export async function checkRateLimit(
       resetAt:      row.reset_at      as string,
     }
   } catch (err) {
+    if (isFailClosed) {
+      console.error('[rate-limit] unexpected error — fail-CLOSED (financial/admin):', err, { key })
+      return _failClosed(policy)
+    }
     console.error('[rate-limit] unexpected error — fail-open:', err, { key })
     return _failOpen(policy)
   }
@@ -199,6 +225,15 @@ function _failOpen(policy: RateLimitPolicy): RateLimitResult {
   return {
     allowed:      true,
     currentCount: 0,
+    limit:        policy.maxRequests,
+    resetAt:      new Date(Date.now() + policy.windowSeconds * 1000).toISOString(),
+  }
+}
+
+function _failClosed(policy: RateLimitPolicy): RateLimitResult {
+  return {
+    allowed:      false,
+    currentCount: policy.maxRequests + 1,
     limit:        policy.maxRequests,
     resetAt:      new Date(Date.now() + policy.windowSeconds * 1000).toISOString(),
   }
