@@ -8,6 +8,7 @@ import {
   issueAuthorizationToken,
   AuthorizationTokenConflictError,
 } from '@/lib/engine/authorization-token'
+import { buildEvidenceGraph, computeGraphCommitment } from '@/lib/engine/evidence-graph'
 import {
   getRailAdapter,
   type RailScope,
@@ -453,6 +454,35 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       }))
     : undefined
 
+  // ── STEP 2.5b-pre: Build evidence graph commitment (Tier D) ────────────────
+  // Snapshot the full evidence state — conditions, AI review, SOV links, deal
+  // context — and hash it. The commitment is bound into both the authorization
+  // token and the success-path audit row, giving verifiers a cryptographic link
+  // from the token back to every piece of evidence that justified the decision.
+  const evidenceGraph = buildEvidenceGraph({
+    milestoneId,
+    milestoneStatus:     milestone.status,
+    milestoneProtection: milestone.protection_status,
+    milestoneAmount:     milestone.amount,
+    milestoneTitle:      milestone.title,
+    dealId:              milestone.deal_id,
+    contractorId:        deal.contractor_id,
+    funderId:            deal.funder_id ?? null,
+    billingRateBps:      fee.billingRateBps,
+    retainagePercentage: retainage.retainagePercentage,
+    gatePassed:          releaseValidation.allowed,
+    gateErrors:          releaseValidation.errors,
+    aiPassed:            aiCheck.passed,
+    aiReason:            aiCheck.reason ?? null,
+    aiWarning:           aiCheck.warning ?? null,
+    sovLinks:            sovLinksForToken ?? null,
+    railScope:           profile.disbursement_rail === 'external_rail' ? 'external_rail' : 'stripe',
+    grossAmount:         fee.grossAmount,
+    netAmount:           netToContractor,
+    currency:            'USD',
+  })
+  const graphCommitment = await computeGraphCommitment(evidenceGraph)
+
   // ── STEP 2.5b: Issue Authorization Token ────────────────────────────────────
   // The token is the durable on-platform artifact for this release decision.
   // Written before any Stripe call so a Stripe failure cannot leave the system
@@ -474,6 +504,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       idempotencyKey,
       issuedBy:        user.id,
       sovLinks:        sovLinksForToken,
+      graphCommitment,
     })
   } catch (issueErr) {
     // Free the reservation we just acquired — money has not moved.
@@ -1069,9 +1100,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         authorization_token_id: authorizationToken.id,
         token_jti:              authorizationToken.jti,
       },
-      // Tier A: bind both the token and the rail confirmation into the chain.
+      // Tier A: bind the token, rail confirmation, and Tier D evidence graph into the chain.
       token_hash:             authorizationToken.tokenHash,
       rail_confirmation_hash: railConfirmationHash,
+      graph_snapshot_hash:    graphCommitment,
     })
 
     // ── STEP 7.1: Mark token confirmed ─────────────────────────────────────

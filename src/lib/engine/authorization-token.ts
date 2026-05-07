@@ -68,6 +68,14 @@ export interface IssueAuthorizationTokenInput {
    * authorization token records exactly which line items were drawn against.
    */
   sovLinks?:          Array<{ sov_line_item_id: string; amount: number }>
+  /**
+   * Tier D — evidence graph commitment hash.
+   * sha256 of the canonical evidence graph snapshot (buildEvidenceGraph +
+   * computeGraphCommitment). Binds the authorization token to the exact
+   * set of documents, conditions, and review state that justified the release.
+   * Null until Tier D is wired in at call sites.
+   */
+  graphCommitment?:   string | null
 }
 
 export interface IssueAuthorizationTokenResult {
@@ -212,7 +220,7 @@ export async function issueAuthorizationToken(
     currency,
     policy_version:   RELEASE_POLICY_VERSION,
     policy_hash:      policyHash,
-    graph_commitment: null,                    // Tier D produces this
+    graph_commitment: input.graphCommitment ?? null,
     nonce,
     sequence_index:   sequenceIndex,
     idempotency_key:  input.idempotencyKey,
@@ -247,7 +255,7 @@ export async function issueAuthorizationToken(
       currency,
       policy_version:   RELEASE_POLICY_VERSION,
       policy_hash:      policyHash,
-      graph_commitment: null,
+      graph_commitment: input.graphCommitment ?? null,
       token_hash:       tokenHash,
       nonce,
       signature_alg:    alg,
