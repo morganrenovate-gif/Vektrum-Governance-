@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 import { getAuthUser, requireRole, requireMFA } from '@/lib/auth/middleware'
 import {
   runAndRecordAuditChainHealth,
@@ -24,7 +25,8 @@ export async function GET(request: NextRequest) {
   let authContext
   try { authContext = await getAuthUser(request) } catch (err) { return err as NextResponse }
   try { requireRole(authContext.profile, 'admin') } catch (err) { return err as NextResponse }
-  try { requireMFA(authContext) }                  catch (err) { return err as NextResponse }
+  const supabase = await createClient()
+  try { await requireMFA(supabase, authContext.profile) } catch (err) { return err as NextResponse }
 
   const url   = new URL(request.url)
   const raw   = url.searchParams.get('limit')
@@ -45,7 +47,8 @@ export async function POST(request: NextRequest) {
   let authContext
   try { authContext = await getAuthUser(request) } catch (err) { return err as NextResponse }
   try { requireRole(authContext.profile, 'admin') } catch (err) { return err as NextResponse }
-  try { requireMFA(authContext) }                  catch (err) { return err as NextResponse }
+  const supabase = await createClient()
+  try { await requireMFA(supabase, authContext.profile) } catch (err) { return err as NextResponse }
 
   const result = await runAndRecordAuditChainHealth('admin_manual')
 

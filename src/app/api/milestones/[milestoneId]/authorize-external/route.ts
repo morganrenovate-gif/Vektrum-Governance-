@@ -4,6 +4,7 @@ import { getAuthUser, requireDealAccess, requireMFA, requireRole } from '@/lib/a
 import { logAudit } from '@/lib/engine/audit'
 import { validateRelease, checkAiPrecondition } from '@/lib/engine/release-gate'
 import { calculateFee, calculateRetainage } from '@/lib/engine/billing'
+import { issueAuthorizationToken, AuthorizationTokenConflictError } from '@/lib/engine/authorization-token'
 import { deliverPartnerWebhook } from '@/lib/engine/partner-webhook'
 import { internalError, notFoundError, validationError } from '@/lib/errors'
 import { POLICIES, checkRateLimit, rateLimitResponse, logRateLimitViolation } from '@/lib/engine/rate-limit'
@@ -296,6 +297,22 @@ export async function POST(
   let releaseInsertedId: string | null = null
 
   try {
+    // ── STEP 2.5: Issue rail-scoped authorization token ─────────────────────
+    // Must happen after reservation (so funds are locked) and before any DB
+    // writes so a token conflict or signing error cannot leave money reserved
+    // without a traceable token.
+    const token = await issueAuthorizationToken({
+      milestoneId,
+      dealId:          milestone.deal_id,
+      payeeId:         deal.contractor_id,
+      funderId:        deal.funder_id!,
+      railScope:       'external_rail',
+      netToContractor,
+      grossAmount:     fee.grossAmount,
+      idempotencyKey,
+      issuedBy:        user.id,
+    })
+
     // ── STEP 3: Insert release row (pending external execution) ─────────────
     // Uses admin client so we can reliably re-read the inserted row by
     // execution_status='pending' (RLS on the user client would filter it).
@@ -304,14 +321,15 @@ export async function POST(
     const { error: releaseInsertError } = await adminClient
       .from('releases')
       .insert({
-        milestone_id:        milestoneId,
-        deal_id:             milestone.deal_id,
-        amount:              milestone.amount,
-        stripe_transfer_id:  null,                    // CHECK constraint: external rail forbids stripe_transfer_id
-        idempotency_key:     idempotencyKey,
-        released_by:         user.id,
-        execution_rail:      'external_manual',
-        execution_status:    'pending',
+        milestone_id:            milestoneId,
+        deal_id:                 milestone.deal_id,
+        amount:                  milestone.amount,
+        stripe_transfer_id:      null,                // CHECK constraint: external rail forbids stripe_transfer_id
+        idempotency_key:         idempotencyKey,
+        released_by:             user.id,
+        execution_rail:          'external_manual',
+        execution_status:        'pending',
+        authorization_token_id:  token.id,
       })
 
     if (releaseInsertError) {
@@ -426,26 +444,29 @@ export async function POST(
         execution_rail:    'external_manual',
         execution_status:  'pending',
       },
+      token_hash: token.tokenHash,
       metadata: {
-        deal_id:              milestone.deal_id,
-        contractor_id:        deal.contractor_id,
-        funder_id:            deal.funder_id,
-        release_id:           releaseInsertedId,
-        gross_amount:         fee.grossAmount,
-        fee_amount:           fee.feeAmount,
-        retainage_amount:     retainage.retainageAmount,
-        retainage_percentage: retainage.retainagePercentage,
-        net_to_contractor:    netToContractor,
-        billing_rate_bps:     fee.billingRateBps,
-        total_debit:          fee.totalDebit,
-        idempotency_key:      idempotencyKey,
-        authorised_by_role:   profile.role,
-        execution_rail:       'external_manual',
-        execution_status:     'pending',
+        deal_id:                 milestone.deal_id,
+        contractor_id:           deal.contractor_id,
+        funder_id:               deal.funder_id,
+        release_id:              releaseInsertedId,
+        authorization_token_id:  token.id,
+        authorization_token_jti: token.jti,
+        gross_amount:            fee.grossAmount,
+        fee_amount:              fee.feeAmount,
+        retainage_amount:        retainage.retainageAmount,
+        retainage_percentage:    retainage.retainagePercentage,
+        net_to_contractor:       netToContractor,
+        billing_rate_bps:        fee.billingRateBps,
+        total_debit:             fee.totalDebit,
+        idempotency_key:         idempotencyKey,
+        authorised_by_role:      profile.role,
+        execution_rail:          'external_manual',
+        execution_status:        'pending',
         // Explicit statement of invariant for audit reviewers
-        ledger_deferred:      true,
-        billing_deferred:     true,
-        stripe_transfer:      null,
+        ledger_deferred:         true,
+        billing_deferred:        true,
+        stripe_transfer:         null,
       },
     })
 
@@ -534,6 +555,16 @@ export async function POST(
       } catch (cancelErr) {
         console.error('[authorize-external] cancel_release_reservation failed:', cancelErr)
       }
+    }
+
+    if (err instanceof AuthorizationTokenConflictError) {
+      return NextResponse.json(
+        {
+          error: 'An active authorization token already exists for this milestone.',
+          code:  'AUTHORIZATION_TOKEN_CONFLICT',
+        },
+        { status: 409 },
+      )
     }
 
     await logAudit({

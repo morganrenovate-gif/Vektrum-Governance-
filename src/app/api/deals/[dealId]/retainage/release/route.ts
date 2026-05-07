@@ -47,7 +47,7 @@ export async function POST(
   const { user, profile } = authContext
 
   // ── Role guard — funders only ────────────────────────────────────────────────
-  if (profile.role !== 'funder' && profile.role !== 'admin') {
+  if (profile.role !== 'funder') {
     return errorResponse(403, 'Only funders may release retainage.')
   }
 
@@ -64,13 +64,7 @@ export async function POST(
   // Mirrors the precondition on /api/milestones/[id]/release. Vektrum records
   // authorization readiness; the selected rail executes disbursement after
   // required release conditions and authorization are complete.
-  // Admins are exempt from this check (admin code paths do not initiate
-  // releases on behalf of a funder; the role gate above already restricts
-  // this route to funder | admin).
-  if (
-    profile.role === 'funder'
-    && (!profile.disbursement_rail || profile.disbursement_rail === 'not_configured')
-  ) {
+  if (!profile.disbursement_rail || profile.disbursement_rail === 'not_configured') {
     return errorResponse(
       400,
       'Disbursement rail not configured. Choose Stripe Connect or an external rail before releasing retainage.',
