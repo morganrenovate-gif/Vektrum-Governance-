@@ -62,6 +62,12 @@ export interface IssueAuthorizationTokenInput {
   issuedBy:           string
   /** Optional explicit expiry. Defaults based on rail. */
   expiresAt?:         Date
+  /**
+   * Tier C — SOV line-item links for this milestone.
+   * When provided, amount_vector is expanded to per-SOV-line entries so the
+   * authorization token records exactly which line items were drawn against.
+   */
+  sovLinks?:          Array<{ sov_line_item_id: string; amount: number }>
 }
 
 export interface IssueAuthorizationTokenResult {
@@ -171,11 +177,17 @@ export async function issueAuthorizationToken(
   const expiresAt  = input.expiresAt ?? new Date(Date.now() + ttlHours * 3_600_000)
   const currency   = input.currency ?? 'USD'
 
-  // amount_vector — Stage B1 always writes a single-entry vector. Tier C
-  // expands this to per-SOV-line entries.
-  const amountVector = [
-    { milestone_id: input.milestoneId, amount: input.netToContractor },
-  ]
+  // amount_vector — when SOV links are provided (Tier C), expand to per-line
+  // entries recording exactly which line items were drawn against. Without links,
+  // fall back to the Stage B1 single-entry vector.
+  const amountVector: Array<{ milestone_id: string; sov_line_item_id?: string; amount: number }> =
+    input.sovLinks && input.sovLinks.length > 0
+      ? input.sovLinks.map(l => ({
+          milestone_id:    input.milestoneId,
+          sov_line_item_id: l.sov_line_item_id,
+          amount:          l.amount,
+        }))
+      : [{ milestone_id: input.milestoneId, amount: input.netToContractor }]
 
   // policy_hash — pin the policy version into a deterministic hash. Once Tier
   // C-or-later introduces dynamic policy bundles, this should hash the actual

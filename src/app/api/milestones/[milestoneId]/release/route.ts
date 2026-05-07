@@ -431,7 +431,29 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   // free the reservation and restore the deal's available balance.
   const reservationMade = true  // reservation succeeded; used in catch block to decide whether to cancel
 
-  // ── STEP 2.5: Issue Authorization Token (Stage B1) ──────────────────────────
+  // ── STEP 2.5a: Fetch SOV line-item links (Tier C) ───────────────────────────
+  // When the milestone has SOV links, pass them to the token issuer so the
+  // amount_vector records which line items were drawn against. Advisory only
+  // at this stage; the gate already ran the SOV balance check above.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: sovLinksRaw } = await (supabase as any)
+    .from('milestone_sov_links')
+    .select('sov_line_item_id')
+    .eq('milestone_id', milestoneId)
+
+  // Build per-line-item amounts. Stage C1: proportional split of netToContractor
+  // across all linked items (equal share). Tier C+ will allow explicit amounts.
+  const sovLinksForToken = sovLinksRaw && sovLinksRaw.length > 0
+    ? sovLinksRaw.map((l: { sov_line_item_id: string }, i: number, arr: unknown[]) => ({
+        sov_line_item_id: l.sov_line_item_id,
+        amount:           i === arr.length - 1
+          // Last item absorbs rounding remainder
+          ? +(netToContractor - Math.floor((netToContractor / arr.length) * (arr.length - 1) * 100) / 100).toFixed(2)
+          : +(netToContractor / arr.length).toFixed(2),
+      }))
+    : undefined
+
+  // ── STEP 2.5b: Issue Authorization Token ────────────────────────────────────
   // The token is the durable on-platform artifact for this release decision.
   // Written before any Stripe call so a Stripe failure cannot leave the system
   // in a state where money moved without a recorded authorization.
@@ -451,6 +473,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       grossAmount:     fee.grossAmount,
       idempotencyKey,
       issuedBy:        user.id,
+      sovLinks:        sovLinksForToken,
     })
   } catch (issueErr) {
     // Free the reservation we just acquired — money has not moved.
@@ -1073,6 +1096,40 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           tokenStatusError.message,
         )
       }
+    }
+
+    // ── STEP 7.2: Update SOV line-item previous_released (Tier C) ──────────
+    // Fire-and-forget — non-fatal. When SOV links are present, increment
+    // previous_released on each linked line item so the balance_to_finish
+    // reflects this draw. Done after token confirmation so a token failure
+    // doesn't advance the SOV ledger.
+    if (sovLinksForToken && sovLinksForToken.length > 0) {
+      void (async () => {
+        const adminForSov = createSupabaseAdminClient()
+        for (const link of sovLinksForToken) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { data: current } = await (adminForSov as any)
+            .from('sov_line_items')
+            .select('previous_released')
+            .eq('id', link.sov_line_item_id)
+            .maybeSingle()
+          if (current) {
+            const newReleased = (current.previous_released ?? 0) + link.amount
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const { error: sovUpdateError } = await (adminForSov as any)
+              .from('sov_line_items')
+              .update({ previous_released: newReleased })
+              .eq('id', link.sov_line_item_id)
+            if (sovUpdateError) {
+              console.error(
+                '[release] sov_line_items previous_released update failed (non-fatal):',
+                link.sov_line_item_id,
+                sovUpdateError.message,
+              )
+            }
+          }
+        }
+      })()
     }
 
     // ── STEP 7.5: Notify contractor that release was authorized ───────────
