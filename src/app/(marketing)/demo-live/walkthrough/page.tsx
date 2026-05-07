@@ -168,7 +168,7 @@ export default function WalkthroughPage() {
             number={4}
             phase="Blocker resolution"
             actor="Funder"
-            actorColor="text-vektrum-blue"
+            actorColor="text-blue-300"
             title="Funder requests lien waiver from contractor"
             status="resolved"
             last={false}
@@ -255,26 +255,26 @@ export default function WalkthroughPage() {
         {/* Summary callout */}
         <div className="mt-14 rounded-2xl border border-vektrum-blue/20 bg-vektrum-blue/[0.04] px-7 py-6 space-y-3">
           <div className="flex items-center gap-2.5">
-            <ShieldCheck size={16} className="text-vektrum-blue flex-shrink-0" aria-hidden="true" />
+            <ShieldCheck size={16} className="text-blue-300 flex-shrink-0" aria-hidden="true" />
             <p className="text-[13px] font-semibold text-white">
               What this demo shows
             </p>
           </div>
           <ul className="space-y-2 text-[12px] text-white/60 leading-relaxed">
             <li className="flex items-start gap-2">
-              <ChevronRight size={10} className="mt-1 flex-shrink-0 text-vektrum-blue/60" aria-hidden="true" />
+              <ChevronRight size={10} className="mt-1 flex-shrink-0 text-blue-300/60" aria-hidden="true" />
               <span>The release gate is deterministic — it checks all 10 conditions. One failure blocks the entire release.</span>
             </li>
             <li className="flex items-start gap-2">
-              <ChevronRight size={10} className="mt-1 flex-shrink-0 text-vektrum-blue/60" aria-hidden="true" />
+              <ChevronRight size={10} className="mt-1 flex-shrink-0 text-blue-300/60" aria-hidden="true" />
               <span>AI reviews evidence and produces a brief. It never approves releases — the gate and funder authorization decide.</span>
             </li>
             <li className="flex items-start gap-2">
-              <ChevronRight size={10} className="mt-1 flex-shrink-0 text-vektrum-blue/60" aria-hidden="true" />
+              <ChevronRight size={10} className="mt-1 flex-shrink-0 text-blue-300/60" aria-hidden="true" />
               <span>Every release produces an authorization token and an audit proof bound into an append-only, tamper-evident chain.</span>
             </li>
             <li className="flex items-start gap-2">
-              <ChevronRight size={10} className="mt-1 flex-shrink-0 text-vektrum-blue/60" aria-hidden="true" />
+              <ChevronRight size={10} className="mt-1 flex-shrink-0 text-blue-300/60" aria-hidden="true" />
               <span>Vektrum does not hold funds. Payment execution runs through Stripe Connect or your existing wire/ACH/escrow process.</span>
             </li>
           </ul>
@@ -334,7 +334,7 @@ function Step({
     completed:  <CheckCircle2 size={13} className="text-emerald-400" />,
     blocked:    <XCircle      size={13} className="text-amber-400" />,
     resolved:   <CheckCircle2 size={13} className="text-emerald-400" />,
-    authorized: <Fingerprint  size={13} className="text-vektrum-blue" />,
+    authorized: <Fingerprint  size={13} className="text-blue-300" />,
   }[status]
 
   const statusLabel = {
@@ -475,9 +475,9 @@ function AuditEntry({
 }) {
   return (
     <div className="flex items-start gap-2 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2 font-mono text-[11px]">
-      <Shield size={10} className="mt-0.5 text-vektrum-blue flex-shrink-0" aria-hidden="true" />
+      <Shield size={10} className="mt-0.5 text-blue-300 flex-shrink-0" aria-hidden="true" />
       <div className="min-w-0 flex-1">
-        <span className="text-vektrum-blue font-semibold">{action}</span>
+        <span className="text-blue-300 font-semibold">{action}</span>
         <span className="text-white/30 mx-1.5">·</span>
         <span className="text-white/50">{actor}</span>
         <p className="mt-0.5 text-white/35 leading-relaxed">{note}</p>
