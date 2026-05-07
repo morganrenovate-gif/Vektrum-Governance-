@@ -229,12 +229,14 @@ await test('18. MilestoneCard Link2 icon imported from lucide-react', () => {
 
 // ── Safety: release gate and payment routes unchanged ─────────────────────────
 
-await test('19. Release gate does not reference milestone_sov_links', () => {
+await test('19. Release gate references milestone_sov_links for SOV balance check (Tier C)', () => {
+  // Phase-1 guardrail (gate must NOT reference SOV) retired when Tier C shipped.
+  // The gate now queries milestone_sov_links and checks sov_line_items.balance_to_finish.
   if (!exists(GATE)) return
   const src = read(GATE)
   assert(
-    !src.includes('milestone_sov_links') && !src.includes('sovLinks'),
-    `${GATE} must not reference milestone SOV links — SOV linkage is advisory only, not a release condition.`,
+    src.includes('milestone_sov_links') || src.includes('balance_to_finish') || src.includes('sov_line_items'),
+    `${GATE} should include Tier C SOV balance check via milestone_sov_links`,
   )
 })
 

@@ -362,24 +362,27 @@ await test('deal detail: passes dealAmount and viewerRole to SovSection', () => 
   )
 })
 
-// ── Safety: release gate and payment routes unchanged ─────────────────────────
+// ── Safety: release gate and payment routes — Tier C gate integration ─────────
+// Phase-1 guardrails (SOV must NOT be referenced) were retired when Tier C
+// shipped. The gate now actively checks SOV balances (balance_to_finish) and
+// the route fetches milestone_sov_links to populate the authorization token's
+// amount_vector. The checks below verify the integration is present.
 
-await test('release gate: SOV mismatch does not appear as a release blocker', () => {
-  // The release gate source must not reference SOV
-  if (!fs.existsSync(path.resolve(ROOT, RELEASE_GATE))) return // skip if file missing
+await test('release gate: SOV balance check is present (Tier C gate integration)', () => {
+  if (!fs.existsSync(path.resolve(ROOT, RELEASE_GATE))) return
   const src = read(RELEASE_GATE)
   assert(
-    !src.includes('sov_line_items') && !src.includes('SovLineItem') && !src.includes('sovTotal'),
-    `${RELEASE_GATE} must not reference SOV — SOV is advisory only in phase 1`,
+    src.includes('sov_line_items') || src.includes('balance_to_finish') || src.includes('milestone_sov_links'),
+    `${RELEASE_GATE} should include Tier C SOV balance check`,
   )
 })
 
-await test('release route: SOV is not referenced (release logic unchanged)', () => {
-  if (!fs.existsSync(path.resolve(ROOT, RELEASE_ROUTE))) return // skip if file missing
+await test('release route: SOV link fetch is present (Tier C token amount_vector)', () => {
+  if (!fs.existsSync(path.resolve(ROOT, RELEASE_ROUTE))) return
   const src = read(RELEASE_ROUTE)
   assert(
-    !src.includes('sov_line_items') && !src.includes('SovLineItem'),
-    `${RELEASE_ROUTE} must not reference SOV — release gate logic must be unchanged`,
+    src.includes('milestone_sov_links') || src.includes('sovLinksForToken') || src.includes('sov_line_items'),
+    `${RELEASE_ROUTE} should fetch SOV links for Tier C authorization token amount_vector`,
   )
 })
 
