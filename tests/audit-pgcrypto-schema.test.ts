@@ -62,7 +62,7 @@ function read(p: string): string {
   return fs.readFileSync(path.resolve(ROOT, p), 'utf-8')
 }
 
-const FIX_MIG    = 'supabase/migrations/20260429000001_pgcrypto_schema_fix.sql'
+const FIX_MIG    = 'supabase/migrations/20260429000001b_pgcrypto_schema_fix.sql'
 const IMMUT_MIG  = 'supabase/migrations/20260424000004_audit_log_immutability.sql'
 const ADMIN_MIG  = 'supabase/migrations/20260424000007_admin_audit.sql'
 const SIGNUP_DEF = 'supabase/migrations/20260429000000_signup_audit_defensive.sql'
