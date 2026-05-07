@@ -23,7 +23,7 @@
 
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { sha256OfCanonicalJson } from '@/lib/engine/audit'
-import { randomBytes, randomUUID, createSign, createPrivateKey } from 'node:crypto'
+import { randomBytes, randomUUID, sign as cryptoSign, createPrivateKey } from 'node:crypto'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -325,12 +325,12 @@ function signCanonicalPayload(payload: object): { signature: string | null; alg:
       return { signature: null, alg: 'unsigned' }
     }
 
-    // ed25519 uses Ed25519 (no separate hash). Sign the canonical JSON bytes.
+    // ed25519 uses no separate hash — pass null as the digest algorithm.
+    // crypto.sign(null, data, key) is the correct Node.js API for Ed25519;
+    // createSign('SHA256').sign(key) throws ERR_CRYPTO_UNSUPPORTED_OPERATION
+    // on Node >= 18 when the key is Ed25519.
     const canonical = canonicalJsonStringify(payload)
-    const signer    = createSign('SHA256') // ignored for Ed25519 but required by API
-    signer.update(canonical)
-    signer.end()
-    const sig = signer.sign(key)
+    const sig = cryptoSign(null, Buffer.from(canonical), key)
     return { signature: sig.toString('base64'), alg: 'ed25519' }
   } catch (err) {
     console.warn(
