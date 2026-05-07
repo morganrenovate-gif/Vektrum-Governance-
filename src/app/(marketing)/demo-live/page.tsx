@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Landmark, HardHat, Shield, ArrowRight } from 'lucide-react'
+import { Landmark, HardHat, Shield, ArrowRight, Play } from 'lucide-react'
 
 // ISR: public marketing surface — no per-user data, safe to cache.
 export const revalidate = 3600
@@ -129,8 +129,34 @@ export default function DemoLivePage() {
           ))}
         </div>
 
+        {/* ─── Guided walkthrough CTA ──────────────────────────────────── */}
+        <div className="mt-10 max-w-4xl mx-auto">
+          <Link
+            href="/demo-live/walkthrough"
+            className="group flex items-center justify-between gap-4 rounded-2xl border border-white/[0.08] bg-surface-2 shadow-card p-6 hover:border-white/[0.14] transition-all duration-300 hover:-translate-y-0.5"
+          >
+            <div className="flex items-center gap-4">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-vektrum-blue/10 border border-vektrum-blue/25">
+                <Play size={15} className="text-blue-300" aria-hidden="true" />
+              </div>
+              <div>
+                <p className="text-[14px] font-semibold text-white leading-snug">
+                  Guided 6-step walkthrough
+                </p>
+                <p className="text-[12px] text-white/55 mt-0.5">
+                  From draw submission to authorized release — including a gate blocker and resolution.
+                </p>
+              </div>
+            </div>
+            <ArrowRight
+              size={14}
+              className="text-blue-300 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1"
+            />
+          </Link>
+        </div>
+
         {/* ─── Footer note ─────────────────────────────────────────────── */}
-        <p className="mt-12 text-center text-[12px] text-white/75 tracking-wide">
+        <p className="mt-10 text-center text-[12px] text-white/75 tracking-wide">
           No account required &nbsp;·&nbsp; Simulated data only &nbsp;·&nbsp; No real funds
         </p>
 
