@@ -23,7 +23,7 @@
 
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { sha256OfCanonicalJson } from '@/lib/engine/audit'
-import { randomBytes, randomUUID, createSign, createPrivateKey } from 'node:crypto'
+import { randomBytes, randomUUID, sign as cryptoSign, createPrivateKey } from 'node:crypto'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -62,6 +62,20 @@ export interface IssueAuthorizationTokenInput {
   issuedBy:           string
   /** Optional explicit expiry. Defaults based on rail. */
   expiresAt?:         Date
+  /**
+   * Tier C — SOV line-item links for this milestone.
+   * When provided, amount_vector is expanded to per-SOV-line entries so the
+   * authorization token records exactly which line items were drawn against.
+   */
+  sovLinks?:          Array<{ sov_line_item_id: string; amount: number }>
+  /**
+   * Tier D — evidence graph commitment hash.
+   * sha256 of the canonical evidence graph snapshot (buildEvidenceGraph +
+   * computeGraphCommitment). Binds the authorization token to the exact
+   * set of documents, conditions, and review state that justified the release.
+   * Null until Tier D is wired in at call sites.
+   */
+  graphCommitment?:   string | null
 }
 
 export interface IssueAuthorizationTokenResult {
@@ -171,11 +185,17 @@ export async function issueAuthorizationToken(
   const expiresAt  = input.expiresAt ?? new Date(Date.now() + ttlHours * 3_600_000)
   const currency   = input.currency ?? 'USD'
 
-  // amount_vector — Stage B1 always writes a single-entry vector. Tier C
-  // expands this to per-SOV-line entries.
-  const amountVector = [
-    { milestone_id: input.milestoneId, amount: input.netToContractor },
-  ]
+  // amount_vector — when SOV links are provided (Tier C), expand to per-line
+  // entries recording exactly which line items were drawn against. Without links,
+  // fall back to the Stage B1 single-entry vector.
+  const amountVector: Array<{ milestone_id: string; sov_line_item_id?: string; amount: number }> =
+    input.sovLinks && input.sovLinks.length > 0
+      ? input.sovLinks.map(l => ({
+          milestone_id:    input.milestoneId,
+          sov_line_item_id: l.sov_line_item_id,
+          amount:          l.amount,
+        }))
+      : [{ milestone_id: input.milestoneId, amount: input.netToContractor }]
 
   // policy_hash — pin the policy version into a deterministic hash. Once Tier
   // C-or-later introduces dynamic policy bundles, this should hash the actual
@@ -200,7 +220,7 @@ export async function issueAuthorizationToken(
     currency,
     policy_version:   RELEASE_POLICY_VERSION,
     policy_hash:      policyHash,
-    graph_commitment: null,                    // Tier D produces this
+    graph_commitment: input.graphCommitment ?? null,
     nonce,
     sequence_index:   sequenceIndex,
     idempotency_key:  input.idempotencyKey,
@@ -235,7 +255,7 @@ export async function issueAuthorizationToken(
       currency,
       policy_version:   RELEASE_POLICY_VERSION,
       policy_hash:      policyHash,
-      graph_commitment: null,
+      graph_commitment: input.graphCommitment ?? null,
       token_hash:       tokenHash,
       nonce,
       signature_alg:    alg,
@@ -325,12 +345,12 @@ function signCanonicalPayload(payload: object): { signature: string | null; alg:
       return { signature: null, alg: 'unsigned' }
     }
 
-    // ed25519 uses Ed25519 (no separate hash). Sign the canonical JSON bytes.
+    // ed25519 uses no separate hash — pass null as the digest algorithm.
+    // crypto.sign(null, data, key) is the correct Node.js API for Ed25519;
+    // createSign('SHA256').sign(key) throws ERR_CRYPTO_UNSUPPORTED_OPERATION
+    // on Node >= 18 when the key is Ed25519.
     const canonical = canonicalJsonStringify(payload)
-    const signer    = createSign('SHA256') // ignored for Ed25519 but required by API
-    signer.update(canonical)
-    signer.end()
-    const sig = signer.sign(key)
+    const sig = cryptoSign(null, Buffer.from(canonical), key)
     return { signature: sig.toString('base64'), alg: 'ed25519' }
   } catch (err) {
     console.warn(

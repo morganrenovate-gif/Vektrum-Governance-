@@ -193,13 +193,15 @@ await test('9. Milestones without SOV links show advisory warning', () => {
   )
 })
 
-await test('10. Milestone SOV advisory does not block release (no gate change)', () => {
-  // The advisory must not be in the release gate source
+await test('10. Release gate includes SOV balance check (Tier C — balance_to_finish guard)', () => {
+  // Tier C promoted SOV from advisory to an active balance guard in the gate.
+  // This test was updated when Tier C shipped to verify the gate integration
+  // is present rather than asserting it is absent.
   if (!fs.existsSync(path.resolve(ROOT, RELEASE_GATE))) return
   const src = read(RELEASE_GATE)
   assert(
-    !src.includes('sov_line_item') && !src.includes('milestone_sov_links'),
-    `${RELEASE_GATE} must not reference SOV — SOV is advisory only, must not block release`,
+    src.includes('sov_line_item') || src.includes('milestone_sov_links') || src.includes('balance_to_finish'),
+    `${RELEASE_GATE} should include Tier C SOV balance check`,
   )
 })
 
@@ -220,12 +222,15 @@ await test('11. SovSection receives hasContract prop from deal page', () => {
 
 // ── Safety: release gate and payment routes unchanged ─────────────────────────
 
-await test('12. Release gate logic is unchanged', () => {
+await test('12. Release gate does not reference hasContract directly (hasContract is a UI-layer prop)', () => {
+  // hasContract is a UI prop on SovSection — it must not leak into the release gate.
+  // SOV (sov_line_items / milestone_sov_links) is intentionally present in the
+  // gate since Tier C shipped; hasContract is a different concern.
   if (!fs.existsSync(path.resolve(ROOT, RELEASE_GATE))) return
   const src = read(RELEASE_GATE)
   assert(
-    !src.includes('sov_line_items') && !src.includes('hasContract'),
-    `${RELEASE_GATE} must not reference SOV or hasContract — release logic is unchanged`,
+    !src.includes('hasContract'),
+    `${RELEASE_GATE} must not reference hasContract — that is a UI-layer prop, not a gate input`,
   )
 })
 

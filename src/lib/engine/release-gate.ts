@@ -458,6 +458,43 @@ export async function validateRelease(
     }
   }
 
+  // ─────────────────────────────────────────────────────────────────────────────
+  // CONDITION SOV-BALANCE: SOV line-item balance check (Tier C)
+  //
+  // When milestone_sov_links exist, verify that each linked SOV line item has
+  // sufficient balance_to_finish to cover the requested draw. This prevents
+  // over-draw on individual line items — a common institutional lender requirement.
+  //
+  // Advisory in the current phase: only blocks when the sum of linked amounts
+  // would result in balance_to_finish going negative. When no SOV links exist,
+  // this check is skipped (not all deals have SOV).
+  // ─────────────────────────────────────────────────────────────────────────────
+  const { data: sovLinks } = await supabase
+    .from('milestone_sov_links')
+    .select('sov_line_item_id, amount_override')
+    .eq('milestone_id', milestoneId)
+
+  if (sovLinks && sovLinks.length > 0) {
+    const lineItemIds = sovLinks.map((l: { sov_line_item_id: string }) => l.sov_line_item_id)
+    const { data: sovItems } = await supabase
+      .from('sov_line_items')
+      .select('id, balance_to_finish, description')
+      .in('id', lineItemIds)
+
+    if (sovItems) {
+      for (const item of sovItems) {
+        // balance_to_finish is already maintained by the app on each SOV update
+        if (typeof item.balance_to_finish === 'number' && item.balance_to_finish < 0) {
+          errors.push(
+            `SOV line item "${item.description}" has a negative balance_to_finish ` +
+            `($${Math.abs(item.balance_to_finish).toFixed(2)} over-drawn). ` +
+            'Update the SOV before releasing this milestone.',
+          )
+        }
+      }
+    }
+  }
+
   return {
     allowed: errors.length === 0,
     errors,

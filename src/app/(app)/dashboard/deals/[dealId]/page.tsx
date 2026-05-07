@@ -12,6 +12,7 @@ import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { AddMilestoneForm } from "./add-milestone-form";
 import { FundDealButton } from "./fund-deal-button";
 import { ReleaseRetainageButton } from "./release-retainage-button";
+import { ConfirmExternalReleaseButton } from "@/components/deal/confirm-external-release-button";
 import type { Deal, Profile, Milestone, LienWaiver, ChangeOrder, MilestoneDocument, ReleaseGateResult, ContractStatus } from "@/lib/types";
 import { formatMoney } from "@/lib/utils";
 import { ArrowLeft, ArrowRight, Info, FolderOpen, FileText, CheckCircle2, Clock, XCircle, AlertCircle, ShieldAlert, ShieldCheck, PenLine } from "lucide-react";
@@ -337,6 +338,31 @@ export default async function DealDetailPage({
 
   // Set of milestone IDs that have at least one link (used for checklist/next-step)
   const milestoneSovLinkedIds = new Set(sovLinksTyped.map(l => l.milestone_id))
+
+  // ── Pending external releases (funder external_rail only) ─────────────────
+  // Releases authorized on external_manual rail with execution_status='pending'
+  // are waiting for the funder to record that payment was executed outside
+  // Vektrum. Fetched via admin client so RLS does not filter them.
+  type PendingExternalRelease = {
+    id:              string
+    milestone_id:    string
+    amount:          number
+    execution_rail:  string
+    execution_status: string
+  }
+  let pendingExternalReleases: PendingExternalRelease[] = []
+  if (typedProfile.role === 'funder') {
+    const adminClient = createSupabaseAdminClient()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: pendingRaw } = await (adminClient as any)
+      .from('releases')
+      .select('id, milestone_id, amount, execution_rail, execution_status')
+      .eq('deal_id', dealId)
+      .eq('execution_rail', 'external_manual')
+      .eq('execution_status', 'pending')
+      .order('created_at', { ascending: true })
+    pendingExternalReleases = (pendingRaw ?? []) as PendingExternalRelease[]
+  }
 
   const sovItems = (sovItemsRaw ?? []) as import('@/lib/types').SovLineItem[]
 
@@ -1052,6 +1078,49 @@ export default async function DealDetailPage({
         hasContract={hasContract}
         releaseRulesAccepted={releaseRulesAccepted}
       />
+
+      {/* ── Pending External Payments (funder + external_rail only) ── */}
+      {/* Shown when one or more milestones have been governance-authorized on
+          the external_manual rail but the funder has not yet recorded that
+          payment was executed. Each row uses ConfirmExternalReleaseButton which
+          calls POST /api/releases/[id]/confirm-external to settle the release. */}
+      {typedProfile.role === "funder" && pendingExternalReleases.length > 0 && (
+        <section>
+          <SectionHeader
+            label="Pending External Payments"
+            count={pendingExternalReleases.length}
+          />
+          <div className="space-y-3">
+            {pendingExternalReleases.map((release) => {
+              const ms = milestones.find(m => m.id === release.milestone_id)
+              const contractorName = typedDeal.contractor?.full_name ?? typedDeal.contractor?.company_name ?? "Contractor"
+              return (
+                <div key={release.id} className="rounded-xl border border-white/[0.08] bg-surface-2 shadow-card px-5 py-4 space-y-3">
+                  {ms && (
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35 mb-0.5">
+                          Milestone
+                        </p>
+                        <p className="text-[14px] font-semibold text-white">{ms.title}</p>
+                      </div>
+                      <span className="tabular-nums text-[13px] font-semibold text-white/80">
+                        {formatMoney(release.amount)}
+                      </span>
+                    </div>
+                  )}
+                  <ConfirmExternalReleaseButton
+                    releaseId={release.id}
+                    amount={release.amount}
+                    contractorName={contractorName}
+                    allowMarkFailed
+                  />
+                </div>
+              )
+            })}
+          </div>
+        </section>
+      )}
 
       {/* ── Deal Readiness Banner (funder only) ── */}
       {typedProfile.role === "funder" && milestones.length > 0 && (
