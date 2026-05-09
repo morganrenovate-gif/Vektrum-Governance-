@@ -102,6 +102,28 @@ check(
   'Verify route reads VEKTRUM_TOKEN_SIGNING_KEY_PUBLIC env var',
 )
 
+// Rate-limit correctness: auth must come before the rate-limit check so the
+// partner ID is available as the rate-limit key (SEC-1 regression guard).
+const authPos = verifySrc.indexOf('requirePartnerAuth')
+const rlPos   = verifySrc.indexOf('checkRateLimit')
+check(authPos !== -1 && rlPos !== -1, 'Verify route has both requirePartnerAuth and checkRateLimit')
+check(
+  authPos < rlPos,
+  'requirePartnerAuth is called before checkRateLimit (auth-first for partner-scoped RL key)',
+)
+check(
+  verifySrc.includes('partnerCtx.partnerId') && verifySrc.includes('partner_api'),
+  'Rate-limit key is scoped to authenticated partner ID, not a generic key',
+)
+check(
+  !verifySrc.match(/checkRateLimit\s*\(\s*request\s*,/),
+  'checkRateLimit is NOT called with raw request object as key (SEC-1 fix)',
+)
+check(
+  verifySrc.includes('POLICIES.partner_api.description'),
+  'rateLimitResponse receives policy description string',
+)
+
 // ── 4. Verify uses ed25519 cryptographic verification ────────────────────────
 
 console.log('\n── 4. Verify uses ed25519 cryptographic verification ───────────────')

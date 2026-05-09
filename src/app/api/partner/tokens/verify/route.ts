@@ -41,20 +41,26 @@ interface VerifyBody {
 }
 
 export async function POST(request: NextRequest) {
-  // Rate limit: partner_api scope
-  const rl = await checkRateLimit(request, POLICIES.partner_api, 'partner-verify')
-  if (!rl.allowed) {
-    await logRateLimitViolation(request, 'partner_api', 'partner-verify')
-    return rateLimitResponse(rl)
-  }
-
+  // Authenticate first so we can key the rate limit by partner ID.
   let partnerCtx
   try {
     partnerCtx = await requirePartnerAuth(request)
   } catch (err) {
     return err as NextResponse
   }
-  void partnerCtx // authenticated; no per-deal scope check needed for sig verification
+
+  // Rate limit: partner_api scope, keyed per authenticated partner.
+  const rlKey = `partner:${partnerCtx.partnerId}:partner_api`
+  const rl = await checkRateLimit(rlKey, POLICIES.partner_api)
+  if (!rl.allowed) {
+    logRateLimitViolation(rlKey, rl, {
+      actorId:    partnerCtx.partnerId,
+      policyName: 'partner_api',
+      entityType: 'partner',
+      entityId:   partnerCtx.partnerId,
+    })
+    return rateLimitResponse(rl, POLICIES.partner_api.description)
+  }
 
   let body: VerifyBody
   try {
