@@ -505,7 +505,7 @@ export async function POST(
 
     // Fire-and-forget — notify admins that external confirmation is needed
     void notifyExternalPaymentConfirmationRequired({
-      releaseId:   releaseInsertedId,
+      releaseId:   releaseInsertedId!,
       milestoneId: milestoneId,
       dealId:      milestone.deal_id,
       funderId:    user.id,

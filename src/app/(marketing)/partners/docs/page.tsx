@@ -125,11 +125,13 @@ export default function PartnerDocsPage() {
               </p>
               <CodeBlock language="http">{`Authorization: Bearer vkp_live_<your_64hex_key>`}</CodeBlock>
               <p>
-                Keys are issued in two environments:{' '}
+                Keys use one of two prefixes:{' '}
                 <code className="text-white/80 bg-white/[0.06] px-1.5 py-0.5 rounded text-[13px]">vkp_live_</code>{' '}
-                for production and{' '}
+                for live integrations and{' '}
                 <code className="text-white/80 bg-white/[0.06] px-1.5 py-0.5 rounded text-[13px]">vkp_test_</code>{' '}
-                for sandbox. Each prefix is followed by 64 hex characters (73 characters total).
+                for development and integration testing. Both prefixes access the same data environment —
+                use dedicated test deals when verifying your integration.
+                Each prefix is followed by 64 hex characters (73 characters total).
                 Only the SHA-256 hash is stored in Vektrum&apos;s database —
                 the plaintext key is shown once at issuance and cannot be recovered. If you lose your
                 key, an admin must rotate it (the previous key is immediately invalidated).
@@ -445,8 +447,8 @@ def verify_vektrum_signature(
                 {[
                   'Received API key from Vektrum admin',
                   'Confirmed GET /api/partner/releases/:id returns expected shape',
-                  'Tested confirm endpoint with a sandbox release',
-                  'Tested fail endpoint with a sandbox release',
+                  'Tested confirm endpoint against a dedicated test deal',
+                  'Tested fail endpoint against a dedicated test deal',
                   'Set up idempotency handling (retry on network error, check alreadyConfirmed)',
                   'Confirmed audit log entries appear in Vektrum dashboard after confirm/fail calls',
                   'If webhooks enabled: received partner signing secret from Vektrum admin',

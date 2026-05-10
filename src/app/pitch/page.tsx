@@ -632,7 +632,7 @@ function ExecutionRailsSlide() {
                 'Same 10-condition gate (Stripe payouts check skipped)',
                 'Authorization recorded; funder executes externally',
                 'Confirmation records method, reference, proof, actor',
-                'SLA-tracked; unconfirmed releases escalate',
+                'Confirmation status tracked; unconfirmed releases visible in admin dashboard',
               ].map((x) => (
                 <div key={x} className="flex items-start gap-2">
                   <CheckCircle2 size={11} className="text-emerald-400 mt-0.5 flex-shrink-0" />
@@ -1829,7 +1829,7 @@ function PlacementSlide() {
     { icon: Shield,       label: '10-condition release gate',         sub: 'Funder-triggered, server-enforced — pass or block with audit record',             vektrum: true,  core: true  },
     { icon: ArrowRight,   label: 'Signed authorization signal',       sub: 'Vektrum issues auth — your wire, ACH, check, or treasury system executes',       vektrum: false, core: false },
     { icon: CheckCircle2, label: 'Reference + proof returned',        sub: 'Method, bank reference, proof document — funder confirms in Vektrum',            vektrum: true,  core: false },
-    { icon: GitBranch,    label: 'Audit + reconciliation',            sub: 'Ledger settled, SLA-tracked, confirmation permanently logged',                   vektrum: true,  core: false },
+    { icon: GitBranch,    label: 'Audit + reconciliation',            sub: 'Ledger settled, confirmation status tracked, confirmation permanently logged',  vektrum: true,  core: false },
   ]
 
   const directFlow: FlowNode[] = [

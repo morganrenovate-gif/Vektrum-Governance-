@@ -133,7 +133,7 @@ export default function PartnersPage() {
               number="2"
               icon={Zap}
               title="Vektrum fires a signed webhook to your endpoint"
-              body="Vektrum immediately fires a signed release.authorized webhook to the endpoint you registered during partner setup. The payload includes the release ID, deal details, milestone details, amounts, and an idempotency key. The signature is an HMAC-SHA256 of the timestamp and raw body, using your partner-specific signing secret."
+              body="Vektrum delivers a signed release.authorized webhook to the endpoint you registered during partner setup. The payload includes the release ID, deal details, milestone details, amounts, and an idempotency key. The signature is an HMAC-SHA256 of the timestamp and raw body, using your partner-specific signing secret."
             />
             <StepCard
               number="3"
@@ -447,7 +447,7 @@ def verify_vektrum_signature(
           <p className="text-[16px] leading-relaxed text-white/55 mb-8 max-w-xl mx-auto">
             Contact us to receive your partner API key and webhook signing secret. Credentials are
             issued once and shown only to the issuing admin. Once you have your credentials, you
-            can begin testing against sandbox releases immediately.
+            can verify your integration using dedicated test deals before going live.
           </p>
 
           <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] px-8 py-8 mb-8">
@@ -459,8 +459,8 @@ def verify_vektrum_signature(
               </div>
               <div className="sm:px-6">
                 <Zap size={16} className="text-blue-300 mx-auto sm:mx-0 mb-2" aria-hidden="true" />
-                <p className="text-[13px] font-semibold text-white mb-1">Sandbox testing</p>
-                <p className="text-[12px] text-white/50 leading-relaxed">Test confirm and fail endpoints with sandbox releases before going live.</p>
+                <p className="text-[13px] font-semibold text-white mb-1">Integration testing</p>
+                <p className="text-[12px] text-white/50 leading-relaxed">Test confirm and fail endpoints against dedicated test deals before going live.</p>
               </div>
               <div className="sm:pl-6">
                 <Shield size={16} className="text-blue-300 mx-auto sm:mx-0 mb-2" aria-hidden="true" />

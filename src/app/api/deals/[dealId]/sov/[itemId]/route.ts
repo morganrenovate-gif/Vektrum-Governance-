@@ -65,7 +65,7 @@ export async function PATCH(
   try {
     body = await request.json()
   } catch {
-    return validationError('Request body must be valid JSON.')
+    return validationError(['Request body must be valid JSON.'])
   }
 
   const adminClient = createSupabaseAdminClient()
@@ -88,7 +88,7 @@ export async function PATCH(
       return errorResponse(403, 'Only funders and admins can approve SOV line items.')
     }
     if (existing.status !== 'pending_review') {
-      return validationError(`Cannot approve a line item with status '${existing.status}'. It must be 'pending_review'.`)
+      return validationError([`Cannot approve a line item with status '${existing.status}'. It must be 'pending_review'.`])
     }
 
     const { data: approved, error: approveErr } = await adminClient
@@ -126,7 +126,7 @@ export async function PATCH(
       return errorResponse(403, 'Only contractors and admins can submit SOV line items for review.')
     }
     if (existing.status !== 'draft') {
-      return validationError(`Cannot submit a line item with status '${existing.status}'. It must be 'draft'.`)
+      return validationError([`Cannot submit a line item with status '${existing.status}'. It must be 'draft'.`])
     }
 
     const { data: submitted, error: submitErr } = await adminClient
@@ -171,7 +171,7 @@ export async function PATCH(
 
   if (body.description !== undefined) {
     if (typeof body.description !== 'string' || !body.description.trim()) {
-      return validationError('description must be a non-empty string.')
+      return validationError(['description must be a non-empty string.'])
     }
     updates.description = (body.description as string).trim()
   }
@@ -187,7 +187,7 @@ export async function PATCH(
   for (const field of numericFields) {
     if (body[field] !== undefined) {
       if (typeof body[field] !== 'number' || (body[field] as number) < 0) {
-        return validationError(`${field} must be a non-negative number.`)
+        return validationError([`${field} must be a non-negative number.`])
       }
       updates[field] = body[field]
     }
@@ -206,7 +206,7 @@ export async function PATCH(
   Object.assign(updates, computed)
 
   if (Object.keys(updates).length === 0) {
-    return validationError('No updatable fields provided.')
+    return validationError(['No updatable fields provided.'])
   }
 
   const { data: updated, error: updateErr } = await adminClient

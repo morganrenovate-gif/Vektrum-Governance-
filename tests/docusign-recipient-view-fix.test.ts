@@ -179,7 +179,7 @@ async function main() {
   ]
   for (const field of requiredFields) {
     check(
-      sigCatch && sigCatch[0].includes(field),
+      !!(sigCatch && sigCatch[0].includes(field)),
       `  3b. diagnostic log includes "${field}"`,
     )
   }

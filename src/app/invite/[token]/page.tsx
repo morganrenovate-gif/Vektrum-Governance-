@@ -114,11 +114,12 @@ export default function InviteAcceptPage() {
           setAuthPhase('unauthenticated')
           return
         }
-        const { data: profile } = await supabase
+        const { data: profileData } = await supabase
           .from('profiles')
           .select('role')
           .eq('id', user.id)
           .single()
+        const profile = profileData as { role: string } | null
         if (!profile) {
           setAuthPhase('unauthenticated')
           return
@@ -126,7 +127,7 @@ export default function InviteAcceptPage() {
         if (profile.role === 'funder') {
           setAuthPhase('funder')
         } else {
-          setAuthPhase({ kind: 'wrong_role', role: profile.role as string })
+          setAuthPhase({ kind: 'wrong_role', role: profile.role })
         }
       } catch {
         setAuthPhase('unauthenticated')

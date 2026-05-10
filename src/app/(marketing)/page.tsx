@@ -114,7 +114,7 @@ export default function HomePage() {
                     className="group inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-7 py-3.5 text-[15px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 transition-all hover:bg-vektrum-blue-hover hover:shadow-xl hover:shadow-vektrum-blue/40 hover:-translate-y-0.5"
                   >
                     Apply to become a design partner
-                    <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                    <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden={true} />
                   </Link>
                   <Link
                     href="/demo-live"
@@ -197,7 +197,7 @@ export default function HomePage() {
                         }`}>
                           {cond.pass
                             ? <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                            : <X size={8} className="text-red-400" aria-hidden="true" />
+                            : <X size={8} className="text-red-400" aria-hidden={true} />
                           }
                         </div>
                         <div className="flex-1 min-w-0">
@@ -221,7 +221,7 @@ export default function HomePage() {
 
                   {/* Blocked banner */}
                   <div className="mt-3 flex items-center gap-2.5 px-3.5 py-3 rounded-xl border border-red-500/25 bg-red-500/[0.08]">
-                    <X size={13} className="text-red-400 flex-shrink-0" aria-hidden="true" />
+                    <X size={13} className="text-red-400 flex-shrink-0" aria-hidden={true} />
                     <div>
                       <p className="text-[12px] font-semibold text-red-400">Release blocked — 2 conditions unmet</p>
                       <p className="text-[10px] text-white/50 mt-0.5">All 10 conditions must pass before funds move.</p>
@@ -299,7 +299,7 @@ export default function HomePage() {
                 key={p}
                 className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-surface-2 px-4 py-3"
               >
-                <AlertTriangle size={16} className="text-amber-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
+                <AlertTriangle size={16} className="text-amber-400 mt-0.5 flex-shrink-0" aria-hidden={true} />
                 <span className="text-[14px] text-white/80 leading-relaxed">{p}</span>
               </li>
             ))}
@@ -359,15 +359,15 @@ export default function HomePage() {
             </p>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-2 text-[12px] text-white/75">
               <WorkflowStep label="Contract / SOV" />
-              <ArrowRight size={12} className="text-white/35" aria-hidden="true" />
+              <ArrowRight size={12} className="text-white/35" aria-hidden={true} />
               <WorkflowStep label="Draw Request" />
-              <ArrowRight size={12} className="text-white/35" aria-hidden="true" />
+              <ArrowRight size={12} className="text-white/35" aria-hidden={true} />
               <WorkflowStep label="Evidence" />
-              <ArrowRight size={12} className="text-white/35" aria-hidden="true" />
+              <ArrowRight size={12} className="text-white/35" aria-hidden={true} />
               <WorkflowStep label="Release Gate" />
-              <ArrowRight size={12} className="text-white/35" aria-hidden="true" />
+              <ArrowRight size={12} className="text-white/35" aria-hidden={true} />
               <WorkflowStep label="Authorization" />
-              <ArrowRight size={12} className="text-white/35" aria-hidden="true" />
+              <ArrowRight size={12} className="text-white/35" aria-hidden={true} />
               <WorkflowStep label="Selected Rail" />
             </div>
           </div>
@@ -438,7 +438,7 @@ export default function HomePage() {
               </p>
               <div className="flex items-start gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/15 flex-shrink-0">
-                  <Sparkles size={16} className="text-blue-300" aria-hidden="true" />
+                  <Sparkles size={16} className="text-blue-300" aria-hidden={true} />
                 </div>
                 <div>
                   <p className="text-[15px] font-semibold text-white">AI draw pre-review current</p>
@@ -458,7 +458,7 @@ export default function HomePage() {
               </p>
               <div className="flex items-start gap-3 mb-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-vektrum-blue/20 flex-shrink-0">
-                  <Shield size={16} className="text-blue-200" aria-hidden="true" />
+                  <Shield size={16} className="text-blue-200" aria-hidden={true} />
                 </div>
                 <div>
                   <p className="text-[15px] font-semibold text-white">Deterministic release gate</p>
@@ -477,7 +477,7 @@ export default function HomePage() {
                   'Sequential release failure',
                 ].map((theme) => (
                   <li key={theme} className="flex items-center gap-2">
-                    <FileWarning size={11} className="text-amber-300 flex-shrink-0" aria-hidden="true" />
+                    <FileWarning size={11} className="text-amber-300 flex-shrink-0" aria-hidden={true} />
                     <span>{theme}</span>
                   </li>
                 ))}
@@ -489,7 +489,7 @@ export default function HomePage() {
           </div>
 
           <p className="mt-8 text-[12px] text-white/55 text-center">
-            <ClipboardCheck size={11} className="inline-block mr-1.5 -mt-0.5" aria-hidden="true" />
+            <ClipboardCheck size={11} className="inline-block mr-1.5 -mt-0.5" aria-hidden={true} />
             AI pre-review is not condition #11. It runs separately, before the gate evaluates.
           </p>
         </div>
@@ -529,7 +529,7 @@ export default function HomePage() {
                   {
                     icon: CheckCircle2,
                     title: '10-condition server-side gate',
-                    desc: 'Every release passes 10 checks simultaneously. No manual override.',
+                    desc: 'Every release passes 10 checks simultaneously. No release gate bypass — AI review overrides require admin MFA and are audit-logged.',
                   },
                   {
                     icon: GitBranch,
@@ -668,7 +668,7 @@ export default function HomePage() {
                   'Self-service setup — no integration required',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
-                    <CheckCircle2 size={13} className="mt-0.5 flex-shrink-0 text-blue-300" aria-hidden="true" />
+                    <CheckCircle2 size={13} className="mt-0.5 flex-shrink-0 text-blue-300" aria-hidden={true} />
                     <span className="text-[13px] leading-relaxed text-white/60">{item}</span>
                   </li>
                 ))}
@@ -696,7 +696,7 @@ export default function HomePage() {
                   'API integration: confirm or fail via partner API endpoints',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
-                    <CheckCircle2 size={13} className="mt-0.5 flex-shrink-0 text-emerald-400" aria-hidden="true" />
+                    <CheckCircle2 size={13} className="mt-0.5 flex-shrink-0 text-emerald-400" aria-hidden={true} />
                     <span className="text-[13px] leading-relaxed text-white/60">{item}</span>
                   </li>
                 ))}
@@ -730,7 +730,7 @@ export default function HomePage() {
             <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.04] p-7 flex flex-col">
               <div className="flex items-center gap-3 mb-6">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/15 flex-shrink-0">
-                  <Building2 size={16} className="text-emerald-400" aria-hidden="true" />
+                  <Building2 size={16} className="text-emerald-400" aria-hidden={true} />
                 </div>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-400 mb-0.5">Institutional · External rail</p>
@@ -745,7 +745,7 @@ export default function HomePage() {
                   { icon: Shield,        label: '10-condition release gate',         sub: 'Server-side, atomic, funder-triggered — pass or block with full audit record',                                   vektrum: true,  core: true  },
                   { icon: ArrowRight,    label: 'Signed authorization signal fired', sub: 'Vektrum issues authorization — your wire, ACH, check, or treasury system executes',                              vektrum: false, core: false },
                   { icon: CheckCircle2,  label: 'Reference + proof returned',        sub: 'Funder records payment method, bank reference, and proof document in Vektrum',                                   vektrum: true,  core: false },
-                  { icon: GitBranch,     label: 'Audit + reconciliation',            sub: 'Ledger settled, SLA-tracked, confirmation permanently and immutably logged',                                     vektrum: true,  core: false },
+                  { icon: GitBranch,     label: 'Audit + reconciliation',            sub: 'Ledger settled, confirmation status tracked, confirmation permanently and immutably logged',                vektrum: true,  core: false },
                 ].map(({ icon: Icon, label, sub, vektrum, core }, i, arr) => (
                   <div key={label}>
                     <div className={`flex items-start gap-3 px-3 py-2.5 rounded-xl${core ? ' bg-vektrum-blue/[0.08] border border-vektrum-blue/25' : ''}`}>
@@ -783,7 +783,7 @@ export default function HomePage() {
             <div className="rounded-2xl border border-vektrum-blue/20 bg-vektrum-blue/[0.04] p-7 flex flex-col">
               <div className="flex items-center gap-3 mb-6">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-vektrum-blue/15 flex-shrink-0">
-                  <CreditCard size={16} className="text-blue-300" aria-hidden="true" />
+                  <CreditCard size={16} className="text-blue-300" aria-hidden={true} />
                 </div>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-blue-300 mb-0.5">Direct · Stripe Connect rail</p>
@@ -979,7 +979,7 @@ export default function HomePage() {
               </ol>
 
               <div className="mt-5 flex items-start gap-3 px-4 py-3.5 rounded-xl bg-red-50 border border-red-100">
-                <AlertCircle size={14} className="text-red-500 flex-shrink-0 mt-0.5" aria-hidden="true" />
+                <AlertCircle size={14} className="text-red-500 flex-shrink-0 mt-0.5" aria-hidden={true} />
                 <p className="text-[13px] text-red-700 font-medium leading-relaxed">
                   If any condition fails, the release is blocked until the underlying issue is resolved.
                 </p>
@@ -1075,7 +1075,7 @@ export default function HomePage() {
                   'Nothing automatically blocks a bad release',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3">
-                    <X size={13} className="mt-[3px] flex-shrink-0 text-red-400/70" aria-hidden="true" />
+                    <X size={13} className="mt-[3px] flex-shrink-0 text-red-400/70" aria-hidden={true} />
                     <span className="text-[13.5px] text-vektrum-muted">{item}</span>
                   </li>
                 ))}
@@ -1102,7 +1102,7 @@ export default function HomePage() {
                   'Release blocked at condition failure — automatically, always',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3">
-                    <CheckCircle2 size={13} className="mt-[3px] flex-shrink-0 text-vektrum-blue" aria-hidden="true" />
+                    <CheckCircle2 size={13} className="mt-[3px] flex-shrink-0 text-vektrum-blue" aria-hidden={true} />
                     <span className="text-[13.5px] text-vektrum-muted">{item}</span>
                   </li>
                 ))}
@@ -1184,7 +1184,7 @@ export default function HomePage() {
                   {scenario.without}
                 </p>
                 <div className="flex items-start gap-2 pt-3 border-t border-white/[0.06]">
-                  <Shield size={11} className="text-blue-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
+                  <Shield size={11} className="text-blue-400 mt-0.5 flex-shrink-0" aria-hidden={true} />
                   <p className="text-[11px] text-blue-200 leading-relaxed">{scenario.condition}</p>
                 </div>
               </div>
@@ -1233,7 +1233,7 @@ export default function HomePage() {
                   'Institutional portfolios: external rail available',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
-                    <ArrowRight size={12} className="mt-0.5 flex-shrink-0 text-vektrum-blue" aria-hidden="true" />
+                    <ArrowRight size={12} className="mt-0.5 flex-shrink-0 text-vektrum-blue" aria-hidden={true} />
                     <span className="text-[13px] leading-relaxed text-vektrum-muted">{item}</span>
                   </li>
                 ))}
@@ -1261,7 +1261,7 @@ export default function HomePage() {
                   'Submit draw packages with documentation in-platform',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
-                    <ArrowRight size={12} className="mt-0.5 flex-shrink-0 text-vektrum-blue" aria-hidden="true" />
+                    <ArrowRight size={12} className="mt-0.5 flex-shrink-0 text-vektrum-blue" aria-hidden={true} />
                     <span className="text-[13px] leading-relaxed text-vektrum-muted">{item}</span>
                   </li>
                 ))}
@@ -1289,7 +1289,7 @@ export default function HomePage() {
                   'All privileged actions dual-logged with justification',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
-                    <ArrowRight size={12} className="mt-0.5 flex-shrink-0 text-vektrum-blue" aria-hidden="true" />
+                    <ArrowRight size={12} className="mt-0.5 flex-shrink-0 text-vektrum-blue" aria-hidden={true} />
                     <span className="text-[13px] leading-relaxed text-vektrum-muted">{item}</span>
                   </li>
                 ))}
@@ -1492,7 +1492,7 @@ export default function HomePage() {
               >
                 <p className="text-[13px] font-semibold text-white mb-1.5 group-hover:text-blue-300 transition-colors">
                   {r.role} view
-                  <ArrowRight size={12} className="inline-block ml-1.5 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
+                  <ArrowRight size={12} className="inline-block ml-1.5 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden={true} />
                 </p>
                 <p className="text-[12px] text-white/50 leading-relaxed">{r.desc}</p>
               </Link>
@@ -1571,7 +1571,7 @@ export default function HomePage() {
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2"
-                    aria-hidden="true"
+                    aria-hidden={true}
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 8l4 4 4-4" />
                   </svg>
@@ -1637,7 +1637,7 @@ export default function HomePage() {
               className="group inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-7 py-3 text-[14px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 hover:bg-vektrum-blue-hover transition-all"
             >
               Create your account
-              <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+              <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden={true} />
             </Link>
             <Link
               href="/pricing"
@@ -1667,7 +1667,7 @@ function TrustBoundaryCard({
     <div className="rounded-xl border border-white/[0.08] bg-surface-2 px-5 py-4">
       <div className="flex items-center gap-2.5 mb-2">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-vektrum-blue/[0.12]">
-          <Icon size={14} className="text-blue-300" aria-hidden="true" />
+          <Icon size={14} className="text-blue-300" aria-hidden={true} />
         </div>
         <p className="text-[13px] font-semibold text-white">{title}</p>
       </div>
@@ -1713,7 +1713,7 @@ function PersonaCard({
     <div className="rounded-2xl border border-white/[0.08] bg-surface-2 p-6">
       <div className="flex items-center gap-3 mb-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-vektrum-blue/[0.12]">
-          <Icon size={16} className="text-blue-300" aria-hidden="true" />
+          <Icon size={16} className="text-blue-300" aria-hidden={true} />
         </div>
         <p className="text-[15px] font-semibold text-white leading-tight">{title}</p>
       </div>

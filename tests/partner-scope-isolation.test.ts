@@ -383,20 +383,19 @@ await test('CONFIRM: Stripe-rail release → 400 before scope check', async () =
 
 await test('CONFIRM: matching partner, external_manual, pending → 200 success', async () => {
   resetState()
-  // Fetch release (first from('releases') call)
+  // Fetch release
   queueTable('releases',        { data: RELEASE_EXTERNAL_PENDING, error: null })
   // Fetch deal
   queueTable('deals',           { data: DEAL_PARTNER_A,           error: null })
   // Fetch milestone
   queueTable('milestones',      { data: MILESTONE_ROW,            error: null })
-  // Update release (second from('releases') call) — returns the updated row
-  queueTable('releases',        { data: [{ id: 'rel-1' }],        error: null })
+  // RPC: partner_confirm_release_atomic → 'confirmed'
+  queueRpc({ data: [{ outcome: 'confirmed', current_execution_status: 'confirmed', current_payment_reference: 'WIRE-REF-001', current_executed_at: '2026-05-11T00:00:00Z' }], error: null })
   // Insert billing record
   queueTable('billing_records', { data: null,                     error: null })
   // RPC: increment_deal_financials
   queueRpc({ data: null, error: null })
-  // RPC: increment_deal_retainage — not called when retainageAmount=0, but queued as safety
-  queueRpc({ data: null, error: null })
+  // RPC: increment_deal_retainage — not called when retainageAmount=0 (deal.retainage_percentage=0)
 
   const res: NextResponse = await POST_CONFIRM(
     makeRequest('POST', { payment_method: 'wire', payment_reference: 'WIRE-REF-001' }),

@@ -22,14 +22,13 @@ export default async function NewDealPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login?next=/dashboard/deals/new')
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: profile } = await (supabase as any)
+  const { data: profile } = await supabase
     .from('profiles')
     .select('role')
     .eq('id', user.id)
-    .single<{ role: string }>()
+    .single()
 
-  const role = profile?.role as DealFormRole | undefined
+  const role = (profile?.role ?? undefined) as DealFormRole | undefined
 
   const ALLOWED: DealFormRole[] = ['contractor', 'funder', 'admin']
   if (!role || !ALLOWED.includes(role)) {

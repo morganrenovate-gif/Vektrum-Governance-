@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
-import { getAuthUser, requireRole, requireMFA, extractAdminJustification, requireAdminAudit } from '@/lib/auth/middleware'
+import { getAuthUser, requireRole, requireMFA, requireAdminAudit } from '@/lib/auth/middleware'
 import { logAudit } from '@/lib/engine/audit'
 import { POLICIES, checkRateLimit, rateLimitResponse, logRateLimitViolation } from '@/lib/engine/rate-limit'
 
@@ -44,10 +44,13 @@ export async function POST(
   const { jti } = await params
 
   // Rate limit: admin_write (fail-closed on error)
-  const rl = await checkRateLimit(request, POLICIES.admin_write, `admin-token-revoke:${jti}`)
+  const rl = await checkRateLimit(`admin-token-revoke:${jti}`, POLICIES.admin_write)
   if (!rl.allowed) {
-    await logRateLimitViolation(request, 'admin_write', `admin-token-revoke:${jti}`)
-    return rateLimitResponse(rl)
+    logRateLimitViolation(`admin-token-revoke:${jti}`, rl, {
+      actorId: null, policyName: 'admin_write',
+      entityType: 'authorization_token', entityId: jti,
+    })
+    return rateLimitResponse(rl, POLICIES.admin_write.description)
   }
 
   let authContext
@@ -78,7 +81,7 @@ export async function POST(
     )
   }
 
-  const adminJustification = extractAdminJustification(body)
+  const adminJustification = (body.admin_justification ?? '').trim()
   if (!adminJustification) {
     return NextResponse.json(
       { error: 'admin_justification is required (at least 20 characters) for token revocation.' },
@@ -149,12 +152,20 @@ export async function POST(
   })
 
   // Dual-write to admin audit log
-  await requireAdminAudit({
-    adminId:       user.id,
-    action:        'token_revoked',
-    targetType:    'authorization_token',
-    targetId:      token.id,
-    justification: adminJustification,
+  await requireAdminAudit(profile, user, adminJustification, {
+    action:       'token_revoked',
+    entityType:   'authorization_token',
+    entityId:     token.id,
+    systemSource: 'api/admin/tokens/[jti]/revoke',
+    oldValues:    { status: token.status },
+    newValues:    { status: 'revoked' },
+    metadata: {
+      jti:             token.jti,
+      token_hash:      token.token_hash,
+      reason:          body.reason!.trim(),
+      milestone_id:    token.milestone_id,
+      draw_request_id: token.draw_request_id,
+    },
   })
 
   return NextResponse.json({ success: true, alreadyRevoked: false })

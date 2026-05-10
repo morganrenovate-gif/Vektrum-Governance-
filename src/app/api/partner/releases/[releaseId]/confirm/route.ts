@@ -144,7 +144,7 @@ export async function POST(
   const { data: release, error: releaseError } = await (admin as any)
     .from('releases')
     .select(
-      'id, milestone_id, deal_id, amount, execution_rail, execution_status, external_payment_reference, external_executed_at, external_executed_by, authorization_token_id',
+      'id, milestone_id, deal_id, amount, execution_rail, execution_status, authorization_token_id',
     )
     .eq('id', releaseId)
     .single()
@@ -159,27 +159,6 @@ export async function POST(
   if (r.execution_rail !== 'external_manual') {
     return validationError([
       `Only external-rail releases can be confirmed via the partner API. execution_rail is '${r.execution_rail}'.`,
-    ])
-  }
-
-  if (r.execution_status === 'confirmed') {
-    return NextResponse.json(
-      {
-        success:                    true,
-        releaseId:                  r.id,
-        alreadyConfirmed:           true,
-        execution_status:           'confirmed',
-        external_payment_reference: r.external_payment_reference,
-        external_executed_at:       r.external_executed_at,
-        note: 'This release has already been confirmed. No further action was taken.',
-      },
-      { status: 200 },
-    )
-  }
-
-  if (r.execution_status !== 'pending') {
-    return validationError([
-      `Only 'pending' external releases can be confirmed. Current status: '${r.execution_status}'.`,
     ])
   }
 
@@ -244,24 +223,35 @@ export async function POST(
   const retainage = calculateRetainage(r.amount, d.retainage_percentage ?? 0)
   const netToContractor = retainage.netToContractor
 
-  // ── STEP 1: Update release to confirmed (atomic on pending status) ─────────
+  // ── STEP 1: Atomic state transition via DB-level SELECT FOR UPDATE ─────────
+  //
+  // partner_confirm_release_atomic acquires a row lock on the release before
+  // reading or writing execution_status. This eliminates the TOCTOU race
+  // between a JavaScript-level status check and the conditional UPDATE:
+  //
+  //   - Two concurrent confirms that both read 'pending' before either writes
+  //     are now serialised at the lock. The winner transitions to 'confirmed';
+  //     the loser reads the winner's committed state and returns 'already_confirmed'
+  //     (same reference) or 'conflict' (different reference).
+  //
+  //   - A concurrent fail that races with this confirm is similarly serialised.
+  //     If the fail wins first, this call reads 'failed' and returns 'wrong_status'.
+  //
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: confirmedRows, error: confirmError } = await (admin as any)
-    .from('releases')
-    .update({
-      execution_status:             'confirmed',
-      external_payment_method:      method,
-      external_payment_reference:   reference,
-      external_executed_at:         executedAtIso,
-      external_executed_by:         d.funder_id,   // attribute to funder-of-record
-      external_execution_notes:     notes,
-      proof_of_payment_document_id: proofDocumentId,
-    })
-    .eq('id', r.id)
-    .eq('execution_status', 'pending')
-    .select('id')
+  const { data: rpcResult, error: rpcError } = await (admin as any).rpc(
+    'partner_confirm_release_atomic',
+    {
+      p_release_id:        r.id,
+      p_payment_method:    method,
+      p_payment_reference: reference,
+      p_executed_at:       executedAtIso,
+      p_executed_by:       d.funder_id,   // attribute to funder-of-record
+      p_notes:             notes,
+      p_proof_doc_id:      proofDocumentId,
+    },
+  )
 
-  if (confirmError) {
+  if (rpcError) {
     await logAudit({
       entity_type: 'release',
       entity_id:   r.id,
@@ -272,19 +262,92 @@ export async function POST(
         partner_name:   partnerCtx.partnerName,
         execution_rail: 'external_manual',
         deal_id:        r.deal_id,
-        error:          confirmError.message,
+        error:          rpcError.message,
       },
       partner_ack_hash: partnerAckHash,
     })
-    return internalError('The release could not be marked confirmed. Please try again.', confirmError.message)
+    return internalError('The release could not be marked confirmed. Please try again.', rpcError.message)
   }
 
-  if (!confirmedRows || confirmedRows.length === 0) {
+  // RPC returns a single-row TABLE result — Supabase JS wraps it as an array.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rpcRow    = (Array.isArray(rpcResult) ? rpcResult[0] : rpcResult) as any
+  const outcome   = rpcRow?.outcome as string | undefined
+
+  // ── Handle: idempotent confirm (same payment_reference) ────────────────────
+  if (outcome === 'already_confirmed') {
+    await logAudit({
+      entity_type:   'release',
+      entity_id:     r.id,
+      action:        'partner_release_confirm_idempotent',
+      actor_id:      null,
+      system_source: 'api/partner/releases/confirm',
+      metadata: {
+        partner_id:                 partnerCtx.partnerId,
+        partner_name:               partnerCtx.partnerName,
+        deal_id:                    r.deal_id,
+        payment_reference_matched:  true,
+        note: 'Repeated confirm with matching payment_reference — no state change.',
+      },
+      partner_ack_hash: partnerAckHash,
+    })
     return NextResponse.json(
-      { error: 'This release was confirmed by a concurrent request. No duplicate was recorded.' },
+      {
+        success:                    true,
+        releaseId:                  r.id,
+        alreadyConfirmed:           true,
+        execution_status:           'confirmed',
+        external_payment_reference: rpcRow.current_payment_reference ?? reference,
+        external_executed_at:       rpcRow.current_executed_at       ?? executedAtIso,
+        note: 'This release has already been confirmed with a matching payment reference.',
+      },
+      { status: 200 },
+    )
+  }
+
+  // ── Handle: conflicting confirm (different payment_reference) ───────────────
+  if (outcome === 'conflict') {
+    await logAudit({
+      entity_type:   'release',
+      entity_id:     r.id,
+      action:        'partner_release_confirm_conflict',
+      actor_id:      null,
+      system_source: 'api/partner/releases/confirm',
+      metadata: {
+        partner_id:                    partnerCtx.partnerId,
+        partner_name:                  partnerCtx.partnerName,
+        deal_id:                       r.deal_id,
+        attempted_payment_reference:   reference,
+        existing_payment_reference:    rpcRow.current_payment_reference,
+        note: 'Conflicting confirm attempt: release already confirmed with a different payment reference.',
+      },
+      partner_ack_hash: partnerAckHash,
+    })
+    return NextResponse.json(
+      {
+        error:
+          'This release was already confirmed with a different payment reference. ' +
+          'Conflicting confirmation rejected. Contact Vektrum support if this is unexpected.',
+        code:            'EXECUTION_CONFLICT',
+        current_status:  'confirmed',
+      },
       { status: 409 },
     )
   }
+
+  // ── Handle: wrong status (failed, reversed, etc.) ───────────────────────────
+  if (outcome === 'wrong_status') {
+    return validationError([
+      `Only 'pending' external releases can be confirmed. Current status: '${rpcRow.current_execution_status}'.`,
+    ])
+  }
+
+  // ── Handle: not found (defensive — route pre-validates existence above) ─────
+  if (outcome !== 'confirmed') {
+    return notFoundError(`Release ${releaseId} was not found or could not be confirmed.`)
+  }
+
+  // ── outcome === 'confirmed': release successfully transitioned ──────────────
 
   // ── STEP 2: Insert billing record ──────────────────────────────────────────
   // From here, failures are logged but do NOT revert the confirmation.

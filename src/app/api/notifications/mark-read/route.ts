@@ -44,10 +44,9 @@ export async function POST(request: NextRequest) {
     // Mark all unread for this user
     const { count, error } = await admin
       .from('notifications')
-      .update({ read_at: now })
+      .update({ read_at: now }, { count: 'exact' })
       .eq('recipient_user_id', user.id)
       .is('read_at', null)
-      .select('id', { count: 'exact', head: true })
 
     if (error) {
       return internalError(`Failed to mark all notifications as read: ${error.message}`)

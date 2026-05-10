@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createHash } from 'node:crypto'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { requirePartnerAuth } from '@/lib/auth/partner'
 import { logAudit } from '@/lib/engine/audit'
@@ -58,10 +59,20 @@ export async function POST(
     }
   }
 
-  // ── Parse body ─────────────────────────────────────────────────────────────
+  // ── Parse body + hash for audit binding ───────────────────────────────────
+  // Read the raw request body once so we can (a) parse it and (b) hash it for
+  // partner_ack_hash binding in every audit event — mirroring the confirm route.
+  let rawBody: Buffer
+  try {
+    rawBody = Buffer.from(await request.arrayBuffer())
+  } catch {
+    return validationError(['Could not read request body.'])
+  }
+  const partnerAckHash = createHash('sha256').update(rawBody).digest('hex')
+
   let body: PartnerFailBody
   try {
-    body = (await request.json()) as PartnerFailBody
+    body = JSON.parse(rawBody.toString('utf-8')) as PartnerFailBody
   } catch {
     return validationError(['Request body must be valid JSON.'])
   }
@@ -99,15 +110,6 @@ export async function POST(
     ])
   }
 
-  if (r.execution_status !== 'pending') {
-    return validationError([
-      `Only 'pending' external releases can be marked failed. Current status: '${r.execution_status}'.` +
-      (r.execution_status === 'confirmed'
-        ? ' A confirmed release cannot be marked failed — contact admin for a reversal.'
-        : ''),
-    ])
-  }
-
   // ── Fetch deal — verify this partner owns it ───────────────────────────────
   const { data: deal, error: dealError } = await admin
     .from('deals')
@@ -133,45 +135,123 @@ export async function POST(
     )
   }
 
-  // ── STEP 1: Transition pending → failed (atomic) ───────────────────────────
+  // ── STEP 1: Atomic state transition via DB-level SELECT FOR UPDATE ─────────
+  //
+  // partner_fail_release_atomic acquires a row lock before reading or writing
+  // execution_status. Concurrent confirm/fail calls on the same release are
+  // serialised at the lock so exactly one terminal outcome can win.
+  //
+  //   - Two concurrent fails: the loser reads 'failed' and returns 'already_failed'.
+  //   - Fail racing with a concurrent confirm: the loser reads 'confirmed' and
+  //     returns 'conflict', which routes to a 409 with an audit event.
+  //
   const existingNotes = typeof r.external_execution_notes === 'string' && r.external_execution_notes.length > 0
     ? `${r.external_execution_notes}\n---\n`
     : ''
   const failureNote = `${existingNotes}[PARTNER FAILED ${new Date().toISOString()}] ${reason}`
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: failedRows, error: updateError } = await (admin as any)
-    .from('releases')
-    .update({
-      execution_status:         'failed',
-      external_execution_notes: failureNote,
-    })
-    .eq('id', r.id)
-    .eq('execution_status', 'pending')
-    .select('id')
+  const { data: rpcResult, error: rpcError } = await (admin as any).rpc(
+    'partner_fail_release_atomic',
+    {
+      p_release_id:   r.id,
+      p_failure_note: failureNote,
+    },
+  )
 
-  if (updateError) {
+  if (rpcError) {
     await logAudit({
-      entity_type: 'release',
-      entity_id:   r.id,
-      action:      'partner_fail_update_failed',
-      actor_id:    null,
+      entity_type:      'release',
+      entity_id:        r.id,
+      action:           'partner_fail_update_failed',
+      actor_id:         null,
+      partner_ack_hash: partnerAckHash,
       metadata: {
         partner_id:   partnerCtx.partnerId,
         partner_name: partnerCtx.partnerName,
         deal_id:      r.deal_id,
-        error:        updateError.message,
+        error:        rpcError.message,
       },
     })
-    return internalError('The release could not be marked as failed. Please try again.', updateError.message)
+    return internalError('The release could not be marked as failed. Please try again.', rpcError.message)
   }
 
-  if (!failedRows || failedRows.length === 0) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rpcRow  = (Array.isArray(rpcResult) ? rpcResult[0] : rpcResult) as any
+  const outcome = rpcRow?.outcome as string | undefined
+
+  // ── Handle: idempotent fail (release already in failed state) ───────────────
+  if (outcome === 'already_failed') {
+    await logAudit({
+      entity_type:      'release',
+      entity_id:        r.id,
+      action:           'partner_release_fail_idempotent',
+      actor_id:         null,
+      system_source:    'api/partner/releases/fail',
+      partner_ack_hash: partnerAckHash,
+      metadata: {
+        partner_id:   partnerCtx.partnerId,
+        partner_name: partnerCtx.partnerName,
+        deal_id:      r.deal_id,
+        reason,
+        note: 'Repeated fail call — release was already in failed state. No state change.',
+      },
+    })
     return NextResponse.json(
-      { error: 'Release state changed concurrently. No action taken.' },
+      {
+        success:                    true,
+        releaseId:                  r.id,
+        alreadyFailed:              true,
+        execution_status:           'failed',
+        note: 'This release was already marked as failed. No further action was taken.',
+      },
+      { status: 200 },
+    )
+  }
+
+  // ── Handle: conflict — release already confirmed ────────────────────────────
+  if (outcome === 'conflict') {
+    await logAudit({
+      entity_type:      'release',
+      entity_id:        r.id,
+      action:           'partner_release_fail_rejected',
+      actor_id:         null,
+      system_source:    'api/partner/releases/fail',
+      partner_ack_hash: partnerAckHash,
+      metadata: {
+        partner_id:    partnerCtx.partnerId,
+        partner_name:  partnerCtx.partnerName,
+        deal_id:       r.deal_id,
+        reason,
+        current_status: rpcRow.current_execution_status,
+        note: 'Fail rejected: release is already confirmed. Admin intervention required to reverse.',
+      },
+    })
+    return NextResponse.json(
+      {
+        error:
+          'This release has already been confirmed. A confirmed release cannot be marked ' +
+          'failed via the partner API — contact Vektrum admin for a reversal.',
+        code:           'EXECUTION_CONFLICT',
+        current_status: 'confirmed',
+      },
       { status: 409 },
     )
   }
+
+  // ── Handle: wrong status (reversed, executing, etc.) ───────────────────────
+  if (outcome === 'wrong_status') {
+    return validationError([
+      `Only 'pending' external releases can be marked failed. Current status: '${rpcRow.current_execution_status}'.`,
+    ])
+  }
+
+  // ── Handle: not found (defensive — route pre-validates existence above) ─────
+  if (outcome !== 'failed') {
+    return notFoundError(`Release ${releaseId} was not found or could not be marked as failed.`)
+  }
+
+  // ── outcome === 'failed': state transitioned successfully ───────────────────
 
   // ── STEP 2: Cancel the funded-balance reservation ──────────────────────────
   const fee = calculateFee(r.amount, d.billing_rate_bps)
@@ -184,10 +264,11 @@ export async function POST(
 
   if (cancelError) {
     await logAudit({
-      entity_type: 'deal',
-      entity_id:   r.deal_id,
-      action:      'partner_fail_reservation_cancel_failed',
-      actor_id:    null,
+      entity_type:      'deal',
+      entity_id:        r.deal_id,
+      action:           'partner_fail_reservation_cancel_failed',
+      actor_id:         null,
+      partner_ack_hash: partnerAckHash,
       metadata: {
         partner_id:   partnerCtx.partnerId,
         release_id:   r.id,
@@ -201,13 +282,14 @@ export async function POST(
 
   // ── STEP 3: Audit log ──────────────────────────────────────────────────────
   await logAudit({
-    entity_type:   'release',
-    entity_id:     r.id,
-    action:        'partner_release_failed',
-    actor_id:      null,
-    system_source: 'api/partner/releases/fail',
-    old_values:    { execution_status: 'pending' },
-    new_values:    { execution_status: 'failed' },
+    entity_type:      'release',
+    entity_id:        r.id,
+    action:           'partner_release_failed',
+    actor_id:         null,
+    system_source:    'api/partner/releases/fail',
+    partner_ack_hash: partnerAckHash,
+    old_values:       { execution_status: 'pending' },
+    new_values:       { execution_status: 'failed' },
     metadata: {
       partner_id:              partnerCtx.partnerId,
       partner_name:            partnerCtx.partnerName,

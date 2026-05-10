@@ -238,5 +238,5 @@ export async function getRecentAuditChainHealth(
     console.error('[audit-chain-health] Failed to read health rows:', error.message)
     return []
   }
-  return (data ?? []) as AuditChainHealthRow[]
+  return (data ?? []) as unknown as AuditChainHealthRow[]
 }

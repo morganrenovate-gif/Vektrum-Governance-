@@ -125,7 +125,7 @@ export async function POST(
     )
   }
 
-  const signers = (live.recipients?.signers ?? []) as SignerStatus[]
+  const signers = (live.recipients?.signers ?? []) as unknown as SignerStatus[]
 
   const funderSigner     = pickSigner(signers, 1)
   const contractorSigner = pickSigner(signers, 2)

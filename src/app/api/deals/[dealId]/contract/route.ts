@@ -289,11 +289,15 @@ export async function POST(
   }
 
   // ── Create DocuSign Envelope ────────────────────────────────────────────────
+  // Pre-generate the contract UUID so DocuSign can embed it as a custom field
+  // for webhook correlation — even though the DB row is inserted after the envelope.
+  const newContractId = crypto.randomUUID()
   let envelopeId: string | null = null
 
   try {
     const envelope = await createEnvelope({
       dealId,
+      contractId:  newContractId,
       subject: `Contract for signature — ${deal.title}`,
       pdfBuffer:   fileBuffer,
       fileName:    safeFileName,
@@ -332,6 +336,7 @@ export async function POST(
   const { data: contract, error: insertError } = await admin
     .from('contracts')
     .insert({
+      id:                  newContractId,
       deal_id:             dealId,
       uploaded_by:         user.id,
       storage_path:        storagePath,

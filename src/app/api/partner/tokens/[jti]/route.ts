@@ -40,10 +40,13 @@ export async function GET(
   const { jti } = await params
 
   // Rate limit: partner_api scope
-  const rl = await checkRateLimit(request, POLICIES.partner_api, `partner-introspect:${jti}`)
+  const rl = await checkRateLimit(`partner-introspect:${jti}`, POLICIES.partner_api)
   if (!rl.allowed) {
-    await logRateLimitViolation(request, 'partner_api', `partner-introspect:${jti}`)
-    return rateLimitResponse(rl)
+    logRateLimitViolation(`partner-introspect:${jti}`, rl, {
+      actorId: null, policyName: 'partner_api',
+      entityType: 'authorization_token', entityId: jti,
+    })
+    return rateLimitResponse(rl, POLICIES.partner_api.description)
   }
 
   let partnerCtx

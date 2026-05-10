@@ -573,6 +573,151 @@ await test('HELPERS: SECURITY DEFINER helpers grant EXECUTE to authenticated (no
   }
 })
 
+// ─── Contracts RLS ───────────────────────────────────────────────────────────
+// Regression guard for BUG-3: contracts_insert_contractor originally used
+// WITH CHECK (is_deal_participant(deal_id)) — allowing funders to INSERT contracts.
+// Fix migration 20260510000002 replaces it with a contractor-only subquery check.
+
+await test('CONTRACTS: RLS is enabled on contracts table', () => {
+  assert(
+    /alter\s+table\s+public\.contracts\s+enable\s+row\s+level\s+security/i.test(corpus),
+    'ENABLE ROW LEVEL SECURITY must be applied to public.contracts.',
+  )
+})
+
+await test('CONTRACTS: INSERT policy does NOT use is_deal_participant in WITH CHECK', () => {
+  // Find the fix migration content (sorts after 011_contracts.sql)
+  const fixMig = '20260510000002_fix_contracts_insert_rls.sql'
+  const fixPath = path.resolve(ROOT, 'supabase/migrations', fixMig)
+  assert(fs.existsSync(fixPath), `Fix migration ${fixMig} must exist.`)
+  const fixSrc = fs.readFileSync(fixPath, 'utf-8')
+  // Strip SQL line comments so references in comment blocks don't false-fail
+  const fixNoComments = fixSrc
+    .split('\n')
+    .filter(line => !line.trim().startsWith('--'))
+    .join('\n')
+  assert(
+    !fixNoComments.includes('is_deal_participant'),
+    'contracts_insert_contractor fix migration must NOT use is_deal_participant in live SQL. ' +
+    'is_deal_participant returns true for funders, allowing them to insert fabricated contracts.',
+  )
+})
+
+await test('CONTRACTS: INSERT policy restricts writes to contractor_id = auth.uid()', () => {
+  const fixMig = '20260510000002_fix_contracts_insert_rls.sql'
+  const fixPath = path.resolve(ROOT, 'supabase/migrations', fixMig)
+  const fixSrc = fs.readFileSync(fixPath, 'utf-8')
+  assert(
+    fixSrc.includes('contractor_id') && fixSrc.includes('auth.uid()'),
+    'contracts_insert_contractor WITH CHECK must verify contractor_id = auth.uid() via a deals subquery.',
+  )
+})
+
+await test('CONTRACTS: SELECT policy still allows deal participants to read', () => {
+  assert(
+    corpus.includes('contracts_select') ||
+    /create\s+policy\s+"?contracts_select"?/i.test(corpus),
+    'A contracts SELECT policy must exist so funders and contractors can read contracts.',
+  )
+})
+
+// ─── Authorization Tokens RLS ─────────────────────────────────────────────────
+
+await test('AUTH_TOKENS: RLS is enabled on authorization_tokens table', () => {
+  assert(
+    /alter\s+table\s+public\.authorization_tokens\s+enable\s+row\s+level\s+security/i.test(corpus),
+    'ENABLE ROW LEVEL SECURITY must be applied to public.authorization_tokens.',
+  )
+})
+
+await test('AUTH_TOKENS: No INSERT policy for authenticated role (fail-closed for browser SDK)', () => {
+  // Extract all CREATE POLICY blocks that reference authorization_tokens + FOR INSERT + TO authenticated
+  const insertPolicies = corpus.match(
+    /create\s+policy\s+[^\n]+\s+on\s+public\.authorization_tokens[^;]*for\s+insert[^;]*to\s+authenticated[^;]*/gi,
+  ) ?? []
+  assert(
+    insertPolicies.length === 0,
+    'No INSERT policy for authenticated role on authorization_tokens. ' +
+    'Token records are written only by the service role. ' +
+    `Found: ${insertPolicies.length} INSERT policies for authenticated.`,
+  )
+})
+
+await test('AUTH_TOKENS: SELECT policy exists for authorized parties', () => {
+  assert(
+    /authorization_tokens_select|authorization_tokens.*for\s+select/i.test(corpus),
+    'A SELECT policy must exist on authorization_tokens for funder/payee/admin access.',
+  )
+})
+
+// ─── Reconciliation RLS ───────────────────────────────────────────────────────
+// Regression guard for BUG-4: reconciliation_runs_admin_only and
+// reconciliation_issues_admin_only used FOR ALL WITH CHECK (is_admin()),
+// allowing admins to INSERT fabricated reconciliation records via the browser SDK.
+// Fix migration 20260510000003 replaces them with SELECT-only + write deny policies.
+
+const RECON_FIX_MIG = 'supabase/migrations/20260510000003_fix_reconciliation_insert_rls.sql'
+
+await test('RECONCILIATION: fix migration exists', () => {
+  const fixPath = path.resolve(ROOT, RECON_FIX_MIG)
+  assert(fs.existsSync(fixPath), `Fix migration ${RECON_FIX_MIG} must exist.`)
+})
+
+await test('RECONCILIATION: reconciliation_runs INSERT policy uses WITH CHECK (false)', () => {
+  const fixPath = path.resolve(ROOT, RECON_FIX_MIG)
+  const fixSrc = fs.readFileSync(fixPath, 'utf-8')
+  const fixNoComments = fixSrc.split('\n').filter(l => !l.trim().startsWith('--')).join('\n')
+  assert(
+    fixNoComments.includes('reconciliation_runs') &&
+    /with\s+check\s*\(\s*false\s*\)/i.test(fixNoComments),
+    'reconciliation_runs fix migration must include WITH CHECK (false) to deny browser SDK writes.',
+  )
+})
+
+await test('RECONCILIATION: reconciliation_runs does NOT allow admin INSERT via is_admin()', () => {
+  const fixPath = path.resolve(ROOT, RECON_FIX_MIG)
+  const fixSrc = fs.readFileSync(fixPath, 'utf-8')
+  const fixNoComments = fixSrc.split('\n').filter(l => !l.trim().startsWith('--')).join('\n')
+  // Ensure the FOR ALL + is_admin() pattern does not appear in live SQL
+  const badPattern = /for\s+all[\s\S]{0,200}with\s+check\s*\(\s*public\.is_admin\s*\(\s*\)\s*\)/i
+  assert(
+    !badPattern.test(fixNoComments),
+    'Fix migration must NOT use FOR ALL WITH CHECK (is_admin()) on reconciliation tables.',
+  )
+})
+
+await test('RECONCILIATION: reconciliation_runs has a SELECT-only policy for admins', () => {
+  const fixPath = path.resolve(ROOT, RECON_FIX_MIG)
+  const fixSrc = fs.readFileSync(fixPath, 'utf-8')
+  assert(
+    fixSrc.includes('reconciliation_runs_select_admin') ||
+    /create\s+policy\s+[^\n]*select[^\n]*reconciliation_runs/i.test(fixSrc) ||
+    /reconciliation_runs[\s\S]{0,300}for\s+select/i.test(fixSrc),
+    'Fix migration must create a SELECT-only policy for admins on reconciliation_runs.',
+  )
+})
+
+await test('RECONCILIATION: reconciliation_issues INSERT policy uses WITH CHECK (false)', () => {
+  const fixPath = path.resolve(ROOT, RECON_FIX_MIG)
+  const fixSrc = fs.readFileSync(fixPath, 'utf-8')
+  const fixNoComments = fixSrc.split('\n').filter(l => !l.trim().startsWith('--')).join('\n')
+  assert(
+    fixNoComments.includes('reconciliation_issues') &&
+    /with\s+check\s*\(\s*false\s*\)/i.test(fixNoComments),
+    'reconciliation_issues fix migration must include WITH CHECK (false) to deny browser SDK writes.',
+  )
+})
+
+await test('RECONCILIATION: reconciliation_issues has a SELECT-only policy for admins', () => {
+  const fixPath = path.resolve(ROOT, RECON_FIX_MIG)
+  const fixSrc = fs.readFileSync(fixPath, 'utf-8')
+  assert(
+    fixSrc.includes('reconciliation_issues_select_admin') ||
+    /reconciliation_issues[\s\S]{0,300}for\s+select/i.test(fixSrc),
+    'Fix migration must create a SELECT-only policy for admins on reconciliation_issues.',
+  )
+})
+
 // ─── Report ──────────────────────────────────────────────────────────────────
 
 console.log('')

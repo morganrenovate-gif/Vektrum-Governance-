@@ -312,7 +312,7 @@ export default function PricingPage() {
               {
                 icon: Lock,
                 title: 'Controlled disbursement',
-                body: 'Funds only transfer after 10 server-side conditions are satisfied simultaneously. No manual override. Every release is a uniquely identified, server-verified event.',
+                body: 'Release authorization requires all 10 server-side conditions to pass simultaneously. No release gate bypass. Every release is a uniquely identified, server-verified event.',
               },
               {
                 icon: FileText,
@@ -565,9 +565,9 @@ export default function PricingPage() {
               ctaExternal={BOOK_CALL_EXTERNAL}
               features={[
                 'Everything in Institutional',
-                'LOS / core banking API integration (included)',
+                'Partner API for integration with existing institutional workflows',
                 'Dedicated customer success manager',
-                '99.9% uptime SLA',
+                'Uptime per Supabase and Vercel provider SLAs',
                 'Audit export for regulatory compliance',
                 'Custom MSA and addendum available',
               ]}
