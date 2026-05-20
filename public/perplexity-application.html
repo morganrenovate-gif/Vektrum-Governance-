@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vektrum — Perplexity Billion Dollar Build Application</title>
+  <style>
+    /* ── Base ──────────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:   #1E3A5F;
+      --blue:   #2563EB;
+      --blue-light: #EFF6FF;
+      --green:  #059669;
+      --gray-50: #F9FAFB;
+      --gray-100:#F3F4F6;
+      --gray-200:#E5E7EB;
+      --gray-600:#4B5563;
+      --gray-800:#1F2937;
+      --text:   #111827;
+      --yellow: #FEF9C3;
+      --yellow-border: #FDE047;
+    }
+
+    html { font-size: 15px; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                   "Helvetica Neue", Arial, sans-serif;
+      color: var(--text);
+      background: #fff;
+      line-height: 1.6;
+    }
+
+    /* ── Page wrapper ──────────────────────────────────────────────────────── */
+    .page {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 40px 32px 60px;
+    }
+
+    /* ── Header ────────────────────────────────────────────────────────────── */
+    .app-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      border-bottom: 3px solid var(--navy);
+      padding-bottom: 20px;
+      margin-bottom: 32px;
+    }
+    .app-header .brand { display: flex; flex-direction: column; gap: 4px; }
+    .app-header .wordmark {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--navy);
+    }
+    .app-header .wordmark span { color: var(--blue); }
+    .app-header .subtitle {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--gray-600);
+    }
+    .app-header .meta {
+      text-align: right;
+      font-size: 12px;
+      color: var(--gray-600);
+      line-height: 1.8;
+    }
+
+    /* ── Section cards ─────────────────────────────────────────────────────── */
+    .section {
+      margin-bottom: 28px;
+      border: 1px solid var(--gray-200);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .section-header {
+      background: var(--navy);
+      color: #fff;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-header .num {
+      background: var(--blue);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .section-header h2 {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+    .section-body {
+      padding: 18px 20px;
+      background: #fff;
+    }
+
+    /* ── Info grid ─────────────────────────────────────────────────────────── */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 8px 16px;
+    }
+    .info-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--gray-600);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding-top: 2px;
+    }
+    .info-value {
+      font-size: 14px;
+      color: var(--text);
+    }
+    .info-value a { color: var(--blue); text-decoration: none; }
+    .info-value.highlight {
+      background: var(--yellow);
+      border: 1px solid var(--yellow-border);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-weight: 600;
+    }
+    .info-value.attest {
+      background: #F0FDF4;
+      border: 1px solid #86EFAC;
+      border-radius: 4px;
+      padding: 2px 8px;
+      color: var(--green);
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    /* ── One-liner block ───────────────────────────────────────────────────── */
+    .oneliner {
+      background: var(--blue-light);
+      border-left: 4px solid var(--blue);
+      border-radius: 6px;
+      padding: 14px 18px;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.4;
+    }
+
+    /* ── Demo links ────────────────────────────────────────────────────────── */
+    .demo-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+    .demo-link .badge {
+      background: var(--blue);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+    }
+    .demo-link a { color: var(--blue); font-weight: 600; word-break: break-all; }
+    .demo-link .note { color: var(--gray-600); font-size: 12px; }
+
+    /* ── Prose ─────────────────────────────────────────────────────────────── */
+    p { font-size: 14px; color: var(--text); margin-bottom: 10px; }
+    p:last-child { margin-bottom: 0; }
+
+    /* ── Proof items ────────────────────────────────────────────────────────── */
+    .proof-item {
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      background: var(--gray-50);
+    }
+    .proof-item:last-child { margin-bottom: 0; }
+    .proof-item .proof-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .proof-item .proof-title .tag {
+      background: var(--navy);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 3px;
+      text-transform: uppercase;
+    }
+    .proof-item p { font-size: 13px; margin-bottom: 0; }
+    .proof-item .result {
+      margin-top: 6px;
+      font-size: 12px;
+      background: #F0FDF4;
+      border: 1px solid #86EFAC;
+      border-radius: 4px;
+      padding: 4px 10px;
+      color: var(--green);
+      font-weight: 600;
+    }
+
+    /* ── Traction timeline ─────────────────────────────────────────────────── */
+    .traction-list {
+      list-style: none;
+      padding: 0;
+    }
+    .traction-list li {
+      display: flex;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--gray-100);
+      font-size: 13.5px;
+    }
+    .traction-list li:last-child { border-bottom: none; }
+    .traction-list .date-chip {
+      background: var(--navy);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      flex-shrink: 0;
+      height: fit-content;
+      margin-top: 2px;
+      white-space: nowrap;
+    }
+
+    /* ── Why big bullets ───────────────────────────────────────────────────── */
+    .why-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .why-card {
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .why-card .why-icon { font-size: 20px; margin-bottom: 6px; }
+    .why-card .why-title { font-size: 12px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+    .why-card p { font-size: 12px; color: var(--gray-600); margin-bottom: 0; }
+
+    /* ── Unlock table ──────────────────────────────────────────────────────── */
+    .unlock-row {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 0;
+      margin-bottom: 4px;
+    }
+    .unlock-period {
+      background: var(--blue);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 8px 12px;
+      border-radius: 6px 0 0 6px;
+      display: flex;
+      align-items: center;
+    }
+    .unlock-items {
+      background: var(--blue-light);
+      border: 1px solid #BFDBFE;
+      border-left: none;
+      border-radius: 0 6px 6px 0;
+      padding: 8px 14px;
+    }
+    .unlock-items ul { list-style: none; padding: 0; }
+    .unlock-items ul li {
+      font-size: 13px;
+      padding: 2px 0;
+      padding-left: 14px;
+      position: relative;
+    }
+    .unlock-items ul li::before {
+      content: "→";
+      position: absolute;
+      left: 0;
+      color: var(--blue);
+      font-weight: 700;
+    }
+
+    /* ── Footer ────────────────────────────────────────────────────────────── */
+    .app-footer {
+      margin-top: 40px;
+      padding-top: 16px;
+      border-top: 1px solid var(--gray-200);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--gray-600);
+    }
+
+    /* ── Print styles ──────────────────────────────────────────────────────── */
+    @media print {
+      html { font-size: 13px; }
+      body { background: #fff !important; }
+      .page { padding: 24px 28px 32px; max-width: 100%; }
+
+      .section { break-inside: avoid; }
+      .why-grid { break-inside: avoid; }
+      .unlock-row { break-inside: avoid; }
+      .proof-item { break-inside: avoid; }
+
+      .section-header { background: var(--navy) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .section-header .num { background: var(--blue) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .demo-link .badge { background: var(--blue) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .traction-list .date-chip { background: var(--navy) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .unlock-period { background: var(--blue) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .proof-item .proof-title .tag { background: var(--navy) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+      .info-value.highlight { background: var(--yellow) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .info-value.attest { background: #F0FDF4 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .proof-item .result { background: #F0FDF4 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .oneliner { background: var(--blue-light) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .unlock-items { background: var(--blue-light) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <header class="app-header">
+    <div class="brand">
+      <div class="wordmark">Vekt<span>rum</span></div>
+      <div class="subtitle">Perplexity Billion Dollar Build — Application</div>
+    </div>
+    <div class="meta">
+      vektrum.io<br>
+      operations@vektrum.io<br>
+      May 2026
+    </div>
+  </header>
+
+  <!-- ── 1. Founder & Company Info ──────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="num">1</div>
+      <h2>Founder &amp; Company Info</h2>
+    </div>
+    <div class="section-body">
+      <div class="info-grid">
+        <span class="info-label">Founder Name</span>
+        <span class="info-value">Adam Morgan</span>
+
+        <span class="info-label">Title</span>
+        <span class="info-value">Co-Founder &amp; Chief Product Officer</span>
+
+        <span class="info-label">Company / Project</span>
+        <span class="info-value">Vektrum</span>
+
+        <span class="info-label">Perplexity Email</span>
+        <span class="info-value highlight">⚠ [YOUR PERPLEXITY ACCOUNT EMAIL — fill in before submitting]</span>
+
+        <span class="info-label">Website</span>
+        <span class="info-value"><a href="https://vektrum.io">https://vektrum.io</a></span>
+
+        <span class="info-label">Contact</span>
+        <span class="info-value"><a href="mailto:operations@vektrum.io">operations@vektrum.io</a></span>
+
+        <span class="info-label">U.S.-Based</span>
+        <span class="info-value attest">✓ Yes — U.S.-based, eligible to attest</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 2. One-Liner ────────────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="num">2</div>
+      <h2>One-Liner — What Are You Building?</h2>
+    </div>
+    <div class="section-body">
+      <div class="oneliner">
+        "Vektrum is the release-control layer for construction disbursements — enforcing 10 server-side conditions before any draw moves."
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 3. Product / Demo Link ──────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="num">3</div>
+      <h2>Product or Demo Link</h2>
+    </div>
+    <div class="section-body">
+      <div class="demo-link">
+        <span class="badge">Live Demo</span>
+        <div>
+          <a href="https://vektrum.io/demo-live/deal/harbor">https://vektrum.io/demo-live/deal/harbor</a>
+          <div class="note">Guided 6-step release authorization walk-through — Harbor Draw #3, $2.18M milestone release</div>
+        </div>
+      </div>
+      <div class="demo-link">
+        <span class="badge">Full Site</span>
+        <div>
+          <a href="https://vektrum.io">https://vektrum.io</a>
+          <div class="note">Marketing, FAQ, design-partner program, founders</div>
+        </div>
+      </div>
+      <div class="demo-link">
+        <span class="badge">Pitch Deck</span>
+        <div>
+          <a href="https://vektrum.io/pitch">https://vektrum.io/pitch</a>
+          <div class="note">Interactive 20-slide investor deck (PDF also available at /vektrum-pitch.pdf)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 4. Two-Minute Demo Video ───────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="num">4</div>
+      <h2>Two-Minute Demo Video</h2>
+    </div>
+    <div class="section-body">
+      <p>
+        A dedicated demo video is in production. In the meantime, the interactive live demo at
+        <a href="https://vektrum.io/demo-live/deal/harbor" style="color:#2563EB;font-weight:600;">vektrum.io/demo-live/deal/harbor</a>
+        walks through the same story end-to-end — Harbor Draw #3, a real $2.18M release:
+      </p>
+      <ul style="margin: 10px 0 0 18px; font-size: 13.5px; line-height: 1.8; color: var(--text);">
+        <li><strong>Step 1:</strong> Funder reviews the deal and milestone status</li>
+        <li><strong>Step 2:</strong> Perplexity AI draw brief completes — risk score 91/100, no critical flags</li>
+        <li><strong>Step 3:</strong> 10-condition gate evaluates all conditions simultaneously (all pass)</li>
+        <li><strong>Step 4:</strong> Funder triggers the release (not the admin, not the contractor)</li>
+        <li><strong>Step 5:</strong> Rail executes (Stripe Connect automated or external/manual)</li>
+        <li><strong>Step 6:</strong> Hash-chained audit row written; contractor notified</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── 5. Computer Usage Proof ────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="num">5</div>
+      <h2>Computer Usage Proof — How Perplexity Changed What We Built</h2>
+    </div>
+    <div class="section-body">
+
+      <div class="proof-item">
+        <div class="proof-title">
+          <span class="tag">Usage 1</span>
+          AI Draw Control Brief — The Core Precondition
+        </div>
+        <p>
+          Perplexity <code style="background:#F3F4F6;padding:1px 5px;border-radius:3px;font-size:12px;">sonar-pro</code> is the first model in our fallback chain and powers the mandatory AI Draw Control Brief.
+          For every release attempt, it reads the draw package and extracts: milestone completion %, lien waiver status,
+          inspection sign-off, budget variance flags, and unresolved open items — then returns a structured risk score (0–100).
+          If any critical risk flag is set, the release gate blocks automatically.
+        </p>
+        <div class="result">
+          Harbor Draw #3 result: risk score 91/100 · no critical flags · gate clears in seconds vs. 2–3 day manual underwriter SLA
+        </div>
+      </div>
+
+      <div class="proof-item">
+        <div class="proof-title">
+          <span class="tag">Usage 2</span>
+          Multi-Provider Fallback Chain — Operational Resilience
+        </div>
+        <p>
+          Perplexity <code style="background:#F3F4F6;padding:1px 5px;border-radius:3px;font-size:12px;">sonar-pro</code> is primary in a three-provider chain
+          (sonar-pro → claude-sonnet → gpt-4o). When any single provider has downtime, the brief runs on the next.
+          This removed an entire reliability engineering workstream — we did not need to build our own
+          document-analysis NLP pipeline or manage model inference infrastructure.
+        </p>
+        <div class="result">
+          Scope change: 3–4 months of NLP infrastructure work eliminated; shipped in days instead
+        </div>
+      </div>
+
+      <div class="proof-item">
+        <div class="proof-title">
+          <span class="tag">Usage 3</span>
+          Made AI-Gated Release Commercially Feasible
+        </div>
+        <p>
+          Without Perplexity, every draw release would require a human underwriter to review the package before
+          the gate could run — a 2–3 day SLA that would make Vektrum a bottleneck rather than an accelerator.
+          <code style="background:#F3F4F6;padding:1px 5px;border-radius:3px;font-size:12px;">sonar-pro</code>'s document reading
+          capability made the AI precondition fast enough to be a gate condition, not a separate workflow step.
+          This is what makes Vektrum's model viable: the AI informs the gate; the gate is deterministic; the funder decides.
+        </p>
+        <div class="result">
+          Product model only exists because AI review is fast enough to be a synchronous gate precondition
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── 6. Traction Snapshot ───────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="num">6</div>
+      <h2>Traction Snapshot</h2>
+    </div>
+    <div class="section-body">
+      <ul class="traction-list">
+        <li>
+          <span class="date-chip">May 2026</span>
+          <span>
+            <strong>Production-grade v1 shipped.</strong> Full 10-condition release gate, DocuSign contract signing (funder + contractor),
+            Stripe Connect automated rail, external/manual execution rail with SLA tracking, AI draw review (Perplexity sonar-pro),
+            hash-chained tamper-evident audit log, Partner API with scoped keys, and Schedule of Values with SOV-milestone linking.
+          </span>
+        </li>
+        <li>
+          <span class="date-chip">Ongoing</span>
+          <span>
+            <strong>Design-partner conversations active.</strong> Outreach to construction lenders, title companies, and fund managers
+            via the design-partner program (live at vektrum.io/design-partners). First pilot funders targeted for Q3 2026.
+          </span>
+        </li>
+        <li>
+          <span class="date-chip">Depth</span>
+          <span>
+            <strong>100+ automated tests</strong> covering release gate (all 10 conditions), webhook idempotency, admin safety,
+            demo-data isolation, route smoke, RLS regression, audit chain health, and security boundaries.
+            The platform is pilot-ready now — no remaining blockers to live funder onboarding.
+          </span>
+        </li>
+        <li>
+          <span class="date-chip">Team</span>
+          <span>
+            <strong>Adam Morgan</strong> (Co-Founder &amp; CPO) — 10+ years construction project management;
+            self-built Vektrum's full technical stack. <strong>Tanner Walstad</strong> (Co-Founder &amp; CCO) —
+            institutional software sales, GTM. <strong>Phillip Walstad</strong> (Board Advisor) — co-founder of
+            Canary Speech (healthcare AI).
+          </span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── 7. Why This Can Be Big ─────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="num">7</div>
+      <h2>Why This Can Become a Very Large Company</h2>
+    </div>
+    <div class="section-body">
+      <div class="why-grid">
+        <div class="why-card">
+          <div class="why-icon">🏗️</div>
+          <div class="why-title">Massive, Underdone Market</div>
+          <p>$550B+ annual US construction starts. Every construction loan has a draw process. The release-control layer has seen near-zero software investment — draw governance still runs on email, PDFs, and spreadsheets.</p>
+        </div>
+        <div class="why-card">
+          <div class="why-icon">🔌</div>
+          <div class="why-title">Rail-Agnostic = No Lock-In</div>
+          <p>Vektrum sits before Stripe, title, escrow, bank treasury, or any execution rail. Lenders keep their existing payment infrastructure and add release enforcement — no rip-and-replace, minimal friction to adopt.</p>
+        </div>
+        <div class="why-card">
+          <div class="why-icon">📈</div>
+          <div class="why-title">Per-Release Fee on Loan Volume</div>
+          <p>0.65–1.00% per release. A single construction lender with $100M in active construction loans running draws twice per year = ~$1.3M ARR per customer. High-frequency, high-margin on top of existing capital flows.</p>
+        </div>
+        <div class="why-card">
+          <div class="why-icon">🛡️</div>
+          <div class="why-title">Compliance + Audit Moat</div>
+          <p>Hash-chained audit evidence and LP-reportable release records become a compliance requirement for institutional lenders. First mover becomes the standard, the way Stripe became the default for online payments.</p>
+        </div>
+        <div class="why-card">
+          <div class="why-icon">🤝</div>
+          <div class="why-title">Network Effects via Partners</div>
+          <p>Each lender brings multiple deals. Each deal brings contractors proven on the platform. Title and escrow partners embed Vektrum into their workflows — distribution compounds with every integration.</p>
+        </div>
+        <div class="why-card">
+          <div class="why-icon">🚧</div>
+          <div class="why-title">No Comparable Competitor</div>
+          <p>Others (Procore, BuilderTrend, lien-waiver apps) track and manage. None enforce a server-side gate that is AI-informed, admin-proof, rail-agnostic, and hash-chained. Vektrum owns a category that does not yet have a winner.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 8. What $1M Unlocks ────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="num">8</div>
+      <h2>What $1M Unlocks</h2>
+    </div>
+    <div class="section-body">
+      <div class="unlock-row">
+        <div class="unlock-period">Next 90 Days</div>
+        <div class="unlock-items">
+          <ul>
+            <li>Close 1–2 paid pilot lenders — convert active design-partner conversations to live deal flow, first revenue milestone</li>
+            <li>Hire GTM lead with institutional lending / fintech-infrastructure sales background to run lender outreach full-time</li>
+            <li>Launch Partner API ecosystem — integrate the first title, escrow, or treasury partner using the Partner API already built and tested</li>
+          </ul>
+        </div>
+      </div>
+      <div style="height:6px;"></div>
+      <div class="unlock-row">
+        <div class="unlock-period">Year 1</div>
+        <div class="unlock-items">
+          <ul>
+            <li>10+ active lenders with live draw flow generating recurring per-release fee revenue</li>
+            <li>3–5 title, escrow, treasury, and banking integrations distributing Vektrum into partner deal rooms</li>
+            <li>SOC 2 Type I certification — controls are already operational; audit formalizes what's built</li>
+            <li>Expand to commercial construction lenders and credit fund managers requiring LP-grade audit evidence</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Footer ──────────────────────────────────────────────────────────── -->
+  <footer class="app-footer">
+    <span>Vektrum · Conditional Authorization Infrastructure for Construction Disbursements</span>
+    <span>vektrum.io · operations@vektrum.io</span>
+  </footer>
+
+</div>
+</body>
+</html>
