@@ -501,6 +501,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       railScope:       profile.disbursement_rail === 'external_rail' ? 'external_rail' : 'stripe',
       netToContractor,
       grossAmount:     fee.grossAmount,
+      // B3 hardening: pass feeAmount so the token row persists the exact reservation
+      // amounts for use by expire-if-stale without recomputing from billing_rate_bps.
+      feeAmount:       fee.feeAmount,
       idempotencyKey,
       issuedBy:        user.id,
       sovLinks:        sovLinksForToken,

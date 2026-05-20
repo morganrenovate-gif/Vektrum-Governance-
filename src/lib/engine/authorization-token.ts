@@ -52,8 +52,14 @@ export interface IssueAuthorizationTokenInput {
   railScope:          'stripe' | 'external_rail'
   /** Net amount the contractor receives this release (post-retainage, pre-fee). */
   netToContractor:    number
-  /** Gross authorized amount (milestone.amount). Used for total_amount. */
+  /** Gross authorized amount (milestone.amount). Used for total_amount and reserved_gross_amount. */
   grossAmount:        number
+  /**
+   * Platform fee amount computed at reservation time (max(50, gross × billing_rate_bps/10000)).
+   * Persisted as reserved_fee_amount so expire-if-stale can cancel the exact reservation
+   * without recomputing from deal.billing_rate_bps, which could diverge if rates change.
+   */
+  feeAmount:          number
   /** Currency. Defaults to USD if not provided. */
   currency?:          string
   /** Idempotency key — same value across retries returns the same token row. */
@@ -256,14 +262,18 @@ export async function issueAuthorizationToken(
       policy_version:   RELEASE_POLICY_VERSION,
       policy_hash:      policyHash,
       graph_commitment: input.graphCommitment ?? null,
-      token_hash:       tokenHash,
+      token_hash:            tokenHash,
       nonce,
-      signature_alg:    alg,
+      signature_alg:         alg,
       signature,
-      not_before:       notBefore.toISOString(),
-      expires_at:       expiresAt.toISOString(),
-      status:           'issued',
-      issued_by:        input.issuedBy,
+      not_before:            notBefore.toISOString(),
+      expires_at:            expiresAt.toISOString(),
+      status:                'issued',
+      issued_by:             input.issuedBy,
+      // B3 hardening: persist original reservation amounts so expire-if-stale
+      // does not recompute from billing_rate_bps at expiry time.
+      reserved_gross_amount: input.grossAmount,
+      reserved_fee_amount:   input.feeAmount,
     })
     .select('id, jti, token_hash, status, sequence_index, expires_at, signature_alg, signature')
     .single()

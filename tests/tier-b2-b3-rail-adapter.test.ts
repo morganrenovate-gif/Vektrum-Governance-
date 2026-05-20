@@ -342,6 +342,27 @@ check(
   'Second-call idempotency: returns 409 / NOT_PENDING when release no longer pending',
 )
 
+// B3 hardening (issue #133): expire-if-stale must read persisted amounts from the
+// authorization token, NOT recompute them from deal.billing_rate_bps at expiry time.
+check(
+  /reserved_gross_amount/.test(expireRoute) && /reserved_fee_amount/.test(expireRoute),
+  'expire-if-stale selects reserved_gross_amount + reserved_fee_amount from token',
+)
+check(
+  /token\.reserved_gross_amount/.test(expireRoute),
+  'expire-if-stale uses token.reserved_gross_amount for cancel_release_reservation (not recomputed)',
+)
+check(
+  /token\.reserved_fee_amount/.test(expireRoute),
+  'expire-if-stale uses token.reserved_fee_amount for cancel_release_reservation (not recomputed)',
+)
+// The actual recomputation formula (billing_rate_bps / 10000) must no longer be present in code.
+// Comments may still reference billing_rate_bps for context; we only check executable logic.
+check(
+  !/billing_rate_bps\s*\/\s*10000/.test(expireRoute),
+  'expire-if-stale does not recompute fee from billing_rate_bps (no billing_rate_bps / 10000 formula)',
+)
+
 console.log('\n── Test wired into npm test ───────────────────────────────────────────')
 
 check(
