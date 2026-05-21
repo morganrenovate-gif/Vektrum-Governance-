@@ -497,7 +497,7 @@ export async function getEnvelopeRecipients(
  */
 export async function getEnvelopeStatus(envelopeId: string): Promise<{
   status:     string
-  recipients: { signers: Array<{ email: string; clientUserId: string; status: string; signedDateTime?: string }> }
+  recipients: { signers: Array<{ email: string; clientUserId: string; status: string; signedDateTime?: string; routingOrder?: string }> }
 }> {
   return dsRequest('GET', `/envelopes/${envelopeId}?include=recipients`)
 }

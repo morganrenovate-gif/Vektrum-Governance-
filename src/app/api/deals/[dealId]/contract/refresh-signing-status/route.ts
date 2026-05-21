@@ -43,6 +43,7 @@ interface SignerStatus {
   status:          string
   signedDateTime?: string
   email:           string
+  clientUserId?:   string
 }
 
 function pickSigner(

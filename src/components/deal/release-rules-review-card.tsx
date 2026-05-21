@@ -155,7 +155,7 @@ export function ReleaseRulesReviewCard({
     >
       {/* Header */}
       <div className="border-b border-vektrum-blue/15 px-5 py-4 flex items-start gap-3">
-        <ListChecks size={15} className="text-blue-300 mt-0.5 flex-shrink-0" aria-hidden="true" />
+        <ListChecks size={15} className="text-blue-300 mt-0.5 flex-shrink-0" aria-hidden={true} />
         <div className="flex-1 min-w-0">
           <p className="text-[14px] font-semibold text-white">
             {isContractor ? 'Release rules under review' : 'Review draft release rules'}
@@ -231,7 +231,7 @@ export function ReleaseRulesReviewCard({
                       <ConfidencePill confidence={item.confidence} />
                       {item.review_required && (
                         <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/[0.10] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-amber-300">
-                          <AlertTriangle size={9} aria-hidden="true" />
+                          <AlertTriangle size={9} aria-hidden={true} />
                           Review
                         </span>
                       )}
@@ -361,8 +361,8 @@ export function ReleaseRulesReviewCard({
                 className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 px-4 py-2.5 text-[13px] font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {pending === 'approve'
-                  ? <Loader2     size={13} className="animate-spin" aria-hidden="true" />
-                  : <CheckCircle2 size={13} aria-hidden="true" />
+                  ? <Loader2     size={13} className="animate-spin" aria-hidden={true} />
+                  : <CheckCircle2 size={13} aria-hidden={true} />
                 }
                 {pending === 'approve' ? 'Approving…' : 'Approve draft release rules'}
               </button>
@@ -372,7 +372,7 @@ export function ReleaseRulesReviewCard({
                 className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.10] bg-surface-3 px-4 py-2.5 text-[13px] font-semibold text-white/75 hover:text-white hover:bg-white/[0.06] hover:border-white/[0.18] transition-colors"
               >
                 Edit manually
-                <ArrowRight size={13} aria-hidden="true" />
+                <ArrowRight size={13} aria-hidden={true} />
               </Link>
 
               <button
@@ -382,8 +382,8 @@ export function ReleaseRulesReviewCard({
                 className="inline-flex items-center gap-1.5 rounded-lg border border-red-500/25 bg-red-500/[0.06] px-4 py-2.5 text-[13px] font-semibold text-red-300 hover:text-red-200 hover:bg-red-500/[0.12] hover:border-red-500/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-400 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {pending === 'discard'
-                  ? <Loader2 size={13} className="animate-spin" aria-hidden="true" />
-                  : <XIcon  size={13} aria-hidden="true" />
+                  ? <Loader2 size={13} className="animate-spin" aria-hidden={true} />
+                  : <XIcon  size={13} aria-hidden={true} />
                 }
                 {pending === 'discard' ? 'Discarding…' : 'Discard draft'}
               </button>
@@ -395,7 +395,7 @@ export function ReleaseRulesReviewCard({
             </p>
             {error && (
               <div role="alert" className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/[0.06] px-3 py-2.5 max-w-md">
-                <AlertCircle size={12} className="text-red-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
+                <AlertCircle size={12} className="text-red-400 mt-0.5 flex-shrink-0" aria-hidden={true} />
                 <p className="text-[12px] text-red-400 leading-relaxed">{error}</p>
               </div>
             )}
@@ -445,7 +445,7 @@ function DetailRow({
 }) {
   return (
     <div className="flex items-start gap-3 rounded-lg border border-white/[0.06] bg-surface-3 px-3 py-2.5">
-      <Icon size={13} className="text-white/55 mt-0.5 flex-shrink-0" aria-hidden="true" />
+      <Icon size={13} className="text-white/55 mt-0.5 flex-shrink-0" aria-hidden={true} />
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
           <p className="text-[12px] font-semibold text-white/85">{label}</p>
@@ -494,7 +494,7 @@ function ListBlock({
   return (
     <div className={`rounded-lg border px-4 py-3 ${cls}`}>
       <p className="text-[10px] font-semibold uppercase tracking-[0.12em] mb-1.5 flex items-center gap-1.5">
-        <Icon size={11} aria-hidden="true" />
+        <Icon size={11} aria-hidden={true} />
         {label}
       </p>
       <ul className="space-y-1">

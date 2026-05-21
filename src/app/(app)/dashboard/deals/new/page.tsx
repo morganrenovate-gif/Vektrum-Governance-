@@ -23,11 +23,12 @@ export default async function NewDealPage() {
   if (!user) redirect('/auth/login?next=/dashboard/deals/new')
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: profile } = await (supabase as any)
+  const { data: profileRow } = await (supabase as any)
     .from('profiles')
     .select('role')
     .eq('id', user.id)
-    .single<{ role: string }>()
+    .single()
+  const profile = profileRow as { role: string } | null
 
   const role = profile?.role as DealFormRole | undefined
 

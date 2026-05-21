@@ -50,7 +50,7 @@ export default function DesignPartnersPage() {
 
         <div className="relative max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-vektrum-blue/30 bg-vektrum-blue/[0.08] px-4 py-1.5 shadow-sm mb-8">
-            <Sparkles size={12} className="text-blue-300" aria-hidden="true" />
+            <Sparkles size={12} className="text-blue-300" aria-hidden={true} />
             <span className="text-[12px] font-semibold tracking-[0.06em] text-blue-200">
               Design Partner Program
             </span>
@@ -74,7 +74,7 @@ export default function DesignPartnersPage() {
               className="group inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-7 py-3 text-[14px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 hover:bg-vektrum-blue-hover transition-all"
             >
               Apply to become a design partner
-              <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+              <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden={true} />
             </Link>
             <p className="mt-3 text-[12px] text-white/50">
               Limited first cohort. 30-minute fit call. No obligation.
@@ -115,7 +115,7 @@ export default function DesignPartnersPage() {
                 key={p}
                 className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-surface-2 px-4 py-3"
               >
-                <AlertTriangle size={16} className="text-amber-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
+                <AlertTriangle size={16} className="text-amber-400 mt-0.5 flex-shrink-0" aria-hidden={true} />
                 <span className="text-[14px] text-white/80 leading-relaxed">{p}</span>
               </li>
             ))}
@@ -144,7 +144,7 @@ export default function DesignPartnersPage() {
                   'Audit trail is incomplete or hard to reconstruct.',
                 ].map((b) => (
                   <li key={b} className="flex items-start gap-2.5 text-[13px] text-white/75">
-                    <AlertTriangle size={13} className="text-amber-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
+                    <AlertTriangle size={13} className="text-amber-400 mt-0.5 flex-shrink-0" aria-hidden={true} />
                     {b}
                   </li>
                 ))}
@@ -164,7 +164,7 @@ export default function DesignPartnersPage() {
                   'Final authorization has a cleaner audit trail.',
                 ].map((b) => (
                   <li key={b} className="flex items-start gap-2.5 text-[13px] text-white/80">
-                    <CheckCircle2 size={13} className="text-emerald-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
+                    <CheckCircle2 size={13} className="text-emerald-400 mt-0.5 flex-shrink-0" aria-hidden={true} />
                     {b}
                   </li>
                 ))}
@@ -179,15 +179,15 @@ export default function DesignPartnersPage() {
             </p>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-2 text-[12px] text-white/75">
               <span className="rounded-md bg-surface-3 px-2.5 py-1.5 font-medium">Contract / SOV</span>
-              <ArrowRight size={12} className="text-white/35" aria-hidden="true" />
+              <ArrowRight size={12} className="text-white/35" aria-hidden={true} />
               <span className="rounded-md bg-surface-3 px-2.5 py-1.5 font-medium">Draw request</span>
-              <ArrowRight size={12} className="text-white/35" aria-hidden="true" />
+              <ArrowRight size={12} className="text-white/35" aria-hidden={true} />
               <span className="rounded-md bg-surface-3 px-2.5 py-1.5 font-medium">Evidence</span>
-              <ArrowRight size={12} className="text-white/35" aria-hidden="true" />
+              <ArrowRight size={12} className="text-white/35" aria-hidden={true} />
               <span className="rounded-md bg-surface-3 px-2.5 py-1.5 font-medium">Conditions checked</span>
-              <ArrowRight size={12} className="text-white/35" aria-hidden="true" />
+              <ArrowRight size={12} className="text-white/35" aria-hidden={true} />
               <span className="rounded-md bg-surface-3 px-2.5 py-1.5 font-medium">Funder authorization</span>
-              <ArrowRight size={12} className="text-white/35" aria-hidden="true" />
+              <ArrowRight size={12} className="text-white/35" aria-hidden={true} />
               <span className="rounded-md bg-surface-3 px-2.5 py-1.5 font-medium">Selected rail executes</span>
             </div>
           </div>
@@ -219,7 +219,7 @@ export default function DesignPartnersPage() {
                   'Preferred founding-partner pricing if there is a fit.',
                 ].map((b) => (
                   <li key={b} className="flex items-start gap-2.5 text-[13px] text-white/80">
-                    <CheckCircle2 size={13} className="text-emerald-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
+                    <CheckCircle2 size={13} className="text-emerald-400 mt-0.5 flex-shrink-0" aria-hidden={true} />
                     {b}
                   </li>
                 ))}
@@ -238,7 +238,7 @@ export default function DesignPartnersPage() {
                   'Honest feedback on pain, value, rollout requirements, and implementation blockers.',
                 ].map((b) => (
                   <li key={b} className="flex items-start gap-2.5 text-[13px] text-white/80">
-                    <ClipboardCheck size={13} className="text-blue-300 mt-0.5 flex-shrink-0" aria-hidden="true" />
+                    <ClipboardCheck size={13} className="text-blue-300 mt-0.5 flex-shrink-0" aria-hidden={true} />
                     {b}
                   </li>
                 ))}
@@ -274,7 +274,7 @@ export default function DesignPartnersPage() {
                 key={label}
                 className="flex items-start gap-2.5 rounded-xl border border-white/[0.06] bg-surface-2 px-4 py-3"
               >
-                <Icon size={15} className="text-blue-300 mt-0.5 flex-shrink-0" aria-hidden="true" />
+                <Icon size={15} className="text-blue-300 mt-0.5 flex-shrink-0" aria-hidden={true} />
                 <span className="text-[13px] text-white/80 leading-snug">{label}</span>
               </div>
             ))}
@@ -297,7 +297,7 @@ export default function DesignPartnersPage() {
                 'Contractor evidence submission',
               ].map((s) => (
                 <li key={s} className="flex items-start gap-2 text-[13px] text-white/75">
-                  <CheckCircle2 size={12} className="text-emerald-400 mt-1 flex-shrink-0" aria-hidden="true" />
+                  <CheckCircle2 size={12} className="text-emerald-400 mt-1 flex-shrink-0" aria-hidden={true} />
                   {s}
                 </li>
               ))}
@@ -345,7 +345,7 @@ export default function DesignPartnersPage() {
               loan servicer, or other external/manual rail.
             </p>
             <div className="flex items-center gap-2 pt-2 text-[12px] text-white/45">
-              <Lock size={12} aria-hidden="true" />
+              <Lock size={12} aria-hidden={true} />
               <span>The selected rail executes funds — Vektrum enforces the conditions before funds move.</span>
             </div>
           </div>
@@ -398,7 +398,7 @@ export default function DesignPartnersPage() {
               className="group inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-vektrum-blue px-7 py-3 text-[14px] font-semibold text-white shadow-lg shadow-vektrum-blue/30 hover:bg-vektrum-blue-hover transition-all"
             >
               Apply to become a design partner
-              <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+              <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden={true} />
             </Link>
             <p className="mt-3 text-[12px] text-white/50">
               Limited first cohort. 30-minute fit call. No obligation.
@@ -406,7 +406,7 @@ export default function DesignPartnersPage() {
           </div>
 
           <div className="mt-10 inline-flex items-center gap-2 text-[12px] text-white/40">
-            <Mail size={12} aria-hidden="true" />
+            <Mail size={12} aria-hidden={true} />
             <span>Construction draw governance · release authorization · audit trail</span>
           </div>
         </div>
@@ -434,7 +434,7 @@ function FlowTile({
   const iconTone = warn ? 'text-amber-400' : ok ? 'text-emerald-400' : 'text-blue-300'
   return (
     <div className={`rounded-xl border ${tone} p-3`}>
-      <Icon size={14} className={`${iconTone} mb-2`} aria-hidden="true" />
+      <Icon size={14} className={`${iconTone} mb-2`} aria-hidden={true} />
       <p className="text-[12px] font-semibold text-white leading-tight">{title}</p>
       <p className="mt-1 text-[11px] text-white/55 leading-snug">{body}</p>
     </div>
@@ -450,7 +450,7 @@ function ProofCard({
 }) {
   return (
     <div className="rounded-2xl border border-white/[0.08] bg-surface-2 p-5">
-      <Icon size={16} className="text-blue-300 mb-3" aria-hidden="true" />
+      <Icon size={16} className="text-blue-300 mb-3" aria-hidden={true} />
       <p className="text-[14px] font-semibold text-white">{title}</p>
       <p className="mt-1.5 text-[12px] text-white/65 leading-relaxed">{body}</p>
     </div>

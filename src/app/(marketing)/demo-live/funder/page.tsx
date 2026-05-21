@@ -124,7 +124,7 @@ export default function DemoFunderPage() {
   const totalDeals      = MOCK_DEALS.length
   const capitalDeployed = MOCK_DEALS.reduce((s, d) => s + d.funded, 0)
   const totalReleased   = MOCK_DEALS.reduce((s, d) => s + d.released, 0)
-  const actionCount     = ACTION_ITEMS.length
+  const actionCount     = ACTION_ITEMS.length as number
 
   return (
     <div className="min-h-screen bg-surface-0">

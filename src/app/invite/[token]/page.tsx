@@ -114,11 +114,12 @@ export default function InviteAcceptPage() {
           setAuthPhase('unauthenticated')
           return
         }
-        const { data: profile } = await supabase
+        const { data: profileRow } = await supabase
           .from('profiles')
           .select('role')
           .eq('id', user.id)
           .single()
+        const profile = profileRow as { role: string } | null
         if (!profile) {
           setAuthPhase('unauthenticated')
           return

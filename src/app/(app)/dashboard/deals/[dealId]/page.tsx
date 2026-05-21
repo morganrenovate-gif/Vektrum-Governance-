@@ -204,7 +204,7 @@ export default async function DealDetailPage({
   // Falls back to most recent voided contract so the voided banner is visible.
   const { data: activeContractRaw } = await supabase
     .from("contracts")
-    .select("id, status, document_name, docusign_envelope_id, funder_signed_at, contractor_signed_at, voided_at, void_reason, created_at")
+    .select("id, status, document_name, docusign_envelope_id, funder_signed_at, contractor_signed_at, voided_at, void_reason, created_at, storage_path, signed_storage_path")
     .eq("deal_id", dealId)
     .not("status", "eq", "voided")
     .maybeSingle();
@@ -231,6 +231,8 @@ export default async function DealDetailPage({
     voided_at?: string | null;
     void_reason?: string | null;
     created_at: string;
+    storage_path?: string | null;
+    signed_storage_path?: string | null;
   } | null;
 
   const milestoneIds = milestones.map((m) => m.id);

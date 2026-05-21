@@ -535,6 +535,10 @@ export interface Contract {
   void_reason:          string | null;
   created_at:           string;
   updated_at:           string;
+  /** Internal storage path for the original PDF. Stripped from API responses; present on raw DB rows. */
+  storage_path?:        string | null;
+  /** Internal storage path for the final signed PDF. Stripped from API responses; present on raw DB rows. */
+  signed_storage_path?: string | null;
 }
 
 export interface BillingRecord {
