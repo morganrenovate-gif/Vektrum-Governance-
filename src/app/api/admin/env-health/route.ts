@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser, requireRole, requireMFA } from '@/lib/auth/middleware'
+import { createClient } from '@/lib/supabase/server'
 import { validateProductionEnv } from '@/lib/env/validate-production-env'
 
 export const dynamic = 'force-dynamic'
@@ -36,8 +37,9 @@ export async function GET(request: NextRequest) {
     return err as NextResponse
   }
 
+  const supabase = await createClient()
   try {
-    requireMFA(authContext)
+    await requireMFA(supabase, authContext.profile)
   } catch (err) {
     return err as NextResponse
   }

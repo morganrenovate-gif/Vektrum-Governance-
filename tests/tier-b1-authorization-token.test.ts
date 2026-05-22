@@ -19,6 +19,11 @@
  *   5. Test is wired into npm test in package.json.
  *   6. The issuer is idempotent — duplicate calls return alreadyIssued=true.
  *   7. Canonical JSON hashing is order-independent (round-tripped from Tier A).
+ *   8. Migration 20260520000001 adds reserved_gross_amount + reserved_fee_amount
+ *      columns to authorization_tokens so expire-if-stale does not recompute
+ *      billing amounts from the mutable billing_rate_bps at expiry time.
+ *   9. Issuer accepts feeAmount and writes reserved_gross_amount / reserved_fee_amount.
+ *  10. Release route passes feeAmount to issueAuthorizationToken.
  *
  * Run: npx tsx tests/tier-b1-authorization-token.test.ts
  */
@@ -36,17 +41,19 @@ function check(cond: boolean, msg: string) { cond ? pass(msg) : fail(msg) }
 
 async function main() {
 
-const MIGRATION   = 'supabase/migrations/20260504000001_authorization_tokens.sql'
+const MIGRATION        = 'supabase/migrations/20260504000001_authorization_tokens.sql'
+const MIGRATION_B3HRD  = 'supabase/migrations/20260520000001_authorization_tokens_reserved_amounts.sql'
 const ISSUER      = 'src/lib/engine/authorization-token.ts'
 const ROUTE       = 'src/app/api/milestones/[milestoneId]/release/route.ts'
 const TYPES       = 'src/lib/types.ts'
 const PACKAGE     = 'package.json'
 
-const migration = read(MIGRATION)
-const issuer    = read(ISSUER)
-const route     = read(ROUTE)
-const types     = read(TYPES)
-const pkg       = read(PACKAGE)
+const migration      = read(MIGRATION)
+const migrationB3hrd = read(MIGRATION_B3HRD)
+const issuer         = read(ISSUER)
+const route          = read(ROUTE)
+const types          = read(TYPES)
+const pkg            = read(PACKAGE)
 
 // ─── 1. Migration shape ────────────────────────────────────────────────────
 console.log('\n── 1. Migration creates the authorization_tokens table ──────────────────')
@@ -289,7 +296,53 @@ check(
   'sha256OfCanonicalJson returns lowercase hex SHA-256',
 )
 
-console.log('\n── 8. Test wired into npm test ─────────────────────────────────────────')
+console.log('\n── 8. B3 hardening — persisted reserved amounts (issue #133) ──────────────')
+
+// 8a. Hardening migration adds the two new columns.
+check(
+  /ALTER TABLE public\.authorization_tokens/.test(migrationB3hrd),
+  'B3-hardening migration ALTERs authorization_tokens',
+)
+check(
+  /reserved_gross_amount/.test(migrationB3hrd),
+  'B3-hardening migration adds reserved_gross_amount column',
+)
+check(
+  /reserved_fee_amount/.test(migrationB3hrd),
+  'B3-hardening migration adds reserved_fee_amount column',
+)
+check(
+  /NUMERIC/.test(migrationB3hrd),
+  'B3-hardening migration uses NUMERIC type for amount columns',
+)
+check(
+  /DEFAULT 0/.test(migrationB3hrd),
+  'B3-hardening migration sets DEFAULT 0 for existing rows',
+)
+
+// 8b. Issuer input accepts feeAmount.
+check(
+  /feeAmount\s*:\s*number/.test(issuer),
+  'IssueAuthorizationTokenInput includes feeAmount field',
+)
+
+// 8c. Issuer INSERT writes the persisted amounts.
+check(
+  /reserved_gross_amount\s*:\s*input\.grossAmount/.test(issuer.replace(/\s+/g, ' ')),
+  'Issuer writes reserved_gross_amount = input.grossAmount to DB row',
+)
+check(
+  /reserved_fee_amount\s*:\s*input\.feeAmount/.test(issuer.replace(/\s+/g, ' ')),
+  'Issuer writes reserved_fee_amount = input.feeAmount to DB row',
+)
+
+// 8d. Release route passes feeAmount to issueAuthorizationToken.
+check(
+  /feeAmount\s*:\s*fee\.feeAmount/.test(route.replace(/\s+/g, ' ')),
+  'Release route passes feeAmount: fee.feeAmount to issueAuthorizationToken',
+)
+
+console.log('\n── 9. Test wired into npm test ─────────────────────────────────────────')
 
 check(
   pkg.includes('tier-b1-authorization-token.test.ts'),

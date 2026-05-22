@@ -146,14 +146,14 @@ export async function POST(
   try {
     body = await request.json()
   } catch {
-    return validationError('Request body must be valid JSON.')
+    return validationError(['Request body must be valid JSON.'])
   }
 
   if (!body.description?.trim()) {
-    return validationError('description is required.')
+    return validationError(['description is required.'])
   }
   if (typeof body.scheduled_value !== 'number' || body.scheduled_value < 0) {
-    return validationError('scheduled_value must be a non-negative number.')
+    return validationError(['scheduled_value must be a non-negative number.'])
   }
 
   const approved_change_orders = body.approved_change_orders ?? 0
@@ -161,10 +161,10 @@ export async function POST(
   const current_requested = body.current_requested ?? 0
   const retainage_amount = body.retainage_amount ?? 0
 
-  if (approved_change_orders < 0) return validationError('approved_change_orders must be >= 0.')
-  if (previous_released < 0) return validationError('previous_released must be >= 0.')
-  if (current_requested < 0) return validationError('current_requested must be >= 0.')
-  if (retainage_amount < 0) return validationError('retainage_amount must be >= 0.')
+  if (approved_change_orders < 0) return validationError(['approved_change_orders must be >= 0.'])
+  if (previous_released < 0) return validationError(['previous_released must be >= 0.'])
+  if (current_requested < 0) return validationError(['current_requested must be >= 0.'])
+  if (retainage_amount < 0) return validationError(['retainage_amount must be >= 0.'])
 
   const computed = computeSovFields(
     body.scheduled_value,

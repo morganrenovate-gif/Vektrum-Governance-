@@ -100,12 +100,12 @@ export async function POST(
   const { sov_line_item_id, allocated_amount } = body
 
   if (!sov_line_item_id || typeof sov_line_item_id !== 'string') {
-    return validationError('sov_line_item_id is required and must be a string.')
+    return validationError(['sov_line_item_id is required and must be a string.'])
   }
 
   const amount = Number(allocated_amount)
   if (!Number.isFinite(amount) || amount < 0) {
-    return validationError('allocated_amount must be a non-negative number.')
+    return validationError(['allocated_amount must be a non-negative number.'])
   }
 
   const supabase = await createClient()

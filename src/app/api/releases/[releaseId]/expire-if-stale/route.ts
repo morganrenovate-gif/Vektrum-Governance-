@@ -131,7 +131,10 @@ export async function POST(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: token, error: tokenError } = await (adminClient as any)
     .from('authorization_tokens')
-    .select('id, jti, token_hash, status, expires_at, total_amount')
+    // B3 hardening: select reserved_gross_amount + reserved_fee_amount so the
+    // cancellation uses the amounts locked at authorization time, not recomputed
+    // from deal.billing_rate_bps (issue #133).
+    .select('id, jti, token_hash, status, expires_at, total_amount, reserved_gross_amount, reserved_fee_amount')
     .eq('id', release.authorization_token_id)
     .single()
 
@@ -167,25 +170,23 @@ export async function POST(
     )
   }
 
-  // ── Fetch deal + amounts (needed by cancel_release_reservation RPC) ──────
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: deal, error: dealError } = await (adminClient as any)
-    .from('deals')
-    .select('id, billing_rate_bps')
-    .eq('id', release.deal_id)
-    .single()
-
-  if (dealError || !deal) {
-    return internalError(
-      `Deal ${release.deal_id} could not be loaded for reservation cancel.`,
-      dealError?.message,
-    )
-  }
-
-  // Recompute fee from milestone amount × billing_rate_bps. Same math the
-  // milestone-release route used at reservation time. Reservation = gross + fee.
-  const grossAmount = release.amount
-  const feeAmount   = Math.max(50, Math.round(grossAmount * deal.billing_rate_bps / 10000 * 100) / 100)
+  // ── Amounts for cancel_release_reservation ───────────────────────────────
+  // B3 hardening (issue #133): use the amounts persisted on the token at
+  // authorization time rather than recomputing from deal.billing_rate_bps.
+  // If billing_rate_bps were ever mutated post-funding (renegotiation, admin
+  // correction, future feature), a recomputation would cancel the wrong amount
+  // and silently corrupt deals.reserved_amount.
+  //
+  // For pre-hardening tokens that have reserved_gross_amount = 0 (default),
+  // fall back to release.amount + a safe minimum fee so the reservation is
+  // still cancelled rather than left orphaned. This case should not occur in
+  // production as no external-rail releases existed before the migration.
+  const grossAmount = token.reserved_gross_amount > 0
+    ? token.reserved_gross_amount
+    : release.amount
+  const feeAmount = token.reserved_fee_amount > 0
+    ? token.reserved_fee_amount
+    : 50  // safe minimum; pre-hardening fallback only
 
   // ── Atomic state transitions ─────────────────────────────────────────────
   // Order matters: token first, release second, reservation cancel third.

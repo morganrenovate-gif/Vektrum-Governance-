@@ -42,18 +42,18 @@ export async function POST(request: NextRequest) {
 
   if (body.all === true) {
     // Mark all unread for this user
-    const { count, error } = await admin
+    const { data: updated, error } = await admin
       .from('notifications')
       .update({ read_at: now })
       .eq('recipient_user_id', user.id)
       .is('read_at', null)
-      .select('id', { count: 'exact', head: true })
+      .select('id')
 
     if (error) {
       return internalError(`Failed to mark all notifications as read: ${error.message}`)
     }
 
-    return NextResponse.json({ updated: count ?? 0 })
+    return NextResponse.json({ updated: updated?.length ?? 0 })
   }
 
   if (body.id && typeof body.id === 'string') {

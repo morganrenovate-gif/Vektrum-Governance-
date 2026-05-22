@@ -309,6 +309,7 @@ export async function POST(
       railScope:       'external_rail',
       netToContractor,
       grossAmount:     fee.grossAmount,
+      feeAmount:       fee.feeAmount,  // B3 hardening: persist original fee at issuance
       idempotencyKey,
       issuedBy:        user.id,
     })
@@ -505,7 +506,7 @@ export async function POST(
 
     // Fire-and-forget — notify admins that external confirmation is needed
     void notifyExternalPaymentConfirmationRequired({
-      releaseId:   releaseInsertedId,
+      releaseId:   releaseInsertedId!,
       milestoneId: milestoneId,
       dealId:      milestone.deal_id,
       funderId:    user.id,

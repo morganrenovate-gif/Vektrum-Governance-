@@ -139,7 +139,10 @@ Run:
   - [ ] F7a. Try `expire-if-stale` on a fresh token whose `expires_at` is in the future → expect 409 `TOKEN_NOT_STALE`
   - [ ] F7b. Try `expire-if-stale` on a Stripe-rail release → expect 422 (only `external_manual` is eligible)
   - [ ] F7c. Try as a contractor (non-funder, non-admin) → expect 403
-- [ ] F8. **CRITICAL — fee math**: confirm the reservation freed in F4 equals the reservation taken at authorization time. Compute manually: `fee = max(50, round(gross × billing_rate_bps / 10000, 2))`. The endpoint recomputes from current `deal.billing_rate_bps`; today this is immutable post-funding so the values match — but explicitly verify in QA.
+- [ ] F8. **Fee math — persisted amounts (B3 hardening, issue #133)**: confirm the reservation freed in F4 equals the reservation taken at authorization time.
+  - Inspect `authorization_tokens.reserved_gross_amount` and `reserved_fee_amount` for the token row — they must match the values recorded in the `funds_reserved` audit event at authorization time.
+  - The endpoint now reads directly from the token row instead of recomputing from `deal.billing_rate_bps`. No manual arithmetic is needed to verify the amounts are correct — they were locked in at issuance.
+  - **Pre-hardening fallback** (tokens issued before migration `20260520000001`): if `reserved_gross_amount = 0`, the endpoint falls back to `release.amount` for gross and `50` for the minimum fee. These pre-hardening rows should not exist in production but are handled safely.
 
 ---
 
