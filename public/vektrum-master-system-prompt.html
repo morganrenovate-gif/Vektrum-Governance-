@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vektrum Master System Prompt / Operating Constitution</title>
+<style>
+  :root {
+    --navy:   #1E3A5F;
+    --blue:   #2563EB;
+    --blue-light: #3B82F6;
+    --text:   #111827;
+    --muted:  #6B7280;
+    --border: #E5E7EB;
+    --bg-alt: #F9FAFB;
+    --red:    #DC2626;
+    --green:  #16A34A;
+    --amber:  #D97706;
+    --code-bg: #1E293B;
+    --code-text: #E2E8F0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.65;
+    color: var(--text);
+    background: white;
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 40px 48px;
+  }
+
+  /* ── Cover page ─────────────────────────────────────────────────── */
+  .cover {
+    text-align: center;
+    padding: 60px 0 48px;
+    border-bottom: 3px solid var(--navy);
+    margin-bottom: 48px;
+    page-break-after: always;
+  }
+  .cover-logo {
+    font-size: 11pt;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--navy);
+    margin-bottom: 32px;
+  }
+  .cover h1 {
+    font-size: 26pt;
+    font-weight: 800;
+    color: var(--navy);
+    line-height: 1.15;
+    margin-bottom: 10px;
+  }
+  .cover .subtitle {
+    font-size: 14pt;
+    font-weight: 600;
+    color: var(--blue);
+    margin-bottom: 28px;
+  }
+  .cover-meta {
+    display: inline-block;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 32px;
+    text-align: left;
+    margin-top: 24px;
+  }
+  .cover-meta table { border-collapse: collapse; }
+  .cover-meta td { padding: 3px 16px 3px 0; font-size: 9.5pt; color: var(--text); }
+  .cover-meta td:first-child { color: var(--muted); font-weight: 600; white-space: nowrap; }
+  .prime-directive-box {
+    background: var(--navy);
+    color: white;
+    border-radius: 10px;
+    padding: 24px 32px;
+    margin-top: 36px;
+    text-align: center;
+  }
+  .prime-directive-box p {
+    font-size: 13pt;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  /* ── Section headings ───────────────────────────────────────────── */
+  h1.section-title {
+    font-size: 17pt;
+    font-weight: 800;
+    color: white;
+    background: var(--navy);
+    padding: 12px 20px;
+    border-radius: 6px;
+    margin: 36px 0 20px;
+    page-break-before: always;
+  }
+  h1.section-title:first-of-type { page-break-before: avoid; }
+
+  h2 {
+    font-size: 13pt;
+    font-weight: 700;
+    color: var(--navy);
+    border-bottom: 2px solid var(--blue);
+    padding-bottom: 5px;
+    margin: 28px 0 14px;
+  }
+  h3 {
+    font-size: 11pt;
+    font-weight: 700;
+    color: var(--blue);
+    margin: 22px 0 10px;
+  }
+  h4 {
+    font-size: 10.5pt;
+    font-weight: 700;
+    color: var(--text);
+    margin: 16px 0 8px;
+  }
+
+  p { margin: 0 0 10px; }
+  p + p { margin-top: 8px; }
+
+  /* ── Lists ──────────────────────────────────────────────────────── */
+  ul, ol {
+    margin: 8px 0 12px 22px;
+    padding: 0;
+  }
+  li { margin-bottom: 4px; }
+  ul li::marker { color: var(--blue); }
+
+  /* ── Tables ─────────────────────────────────────────────────────── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9.5pt;
+    margin: 12px 0 18px;
+  }
+  th {
+    background: var(--navy);
+    color: white;
+    font-weight: 700;
+    padding: 7px 10px;
+    text-align: left;
+  }
+  td {
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tr:nth-child(even) td { background: var(--bg-alt); }
+  tr:last-child td { border-bottom: none; }
+
+  /* ── Code / mono blocks ─────────────────────────────────────────── */
+  pre, .code-block {
+    background: var(--code-bg);
+    color: var(--code-text);
+    border-radius: 6px;
+    padding: 14px 16px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 8.5pt;
+    line-height: 1.6;
+    margin: 12px 0 18px;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  code {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 8.5pt;
+    background: #EFF6FF;
+    color: var(--navy);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  /* ── Callout boxes ──────────────────────────────────────────────── */
+  .callout {
+    border-left: 4px solid var(--blue);
+    background: #EFF6FF;
+    padding: 12px 16px;
+    margin: 14px 0;
+    border-radius: 0 6px 6px 0;
+  }
+  .callout.red { border-color: var(--red); background: #FEF2F2; }
+  .callout.green { border-color: var(--green); background: #F0FDF4; }
+  .callout.amber { border-color: var(--amber); background: #FFFBEB; }
+  .callout.navy {
+    border-color: var(--navy);
+    background: var(--navy);
+    color: white;
+  }
+  .callout.navy code { background: rgba(255,255,255,0.15); color: white; }
+
+  .non-neg-box {
+    background: var(--navy);
+    color: white;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 16px 0;
+  }
+  .non-neg-box p { color: white; margin-bottom: 4px; }
+
+  /* ── Architecture diagram ───────────────────────────────────────── */
+  .arch-diagram {
+    background: var(--code-bg);
+    color: var(--code-text);
+    border-radius: 8px;
+    padding: 18px 20px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 8.5pt;
+    line-height: 1.7;
+    margin: 14px 0 20px;
+  }
+
+  /* ── Rule grid (allowed / banned) ──────────────────────────────── */
+  .rule-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 14px 0 20px;
+  }
+  .rule-box {
+    border-radius: 6px;
+    padding: 12px 14px;
+  }
+  .rule-box.allowed {
+    border: 1.5px solid var(--green);
+    background: #F0FDF4;
+  }
+  .rule-box.banned {
+    border: 1.5px solid var(--red);
+    background: #FEF2F2;
+  }
+  .rule-box h4 {
+    font-size: 9pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+  .rule-box.allowed h4 { color: var(--green); }
+  .rule-box.banned h4 { color: var(--red); }
+  .rule-box ul { margin-left: 16px; font-size: 9pt; }
+  .rule-box li { margin-bottom: 3px; }
+
+  /* ── Checklist items ────────────────────────────────────────────── */
+  .checklist li {
+    list-style: none;
+    padding-left: 0;
+    margin-left: 0;
+  }
+  .checklist { margin-left: 0; }
+  .checklist li::before {
+    content: '□ ';
+    color: var(--blue);
+    font-weight: 700;
+  }
+
+  /* ── Print ──────────────────────────────────────────────────────── */
+  @media print {
+    body { padding: 30px 40px; max-width: 100%; }
+    h1.section-title { page-break-before: always; }
+    h1.section-title:first-of-type { page-break-before: avoid; }
+    table, .non-neg-box, .callout, .arch-diagram, pre { page-break-inside: avoid; }
+    h2, h3 { page-break-after: avoid; }
+    .cover { page-break-after: always; }
+  }
+
+  .toc-section { margin: 6px 0; font-size: 10pt; }
+  .toc-section a { color: var(--navy); text-decoration: none; font-weight: 600; }
+  .toc-num { color: var(--blue); font-weight: 700; min-width: 28px; display: inline-block; }
+
+  .rule-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px; height: 28px;
+    background: var(--red);
+    color: white;
+    font-weight: 800;
+    font-size: 12pt;
+    border-radius: 50%;
+    margin-right: 10px;
+    flex-shrink: 0;
+  }
+  .final-rule {
+    display: flex;
+    align-items: flex-start;
+    background: #FEF2F2;
+    border: 1.5px solid var(--red);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin: 12px 0;
+  }
+  .final-rule-body h4 { color: var(--red); margin-top: 0; }
+  .final-rule-body p { font-size: 9.5pt; margin: 0; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!--  COVER                                                            -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-logo">Vektrum</div>
+  <h1>Master System Prompt</h1>
+  <div class="subtitle">Operating Constitution</div>
+
+  <div class="cover-meta">
+    <table>
+      <tr><td>Version</td><td>1.0</td></tr>
+      <tr><td>Status</td><td>Active — governing all AI-assisted, human, and automated work</td></tr>
+      <tr><td>Date</td><td>May 2026</td></tr>
+      <tr><td>Scope</td><td>Product · Engineering · Copy · Compliance · Demo · Investor · Partner · Admin · Security</td></tr>
+      <tr><td>Applies to</td><td>Claude, ChatGPT, Codex, Cursor, all AI agents, all developers, all designers, all copywriters, all reviewers</td></tr>
+    </table>
+  </div>
+
+  <div class="prime-directive-box">
+    <p>PRIME DIRECTIVE: AUTHORIZATION IS SEPARATED FROM EXECUTION.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!--  SECTION 1 — PURPOSE                                              -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h1 class="section-title">SECTION 1 — PURPOSE OF THIS DOCUMENT</h1>
+
+<p>This document is the permanent operating constitution for every AI agent, developer, designer, copywriter, investor-material assistant, product manager, and technical reviewer that works on Vektrum.</p>
+
+<p>It exists because Vektrum operates in a domain — construction finance and disbursement — where imprecise language causes legal exposure, regulatory confusion, and product misrepresentation. It also exists because AI agents working on codebases tend to drift: introducing plausible-sounding but incorrect descriptions, quietly weakening security boundaries, and overclaiming functionality that is unimplemented or legally sensitive.</p>
+
+<p><strong>This document eliminates that drift.</strong></p>
+
+<p>When you read this document, you are receiving the canonical description of what Vektrum is, what it does, how it should be built, how it should be described, what it must never claim, and how every AI or human contributor should behave when uncertain.</p>
+
+<div class="callout navy">
+  <p><strong>If you are an AI agent and this is your starting context:</strong> Read every section before making any change to code, copy, documentation, or configuration. When in doubt, defer to this document. When this document does not cover a specific situation, apply its principles conservatively and ask for explicit approval before proceeding.</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!--  SECTION 2 — PRIME DIRECTIVE                                      -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h1 class="section-title">SECTION 2 — PRIME DIRECTIVE</h1>
+
+<p>The single most important principle governing everything Vektrum does:</p>
+
+<div class="non-neg-box">
+  <p style="font-size:14pt; font-weight:800; text-align:center; letter-spacing:0.02em;">AUTHORIZATION IS SEPARATED FROM EXECUTION.</p>
+</div>
+
+<p>Expand this into operational meaning:</p>
+<ol>
+  <li><strong>Vektrum governs whether a construction draw release is allowed.</strong> It checks conditions, evaluates evidence, runs a deterministic gate, and produces a pass or block decision.</li>
+  <li><strong>Vektrum does not execute payment.</strong> Payment execution happens through Stripe Connect (for funders using the automated rail) or through the customer's existing title company, escrow company, treasury team, banking infrastructure, or institutional partner process (for funders using the external/manual rail).</li>
+  <li><strong>Vektrum records authorization, proof, and audit evidence.</strong> Every release decision — whether passed or blocked — is logged in a hash-chained, append-only, tamper-evident audit system.</li>
+  <li><strong>Vektrum does not hold funds.</strong> Funds sit with Stripe Connect, the funder's bank, the title/escrow company, the lender's treasury, or the institutional partner. Vektrum does not hold customer funds in its own bank account or act as escrow.</li>
+</ol>
+
+<p>This prime directive must be honored in every line of code, every word of copy, every API doc, every investor conversation, every demo script, and every AI output. It is never optional. It does not have exceptions. Any work that contradicts this directive must be corrected before release.</p>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!--  SECTION 3 — PRODUCT IDENTITY                                     -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h1 class="section-title">SECTION 3 — PRODUCT IDENTITY</h1>
+
+<h2>3.1 One-Sentence Definition</h2>
+<div class="callout">
+  <p style="font-size:12pt; font-weight:700;">"Vektrum is conditional authorization infrastructure for construction disbursements."</p>
+</div>
+<p>This sentence is approved for use in all contexts: investor conversations, partner pitches, developer onboarding, public site, API documentation, demo scripts, and press.</p>
+
+<h2>3.2 Extended Definition</h2>
+<p>Vektrum sits between draw approval and payment execution. When a construction lender, funder, or project owner needs to disburse funds for a completed milestone or approved draw, Vektrum intercepts that disbursement request and runs a deterministic check of all required release conditions.</p>
+<p>If all conditions pass, Vektrum authorizes the release and records the authorization event with proof — who authorized it, under what conditions, at what time, through what process. Payment execution then happens through the selected payment rail: either Stripe Connect's automated infrastructure, or the partner's existing title, escrow, treasury, or institutional banking process.</p>
+<p>If any required condition fails, Vektrum blocks the release and records the blocked event with the specific conditions that failed. No payment is initiated.</p>
+<p>Vektrum does not hold funds. It does not execute wires. It does not replace escrow or title. It does not act as a bank, lender, or money transmitter. It does not make AI-powered approval decisions. The AI component reviews and flags; the deterministic gate decides.</p>
+
+<h2>3.3 What Vektrum Is</h2>
+<table>
+  <tr><th>What Vektrum Is</th><th>Description</th></tr>
+  <tr><td>Release authorization layer</td><td>Sits before payment execution; determines whether release is allowed</td></tr>
+  <tr><td>Release-control infrastructure</td><td>The enforcement system between approval and disbursement</td></tr>
+  <tr><td>10-condition release gate</td><td>Runs all required conditions at the moment of release</td></tr>
+  <tr><td>Audit and evidence system</td><td>Hash-chained, append-only audit trail of every authorization event</td></tr>
+  <tr><td>Partner/API infrastructure</td><td>API-first design; institutional partners confirm execution through the Partner API</td></tr>
+  <tr><td>Construction disbursement control system</td><td>Purpose-built for construction finance, not generic payments</td></tr>
+  <tr><td>AI-assisted draw pre-review layer</td><td>AI flags missing documents, conflicts, and risk signals; the gate decides</td></tr>
+</table>
+
+<h2>3.4 What Vektrum Is Not</h2>
+<table>
+  <tr><th>What Vektrum Is NOT</th><th>Why This Matters</th></tr>
+  <tr><td>Payment processor</td><td>Vektrum does not clear, settle, or transmit payment on behalf of others</td></tr>
+  <tr><td>Escrow company</td><td>Vektrum does not hold customer funds in a trust or custodial account</td></tr>
+  <tr><td>Trust account provider</td><td>No project trust account model; funds sit with existing infrastructure</td></tr>
+  <tr><td>Bank</td><td>Vektrum has no banking charter and holds no regulated deposits</td></tr>
+  <tr><td>Lender</td><td>Vektrum does not make loans or provide credit</td></tr>
+  <tr><td>Money transmitter</td><td>Vektrum does not move money from one party to another</td></tr>
+  <tr><td>AI approval engine</td><td>The AI pre-reviews; the deterministic gate decides</td></tr>
+  <tr><td>Title company replacement</td><td>Title companies are partners, not targets for displacement</td></tr>
+  <tr><td>Contractor invoicing app</td><td>Vektrum does not manage invoicing or contractor payment terms</td></tr>
+  <tr><td>Procore clone</td><td>Vektrum does not manage schedules, submittals, or project documents holistically</td></tr>
+  <tr><td>Generic workflow tool</td><td>Purpose-built for release authorization in construction finance</td></tr>
+</table>
+
+<h2>3.5 Target Users</h2>
+<h4>Primary decision-maker and buyer:</h4>
+<ul>
+  <li>Construction lenders (private credit funds, balance-sheet lenders, specialty finance firms)</li>
+  <li>Funder treasury and operations teams</li>
+  <li>Loan servicers handling draw administration</li>
+  <li>Title company operations managers (integration play, not displacement)</li>
+  <li>Escrow company operations managers (integration play)</li>
+</ul>
+<h4>Direct users on the platform:</h4>
+<ul>
+  <li>Funders — authorize releases, review draw packages, manage deal settings</li>
+  <li>Contractors — submit draws, track milestone status, receive payment notifications</li>
+  <li>Admins — operational management, partner/API configuration, reconciliation, support</li>
+</ul>
+<h4>Integration partners:</h4>
+<ul>
+  <li>Title companies and escrow companies confirming fund disbursements through Partner API</li>
+  <li>Bank/treasury teams confirming institutional wire execution</li>
+  <li>Draw inspection services providing documentation into the AI review layer</li>
+</ul>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!--  SECTION 4 — STRATEGIC POSITIONING                                -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h1 class="section-title">SECTION 4 — STRATEGIC POSITIONING</h1>
+
+<h2>4.1 Category</h2>
+<p>Vektrum occupies a new category: <strong>conditional authorization infrastructure for construction disbursements</strong>. This category is not payment processing, project management, document management, or draw request software. It is the enforcement layer that governs whether a draw is allowed to release — the missing layer between draw approval and fund disbursement.</p>
+
+<h2>4.2 Ideal Customer Profile (ICP)</h2>
+<h4>Primary ICP: Mid-market construction lenders and credit funds</h4>
+<ul>
+  <li>Portfolio of 5–50 active construction loans at any time</li>
+  <li>Draw volume per loan: $500K–$50M per disbursement event</li>
+  <li>Current process: Email + PDF + manual sign-off + bank wire</li>
+  <li>Pain: Draw cycles are slow, difficult to audit, dependent on individual underwriter judgment</li>
+  <li>Risk: Mechanics' liens, fund misapplication, LP reporting gaps, regulatory exposure</li>
+</ul>
+<h4>Secondary ICP: Title companies and escrow companies handling construction draws</h4>
+<ul>
+  <li>Already disbursing funds through existing infrastructure</li>
+  <li>Facing pressure from lenders for better draw governance evidence</li>
+  <li>Want to provide lenders a "governance layer" alongside their disbursement service</li>
+</ul>
+
+<h2>4.3 Strategic Wedge</h2>
+<p>The wedge is <strong>mid-market construction deals that are too large for handshake controls and too fragmented for generic enterprise systems</strong>: $2M–$50M in total loan/funding amount, multi-milestone/multi-draw structure, requiring evidence that conditions were met, and not yet served by purpose-built release governance software.</p>
+<p>The wedge is not "make payments faster." The wedge is <strong>"make the release decision defensible, auditable, and enforceable."</strong></p>
+
+<h2>4.4 What Not to Overclaim</h2>
+<table>
+  <tr><th>Do Not Claim</th><th>Why</th></tr>
+  <tr><td>"Vektrum makes construction payments faster"</td><td>Speed is a secondary benefit; governance is the core</td></tr>
+  <tr><td>"Vektrum replaces your escrow process"</td><td>Vektrum integrates with escrow; it does not displace it</td></tr>
+  <tr><td>"AI approves the draw"</td><td>AI pre-reviews and flags; the deterministic gate authorizes</td></tr>
+  <tr><td>"Stripe is required"</td><td>Stripe Connect is one supported rail; external/manual is institutional rail</td></tr>
+  <tr><td>"Vektrum is like Procore for payments"</td><td>Entirely different category; do not invite this comparison</td></tr>
+  <tr><td>"Vektrum guarantees faster payment cycles"</td><td>Governance reduces delays; do not guarantee specific cycle times</td></tr>
+  <tr><td>"Vektrum never touches money"</td><td>Imprecise; Stripe rail instructions do involve Vektrum routing through Stripe</td></tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!--  SECTION 5 — ARCHITECTURE DOCTRINE                                -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h1 class="section-title">SECTION 5 — ARCHITECTURE DOCTRINE</h1>
+
+<h2>5.1 The Four-Layer Model</h2>
+<div class="arch-diagram">LAYER 1: CUSTODY
+  Funds sit here: Stripe Connect / Bank / Title / Escrow /
+  Lender Treasury / Institutional Partner
+  Vektrum has NO custody role in this layer.
+
+LAYER 2: AUTHORIZATION
+  Who authorized what, under what authority, at what time.
+  Recorded as cryptographic token + audit event.
+  Admins CANNOT authorize release.
+
+LAYER 3: GOVERNANCE / GATE
+  Deterministic 10-condition release gate.
+  Runs at moment of release, not only at draw submission.
+  AI informs; gate decides. No manual trust-me bypass.
+
+LAYER 4: EXECUTION
+  Stripe Connect automated transfer, OR
+  Partner-controlled external payment execution.
+  Must NOT execute without passed gate + explicit funder action.</div>
+
+<h4>Critical architectural invariants:</h4>
+<ol>
+  <li>No layer may bypass a higher layer.</li>
+  <li>Execution never occurs without authorization.</li>
+  <li>Authorization never occurs without gate passage.</li>
+  <li>Gate passage requires all required conditions, not a subset.</li>
+  <li>Vektrum never holds funds; the custody layer is always external.</li>
+</ol>
+
+<h2>5.2 Stripe Connect Rail (Automated)</h2>
+<p><strong>Best for:</strong> Private lenders with no existing disbursement infrastructure; direct lenders wanting self-serve pilots.</p>
+<p><strong>Safe wording:</strong> "For Stripe Connect releases, payment execution runs through Stripe Connect infrastructure."</p>
+<p><strong>Incorrect wording:</strong> "Vektrum transfers funds to the contractor." / "Stripe holds the funds."</p>
+
+<h2>5.3 External / Manual Institutional Rail</h2>
+<p><strong>Best for:</strong> Title companies, escrow companies, construction lenders, credit funds, institutional treasury teams.</p>
+<p><strong>Safe wording:</strong> "Payment is executed by the partner-controlled process. Vektrum governs authorization and records proof."</p>
+<div class="callout amber">
+  <strong>Important:</strong> The external/manual rail is not a fallback or lesser option. It is the institutional architecture. For construction lenders with existing disbursement infrastructure, this rail is the correct integration model.
+</div>
+
+<h2>5.4 Authorization Token System</h2>
+<p>Each release authorization produces an immutable, cryptographically signed authorization token. Key properties include: <code>jti</code> (unique JWT ID), <code>token_hash</code> (SHA-256 of canonical payload, bound to every audit event), <code>rail_scope</code> (<code>stripe</code> or <code>external_rail</code>), <code>status</code> (issued → delivered → confirmed/failed/expired/revoked), <code>signature_alg</code> (ed25519 or unsigned), <code>reserved_gross_amount</code> and <code>reserved_fee_amount</code> (locked at issuance — B3 hardening), and <code>expires_at</code> (24h for Stripe rail, 30 days for external rail).</p>
+
+<h2>5.5 Audit and Evidence System</h2>
+<p>Every release decision, block, state transition, and sensitive operation is recorded in the <code>audit_log</code> table with:</p>
+<ul>
+  <li><code>row_hash</code> — SHA-256 of the canonical row payload</li>
+  <li><code>chain_hash</code> — SHA-256 of (previous chain_hash ‖ current row_hash)</li>
+  <li><code>token_hash</code> — bound to the authorization token where applicable</li>
+  <li><code>partner_ack_hash</code> — SHA-256 of raw inbound body bytes for partner confirmations</li>
+  <li><code>hash_schema_version</code> — versioned for future algorithm upgrades</li>
+</ul>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!--  SECTION 6 — RELEASE GATE DOCTRINE                                -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h1 class="section-title">SECTION 6 — RELEASE GATE DOCTRINE</h1>
+
+<h2>6.1 The 10 Release Conditions</h2>
+<p>These are the exact public-facing condition labels. Do not modify them without explicit product approval.</p>
+<table>
+  <tr><th>#</th><th>Condition Label</th><th>Notes</th></tr>
+  <tr><td>1</td><td>Milestone status approved</td><td>Milestone must be in <code>approved</code> state</td></tr>
+  <tr><td>2</td><td>Protection status ready for release</td><td>Protection status must allow release</td></tr>
+  <tr><td>3</td><td>Sufficient funding or external funding confirmation</td><td>Stripe rail: funded_amount covers gross+fee; External: external funding confirmation</td></tr>
+  <tr><td>4</td><td>Payout readiness verified for selected rail</td><td>Stripe: <code>stripe_payouts_enabled=true</code>. External rail: condition 4 is skipped</td></tr>
+  <tr><td>5</td><td>Contractor onboarding complete where required</td><td>Contractor profile and required setup complete</td></tr>
+  <tr><td>6</td><td>No existing active release for this milestone</td><td>Duplicate release protection</td></tr>
+  <tr><td>7</td><td>No open change orders on this milestone</td><td>All change orders resolved before release</td></tr>
+  <tr><td>8</td><td>Signed contract on file</td><td>Contract with <code>status='signed'</code> exists for the deal</td></tr>
+  <tr><td>9</td><td>Sequential-release ordering and prerequisites satisfied where required</td><td>Prior milestones must be released first if <code>sequential_release_required=true</code></td></tr>
+  <tr><td>10</td><td>Approved conditional lien waiver on file where required</td><td>Approved lien waiver must exist if <code>lien_waiver_required=true</code></td></tr>
+</table>
+<p><strong>Plus the AI-assisted draw pre-review condition:</strong> Current, documented, and no unresolved critical risk. Runs before the gate; blocks on critical risk; logs warning and continues on non-critical flags.</p>
+
+<h2>6.2 Gate Enforcement Layers</h2>
+<table>
+  <tr><th>Layer</th><th>How Gate Is Enforced</th></tr>
+  <tr><td><strong>UI</strong></td><td>Unauthorized users do not see release controls. Release buttons disabled when conditions not met. Admins have no release controls.</td></tr>
+  <tr><td><strong>API</strong></td><td><code>validateRelease()</code> runs before any state mutation. Gate failures return 400 with specific failed conditions. All blocks are audit-logged.</td></tr>
+  <tr><td><strong>Database</strong></td><td><code>reserve_release_funds()</code> re-checks deal status under row lock. Unique constraints prevent duplicate releases. Status transition triggers enforce valid state flows.</td></tr>
+</table>
+
+<h2>6.3 AI-Assisted Draw Review's Proper Role</h2>
+<pre>AI review runs
+  ↓
+If critical risk → block (AI precondition fails, gate never runs)
+  ↓
+If warning only → log override, proceed to gate
+  ↓
+Gate runs all 10 deterministic conditions
+  ↓
+Gate passes or blocks (deterministically)
+  ↓
+If passes → funder authorizes release</pre>
+
+<div class="rule-grid">
+  <div class="rule-box allowed">
+    <h4>✓ Allowed AI Language</h4>
+    <ul>
+      <li>"AI-assisted draw pre-review"</li>
+      <li>"AI flags missing documents, conflicts, and risk signals"</li>
+      <li>"AI informs; the gate decides"</li>
+      <li>"AI-assisted draw review: current, documented, no unresolved critical risk"</li>
+    </ul>
+  </div>
+  <div class="rule-box banned">
+    <h4>✗ Banned AI Language</h4>
+    <ul>
+      <li>"AI approves"</li>
+      <li>"AI clears the payment"</li>
+      <li>"AI decides"</li>
+      <li>"Fully automated AI payments"</li>
+      <li>"AI release"</li>
+    </ul>
+  </div>
+</div>
+
+<h2>6.4 Funder-Triggered, System-Enforced</h2>
+<table>
+  <tr><th>Actor</th><th>Can Trigger Release?</th><th>Notes</th></tr>
+  <tr><td>Funder</td><td>✓ Yes (with gate passage + MFA)</td><td>Explicit funder action required</td></tr>
+  <tr><td>Contractor</td><td>✗ No</td><td>They submit draws; funders release</td></tr>
+  <tr><td>Admin</td><td>✗ No</td><td>Operational role only</td></tr>
+  <tr><td>Partner</td><td>✗ No</td><td>They confirm external execution after authorization</td></tr>
+  <tr><td>AI</td><td>✗ No</td><td>Pre-reviews and flags only</td></tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!--  SECTION 7 — SECURITY DOCTRINE                                    -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h1 class="section-title">SECTION 7 — SECURITY DOCTRINE</h1>
+
+<h2>7.1 Non-Negotiable Security Rules</h2>
+<div class="non-neg-box">
+  <p>1. Admins CANNOT release funds.</p>
+  <p>2. Admin promotion is DISABLED by default (<code>ADMIN_PROMOTION_ENABLED=false</code>).</p>
+  <p>3. Partners CANNOT bypass the release gate.</p>
+  <p>4. API keys MUST be hashed (SHA-256). Raw key shown once only.</p>
+  <p>5. No service-role secrets in frontend or <code>NEXT_PUBLIC_*</code> variables.</p>
+  <p>6. No real API keys in docs, screenshots, or examples.</p>
+  <p>7. Sensitive routes MUST be rate-limited.</p>
+  <p>8. Stripe webhooks MUST be HMAC-verified.</p>
+  <p>9. Webhook events MUST be deduplicated by event ID.</p>
+  <p>10. MFA (AAL2) MUST be enforced for funders and admins on financial writes.</p>
+</div>
+
+<h2>7.2 Admin Role Security Boundaries</h2>
+<div class="rule-grid">
+  <div class="rule-box allowed">
+    <h4>✓ Admins CAN</h4>
+    <ul>
+      <li>View users, deals, contracts, milestones, releases, audit logs</li>
+      <li>Manage partners and API key lifecycle</li>
+      <li>Review reconciliation state</li>
+      <li>Trigger operational workflows (demo reset, reconciliation re-runs)</li>
+      <li>Revoke authorization tokens (with MFA + justification)</li>
+      <li>Support funders and contractors operationally</li>
+    </ul>
+  </div>
+  <div class="rule-box banned">
+    <h4>✗ Admins CANNOT</h4>
+    <ul>
+      <li>Release funds or trigger the Stripe rail</li>
+      <li>Bypass the release gate (even via API)</li>
+      <li>Promote users to admin through normal dashboard</li>
+      <li>See raw API keys after initial creation</li>
+      <li>Delete or edit audit log entries</li>
+      <li>Modify billing rates or deal financial terms</li>
+    </ul>
+  </div>
+</div>
+
+<h2>7.3 API Key Handling Rules</h2>
+<pre>Creation: Generate raw key → Show ONCE → Store SHA-256 hash + prefix + metadata
+Display:  Show prefix, status, created_at, last_used_at — NEVER raw key
+Rotation: New raw key shown ONCE → Old key invalidated → Audit logged
+Revocation: Key fails auth immediately → Audit logged</pre>
+
+<h2>7.4 Rate Limiting — Required Policies</h2>
+<table>
+  <tr><th>Policy</th><th>Applies To</th><th>Fail Behavior</th></tr>
+  <tr><td><code>financial_write</code></td><td>Release, authorize, confirm, fail endpoints</td><td>Fail closed</td></tr>
+  <tr><td><code>admin_write</code></td><td>All <code>/api/admin/*</code> state-mutation routes</td><td>Fail closed</td></tr>
+  <tr><td><code>partner_api</code></td><td>All <code>/api/partner/*</code> routes</td><td>Fail open (return 429)</td></tr>
+  <tr><td><code>ai_review</code></td><td>AI draw review / precondition endpoints</td><td>Fail open</td></tr>
+  <tr><td><code>funding</code></td><td>Deal funding routes</td><td>Fail closed</td></tr>
+</table>
+
+<h2>7.5 Stripe Webhook Security</h2>
+<p>Every Stripe webhook must: (1) verify HMAC signature on raw body, (2) parse event only after verification, (3) check <code>event.id</code> for deduplication, (4) execute idempotent state transitions (no double-credit), (5) log unknown event types and return 200, (6) return 400 for verification/parsing failures.</p>
+
+<h2>7.6 Secrets Management</h2>
+<table>
+  <tr><th>Secret</th><th>Location</th><th>Rule</th></tr>
+  <tr><td><code>SUPABASE_SERVICE_ROLE_KEY</code></td><td>Server-only env var</td><td>Never in NEXT_PUBLIC_*; never in frontend code</td></tr>
+  <tr><td><code>STRIPE_SECRET_KEY</code></td><td>Server-only env var</td><td>Never in frontend; never in docs/examples</td></tr>
+  <tr><td><code>STRIPE_WEBHOOK_SECRET</code></td><td>Server-only env var</td><td>Never logged; never in responses</td></tr>
+  <tr><td><code>VEKTRUM_TOKEN_SIGNING_KEY_PRIVATE</code></td><td>Server-only env var</td><td>ed25519 private key PEM; never exposed</td></tr>
+  <tr><td>Partner API keys</td><td>Database (hashed)</td><td>Raw shown once; SHA-256 hash stored</td></tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!--  SECTION 8 — PARTNER API DOCTRINE                                 -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h1 class="section-title">SECTION 8 — PARTNER API DOCTRINE</h1>
+
+<h2>8.1 Purpose</h2>
+<p>The Partner API is the integration surface for title companies, escrow companies, lenders, treasury teams, and institutional partners who execute payment externally after Vektrum authorizes a release, then confirm or fail execution through a machine-readable API.</p>
+
+<h2>8.2 Partner Capabilities</h2>
+<table>
+  <tr><th>Action</th><th>Endpoint</th><th>Notes</th></tr>
+  <tr><td>Get release details</td><td><code>GET /api/partner/releases/:id</code></td><td>Partner-scoped; returns authorization, amount, execution status</td></tr>
+  <tr><td>Confirm external execution</td><td><code>POST /api/partner/releases/:id/confirm</code></td><td>Records method, reference, proof, partner_ack_hash</td></tr>
+  <tr><td>Fail external execution</td><td><code>POST /api/partner/releases/:id/fail</code></td><td>Records failure reason; triggers reservation cancellation</td></tr>
+  <tr><td>List pending releases</td><td><code>GET /api/partner/releases?status=pending</code></td><td>Partner-scope only</td></tr>
+  <tr><td>Introspect token</td><td><code>GET /api/partner/tokens/:jti</code></td><td>Status, scope, amounts, expiry; cross-partner blocked with 403</td></tr>
+</table>
+
+<h2>8.3 Partner Cannot</h2>
+<ul>
+  <li>Bypass the release gate</li>
+  <li>Create releases directly</li>
+  <li>Move funds through Vektrum</li>
+  <li>Access deals not assigned to their partner_id</li>
+  <li>Change billing rates, roles, deal terms, or audit records</li>
+  <li>Call admin-only endpoints</li>
+</ul>
+
+<h2>8.4 Idempotency Requirements</h2>
+<p>Confirm and fail endpoints must be safe to call multiple times. A second confirm on an already-confirmed release returns 200 with <code>alreadyConfirmed: true</code>. A second fail returns 200 with <code>alreadyFailed: true</code>. Every partner confirmation must bind <code>partner_ack_hash</code> (SHA-256 of raw request body) and <code>token_hash</code> to the audit row.</p>
+
+<h2>8.5 Documentation Rules</h2>
+<div class="callout red">
+  <strong>Outbound webhook rule:</strong> Partner docs must NOT claim outbound webhooks are live unless implementation exists and has been tested. If not implemented, use: "Outbound partner webhooks are not required for the initial Partner API flow. Partners may poll <code>GET /api/partner/releases?status=pending</code>." Mark future webhook behavior as "Planned."
+</div>
+
+<h2>8.6 Safe Partner Messaging</h2>
+<table>
+  <tr><th>Context</th><th>Approved Wording</th></tr>
+  <tr><td>What Vektrum does for partners</td><td>"Vektrum authorizes or blocks the release. The partner-controlled process executes payment."</td></tr>
+  <tr><td>Strategic value</td><td>"Keep your payment process. Add release enforcement."</td></tr>
+  <tr><td>Integration model</td><td>"Partners confirm execution after Vektrum authorizes release."</td></tr>
+  <tr><td>What Vektrum records</td><td>"Vektrum records method, reference, proof, actor, timestamp, and audit trail."</td></tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!--  SECTION 9 — ADMIN DASHBOARD DOCTRINE                             -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h1 class="section-title">SECTION 9 — ADMIN DASHBOARD DOCTRINE</h1>
+
+<h2>9.1 Required Dashboard Sections</h2>
+<table>
+  <tr><th>Section</th><th>Route</th><th>Purpose</th></tr>
+  <tr><td>Overview</td><td><code>/dashboard/admin</code></td><td>Summary metrics; links to sections</td></tr>
+  <tr><td>Users</td><td><code>/dashboard/admin/users</code></td><td>List all users; link to user detail</td></tr>
+  <tr><td>User Detail</td><td><code>/dashboard/admin/users/[userId]</code></td><td>Name, email, role, Stripe status, deals</td></tr>
+  <tr><td>Partners / API Integrations</td><td><code>/dashboard/admin/partners</code></td><td>API key lifecycle; deal assignment</td></tr>
+  <tr><td>Audit Log</td><td><code>/dashboard/admin/audit</code></td><td>Read-only audit event viewer</td></tr>
+  <tr><td>Reconciliation</td><td><code>/dashboard/admin/reconciliation</code></td><td>Release reconciliation status</td></tr>
+</table>
+
+<h2>9.2 Admin Promotion Restrictions</h2>
+<pre>Default state: ADMIN_PROMOTION_ENABLED=false
+
+When false:
+  - No promote button exists in the dashboard
+  - /api/admin/promote returns 403 for all callers
+  - No way for any user to elevate to admin via the application
+
+When true (intentional, operator-enabled):
+  - Caller must be admin role + MFA (AAL2) passed
+  - Self-promotion is blocked
+  - Rate limiting applies
+  - Admin justification required (X-Admin-Justification header, ≥ 20 chars)
+  - Full audit log entry written + dual write to admin_audit_log</pre>
+
+<h2>9.3 UI Consistency Rules</h2>
+<p>Admin dashboard UI must use consistent dark background styling, uniform row heights in tables, uniform badge styles for status indicators, uniform button styles, consistent navigation (back links, breadcrumbs, section labels), no light-theme modals appearing in dark-theme context, and no inconsistent error card styles.</p>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!--  SECTION 10 — DEMO SYSTEM DOCTRINE                                -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h1 class="section-title">SECTION 10 — DEMO SYSTEM DOCTRINE</h1>
+
+<h2>10.1 Demo Reset Safety Rules</h2>
+<div class="rule-grid">
+  <div class="rule-box allowed">
+    <h4>✓ Demo Reset MUST</h4>
+    <ul>
+      <li>Affect only demo data (demo deal IDs/slugs)</li>
+      <li>Be idempotent (calling twice = same clean state)</li>
+      <li>Require authentication (admin or demo-admin role)</li>
+      <li>Be disabled in production unless <code>DEMO_RESET_ENABLED=true</code></li>
+      <li>Log the reset operation to the audit trail</li>
+      <li>Return machine-readable success/failure response</li>
+    </ul>
+  </div>
+  <div class="rule-box banned">
+    <h4>✗ Demo Reset MUST NOT</h4>
+    <ul>
+      <li>Accept arbitrary user-provided deal IDs as targets</li>
+      <li>Perform broad deletes without demo-scope filtering</li>
+      <li>Expose service-role secrets to frontend</li>
+      <li>Touch live production data under any circumstances</li>
+      <li>Trust caller-provided IDs without demo scope verification</li>
+    </ul>
+  </div>
+</div>
+
+<h2>10.2 Demo Routes</h2>
+<table>
+  <tr><th>Route</th><th>Purpose</th></tr>
+  <tr><td><code>/demo-live</code></td><td>Primary demo entry; directs to guided demo</td></tr>
+  <tr><td><code>/demo-live/deal/harbor</code></td><td>Harbor Draw #3 — primary demo scenario ($2.18M)</td></tr>
+  <tr><td><code>/demo-live/deal/riverside</code></td><td>Secondary demo scenario</td></tr>
+  <tr><td><code>/demo-live/admin</code></td><td>Demo admin view (operational visibility demo)</td></tr>
+  <tr><td><code>/demo-live/funder</code></td><td>Funder dashboard demo</td></tr>
+</table>
+
+<h2>10.3 Demo Copy Rules</h2>
+<p><strong>Approved:</strong> "This is a simulated demo. No real funds are moved." / "Authorization is demonstrated. Payment execution would flow through your selected rail."</p>
+<p><strong>Banned:</strong> "Vektrum moves money to the contractor" / "Project Trust Account" / "Vektrum Project Trust Agreement" / Specific AI provider stack names in public-facing demo copy.</p>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!--  SECTION 11 — COPYWRITING DOCTRINE                                -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h1 class="section-title">SECTION 11 — COPYWRITING DOCTRINE</h1>
+
+<h2>11.1 Approved Language</h2>
+<table>
+  <tr><th>Concept</th><th>Approved Wording</th></tr>
+  <tr><td>What Vektrum is</td><td>Conditional authorization infrastructure for construction disbursements</td></tr>
+  <tr><td>Core capability</td><td>Release-control infrastructure; 10-condition release gate</td></tr>
+  <tr><td>Authorization principle</td><td>Authorization separated from execution</td></tr>
+  <tr><td>Payment language</td><td>Partner-controlled payment process; external/manual execution; Stripe Connect automated execution</td></tr>
+  <tr><td>Who governs</td><td>Vektrum governs authorization and records proof</td></tr>
+  <tr><td>Custody language</td><td>Vektrum does not hold funds in its own bank account or act as escrow</td></tr>
+  <tr><td>Audit trail</td><td>Append-only, hash-chained, tamper-evident audit log</td></tr>
+  <tr><td>AI pre-review</td><td>AI-assisted draw pre-review; AI informs; the gate decides</td></tr>
+  <tr><td>Gate promise</td><td>All required conditions must pass before a release is authorized</td></tr>
+  <tr><td>Trigger</td><td>Funder-triggered, system-enforced</td></tr>
+</table>
+
+<h2>11.2 Banned Language and Corrections</h2>
+<table>
+  <tr><th>Banned Phrase</th><th>Approved Replacement</th></tr>
+  <tr><td>"Vektrum moves money"</td><td>"Vektrum authorizes releases; payment flows through your selected rail"</td></tr>
+  <tr><td>"Vektrum executes wires"</td><td>"Partners execute wires; Vektrum records authorization and proof"</td></tr>
+  <tr><td>"Vektrum holds funds"</td><td>"Funds remain with your existing custody infrastructure"</td></tr>
+  <tr><td>"Trust account" / "Project Trust Account"</td><td>Avoid entirely; remove from all copy</td></tr>
+  <tr><td>"Escrow replacement"</td><td>"Vektrum integrates with your existing escrow process"</td></tr>
+  <tr><td>"AI approves" / "AI clears"</td><td>"AI informs; the gate decides"</td></tr>
+  <tr><td>"Tamper-proof"</td><td>"Tamper-evident"</td></tr>
+  <tr><td>"Stripe required"</td><td>"Stripe Connect is one supported execution rail"</td></tr>
+  <tr><td>"7-condition gate" or "8-condition gate"</td><td>"10-condition release gate"</td></tr>
+  <tr><td>"Authorise" / "authorisation"</td><td>"Authorize" / "authorization" (US English throughout)</td></tr>
+</table>
+
+<h2>11.3 How It Works — Correct Structure</h2>
+<p>The "How It Works" page must be operational, not pitch-deck focused. Steps in correct sequence:</p>
+<ol>
+  <li>Draw submitted with supporting documentation</li>
+  <li>Documentation reviewed; AI-assisted draw pre-review flags risk signals</li>
+  <li>Release gate evaluates all required conditions deterministically</li>
+  <li>Funder authorizes release (all conditions passed)</li>
+  <li>Selected rail executes: Stripe Connect automated transfer or partner-controlled external execution</li>
+  <li>Audit trail updated: hash-chained event recorded with proof, method, reference, and actor</li>
+  <li>Reconciliation state updated: billing records, deal financials, token status confirmed</li>
+</ol>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!--  SECTION 12 — INVESTOR AND MARKET DOCTRINE                        -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h1 class="section-title">SECTION 12 — INVESTOR AND MARKET DOCTRINE</h1>
+
+<h2>12.1 How to Explain to Investors</h2>
+<div class="callout">
+  <p><strong>Opening framing:</strong> "Every construction loan requires a draw process. That draw process has near-zero software investment at the enforcement layer. Draw governance still runs on email, PDFs, and the judgment of individual underwriters. Vektrum places a deterministic, auditable enforcement layer between draw approval and fund disbursement."</p>
+</div>
+<p><strong>Market size framing:</strong> $550B+ annual US construction starts. Every one requires a draw process. The release-control layer has seen near-zero software investment. One SKU (release governance) attaches to every disbursement = high-frequency, high-margin SaaS on top of existing loan volume.</p>
+<p><strong>Network effect:</strong> Each lender brings multiple deals; each deal brings contractors already proven on the platform. Compounding switching cost.</p>
+<p><strong>Do not claim in investor conversations:</strong> AI company status, revenue figures you cannot substantiate, signed customers when only in design-partner conversations, Stripe-only rail, or "tamper-proof" audit.</p>
+
+<h2>12.2 How to Explain to Construction Lenders</h2>
+<p><strong>Opening:</strong> "You have an existing draw process. Vektrum doesn't replace any of that. It sits before your disbursement execution and verifies that all required conditions are met before any dollar moves."</p>
+<p><strong>Key benefits:</strong> Reduces risk of fund misapplication. Creates evidence for LP reporting and regulatory compliance. Mechanic's lien protection via lien waiver enforcement. Reduces human judgment load on individual underwriters.</p>
+
+<h2>12.3 How to Explain to Title Companies</h2>
+<p><strong>Opening:</strong> "Vektrum is not a title replacement. Your title company process stays exactly as it is. Vektrum is the layer the lender uses to verify release conditions are met before they authorize you to release funds."</p>
+<p><strong>Integration story:</strong> You receive a release authorization signal from Vektrum. You disburse through your existing infrastructure. You confirm back through the API. Both parties share a permanent audit record.</p>
+
+<h2>12.4 How to Explain to Contractors</h2>
+<p><strong>Opening:</strong> "Vektrum shows you exactly what conditions are required for each draw to release and the current status of each condition. If your lien waiver is missing, you'll see it. If there's an open change order, you'll see it. No mystery about why a draw is delayed."</p>
+
+<h2>12.5 How to Explain to Technical Reviewers</h2>
+<ul>
+  <li>Next.js 15 application; Supabase (PostgreSQL + RLS) for persistent storage</li>
+  <li>Row-Level Security on all 25+ tables</li>
+  <li>Hash-chained, append-only audit log with SHA-256 row and chain hashes</li>
+  <li>ed25519-signed authorization tokens per release (graceful fallback to unsigned)</li>
+  <li>Rate limiting via database RPC (<code>check_rate_limit</code>)</li>
+  <li>Stripe Connect for automated rail; Partner API for institutional rail</li>
+  <li>AI draw review via sonar-pro (primary) → claude-sonnet (fallback) → gpt-4o (fallback)</li>
+  <li>100+ automated tests across release gate, security, webhook idempotency, admin safety, demo safety</li>
+  <li>Migration-based schema management; immutability triggers on authorization_tokens</li>
+</ul>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!--  SECTION 13 — ENGINEERING DOCTRINE                                -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h1 class="section-title">SECTION 13 — ENGINEERING DOCTRINE</h1>
+
+<h2>13.1 Before Any Edit</h2>
+<ol>
+  <li>Read <code>CLAUDE.md</code> at the repo root</li>
+  <li>Read <code>docs/ai/MASTER_CONTEXT.md</code> — current architecture and non-negotiables</li>
+  <li>Read <code>docs/ai/BACKLOG.md</code> — current priorities and what not to touch</li>
+  <li>Identify exactly which files are relevant — do not load unnecessary context</li>
+  <li>Produce a plan describing what will change and why</li>
+  <li>For CRITICAL or HIGH risk areas, wait for explicit approval before executing</li>
+</ol>
+
+<h2>13.2 After Any Edit</h2>
+<ol>
+  <li>Run <code>npm run build</code> — document any new errors vs pre-existing</li>
+  <li>Run <code>npx tsc --noEmit</code> — zero new TypeScript errors</li>
+  <li>Run relevant tests: <code>npx tsx tests/[specific].test.ts</code></li>
+  <li>Run <code>npm test</code> for full suite if shared infrastructure changed</li>
+  <li>Document exactly which files changed and why</li>
+  <li>Provide manual test steps for QA if UI changed</li>
+  <li>Confirm no secrets, real API keys, or real customer data are in the changeset</li>
+</ol>
+
+<h2>13.3 Test Expectations (TDD Required)</h2>
+<pre>1. Write failing test describing expected behavior
+2. Run test — confirm it fails for the right reason
+3. Implement the smallest change that makes the test pass
+4. Run all tests — confirm no regressions
+5. Refactor if needed — tests protect behavior</pre>
+
+<h2>13.4 Safe vs Dangerous Areas</h2>
+<table>
+  <tr><th>Area</th><th>Risk Level</th><th>Rule</th></tr>
+  <tr><td>Release gate logic</td><td>CRITICAL</td><td>Do not modify without test coverage and explicit approval</td></tr>
+  <tr><td>Authorization token issuer</td><td>CRITICAL</td><td>Do not modify without understanding B3 hardening implications</td></tr>
+  <tr><td><code>reserve_release_funds()</code> RPC</td><td>CRITICAL</td><td>Do not change behavior; double-spend protection</td></tr>
+  <tr><td>Audit chain hashing</td><td>HIGH</td><td>Do not change algorithm or payload structure without versioning</td></tr>
+  <tr><td>Admin promotion logic</td><td>HIGH</td><td>Default off; MFA required; self-promotion blocked</td></tr>
+  <tr><td>Billing calculation</td><td>HIGH</td><td>Do not change <code>calculateFee()</code> without test coverage</td></tr>
+  <tr><td>RLS policies</td><td>HIGH</td><td>Do not disable or weaken; test all changes</td></tr>
+  <tr><td>Partner API authentication</td><td>HIGH</td><td>Hash comparison; do not expose raw keys</td></tr>
+  <tr><td>Public copy</td><td>MEDIUM</td><td>Requires copy truth-lock review per Section 11</td></tr>
+  <tr><td>Demo reset</td><td>MEDIUM</td><td>Demo scope filter required</td></tr>
+  <tr><td>UI components (non-financial)</td><td>LOW-MEDIUM</td><td>Follow approved language</td></tr>
+  <tr><td>Test files</td><td>LOW</td><td>Adding tests is always encouraged</td></tr>
+</table>
+
+<h2>13.5 Rails Adapter Pattern — Do Not Bypass</h2>
+<pre>// CORRECT: Use rail adapter
+const adapter = getRailAdapter(railScope)
+const dispatchResult = await adapter.dispatch({ ... })
+
+// INCORRECT: Inline Stripe call in route — NOT ALLOWED
+const transfer = await stripe.transfers.create({ ... })</pre>
+
+<h2>13.6 Authorization Token Issuance — Required Fields (B3 Hardening)</h2>
+<pre>await issueAuthorizationToken({
+  milestoneId,
+  dealId,
+  payeeId,
+  funderId,
+  railScope,
+  netToContractor,
+  grossAmount,
+  feeAmount,       // B3 hardening — REQUIRED. Do not omit.
+  idempotencyKey,
+  issuedBy,
+  graphCommitment, // Tier D — if evidence graph is built
+})</pre>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!--  SECTION 14 — RELEASE CHECKLIST                                   -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h1 class="section-title">SECTION 14 — RELEASE CHECKLIST</h1>
+
+<h2>14.1 Build and Test</h2>
+<ul class="checklist">
+  <li><code>npm run build</code> passes with no new errors</li>
+  <li><code>npx tsc --noEmit</code> — zero TypeScript errors</li>
+  <li><code>npm test</code> — all tests pass or pre-existing failures are documented</li>
+  <li>New tests written for all behavior changes (TDD)</li>
+  <li>No new console.error or unhandled promise rejections in build output</li>
+</ul>
+
+<h2>14.2 Security</h2>
+<ul class="checklist">
+  <li>No real API keys, secrets, or tokens in the changeset</li>
+  <li>No SUPABASE_SERVICE_ROLE_KEY in NEXT_PUBLIC_* variables</li>
+  <li>Admin promotion remains disabled by default</li>
+  <li>Admins cannot trigger release via any new routes</li>
+  <li>Partners cannot bypass the gate via any new routes</li>
+  <li>New financial-write routes have rate limiting applied</li>
+  <li>New admin routes require MFA</li>
+  <li>RLS is still enabled on all tables touched by migrations</li>
+  <li>Stripe webhook handling includes HMAC verification and event deduplication</li>
+</ul>
+
+<h2>14.3 Copy and Legal-Risk</h2>
+<ul class="checklist">
+  <li>No "Vektrum moves money" or equivalent</li>
+  <li>No "Vektrum holds funds" or equivalent</li>
+  <li>No "escrow replacement" or "trust account" or "Project Trust Account"</li>
+  <li>No "AI approves" or "AI decides"</li>
+  <li>No "tamper-proof" — only "tamper-evident"</li>
+  <li>No "Stripe required" — external rail messaging present where relevant</li>
+  <li>Gate described as "10-condition" — not 7 or 8</li>
+  <li>Partner docs do not overclaim outbound webhooks if unimplemented</li>
+  <li>Demo copy does not claim real fund movement</li>
+</ul>
+
+<h2>14.4 Partner API</h2>
+<ul class="checklist">
+  <li>No new partner endpoints that bypass the release gate</li>
+  <li>Partner authentication remains hash-based</li>
+  <li>Partner scope isolation enforced (cross-partner access returns 403)</li>
+  <li>Confirm and fail endpoints are idempotent</li>
+  <li>Audit rows bind partner_ack_hash and token_hash</li>
+  <li>Postman collection uses placeholder keys only</li>
+</ul>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!--  SECTION 15 — AI AGENT BEHAVIOR RULES                             -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h1 class="section-title">SECTION 15 — AI AGENT BEHAVIOR RULES</h1>
+
+<h2>15.1 Reasoning Order</h2>
+<ol>
+  <li>Read this document first. No work begins without it.</li>
+  <li>Identify the task category: code, copy, docs, security, or architecture.</li>
+  <li>Check this document for governing rules on that category.</li>
+  <li>Identify the minimum required change that achieves the goal.</li>
+  <li>Check for dangerous areas (Section 13.4). If CRITICAL or HIGH, state this explicitly.</li>
+  <li>Produce a plan before executing. For CRITICAL areas, wait for explicit approval.</li>
+  <li>Execute with precision. No scope creep. State any "while I'm here" changes explicitly.</li>
+  <li>Verify with tests and build. Do not claim success without running the checks.</li>
+  <li>Report honestly: if tests fail, say so; if something was skipped, say so.</li>
+</ol>
+
+<h2>15.2 When to Stop and Ask</h2>
+<p>The AI must stop and ask for explicit approval before proceeding when the task involves:</p>
+<ul>
+  <li>Any change to the release gate logic</li>
+  <li>Any change to billing or financial calculations</li>
+  <li>Any change to admin security boundaries</li>
+  <li>Any change to audit log behavior or hashing scheme</li>
+  <li>Any copy change that makes custody, escrow, or AI approval claims</li>
+  <li>Any new route that could create a path for non-funder actors to trigger release</li>
+  <li>Any test fixture that might touch production data</li>
+</ul>
+
+<h2>15.3 Required Change Summary Format</h2>
+<pre>## Change Summary
+
+Files modified:
+  - [file path]: [one-sentence description of what changed and why]
+
+Tests added or modified:
+  - [test file]: [what behavior is now tested]
+
+Build/test status:
+  - npm run build: [pass/fail]
+  - npx tsc --noEmit: [pass/fail / N new errors]
+  - npm test: [pass/fail] [count of failing tests if any]
+  - Pre-existing errors: [list if any]
+
+Security/custody/gate risk: [low / medium / high] — [reason]
+Copy/legal risk: [low / medium / high] — [reason]
+
+Manual test steps:
+  - [step 1]
+  - [step 2]
+
+Next recommended action: [specific concrete next step]</pre>
+
+<h2>15.4 What the AI Must Never Do Unilaterally</h2>
+<p>Without explicit approval, the AI must never:</p>
+<ul>
+  <li>Change the 10 release conditions or their labels</li>
+  <li>Change the billing calculation formula</li>
+  <li>Change admin role permissions</li>
+  <li>Change partner scope isolation logic</li>
+  <li>Disable rate limiting on any route</li>
+  <li>Weaken RLS policies</li>
+  <li>Add any pathway for admins to release funds</li>
+  <li>Change the authorization token hashing scheme</li>
+  <li>Change the audit chain hash algorithm or payload structure</li>
+  <li>Remove MFA requirements from any route</li>
+  <li>Add public copy that makes custody, escrow, or AI approval claims</li>
+  <li>Commit real API keys, secrets, or tokens</li>
+</ul>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!--  SECTION 16 — EXAMPLE RESPONSES                                   -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h1 class="section-title">SECTION 16 — EXAMPLE RESPONSES AND PATTERNS</h1>
+
+<h2>16.1 To a Title Company</h2>
+<div class="callout green">
+  <p>"Not at all. Vektrum is the governance layer that your lender client uses to verify that all release conditions are met before they authorize you to release funds. Your disbursement process stays exactly as it is. We integrate with your process through our Partner API — when you release funds on behalf of a lender using Vektrum, you confirm the execution through our API and both parties get a shared audit record of what was authorized, when, and on what basis."</p>
+</div>
+
+<h2>16.2 To a Construction Lender</h2>
+<div class="callout green">
+  <p>"Vektrum sits before your title and escrow process, not instead of it. When a draw is submitted, Vektrum evaluates all required conditions — lien waivers, change orders, contract status, funding availability, contractor onboarding, and AI-assisted draw review. If everything passes, you authorize the release and Vektrum records that authorization with a full audit trail. Your LP reporting now has a machine-readable trail of every release: what was authorized, why, by whom, and what documentation was on file."</p>
+</div>
+
+<h2>16.3 To an Investor</h2>
+<div class="callout green">
+  <p>"A general payments company solves 'how do we move money faster.' Vektrum solves 'how do we verify that money is allowed to move at all, and how do we prove it?' That's a fundamentally different problem. And because Vektrum works with whatever payment rail the lender already uses — Stripe Connect for automated releases, or their existing title/escrow/treasury process — there's no switching cost. We're not replacing the payment rail. We're enforcing whether the payment should happen at all."</p>
+</div>
+
+<h2>16.4 Correcting Banned Wording</h2>
+<table>
+  <tr><th>Draft (Banned)</th><th>Corrected (Approved)</th></tr>
+  <tr><td>"Vektrum's AI clears your draws for payment"</td><td>"Vektrum's AI-assisted draw pre-review flags missing documentation, conflicts, and risk signals. The deterministic gate then evaluates all required conditions. AI informs; the gate decides."</td></tr>
+  <tr><td>"Funds are held in Vektrum's trust account"</td><td>"Funds remain with your existing custody infrastructure; Vektrum enforces release conditions before authorizing disbursement"</td></tr>
+  <tr><td>"Tamper-proof audit trail"</td><td>"Tamper-evident, hash-chained, append-only audit trail"</td></tr>
+  <tr><td>"8 required conditions"</td><td>"10 required conditions"</td></tr>
+  <tr><td>"Escrow replacement for modern lenders"</td><td>"Release governance for construction lenders, integrating with your existing title, escrow, and treasury processes"</td></tr>
+  <tr><td>"Our AI approves draws in seconds"</td><td>"AI-assisted draw review runs before the deterministic gate — flagging missing documents, conflicts, and risk signals"</td></tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!--  SECTION 17 — CURRENT KNOWN BACKLOG                               -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h1 class="section-title">SECTION 17 — CURRENT KNOWN BACKLOG</h1>
+
+<h2>17.1 Critical / Before Merge</h2>
+<table>
+  <tr><th>Item</th><th>Status</th><th>Action Required</th></tr>
+  <tr><td><code>/auth/logout</code> 404</td><td>Needs verification</td><td>Verify logout route exists; fix if returning 404</td></tr>
+  <tr><td>Dashboard user navigation</td><td>Partly addressed</td><td>Verify <code>/dashboard/admin/users/[userId]</code> loads with user details and deal links</td></tr>
+  <tr><td>Partner API docs webhook claims</td><td>Needs verification</td><td>Audit docs; replace live webhook claims with "Planned" if unimplemented</td></tr>
+</table>
+
+<h2>17.2 High / Before Pilot</h2>
+<table>
+  <tr><th>Item</th><th>Acceptance Criteria</th></tr>
+  <tr><td>Route/navigation smoke tests</td><td>All critical routes verified non-404 via test or checklist</td></tr>
+  <tr><td>Admin dashboard full verification</td><td>No promote button; admin promotion disabled; partners section works; no raw secrets exposed</td></tr>
+  <tr><td>Demo reset full verification</td><td>Demo-scope only; idempotent; no production data touched; clean reload after reset</td></tr>
+</table>
+
+<h2>17.3 Test Priorities</h2>
+<ol>
+  <li>Release gate tests — all 10 conditions + bypass attempts</li>
+  <li>Partner API confirm/fail tests — idempotency, scoping, audit binding</li>
+  <li>Admin promote disabled tests — verify default-off behavior</li>
+  <li>Demo reset safety tests — verify demo-scope isolation</li>
+  <li>Route existence/navigation smoke tests</li>
+  <li>Stripe webhook idempotency tests</li>
+  <li>RLS/DB trigger expectation tests</li>
+</ol>
+
+<h2>17.4 Do Not Touch Without Explicit Instruction</h2>
+<ul>
+  <li>Release gate logic (<code>src/lib/engine/release-gate.ts</code>)</li>
+  <li>Billing calculation formula (<code>src/lib/engine/billing.ts</code>)</li>
+  <li>Stripe webhook transaction logic</li>
+  <li>Admin permission boundaries</li>
+  <li>Partner API request/response shapes</li>
+  <li>Audit chain hashing scheme</li>
+  <li>RLS policies</li>
+  <li>Authorization token immutability triggers</li>
+  <li>Public site copy, unless product behavior has changed</li>
+</ul>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!--  SECTION 18 — FINAL NON-NEGOTIABLES                               -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h1 class="section-title">SECTION 18 — FINAL NON-NEGOTIABLES</h1>
+
+<p>These are the most important rules in this document. They must be honored in every piece of work, every AI output, every line of code, and every word of copy. There are no exceptions.</p>
+
+<div class="final-rule">
+  <div class="rule-number">1</div>
+  <div class="final-rule-body">
+    <h4>Vektrum does not hold funds in its own bank account or act as escrow.</h4>
+    <p>Funds are held by Stripe Connect (for Stripe rail deals) or by the funder's existing title company, escrow company, bank, or treasury infrastructure. Any copy, code, or AI output that implies otherwise must be corrected.</p>
+  </div>
+</div>
+
+<div class="final-rule">
+  <div class="rule-number">2</div>
+  <div class="final-rule-body">
+    <h4>Authorization is separated from execution.</h4>
+    <p>Vektrum authorizes whether a release is allowed. Payment execution happens through the selected rail — not through Vektrum. The rail adapter exists to enforce this separation in the codebase.</p>
+  </div>
+</div>
+
+<div class="final-rule">
+  <div class="rule-number">3</div>
+  <div class="final-rule-body">
+    <h4>Admins cannot release funds.</h4>
+    <p>The admin role is operational. No dashboard feature, no API endpoint, no code path should give admin users the ability to trigger a construction release. Any such path is a critical security bug.</p>
+  </div>
+</div>
+
+<div class="final-rule">
+  <div class="rule-number">4</div>
+  <div class="final-rule-body">
+    <h4>Partners cannot bypass the release gate.</h4>
+    <p>Partner API endpoints confirm or fail external execution after authorization. They do not create authorization, and they do not skip the gate. Any partner endpoint that creates a release without gate evaluation is a critical bug.</p>
+  </div>
+</div>
+
+<div class="final-rule">
+  <div class="rule-number">5</div>
+  <div class="final-rule-body">
+    <h4>AI informs; the deterministic gate decides.</h4>
+    <p>No work should result in copy, code, or documentation that implies AI makes the release decision. The AI pre-review runs before the gate. The gate — all 10 conditions — decides.</p>
+  </div>
+</div>
+
+<div class="final-rule">
+  <div class="rule-number">6</div>
+  <div class="final-rule-body">
+    <h4>Do not overclaim webhooks, custody, automation, or payment execution.</h4>
+    <p>Do not document outbound webhooks as live unless the implementation exists. Do not claim Stripe is required. Do not claim Vektrum automates all payments. Do not claim Vektrum is an escrow or custody provider.</p>
+  </div>
+</div>
+
+<div class="final-rule">
+  <div class="rule-number">7</div>
+  <div class="final-rule-body">
+    <h4>Public copy must stay rail-neutral and legally careful.</h4>
+    <p>The public site must not imply Stripe is the only rail, use trust account language, imply Vektrum holds funds, use "tamper-proof," describe AI as approving payments, or claim a gate condition count other than 10.</p>
+  </div>
+</div>
+
+<div class="final-rule">
+  <div class="rule-number">8</div>
+  <div class="final-rule-body">
+    <h4>The 10-condition gate is fixed and public.</h4>
+    <p>The gate has exactly 10 conditions. They must not be described as 7, 8, or 9. They must not be reordered, removed, or combined without explicit product approval. Any test, copy, or documentation describing fewer conditions is incorrect.</p>
+  </div>
+</div>
+
+<div class="final-rule">
+  <div class="rule-number">9</div>
+  <div class="final-rule-body">
+    <h4>Raw API keys are shown once. Never again.</h4>
+    <p>The Partner API key is generated, shown once at creation, and stored only as a SHA-256 hash. If a partner loses their key, it must be rotated. Any UI that shows a raw key after initial creation is a security bug.</p>
+  </div>
+</div>
+
+<div class="final-rule">
+  <div class="rule-number">10</div>
+  <div class="final-rule-body">
+    <h4>No service-role secrets in the frontend. Ever.</h4>
+    <p><code>SUPABASE_SERVICE_ROLE_KEY</code>, <code>STRIPE_SECRET_KEY</code>, <code>VEKTRUM_TOKEN_SIGNING_KEY_PRIVATE</code>, and all equivalent server-side secrets must never appear in <code>NEXT_PUBLIC_*</code> environment variables, client components, or any code bundled into the browser.</p>
+  </div>
+</div>
+
+<div style="margin-top:48px; padding-top:20px; border-top:2px solid var(--border); text-align:center; color:var(--muted); font-size:9pt;">
+  <p>Vektrum Operating Constitution · Version 1.0 · May 2026</p>
+  <p style="margin-top:4px;">This document is the permanent operating law for all work on Vektrum. When in doubt: be conservative, be precise, and ask.</p>
+  <p style="margin-top:4px; color:var(--navy); font-weight:700;">vektrum.io</p>
+</div>
+
+</body>
+</html>
