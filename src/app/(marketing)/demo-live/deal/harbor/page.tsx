@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import {
   CheckCircle2, ChevronDown, ChevronUp, Brain, FileText, Sparkles,
-  Shield, List, Info, PenLine,
+  Shield, List, Info, PenLine, Loader2,
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format'
 import {
@@ -70,6 +70,11 @@ export default function HarborDealPage() {
   const [submitModal, setSubmitModal]     = useState<{ id: string; name: string; amount: number } | null>(null)
   const [releaseEvents, setReleaseEvents] = useState<Array<{ text: string; date: string }>>([])
 
+  // Perplexity AI review interactive state
+  const [aiReviewState, setAiReviewState]       = useState<'idle' | 'running' | 'complete'>('idle')
+  const [streamedCount, setStreamedCount]       = useState(0)
+  const [reviewGeneratedAt, setReviewGeneratedAt] = useState('Just now')
+
   useDemoAutoReset(() => {
     setOverrides({})
     setNewlyReleased(new Set())
@@ -77,6 +82,9 @@ export default function HarborDealPage() {
     setReleaseModal(false)
     setSubmitModal(null)
     setReleaseEvents([])
+    setAiReviewState('idle')
+    setStreamedCount(0)
+    setReviewGeneratedAt('Just now')
   })
 
   function getStatus(id: string, defaultStatus: DemoMilestoneStatus): DemoMilestoneStatus {
@@ -102,6 +110,27 @@ export default function HarborDealPage() {
   )
 
   const ms3Released = newlyReleased.has('ms-hb-3') || overrides['ms-hb-3'] === 'released'
+
+  function handleRunAiReview() {
+    setAiReviewState('running')
+    setStreamedCount(0)
+    const total = harborDrawBrief.findings.length
+    for (let i = 1; i <= total; i++) {
+      const idx = i
+      setTimeout(() => setStreamedCount(idx), 1400 + (i - 1) * 360)
+    }
+    setTimeout(() => {
+      setAiReviewState('complete')
+      setReviewGeneratedAt('Just now')
+      setReleaseEvents((prev) => [
+        ...prev,
+        {
+          text: 'Perplexity AI Draw Review completed — sonar-pro — score 91/100, risk: low — all 10 release conditions verified',
+          date: 'Just now',
+        },
+      ])
+    }, 1400 + (total - 1) * 360 + 700)
+  }
 
   return (
     <div className="min-h-screen bg-surface-0">
@@ -239,31 +268,91 @@ export default function HarborDealPage() {
               </div>
             </div>
 
-            {/* Perplexity Draw Control Brief */}
-            <div className="rounded-lg border border-white/[0.08] bg-surface-3 p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Brain size={13} className="text-blue-400 flex-shrink-0" aria-hidden="true" />
-                <p className="text-[12px] font-semibold text-white">
-                  {harborDrawBrief.generated_by} Draw Control Brief
+            {/* Perplexity AI Draw Review — interactive */}
+            {aiReviewState === 'idle' && (
+              <div className="rounded-lg border border-vektrum-blue/20 bg-surface-3 p-4">
+                <div className="flex items-start gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <Brain size={14} className="text-blue-400 flex-shrink-0" aria-hidden="true" />
+                      <p className="text-[13px] font-semibold text-white">Perplexity Computer Draw Review</p>
+                    </div>
+                    <p className="text-[12px] text-white/45 leading-relaxed">
+                      Run Perplexity sonar-pro to independently verify the draw package and all 10 release-gate conditions.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRunAiReview}
+                    className="flex-shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-vektrum-blue hover:bg-vektrum-blue-hover px-3.5 py-2 text-[12px] font-semibold text-white transition-colors"
+                  >
+                    <Sparkles size={13} aria-hidden="true" />
+                    Run AI Review
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {aiReviewState === 'running' && (
+              <div className="rounded-lg border border-vektrum-blue/30 bg-vektrum-blue/[0.04] p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Loader2 size={13} className="text-blue-400 animate-spin flex-shrink-0" aria-hidden="true" />
+                  <p className="text-[12px] font-semibold text-white/80">
+                    Perplexity sonar-pro
+                    {streamedCount === 0 ? ' — Initializing' : ' — Analyzing'}
+                    <span className="animate-pulse">…</span>
+                  </p>
+                </div>
+                <div className="font-mono space-y-0.5">
+                  {streamedCount === 0 ? (
+                    <>
+                      <p className="text-[11px] text-white/35">  Connecting to Perplexity sonar-pro endpoint…</p>
+                      <p className="text-[11px] text-white/35">  Loading draw package — Draw #3 · $2,180,000…</p>
+                      <p className="text-[11px] text-white/35">  Starting 10-condition release gate analysis…</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-[11px] text-white/30">  model: sonar-pro · draw: #3 · $2,180,000</p>
+                      <div className="mt-1.5 space-y-0.5">
+                        {harborDrawBrief.findings.slice(0, streamedCount).map((f, i) => (
+                          <p key={i} className="text-[11px] text-emerald-400/85">{f}</p>
+                        ))}
+                        {streamedCount < harborDrawBrief.findings.length && (
+                          <span className="inline-block text-[11px] text-blue-300 animate-pulse">▌</span>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {aiReviewState === 'complete' && (
+              <div className="rounded-lg border border-white/[0.08] bg-surface-3 p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Brain size={13} className="text-blue-400 flex-shrink-0" aria-hidden="true" />
+                  <p className="text-[12px] font-semibold text-white">
+                    {harborDrawBrief.generated_by} Draw Control Brief
+                  </p>
+                  <span className="ml-auto text-[11px] text-emerald-400/70">{reviewGeneratedAt}</span>
+                </div>
+                <p className="text-[12px] text-white/55 leading-relaxed mb-3">
+                  {harborDrawBrief.summary}
                 </p>
-                <span className="ml-auto text-[11px] text-white/40">{harborDrawBrief.generated_at}</span>
+                <div className="space-y-1 mb-3">
+                  {harborDrawBrief.findings.map((f, i) => (
+                    <p key={i} className="text-[11px] text-white/55 font-mono">{f}</p>
+                  ))}
+                </div>
+                <div className="flex items-center gap-2 pt-2 border-t border-white/[0.06]">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-vektrum-blue/[0.12] border border-vektrum-blue/30 px-2.5 py-1 text-[11px] font-semibold text-blue-300">
+                    <Brain size={11} aria-hidden="true" />
+                    Score {harborDrawBrief.ai_score}/100 · Risk: {harborDrawBrief.risk_level}
+                  </span>
+                  <span className="text-[11px] text-white/50 flex-1">{harborDrawBrief.recommendation}</span>
+                </div>
               </div>
-              <p className="text-[12px] text-white/55 leading-relaxed mb-3">
-                {harborDrawBrief.summary}
-              </p>
-              <div className="space-y-1 mb-3">
-                {harborDrawBrief.findings.map((f, i) => (
-                  <p key={i} className="text-[11px] text-white/55 font-mono">{f}</p>
-                ))}
-              </div>
-              <div className="flex items-center gap-2 pt-2 border-t border-white/[0.06]">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-vektrum-blue/[0.12] border border-vektrum-blue/30 px-2.5 py-1 text-[11px] font-semibold text-blue-300">
-                  <Brain size={11} aria-hidden="true" />
-                  Score {harborDrawBrief.ai_score}/100 · Risk: {harborDrawBrief.risk_level}
-                </span>
-                <span className="text-[11px] text-white/50 flex-1">{harborDrawBrief.recommendation}</span>
-              </div>
-            </div>
+            )}
 
             {/* Contract & DocuSign status */}
             <div className="rounded-lg border border-white/[0.08] bg-surface-3 p-4">
@@ -496,8 +585,8 @@ export default function HarborDealPage() {
                         </span>
                       </div>
                     )}
-                    {/* Perplexity Draw Control Brief — ms-hb-3 only */}
-                    {ms.id === 'ms-hb-3' && status === 'approved' && (
+                    {/* Perplexity Draw Control Brief — ms-hb-3 only, after review runs */}
+                    {ms.id === 'ms-hb-3' && status === 'approved' && aiReviewState === 'complete' && (
                       <div className="rounded-lg bg-vektrum-blue/[0.06] border border-vektrum-blue/20 p-3">
                         <div className="flex items-center gap-2 mb-1.5">
                           <Brain size={13} className="text-blue-400 flex-shrink-0" aria-hidden="true" />
