@@ -473,12 +473,16 @@ export const harborDrawBrief: DemoDrawBrief = {
     'erection is 100% complete per inspection. All supporting documents are in order ' +
     'and all 10 release-gate conditions are satisfied.',
   findings: [
-    '✓ Inspection report confirms structural steel erection complete',
-    '✓ Conditional lien waiver on file — Webb Construction',
+    '✓ Milestone status approved — Structural Steel Erection 100% complete per inspection',
+    '✓ Protection status ready for release — no disputes or active holds',
+    '✓ Sufficient funding confirmed — $9,100,000 funded, draw within approved budget',
+    '✓ Payout readiness verified — Webb Construction payout account active',
+    '✓ Contractor onboarding complete — Webb Construction verified',
+    '✓ No active duplicate release on this milestone',
     '✓ No open change orders on this milestone',
-    '✓ Sequential prerequisites satisfied — milestones 1 & 2 released',
     '✓ Signed contract on file — Harbor_Logistics_Agreement.pdf',
-    '✓ SOV line item linked — $2,180,000 allocated',
+    '✓ Sequential prerequisites satisfied — milestones 1 & 2 released',
+    '✓ Conditional lien waiver on file — Webb Construction',
   ],
   recommendation:
     'All 10 release conditions verified. Funder authorization required to proceed.',
