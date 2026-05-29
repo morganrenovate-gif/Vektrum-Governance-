@@ -39,11 +39,16 @@ const AI_FINDINGS_INITIAL = [
 ]
 
 const AI_FINDINGS_RECHECK = [
-  { text: 'Lien waiver detected.',                                    type: 'ok' as const },
-  { text: 'Waiver references Harbor Logistics Center.',               type: 'ok' as const },
-  { text: 'Waiver amount matches Structural Steel Erection draw.',    type: 'ok' as const },
-  { text: 'Waiver party matches Webb Construction Group.',            type: 'ok' as const },
-  { text: 'No new exception detected.',                               type: 'ok' as const },
+  { text: 'Lien waiver detected — LienWaiver_StructuralSteel_WBB.pdf.',          type: 'ok' as const },
+  { text: 'Waiver references Harbor Logistics Center.',                            type: 'ok' as const },
+  { text: 'Waiver amount matches Structural Steel Erection draw — $2,180,000.',   type: 'ok' as const },
+  { text: 'Waiver party matches Webb Construction Group.',                         type: 'ok' as const },
+  { text: 'No new exception detected.',                                            type: 'ok' as const },
+  { text: 'Inspection report confirms Structural Steel Erection 100% complete.',  type: 'ok' as const },
+  { text: 'Schedule of Values matches draw amount — $2,180,000 allocated.',       type: 'ok' as const },
+  { text: 'Contractor account and onboarding verified — Webb Construction.',      type: 'ok' as const },
+  { text: 'Sequential prerequisites satisfied — milestones 1 & 2 released.',     type: 'ok' as const },
+  { text: 'All 10 release conditions verified. Evidence package complete.',       type: 'ok' as const },
 ]
 
 const GATE_CONDITIONS = [
