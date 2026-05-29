@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import {
   CheckCircle2, XCircle, AlertTriangle, FileText, Brain,
-  Shield, ChevronRight, Play, Pause, Lock, User,
+  Shield, ChevronRight, ChevronLeft, Play, Pause, Lock, User,
   Zap, ArrowRight, Hash, Clock, Award, Layers,
 } from 'lucide-react'
 
@@ -70,8 +70,8 @@ const AUDIT_EVENTS = [
   { seq: 8, action: 'Partner-controlled execution pending — execution rail notified',        hash: '1d82c4fe', actor: 'System',                ts: '2026-05-29T09:04:56Z' },
 ]
 
-const TOKEN_HASH   = '9e4a2f7b3c1d8e56f0a9b4c2d7e3f1a8b5c9d2e6f4a1b7c3d8e5f2a0b9c4d1e7'
-const TOKEN_SIG    = 'ed25519:3d9f2a1c8b4e7f5a2d6c9e3b1f8a4d7c2e5b9f1a6d3c8e2b5f7a1d4c9e6b3f2a'
+const TOKEN_HASH = '9e4a2f7b3c1d8e56f0a9b4c2d7e3f1a8b5c9d2e6f4a1b7c3d8e5f2a0b9c4d1e7'
+const TOKEN_SIG  = 'ed25519:3d9f2a1c8b4e7f5a2d6c9e3b1f8a4d7c2e5b9f1a6d3c8e2b5f7a1d4c9e6b3f2a'
 
 // ── Step metadata ─────────────────────────────────────────────────────────────
 
@@ -89,19 +89,23 @@ const STEP_LABELS: Record<StepId, string> = {
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function DemoBillionDollarBuild() {
-  const [step, setStep]             = useState<StepId>(1)
-  const [autoPlay, setAutoPlay]     = useState(false)
-  const [authState, setAuthState]   = useState<AuthState>('idle')
+  const [step, setStep]               = useState<StepId>(1)
+  const [autoPlay, setAutoPlay]       = useState(false)
+  const [authState, setAuthState]     = useState<AuthState>('idle')
   const [authChecked, setAuthChecked] = useState(false)
 
-  // Streaming state for AI panels
-  const [aiCount1, setAiCount1]     = useState(0)  // step 2 initial review
-  const [aiCount4, setAiCount4]     = useState(0)  // step 4 re-check
-  const streamedRef = useRef<Set<StepId>>(new Set())
+  const [aiCount1, setAiCount1] = useState(0)
+  const [aiCount4, setAiCount4] = useState(0)
+  const streamedRef  = useRef<Set<StepId>>(new Set())
+
+  // One ref per step for scrollIntoView
+  const stepRefs    = useRef<(HTMLDivElement | null)[]>([null, null, null, null, null, null, null, null])
+  const hasMounted  = useRef(false)
 
   const totalSteps = 8
 
-  // Stream AI findings when entering step 2 or step 4
+  // ── Streaming ──────────────────────────────────────────────────────────────
+
   const streamFindings = useCallback((findings: typeof AI_FINDINGS_INITIAL, setter: (n: number) => void) => {
     findings.forEach((_, i) => {
       setTimeout(() => setter(i + 1), 400 + i * 480)
@@ -121,7 +125,8 @@ export default function DemoBillionDollarBuild() {
     }
   }, [step, streamFindings])
 
-  // Auto-play: advance every 6s, pause on step 6 (requires human action)
+  // ── Auto-play (pauses at step 6 and 8) ────────────────────────────────────
+
   useEffect(() => {
     if (!autoPlay) return
     if (step === 6 || step === 8) { setAutoPlay(false); return }
@@ -129,8 +134,41 @@ export default function DemoBillionDollarBuild() {
     return () => clearTimeout(t)
   }, [autoPlay, step])
 
+  // ── Scroll active step into view on navigation ─────────────────────────────
+
+  useEffect(() => {
+    if (!hasMounted.current) { hasMounted.current = true; return }
+    const el = stepRefs.current[step - 1]
+    if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60)
+  }, [step])
+
+  // ── Keyboard navigation ────────────────────────────────────────────────────
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        e.preventDefault()
+        setStep((s) => s < 8 ? (s + 1) as StepId : s)
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault()
+        setStep((s) => s > 1 ? (s - 1) as StepId : s)
+      } else if (e.key === 'Escape') {
+        setAutoPlay(false)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+
   function advance() {
     if (step < totalSteps) setStep((s) => (s + 1) as StepId)
+  }
+
+  function back() {
+    if (step > 1) setStep((s) => (s - 1) as StepId)
   }
 
   function reset() {
@@ -141,326 +179,376 @@ export default function DemoBillionDollarBuild() {
     setAiCount1(0)
     setAiCount4(0)
     streamedRef.current.clear()
+    // Scroll to top on reset
+    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 60)
   }
+
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <div className="min-h-screen bg-surface-0 text-white">
-      {/* Competition banner */}
-      <div className="bg-vektrum-blue/[0.15] border-b border-vektrum-blue/30 px-4 py-2 text-center">
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-blue-300/80">
+
+      {/* Competition banner — compact, non-sticky */}
+      <div className="bg-vektrum-blue/[0.12] border-b border-vektrum-blue/25 px-4 py-1.5 text-center">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-blue-300/65">
           Competition demo — simulated data. No real funds, accounts, or payment execution.
         </p>
       </div>
 
-      <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
+      {/* Scrollable content — pb-28 clears the fixed nav bar */}
+      <div className="max-w-3xl mx-auto px-4 pt-5 pb-28 space-y-5">
 
-        {/* Header */}
-        <div className="text-center space-y-2 pb-2">
+        {/* Page header */}
+        <div className="text-center space-y-1">
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-blue-400/70">
             Perplexity Billion Dollar Build
           </p>
-          <h1 className="text-2xl font-bold text-white leading-tight">
-            Vektrum: The Authorization Layer<br className="hidden sm:block" /> Between Proof and Payment
+          <h1 className="text-xl font-bold text-white leading-tight">
+            Vektrum: The Authorization Layer Between Proof and Payment
           </h1>
-          <p className="text-[13px] text-white/45 max-w-lg mx-auto">
+          <p className="text-[12px] text-white/40">
             Perplexity understands the proof. Vektrum governs the authorization.
           </p>
         </div>
 
-        {/* Step indicator */}
-        <div className="rounded-xl border border-white/[0.08] bg-surface-2 px-4 py-3">
-          <div className="flex items-center justify-between gap-2 mb-2">
-            <p className="text-[11px] text-white/40 font-semibold uppercase tracking-wide">
-              Step {step} of {totalSteps} — {STEP_LABELS[step]}
-            </p>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setAutoPlay((p) => !p)}
-                disabled={step === 8}
-                className="inline-flex items-center gap-1.5 text-[11px] text-white/50 hover:text-blue-300 transition-colors disabled:opacity-30"
-              >
-                {autoPlay ? <Pause size={12} /> : <Play size={12} />}
-                {autoPlay ? 'Pause' : 'Auto'}
-              </button>
-              {step < totalSteps ? (
-                <button
-                  type="button"
-                  onClick={advance}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-vektrum-blue hover:bg-vektrum-blue-hover px-3 py-1.5 text-[12px] font-semibold text-white transition-colors"
-                >
-                  Next step <ChevronRight size={13} />
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={reset}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-white/20 px-3 py-1.5 text-[12px] text-white/60 hover:text-white transition-colors"
-                >
-                  Restart
-                </button>
-              )}
-            </div>
-          </div>
-          <div className="flex gap-1">
-            {Array.from({ length: totalSteps }, (_, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => setStep((i + 1) as StepId)}
-                className={`h-1.5 flex-1 rounded-full transition-colors ${
-                  i + 1 < step  ? 'bg-emerald-500/60' :
-                  i + 1 === step ? 'bg-vektrum-blue' :
-                  'bg-white/[0.08]'
-                }`}
-              />
-            ))}
-          </div>
+        {/* ── Step 1: Draw arrives ───────────────────────────────────────── */}
+        <div ref={(el) => { stepRefs.current[0] = el }} className="scroll-mt-3">
+          {step >= 1 && (
+            <StepCard
+              icon={<FileText size={15} className="text-blue-400" />}
+              title="Draw #3 — Structural Steel Erection"
+              subtitle="Harbor Logistics Center · Webb Construction Group"
+              badge={{ label: 'Draw Submitted', color: 'amber' }}
+              active={step === 1}
+            >
+              <div className="grid grid-cols-2 gap-3 text-[12px] mb-4">
+                <InfoRow label="Amount"      value="$2,180,000" bold />
+                <InfoRow label="Draw"        value="Draw #3 of 5" />
+                <InfoRow label="Funder"      value="Sarah Chen" />
+                <InfoRow label="Contractor"  value="Marcus Webb" />
+              </div>
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-white/35 mb-2">Evidence package</p>
+                <div className="space-y-1.5">
+                  {EVIDENCE_INITIAL.map((e, i) => (
+                    <EvidenceRow key={i} {...e} />
+                  ))}
+                </div>
+              </div>
+              <CalloutBox type="warn" className="mt-4">
+                Conditional lien waiver not found. Evidence package is incomplete.
+              </CalloutBox>
+            </StepCard>
+          )}
         </div>
 
-        {/* ── Step 1: Draw arrives ─────────────────────────────────────────── */}
-        {step >= 1 && (
-          <StepCard
-            icon={<FileText size={15} className="text-blue-400" />}
-            title="Draw #3 — Structural Steel Erection"
-            subtitle="Harbor Logistics Center · Webb Construction Group"
-            badge={{ label: 'Draw Submitted', color: 'amber' }}
-          >
-            <div className="grid grid-cols-2 gap-3 text-[12px] mb-4">
-              <InfoRow label="Amount"      value="$2,180,000" bold />
-              <InfoRow label="Draw"        value="Draw #3 of 5" />
-              <InfoRow label="Funder"      value="Sarah Chen" />
-              <InfoRow label="Contractor"  value="Marcus Webb" />
-            </div>
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-white/35 mb-2">Evidence package</p>
-              <div className="space-y-1.5">
-                {EVIDENCE_INITIAL.map((e, i) => (
-                  <EvidenceRow key={i} {...e} />
-                ))}
-              </div>
-            </div>
-            <CalloutBox type="warn" className="mt-4">
-              Conditional lien waiver not found. Evidence package is incomplete.
-            </CalloutBox>
-          </StepCard>
-        )}
-
-        {/* ── Step 2: Perplexity reviews ───────────────────────────────────── */}
-        {step >= 2 && (
-          <AiPanel
-            title="Perplexity Draw Control Brief"
-            subtitle="Draw #3 · Harbor Logistics Center · sonar-pro"
-            findings={AI_FINDINGS_INITIAL}
-            shownCount={aiCount1}
-            score={78}
-            risk="Medium"
-            evidence="Incomplete"
-            attribution="Perplexity informs. It does not approve payment."
-          />
-        )}
-
-        {/* ── Step 3: Gate blocked ─────────────────────────────────────────── */}
-        {step >= 3 && (
-          <GatePanel passCount={9} failIndex={9} gateState="blocked" />
-        )}
-
-        {/* ── Step 4: Evidence resolved + re-check ────────────────────────── */}
-        {step >= 4 && (
-          <div className="space-y-4">
-            <StepCard
-              icon={<FileText size={15} className="text-emerald-400" />}
-              title="Evidence updated"
-              subtitle="Contractor uploaded missing document"
-              badge={{ label: 'Document Added', color: 'emerald' }}
-            >
-              <div className="space-y-1.5">
-                {EVIDENCE_RESOLVED.map((e, i) => (
-                  <EvidenceRow key={i} {...e} />
-                ))}
-              </div>
-            </StepCard>
-
+        {/* ── Step 2: Perplexity reviews ─────────────────────────────────── */}
+        <div ref={(el) => { stepRefs.current[1] = el }} className="scroll-mt-3">
+          {step >= 2 && (
             <AiPanel
-              title="Perplexity Re-check"
-              subtitle="LienWaiver_StructuralSteel_WBB.pdf · sonar-pro"
-              findings={AI_FINDINGS_RECHECK}
-              shownCount={aiCount4}
-              score={91}
-              risk="Low"
-              evidence="Sufficient"
+              title="Perplexity Draw Control Brief"
+              subtitle="Draw #3 · Harbor Logistics Center · sonar-pro"
+              findings={AI_FINDINGS_INITIAL}
+              shownCount={aiCount1}
+              score={78}
+              risk="Medium"
+              evidence="Incomplete"
               attribution="Perplexity informs. It does not approve payment."
+              active={step === 2}
             />
-          </div>
-        )}
+          )}
+        </div>
 
-        {/* ── Step 5: Gate passes ──────────────────────────────────────────── */}
-        {step >= 5 && (
-          <GatePanel passCount={10} failIndex={-1} gateState="passed" />
-        )}
+        {/* ── Step 3: Gate blocked ───────────────────────────────────────── */}
+        <div ref={(el) => { stepRefs.current[2] = el }} className="scroll-mt-3">
+          {step >= 3 && (
+            <GatePanel passCount={9} failIndex={9} gateState="blocked" active={step === 3} />
+          )}
+        </div>
 
-        {/* ── Step 6: Human authorization ─────────────────────────────────── */}
-        {step >= 6 && (
-          <StepCard
-            icon={<User size={15} className="text-blue-400" />}
-            title="Funder Authorization"
-            subtitle="Release authorization requires explicit funder action"
-            badge={
-              authState === 'authorized'
-                ? { label: 'Release Authorized', color: 'emerald' }
-                : { label: 'Awaiting Authorization', color: 'blue' }
-            }
-          >
-            {authState !== 'authorized' && (
-              <>
-                <div className="grid grid-cols-2 gap-3 text-[12px] mb-4">
-                  <InfoRow label="Authorized funder" value="Sarah Chen" bold />
-                  <InfoRow label="Amount"            value="$2,180,000" />
-                  <InfoRow label="Gate status"       value="10/10 conditions" />
-                  <InfoRow label="Execution rail"    value="Partner-controlled" />
+        {/* ── Step 4: Evidence resolved + re-check ──────────────────────── */}
+        <div ref={(el) => { stepRefs.current[3] = el }} className="scroll-mt-3">
+          {step >= 4 && (
+            <div className="space-y-4">
+              <StepCard
+                icon={<FileText size={15} className="text-emerald-400" />}
+                title="Evidence updated"
+                subtitle="Contractor uploaded missing document"
+                badge={{ label: 'Document Added', color: 'emerald' }}
+                active={step === 4}
+              >
+                <div className="space-y-1.5">
+                  {EVIDENCE_RESOLVED.map((e, i) => (
+                    <EvidenceRow key={i} {...e} />
+                  ))}
                 </div>
-                <CalloutBox type="info" className="mb-4">
-                  Vektrum governs authorization and records proof. Funds remain with the selected payment provider or institutional partner until externally executed.
-                </CalloutBox>
-                {authState === 'idle' && (
-                  <button
-                    type="button"
-                    onClick={() => setAuthState('confirming')}
-                    className="w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 py-3 text-[14px] font-bold text-white transition-colors flex items-center justify-center gap-2"
-                  >
-                    <Lock size={15} />
-                    Authorize Release — $2,180,000
-                  </button>
-                )}
-              </>
-            )}
-
-            {authState === 'confirming' && (
-              <ConfirmModal
-                onConfirm={() => {
-                  if (!authChecked) return
-                  setAuthState('authorized')
-                  if (step === 6) setTimeout(() => setStep(7), 800)
-                }}
-                onCancel={() => setAuthState('idle')}
-                checked={authChecked}
-                onCheck={setAuthChecked}
+              </StepCard>
+              <AiPanel
+                title="Perplexity Re-check"
+                subtitle="LienWaiver_StructuralSteel_WBB.pdf · sonar-pro"
+                findings={AI_FINDINGS_RECHECK}
+                shownCount={aiCount4}
+                score={91}
+                risk="Low"
+                evidence="Sufficient"
+                attribution="Perplexity informs. It does not approve payment."
+                active={step === 4}
               />
-            )}
+            </div>
+          )}
+        </div>
 
-            {authState === 'authorized' && (
-              <div className="rounded-lg border border-emerald-500/25 bg-emerald-500/[0.06] p-4 text-center space-y-1">
-                <CheckCircle2 size={28} className="text-emerald-400 mx-auto" />
-                <p className="text-[15px] font-bold text-emerald-300">Release Authorized</p>
-                <p className="text-[12px] text-white/50">
-                  Authorization token issued · Audit proof recorded · Partner rail notified
-                </p>
-              </div>
-            )}
-          </StepCard>
-        )}
+        {/* ── Step 5: Gate passes ────────────────────────────────────────── */}
+        <div ref={(el) => { stepRefs.current[4] = el }} className="scroll-mt-3">
+          {step >= 5 && (
+            <GatePanel passCount={10} failIndex={-1} gateState="passed" active={step === 5} />
+          )}
+        </div>
 
-        {/* ── Step 7: Token + audit chain ──────────────────────────────────── */}
-        {step >= 7 && (
-          <div className="space-y-4">
-            {/* Token card */}
-            <div className="rounded-xl border border-vektrum-blue/30 bg-vektrum-blue/[0.04] overflow-hidden">
-              <div className="flex items-center gap-2.5 border-b border-vektrum-blue/20 px-5 py-3">
-                <Award size={14} className="text-blue-400" aria-hidden="true" />
-                <p className="text-[13px] font-semibold text-white">Authorization Token</p>
-                <span className="ml-auto inline-flex items-center rounded-full bg-emerald-500/[0.12] border border-emerald-500/20 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">
-                  Authorized
-                </span>
+        {/* ── Step 6: Human authorization ───────────────────────────────── */}
+        <div ref={(el) => { stepRefs.current[5] = el }} className="scroll-mt-3">
+          {step >= 6 && (
+            <StepCard
+              icon={<User size={15} className="text-blue-400" />}
+              title="Funder Authorization"
+              subtitle="Release authorization requires explicit funder action"
+              badge={
+                authState === 'authorized'
+                  ? { label: 'Release Authorized', color: 'emerald' }
+                  : { label: 'Awaiting Authorization', color: 'blue' }
+              }
+              active={step === 6}
+            >
+              {authState !== 'authorized' && (
+                <>
+                  <div className="grid grid-cols-2 gap-3 text-[12px] mb-4">
+                    <InfoRow label="Authorized funder" value="Sarah Chen" bold />
+                    <InfoRow label="Amount"            value="$2,180,000" />
+                    <InfoRow label="Gate status"       value="10/10 conditions" />
+                    <InfoRow label="Execution rail"    value="Partner-controlled" />
+                  </div>
+                  <CalloutBox type="info" className="mb-4">
+                    Vektrum governs authorization and records proof. Funds remain with the selected payment provider or institutional partner until externally executed.
+                  </CalloutBox>
+                  {authState === 'idle' && (
+                    <button
+                      type="button"
+                      onClick={() => setAuthState('confirming')}
+                      className="w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 py-3 text-[14px] font-bold text-white transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Lock size={15} />
+                      Authorize Release — $2,180,000
+                    </button>
+                  )}
+                </>
+              )}
+
+              {authState === 'confirming' && (
+                <ConfirmModal
+                  onConfirm={() => {
+                    if (!authChecked) return
+                    setAuthState('authorized')
+                    if (step === 6) setTimeout(() => setStep(7), 800)
+                  }}
+                  onCancel={() => setAuthState('idle')}
+                  checked={authChecked}
+                  onCheck={setAuthChecked}
+                />
+              )}
+
+              {authState === 'authorized' && (
+                <div className="rounded-lg border border-emerald-500/25 bg-emerald-500/[0.06] p-4 text-center space-y-1">
+                  <CheckCircle2 size={28} className="text-emerald-400 mx-auto" />
+                  <p className="text-[15px] font-bold text-emerald-300">Release Authorized</p>
+                  <p className="text-[12px] text-white/50">
+                    Authorization token issued · Audit proof recorded · Partner rail notified
+                  </p>
+                </div>
+              )}
+            </StepCard>
+          )}
+        </div>
+
+        {/* ── Step 7: Token + audit chain ───────────────────────────────── */}
+        <div ref={(el) => { stepRefs.current[6] = el }} className="scroll-mt-3">
+          {step >= 7 && (
+            <div className="space-y-4">
+              {/* Token card */}
+              <div className="rounded-xl border border-vektrum-blue/30 bg-vektrum-blue/[0.04] overflow-hidden">
+                <div className="flex items-center gap-2.5 border-b border-vektrum-blue/20 px-5 py-3">
+                  <Award size={14} className="text-blue-400" aria-hidden="true" />
+                  <p className="text-[13px] font-semibold text-white">Authorization Token</p>
+                  <span className="ml-auto inline-flex items-center rounded-full bg-emerald-500/[0.12] border border-emerald-500/20 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">
+                    Authorized
+                  </span>
+                </div>
+                <div className="px-5 py-3 font-mono text-[11px] space-y-1.5">
+                  <TokenRow label="token_id"   value="AT-BDB-2180" highlight />
+                  <TokenRow label="policy"     value="10-condition-gate.v1" />
+                  <TokenRow label="amount"     value="$2,180,000" />
+                  <TokenRow label="actor"      value="Sarah Chen" />
+                  <TokenRow label="milestone"  value="Structural Steel Erection" />
+                  <TokenRow label="timestamp"  value="2026-05-29T09:04:55Z" />
+                  <TokenRow label="signature"  value={TOKEN_SIG} truncate />
+                  <TokenRow label="token_hash" value={TOKEN_HASH} truncate />
+                </div>
               </div>
-              <div className="px-5 py-4 font-mono text-[11px] space-y-2">
-                <TokenRow label="token_id"    value="AT-BDB-2180" highlight />
-                <TokenRow label="policy"      value="10-condition-gate.v1" />
-                <TokenRow label="amount"      value="$2,180,000" />
-                <TokenRow label="actor"       value="Sarah Chen" />
-                <TokenRow label="milestone"   value="Structural Steel Erection" />
-                <TokenRow label="timestamp"   value="2026-05-29T09:04:55Z" />
-                <TokenRow label="signature"   value={TOKEN_SIG} truncate />
-                <TokenRow label="token_hash"  value={TOKEN_HASH} truncate />
+
+              {/* Audit chain — internally scrollable so it fits the viewport */}
+              <div className="rounded-xl border border-white/[0.08] bg-surface-2 overflow-hidden">
+                <div className="flex items-center gap-2.5 border-b border-white/[0.06] px-5 py-3">
+                  <Layers size={14} className="text-white/55" aria-hidden="true" />
+                  <p className="text-[13px] font-semibold text-white">Audit Event Chain</p>
+                  <span className="ml-auto text-[11px] text-white/35">8 events · hash-chained · append-only</span>
+                </div>
+                <div className="divide-y divide-white/[0.04] max-h-52 overflow-y-auto">
+                  {AUDIT_EVENTS.map((e) => (
+                    <div key={e.seq} className="px-5 py-2 flex items-start gap-3">
+                      <span className="mt-0.5 flex-shrink-0 h-5 w-5 rounded-full bg-vektrum-blue/[0.15] border border-vektrum-blue/20 flex items-center justify-center text-[9px] font-bold text-blue-300">
+                        {e.seq}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[12px] text-white/75 leading-snug">{e.action}</p>
+                        <div className="flex items-center gap-3 mt-0.5">
+                          <span className="text-[10px] text-white/35">{e.actor}</span>
+                          <span className="text-[10px] text-white/25 font-mono">{e.ts.replace('T', ' ').replace('Z', '')}</span>
+                        </div>
+                      </div>
+                      <span className="flex-shrink-0 font-mono text-[10px] text-white/25 mt-0.5">
+                        #{e.hash}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
+          )}
+        </div>
 
-            {/* Audit chain */}
-            <div className="rounded-xl border border-white/[0.08] bg-surface-2 overflow-hidden">
-              <div className="flex items-center gap-2.5 border-b border-white/[0.06] px-5 py-3">
-                <Layers size={14} className="text-white/55" aria-hidden="true" />
-                <p className="text-[13px] font-semibold text-white">Audit Event Chain</p>
-                <span className="ml-auto text-[11px] text-white/35">8 events · hash-chained · append-only</span>
-              </div>
-              <div className="divide-y divide-white/[0.04]">
-                {AUDIT_EVENTS.map((e) => (
-                  <div key={e.seq} className="px-5 py-2.5 flex items-start gap-3">
-                    <span className="mt-0.5 flex-shrink-0 h-5 w-5 rounded-full bg-vektrum-blue/[0.15] border border-vektrum-blue/20 flex items-center justify-center text-[9px] font-bold text-blue-300">
-                      {e.seq}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[12px] text-white/75 leading-snug">{e.action}</p>
-                      <div className="flex items-center gap-3 mt-0.5">
-                        <span className="text-[10px] text-white/35">{e.actor}</span>
-                        <span className="text-[10px] text-white/25 font-mono">{e.ts.replace('T', ' ').replace('Z', '')}</span>
-                      </div>
-                    </div>
-                    <span className="flex-shrink-0 font-mono text-[10px] text-white/25 mt-0.5">
-                      #{e.hash}
-                    </span>
+        {/* ── Step 8: Competition summary ────────────────────────────────── */}
+        <div ref={(el) => { stepRefs.current[7] = el }} className="scroll-mt-3">
+          {step >= 8 && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { icon: <Brain size={18} className="text-blue-400" />, title: 'Perplexity reviews messy evidence', body: 'sonar-pro reads draw packages, detects missing documents, and scores completeness — in seconds.' },
+                  { icon: <Shield size={18} className="text-white/70" />, title: 'Vektrum enforces release policy', body: 'A deterministic 10-condition gate decides whether release is permitted. AI informs; the gate decides.' },
+                  { icon: <User size={18} className="text-emerald-400" />, title: 'Humans retain authority', body: 'The authorized funder reviews and confirms every release. Authorization is explicit, logged, and immutable.' },
+                  { icon: <Zap size={18} className="text-amber-400" />, title: 'Existing rails execute payment', body: 'Stripe Connect, title, escrow, treasury, or bank — Vektrum authorizes; the partner executes.' },
+                ].map((c, i) => (
+                  <div key={i} className="rounded-xl border border-white/[0.08] bg-surface-2 p-4 space-y-2">
+                    {c.icon}
+                    <p className="text-[13px] font-semibold text-white leading-snug">{c.title}</p>
+                    <p className="text-[12px] text-white/45 leading-relaxed">{c.body}</p>
                   </div>
                 ))}
               </div>
-            </div>
-          </div>
-        )}
 
-        {/* ── Step 8: Competition summary ───────────────────────────────────── */}
-        {step >= 8 && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { icon: <Brain size={18} className="text-blue-400" />, title: 'Perplexity reviews messy evidence', body: 'sonar-pro reads draw packages, detects missing documents, and scores completeness — in seconds.' },
-                { icon: <Shield size={18} className="text-white/70" />, title: 'Vektrum enforces release policy', body: 'A deterministic 10-condition gate decides whether release is permitted. AI informs; the gate decides.' },
-                { icon: <User size={18} className="text-emerald-400" />, title: 'Humans retain authority', body: 'The authorized funder reviews and confirms every release. Authorization is explicit, logged, and immutable.' },
-                { icon: <Zap size={18} className="text-amber-400" />, title: 'Existing rails execute payment', body: 'Stripe Connect, title, escrow, treasury, or bank — Vektrum authorizes; the partner executes.' },
-              ].map((c, i) => (
-                <div key={i} className="rounded-xl border border-white/[0.08] bg-surface-2 p-4 space-y-2">
-                  {c.icon}
-                  <p className="text-[13px] font-semibold text-white leading-snug">{c.title}</p>
-                  <p className="text-[12px] text-white/45 leading-relaxed">{c.body}</p>
+              <div className="rounded-xl border border-vektrum-blue/30 bg-vektrum-blue/[0.06] px-6 py-5 text-center space-y-3">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-blue-400/70">
+                  AI reviews. Gate decides. Human authorizes. Partner rail executes.
+                </p>
+                <p className="text-[22px] font-bold text-white leading-tight">
+                  Vektrum is the authorization layer<br className="hidden sm:block" /> between proof and payment.
+                </p>
+                <div className="flex items-center justify-center gap-2 pt-1">
+                  <span className="inline-flex items-center gap-1.5 text-[12px] text-white/50">
+                    <Hash size={12} className="text-blue-400/60" />
+                    10-condition gate · ed25519 token · hash-chained audit · partner-controlled execution
+                  </span>
                 </div>
-              ))}
-            </div>
-
-            <div className="rounded-xl border border-vektrum-blue/30 bg-vektrum-blue/[0.06] px-6 py-5 text-center space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-blue-400/70">
-                AI reviews. Gate decides. Human authorizes. Partner rail executes.
-              </p>
-              <p className="text-[22px] font-bold text-white leading-tight">
-                Vektrum is the authorization layer<br className="hidden sm:block" /> between proof and payment.
-              </p>
-              <div className="flex items-center justify-center gap-2 pt-1">
-                <span className="inline-flex items-center gap-1.5 text-[12px] text-white/50">
-                  <Hash size={12} className="text-blue-400/60" />
-                  10-condition gate · ed25519 token · hash-chained audit · partner-controlled execution
-                </span>
+                <button
+                  type="button"
+                  onClick={reset}
+                  className="inline-flex items-center gap-2 rounded-lg border border-white/20 px-4 py-2 text-[12px] text-white/60 hover:text-white transition-colors mt-2"
+                >
+                  Restart demo <ArrowRight size={13} />
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={reset}
-                className="inline-flex items-center gap-2 rounded-lg border border-white/20 px-4 py-2 text-[12px] text-white/60 hover:text-white transition-colors mt-2"
-              >
-                Restart demo <ArrowRight size={13} />
-              </button>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
-        {/* Persistent bottom tag */}
-        <p className="text-center text-[11px] text-white/25 pb-4">
+        <p className="text-center text-[10px] text-white/20">
           vektrum.io · authorization infrastructure for construction disbursements
         </p>
       </div>
+
+      {/* ── Fixed bottom navigation bar ─────────────────────────────────────── */}
+      <div className="fixed bottom-0 inset-x-0 z-50 bg-surface-0/95 backdrop-blur-sm border-t border-white/[0.07]">
+        <div className="max-w-3xl mx-auto px-4 h-14 flex items-center gap-3">
+
+          {/* Previous */}
+          <button
+            type="button"
+            onClick={back}
+            disabled={step === 1}
+            className="inline-flex items-center gap-1 rounded-lg border border-white/[0.12] px-3 py-1.5 text-[12px] text-white/45 hover:text-white hover:border-white/25 disabled:opacity-20 disabled:cursor-not-allowed transition-colors flex-shrink-0"
+          >
+            <ChevronLeft size={13} /> Prev
+          </button>
+
+          {/* Center: step label + progress pip track */}
+          <div className="flex-1 flex flex-col items-center gap-1.5 min-w-0">
+            <p className="text-[11px] font-semibold text-white/40 uppercase tracking-wide">
+              Step {step} of {totalSteps} — {STEP_LABELS[step]}
+            </p>
+            <div className="flex items-center gap-1">
+              {Array.from({ length: totalSteps }, (_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setStep((i + 1) as StepId)}
+                  title={`Step ${i + 1}: ${STEP_LABELS[(i + 1) as StepId]}`}
+                  className={`h-1.5 rounded-full transition-all duration-200 ${
+                    i + 1 < step  ? 'w-4 bg-emerald-500/55' :
+                    i + 1 === step ? 'w-6 bg-vektrum-blue' :
+                    'w-4 bg-white/[0.10]'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Auto-play + Next/Restart */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => setAutoPlay((p) => !p)}
+              disabled={step === 8}
+              title="Auto-advance every 6 seconds (pauses at step 6)"
+              className="inline-flex items-center gap-1 text-[11px] text-white/35 hover:text-blue-300 disabled:opacity-20 transition-colors"
+            >
+              {autoPlay ? <Pause size={12} /> : <Play size={12} />}
+              {autoPlay ? 'Pause' : 'Auto'}
+            </button>
+
+            {step < totalSteps ? (
+              <button
+                type="button"
+                onClick={advance}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-vektrum-blue hover:bg-vektrum-blue-hover px-4 py-1.5 text-[12px] font-semibold text-white transition-colors"
+              >
+                Next <ChevronRight size={13} />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={reset}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-white/20 px-3 py-1.5 text-[12px] text-white/50 hover:text-white transition-colors"
+              >
+                Restart <ArrowRight size={13} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Keyboard hint */}
+        <p className="text-center text-[9px] text-white/18 pb-1.5 leading-none">
+          ← → or Space to navigate · Esc stops auto
+        </p>
+      </div>
+
     </div>
   )
 }
@@ -468,12 +556,13 @@ export default function DemoBillionDollarBuild() {
 // ── Sub-components ─────────────────────────────────────────────────────────────
 
 function StepCard({
-  icon, title, subtitle, badge, children,
+  icon, title, subtitle, badge, active, children,
 }: {
   icon: React.ReactNode
   title: string
   subtitle?: string
   badge?: { label: string; color: 'amber' | 'emerald' | 'blue' | 'red' }
+  active?: boolean
   children?: React.ReactNode
 }) {
   const badgeClass: Record<string, string> = {
@@ -483,7 +572,9 @@ function StepCard({
     red:     'bg-red-500/[0.12] border-red-500/20 text-red-400',
   }
   return (
-    <div className="rounded-xl border border-white/[0.08] bg-surface-2 overflow-hidden">
+    <div className={`rounded-xl border bg-surface-2 overflow-hidden transition-colors duration-200 ${
+      active ? 'border-vektrum-blue/40' : 'border-white/[0.08]'
+    }`}>
       <div className="flex items-center gap-2.5 border-b border-white/[0.06] px-5 py-3.5">
         {icon}
         <div className="flex-1 min-w-0">
@@ -513,18 +604,14 @@ function EvidenceRow({ name, ok, missing, new: isNew }: { name: string; ok: bool
         {name}
       </span>
       {ok && !missing && <CheckCircle2 size={12} className="text-emerald-400 flex-shrink-0" />}
-      {missing && (
-        <span className="text-[10px] font-semibold uppercase text-red-400/80">Missing</span>
-      )}
-      {isNew && (
-        <span className="text-[10px] font-semibold uppercase text-emerald-400/80">New</span>
-      )}
+      {missing && <span className="text-[10px] font-semibold uppercase text-red-400/80">Missing</span>}
+      {isNew   && <span className="text-[10px] font-semibold uppercase text-emerald-400/80">New</span>}
     </div>
   )
 }
 
 function AiPanel({
-  title, subtitle, findings, shownCount, score, risk, evidence, attribution,
+  title, subtitle, findings, shownCount, score, risk, evidence, attribution, active,
 }: {
   title: string
   subtitle: string
@@ -534,9 +621,12 @@ function AiPanel({
   risk: string
   evidence: string
   attribution: string
+  active?: boolean
 }) {
   return (
-    <div className="rounded-xl border border-vektrum-blue/25 bg-vektrum-blue/[0.04] overflow-hidden">
+    <div className={`rounded-xl overflow-hidden transition-colors duration-200 ${
+      active ? 'border border-vektrum-blue/40 bg-vektrum-blue/[0.05]' : 'border border-vektrum-blue/25 bg-vektrum-blue/[0.04]'
+    }`}>
       <div className="flex items-center gap-2.5 border-b border-vektrum-blue/15 px-5 py-3.5">
         <Brain size={14} className="text-blue-400 flex-shrink-0" aria-hidden="true" />
         <div className="flex-1 min-w-0">
@@ -548,7 +638,6 @@ function AiPanel({
         </span>
       </div>
       <div className="px-5 py-4 space-y-3">
-        {/* Streaming findings */}
         <div className="space-y-1.5">
           {findings.slice(0, shownCount).map((f, i) => (
             <div key={i} className="flex items-start gap-2">
@@ -565,8 +654,6 @@ function AiPanel({
             <span className="inline-block text-[12px] text-blue-300 animate-pulse ml-4">▌</span>
           )}
         </div>
-
-        {/* Scores — only shown when streaming complete */}
         {shownCount >= findings.length && (
           <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/[0.06]">
             <ScoreBadge label="Score" value={`${score}/100`} color={score >= 90 ? 'emerald' : 'amber'} />
@@ -591,16 +678,18 @@ function ScoreBadge({ label, value, color }: { label: string; value: string; col
   )
 }
 
-function GatePanel({ passCount, failIndex, gateState }: {
+function GatePanel({ passCount, failIndex, gateState, active }: {
   passCount: number
   failIndex: number
   gateState: 'blocked' | 'passed'
+  active?: boolean
 }) {
   return (
-    <div className={`rounded-xl overflow-hidden border ${
-      gateState === 'blocked' ? 'border-red-500/25' : 'border-emerald-500/25'
+    <div className={`rounded-xl overflow-hidden border transition-colors duration-200 ${
+      gateState === 'blocked'
+        ? active ? 'border-red-500/40' : 'border-red-500/25'
+        : active ? 'border-emerald-500/40' : 'border-emerald-500/25'
     }`}>
-      {/* Status banner */}
       <div className={`px-5 py-4 flex items-center gap-3 ${
         gateState === 'blocked'
           ? 'bg-red-500/[0.10] border-b border-red-500/20'
@@ -635,9 +724,7 @@ function GatePanel({ passCount, failIndex, gateState }: {
           </p>
         </div>
       </div>
-
-      {/* Conditions */}
-      <div className={`px-5 py-3 ${gateState === 'blocked' ? 'bg-surface-2' : 'bg-surface-2'}`}>
+      <div className="px-5 py-3 bg-surface-2">
         <div className="flex items-center gap-2 mb-3">
           <Shield size={13} className="text-white/40" aria-hidden="true" />
           <p className="text-[11px] font-semibold uppercase tracking-wide text-white/35">
@@ -742,8 +829,8 @@ function InfoRow({ label, value, bold }: { label: string; value: string; bold?: 
 function TokenRow({ label, value, highlight, truncate }: { label: string; value: string; highlight?: boolean; truncate?: boolean }) {
   return (
     <div className="flex items-start gap-3">
-      <span className="text-white/30 w-28 flex-shrink-0">{label}</span>
-      <span className={`${highlight ? 'text-blue-300 font-semibold' : 'text-white/60'} ${truncate ? 'truncate max-w-[280px]' : ''}`}>
+      <span className="text-white/30 w-24 flex-shrink-0">{label}</span>
+      <span className={`${highlight ? 'text-blue-300 font-semibold' : 'text-white/60'} ${truncate ? 'truncate max-w-[300px]' : ''}`}>
         {value}
       </span>
     </div>
