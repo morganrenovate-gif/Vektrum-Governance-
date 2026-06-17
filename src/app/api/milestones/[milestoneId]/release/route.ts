@@ -18,6 +18,7 @@ import { notifyTransactionReceipt } from '@/lib/engine/notifications'
 import { notifyReleaseAuthorized, notifyReleaseBlocked } from '@/lib/engine/notify'
 import { internalError, notFoundError, validationError } from '@/lib/errors'
 import { POLICIES, checkRateLimit, rateLimitResponse, logRateLimitViolation } from '@/lib/engine/rate-limit'
+import { computeSovFields } from '@/lib/engine/sov'
 
 export const dynamic = 'force-dynamic'
 
@@ -1133,38 +1134,63 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       }
     }
 
-    // ── STEP 7.2: Update SOV line-item previous_released (Tier C) ──────────
-    // Fire-and-forget — non-fatal. When SOV links are present, increment
-    // previous_released on each linked line item so the balance_to_finish
-    // reflects this draw. Done after token confirmation so a token failure
-    // doesn't advance the SOV ledger.
+    // ── STEP 7.2: Update SOV line-item ledger after release (Tier C) ──────
+    // Awaited so derived fields are never stale on the next page load.
+    // Errors are caught and logged — they must not block the release response
+    // because the Stripe transfer has already succeeded.
+    //
+    // We update ALL four stored-computed fields so the SOV table always
+    // reconciles: previous_released, balance_to_finish, percent_complete,
+    // and revised_value. Using computeSovFields from lib/engine/sov is the
+    // single source of truth for the formula.
     if (sovLinksForToken && sovLinksForToken.length > 0) {
-      void (async () => {
-        const adminForSov = createSupabaseAdminClient()
-        for (const link of sovLinksForToken) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const { data: current } = await (adminForSov as any)
-            .from('sov_line_items')
-            .select('previous_released')
-            .eq('id', link.sov_line_item_id)
-            .maybeSingle()
-          if (current) {
-            const newReleased = (current.previous_released ?? 0) + link.amount
+      const adminForSov = createSupabaseAdminClient()
+      await Promise.all(
+        sovLinksForToken.map(async (link) => {
+          try {
+            // Fetch the full row so we can recompute all derived fields
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const { data: current } = await (adminForSov as any)
+              .from('sov_line_items')
+              .select('scheduled_value, approved_change_orders, previous_released, current_requested')
+              .eq('id', link.sov_line_item_id)
+              .maybeSingle()
+
+            if (!current) return
+
+            const newPrevReleased = (current.previous_released ?? 0) + link.amount
+            const computed = computeSovFields(
+              current.scheduled_value    ?? 0,
+              current.approved_change_orders ?? 0,
+              newPrevReleased,
+              current.current_requested  ?? 0,
+            )
+
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const { error: sovUpdateError } = await (adminForSov as any)
               .from('sov_line_items')
-              .update({ previous_released: newReleased })
+              .update({
+                previous_released: newPrevReleased,
+                ...computed,
+              })
               .eq('id', link.sov_line_item_id)
+
             if (sovUpdateError) {
               console.error(
-                '[release] sov_line_items previous_released update failed (non-fatal):',
+                '[release] sov_line_items update failed (non-fatal):',
                 link.sov_line_item_id,
                 sovUpdateError.message,
               )
             }
+          } catch (sovErr) {
+            console.error(
+              '[release] sov_line_items update threw (non-fatal):',
+              link.sov_line_item_id,
+              sovErr,
+            )
           }
-        }
-      })()
+        }),
+      )
     }
 
     // ── STEP 7.5: Notify contractor that release was authorized ───────────

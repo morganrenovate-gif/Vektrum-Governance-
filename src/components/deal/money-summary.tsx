@@ -32,7 +32,10 @@ export function MoneySummary({
   retainageReleased,
   className,
 }: MoneySummaryProps) {
-  const remaining = Math.max(0, totalAmount - releasedAmount);
+  // Remaining = what the funder has deposited minus what has been released.
+  // Using fundedAmount (not totalAmount) so a partially-funded deal never shows
+  // more available than what is actually on hand — the phantom balance fix.
+  const remaining = Math.max(0, fundedAmount - releasedAmount);
   const fundedPct = totalAmount > 0 ? (fundedAmount / totalAmount) * 100 : 0;
   const releasedPct = totalAmount > 0 ? (releasedAmount / totalAmount) * 100 : 0;
 

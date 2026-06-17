@@ -4,26 +4,10 @@ import { createClient } from '@/lib/supabase/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { logAudit } from '@/lib/engine/audit'
 import { errorResponse, validationError, internalError } from '@/lib/errors'
+import { computeSovFields } from '@/lib/engine/sov'
 import type { SovLineItem } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
-
-// ─── Computed field helpers ───────────────────────────────────────────────────
-
-function computeSovFields(
-  scheduled_value: number,
-  approved_change_orders: number,
-  previous_released: number,
-  current_requested: number,
-): { revised_value: number; balance_to_finish: number; percent_complete: number } {
-  const revised_value = scheduled_value + approved_change_orders
-  const balance_to_finish = Math.max(0, revised_value - previous_released - current_requested)
-  const percent_complete =
-    revised_value > 0
-      ? Math.min(100, ((previous_released + current_requested) / revised_value) * 100)
-      : 0
-  return { revised_value, balance_to_finish, percent_complete }
-}
 
 // ─── GET /api/deals/[dealId]/sov ─────────────────────────────────────────────
 //
