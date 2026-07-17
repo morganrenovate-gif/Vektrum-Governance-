@@ -1,5 +1,21 @@
 # Vektrum One-Pager — Master Specification
 
+> **⚡ v2 — Redesign (current, shipped).** The live files (`vektrum-one-pager.html` / `.pdf`) now use a re-architected information design optimized for a 3-second read. The prior version is archived as `vektrum-one-pager-v1.*`. Key changes:
+> - **Headline leads with prevention, not the competitor:** `Unauthorized draws don't get released.` (was `Workflow tools track work. Vektrum governs release.`) — the old first line anchored readers on "workflow," the category to escape.
+> - **3-second visual = a live gate blocking a bad draw:** the hero now pairs the headline with a Release-Gate product card showing `$420,000 draw` and a red **`RELEASE BLOCKED · 1 of 10 conditions failed`** state. Concrete refusal beats an abstract 7-step process (picture-superiority + loss-aversion).
+> - **Kicker promoted:** `RELEASE CONTROL FOR CONSTRUCTION CAPITAL` is now a visible cobalt label, not tucked mono-caps.
+> - **7-step spine → one gate line:** `Draw + evidence + AI brief → 10-condition gate → Blocked / Authorized → your rail executes → immutable audit`, with the 10 conditions as a compact checklist.
+> - **Differentiation moved up** (`Why workflow software can't do this` → `Approval is not authorization`), answering the "isn't this Procore?" objection early.
+> - **AI removed from the hero**, de-emphasized to a precondition (per the rule that AI must not be a first-3-second takeaway).
+> - **CTA changed** from `Apply to become a design partner` to **`See the gate block a live draw →`** (convert on proof, not commitment).
+> - New question order: **What → Why care → Why now → Different → Why your software can't → Trust → CTA.**
+>
+> Everything below documents the shared design system (brand, type, color, print) and the reasoning framework; both versions use it. The verbatim v1 copy is retained for reference.
+
+---
+
+## (v1 reference) Master Specification
+
 **Deliverable:** The definitive one-page introduction to Vektrum.
 **Format:** Portrait, US Letter (8.5 × 11 in), full-bleed, single page.
 **Files:**

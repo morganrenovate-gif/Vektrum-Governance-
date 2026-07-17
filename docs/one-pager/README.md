@@ -14,7 +14,10 @@ Portrait, US Letter, single page. Every claim is grounded in the actual implemen
 
 ## Core message
 
-> Workflow tools track work. **Vektrum governs release.**
+> **Unauthorized draws don't get released.**
+> Vektrum verifies every release condition before a construction draw is authorized.
+
+The current files are the **v2 redesign** (leads with prevention + a live "RELEASE BLOCKED" gate card). The earlier version is archived as `vektrum-one-pager-v1.*`; see the spec's v2 note for the rationale.
 
 ## Regenerating the PDF
 
