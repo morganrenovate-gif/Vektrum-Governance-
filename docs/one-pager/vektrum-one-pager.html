@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Vektrum — Release Control for Construction Capital</title>
-<meta name="description" content="Unauthorized construction draws do not get released. Vektrum verifies every release condition before a draw is authorized — a deterministic 10-condition gate, non-custodial, on your existing rails."/>
+<meta name="description" content="Unauthorized construction draws do not get released. Vektrum verifies every release condition before a draw is authorized — deterministic 10-condition gate, non-custodial, on your existing rails."/>
 </head>
 <body>
 <style>
@@ -33,7 +33,7 @@ body{background:#e9edf4;color:var(--ink);font-family:var(--sans);-webkit-font-sm
 .sheet{width:8.5in;min-height:11in;margin:24px auto;background:var(--bg);color:var(--ink);
   box-shadow:0 24px 70px rgba(9,18,38,.28);overflow:hidden;display:flex;flex-direction:column;position:relative;}
 
-.sec-label{display:flex;align-items:center;gap:9px;margin-bottom:7px;}
+.sec-label{display:flex;align-items:center;gap:9px;margin-bottom:9px;}
 .sec-label .bar{width:16px;height:2px;background:var(--cobalt);border-radius:2px;}
 .sec-label .t{font-family:var(--mono);font-size:8px;letter-spacing:.19em;text-transform:uppercase;font-weight:600;color:var(--cobalt);}
 
@@ -42,7 +42,7 @@ body{background:#e9edf4;color:var(--ink);font-family:var(--sans);-webkit-font-sm
     radial-gradient(120% 90% at 82% -20%, rgba(26,58,150,.40) 0%, rgba(26,58,150,0) 55%),
     radial-gradient(80% 70% at 0% 0%, rgba(26,58,150,.16) 0%, rgba(26,58,150,0) 55%),
     linear-gradient(180deg,#0E1D2E 0%, #0A1624 100%);
-  color:#fff;padding:14px 40px 14px;position:relative;}
+  color:#fff;padding:15px 40px 17px;position:relative;}
 .hero:after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(78,116,216,.55),transparent);}
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:10px;}
 .lockup{display:flex;align-items:center;gap:11px;}
@@ -52,8 +52,8 @@ body{background:#e9edf4;color:var(--ink);font-family:var(--sans);-webkit-font-sm
 .kicker{font-family:var(--mono);font-size:8.4px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;color:var(--cobalt-hi);
   border:1px solid rgba(78,116,216,.35);border-radius:999px;padding:5px 11px;background:rgba(30,55,120,.25);}
 
-.hero-grid{display:grid;grid-template-columns:1.12fr .88fr;gap:26px;align-items:center;}
-.h1{font-family:var(--disp);font-weight:700;font-size:37px;line-height:1.0;letter-spacing:-.035em;margin:0;text-wrap:balance;}
+.hero-grid{display:grid;grid-template-columns:.82fr 1.18fr;gap:22px;align-items:center;}
+.h1{font-family:var(--disp);font-weight:700;font-size:31px;line-height:1.02;letter-spacing:-.035em;margin:0;text-wrap:balance;}
 .h1 .accent{color:var(--cobalt-hi);}
 .deck{margin:10px 0 0;font-size:12.5px;line-height:1.44;color:rgba(255,255,255,.74);max-width:23em;}
 .deck b{color:#fff;font-weight:600;}
@@ -63,31 +63,31 @@ body{background:#e9edf4;color:var(--ink);font-family:var(--sans);-webkit-font-sm
 .hchip .dot{width:5px;height:5px;border-radius:50%;background:var(--cobalt-hi);box-shadow:0 0 0 2.5px rgba(78,116,216,.22);}
 
 /* Gate product card */
-.gatecard{background:linear-gradient(180deg,#12233A,#0C1B2E);border:1px solid rgba(120,150,220,.22);border-radius:14px;
-  padding:12px 15px 12px;box-shadow:0 18px 40px rgba(0,0,0,.42),0 0 0 1px rgba(255,255,255,.03);}
+.gatecard{background:linear-gradient(180deg,#132741,#0B1A2C);border:1px solid rgba(150,130,150,.26);border-radius:16px;
+  padding:17px 18px 16px;box-shadow:0 26px 60px rgba(0,0,0,.5),0 0 0 1px rgba(240,140,140,.14),0 0 46px rgba(176,28,28,.16);}
 .gc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.08);}
-.gc-lab{font-family:var(--mono);font-size:7.4px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.5);font-weight:600;}
-.gc-amt{font-family:var(--disp);font-size:20px;font-weight:700;letter-spacing:-.03em;color:#fff;line-height:1;margin-top:5px;}
-.gc-amt span{font-size:9.5px;font-weight:500;color:rgba(255,255,255,.55);font-family:var(--sans);letter-spacing:0;}
+.gc-lab{font-family:var(--mono);font-size:7.8px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.52);font-weight:600;}
+.gc-amt{font-family:var(--disp);font-size:26px;font-weight:700;letter-spacing:-.03em;color:#fff;line-height:1;margin-top:6px;}
+.gc-amt span{font-size:10.5px;font-weight:500;color:rgba(255,255,255,.55);font-family:var(--sans);letter-spacing:0;}
 .gc-ai{font-family:var(--mono);font-size:6.8px;letter-spacing:.1em;text-transform:uppercase;color:var(--cobalt-hi);text-align:right;line-height:1.5;}
-.gc-rows{display:flex;flex-direction:column;gap:5px;padding:9px 0 2px;}
-.gc-row{display:flex;align-items:center;gap:8px;font-size:10px;color:rgba(255,255,255,.82);}
-.gc-row .ck{width:15px;height:15px;border-radius:5px;display:flex;align-items:center;justify-content:center;flex:none;}
+.gc-rows{display:flex;flex-direction:column;gap:8px;padding:13px 0 4px;}
+.gc-row{display:flex;align-items:center;gap:9px;font-size:10.8px;color:rgba(255,255,255,.85);}
+.gc-row .ck{width:17px;height:17px;border-radius:5px;display:flex;align-items:center;justify-content:center;flex:none;}
 .gc-row.ok .ck{background:rgba(26,122,74,.2);color:#5FD39B;}
 .gc-row.no{color:#fff;}
 .gc-row.no .ck{background:rgba(176,28,28,.28);color:#FF8A8A;}
 .gc-row.no .lbl{font-weight:600;}
-.gc-status{margin-top:9px;display:flex;align-items:center;gap:9px;background:rgba(176,28,28,.16);border:1px solid rgba(240,120,120,.35);border-radius:9px;padding:9px 11px;}
-.gc-status .pill{font-family:var(--disp);font-weight:700;font-size:12px;letter-spacing:.01em;color:#FF9B9B;display:flex;align-items:center;gap:6px;white-space:nowrap;}
-.gc-status .meta{font-family:var(--mono);font-size:7.4px;letter-spacing:.06em;color:rgba(255,255,255,.6);margin-left:auto;text-align:right;line-height:1.5;}
+.gc-status{margin-top:12px;display:flex;align-items:center;gap:10px;background:rgba(176,28,28,.22);border:1px solid rgba(240,120,120,.5);border-radius:11px;padding:13px 14px;box-shadow:0 0 0 3px rgba(176,28,28,.08);}
+.gc-status .pill{font-family:var(--disp);font-weight:700;font-size:16px;letter-spacing:.01em;color:#FF9B9B;display:flex;align-items:center;gap:8px;white-space:nowrap;}
+.gc-status .meta{font-family:var(--mono);font-size:7.8px;letter-spacing:.06em;color:rgba(255,255,255,.6);margin-left:auto;text-align:right;line-height:1.5;}
 
 /* ═══ STAKES ═══ */
-.stakes{background:var(--surface-alt);border-bottom:1px solid var(--border);padding:9px 40px;}
+.stakes{background:var(--surface-alt);border-bottom:1px solid var(--border);padding:13px 40px;}
 .stakes p{margin:0;font-size:12.5px;line-height:1.45;color:var(--ink);max-width:56em;}
 .stakes b{color:var(--cobalt);font-weight:700;}
 
 /* ═══ BODY ═══ */
-.body{padding:9px 40px 6px;flex:1;}
+.body{padding:16px 40px 6px;flex:1;}
 
 /* Gate mechanism */
 .gate-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;}
@@ -111,9 +111,9 @@ body{background:#e9edf4;color:var(--ink);font-family:var(--sans);-webkit-font-sm
 .fork .auth{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd);}
 
 .conds{margin-top:9px;background:var(--surface);border:1px solid var(--hair);border-radius:11px;padding:9px 14px;box-shadow:0 1px 3px rgba(20,20,20,.04);}
-.conds-lab{font-family:var(--mono);font-size:7.4px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:6px;}
-.cond-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px 22px;}
-.cond{display:flex;gap:7px;font-size:9.6px;color:var(--ink);line-height:1.3;align-items:baseline;}
+.conds-lab{font-family:var(--mono);font-size:7.6px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:9px;}
+.cond-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px 22px;}
+.cond{display:flex;gap:7px;font-size:10px;color:var(--ink);line-height:1.3;align-items:baseline;}
 .cond .cn{font-family:var(--mono);font-size:8px;font-weight:700;color:var(--cobalt);flex:none;width:13px;}
 
 /* Contrast */
@@ -129,14 +129,32 @@ body{background:#e9edf4;color:var(--ink);font-family:var(--sans);-webkit-font-sm
 .cc.a .cb{color:var(--muted);}.cc.b .cb{color:rgba(255,255,255,.86);}
 
 /* Trust row */
-.trust{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px;}
-.tr{background:var(--surface);border:1px solid var(--hair);border-radius:10px;padding:8px 11px;box-shadow:0 1px 2px rgba(20,20,20,.04);}
-.tr .th{display:flex;align-items:center;gap:6px;font-family:var(--disp);font-weight:700;font-size:10.5px;letter-spacing:-.01em;color:var(--ink);margin-bottom:4px;}
-.tr .th svg{width:13px;height:13px;color:var(--cobalt);flex:none;}
-.tr .tb{font-size:9px;line-height:1.36;color:var(--muted);}
+.trust{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-top:18px;}
+.tr{background:var(--surface);border:1px solid var(--hair);border-radius:11px;padding:13px 13px;box-shadow:0 1px 2px rgba(20,20,20,.04);}
+.tr .th{display:flex;align-items:center;gap:7px;font-family:var(--disp);font-weight:700;font-size:11.5px;letter-spacing:-.01em;color:var(--ink);margin-bottom:5px;}
+.tr .th svg{width:15px;height:15px;color:var(--cobalt);flex:none;}
+.tr .tb{font-size:9.6px;line-height:1.4;color:var(--muted);}
+
+
+/* Visual story — blocked → fixed → authorized → audit */
+.story-title{font-family:var(--disp);font-weight:700;font-size:19px;letter-spacing:-.02em;color:var(--ink);margin:0 0 14px;}
+.story-title em{font-style:normal;color:var(--cobalt);}
+.story{display:flex;align-items:stretch;gap:3px;}
+.step{flex:1;min-width:0;background:var(--surface);border:1px solid var(--hair);border-radius:12px;padding:17px 6px 16px;
+  display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center;box-shadow:0 1px 2px rgba(20,20,20,.04);}
+.step .si{width:25px;height:25px;color:var(--cobalt);flex:none;}
+.step .sl{font-family:var(--mono);font-size:7.7px;letter-spacing:.02em;line-height:1.32;color:var(--muted);font-weight:600;text-transform:uppercase;}
+.step.block{background:var(--red);border-color:var(--red);box-shadow:0 6px 16px rgba(176,28,28,.34);transform:scale(1.06);}
+.step.block .si{color:#fff;}.step.block .sl{color:#fff;font-weight:700;}
+.step.auth{background:var(--green);border-color:var(--green);box-shadow:0 6px 16px rgba(26,122,74,.32);transform:scale(1.06);}
+.step.auth .si{color:#fff;}.step.auth .sl{color:#fff;font-weight:700;}
+.step.audit{background:var(--green-bg);border-color:var(--green-bd);}
+.step.audit .si{color:var(--green);}.step.audit .sl{color:var(--green);}
+.sarrow{display:flex;align-items:center;color:var(--faint);flex:none;}
+.cond-strip{margin-top:18px;background:var(--surface);border:1px solid var(--hair);border-radius:12px;padding:14px 16px;box-shadow:0 1px 3px rgba(20,20,20,.04);}
 
 /* ═══ FOOTER ═══ */
-.foot{margin-top:11px;background:linear-gradient(180deg,#0A1626,#031226);color:#fff;padding:11px 40px 11px;position:relative;}
+.foot{margin-top:18px;background:linear-gradient(180deg,#0A1626,#031226);color:#fff;padding:11px 40px 11px;position:relative;}
 .foot:before{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(78,116,216,.55),transparent);}
 .whynow{font-size:10.5px;line-height:1.38;color:rgba(255,255,255,.66);max-width:52em;margin:0 0 7px;}
 .whynow b{color:#fff;font-weight:600;}
@@ -192,7 +210,7 @@ body{background:#e9edf4;color:var(--ink);font-family:var(--sans);-webkit-font-sm
     <div class="hero-grid">
       <div>
         <h1 class="h1">Unauthorized draws <span class="accent">don't get released.</span></h1>
-        <p class="deck">Vektrum verifies <b>every release condition</b> before a construction draw is authorized — so capital moves only when it's supposed to.</p>
+        <p class="deck"><b>Every release condition</b> is verified before a draw is authorized.</p>
         <div class="hchips">
           <span class="hchip"><span class="dot"></span>Deterministic gate</span>
           <span class="hchip"><span class="dot"></span>Non-custodial</span>
@@ -215,7 +233,7 @@ body{background:#e9edf4;color:var(--ink);font-family:var(--sans);-webkit-font-sm
           <div class="gc-row no"><span class="ck"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg></span><span class="lbl">Conditional lien waiver — not on file</span></div>
         </div>
         <div class="gc-status">
-          <span class="pill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>RELEASE BLOCKED</span>
+          <span class="pill"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>RELEASE BLOCKED</span>
           <span class="meta">1 of 10 conditions failed<br/>logged to audit</span>
         </div>
       </div>
@@ -224,73 +242,46 @@ body{background:#e9edf4;color:var(--ink);font-family:var(--sans);-webkit-font-sm
 
   <!-- STAKES -->
   <section class="stakes">
-    <p>Approvals get tracked. Releases don't get enforced. <b>That gap — between a signed approval and a live wire — is where draw fraud, mechanic's liens, and frozen facilities happen.</b></p>
+    <p>Approvals get tracked. Releases don't. <b>That gap is where fraud, liens, and frozen capital live.</b></p>
   </section>
 
   <!-- BODY -->
   <section class="body">
-    <!-- THE GATE -->
-    <div class="sec-label"><span class="bar"></span><span class="t">The gate</span></div>
-    <div class="gate-head">
-      <h2 class="gate-title">One gate. Ten conditions. No exceptions.</h2>
-      <span class="gate-rule"><b>AI informs.</b> The gate decides. The funder authorizes. No one overrides it.</span>
+    <!-- THE STORY -->
+    <div class="sec-label"><span class="bar"></span><span class="t">The lifecycle of a draw</span></div>
+    <h2 class="story-title">Approval isn't authorization. <em>The gate is.</em></h2>
+    <div class="story">
+      <div class="step "><svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h4"/></svg><span class="sl">Draw<br/>requested</span></div><div class="sarrow"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div><div class="step "><svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h5"/><path d="M14 2v6h6"/><circle cx="16.5" cy="16.5" r="2.6"/><path d="m21 21-1.9-1.9"/></svg><span class="sl">AI reviews<br/>documents</span></div><div class="sarrow"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div><div class="step "><svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg><span class="sl">1 condition<br/>fails</span></div><div class="sarrow"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div><div class="step block"><svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10.5" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg><span class="sl">Release<br/>blocked</span></div><div class="sarrow"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div><div class="step "><svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 12v6M9 15h6"/></svg><span class="sl">Missing doc<br/>added</span></div><div class="sarrow"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div><div class="step auth"><svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.4 12 2.6 2.6 5-5"/></svg><span class="sl">Release<br/>authorized</span></div><div class="sarrow"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div><div class="step audit"><svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg><span class="sl">Audit<br/>recorded</span></div>
     </div>
 
-    <div class="flowline">
-      <div class="fl"><span class="n">Input</span><span class="v">Draw + evidence + AI brief</span></div>
-      <div class="fl-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
-      <div class="fl gate"><span class="n">Server-side</span><span class="v">10-condition gate</span></div>
-      <div class="fl-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
-      <div class="fork"><span class="b blocked">✕ BLOCKED</span><span class="b auth">✓ AUTHORIZED</span></div>
-      <div class="fl-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
-      <div class="fl"><span class="n">Only if authorized</span><span class="v">Your rail executes</span></div>
-      <div class="fl-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
-      <div class="fl audit"><span class="n">Every time</span><span class="v">Immutable audit</span></div>
-    </div>
-
-    <div class="conds">
-      <div class="conds-lab">All ten must pass — enforced in the UI, the API, and the database</div>
+    <div class="cond-strip">
+      <div class="conds-lab">The gate checks 10 server-side conditions — enforced in UI · API · database</div>
       <div class="cond-grid">
         <div class="cond"><span class="cn">01</span><span>Milestone approved by the funder</span></div>
         <div class="cond"><span class="cn">06</span><span>No existing active release (no duplicates)</span></div>
-        <div class="cond"><span class="cn">02</span><span>Milestone protection cleared for release</span></div>
+        <div class="cond"><span class="cn">02</span><span>Milestone protection cleared</span></div>
         <div class="cond"><span class="cn">07</span><span>No unresolved change orders</span></div>
         <div class="cond"><span class="cn">03</span><span>Sufficient funded balance</span></div>
         <div class="cond"><span class="cn">08</span><span>Signed contract on file</span></div>
-        <div class="cond"><span class="cn">04</span><span>Payout account verified (where required)</span></div>
+        <div class="cond"><span class="cn">04</span><span>Payout account verified</span></div>
         <div class="cond"><span class="cn">09</span><span>Sequential-release prerequisites met</span></div>
         <div class="cond"><span class="cn">05</span><span>Contractor onboarding complete</span></div>
-        <div class="cond"><span class="cn">10</span><span>Approved conditional lien waiver on file</span></div>
-      </div>
-    </div>
-
-    <!-- WHY WORKFLOW CAN'T -->
-    <div class="sec-label" style="margin-top:11px;"><span class="bar"></span><span class="t">Why workflow software can't do this</span></div>
-    <div class="compete">
-      <div class="cc a">
-        <div class="k">Project &amp; workflow tools</div>
-        <div class="ct">They track the approval. They can't stop the release.</div>
-        <div class="cb">Tasks, documents, and sign-offs live here. But the disbursement itself stays a manual, discretionary decision — nothing enforces the conditions.</div>
-      </div>
-      <div class="cc b">
-        <div class="k">Vektrum · the enforcement layer</div>
-        <div class="ct">Approval is not authorization.</div>
-        <div class="cb">The release is <b>blocked in the UI, the API, and the database</b> until all ten conditions pass. No admin, contractor, or partner can move money early.</div>
+        <div class="cond"><span class="cn">10</span><span>Approved conditional lien waiver</span></div>
       </div>
     </div>
 
     <!-- TRUST -->
     <div class="trust">
-      <div class="tr"><div class="th"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg>Deterministic</div><div class="tb">Server-side gate. No UI, admin, or partner bypass.</div></div>
-      <div class="tr"><div class="th"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>Non-custodial</div><div class="tb">Your rail moves the money — never Vektrum.</div></div>
-      <div class="tr"><div class="th"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="m9 15 2 2 4-4"/></svg>Tamper-evident</div><div class="tb">Every decision hash-chained into an append-only ledger.</div></div>
-      <div class="tr"><div class="th"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v12"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="6" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>Two rails</div><div class="tb">Stripe Connect, or your bank, title, or escrow partner.</div></div>
+      <div class="tr"><div class="th"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg>Deterministic</div><div class="tb">Server-side gate. No bypass.</div></div>
+      <div class="tr"><div class="th"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>Non-custodial</div><div class="tb">Your rail moves the money, never Vektrum.</div></div>
+      <div class="tr"><div class="th"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="m9 15 2 2 4-4"/></svg>Tamper-evident</div><div class="tb">Hash-chained, append-only ledger.</div></div>
+      <div class="tr"><div class="th"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v12"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="6" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>Two rails</div><div class="tb">Stripe, or your bank / title / escrow.</div></div>
     </div>
   </section>
 
   <!-- FOOTER -->
   <footer class="foot">
-    <p class="whynow"><b>Credit is tighter and draw-fraud losses are rising.</b> Lenders are moving from trust-based draws to verified release control — before they wire, not after.</p>
+    <p class="whynow">Lenders are moving from <b>trust-based draws to verified release control</b> — before the wire, not after.</p>
     <div class="foot-grid">
       <div class="cta-l">
         <div class="ct">See the gate block a live draw <span class="arw">→</span></div>

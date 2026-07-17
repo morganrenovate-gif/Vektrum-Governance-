@@ -10,7 +10,12 @@
 > - **CTA changed** from `Apply to become a design partner` to **`See the gate block a live draw →`** (convert on proof, not commitment).
 > - New question order: **What → Why care → Why now → Different → Why your software can't → Trust → CTA.**
 >
-> Everything below documents the shared design system (brand, type, color, print) and the reasoning framework; both versions use it. The verbatim v1 copy is retained for reference.
+> **⚡ v3 — Clarity pass (current, shipped).** Three targeted changes on top of v2, same aesthetic/layout:
+> 1. **The blocked-draw card is now the hero visual** — enlarged (dominant hero column, 26px amount, prominent red `RELEASE BLOCKED` bar + glow) so the eye goes headline → card and the product is understood at a glance.
+> 2. **Copy cut ~35%** — deck, stakes, trust, and why-now lines shortened; the two "workflow vs Vektrum" paragraph cards removed.
+> 3. **Explanation → visual story.** "Approval is not authorization" is now *shown*, not told: `Draw requested → AI reviews documents → 1 condition fails → 🔒 RELEASE BLOCKED → Missing doc added → ✅ RELEASE AUTHORIZED → Audit recorded`, with the blocked (red) and authorized (green) states scaled up. Section title: *"Approval isn't authorization. The gate is."* The 10-condition checklist remains as proof.
+>
+> Everything below documents the shared design system (brand, type, color, print) and the reasoning framework; all versions use it. The verbatim v1 copy is retained for reference.
 
 ---
 
