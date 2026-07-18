@@ -1,0 +1,70 @@
+flowchart LR
+  %% ============================================================= ACTORS (swimlane)
+  subgraph ACTORS["ACTORS"]
+    direction TB
+    LO["Lender / Owner<br/>(capital source)"]
+    GC["General Contractor<br/>(Procore user)"]
+    ESC["Escrow / Fund Control"]
+    SUB["Subcontractor"]
+  end
+
+  %% ============================================================= PROCORE (system of record)
+  subgraph PROCORE["PROCORE — Project system of record"]
+    direction TB
+    P_PROJ["Project /<br/>Project Financials"]
+    P_SOV["Prime Contract<br/>Schedule of Values<br/>(AIA G702 / G703)"]
+    P_CO["Change Orders"]
+    P_DOC["Documents / Photos"]
+    P_LS["Levelset<br/>Lien Waivers"]
+    P_PAY["Procore Pay<br/>GC to Sub payment"]
+  end
+
+  %% ============================================================= VEKTRUM (capital-in governance)
+  subgraph VEKTRUM["VEKTRUM — Capital-in governance layer"]
+    direction TB
+    V_IN["Draw intake<br/>deal + SOV + evidence"]
+    V_GATE{"Release Gate<br/>10 conditions<br/>server-side"}
+    V_AUTH["Signed disbursement<br/>authorization"]
+    V_RAIL["Disbursement rail<br/>Stripe Connect / external"]
+    V_AUD["Hash-chained<br/>audit trail"]
+  end
+
+  %% ---- LIVE: existing human + Procore workflow ------------------------------
+  LO -->|"funds loan / project"| P_PROJ
+  GC -->|"submits draw, updates SOV"| P_SOV
+  GC -->|"logs change orders"| P_CO
+
+  %% ---- PROPOSED: Procore -> Vektrum (READ) ----------------------------------
+  P_SOV -. "P->V  READ: SOV lines, % complete  [PROPOSED]" .-> V_IN
+  P_CO  -. "P->V  READ: change orders  [PROPOSED]" .-> V_IN
+  P_DOC -. "P->V  READ: evidence docs / photos  [PROPOSED]" .-> V_IN
+  P_LS  -. "P->V  READ: lien-waiver status  [PROPOSED]" .-> V_IN
+
+  %% ---- LIVE: Vektrum internal governance ------------------------------------
+  V_IN --> V_GATE
+  V_GATE -->|"BLOCKED: condition unmet -> back to GC / Owner"| GC
+  V_GATE -->|"AUTHORIZED"| V_AUTH
+  V_GATE --> V_AUD
+  V_AUTH --> V_AUD
+  V_AUTH --> V_RAIL
+
+  %% ---- LIVE: disbursement on Vektrum-owned rails ----------------------------
+  V_RAIL -->|"executes disbursement"| ESC
+  ESC -->|"funds released into project"| GC
+
+  %% ---- PROPOSED: Vektrum -> Procore (WRITE-BACK, non-invasive) ---------------
+  V_AUD  -. "V->P  CREATE: audit / verification attachment on Prime Contract  [PROPOSED]" .-> P_DOC
+  V_AUTH -. "V->P  UPDATE: draw-verification status (custom field)  [PROPOSED]" .-> P_PROJ
+
+  %% ---- OUT OF VEKTRUM SCOPE: Procore Pay / Levelset lane --------------------
+  P_PAY -->|"GC to Sub payment (NOT Vektrum)"| SUB
+
+  classDef procore fill:#FFF1E8,stroke:#F0743C,color:#8A3E12;
+  classDef vektrum fill:#E8EDF8,stroke:#1A3A96,color:#0D1B2A;
+  classDef actor   fill:#F4F6FA,stroke:#5A6478,color:#141414;
+  classDef oos     fill:#EFEFEF,stroke:#9AA3B5,color:#5A6478,stroke-dasharray:4 3;
+
+  class P_PROJ,P_SOV,P_CO,P_DOC,P_LS procore;
+  class P_PAY oos;
+  class V_IN,V_GATE,V_AUTH,V_RAIL,V_AUD vektrum;
+  class LO,GC,ESC,SUB actor;
