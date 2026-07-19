@@ -1,0 +1,2 @@
+import { getProcoreConfig } from './config'
+export async function verifyIdentity(token:string) { const c=getProcoreConfig(); const res=await fetch(`${c.apiBaseUrl}/rest/v1.0/me`,{headers:{Authorization:`Bearer ${token}`,'Procore-Company-Id':c.companyId},cache:'no-store'}); if(!res.ok) throw new Error(`Procore identity verification failed (${res.status}).`); const body=await res.json() as Record<string,unknown>; return { subject:String(body.id ?? body.user_id ?? ''), displayName:String(body.name ?? body.login ?? body.email ?? 'Verified Procore user') } }
