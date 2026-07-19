@@ -8,14 +8,15 @@ import { SecurityTab } from './security-tab'
 import { StripeTab } from './stripe-tab'
 import { DisbursementRailTab } from './disbursement-rail-tab'
 import { ComingSoonTab } from './coming-soon-tab'
-import { Bell, User, CreditCard, Shield, AlertTriangle, Wallet } from 'lucide-react'
+import { ProcoreSandboxTab } from './procore-sandbox-tab'
+import { Bell, User, CreditCard, Shield, AlertTriangle, Wallet, Link2 } from 'lucide-react'
 
 interface SettingsShellProps {
   profile: Profile
   userEmail: string
 }
 
-type TabId = 'profile' | 'notifications' | 'stripe' | 'disbursement' | 'security' | 'danger'
+type TabId = 'profile' | 'notifications' | 'stripe' | 'disbursement' | 'procore' | 'security' | 'danger'
 
 interface Tab {
   id: TabId
@@ -34,6 +35,7 @@ const TABS: Tab[] = [
   { id: 'notifications', label: 'Notifications',  icon: Bell,    comingSoon: true },
   { id: 'disbursement',  label: 'Disbursement',   icon: Wallet,        visibleForRoles: ['funder'] },
   { id: 'stripe',        label: 'Stripe Connect', icon: CreditCard,    visibleForRoles: ['contractor'] },
+  { id: 'procore',       label: 'Integrations',   icon: Link2 },
   { id: 'security',      label: 'Security',       icon: Shield },
   { id: 'danger',        label: 'Danger Zone',    icon: AlertTriangle },
 ]
@@ -109,6 +111,7 @@ export function SettingsShell({ profile, userEmail }: SettingsShellProps) {
             {activeTab === 'disbursement' && (
               <DisbursementRailTab profile={profile} />
             )}
+            {activeTab === 'procore' && <ProcoreSandboxTab />}
             {activeTab === 'security' && (
               <SecurityTab />
             )}
