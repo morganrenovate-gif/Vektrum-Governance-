@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test:procore": "tsx tests/procore-oauth-security.test.ts && tsx tests/procore-phase1a-safety.test.ts && tsx tests/procore-funder-access.test.ts",
     "env:check": "tsx scripts/check-prod-env.mjs",
     "schema:check": "node scripts/check-schema-drift.mjs",
     "webhook:test": "tsx scripts/send-test-partner-webhook.ts",
