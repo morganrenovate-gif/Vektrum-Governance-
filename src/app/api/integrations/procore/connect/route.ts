@@ -1,0 +1,8 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { getAuthUser, requireRole } from '@/lib/auth/middleware'
+import { createSupabaseAdminClient } from '@/lib/supabase/admin'
+import { logAudit } from '@/lib/engine/audit'
+import { hash, secret } from '@/lib/integrations/procore/oauth'
+import { getProcoreConfig } from '@/lib/integrations/procore/config'
+export const dynamic='force-dynamic'
+export async function GET(request:NextRequest) { try { const {user,profile}=await getAuthUser(request); requireRole(profile, 'funder'); const c=getProcoreConfig(), state=secret(), admin=createSupabaseAdminClient(); const {error}=await admin.from('procore_oauth_transactions').insert({profile_id:user.id,state_hash:hash(state),code_verifier_hash:hash(secret()),redirect_uri:c.redirectUri,requested_scopes:c.scopes ?? '',expires_at:new Date(Date.now()+10*60_000).toISOString()}); if(error) throw new Error('Could not start secure Procore connection.'); await logAudit({entity_type:'profile',entity_id:user.id,action:'procore_oauth_started',actor_id:user.id,actor_role:profile.role,system_source:'api/integrations/procore/connect',metadata:{environment:'sandbox'}}); const url=new URL(c.authorizeUrl); url.searchParams.set('client_id',c.clientId);url.searchParams.set('redirect_uri',c.redirectUri);url.searchParams.set('response_type','code');url.searchParams.set('state',state);if(c.scopes) url.searchParams.set('scope',c.scopes); return NextResponse.redirect(url) } catch(e) { if (e instanceof NextResponse) return e; return NextResponse.redirect(new URL('/dashboard/funder/integrations/procore?procore=connect_error', request.url)) } }
