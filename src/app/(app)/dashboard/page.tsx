@@ -13,6 +13,7 @@ import { CapitalSummary } from '@/components/dashboard/capital-summary'
 import { ReadinessGauge } from '@/components/dashboard/readiness-gauge'
 import { IntelBriefing } from '@/components/dashboard/intel-briefing'
 import { PortfolioRiskChart } from '@/components/dashboard/portfolio-risk-chart'
+import { ProcoreIntegrationCard } from '@/components/dashboard/procore-integration-card'
 import { OnboardingWizard } from '@/components/onboarding/onboarding-wizard'
 import { AssistantPanel } from '@/components/assistant/assistant-panel'
 import { formatMoney } from '@/lib/utils'
@@ -499,6 +500,8 @@ export default async function DashboardPage() {
 
             {/* Weekly briefing card */}
             <IntelBriefing />
+
+            <ProcoreIntegrationCard />
 
             {/* Capital Summary */}
             <CapitalSummary
