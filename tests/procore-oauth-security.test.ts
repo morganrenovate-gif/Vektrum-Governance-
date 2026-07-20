@@ -14,7 +14,9 @@ assert.throws(() => decryptAccess({ access_token_ciphertext: encrypted.access_to
 
 const procoreEnv = {
   PROCORE_CLIENT_ID: 'test-client', PROCORE_CLIENT_SECRET: 'test-secret',
-  PROCORE_OAUTH_AUTHORIZE_URL: 'https://login.procore.com/oauth/authorize',
+  PROCORE_OAUTH_AUTHORIZE_URL: 'https://login-sandbox.procore.com/oauth/authorize',
+  PROCORE_TOKEN_URL: 'https://login-sandbox.procore.com/oauth/token',
+  PROCORE_API_BASE_URL: 'https://sandbox.procore.com',
   PROCORE_REDIRECT_URI: 'http://localhost:3000/api/integrations/procore/callback',
   PROCORE_SANDBOX_COMPANY_ID: '4287207', PROCORE_TOKEN_ENCRYPTION_KEY: key,
   PROCORE_ENVIRONMENT: 'sandbox', PROCORE_WRITE_OPERATIONS_ENABLED: 'false',
@@ -22,6 +24,10 @@ const procoreEnv = {
 const previousEnv = Object.fromEntries(Object.keys(procoreEnv).map((name) => [name, process.env[name]]))
 Object.assign(process.env, procoreEnv)
 assert.equal(getProcoreConfig().companyId, '4287207', 'Valid sandbox configuration must not require an undocumented enablement flag')
+assert.equal(getProcoreConfig().tokenUrl, 'https://login-sandbox.procore.com/oauth/token', 'Developer Sandbox token URL must be used')
+assert.equal(getProcoreConfig().scopes, undefined, 'No unverified OAuth scope must be sent by default')
+process.env.PROCORE_REDIRECT_URI = 'https://vektrum.io/api/integrations/procore/callback'
+assert.equal(getProcoreConfig().redirectUri, 'https://vektrum.io/api/integrations/procore/callback', 'Approved deployed callback must be accepted')
 process.env.PROCORE_INTEGRATION_ENABLED = 'false'
 assert.throws(() => getProcoreConfig(), /disabled/, 'An explicit false flag remains a fail-closed kill switch')
 for (const [name, value] of Object.entries(previousEnv)) {
