@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { LogOut, Settings, FileText, ChevronDown, Shield, Briefcase, FileBox, DollarSign, HelpCircle } from 'lucide-react'
+import { LogOut, Settings, FileText, ChevronDown, Shield, Briefcase, FileBox, DollarSign, HelpCircle, Boxes } from 'lucide-react'
 
 interface UserMenuProps {
   name: string | null
@@ -141,6 +141,13 @@ export function UserMenu({ name, email, role }: UserMenuProps) {
                   Payments
                 </Link>
               </>
+            )}
+
+            {role === 'funder' && (
+              <Link href="/dashboard/funder/integrations/procore" role="menuitem" onClick={() => setOpen(false)} className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-white hover:bg-surface-3 transition-colors">
+                <Boxes size={14} className="text-blue-300" aria-hidden="true" />
+                Procore Sandbox
+              </Link>
             )}
 
             <Link
