@@ -2,6 +2,10 @@ import { createServerClient } from '@supabase/ssr'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Profile } from '@/lib/types'
 import { calculateFee } from '@/lib/engine/billing'
+import {
+  makeResult,
+  type ConditionResult,
+} from '@/lib/engine/gate-conditions'
 
 // ─── Result Shape ─────────────────────────────────────────────────────────────
 
@@ -9,6 +13,14 @@ export interface ReleaseValidationResult {
   allowed: boolean
   /** All blocking conditions, collected in a single pass. Never just the first one. */
   errors: string[]
+  /**
+   * Phase 1 (additive, non-behavioural): one structured result per evaluated
+   * condition — passed, failed, not_applicable, or error. `errors` remains the
+   * authoritative, byte-for-byte-unchanged decision surface; `results` is a
+   * richer, reproducible record of the same decision. Existing callers that
+   * only read { allowed, errors } are unaffected.
+   */
+  results: ConditionResult[]
 }
 
 export type ExecutionRail = 'stripe_connect' | 'external_manual'
@@ -48,14 +60,19 @@ export interface ValidateReleaseOptions {
  * use Stripe Connect. All other 9 conditions still apply identically. This
  * is the ONLY difference between the two rails at the gate layer.
  *
+ * Phase 1: the function additionally returns `results` — a structured record
+ * of every condition evaluated (passed / failed / not_applicable / error) —
+ * WITHOUT changing any pass/fail decision or any `errors` string. `errors` is
+ * still derived exactly as before.
+ *
  * @param supabase      - Supabase client (user-scoped or admin; must be able
  *                        to read deals, milestones, profiles, and releases).
  * @param milestoneId   - The UUID of the milestone to release.
  * @param callerProfile - The Profile of the user triggering the release.
  * @param options       - Rail selection and other future options.
  *
- * @returns { allowed: true, errors: [] } if all conditions pass.
- * @returns { allowed: false, errors: [...] } if one or more conditions fail.
+ * @returns { allowed: true, errors: [], results } if all conditions pass.
+ * @returns { allowed: false, errors: [...], results } if one or more fail.
  *          Never throws — unexpected errors are collected as error strings.
  */
 export async function validateRelease(
@@ -66,6 +83,7 @@ export async function validateRelease(
 ): Promise<ReleaseValidationResult> {
   const executionRail: ExecutionRail = options.executionRail ?? 'stripe_connect'
   const errors: string[] = []
+  const results: ConditionResult[] = []
 
   // ── Caller Role Check ───────────────────────────────────────────────────────
   // SECURITY: Only the deal funder may release milestone payments.
@@ -74,15 +92,23 @@ export async function validateRelease(
   // Admins may only modify protection_status after documented funder sign-off
   // via the protection endpoint; they cannot trigger Stripe transfers directly.
   if (callerProfile.role !== 'funder') {
-    errors.push(
+    const msg =
       'Only the deal funder can release milestone payments. ' +
-        `Your account is registered as a '${callerProfile.role}'. ` +
-        'Admin accounts cannot directly trigger releases — contact the deal ' +
-        'funder to authorise this payment.',
-    )
+      `Your account is registered as a '${callerProfile.role}'. ` +
+      'Admin accounts cannot directly trigger releases — contact the deal ' +
+      'funder to authorise this payment.'
+    errors.push(msg)
+    results.push(makeResult('ACTOR_AUTHORIZED', 'failed', {
+      resultCode: 'FAIL_ACTOR_NOT_FUNDER',
+      explanation: msg,
+      inputs: { actor_role: callerProfile.role },
+    }))
     // If the caller is not authorised, do not load any deal data — return immediately
-    return { allowed: false, errors }
+    return { allowed: false, errors, results }
   }
+  results.push(makeResult('ACTOR_AUTHORIZED', 'passed', {
+    inputs: { actor_role: callerProfile.role },
+  }))
 
   // ── Fetch Milestone ─────────────────────────────────────────────────────────
   const { data: milestone, error: milestoneError } = await supabase
@@ -97,6 +123,7 @@ export async function validateRelease(
       errors: [
         `Milestone ${milestoneId} could not be found. Verify the milestone ID and try again.`,
       ],
+      results,
     }
   }
 
@@ -115,6 +142,7 @@ export async function validateRelease(
       errors: [
         `The deal associated with milestone ${milestoneId} could not be found. Contact support if this persists.`,
       ],
+      results,
     }
   }
 
@@ -160,16 +188,23 @@ export async function validateRelease(
   // anyway (Condition 8 will also block on the voided contract), but the
   // frozen check provides a clearer, purpose-specific error message.
   if (deal.status === 'frozen') {
-    return {
-      allowed: false,
-      errors: [
-        'This deal has been frozen because the contract was voided after milestone ' +
-        'payments had already been released. No further releases are permitted until ' +
-        'an admin reviews the situation and unfreezes the deal. ' +
-        'Contact operations@vektrum.io with the deal ID to request an unfreeze.',
-      ],
-    }
+    const msg =
+      'This deal has been frozen because the contract was voided after milestone ' +
+      'payments had already been released. No further releases are permitted until ' +
+      'an admin reviews the situation and unfreezes the deal. ' +
+      'Contact operations@vektrum.io with the deal ID to request an unfreeze.'
+    results.push(makeResult('DEAL_NOT_FROZEN', 'failed', {
+      resultCode: 'FAIL_DEAL_FROZEN',
+      explanation: msg,
+      inputs: { deal_status: deal.status },
+      evidenceRefs: [deal.id],
+    }))
+    return { allowed: false, errors: [msg], results }
   }
+  results.push(makeResult('DEAL_NOT_FROZEN', 'passed', {
+    inputs: { deal_status: deal.status },
+    evidenceRefs: [deal.id],
+  }))
 
   // ── Fetch Contract (condition 8) ─────────────────────────────────────────────
   // Belt-and-suspenders: funding already requires a signed contract, but we
@@ -188,22 +223,38 @@ export async function validateRelease(
   // CONDITION 1: Milestone must be in 'approved' status
   // ─────────────────────────────────────────────────────────────────────────────
   if (milestone.status !== 'approved') {
-    errors.push(
+    const msg =
       `This milestone has not been approved yet. The funder must review and approve ` +
-        `the submitted work before funds can be released. ` +
-        `Current status: '${milestone.status}'.`,
-    )
+      `the submitted work before funds can be released. ` +
+      `Current status: '${milestone.status}'.`
+    errors.push(msg)
+    results.push(makeResult('MILESTONE_APPROVED', 'failed', {
+      resultCode: 'FAIL_MILESTONE_NOT_APPROVED', explanation: msg,
+      inputs: { status: milestone.status }, evidenceRefs: [milestone.id],
+    }))
+  } else {
+    results.push(makeResult('MILESTONE_APPROVED', 'passed', {
+      inputs: { status: milestone.status }, evidenceRefs: [milestone.id],
+    }))
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
   // CONDITION 2: Milestone protection_status must be 'ready_for_release'
   // ─────────────────────────────────────────────────────────────────────────────
   if (milestone.protection_status !== 'ready_for_release') {
-    errors.push(
+    const msg =
       `This milestone is not cleared for release. ` +
-        `Current protection status: '${milestone.protection_status}'. ` +
-        `The milestone must reach 'ready_for_release' protection status before funds can be disbursed.`,
-    )
+      `Current protection status: '${milestone.protection_status}'. ` +
+      `The milestone must reach 'ready_for_release' protection status before funds can be disbursed.`
+    errors.push(msg)
+    results.push(makeResult('PROTECTION_READY', 'failed', {
+      resultCode: 'FAIL_PROTECTION_NOT_READY', explanation: msg,
+      inputs: { protection_status: milestone.protection_status }, evidenceRefs: [milestone.id],
+    }))
+  } else {
+    results.push(makeResult('PROTECTION_READY', 'passed', {
+      inputs: { protection_status: milestone.protection_status }, evidenceRefs: [milestone.id],
+    }))
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -213,16 +264,9 @@ export async function validateRelease(
   // Available = funded_amount − released_amount − fees_collected − reserved_amount
   // Required  = milestone.amount + platform fee
   //
-  // reserved_amount represents funds committed to concurrent in-flight releases
-  // (reserved before their Stripe transfers complete). Subtracting it here gives
-  // the user an accurate picture of what's actually available, even if another
-  // release is being processed simultaneously.
-  //
   // NOTE: This check is a fast user-facing pre-check with helpful error messages.
   //       The authoritative atomic gate is reserve_release_funds() in the route,
-  //       which uses SELECT FOR UPDATE to prevent race conditions. These two checks
-  //       are complementary — this one catches the obvious case early; the RPC
-  //       catches the concurrent edge case.
+  //       which uses SELECT FOR UPDATE to prevent race conditions.
   // ─────────────────────────────────────────────────────────────────────────────
   const available  = deal.funded_amount - deal.released_amount - deal.fees_collected - (deal.reserved_amount ?? 0)
   const fee        = calculateFee(milestone.amount, deal.billing_rate_bps)
@@ -230,42 +274,88 @@ export async function validateRelease(
   const shortfall  = totalDebit - available
 
   if (available < totalDebit) {
-    errors.push(
+    const msg =
       `Insufficient funded balance. ` +
-        `Available: $${available.toFixed(2)}. ` +
-        `Required: $${milestone.amount.toFixed(2)} (milestone) + $${fee.feeAmount.toFixed(2)} (${fee.rateLabel} platform fee) = $${totalDebit.toFixed(2)}. ` +
-        `The funder needs to deposit $${shortfall.toFixed(2)} more before this milestone can be released.`,
-    )
+      `Available: $${available.toFixed(2)}. ` +
+      `Required: $${milestone.amount.toFixed(2)} (milestone) + $${fee.feeAmount.toFixed(2)} (${fee.rateLabel} platform fee) = $${totalDebit.toFixed(2)}. ` +
+      `The funder needs to deposit $${shortfall.toFixed(2)} more before this milestone can be released.`
+    errors.push(msg)
+    results.push(makeResult('FUNDED_BALANCE_SUFFICIENT', 'failed', {
+      resultCode: 'FAIL_INSUFFICIENT_BALANCE', explanation: msg,
+      inputs: { available, total_debit: totalDebit, milestone_amount: milestone.amount, fee_amount: fee.feeAmount },
+      evidenceRefs: [deal.id],
+    }))
+  } else {
+    results.push(makeResult('FUNDED_BALANCE_SUFFICIENT', 'passed', {
+      inputs: { available, total_debit: totalDebit, milestone_amount: milestone.amount, fee_amount: fee.feeAmount },
+      evidenceRefs: [deal.id],
+    }))
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
   // CONDITION 4: Contractor must have Stripe payouts enabled
   //
-  // Rail-aware: skipped for external_manual. Payment is executed outside Vektrum
-  // (by the funder or a partner treasury system), so the contractor does not
-  // need a Stripe Connect account for this rail. The funder is responsible for
-  // knowing where to send payment to the contractor off-platform.
-  //
-  // This is the ONLY condition that differs between the two rails. All other
-  // 9 conditions apply identically regardless of execution_rail.
+  // Rail-aware: skipped for external_manual. This is the ONLY condition that
+  // differs between the two rails. All other 9 conditions apply identically.
   // ─────────────────────────────────────────────────────────────────────────────
-  if (executionRail === 'stripe_connect' && contractorProfile && !contractorProfile.stripe_payouts_enabled) {
+  if (executionRail !== 'stripe_connect') {
+    results.push(makeResult('PAYOUT_ACCOUNT_READY', 'not_applicable', {
+      resultCode: 'NOT_APPLICABLE_EXTERNAL_RAIL',
+      explanation: 'External/manual rail — Vektrum-controlled payout readiness is not evaluated.',
+      inputs: { execution_rail: executionRail },
+    }))
+  } else if (!contractorProfile) {
+    results.push(makeResult('PAYOUT_ACCOUNT_READY', 'error', {
+      resultCode: 'ERROR_CONTRACTOR_MISSING',
+      explanation: 'Contractor profile unavailable; Stripe payout readiness could not be evaluated.',
+      inputs: { execution_rail: executionRail },
+    }))
+  } else if (!contractorProfile.stripe_payouts_enabled) {
     errors.push(
       'The contractor has not completed Stripe onboarding. ' +
         'Payouts must be enabled before funds can be released. ' +
         'The contractor should log in and complete their Stripe Connect setup.',
     )
+    results.push(makeResult('PAYOUT_ACCOUNT_READY', 'failed', {
+      resultCode: 'FAIL_STRIPE_PAYOUTS_DISABLED',
+      explanation: 'The contractor has not completed Stripe onboarding. ' +
+        'Payouts must be enabled before funds can be released. ' +
+        'The contractor should log in and complete their Stripe Connect setup.',
+      inputs: { execution_rail: executionRail, stripe_payouts_enabled: false },
+      evidenceRefs: [contractorProfile.id],
+    }))
+  } else {
+    results.push(makeResult('PAYOUT_ACCOUNT_READY', 'passed', {
+      inputs: { execution_rail: executionRail, stripe_payouts_enabled: true },
+      evidenceRefs: [contractorProfile.id],
+    }))
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
   // CONDITION 5: Contractor must have completed platform onboarding
   // ─────────────────────────────────────────────────────────────────────────────
-  if (contractorProfile && !contractorProfile.onboarding_complete) {
+  if (!contractorProfile) {
+    results.push(makeResult('CONTRACTOR_ONBOARDING_COMPLETE', 'error', {
+      resultCode: 'ERROR_CONTRACTOR_MISSING',
+      explanation: 'Contractor profile unavailable; onboarding completeness could not be evaluated.',
+    }))
+  } else if (!contractorProfile.onboarding_complete) {
     errors.push(
       "The contractor's account setup is incomplete. " +
         'They must finish onboarding before receiving payments. ' +
         'Ask the contractor to log in and complete all required onboarding steps.',
     )
+    results.push(makeResult('CONTRACTOR_ONBOARDING_COMPLETE', 'failed', {
+      resultCode: 'FAIL_ONBOARDING_INCOMPLETE',
+      explanation: "The contractor's account setup is incomplete. " +
+        'They must finish onboarding before receiving payments. ' +
+        'Ask the contractor to log in and complete all required onboarding steps.',
+      inputs: { onboarding_complete: false }, evidenceRefs: [contractorProfile.id],
+    }))
+  } else {
+    results.push(makeResult('CONTRACTOR_ONBOARDING_COMPLETE', 'passed', {
+      inputs: { onboarding_complete: true }, evidenceRefs: [contractorProfile.id],
+    }))
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -276,12 +366,26 @@ export async function validateRelease(
       'Could not verify whether this milestone has already been released. ' +
         'Release aborted as a precaution. Please try again or contact support.',
     )
+    results.push(makeResult('NO_ACTIVE_RELEASE', 'error', {
+      resultCode: 'ERROR_RELEASE_QUERY',
+      explanation: 'Could not verify whether this milestone has already been released. ' +
+        'Release aborted as a precaution. Please try again or contact support.',
+    }))
   } else if (existingRelease) {
     errors.push(
       'Funds for this milestone have already been released. ' +
         'Duplicate releases are not permitted. ' +
         'If you believe this is an error, contact support with the milestone ID.',
     )
+    results.push(makeResult('NO_ACTIVE_RELEASE', 'failed', {
+      resultCode: 'FAIL_ACTIVE_RELEASE_EXISTS',
+      explanation: 'Funds for this milestone have already been released. ' +
+        'Duplicate releases are not permitted. ' +
+        'If you believe this is an error, contact support with the milestone ID.',
+      evidenceRefs: existingRelease?.id ? [existingRelease.id] : undefined,
+    }))
+  } else {
+    results.push(makeResult('NO_ACTIVE_RELEASE', 'passed'))
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -292,6 +396,11 @@ export async function validateRelease(
       'Could not verify pending change orders for this milestone. ' +
         'Release aborted as a precaution. Please try again or contact support.',
     )
+    results.push(makeResult('CHANGE_ORDERS_RESOLVED', 'error', {
+      resultCode: 'ERROR_CHANGE_ORDER_QUERY',
+      explanation: 'Could not verify pending change orders for this milestone. ' +
+        'Release aborted as a precaution. Please try again or contact support.',
+    }))
   } else if (openChangeOrders && openChangeOrders.length > 0) {
     errors.push(
       `There ${openChangeOrders.length === 1 ? 'is' : 'are'} ${openChangeOrders.length} ` +
@@ -299,27 +408,47 @@ export async function validateRelease(
         `that must be resolved before release. ` +
         `The funder must approve or reject all submitted change orders before funds can be disbursed.`,
     )
+    results.push(makeResult('CHANGE_ORDERS_RESOLVED', 'failed', {
+      resultCode: 'FAIL_OPEN_CHANGE_ORDERS',
+      explanation: `There ${openChangeOrders.length === 1 ? 'is' : 'are'} ${openChangeOrders.length} ` +
+        `pending change order${openChangeOrders.length === 1 ? '' : 's'} on this milestone ` +
+        `that must be resolved before release. ` +
+        `The funder must approve or reject all submitted change orders before funds can be disbursed.`,
+      inputs: { open_change_order_count: openChangeOrders.length },
+      evidenceRefs: openChangeOrders.map((c: { id: string }) => c.id),
+    }))
+  } else {
+    results.push(makeResult('CHANGE_ORDERS_RESOLVED', 'passed', {
+      inputs: { open_change_order_count: 0 },
+    }))
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
   // CONDITION 8: Deal must have a fully-executed (signed) contract on file
-  //
-  // Funding already enforces this, but contracts can be voided after a deal
-  // is funded. We re-check at release time to ensure the legal record is intact.
-  // If no contract exists or the contract was voided post-funding, all releases
-  // on the deal are blocked until a new signed contract is on file.
   // ─────────────────────────────────────────────────────────────────────────────
   if (contractQueryError) {
     errors.push(
       'Could not verify contract status for this deal. ' +
         'Release aborted as a precaution. Please try again or contact support.',
     )
+    results.push(makeResult('SIGNED_CONTRACT_PRESENT', 'error', {
+      resultCode: 'ERROR_CONTRACT_QUERY',
+      explanation: 'Could not verify contract status for this deal. ' +
+        'Release aborted as a precaution. Please try again or contact support.',
+    }))
   } else if (!contract) {
     errors.push(
       'This deal does not have a contract on file. ' +
         'A fully-executed contract is required before any milestone can be released. ' +
         'The contractor must upload the contract PDF and both parties must sign.',
     )
+    results.push(makeResult('SIGNED_CONTRACT_PRESENT', 'failed', {
+      resultCode: 'FAIL_NO_CONTRACT',
+      explanation: 'This deal does not have a contract on file. ' +
+        'A fully-executed contract is required before any milestone can be released. ' +
+        'The contractor must upload the contract PDF and both parties must sign.',
+      evidenceRefs: [deal.id],
+    }))
   } else if (contract.status !== 'signed') {
     const detail =
       contract.status === 'voided'
@@ -328,24 +457,20 @@ export async function validateRelease(
         : `Contract is not fully executed (status: '${contract.status}'). ` +
           'Both parties must sign the contract before funds can be released.'
     errors.push(detail)
+    results.push(makeResult('SIGNED_CONTRACT_PRESENT', 'failed', {
+      resultCode: contract.status === 'voided' ? 'FAIL_CONTRACT_VOIDED' : 'FAIL_CONTRACT_UNSIGNED',
+      explanation: detail, inputs: { contract_status: contract.status }, evidenceRefs: [deal.id],
+    }))
+  } else {
+    results.push(makeResult('SIGNED_CONTRACT_PRESENT', 'passed', {
+      inputs: { contract_status: contract.status }, evidenceRefs: [deal.id],
+    }))
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
   // CONDITION 9: Sequential release order + explicit prerequisites
-  //
-  // 9a. Deal-level sequential ordering (deal.sequential_release_required = true)
-  //     Every milestone with order_index < current must be 'released' before
-  //     this milestone can be released. Required for institutional lender
-  //     compliance. Enforced only when the flag is set on the deal.
-  //
-  // 9b. Explicit prerequisites (milestone_prerequisites table)
-  //     Any row in milestone_prerequisites where milestone_id = this milestone
-  //     represents a hard release dependency, enforced regardless of the
-  //     sequential_release_required flag.
-  //
-  // Both checks are run in parallel and all blocking milestones are reported
-  // simultaneously so the funder sees the complete picture in one response.
   // ─────────────────────────────────────────────────────────────────────────────
+  const errorsBeforePrereq = errors.length
 
   // Run both prerequisite queries in parallel
   const [sequentialResult, explicitPrereqResult] = await Promise.all([
@@ -413,24 +538,30 @@ export async function validateRelease(
     }
   }
 
+  // Structured record for the combined prerequisite condition. `errors` above is
+  // unchanged; this derives the condition outcome from whether any prereq error
+  // was appended in this block.
+  {
+    const prereqErrs = errors.slice(errorsBeforePrereq)
+    const hadQueryError = sequentialResult.error != null || explicitPrereqResult.error != null
+    if (prereqErrs.length === 0) {
+      results.push(makeResult('PREREQUISITES_SATISFIED', 'passed', {
+        inputs: { sequential_release_required: !!deal.sequential_release_required },
+      }))
+    } else if (hadQueryError) {
+      results.push(makeResult('PREREQUISITES_SATISFIED', 'error', {
+        resultCode: 'ERROR_PREREQUISITE_QUERY', explanation: prereqErrs.join(' '),
+      }))
+    } else {
+      results.push(makeResult('PREREQUISITES_SATISFIED', 'failed', {
+        resultCode: 'FAIL_PREREQUISITES_UNMET', explanation: prereqErrs.join(' '),
+        inputs: { blocking_count: prereqErrs.length, sequential_release_required: !!deal.sequential_release_required },
+      }))
+    }
+  }
+
   // ─────────────────────────────────────────────────────────────────────────────
   // CONDITION 10: Approved conditional lien waiver on file
-  //
-  // When deal.lien_waiver_required = true, an approved conditional_progress
-  // lien waiver must exist for this milestone before funds can be released.
-  //
-  // Legal basis: Most US states require lien waivers before construction
-  // disbursements (Cal. Civil Code §8132-8138; Texas Property Code §53.281;
-  // NY Lien Law §34). The conditional_progress form is the standard pre-payment
-  // waiver — it protects the funder's collateral from mechanics' lien claims.
-  //
-  // The waiver must be:
-  //   - Linked to this specific milestone (milestone_id = milestoneId)
-  //   - Type: conditional_progress (the pre-disbursement AIA form)
-  //   - Status: approved (reviewed and accepted by the funder)
-  //
-  // If missing, the release is blocked and the funder is prompted to request
-  // a waiver and have the contractor upload the signed PDF.
   // ─────────────────────────────────────────────────────────────────────────────
   if (deal.lien_waiver_required) {
     const { data: approvedWaiver, error: waiverQueryError } = await supabase
@@ -448,6 +579,11 @@ export async function validateRelease(
         'Could not verify lien waiver status for this milestone. ' +
           'Release aborted as a precaution. Please try again or contact support.',
       )
+      results.push(makeResult('LIEN_WAIVER_APPROVED', 'error', {
+        resultCode: 'ERROR_LIEN_WAIVER_QUERY',
+        explanation: 'Could not verify lien waiver status for this milestone. ' +
+          'Release aborted as a precaution. Please try again or contact support.',
+      }))
     } else if (!approvedWaiver) {
       errors.push(
         'An approved conditional lien waiver is required before this milestone can be released. ' +
@@ -455,19 +591,29 @@ export async function validateRelease(
           'conditional progress payment lien waiver (AIA G702/G703 equivalent). ' +
           'Contact the deal funder to initiate the waiver process.',
       )
+      results.push(makeResult('LIEN_WAIVER_APPROVED', 'failed', {
+        resultCode: 'FAIL_NO_APPROVED_WAIVER',
+        explanation: 'An approved conditional lien waiver is required before this milestone can be released. ' +
+          'The funder must request a waiver and the contractor must upload a signed ' +
+          'conditional progress payment lien waiver (AIA G702/G703 equivalent). ' +
+          'Contact the deal funder to initiate the waiver process.',
+        inputs: { lien_waiver_required: true },
+      }))
+    } else {
+      results.push(makeResult('LIEN_WAIVER_APPROVED', 'passed', {
+        inputs: { lien_waiver_required: true }, evidenceRefs: [approvedWaiver.id],
+      }))
     }
+  } else {
+    results.push(makeResult('LIEN_WAIVER_APPROVED', 'not_applicable', {
+      resultCode: 'NOT_APPLICABLE_WAIVER_NOT_REQUIRED',
+      explanation: 'Lien waiver is not required for this deal.',
+      inputs: { lien_waiver_required: false },
+    }))
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
   // CONDITION SOV-BALANCE: SOV line-item balance check (Tier C)
-  //
-  // When milestone_sov_links exist, verify that each linked SOV line item has
-  // sufficient balance_to_finish to cover the requested draw. This prevents
-  // over-draw on individual line items — a common institutional lender requirement.
-  //
-  // Advisory in the current phase: only blocks when the sum of linked amounts
-  // would result in balance_to_finish going negative. When no SOV links exist,
-  // this check is skipped (not all deals have SOV).
   // ─────────────────────────────────────────────────────────────────────────────
   const { data: sovLinks } = await supabase
     .from('milestone_sov_links')
@@ -481,10 +627,12 @@ export async function validateRelease(
       .select('id, balance_to_finish, description')
       .in('id', lineItemIds)
 
+    let sovFailed = false
     if (sovItems) {
       for (const item of sovItems) {
         // balance_to_finish is already maintained by the app on each SOV update
         if (typeof item.balance_to_finish === 'number' && item.balance_to_finish < 0) {
+          sovFailed = true
           errors.push(
             `SOV line item "${item.description}" has a negative balance_to_finish ` +
             `($${Math.abs(item.balance_to_finish).toFixed(2)} over-drawn). ` +
@@ -493,42 +641,77 @@ export async function validateRelease(
         }
       }
     }
+    results.push(makeResult('SOV_BALANCE_VALID', sovFailed ? 'failed' : 'passed', {
+      resultCode: sovFailed ? 'FAIL_SOV_OVERDRAWN' : 'PASS',
+      explanation: sovFailed ? 'One or more linked SOV line items are over-drawn.' : null,
+      inputs: { linked_line_items: lineItemIds.length },
+      evidenceRefs: lineItemIds,
+    }))
+  } else {
+    results.push(makeResult('SOV_BALANCE_VALID', 'not_applicable', {
+      resultCode: 'NOT_APPLICABLE_NO_SOV_LINKS',
+      explanation: 'No SOV line items are linked to this milestone.',
+    }))
   }
 
   return {
     allowed: errors.length === 0,
     errors,
+    results,
   }
 }
 
 // ─── AI Draw Review Precondition ─────────────────────────────────────────────
 
 /**
+ * Durable, structured reference to the exact AI review or admin override that
+ * checkAiPrecondition() used to reach its decision. Persisted alongside a gate
+ * evaluation so a historical release decision can be reproduced and so a later
+ * AI review cannot rewrite history. Contains NO raw provider payloads/secrets.
+ */
+export interface AiReviewSnapshot {
+  /** 'review' = standard ai_draw_review; 'override' = admin bypass; 'none' = neither present. */
+  source: 'review' | 'override' | 'none'
+  /** audit_log row id of the exact review/override used (null when source = 'none'). */
+  sourceAuditId: string | null
+  resultType: 'ai_draw_review' | 'ai_review_admin_override' | null
+  riskLevel: string | null
+  provider: string | null
+  model: string | null
+  createdAt: string | null
+  /** Freshness boundary that applied (48h for reviews; override TTL for overrides). */
+  freshnessBoundaryMs: number | null
+  /** Override-only fields. */
+  overrideExpiresAt: string | null
+  overrideApprover: string | null
+}
+
+/**
  * Checks whether a passing AI draw review (or active admin override) exists
  * for the milestone. This is a SEPARATE precondition checked BEFORE the
  * 10-condition release gate.
  *
- * Pass logic (checked in order):
- *   1. Standard ai_draw_review — must be < 48 h old and NOT critical risk.
- *   2. Admin override (ai_review_admin_override) — TTL controlled by
- *      AI_ADMIN_OVERRIDE_TTL_HOURS env var (default 4 h). Gate passes but a
- *      console.warn and a 'warning' field in the result signal the override.
- *
- * Override guards (enforced by the override endpoint, not re-validated here):
- *   - Only admins with AAL2 MFA may create overrides.
- *   - Overrides cannot be created while a critical-risk review is in effect.
+ * Phase 1: additionally returns a durable `snapshot` of the exact review or
+ * override used, WITHOUT re-running AI and WITHOUT changing the pass/block
+ * decision. AI still only blocks or clears — it never authorizes a release.
  */
 export async function checkAiPrecondition(
   milestoneId: string,
   supabase: SupabaseClient,
-): Promise<{ passed: boolean; reason?: string; warning?: string }> {
+): Promise<{ passed: boolean; reason?: string; warning?: string; snapshot: AiReviewSnapshot }> {
 
   const FORTY_EIGHT_HOURS_MS = 48 * 60 * 60 * 1000
+
+  const emptySnapshot: AiReviewSnapshot = {
+    source: 'none', sourceAuditId: null, resultType: null, riskLevel: null,
+    provider: null, model: null, createdAt: null, freshnessBoundaryMs: null,
+    overrideExpiresAt: null, overrideApprover: null,
+  }
 
   // ── 1. Standard AI draw review ────────────────────────────────────────────
   const { data: reviews } = await supabase
     .from('audit_log')
-    .select('created_at, metadata')
+    .select('id, created_at, metadata')
     .eq('entity_type', 'milestone')
     .eq('entity_id', milestoneId)
     .eq('action', 'ai_draw_review')
@@ -538,25 +721,36 @@ export async function checkAiPrecondition(
   if (reviews && reviews.length > 0) {
     const review    = reviews[0]
     const reviewAge = Date.now() - new Date(review.created_at).getTime()
+    const meta      = (review.metadata as Record<string, unknown> | null) ?? {}
+    const reviewSnapshot: AiReviewSnapshot = {
+      source: 'review',
+      sourceAuditId: (review as { id?: string }).id ?? null,
+      resultType: 'ai_draw_review',
+      riskLevel: (meta.risk_level as string | undefined) ?? null,
+      provider: (meta.provider_used as string | undefined) ?? null,
+      model: (meta.model as string | undefined) ?? null,
+      createdAt: review.created_at,
+      freshnessBoundaryMs: FORTY_EIGHT_HOURS_MS,
+      overrideExpiresAt: null,
+      overrideApprover: null,
+    }
 
     if (reviewAge <= FORTY_EIGHT_HOURS_MS) {
-      const riskLevel = (review.metadata as Record<string, unknown> | null)?.risk_level
+      const riskLevel = meta.risk_level
       if (riskLevel === 'critical') {
         return {
           passed: false,
           reason: 'AI flagged critical risk — admin review required before release',
+          snapshot: reviewSnapshot,
         }
       }
       // Valid, non-critical, non-expired review → pass
-      return { passed: true }
+      return { passed: true, snapshot: reviewSnapshot }
     }
     // Expired review — fall through to check admin override before failing
   }
 
   // ── 2. Admin override (for AI service unavailability) ─────────────────────
-  // Check for an active ai_review_admin_override entry. These expire after
-  // AI_ADMIN_OVERRIDE_TTL_HOURS (default 4 h) — much shorter than the normal
-  // 48 h TTL to limit the blast radius of an emergency bypass.
   const ttlHours = Math.max(
     1,
     parseInt(process.env.AI_ADMIN_OVERRIDE_TTL_HOURS ?? '4', 10),
@@ -565,7 +759,7 @@ export async function checkAiPrecondition(
 
   const { data: overrides } = await supabase
     .from('audit_log')
-    .select('created_at, metadata')
+    .select('id, created_at, metadata, actor_id')
     .eq('entity_type', 'milestone')
     .eq('entity_id', milestoneId)
     .eq('action', 'ai_review_admin_override')
@@ -587,11 +781,25 @@ export async function checkAiPrecondition(
         'Standard AI precondition bypassed by admin override.',
       )
 
+      const overrideSnapshot: AiReviewSnapshot = {
+        source: 'override',
+        sourceAuditId: (override as { id?: string }).id ?? null,
+        resultType: 'ai_review_admin_override',
+        riskLevel: typeof overrideRiskLevel === 'string' ? overrideRiskLevel : String(overrideRiskLevel),
+        provider: null,
+        model: null,
+        createdAt: override.created_at,
+        freshnessBoundaryMs: ttlMs,
+        overrideExpiresAt: typeof expiresAt === 'string' ? expiresAt : String(expiresAt),
+        overrideApprover: (override as { actor_id?: string }).actor_id ?? null,
+      }
+
       return {
         passed:  true,
         warning:
           `Admin override in effect — AI draw review bypassed by admin ` +
           `(asserted risk: ${overrideRiskLevel}, expires: ${expiresAt}).`,
+        snapshot: overrideSnapshot,
       }
     }
     // Override exists but has expired — fall through to failure
@@ -599,14 +807,28 @@ export async function checkAiPrecondition(
 
   // ── 3. No valid review or active override ─────────────────────────────────
   if (!reviews || reviews.length === 0) {
-    return { passed: false, reason: 'AI draw review is required before release' }
+    return { passed: false, reason: 'AI draw review is required before release', snapshot: emptySnapshot }
   }
 
-  // Reviews exist but all are expired
+  // Reviews exist but all are expired — snapshot references the expired review.
+  const expiredReview = reviews[0]
+  const expiredMeta   = (expiredReview.metadata as Record<string, unknown> | null) ?? {}
   return {
     passed: false,
     reason:
       'AI assessment expired — please request a fresh review. ' +
       'If the AI service is unavailable, an admin can apply a temporary override.',
+    snapshot: {
+      source: 'review',
+      sourceAuditId: (expiredReview as { id?: string }).id ?? null,
+      resultType: 'ai_draw_review',
+      riskLevel: (expiredMeta.risk_level as string | undefined) ?? null,
+      provider: (expiredMeta.provider_used as string | undefined) ?? null,
+      model: (expiredMeta.model as string | undefined) ?? null,
+      createdAt: expiredReview.created_at,
+      freshnessBoundaryMs: FORTY_EIGHT_HOURS_MS,
+      overrideExpiresAt: null,
+      overrideApprover: null,
+    },
   }
 }
