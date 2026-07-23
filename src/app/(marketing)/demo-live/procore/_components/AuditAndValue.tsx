@@ -32,7 +32,7 @@ export function AuditTimeline({ ctx }: { ctx: DemoContext }) {
           Technical evidence concept
         </summary>
         <div className="grid gap-2 px-4 pb-4 text-[12.5px] text-vektrum-muted sm:grid-cols-2">
-          <p>Authorization reference: <InertRef>DEMO-AUTH-HPMC-07</InertRef> <span className="text-vektrum-faint">(Simulated)</span></p>
+          <p>Authorization references: <InertRef>DEMO-AUTH-HPMC-07A</InertRef> / <InertRef>DEMO-AUTH-HPMC-07B</InertRef> <span className="text-vektrum-faint">(Simulated)</span></p>
           <p>Evidence snapshot reference: <InertRef>DEMO-SNAP-HPMC-07-2</InertRef> <span className="text-vektrum-faint">(Simulated)</span></p>
           <p>Audit-chain reference: <InertRef>MOCK-CHAIN-HPMC-07</InertRef> <span className="text-vektrum-faint">(Simulated)</span></p>
           <p>External acknowledgement reference: <InertRef>DEMO-MWTE-88241</InertRef> <span className="text-vektrum-faint">(Simulated)</span></p>

@@ -1,40 +1,57 @@
 /**
- * Chapter Four — Execution evidence.
+ * Chapter Four — Execution evidence & audit.
+ * TWO distinct authorization records (eligible units, then the resolved unit).
  * Vektrum records authorization; the selected external process executes and returns
  * confirmation evidence. No execution occurs in this prototype.
  */
 import { ArrowRight, Landmark, ShieldCheck } from 'lucide-react';
 import { Card, Eyebrow, KV, StatusBadge, money, InertRef } from './primitives';
-import { authorizationRecord, externalConfirmation, project } from '../_lib/fixtures';
-import type { DemoContext } from '../_lib/types';
+import { authEligible, authResolved, externalConfirmation, project, EXECUTION_NOTE } from '../_lib/fixtures';
+import type { AuthorizationRecord, DemoContext } from '../_lib/types';
+
+function AuthCard({ rec, confirmed, kicker }: { rec: AuthorizationRecord; confirmed: boolean; kicker: string }) {
+  return (
+    <Card className="border-vektrum-blue-border">
+      <div className="flex items-center justify-between gap-3">
+        <Eyebrow>{kicker}</Eyebrow>
+        <StatusBadge status="issued" labelOverride="Issued — simulated" />
+      </div>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+        <KV k="Authorization ID" v={<InertRef>{rec.authorizationId}</InertRef>} />
+        <KV k="Reference ID" v={<InertRef>{rec.referenceId}</InertRef>} />
+        <KV k="Rail scope" v={rec.railScope} />
+        <KV k="Authorized by" v={`${rec.authorizedBy} · ${rec.role}`} />
+        <KV k="Authorized at" v={rec.authorizedAt} />
+        <KV k="Authorized net" v={money(rec.authorizedNetAmount)} />
+        <KV k="Bound units" v={rec.includedUnitIds.join(', ')} />
+        <KV k="Excluded (isolated)" v={rec.excludedUnitIds.length ? rec.excludedUnitIds.join(', ') : 'None'} />
+        <KV k="Execution status" v={confirmed
+          ? <StatusBadge status="confirmed" labelOverride="Confirmed — simulated" />
+          : <StatusBadge status="pending" labelOverride="Awaiting external confirmation" />} />
+      </div>
+    </Card>
+  );
+}
 
 export function ChapterExecutionEvidence({ ctx, onConfirm }: { ctx: DemoContext; onConfirm: () => void }) {
   const confirmed = ctx.externalConfirmationRecorded;
   return (
     <div className="space-y-5">
-      {/* Issued authorization record */}
-      <Card className="border-vektrum-blue-border">
-        <div className="flex items-center justify-between gap-3">
-          <Eyebrow>Recorded authorization — simulated</Eyebrow>
-          <StatusBadge status="issued" labelOverride="Issued — simulated" />
-        </div>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-          <KV k="Authorization ID" v={<InertRef>{authorizationRecord.authorizationId}</InertRef>} />
-          <KV k="Reference ID" v={<InertRef>{authorizationRecord.referenceId}</InertRef>} />
-          <KV k="Rail scope" v={authorizationRecord.railScope} />
-          <KV k="Authorized by" v={`${authorizationRecord.authorizedBy} · ${authorizationRecord.role}`} />
-          <KV k="Authorized at" v={authorizationRecord.authorizedAt} />
-          <KV k="Authorized gross amount" v={money(authorizationRecord.authorizedGrossAmount)} />
-          <KV k="Expiration" v={authorizationRecord.expiration} />
-          <KV k="Signature status" v={<StatusBadge status="simulated" labelOverride="Simulated / inert" />} />
-          <KV k="Execution status" v={confirmed
-            ? <StatusBadge status="confirmed" labelOverride="Confirmed — simulated" />
-            : <StatusBadge status="pending" labelOverride="Awaiting external confirmation" />} />
-        </div>
-        <p className="mt-4 rounded-lg bg-vektrum-blue-subtle px-3 py-2 text-[13px] font-semibold text-vektrum-blue">
-          Authorization demonstrated; no payment executed.
-        </p>
+      <Card className="bg-vektrum-blue-subtle">
+        <h3 className="text-[16px] font-bold tracking-tight text-vektrum-blue">
+          One draw, two scoped authorizations — the isolated amount never leaked.
+        </h3>
+        <p className="mt-1 max-w-3xl text-[13px] text-vektrum-muted">{EXECUTION_NOTE}</p>
       </Card>
+
+      {/* Both authorization records */}
+      <AuthCard rec={authEligible} confirmed={confirmed} kicker="Authorization 1 — eligible units (excludes isolated)" />
+      <AuthCard rec={authResolved} confirmed={confirmed} kicker="Authorization 2 — resolved unit (separate record)" />
+
+      <p className="rounded-lg bg-vektrum-blue-subtle px-3 py-2 text-[13px] font-semibold text-vektrum-blue">
+        Authorization demonstrated; no payment executed. Total authorized net{' '}
+        {money(authEligible.authorizedNetAmount + authResolved.authorizedNetAmount)} across two independent records.
+      </p>
 
       {/* Boundary: Vektrum vs external process */}
       <div className="grid gap-4 lg:grid-cols-2">
@@ -44,8 +61,8 @@ export function ChapterExecutionEvidence({ ctx, onConfirm }: { ctx: DemoContext;
             <h4 className="text-[13px] font-bold uppercase tracking-wide text-vektrum-text">Vektrum</h4>
           </div>
           <ul className="space-y-1.5 text-[13px] text-vektrum-muted">
-            <li className="flex gap-2"><span className="text-vektrum-faint" aria-hidden={true}>•</span>Lender authorization recorded</li>
-            <li className="flex gap-2"><span className="text-vektrum-faint" aria-hidden={true}>•</span>Gate result recorded</li>
+            <li className="flex gap-2"><span className="text-vektrum-faint" aria-hidden={true}>•</span>Two lender authorizations recorded, each scoped to specific units</li>
+            <li className="flex gap-2"><span className="text-vektrum-faint" aria-hidden={true}>•</span>Gate results recorded per unit</li>
             <li className="flex gap-2"><span className="text-vektrum-faint" aria-hidden={true}>•</span>Governed evidence snapshot referenced</li>
             <li className="flex gap-2"><span className="text-vektrum-faint" aria-hidden={true}>•</span>Awaiting external confirmation</li>
           </ul>
@@ -56,7 +73,7 @@ export function ChapterExecutionEvidence({ ctx, onConfirm }: { ctx: DemoContext;
             <h4 className="text-[13px] font-bold uppercase tracking-wide text-vektrum-text">External partner-controlled process</h4>
           </div>
           <ul className="space-y-1.5 text-[13px] text-vektrum-muted">
-            <li className="flex gap-2"><span className="text-vektrum-faint" aria-hidden={true}>•</span>Receives an authorization reference through a future approved workflow</li>
+            <li className="flex gap-2"><span className="text-vektrum-faint" aria-hidden={true}>•</span>Receives authorization references through a future approved workflow</li>
             <li className="flex gap-2"><span className="text-vektrum-faint" aria-hidden={true}>•</span>Independently executes through existing infrastructure</li>
             <li className="flex gap-2"><span className="text-vektrum-faint" aria-hidden={true}>•</span>Returns execution status or confirmation evidence</li>
             <li className="flex gap-2"><span className="text-vektrum-faint" aria-hidden={true}>•</span>No execution occurs in this prototype</li>
@@ -96,8 +113,8 @@ export function ChapterExecutionEvidence({ ctx, onConfirm }: { ctx: DemoContext;
             Authorization and simulated execution confirmation recorded.
           </p>
           <p className="mt-1 max-w-3xl text-[13px] text-vektrum-muted">
-            Vektrum records what the lender authorized, which policy requirements passed, who authorized the release,
-            and the confirmation reference returned by the external process.
+            Vektrum records what the lender authorized per unit, which policy conditions passed, who authorized each
+            release, and the confirmation reference returned by the external process.
           </p>
         </Card>
       )}

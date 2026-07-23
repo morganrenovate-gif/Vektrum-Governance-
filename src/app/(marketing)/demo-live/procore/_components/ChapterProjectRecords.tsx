@@ -4,6 +4,8 @@
  */
 import { Download, ArrowRight, Building2, ShieldCheck, Landmark } from 'lucide-react';
 import { Card, Eyebrow, KV, StatusBadge, money, InertRef } from './primitives';
+import { ReleaseUnitsTable } from './ReleaseUnits';
+import { releaseUnitViews } from '../_lib/machine';
 import {
   project, draw, snapshot, lenderPolicy, changeOrder, lienWaiver,
   conceptualMappings, MAPPING_CAVEAT,
@@ -108,6 +110,13 @@ export function ChapterProjectRecords({
               Vektrum references a point-in-time governed snapshot for external lender review.
             </p>
           </Card>
+
+          {/* The draw as four independently-governable release units */}
+          <ReleaseUnitsTable units={releaseUnitViews(ctx)} />
+          <p className="-mt-2 px-1 text-[12px] text-vektrum-muted">
+            Each schedule-of-values line becomes an independently-governable release unit. If one unit fails a policy
+            condition or enters a dispute, only that unit is contained — the rest continue to authorization.
+          </p>
 
           {/* Conceptual field mapping (collapsed) */}
           <details className="rounded-2xl border border-vektrum-border bg-vektrum-surface">

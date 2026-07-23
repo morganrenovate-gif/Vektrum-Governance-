@@ -44,6 +44,20 @@ const ALLOWLIST: string[] = [
   // Security page was migrated from bg-vektrum-bg (light) to bg-surface-0
   // (dark navy). All text-vektrum-blue instances replaced with text-blue-300/400.
   // It is intentionally NOT on this allowlist — any reintroduction will fail A1.
+
+  // Procore × Vektrum milestone-isolation demo (/demo-live/procore). This is a
+  // LIGHT-themed workspace: Cards are bg-vektrum-surface (white) and the only
+  // text-vektrum-blue usage is the Eyebrow/label + inert-badge text on those
+  // light surfaces (dark blue on white reads correctly). The one dark panel
+  // (BetterTogether, bg-vektrum-canvas) uses text-blue-300, not text-vektrum-blue.
+  'src/app/(marketing)/demo-live/procore/ProcoreDemoWorkspace.tsx',
+  'src/app/(marketing)/demo-live/procore/_components/primitives.tsx',
+  'src/app/(marketing)/demo-live/procore/_components/AuditAndValue.tsx',
+  'src/app/(marketing)/demo-live/procore/_components/ReleaseUnits.tsx',
+  'src/app/(marketing)/demo-live/procore/_components/ProgressNavigator.tsx',
+  'src/app/(marketing)/demo-live/procore/_components/ChapterProjectRecords.tsx',
+  'src/app/(marketing)/demo-live/procore/_components/ChapterLenderReview.tsx',
+  'src/app/(marketing)/demo-live/procore/_components/ChapterExecutionEvidence.tsx',
 ]
 
 const results: { name: string; passed: boolean; error?: string }[] = []
