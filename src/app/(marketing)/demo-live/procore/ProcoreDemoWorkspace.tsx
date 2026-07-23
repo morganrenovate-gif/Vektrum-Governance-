@@ -4,12 +4,14 @@
  *
  * SIMULATED INTEGRATION CONCEPT — fictional demo data only. No external system
  * is connected and no funds are moved. Holds the pure reducer, routes the four
- * executive chapters, manages focus + screen-reader announcements, and offers a
- * deterministic reset. Imports NO production logic.
+ * executive chapters of the MILESTONE-ISOLATION walkthrough, manages focus +
+ * screen-reader announcements, and offers a deterministic reset. The only
+ * production code reached (transitively, via the machine) is the pure
+ * reconciliation engine src/lib/engine/release-units.ts.
  */
 import { useReducer, useState, useRef, useEffect, useCallback } from 'react';
 import { RotateCcw } from 'lucide-react';
-import { reducer, makeInitialContext } from './_lib/machine';
+import { reducer, makeInitialContext, currentAuthRound, authorizationScope } from './_lib/machine';
 import { DISCLOSURE, FICTION_LABEL } from './_lib/fixtures';
 import type { DemoContext } from './_lib/types';
 import { ProgressNavigator } from './_components/ProgressNavigator';
@@ -22,23 +24,26 @@ import { AuditTimeline, BetterTogether } from './_components/AuditAndValue';
 
 const CHAPTER_OF: Record<DemoContext['state'], number> = {
   snapshot_available: 1, snapshot_imported: 1,
-  review_blocked: 2, source_updates_staged: 2, updated_snapshot_received: 2,
-  gate_ready: 3, authorization_modal_open: 3,
-  authorization_recorded: 4, external_confirmation_recorded: 4,
+  review_isolated: 2, authorize_eligible_open: 2,
+  eligible_authorized: 3, source_updates_staged: 3, isolated_resolved: 3, authorize_resolved_open: 3,
+  resolved_authorized: 4, external_confirmation_recorded: 4,
 };
 const CHAPTER_TITLE: Record<number, string> = {
-  1: 'Chapter 1 — Project records', 2: 'Chapter 2 — Lender review',
-  3: 'Chapter 3 — Release authorization', 4: 'Chapter 4 — Execution evidence',
+  1: 'Chapter 1 — Project records & release units',
+  2: 'Chapter 2 — Isolate the exception, authorize eligible work',
+  3: 'Chapter 3 — Resolve & re-authorize the contained unit',
+  4: 'Chapter 4 — Execution evidence & audit',
 };
 const ANNOUNCE: Record<DemoContext['state'], string> = {
   snapshot_available: 'Demo reset to the initial state.',
-  snapshot_imported: 'Project snapshot imported. Procore remains the system of record.',
-  review_blocked: 'Lender-policy pre-review complete. Two policy exceptions identified. Authorization unavailable.',
-  source_updates_staged: 'Both simulated source updates staged. You can now receive an updated snapshot.',
-  updated_snapshot_received: 'Updated snapshot received.',
-  gate_ready: 'Updated snapshot received. Risk is Low. All applicable conditions passed. Ready for funder authorization.',
-  authorization_modal_open: 'Authorization dialog opened.',
-  authorization_recorded: 'Release authorization recorded. No payment executed by Vektrum.',
+  snapshot_imported: 'Project snapshot imported. Draw broken into four release units. Procore remains the system of record.',
+  review_isolated: 'Pre-review complete. Two exceptions contained to one $310,000 unit. Three units remain eligible.',
+  authorize_eligible_open: 'Authorization dialog opened for the eligible units. Isolated unit excluded.',
+  eligible_authorized: 'Eligible units authorized for $1,776,500 net. Isolated unit still contained.',
+  source_updates_staged: 'Both simulated source corrections staged for the contained unit.',
+  isolated_resolved: 'Updated snapshot received. Contained unit re-evaluated to eligible.',
+  authorize_resolved_open: 'Authorization dialog opened for the resolved unit.',
+  resolved_authorized: 'Resolved unit authorized for $294,500 net in a separate record.',
   external_confirmation_recorded: 'Simulated external confirmation recorded.',
 };
 
@@ -50,11 +55,11 @@ export function ProcoreDemoWorkspace() {
   const chapter = CHAPTER_OF[ctx.state];
   const headingRef = useRef<HTMLHeadingElement>(null);
 
-  // Announce + move focus to the chapter heading on chapter change.
   const prevChapter = useRef(chapter);
   useEffect(() => {
     setLive(ANNOUNCE[ctx.state]);
-    if (prevChapter.current !== chapter && ctx.state !== 'authorization_modal_open') {
+    const modalOpen = ctx.state === 'authorize_eligible_open' || ctx.state === 'authorize_resolved_open';
+    if (prevChapter.current !== chapter && !modalOpen) {
       headingRef.current?.focus();
     }
     prevChapter.current = chapter;
@@ -68,6 +73,10 @@ export function ProcoreDemoWorkspace() {
       prefersReduced ? 0 : 700);
   }, []);
   const onReset = useCallback(() => dispatch({ type: 'RESET' }), []);
+
+  const modalOpen = ctx.state === 'authorize_eligible_open' || ctx.state === 'authorize_resolved_open';
+  const round = currentAuthRound(ctx);
+  const scope = modalOpen ? authorizationScope(ctx) : null;
 
   return (
     <div className="min-h-screen bg-vektrum-bg">
@@ -87,7 +96,7 @@ export function ProcoreDemoWorkspace() {
               Proposed integration workflow · Simulated
             </p>
             <h1 className="text-[22px] font-bold tracking-tight text-vektrum-text">
-              Construction-loan disbursement authorization
+              Block the disputed milestone — not the entire draw
             </h1>
           </div>
           <button
@@ -114,12 +123,16 @@ export function ProcoreDemoWorkspace() {
           {chapter === 2 && (
             <ChapterLenderReview
               ctx={ctx}
-              onStage={(u) => dispatch({ type: 'STAGE_SOURCE_UPDATE', update: u })}
-              onReceive={() => dispatch({ type: 'RECEIVE_UPDATED_SNAPSHOT' })}
+              onOpenAuthorizeEligible={() => dispatch({ type: 'OPEN_AUTHORIZATION', round: 'eligible' })}
             />
           )}
           {chapter === 3 && (
-            <ChapterAuthorization onOpenAuthorize={() => dispatch({ type: 'OPEN_AUTHORIZATION' })} />
+            <ChapterAuthorization
+              ctx={ctx}
+              onStage={(u) => dispatch({ type: 'STAGE_SOURCE_UPDATE', update: u })}
+              onReceive={() => dispatch({ type: 'RECEIVE_UPDATED_SNAPSHOT' })}
+              onOpenAuthorizeResolved={() => dispatch({ type: 'OPEN_AUTHORIZATION', round: 'resolved' })}
+            />
           )}
           {chapter === 4 && (
             <ChapterExecutionEvidence ctx={ctx} onConfirm={() => dispatch({ type: 'RECORD_EXTERNAL_CONFIRMATION' })} />
@@ -139,8 +152,12 @@ export function ProcoreDemoWorkspace() {
         </div>
       </div>
 
-      {ctx.state === 'authorization_modal_open' && (
+      {modalOpen && round && scope && (
         <AuthorizeModal
+          round={round}
+          netAmount={scope.netAmount}
+          includedUnitIds={scope.unitIds}
+          excludedUnitIds={scope.excludedIsolatedUnitIds}
           onClose={() => dispatch({ type: 'CLOSE_AUTHORIZATION' })}
           onConfirm={() => dispatch({ type: 'RECORD_AUTHORIZATION' })}
         />

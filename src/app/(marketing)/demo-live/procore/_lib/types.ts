@@ -2,10 +2,11 @@
  * Procore × Vektrum partnership prototype — shared types.
  *
  * SIMULATED INTEGRATION CONCEPT. Fictional demo data only. No external system
- * is connected and no funds are moved. Nothing in this module imports or touches
- * production logic (release gate, authorization tokens, audit hashing, Partner
- * API, Supabase, Stripe, auth). Every identifier is inert and prefixed
- * DEMO-/MOCK-/SIM-.
+ * is connected and no funds are moved. The demo consumes ONE piece of real shared
+ * domain logic — src/lib/engine/release-units.ts (pure, no I/O) — to compute the
+ * draw reconciliation and authorization scope, so the numbers shown are produced by
+ * the same audited code the tests prove. It imports NO gate/token/audit/Supabase/
+ * Stripe/auth runtime. Every identifier is inert and prefixed DEMO-/MOCK-/SIM-.
  */
 
 // ─── Status vocabulary (icon + label + a11y description live in the UI) ──────
@@ -98,6 +99,28 @@ export interface LenderPolicy {
   lastRevision: string;
 }
 
+// ─── Release units (the SOV broken into independently-governable units) ──────
+/**
+ * One Schedule-of-Values release unit as SHOWN in the demo. The financial
+ * amounts (grossAmount/retainageAmount) feed the real reconcileDraw()/
+ * deriveAuthorizationScope() in src/lib/engine/release-units.ts. `unitStatus` is
+ * derived by the machine from context, never hard-coded per screen.
+ */
+export interface ReleaseUnitFixture {
+  id: string;              // inert DEMO- id (maps to a milestone id in production)
+  sovLine: string;         // G703-style line number
+  label: string;
+  grossAmount: number;
+  retainageAmount: number;
+  /** Machine reason this unit is isolated when it is (failed condition/dispute). */
+  isolationReason?: string;
+  /** Genuine downstream dependency (unit id) blocked while this one is isolated. */
+  dependentUnitId?: string;
+  /** Human list of the conditions that fail while isolated. */
+  failedConditions?: string[];
+  evidenceRefs?: string[];
+}
+
 // ─── AI-assisted pre-review (deterministic; informs, never authorizes) ───────
 export interface PreReviewObservation {
   kind: 'blocking' | 'informational';
@@ -114,9 +137,8 @@ export interface PreReview {
 export interface GateCondition {
   index: number; // 1..10
   label: string;
-  /** Base state before any source updates. */
   baseStatus: Extract<StatusKind, 'passed' | 'blocked' | 'not_applicable'>;
-  /** True for the two conditions the source updates resolve (7 and 10). */
+  /** True for the conditions the isolated unit fails (7 change order, 10 waiver). */
   resolvedByUpdate?: boolean;
   notApplicableReason?: string;
 }
@@ -129,15 +151,21 @@ export interface AuthorizationRecord {
   authorizedBy: string;
   role: string;
   authorizedAt: string;
+  /** Net amount this authorization covers. */
+  authorizedNetAmount: number;
   authorizedGrossAmount: number;
+  /** Unit ids this authorization is bound to (scope). */
+  includedUnitIds: string[];
+  /** Unit ids explicitly excluded (isolated) at authorization time. */
+  excludedUnitIds: string[];
   expiration: string;
-  signatureStatus: string; // 'Simulated / inert'
-  executionStatus: string; // 'Awaiting external confirmation'
+  signatureStatus: string;
+  executionStatus: string;
 }
 
 export interface ExternalConfirmation {
-  executionStatus: string; // 'Confirmed — simulated'
-  method: string; // 'External wire — simulated'
+  executionStatus: string;
+  method: string;
   confirmationReference: string;
   confirmedBy: string;
   confirmedAt: string;
@@ -162,39 +190,51 @@ export interface AuditEvent {
 }
 
 // ─── State machine ───────────────────────────────────────────────────────────
+// Isolation-first flow with TWO authorization rounds:
+//   import → pre-review isolates one unit → authorize the ELIGIBLE units now
+//   → resolve the isolated unit at source → authorize the RESOLVED unit
+//   → external confirmation. The isolated amount is never inside the first scope.
 export type DemoState =
   | 'snapshot_available'
   | 'snapshot_imported'
-  | 'review_blocked'
-  | 'source_updates_staged'
-  | 'updated_snapshot_received'
-  | 'gate_ready'
-  | 'authorization_modal_open'
-  | 'authorization_recorded'
+  | 'review_isolated'          // pre-review done: one unit isolated, others eligible
+  | 'authorize_eligible_open'  // funder authorization dialog (round 1)
+  | 'eligible_authorized'      // eligible units authorized; isolated unit still contained
+  | 'source_updates_staged'    // both source corrections staged for the isolated unit
+  | 'isolated_resolved'        // updated snapshot received; isolated unit now eligible
+  | 'authorize_resolved_open'  // funder authorization dialog (round 2)
+  | 'resolved_authorized'      // resolved unit authorized (separate record)
   | 'external_confirmation_recorded';
+
+export type AuthRound = 'eligible' | 'resolved';
 
 export type DemoAction =
   | { type: 'IMPORT_SNAPSHOT' }
   | { type: 'RUN_PRE_REVIEW' }
-  | { type: 'STAGE_SOURCE_UPDATE'; update: 'co_approved' | 'waiver_approved' }
-  | { type: 'RECEIVE_UPDATED_SNAPSHOT' }
-  | { type: 'OPEN_AUTHORIZATION' }
+  | { type: 'OPEN_AUTHORIZATION'; round: AuthRound }
   | { type: 'CLOSE_AUTHORIZATION' }
   | { type: 'RECORD_AUTHORIZATION' }
+  | { type: 'STAGE_SOURCE_UPDATE'; update: 'co_approved' | 'waiver_approved' }
+  | { type: 'RECEIVE_UPDATED_SNAPSHOT' }
   | { type: 'RECORD_EXTERNAL_CONFIRMATION' }
   | { type: 'RESET' };
 
 export interface DemoContext {
   state: DemoState;
-  /** which simulated source updates have been staged in the presenter panel */
+  /** simulated source corrections staged for the isolated unit */
   staged: { co_approved: boolean; waiver_approved: boolean };
-  /** derived live records that flip after the updated snapshot is received */
+  /** derived live records that flip once the updated snapshot is received */
   changeOrderStatus: ChangeOrderRecord['status'];
   lienWaiverStatus: LienWaiverRecord['status'];
   riskLevel: RiskLevel;
-  aiRequirementSatisfied: boolean;
-  authorizationRecorded: boolean;
+  /** the isolated unit's exceptions are resolved at source */
+  isolatedResolved: boolean;
+  /** round 1 (eligible units) authorization recorded */
+  eligibleAuthorized: boolean;
+  /** round 2 (resolved unit) authorization recorded */
+  resolvedAuthorized: boolean;
   externalConfirmationRecorded: boolean;
-  /** monotonically-advancing simulated snapshot label for display */
+  /** which round the open authorization dialog is for (null when closed) */
+  authRound: AuthRound | null;
   snapshotTimestamp: string;
 }

@@ -10,9 +10,20 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { X } from 'lucide-react';
 import { KV, money, InertRef } from './primitives';
 import { project, draw, lenderPolicy, funder } from '../_lib/fixtures';
+import type { AuthRound } from '../_lib/types';
 
-export function AuthorizeModal({ onClose, onConfirm }: { onClose: () => void; onConfirm: () => void }) {
+export function AuthorizeModal({
+  onClose, onConfirm, round, netAmount, includedUnitIds, excludedUnitIds,
+}: {
+  onClose: () => void;
+  onConfirm: () => void;
+  round: AuthRound;
+  netAmount: number;
+  includedUnitIds: string[];
+  excludedUnitIds: string[];
+}) {
   const [ack, setAck] = useState(false);
+  const scopeLabel = round === 'eligible' ? 'Eligible units (isolated unit excluded)' : 'Resolved unit only';
   const dialogRef = useRef<HTMLDivElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
 
@@ -62,22 +73,23 @@ export function AuthorizeModal({ onClose, onConfirm }: { onClose: () => void; on
           </button>
         </div>
         <p id="authz-desc" className="mb-4 text-[13px] text-vektrum-muted">
-          This records the lender&rsquo;s release authorization for the governed draw. Vektrum executes no payment.
+          This records the lender&rsquo;s release authorization for a specific set of release units. Vektrum executes no
+          payment. The isolated amount cannot be included in this scope.
         </p>
 
         <dl className="grid grid-cols-2 gap-4">
           <KV k="Project" v={`${project.name}`} />
           <KV k="Draw" v={draw.drawNumber} />
-          <KV k="Gross requested" v={money(draw.grossRequested)} />
-          <KV k="Retainage" v={money(draw.retainage)} />
-          <KV k="Net amount" v={money(draw.netRepresented)} />
+          <KV k="Authorization scope" v={scopeLabel} />
+          <KV k="Units in scope" v={includedUnitIds.join(', ') || '—'} />
+          <KV k="Excluded (isolated)" v={excludedUnitIds.length ? excludedUnitIds.join(', ') : 'None'} />
+          <KV k="Authorized net" v={money(netAmount)} />
           <KV k="Lender policy" v={<InertRef>{lenderPolicy.policyId}</InertRef>} />
           <KV k="Execution rail" v={draw.executionRail} />
           <KV k="External partner" v={project.disbursementPartner} />
           <KV k="Applicable conditions passed" v="9 of 9" />
-          <KV k="Not-applicable conditions" v="1 (external rail)" />
           <KV k="Funder" v={`${funder.name} · ${funder.title}`} />
-          <KV k="Authorization scope" v="Lender release authorization only" />
+          <KV k="Authorization type" v="Lender release authorization only" />
         </dl>
 
         <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-xl border border-vektrum-border bg-vektrum-surface-alt p-3">
