@@ -4,13 +4,13 @@
  */
 import { Check } from 'lucide-react';
 
-const STEPS = ['Project snapshot', 'Policy review', 'Authorization', 'Confirmation'];
+const STEPS = ['Project & units', 'Isolate + authorize eligible', 'Resolve + re-authorize', 'Execution evidence'];
 
 const GUIDE: Record<number, string> = {
-  1: 'Procore remains the project system of record; Vektrum imports a governed, read-only snapshot for external lender review.',
-  2: "Vektrum applies the lender's release policy to the snapshot — AI informs; the deterministic gate decides.",
-  3: 'An authorized funder explicitly records the release authorization. Vektrum executes no payment.',
-  4: 'Payment execution remains in the selected external process, which returns confirmation evidence.',
+  1: 'Procore remains the project system of record; Vektrum imports a governed, read-only snapshot and breaks the draw into release units.',
+  2: 'Two exceptions are contained to ONE unit. AI informs; the gate decides. The funder authorizes the three eligible units now — the isolated $310K unit is excluded.',
+  3: 'The isolated unit’s exceptions are corrected at source, it is re-evaluated, and it receives its OWN separate authorization — the earlier one is unchanged.',
+  4: 'Two scoped authorization records; payment execution remains in the selected external process, which returns confirmation evidence.',
 };
 
 export function ProgressNavigator({

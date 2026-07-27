@@ -39,6 +39,13 @@ Public 10-condition gate:
 
 Gate enforcement must exist in UI, API, and database. AI-assisted review must be current, documented, and have no unresolved critical risk.
 
+## Paired Core Capabilities
+Vektrum has two paired core capabilities:
+1. **Policy-based release governance** — determines *whether* a release unit is eligible (the deterministic gate).
+2. **Milestone isolation** — determines *how narrowly* a failed or disputed unit affects the rest of the draw. When a milestone/SOV release unit is disputed or fails a required condition, Vektrum contains the exception to that unit, its reserved amount, its evidence, and its genuine dependencies, so unrelated eligible work continues toward authorization.
+
+Approved language (use only where behavior supports it): "Vektrum contains the exception without freezing the project." / "Block the disputed milestone — not the entire draw." Isolation never bypasses global hard stops (unauthorized actor, frozen/inactive deal, insufficient aggregate funds, duplicate release, sequential prerequisites). See `docs/architecture/MILESTONE_ISOLATION.md`.
+
 ## Security
 - Admins cannot release funds.
 - Admin promotion disabled by default.
