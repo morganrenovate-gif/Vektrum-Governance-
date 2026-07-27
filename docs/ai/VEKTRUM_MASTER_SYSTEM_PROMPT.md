@@ -2,13 +2,26 @@
 
 | | |
 |---|---|
-| **Version** | 1.1 |
+| **Version** | 1.2 |
 | **Status** | Active — governing all AI-assisted, human, and automated work |
-| **Date** | July 2026 (supersedes Version 1.0, May 2026 — `public/vektrum-master-system-prompt.pdf`) |
+| **Date** | July 2026 (supersedes v1.1 July 2026 and v1.0 May 2026) |
 | **Scope** | Product · Engineering · Copy · Compliance · Demo · Investor · Partner · Ecosystem/Integrations · Admin · Security |
 | **Applies to** | Claude, ChatGPT, Codex, Cursor, all AI agents, all developers, all designers, all copywriters, all reviewers |
 
 ## PRIME DIRECTIVE: AUTHORIZATION IS SEPARATED FROM EXECUTION.
+
+### Changelog — v1.1 → v1.2 (full code-conformance audit, 2026-07-27)
+
+Every verifiable claim in this document was audited against the codebase (report: `docs/audit/master-prompt-conformance-audit-2026-07-27.md`). Corrections:
+
+1. **§6.1/6.3** — documents the AI-review freshness window (48 hours) and the guarded **admin AI-review override** for AI-service outages (AAL2 MFA + justification, short TTL, never over critical risk, audit-logged). The override affects only the AI precondition; the 10 deterministic conditions can never be overridden.
+2. **§7.2** — admin capabilities now include the temporary AI-review override (matching the existing endpoint guards).
+3. **§7.4** — rate-limit policy table corrected to the real policy names and fail behaviors (`ai_analysis`, `ai_draw_review`, `deal_fund`, `cron`; only `financial_write` and `admin_write` fail closed).
+4. **§8.4** — corrected: a repeat partner **fail** call returns a 400 validation error (state-safe), not `200 alreadyFailed`. Repeat **confirm** returns `200 alreadyConfirmed: true` as documented.
+5. **§8.5** — outbound partner webhooks (`release.authorized`, HMAC-signed, per-partner secret) are now **implemented and tested**; the docs rule stands, and current docs are compliant.
+6. **§9.1** — admin dashboard route table corrected to the routes that actually exist.
+7. **§12.5** — figures verified and tightened: RLS enabled on all 31 tables; 117 automated test files.
+8. **§13.5/§17** — known deviation flagged: the retainage release route calls Stripe transfers inline, bypassing the rail adapter. Logged as a backlog refactor; the rule is unchanged.
 
 ### Changelog — v1.0 → v1.1
 
@@ -226,7 +239,7 @@ These are the exact public-facing condition labels. Do not modify them without e
 | 9 | Sequential-release ordering and prerequisites satisfied where required | Prior milestones must be released first if `sequential_release_required=true` |
 | 10 | Approved conditional lien waiver on file where required | Approved lien waiver must exist if `lien_waiver_required=true` |
 
-Plus the AI-assisted draw pre-review condition: **Current, documented, and no unresolved critical risk.** Runs before the gate; blocks on critical risk; logs warning and continues on non-critical flags.
+Plus the AI-assisted draw pre-review condition: **Current, documented, and no unresolved critical risk.** "Current" means the latest AI draw review is less than 48 hours old. Runs before the gate; blocks on critical risk; logs warning and continues on non-critical flags.
 
 ### 6.2 Gate Enforcement Layers
 
@@ -239,6 +252,8 @@ Plus the AI-assisted draw pre-review condition: **Current, documented, and no un
 ### 6.3 AI-Assisted Draw Review's Proper Role
 
 AI review runs → if critical risk → block (AI precondition fails, gate never runs) → if warning only → log override, proceed to gate → gate runs all 10 deterministic conditions → gate passes or blocks (deterministically) → if passes → funder authorizes release.
+
+**Admin AI-review override (AI-service outage contingency).** When the AI service is unavailable or a review has expired, an admin may create a temporary override of the **AI precondition only** (`ai_review_admin_override`). Guards, enforced in code: admin role + AAL2 MFA + written justification (≥ 20 chars) + rate limiting; the override can never be created over a critical-risk review; asserted risk must be low/medium/high — never critical; it expires after `AI_ADMIN_OVERRIDE_TTL_HOURS` (default 4 h, far shorter than the 48 h review window); it is audit-logged and every gate result run under it carries an explicit warning. The override does not and must never touch the 10 deterministic conditions — those cannot be overridden by anyone.
 
 | ✓ ALLOWED AI LANGUAGE | ✗ BANNED AI LANGUAGE |
 |---|---|
@@ -283,7 +298,8 @@ AI review runs → if critical risk → block (AI precondition fails, gate never
 | Review reconciliation state | Promote users to admin through normal dashboard |
 | Trigger operational workflows (demo reset, reconciliation re-runs) | See raw API keys after initial creation |
 | Revoke authorization tokens (with MFA + justification) | Delete or edit audit log entries |
-| Support funders and contractors operationally | Modify billing rates or deal financial terms |
+| Apply a temporary AI-review override when the AI service is unavailable (MFA + justification; TTL-limited; never over critical risk — §6.3) | Modify billing rates or deal financial terms |
+| Support funders and contractors operationally | Override any of the 10 deterministic gate conditions |
 
 ### 7.3 API Key Handling Rules
 
@@ -294,13 +310,17 @@ AI review runs → if critical risk → block (AI precondition fails, gate never
 
 ### 7.4 Rate Limiting — Required Policies
 
-| Policy | Applies To | Fail Behavior |
+| Policy | Applies To | Fail Behavior on rate-limit infrastructure failure |
 |---|---|---|
-| financial_write | Release, authorize, confirm, fail endpoints | Fail closed |
-| admin_write | All `/api/admin/*` state-mutation routes | Fail closed |
-| partner_api | All `/api/partner/*` routes | Fail open (return 429) |
-| ai_review | AI draw review / precondition endpoints | Fail open |
-| funding | Deal funding routes | Fail closed |
+| `financial_write` | Release, authorize, confirm, fail endpoints (5/60s default) | Fail closed |
+| `admin_write` | All `/api/admin/*` state-mutation routes (20/60s default) | Fail closed |
+| `partner_api` | All `/api/partner/*` routes (60/60s per partner) | Fail open |
+| `ai_analysis` | `POST /api/analyze-contract` (10/hour) | Fail open |
+| `ai_draw_review` | `POST /api/ai/draw-review` (15/5min) | Fail open |
+| `deal_fund` | `POST /api/deals/[dealId]/fund` (5/5min) | Fail open |
+| `cron` | `POST /api/cron/reconcile` (secondary to `CRON_SECRET`) | Fail open |
+
+"Fail closed" means a rate-limit datastore outage denies the request rather than silently dropping the guard; only the two financial-write policies fail closed — for all others, auth and validation remain the primary controls.
 
 ### 7.5 Stripe Webhook Security
 
@@ -346,11 +366,11 @@ The Partner API is the integration surface for title companies, escrow companies
 
 ### 8.4 Idempotency Requirements
 
-Confirm and fail endpoints must be safe to call multiple times. A second confirm on an already-confirmed release returns 200 with `alreadyConfirmed: true`. A second fail returns 200 with `alreadyFailed: true`. Every partner confirmation must bind `partner_ack_hash` (SHA-256 of raw request body) and `token_hash` to the audit row.
+Confirm and fail endpoints must be safe to call multiple times — repeat calls never double-apply state. A second confirm on an already-confirmed release returns 200 with `alreadyConfirmed: true`. A second fail on an already-failed release returns a 400 validation error stating only pending releases can be marked failed (state-safe rejection; a confirmed release can never be marked failed). Every partner confirmation must bind `partner_ack_hash` (SHA-256 of raw request body) and `token_hash` to the audit row.
 
 ### 8.5 Documentation Rules
 
-**Outbound webhook rule:** Partner docs must NOT claim outbound webhooks are live unless implementation exists and has been tested. If not implemented, use: "Outbound partner webhooks are not required for the initial Partner API flow. Partners may poll `GET /api/partner/releases?status=pending`." Mark future webhook behavior as "Planned."
+**Outbound webhook rule:** Partner docs must NOT claim outbound webhooks are live unless implementation exists and has been tested. **Current status (verified 2026-07-27): implemented and tested** — on external-rail authorization, `deliverPartnerWebhook` sends a signed `release.authorized` event to the partner's registered `webhook_url` using a per-partner `whsec_` secret (`src/lib/engine/partner-webhook.ts`; `tests/partner-webhook-test-event.test.ts` 15/15). Webhooks remain optional per integration; partners without a webhook URL poll `GET /api/partner/releases?status=pending`. If this implementation is ever removed or broken, docs must revert to "Planned" language.
 
 ### 8.6 Safe Partner Messaging
 
@@ -369,12 +389,14 @@ Confirm and fail endpoints must be safe to call multiple times. A second confirm
 
 | Section | Route | Purpose |
 |---|---|---|
-| Overview | `/dashboard/admin` | Summary metrics; links to sections |
-| Users | `/dashboard/admin/users` | List all users; link to user detail |
+| Overview | `/dashboard/admin` | Summary metrics, user list, recent audit entries, audit-chain health badge |
 | User Detail | `/dashboard/admin/users/[userId]` | Name, email, role, Stripe status, deals |
 | Partners / API Integrations | `/dashboard/admin/partners` | API key lifecycle; deal assignment |
-| Audit Log | `/dashboard/admin/audit` | Read-only audit event viewer |
-| Reconciliation | `/dashboard/admin/reconciliation` | Release reconciliation status |
+| Ops | `/dashboard/admin/ops` | Operational health: release health, webhook health, reconciliation issues, admin audit-log panel, cross-entity search |
+| Subscriptions | `/dashboard/admin/subscriptions` | Subscription tier management |
+| Design-Partner Applications | `/dashboard/admin/design-partner-applications` | Inbound design-partner pipeline |
+
+Audit-log and reconciliation review are served by the Overview and Ops pages plus read-only admin APIs (`/api/admin/audit-log`, `/api/admin/reconciliation`); there are no separate `/dashboard/admin/audit` or `/dashboard/admin/reconciliation` pages.
 
 ### 9.2 Admin Promotion Restrictions
 
@@ -521,14 +543,14 @@ Key benefits: Reduces risk of fund misapplication. Creates evidence for LP repor
 ### 12.5 How to Explain to Technical Reviewers
 
 - Next.js 15 application; Supabase (PostgreSQL + RLS) for persistent storage
-- Row-Level Security on all 25+ tables
-- Hash-chained, append-only audit log with SHA-256 row and chain hashes
-- ed25519-signed authorization tokens per release (graceful fallback to unsigned)
-- Rate limiting via database RPC (`check_rate_limit`)
-- Stripe Connect for automated rail; Partner API for institutional rail
-- AI draw review via sonar-pro (primary) → claude-sonnet (fallback) → gpt-4o (fallback)
-- 100+ automated tests across release gate, security, webhook idempotency, admin safety, demo safety — plus the Procore suites: `test:procore` (OAuth security, Phase 1A route/RLS safety, funder access) and `demo-procore-prototype` (70 behavioral + banned-language checks)
-- Migration-based schema management; immutability triggers on `authorization_tokens`
+- Row-Level Security enabled on all 31 tables (verified against migrations 2026-07-27)
+- Hash-chained, append-only audit log with SHA-256 row and chain hashes (`hash_schema_version` 2; `token_hash` + `partner_ack_hash` binding)
+- ed25519-signed authorization tokens per release (graceful fallback to unsigned); status flow issued → delivered → confirmed/failed/expired/revoked; TTL 24 h (Stripe rail) / 30 days (external rail); amounts locked at issuance
+- Rate limiting via database RPC (`check_rate_limit`); `financial_write` and `admin_write` fail closed
+- Stripe Connect for automated rail; Partner API for institutional rail, with optional HMAC-signed outbound `release.authorized` webhooks
+- AI draw review via sonar-pro (primary) → claude-sonnet (fallback) → gpt-4o (fallback); 48 h freshness window
+- 117 automated test files across release gate (55 checks), security, webhook idempotency, admin safety, demo safety — plus the Procore suites: `test:procore` (OAuth security, Phase 1A route/RLS safety, funder access) and `demo-procore-prototype` (70 behavioral + banned-language checks)
+- Migration-based schema management; immutability triggers on `authorization_tokens` and `audit_log`
 - Procore connectivity (Phase 1A): sandbox-only OAuth, read-only client, AES-256-GCM token storage, server-only RLS — see Section 18
 
 ---
@@ -590,6 +612,8 @@ const dispatchResult = await adapter.dispatch({ ... })
 // INCORRECT: Inline Stripe call in route — NOT ALLOWED
 const transfer = await stripe.transfers.create({ ... })
 ```
+
+**Known deviation (flagged in the 2026-07-27 conformance audit, unresolved):** `src/app/api/deals/[dealId]/retainage/release/route.ts` calls `stripe.transfers.create` inline instead of going through the rail adapter. The rule stands; the deviation is tracked in Section 17.2 and must be refactored — with tests and explicit approval — rather than used as precedent.
 
 ### 13.6 Authorization Token Issuance — Required Fields (B3 Hardening)
 
@@ -770,8 +794,8 @@ Without explicit approval, the AI must never:
 | Item | Status | Action Required |
 |---|---|---|
 | `/auth/logout` 404 | Needs verification | Verify logout route exists; fix if returning 404 |
-| Dashboard user navigation | Partly addressed | Verify `/dashboard/admin/users/[userId]` loads with user details and deal links |
-| Partner API docs webhook claims | Needs verification | Audit docs; replace live webhook claims with "Planned" if unimplemented |
+| Dashboard user navigation | Partly addressed | Route `/dashboard/admin/users/[userId]` exists (verified 2026-07-27); runtime behavior with real data still needs manual QA |
+| Partner API docs webhook claims | **Resolved 2026-07-27** | Outbound `release.authorized` webhooks are implemented and tested; docs are compliant with §8.5 |
 
 ### 17.2 High / Before Pilot
 
@@ -780,6 +804,7 @@ Without explicit approval, the AI must never:
 | Route/navigation smoke tests | All critical routes verified non-404 via test or checklist |
 | Admin dashboard full verification | No promote button; admin promotion disabled; partners section works; no raw secrets exposed |
 | Demo reset full verification | Demo-scope only; idempotent; no production data touched; clean reload after reset (known issue: demo contractor reset may not restore all buttons/state) |
+| Retainage release rail-adapter refactor | `retainage/release` route stops calling `stripe.transfers.create` inline and dispatches through `getRailAdapter` (§13.5 known deviation); behavior protected by tests before and after |
 
 ### 17.3 Procore Integration Track (new in v1.1)
 
@@ -891,6 +916,6 @@ These are the most important rules in this document. They must be honored in eve
 
 ---
 
-*Vektrum Operating Constitution · Version 1.1 · July 2026*
+*Vektrum Operating Constitution · Version 1.2 · July 2026 · code-conformance audited 2026-07-27*
 *This document is the permanent operating law for all work on Vektrum. When in doubt: be conservative, be precise, and ask.*
 *vektrum.io*
