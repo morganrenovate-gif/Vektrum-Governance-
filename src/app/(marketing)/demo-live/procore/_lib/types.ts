@@ -47,14 +47,6 @@ export interface DrawPackage {
   executionRail: string;
 }
 
-export interface ProjectSnapshot {
-  snapshotTimestamp: string;
-  sourceMode: string;
-  destination: string;
-  includedRecordCategories: string[];
-  sourceLabel: string;
-}
-
 export interface FunderUser {
   name: string;
   title: string;
@@ -72,7 +64,7 @@ export interface EvidenceRecord {
 
 export interface ChangeOrderRecord {
   id: string;
-  status: 'open' | 'approved';
+  status: 'pending' | 'approved';
   affectsCurrentMilestone: boolean;
   amount: number;
   description: string;
@@ -82,7 +74,7 @@ export interface ChangeOrderRecord {
 export interface LienWaiverRecord {
   id: string;
   waiverType: string;
-  status: 'draft' | 'approved';
+  status: 'unapproved' | 'approved';
   amount: number;
   source: string;
 }
@@ -96,6 +88,17 @@ export interface LenderPolicy {
   executionRail: string;
   status: string;
   lastRevision: string;
+}
+
+/**
+ * Gross-scope evaluation view for the draw (display only — NOT
+ * partial-authorization). `affectedByChangeOrder + unaffectedGross === grossRequested`.
+ */
+export interface FinancialImpactFixture {
+  grossRequested: number;
+  affectedByChangeOrder: number;
+  unaffectedGross: number;
+  releaseUnit: string;
 }
 
 // ─── AI-assisted pre-review (deterministic; informs, never authorizes) ───────
@@ -114,9 +117,9 @@ export interface PreReview {
 export interface GateCondition {
   index: number; // 1..10
   label: string;
-  /** Base state before any source updates. */
+  /** Base state before any source corrections. */
   baseStatus: Extract<StatusKind, 'passed' | 'blocked' | 'not_applicable'>;
-  /** True for the two conditions the source updates resolve (7 and 10). */
+  /** True for the two conditions the source corrections resolve (7 and 10). */
   resolvedByUpdate?: boolean;
   notApplicableReason?: string;
 }
@@ -163,38 +166,35 @@ export interface AuditEvent {
 
 // ─── State machine ───────────────────────────────────────────────────────────
 export type DemoState =
-  | 'snapshot_available'
-  | 'snapshot_imported'
+  | 'workspace'
   | 'review_blocked'
-  | 'source_updates_staged'
-  | 'updated_snapshot_received'
   | 'gate_ready'
   | 'authorization_modal_open'
   | 'authorization_recorded'
   | 'external_confirmation_recorded';
 
+/** Actors represented in the walkthrough. Only 'funder' may authorize. */
+export type DemoActor = 'funder' | 'admin' | 'contractor' | 'partner' | 'ai';
+
+export type SourceRecordKey = 'co_027' | 'lien_waiver';
+
 export type DemoAction =
-  | { type: 'IMPORT_SNAPSHOT' }
-  | { type: 'RUN_PRE_REVIEW' }
-  | { type: 'STAGE_SOURCE_UPDATE'; update: 'co_approved' | 'waiver_approved' }
-  | { type: 'RECEIVE_UPDATED_SNAPSHOT' }
+  | { type: 'EVALUATE' }
+  | { type: 'RESOLVE_SOURCE_RECORD'; record: SourceRecordKey }
   | { type: 'OPEN_AUTHORIZATION' }
   | { type: 'CLOSE_AUTHORIZATION' }
-  | { type: 'RECORD_AUTHORIZATION' }
+  | { type: 'RECORD_AUTHORIZATION'; actor: DemoActor }
   | { type: 'RECORD_EXTERNAL_CONFIRMATION' }
   | { type: 'RESET' };
 
 export interface DemoContext {
   state: DemoState;
-  /** which simulated source updates have been staged in the presenter panel */
-  staged: { co_approved: boolean; waiver_approved: boolean };
-  /** derived live records that flip after the updated snapshot is received */
   changeOrderStatus: ChangeOrderRecord['status'];
   lienWaiverStatus: LienWaiverRecord['status'];
   riskLevel: RiskLevel;
   aiRequirementSatisfied: boolean;
   authorizationRecorded: boolean;
   externalConfirmationRecorded: boolean;
-  /** monotonically-advancing simulated snapshot label for display */
-  snapshotTimestamp: string;
+  /** Deterministic evidence-snapshot version: V1 initial, V2/V3 per correction. */
+  snapshotVersion: 1 | 2 | 3;
 }

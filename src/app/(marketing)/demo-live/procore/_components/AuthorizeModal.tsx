@@ -9,7 +9,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { X } from 'lucide-react';
 import { KV, money, InertRef } from './primitives';
-import { project, draw, lenderPolicy, funder } from '../_lib/fixtures';
+import { project, draw, lenderPolicy, funder, authorizationRecord } from '../_lib/fixtures';
 
 export function AuthorizeModal({ onClose, onConfirm }: { onClose: () => void; onConfirm: () => void }) {
   const [ack, setAck] = useState(false);
@@ -78,6 +78,8 @@ export function AuthorizeModal({ onClose, onConfirm }: { onClose: () => void; on
           <KV k="Not-applicable conditions" v="1 (external rail)" />
           <KV k="Funder" v={`${funder.name} · ${funder.title}`} />
           <KV k="Authorization scope" v="Lender release authorization only" />
+          <KV k="Authorization ID" v={<InertRef>{authorizationRecord.authorizationId}</InertRef>} />
+          <KV k="Actor" v="Authorized funder (only role that may authorize)" />
         </dl>
 
         <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-xl border border-vektrum-border bg-vektrum-surface-alt p-3">
