@@ -13,6 +13,7 @@ Fact-grounded rebuild of the Better Together solution brief against the official
 | `07-open-questions-and-evidence-gaps.md` | Founder/Procore questions and gaps that would strengthen the deck |
 | `08-source-register.md` | Every source reviewed, access method, date, and what it supports |
 | `09-executive-recommendation.md` | Verdict, strongest/riskiest claims, next steps |
-| `working-draft/` | Clearly labeled **working draft** deck (`.pptx` + `.pdf` + QA renders). **Not the official Procore template** — the official editable file (30.6 MB, in Google Drive) exceeded this environment's 10 MB retrieval limit; paste `05` into it to produce the final deck. |
+| `filled-template/` | **Primary deliverable:** the official Better Together template with every placeholder block filled in from the claim ledger (`.pptx` + `.pdf` + QA renders, all 9 pages). Built on the official template artwork (from the template PDF at 220 dpi); placeholder text replaced in the template's own style, instruction notes removed, Vektrum lockup added to the partner-logo box. Backgrounds are rasters, so per-slide text edits should be made against `05`; for a fully editable native deck, duplicate the Google Slides master and paste `05` in. |
+| `working-draft/` | Earlier Vektrum-branded working draft (`.pptx` + `.pdf` + QA renders), superseded by `filled-template/` as the presentation deliverable. |
 
 Supersedes the positioning in `../better-together-outline.md` and `../vektrum-procore-better-together.pptx` where they conflict (see contradiction register in `01`).
